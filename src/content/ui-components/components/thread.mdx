@@ -1,20 +1,20 @@
 ---
-title: Display and interact with comment threads
+title: 显示和交互评论线程
 meta:
-  title: Thread | Tiptap UI Component
-  description: Interact and display comment threads in your Tiptap editor with the Thread UI component. More in the docs.
-  category: UI Components
+  title: 线程 | Tiptap UI 组件
+  description: 在您的 Tiptap 编辑器中使用线程 UI 组件交互和显示评论线程。更多内容请参见文档。
+  category: UI 组件
 ---
 
-Components for displaying and interacting with comment threads.
+用于显示和交互评论线程的组件。
 
-## Install
+## 安装
 
 ```bash
 npx @tiptap/cli add thread
 ```
 
-## Usage
+## 使用方法
 
 ```tsx
 import { Thread, ThreadFloating } from '@/components/tiptap-ui/thread'
@@ -24,9 +24,9 @@ import { Comments } from '@tiptap-pro/extension-comments'
 export default function MyEditor() {
   const editor = useEditor({
     extensions: [
-      // other extensions
+      // 其他扩展
       Comments.configure({
-        // comments configuration
+        // 评论配置
       }),
     ],
   })
@@ -40,44 +40,44 @@ export default function MyEditor() {
 }
 ```
 
-## Props
+## 属性
 
-| Name   | Type           | Default | Description                |
-| ------ | -------------- | ------- | -------------------------- |
-| editor | Editor \| null | null    | The Tiptap editor instance |
+| 名称   | 类型           | 默认值 | 描述                      |
+| ------ | -------------- | ------- | ------------------------ |
+| editor | Editor \| null | null    | Tiptap 编辑器实例      |
 
-## Requirements
+## 需求
 
-Used reference components
+使用的参考组件
 
-- `app-context` (context)
-- `collab-context` (context)
-- `thread-store` (context)
-- `user-context` (context)
-- `use-mobile` (hook)
-- `use-thread-handlers` (hook)
-- `use-tiptap-editor` (hook)
-- `use-thread-position` (hook)
-- `use-thread-sync` (hook)
+- `app-context` (上下文)
+- `collab-context` (上下文)
+- `thread-store` (上下文)
+- `user-context` (上下文)
+- `use-mobile` (钩子)
+- `use-thread-handlers` (钩子)
+- `use-tiptap-editor` (钩子)
+- `use-thread-position` (钩子)
+- `use-thread-sync` (钩子)
 - `comments` (ui)
 - `floating-element` (ui)
-- `check-icon` (icon)
-- `chevron-left-icon` (icon)
-- `chevron-right-icon` (icon)
-- `circle-check-icon` (icon)
-- `close-icon` (icon)
-- `ellipsis-icon` (icon)
-- `link-icon` (icon)
-- `rotate-ccw-icon` (icon)
-- `trash-icon` (icon)
-- `button` (primitive)
-- `badge` (primitive)
-- `dropdown-menu` (primitive)
+- `check-icon` (图标)
+- `chevron-left-icon` (图标)
+- `chevron-right-icon` (图标)
+- `circle-check-icon` (图标)
+- `close-icon` (图标)
+- `ellipsis-icon` (图标)
+- `link-icon` (图标)
+- `rotate-ccw-icon` (图标)
+- `trash-icon` (图标)
+- `button` (原始组件)
+- `badge` (原始组件)
+- `dropdown-menu` (原始组件)
 
-Open source feature(s)
+开源特性
 
 - `@floating-ui/react`
 
-Cloud feature(s)
+云端特性
 
 - `@hocuspocus/provider`

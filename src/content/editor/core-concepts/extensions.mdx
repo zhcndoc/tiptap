@@ -1,42 +1,42 @@
 ---
-title: Extensions in Tiptap
+title: Tiptap 中的扩展
 meta:
-  title: Extensions | Tiptap Editor Docs
-  description: Learn how to create, customize, and integrate extensions into Tiptap to improve your text editor's functionality.
+  title: 扩展 | Tiptap 编辑器文档
+  description: 学习如何创建、定制和集成扩展到 Tiptap 中，以提升你的文本编辑器的功能。
 ---
 
-Extensions enhance Tiptap by adding new capabilities or modifying the editor's behavior. Whether it is adding new types of content, customizing the editor's appearance, or extending its functionality, extensions are the building blocks of Tiptap.
+扩展通过添加新功能或修改编辑器的行为来增强 Tiptap。无论是添加新的内容类型、定制编辑器的外观，还是扩展其功能，扩展都是 Tiptap 的基础构件。
 
-To add new types of content into your editor you can use [nodes](/editor/api/nodes) and [marks](/editor/extensions/marks) which can render content in the editor.
+要在编辑器中添加新类型的内容，可以使用 [节点](/editor/api/nodes) 和 [标记](/editor/extensions/marks)，它们可以在编辑器中呈现内容。
 
-The optional `@tiptap/starter-kit` includes the most commonly used extensions, simplifying setup. Read more about [`StarterKit`](/editor/getting-started/configure#default-extensions).
+可选的 `@tiptap/starter-kit` 包含最常用的扩展，简化了设置过程。阅读更多关于 [`StarterKit`](/editor/getting-started/configure#default-extensions) 的内容。
 
-Expand your editor's functionality with extensions created by the Tiptap community. Discover a variety of custom features and tools in the [Awesome Tiptap Repository](https://github.com/ueberdosis/awesome-tiptap#community-extensions). For collaboration and support, engage with other developers in the [Discussion Thread](https://github.com/ueberdosis/tiptap/discussions/2973) on community-built extensions.
+通过 Tiptap 社区创建的扩展来扩展编辑器的功能。在 [Awesome Tiptap Repository](https://github.com/ueberdosis/awesome-tiptap#community-extensions) 中发现各种自定义功能和工具。有关协作和支持，请在社区构建扩展的 [讨论线程](https://github.com/ueberdosis/tiptap/discussions/2973) 中与其他开发者交流。
 
-## What are extensions?
+## 什么是扩展？
 
-Although Tiptap tries to hide most of the complexity of ProseMirror, it’s built on top of its APIs and we recommend you to read through the [ProseMirror Guide](https://ProseMirror.net/docs/guide/) for advanced usage. You’ll have a better understanding of how everything works under the hood and get more familiar with many terms and jargon used by Tiptap.
+尽管 Tiptap 尝试隐藏 ProseMirror 的大部分复杂性，但它是建立在其 API 之上的，我们建议您阅读 [ProseMirror 指南](https://ProseMirror.net/docs/guide/) 以获取更高级的用法。您将更好地理解后台的工作原理，并更加熟悉 Tiptap 中使用的许多术语和行话。
 
-Existing [nodes](/editor/extensions/nodes), [marks](/editor/extensions/marks) and [functionality](/editor/extensions/functionality) can give you a good impression on how to approach your own extensions. To make it easier to switch between the documentation and the source code, we linked to the file on GitHub from every single extension documentation page.
+现有的 [节点](/editor/extensions/nodes)、[标记](/editor/extensions/marks) 和 [功能](/editor/extensions/functionality) 可以让您对如何着手自己的扩展有一个良好的印象。为了方便在文档和源代码之间切换，我们在每个扩展文档页面上都链接到了 GitHub 的文件。
 
-We recommend to start with customizing existing extensions first, and create your own extensions with the gained knowledge later. That’s why all the examples below extend existing extensions, but all examples will work on newly created extensions as well.
+我们建议首先从定制现有扩展开始，然后再用获得的知识创建自己的扩展。这就是为什么下面的所有示例都扩展现有扩展，但所有示例也都可以在新创建的扩展上运行的原因。
 
-## Create a new extension
+## 创建新扩展
 
-You’re free to create your own extensions for Tiptap. Here is the boilerplate code that’s needed to create and register your own extension:
+您可以自由地为 Tiptap 创建自己的扩展。以下是创建和注册您自己扩展所需的样板代码：
 
 ```js
 import { Extension } from '@tiptap/core'
 
 const CustomExtension = Extension.create({
-  // Your code here
+  // 在此处编写您的代码
 })
 
 const editor = new Editor({
   extensions: [
-    // Register your custom extension with the editor.
+    // 将您的自定义扩展与编辑器注册。
     CustomExtension,
-    // … and don’t forget all other extensions.
+    // … 并且不要忘记所有其他扩展。
     Document,
     Paragraph,
     Text,
@@ -45,10 +45,10 @@ const editor = new Editor({
 })
 ```
 
-You can easily bootstrap a new extension via our CLI.
+您可以通过我们的 CLI 轻松引导创建一个新扩展。
 
 ```bash
 npm init tiptap-extension
 ```
 
-Learn more about custom extensions in our [guide](/editor/extensions/custom-extensions).
+在我们的 [指南](/editor/extensions/custom-extensions) 中了解更多关于自定义扩展的信息。

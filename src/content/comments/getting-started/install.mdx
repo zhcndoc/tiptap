@@ -1,46 +1,46 @@
 ---
-title: Install the Comments extension
+title: 安装评论扩展
 meta:
-  title: Install comments | Tiptap Comments Docs
-  description: Install the comments extension in Tiptap to add threaded discussions to your editor and app. Learn more in the docs!
-  category: Comments
+  title: 安装评论 | Tiptap 评论文档
+  description: 在 Tiptap 中安装评论扩展，为您的编辑器和应用程序添加线程讨论。在文档中了解更多信息！
+  category: 评论
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
-Install and configure the comments extension by following this guide. Take a look at the Comments example application at the bottom of this page for a whole integration.
+通过遵循本指南安装并配置评论扩展。请查看本页底部的评论示例应用程序以获取完整的集成。
 
-<Callout title="Integrate or test Comments" variant="warning">
-    To test or integrate this feature you need an [active trial or Tiptap subscription](https://cloud.tiptap.dev/v2/billing).
+<Callout title="集成或测试评论" variant="warning">
+    要测试或集成此功能，您需要一个[有效的试用或 Tiptap 订阅](https://cloud.tiptap.dev/v2/billing)。
 </Callout>
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始免费[试用](https://cloud.tiptap.dev/v2/billing)或订阅一个[Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Start Document server">
-        To store Comments [Add an Environment](https://cloud.tiptap.dev/v2/configuration/document-server) in your dashboard and configure your [Document server](https://cloud.tiptap.dev/v2/configuration/document-server).
+    <RequirementItem label="2. 启动文档服务器">
+        要存储评论，请在您的仪表板中[添加环境](https://cloud.tiptap.dev/v2/configuration/document-server)并配置您的[文档服务器](https://cloud.tiptap.dev/v2/configuration/document-server)。
     </RequirementItem>
-    <RequirementItem label="3. Install from private registry">
-        To install this extension, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="3. 从私有注册表安装">
+        要安装此扩展，请按照[设置指南](/guides/pro-extensions)进行身份验证，访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-## Access the Pro registry
-The Comments extension is published in Tiptap’s private npm registry. Integrate the extension by following the [private registry guide](/guides/pro-extensions).
+## 访问专业注册表
+评论扩展发布在 Tiptap 的私有 npm 注册表中。通过遵循[私有注册表指南](/guides/pro-extensions)集成该扩展。
 
 
 ```bash
 npm install @tiptap-pro/extension-comments@next
 ```
 
-## Integrating the Comments extension
+## 集成评论扩展
 
-After installing the `comments` extension via npm or any other package manager, you can use it in your editor by registering the extension in the `extensions` property of your editor instance.
+通过 npm 或其他包管理器安装 `comments` 扩展后，可以在您的编辑器中通过在编辑器实例的 `extensions` 属性中注册该扩展来使用它。
 
-The Comments extension consists of multiple components, including nodes and plugins. To include all the required features, use the `CommentsKit` extension.
+评论扩展由多个组件组成，包括节点和插件。要包括所有所需功能，请使用 `CommentsKit` 扩展。
 
 ```js
 import { ThreadsKit } from '@tiptap-pro/extension-comments'
@@ -54,11 +54,11 @@ const editor = new Editor({
 })
 ```
 
-This will add all required extensions to your editor. Since Threads are a **cloud** or **on premises** feature you will need to also pass through a `TiptapCollabProvider` instance to your comments extension.
+这将把所有必需的扩展添加到您的编辑器中。由于线程是一个 **云** 或 **本地** 功能，您还需要将 `TiptapCollabProvider` 实例传递给您的评论扩展。
 
 ```js
 const collabProvider = new TiptapCollabProvider({
-  // your provider options
+  // 您的提供者选项
 })
 
 const editor = new Editor({
@@ -72,10 +72,10 @@ const editor = new Editor({
 })
 ```
 
-Your editor is now ready to support threads.
+您的编辑器现在已准备好支持线程。
 
 <hr />
 
-See a full example of how to use the Comments extension in the following example:
+请查看以下示例中如何使用评论扩展的完整示例：
 
 <CodeDemo isPro path="/Extensions/Comments?inline=false&hideSource=false" />

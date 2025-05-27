@@ -1,9 +1,9 @@
 ---
-title: Make your editor collaborative
+title: 让您的编辑器具备协作功能
 meta:
-  title: Collaboration | Tiptap Collaboration Docs
-  description: Make your editor collaborative with Tiptap Collaboration on your premises or in our cloud. Learn more in our docs!
-  category: Collaboration
+  title: 协作 | Tiptap 协作文档
+  description: 使用 Tiptap 协作在本地或我们的云中让您的编辑器具备协作功能。了解更多信息请查看我们的文档！
+  category: 协作
 ---
 
 import { ArrowRightIcon } from 'lucide-react'
@@ -12,49 +12,49 @@ import * as CtaBox from '@/components/CtaBox'
 import { Button } from '@/components/ui/Button'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
-Collaboration adds real-time collaborative editing to your editor. Presence indicators show who’s active, awareness highlights each user’s cursor and selection, and built-in [version history](/collaboration/documents/history) and [Comments](/comments/getting-started/overview) track every change.
+协作为您的编辑器添加实时协作编辑功能。在线状态指示器显示谁正在活跃，意识高亮显示每个用户的光标和选择，内置的 [版本历史](/collaboration/documents/history) 和 [评论](/comments/getting-started/overview) 跟踪每个更改。
 
-It runs on our open source [Hocuspocus](https://github.com/ueberdosis/hocuspocus) backend, syncs content with the Yjs CRDT, and scales from a single demo to thousands of concurrent connections.
+它在我们的开源 [Hocuspocus](https://github.com/ueberdosis/hocuspocus) 后端运行，通过 Yjs CRDT 同步内容，并且可以从单个演示扩展到数千个并发连接。
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Start Document server">
-        [Add an Environment](https://cloud.tiptap.dev/v2/configuration/document-server) in your dashboard and configure your [Document server](https://cloud.tiptap.dev/v2/configuration/document-server).
+    <RequirementItem label="2. 启动文档服务器">
+        在您的仪表板中 [添加环境](https://cloud.tiptap.dev/v2/configuration/document-server) 并配置您的 [文档服务器](https://cloud.tiptap.dev/v2/configuration/document-server)。
     </RequirementItem>
 </Requirements>
 
-## Maintain documents
-Every change is stored as a Yjs update. Use the [REST API](/collaboration/documents/rest-api) to fetch JSON or push programmatic edits. Add [webhooks](/collaboration/core-concepts/webhooks) for instant notifications and to retrieve all your documents.
+## 维护文档
+每个更改都存储为 Yjs 更新。使用 [REST API](/collaboration/documents/rest-api) 获取 JSON 或推送程序性编辑。添加 [网络hooks](/collaboration/core-concepts/webhooks) 以获取即时通知并检索您所有的文档。
 
-Create your own backups of all documents and associated information using our [document management API](/collaboration/documents/rest-api).
+使用我们的 [文档管理 API](/collaboration/documents/rest-api) 创建所有文档及其相关信息的备份。
 
-## Enable advanced features
-- [Version history](/collaboration/documents/history) – install the Collaboration History extension and let users restore any previous state.
-- [Snapshot compare](/collaboration/documents/snapshot-compare) – highlight differences between versions with Snapshot Compare.
-- [Semantic search](/collaboration/documents/semantic-search) – join the beta to search your library by meaning rather than keywords.
+## 启用高级功能
+- [版本历史](/collaboration/documents/history) – 安装协作历史扩展，让用户恢复任何先前状态。
+- [快照比较](/collaboration/documents/snapshot-compare) – 以快照比较突出显示版本之间的差异。
+- [语义搜索](/collaboration/documents/semantic-search) – 加入测试版，通过含义而非关键字搜索您的库。
 
 <CtaBox.Wrapper className="mt-12">
-    <CtaBox.Title>Enterprise on-premises solution</CtaBox.Title>
+    <CtaBox.Title>企业本地解决方案</CtaBox.Title>
     <CtaBox.Description>
-        Integrate Collaboration and all other Tiptap features into your infrastructure.
+        将协作及所有其他 Tiptap 功能集成到您的基础设施中。
     </CtaBox.Description>
     <CtaBox.List>
-        <CtaBox.ListItem title="On-premises: ">
-            Deploy our docker images in your own stack
+        <CtaBox.ListItem title="本地部署: ">
+            在您的堆栈中部署我们的 docker 镜像
         </CtaBox.ListItem>
-        <CtaBox.ListItem title="High availability cluster: ">
-            Scale confidently to millions of users
+        <CtaBox.ListItem title="高可用集群: ">
+            自信地扩展到数百万用户
         </CtaBox.ListItem>
-        <CtaBox.ListItem title="Dedicated support: ">
-            Custom development and integration support in Chat
+        <CtaBox.ListItem title="专属支持: ">
+            提供聊天中的定制开发和集成支持
         </CtaBox.ListItem>
     </CtaBox.List>
     <CtaBox.Actions className="-mx-3">
         <Button className="text-white/80 hover:text-white/100" variant="tertiary" asChild>
             <Link href="https://tiptap.dev/contact-sales">
-                Let's talk
+                咨询我们
                 <ArrowRightIcon className="w-4 h-4" />
             </Link>
         </Button>
@@ -62,20 +62,20 @@ Create your own backups of all documents and associated information using our [d
 </CtaBox.Wrapper>
 
 
-## Migrate from Hocuspocus or Collaboration Cloud
+## 从 Hocuspocus 或协作云迁移
 
-Migrating your application from Hocuspocus to either an on-premises solution or the Tiptap Collaboration Cloud involves a simple switch from the `HocuspocusProvider` to the `TiptapCollabProvider`, or the other way around.
+将您的应用程序从 Hocuspocus 迁移到本地解决方案或 Tiptap 协作云只需简单地将 `HocuspocusProvider` 切换为 `TiptapCollabProvider`，或反之。
 
-This doesn't require any other updates to your setup, and the way you interact with the API won't change as well. The `TiptapCollabProvider` acts as a go-between, managing how your application connects to the server and handles login details.
+这不需要对您的设置进行其他任何更新，您与 API 的交互方式也不会改变。`TiptapCollabProvider` 作为中介，管理您的应用程序如何连接到服务器以及处理登录详情。
 
-This migration approach is also applicable when migrating from the Tiptap Collaboration Cloud to an on-premises configuration.
+这种迁移方式也适用于从 Tiptap 协作云迁移到本地配置。
 
-Review the [Batch Import endpoint](/collaboration/documents/rest-api#batch-import-documents) to migrate your documents.
+查看 [批量导入端点](/collaboration/documents/rest-api#batch-import-documents) 以迁移您的文档。
 
-## Schema management
+## 架构管理
 
-Tiptap enforces strict schema adherence, discarding any elements not defined in the active schema. This can cause issues when clients using different schema versions concurrently edit a document.
+Tiptap 强制执行严格的架构遵循，丢弃活动架构中未定义的任何元素。这可能导致当使用不同架构版本的客户端同时编辑文档时出现问题。
 
-For instance, imagine adding a task list feature in an update. Users on the previous schema won't see these task lists, and any added by a user on the new schema will disappear from their view due to schema discrepancies. This occurs because Tiptap synchronizes changes across clients, removing unrecognized elements based on the older schema.
+例如，想象在一个更新中添加任务列表功能。使用先前架构的用户无法看到这些任务列表，任何由新架构用户添加的任务列表由于架构不一致将从他们的视图中消失。这是因为 Tiptap 在客户端之间同步更改，根据较旧的架构删除未识别的元素。
 
-To mitigate these issues, consider implementing [Invalid Schema Handling](/editor/core-concepts/schema#invalid-schema-handling) as outlined in the Tiptap Editor docs.
+为了缓解这些问题，考虑实施 [无效架构处理](/editor/core-concepts/schema#invalid-schema-handling)，如 Tiptap 编辑器文档中所述。

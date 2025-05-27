@@ -1,194 +1,194 @@
 ---
-title: Events in Tiptap
+title: Tiptap 中的事件
 meta:
-  title: Events in Tiptap | Tiptap Editor Docs
-  description: Use and handle various events in Tiptap, including creation, updates, focus, blur, and destruction. More in the docs!
-  category: Editor
+  title: Tiptap 中的事件 | Tiptap 编辑器文档
+  description: 使用和处理 Tiptap 中的各种事件，包括创建、更新、获得焦点、失去焦点和销毁。在文档中了解更多！
+  category: 编辑器
 ---
 
-The editor fires a few different events that you can hook into. Let’s have a look at all the available events first.
+编辑器会触发一些不同的事件供你挂载。让我们先看看所有可用的事件。
 
-## List of available events
+## 可用事件列表
 
-| Event Name        | Description                                                                                                   |
-| ----------------- | ------------------------------------------------------------------------------------------------------------- |
-| `beforeCreate`    | Before the editor view is created.                                                                            |
-| `create`          | When the editor is fully initialized and ready.                                                               |
-| `update`          | When there is a change in the content.                                                                        |
-| `selectionUpdate` | When the selection changes within the editor.                                                                 |
-| `transaction`     | When the editor state changes due to any operation.                                                           |
-| `focus`           | When the editor gains focus.                                                                                  |
-| `blur`            | When the editor loses focus.                                                                                  |
-| `destroy`         | When the editor instance is being destroyed.                                                                  |
-| `paste`           | When content is pasted into the editor.                                                                       |
-| `drop`            | When content is dropped into the editor.                                                                      |
-| `delete`          | When content is deleted from the editor.                                                                      |
-| `contentError`    | The content does not match the schema. [Read more here](/editor/core-concepts/schema#invalid-schema-handling) |
+| 事件名称          | 描述                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| `beforeCreate`    | 在编辑器视图创建之前。                                                                                  |
+| `create`          | 当编辑器完全初始化并准备就绪时。                                                                         |
+| `update`          | 当内容发生变化时。                                                                                     |
+| `selectionUpdate` | 当选择在编辑器中更改时。                                                                                |
+| `transaction`     | 当编辑器状态因任何操作而变化时。                                                                         |
+| `focus`           | 当编辑器获得焦点时。                                                                                   |
+| `blur`            | 当编辑器失去焦点时。                                                                                   |
+| `destroy`         | 当编辑器实例正在被销毁时。                                                                              |
+| `paste`           | 当内容被粘贴到编辑器中时。                                                                              |
+| `drop`            | 当内容被拖放到编辑器中时。                                                                              |
+| `delete`          | 当内容从编辑器中删除时。                                                                                |
+| `contentError`    | 内容与模式不匹配。 [在这里阅读更多](/editor/core-concepts/schema#invalid-schema-handling) |
 
-## Register event listeners
+## 注册事件监听器
 
-There are three ways to register event listeners.
+有三种方法可以注册事件监听器。
 
-### Option 1: Configuration
+### 选项 1：配置
 
-You can define your event listeners on a new editor instance right-away:
+你可以在新的编辑器实例上立即定义事件监听器：
 
 ```js
 const editor = new Editor({
   onBeforeCreate({ editor }) {
-    // Before the view is created.
+    // 在视图创建之前。
   },
   onCreate({ editor }) {
-    // The editor is ready.
+    // 编辑器已准备好。
   },
   onUpdate({ editor }) {
-    // The content has changed.
+    // 内容已改变。
   },
   onSelectionUpdate({ editor }) {
-    // The selection has changed.
+    // 选择已改变。
   },
   onTransaction({ editor, transaction }) {
-    // The editor state has changed.
+    // 编辑器状态已改变。
   },
   onFocus({ editor, event }) {
-    // The editor is focused.
+    // 编辑器获得了焦点。
   },
   onBlur({ editor, event }) {
-    // The editor isn’t focused anymore.
+    // 编辑器不再获得焦点。
   },
   onDestroy() {
-    // The editor is being destroyed.
+    // 编辑器正在被销毁。
   },
   onPaste(event: ClipboardEvent, slice: Slice) {
-    // The editor is being pasted into.
+    // 内容正在被粘贴到编辑器中。
   },
   onDrop(event: DragEvent, slice: Slice, moved: boolean) {
-    // The editor is being pasted into.
+    // 内容正在被拖放到编辑器中。
   },
   onDelete({ type, deletedRange, newRange, partial, node, mark, from, to, newFrom, newTo }) {
-    // Content was deleted from the editor (either a node or mark).
+    // 内容已从编辑器中删除（节点或标记）。
   },
   onContentError({ editor, error, disableCollaboration }) {
-    // The editor content does not match the schema.
+    // 编辑器内容与模式不匹配。
   },
 })
 ```
 
-### Option 2: Binding
+### 选项 2：绑定
 
-Or you can register your event listeners on a running editor instance:
+或者你可以在正在运行的编辑器实例上注册事件监听器：
 
-#### Bind event listeners
+#### 绑定事件监听器
 
 ```js
 editor.on('beforeCreate', ({ editor }) => {
-  // Before the view is created.
+  // 在视图创建之前。
 })
 
 editor.on('create', ({ editor }) => {
-  // The editor is ready.
+  // 编辑器已准备好。
 })
 
 editor.on('update', ({ editor }) => {
-  // The content has changed.
+  // 内容已改变。
 })
 
 editor.on('selectionUpdate', ({ editor }) => {
-  // The selection has changed.
+  // 选择已改变。
 })
 
 editor.on('transaction', ({ editor, transaction }) => {
-  // The editor state has changed.
+  // 编辑器状态已改变。
 })
 
 editor.on('focus', ({ editor, event }) => {
-  // The editor is focused.
+  // 编辑器获得了焦点。
 })
 
 editor.on('blur', ({ editor, event }) => {
-  // The editor isn’t focused anymore.
+  // 编辑器不再获得焦点。
 })
 
 editor.on('destroy', () => {
-  // The editor is being destroyed.
+  // 编辑器正在被销毁。
 })
 
 editor.on('paste', ({ event, slice, editor }) => {
-  // The editor is being pasted into.
+  // 内容正在被粘贴到编辑器中。
 })
 
 editor.on('drop', ({ editor, event, slice, moved }) => {
-  // The editor is being destroyed.
+  // 内容正在被拖放到编辑器中。
 })
 
 editor.on('delete', ({ type, deletedRange, newRange, partial, node, mark }) => {
-  // Content was deleted from the editor (either a node or mark).
+  // 内容已从编辑器中删除（节点或标记）。
 })
 
 editor.on('contentError', ({ editor, error, disableCollaboration }) => {
-  // The editor content does not match the schema.
+  // 编辑器内容与模式不匹配。
 })
 ```
 
-#### Unbind event listeners
+#### 解绑事件监听器
 
-If you need to unbind those event listeners at some point, you should register your event listeners with `.on()` and unbind them with `.off()` then.
+如果你需要在某个时候解绑这些事件监听器，你应该使用 `.on()` 注册事件监听器，并使用 `.off()` 解绑它们。
 
 ```js
 const onUpdate = () => {
-  // The content has changed.
+  // 内容已改变。
 }
 
-// Bind …
+// 绑定 …
 editor.on('update', onUpdate)
 
-// … and unbind.
+// … 并解绑。
 editor.off('update', onUpdate)
 ```
 
-### Option 3: Extensions
+### 选项 3：扩展
 
-Moving your event listeners to custom extensions (or nodes, or marks) is also possible. Here’s how that would look like:
+你也可以将事件监听器移动到自定义扩展（或节点，或标记）中。以下是这样的代码示例：
 
 ```js
 import { Extension } from '@tiptap/core'
 
 const CustomExtension = Extension.create({
   onBeforeCreate({ editor }) {
-    // Before the view is created.
+    // 在视图创建之前。
   },
   onCreate({ editor }) {
-    // The editor is ready.
+    // 编辑器已准备好。
   },
   onUpdate({ editor }) {
-    // The content has changed.
+    // 内容已改变。
   },
   onSelectionUpdate({ editor }) {
-    // The selection has changed.
+    // 选择已改变。
   },
   onTransaction({ editor, transaction }) {
-    // The editor state has changed.
+    // 编辑器状态已改变。
   },
   onFocus({ editor, event }) {
-    // The editor is focused.
+    // 编辑器获得了焦点。
   },
   onBlur({ editor, event }) {
-    // The editor isn’t focused anymore.
+    // 编辑器不再获得焦点。
   },
   onDestroy() {
-    // The editor is being destroyed.
+    // 编辑器正在被销毁。
   },
   onPaste(event: ClipboardEvent, slice: Slice) {
-    // The editor is being pasted into.
+    // 内容正在被粘贴到编辑器中。
   },
   onDrop(event: DragEvent, slice: Slice, moved: boolean) {
-    // The editor is being pasted into.
+    // 内容正在被拖放到编辑器中。
   },
   onDelete({ type, deletedRange, newRange, partial, node, mark }) {
-    // Content was deleted from the editor (either a node or mark).
+    // 内容已从编辑器中删除（节点或标记）。
   },
   onContentError({ editor, error, disableCollaboration }) {
-    // The editor content does not match the schema.
+    // 编辑器内容与模式不匹配。
   },
 })
 ```

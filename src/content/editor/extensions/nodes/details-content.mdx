@@ -1,16 +1,16 @@
 ---
-title: DetailsContent extension
+title: 详细内容扩展
 icon: menu-unfold-line
 extension:
   name: DetailsContent
-  description: Add content to your details nodes.
+  description: 向您的详细节点添加内容。
   type: node
   icon: Text
   isPro: true
 meta:
-  title: DetailsContent extension | Tiptap Editor Docs
-  description: Show and hide content with the Details and DetailsContent extension in your Tiptap Editor. Great to… toggle hiding content!
-  category: Editor
+  title: 详细内容扩展 | Tiptap 编辑器文档
+  description: 在您的 Tiptap 编辑器中使用 Details 和 DetailsContent 扩展来显示和隐藏内容。非常适合… 切换隐藏内容！
+  category: 编辑器
 tags:
   - type: pro
 ---
@@ -20,31 +20,31 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始一个免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅一个 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Install from private registry">
-        To install this frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 认证到 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-The Details extension enables you to use the `<details>` HTML tag in the editor. This is great to show and hide content.
+详细扩展使您能够在编辑器中使用 `<details>` HTML 标签。这非常适合显示和隐藏内容。
 
 <CodeDemo isPro path="/Nodes/Details" />
 
-## Install
+## 安装
 
-<Callout title="Set up access to Tiptap's private repository" variant="info">
-  Integrate this pro extension by registering a free [Tiptap
-  account](https://cloud.tiptap.dev/register) and following our [access
-  guide](/guides/pro-extensions) to Tiptap’s private repository.
+<Callout title="设置访问 Tiptap 的私有存储库" variant="info">
+  通过注册一个免费的 [Tiptap
+  账户](https://cloud.tiptap.dev/register) 并按照我们的 [访问
+  指南](/guides/pro-extensions) 访问 Tiptap 的私有存储库，集成此专业扩展。
 </Callout>
 
 ```bash
 npm install @tiptap-pro/extension-details@next
 ```
 
-## Usage
+## 用法
 
 ```js
 import { Details, DetailsSummary, DetailsContent } from '@tiptap-pro/extension-details'
@@ -54,11 +54,11 @@ const editor = new Editor({
 })
 ```
 
-## Settings
+## 设置
 
 ### HTMLAttributes
 
-Custom HTML attributes that should be added to the rendered HTML tag.
+应添加到渲染的 HTML 标签的自定义 HTML 属性。
 
 ```js
 DetailsContent.configure({

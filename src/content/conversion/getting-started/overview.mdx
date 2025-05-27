@@ -1,9 +1,9 @@
 ---
-title: Import and export documents with Tiptap
+title: 使用 Tiptap 导入和导出文档
 meta:
-    title: Conversion | Tiptap Conversion
-    description: Use Tiptap to convert documents from DOCX, ODT or Markdown to Tiptap JSON format
-    category: Conversion
+    title: 转换 | Tiptap 转换
+    description: 使用 Tiptap 将文档从 DOCX、ODT 或 Markdown 转换为 Tiptap JSON 格式
+    category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -11,30 +11,30 @@ import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的帐户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Configure Convert app">
-        In case you want to integrate the REST API retrieve your App ID and Convert secret from [your dashboard](https://cloud.tiptap.dev/v2/cloud/convert).
+    <RequirementItem label="2. 配置 Convert 应用">
+        如果您希望集成 REST API，请从 [您的仪表板](https://cloud.tiptap.dev/v2/cloud/convert) 获取您的应用 ID 和 Convert 密钥。
     </RequirementItem>
-    <RequirementItem label="3. Install from private registry">
-        To install the frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="3. 从私有注册表安装">
+        要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证，以访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-The Tiptap Conversion Service makes it easy to import and export content between Tiptap and document file formats. It offers:
+Tiptap 转换服务使在 Tiptap 和文档文件格式之间导入和导出内容变得容易。它提供：
 
-<Callout title="Integrate or test Conversion" variant="warning">
-    To test or integrate this feature you need an [active trial or Tiptap subscription](https://cloud.tiptap.dev/v2/billing).
+<Callout title="集成或测试转换" variant="warning">
+    要测试或集成此功能，您需要一个 [活动试用或 Tiptap 订阅](https://cloud.tiptap.dev/v2/billing)。
 </Callout>
 
-- **Import**: Convert files (Word DOCX, OpenOffice/LibreOffice ODT, or Markdown files) into Tiptap’s JSON document format.
-- **Export**: Turn Tiptap JSON back into Word DOCX, OpenOffice/LibreOffice ODT, or Markdown files.
-- **Editor Extensions**: Use built-in Tiptap Pro extensions to import/export directly within a Tiptap editor instance.
-- **REST API**: Use HTTP endpoints to integrate our conversion services anywhere needed without a Tiptap editor being required.
+- **导入**：将文件（Word DOCX、OpenOffice/LibreOffice ODT 或 Markdown 文件）转换为 Tiptap 的 JSON 文档格式。
+- **导出**：将 Tiptap JSON 转回 Word DOCX、OpenOffice/LibreOffice ODT 或 Markdown 文件。
+- **编辑器扩展**：使用内置的 Tiptap Pro 扩展直接在 Tiptap 编辑器实例中进行导入/导出。
+- **REST API**：使用 HTTP 端点在需要的任何地方集成我们的转换服务，而无需 Tiptap 编辑器。
 
 <CodeDemo src="https://develop--tiptap-pro.netlify.app/preview/Extensions/ExportImportDocx" />
 
-<Callout title="Conversion service">
-    We are continuously improving the conversion service. Support for page breaks, headers/footers, references like footnotes, and other complex features are in active development.
+<Callout title="转换服务">
+    我们正在不断改进转换服务。对分页、页眉/页脚、引用（如脚注）和其他复杂功能的支持正在积极开发中。
 </Callout>

@@ -1,63 +1,62 @@
 ---
-title: Inject content REST API
+title: 注入内容 REST API
 meta:
-  title: Inject content API | Tiptap Collaboration Docs
-  description: Manage your Collaboration documents with JSON updates using the Inject Content API. Learn more in our docs!
-  category: Collaboration
+  title: 注入内容 API | Tiptap 协作文档
+  description: 使用注入内容 API，通过 JSON 更新管理您的协作文档。了解更多信息，请查看我们的文档！
+  category: 协作
 ---
 
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
-To inject content into documents server-side, use the PATCH endpoint described in this document. This feature supports version history, tracking changes as well as content added through this endpoint.
-
+要在服务器端注入内容到文档中，请使用本文档中描述的 PATCH 端点。此功能支持版本历史记录，跟踪更改以及通过此端点添加的内容。
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to the [Team plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [团队计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Start Document server">
-        [Add an Environment](https://cloud.tiptap.dev/v2/configuration/document-server) in your dashboard and configure your [Document server](https://cloud.tiptap.dev/v2/configuration/document-server).
+    <RequirementItem label="2. 启动文档服务器">
+        在您的仪表板中 [添加环境](https://cloud.tiptap.dev/v2/configuration/document-server) 并配置您的 [文档服务器](https://cloud.tiptap.dev/v2/configuration/document-server)。
     </RequirementItem>
 </Requirements>
 
-The update document endpoint also allows JSON updates to modify documents on your Collaboration server, both On-Premises and Cloud:
+更新文档的端点还允许 JSON 更新以修改您在协作服务器上的文档，包括本地部署和云端：
 
-- Add `json`, `binary`, or `base64` content to any document server-side.
-- Inject content into specific nodes using the [UniqueID extension](/editor/extensions/functionality/uniqueid).
-- Users can still collaborate in real-time as content is injected.
-- Track user and injected content changes, fully compatible with [Snapshots](/collaboration/documents/snapshot).
+- 在任何文档服务器端添加 `json`、`binary` 或 `base64` 内容。
+- 使用 [UniqueID 扩展](/editor/extensions/functionality/uniqueid) 向特定节点注入内容。
+- 用户仍然可以实时协作，因为内容在注入过程中。
+- 跟踪用户和注入内容的更改，完全兼容 [快照](/collaboration/documents/snapshot)。
 
-### Use cases
+### 用例
 
-The content injection REST API enables a couple of handy but sophisticated use cases:
+内容注入 REST API 可以实现一些方便但复杂的用例：
 
-- Live translation of document content.
-- Programmatically tagging or manipulating document content server-side.
-- Integrating server-side components, like executing SQL queries and displaying results.
-- Version history integration and conflict-free merging of concurrent edits.
+- 文档内容的实时翻译。
+- 在服务器端以编程方式标记或操作文档内容。
+- 集成服务器端组件，例如执行 SQL 查询并显示结果。
+- 版本历史集成和无冲突的并发编辑合并。
 
-<Callout title="Integrate or test content injection" variant="warning">
-    This feature needs an [active trial or Tiptap Team subscription](https://cloud.tiptap.dev/v2/billing).
+<Callout title="集成或测试内容注入" variant="warning">
+    此功能需要 [有效的试用或 Tiptap 团队订阅](https://cloud.tiptap.dev/v2/billing)。
 </Callout>
 
-## Update a document
+## 更新文档
 
-To update an existing document on the Collaboration server, you can use the `PATCH` method with the following API endpoint:
+要在协作服务器上更新现有文档，可以使用 `PATCH` 方法与以下 API 端点：
 
 ```bash
 PATCH /api/documents/:identifier?format=:format
 ```
 
-This endpoint accepts a Yjs update message and applies it to the specified document. The `format` query parameter specifies the format of the update and can be one of the following:
+此端点接受 Yjs 更新消息并将其应用于指定文档。`format` 查询参数指定更新的格式，可以是以下之一：
 
-- `json`: Updates the document using JSON format (with some caveats, [see below](#update-via-json)).
-- `binary`: Directly using Yjs's `Y.encodeStateAsUpdate` method.
-- `base64`: The binary state encoded as a Base64 string.
+- `json`：使用 JSON 格式更新文档（有一些注意事项，[见下文](#update-via-json)）。
+- `binary`：直接使用 Yjs 的 `Y.encodeStateAsUpdate` 方法。
+- `base64`：将二进制状态编码为 Base64 字符串。
 
-Upon successful update, the server will return HTTP status `204`. If the document does not exist, it will return `404`, and if the payload is invalid or the update cannot be applied, it will return `422`.
+成功更新后，服务器将返回 HTTP 状态 `204`。如果文档不存在，将返回 `404`，如果负载无效或无法应用更新，将返回 `422`。
 
-**Example:** `curl` command to update a document
+**示例：** 更新文档的 `curl` 命令
 
 ```bash
 curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \\
@@ -65,53 +64,52 @@ curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/doc
 --data '@yjsUpdate.binary.txt'
 ```
 
-## Update via JSON
+## 通过 JSON 更新
 
-When updating via JSON, the server computes the difference between the current document state and the provided JSON, then internally calculates the required Yjs update to reach the target state.
+通过 JSON 更新时，服务器计算当前文档状态与提供的 JSON 之间的差异，然后内部计算所需的 Yjs 更新以达到目标状态。
 
-To ensure precise updates, especially for node-specific changes, it is recommended to use the `nodeAttributeName` and `nodeAttributeValue` parameters. These can be generated by Tiptap's [UniqueID Extension](/editor/extensions/functionality/uniqueid) or a custom implementation.
-Note that this only works for top level nodes.
+为了确保精确更新，特别是对于节点特定的更改，建议使用 `nodeAttributeName` 和 `nodeAttributeValue` 参数。这些可以通过 Tiptap 的 [UniqueID 扩展](/editor/extensions/functionality/uniqueid) 或自定义实现生成。
+注意，这仅适用于顶层节点。
 
-- `nodeAttributeName`: Configured as `attributeName` in the [UniqueID extension](/editor/extensions/functionality/uniqueid).
-- `nodeAttributeValue`: The unique value generated for the node being updated. You can pass multiple values with `?nodeAttributeValue=a&=nodeAttributeValue=b`.
+- `nodeAttributeName`：在 [UniqueID 扩展](/editor/extensions/functionality/uniqueid) 中配置为 `attributeName`。
+- `nodeAttributeValue`：为正在更新的节点生成的唯一值。您可以通过 `?nodeAttributeValue=a&=nodeAttributeValue=b` 传递多个值。
 
-You can use `?mode=append` to append nodes to the document's JSON representation without altering existing nodes.
+您可以使用 `?mode=append` 将节点附加到文档的 JSON 表示，而不更改现有节点。
 
-Omitting these parameters may result in overwriting any updates made between fetching the document and issuing the update call. The `get document` call returns a header `x-${fragmentName}-checksum` which can be used to detect conflicts by passing
-it to the update call as `?checksum=${checksum}`. If the document has been updated since the last fetch, the update will fail with a `409 Checksum mismatch.` status.
+省略这些参数可能会导致覆盖在获取文档和发出更新调用之间所做的任何更新。`get document` 调用返回一个头 `x-${fragmentName}-checksum`，可以通过将其传递给更新调用作为 `?checksum=${checksum}` 来检测冲突。如果自上次获取以来文档已被更新，更新将以 `409 Checksum mismatch.` 状态失败。
 
-**Example:** Updating a document using JSON
+**示例：** 使用 JSON 更新文档
 
 ```typescript
-// Define the document name, secret, and application ID
-const docName = '' // URI-encoded if necessary
+// 定义文档名称、密钥和应用程序 ID
+const docName = '' // 如有必要，请进行 URI 编码
 const secret = ''
 const appId = '';
 
-// Construct the base URL
+// 构建基本 URL
 const url = `https://${appId}.collab.tiptap.cloud`
 
-// Fetch the current document's JSON representation
+// 获取当前文档的 JSON 表示
 const docJson = await axios.get(`${url}/api/documents/${docName}?format=json`, {
     headers: {
     Authorization: secret
   },
 })
 
-// Extract the document's JSON content
+// 提取文档的 JSON 内容
 const tiptapJson = docJson.data
 const nodes = tiptapJson.content
 
-// Find and log specific nodes using their unique identifiers
+// 使用唯一标识符查找并记录特定节点
 const query = nodes.find(n => n.attrs?.identifier === 'fe5c0789-85d9-4877-a2c3-bccf5d874866').content[0].text
 const resultTable = nodes.find(n => n.attrs?.identifier === '246368b6-0746-4ca1-a16f-8d964aff4041')
 
 console.log(`Query: ${query}`)
 console.log(JSON.stringify(resultTable.content))
 
-// Append new content to the result table node
+// 向结果表节点附加新内容
 resultTable.content.push({
-  // New table row content here
+  // 新表行内容在此
   {
     "type": "tableRow",
     "content": [
@@ -182,7 +180,7 @@ resultTable.content.push({
   }
 })
 
-// Send the updated JSON back to the server to apply the changes
+// 将更新后的 JSON 发送回服务器以应用更改
 await axios.patch(`${url}/api/documents/${docName}?format=json`, tiptapJson, {
   headers: {
     Authorization: secret
@@ -190,12 +188,12 @@ await axios.patch(`${url}/api/documents/${docName}?format=json`, tiptapJson, {
 })
 ```
 
-### Update only node attrs
+### 仅更新节点属性
 
-If you want to only update attributes of a node, you can use the `?mode=attrs` query parameter. This will only update the attributes of the node and not its content.
-In this mode, the `nodeAttributeName` and `nodeAttributeValue` parameters work for any (not just top level) nodes.
+如果您只想更新节点的属性，可以使用 `?mode=attrs` 查询参数。这将仅更新节点的属性，而不更新其内容。
+在此模式下，`nodeAttributeName` 和 `nodeAttributeValue` 参数适用于任何（不仅仅是顶层）节点。
 
-Note that we're deleting all attrs on that node and then setting only the ones specified in the payload of the request. Not specifying a node filter (nodeAttributeName, nodeAttributeValue) will result in all nodes being updated.
+请注意，我们将删除该节点上的所有属性，然后仅设置请求负载中指定的属性。不指定节点过滤器（nodeAttributeName, nodeAttributeValue）会导致所有节点被更新。
 
 ```
 curl --location --request PATCH '/api/documents/:identifier?format=json&nodeAttributeName=id&nodeAttributeValue=12&mode=attrs' \
@@ -205,14 +203,14 @@ curl --location --request PATCH '/api/documents/:identifier?format=json&nodeAttr
 }'
 ```
 
-## Create a document
+## 创建文档
 
-To seed a new document on the Tiptap Collab server, use the `POST` method with the following endpoint:
+要在 Tiptap Collab 服务器上创建新文档，请使用 `POST` 方法与以下端点：
 
 ```bash
 POST /api/documents/:identifier?format=:format
 ```
 
-The server will return HTTP status `204` for successful creation, `409` if the document already exists (you must delete it first to overwrite), and `422` if the action failed.
+服务器将返回成功创建的 HTTP 状态 `204`，如果文档已存在则返回 `409`（您必须先删除它以覆盖），如果操作失败则返回 `422`。
 
-The `format` parameter accepts the same values as the update endpoint (`binary`, `base64`, or `json`).
+`format` 参数接受与更新端点相同的值（`binary`、`base64` 或 `json`）。

@@ -1,23 +1,23 @@
 ---
-title: Add a tooltip UI component to your Editor
+title: 向您的编辑器添加提示工具 UI 组件
 meta:
-  title: Tooltip | Tiptap UI Component
-  description: Add a small informational popup that appears when hovering over an element. More in the docs!
-  category: UI Components
+  title: 提示工具 | Tiptap UI 组件
+  description: 添加一个小信息弹出框，当悬停在元素上时显示。更多信息请参阅文档！
+  category: UI 组件
 component:
-  name: Tooltip
-  description: Add a popup that appears when you hover over elements.
+  name: 提示工具
+  description: 添加一个当您悬停在元素上时出现的弹出框。
   type: primitive
   isFree: true
   isCloud: false
   isOpen: true
   isNew: false
-  icon: Asterisk
+  icon: 星号
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-A small informational popup that appears when hovering over an element.
+当悬停在元素上时出现的小信息弹出框。
 
 <CodeDemo
   isScrollable
@@ -25,21 +25,21 @@ A small informational popup that appears when hovering over an element.
   src="https://template.tiptap.dev/preview/tiptap-ui-primitive/tooltip"
 />
 
-## Install
-You can add the primitive via Tiptap CLI (for Vite or Next.js)
+## 安装
+您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加该原始组件。
 
 ```bash
 npx @tiptap/cli add tooltip
 ```
 
-### Manual Integration
-For frameworks other than Vite or Next.js, add the primitive manually from the [open-source repository](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui-primitive/tooltip).
+### 手动集成
+对于 Vite 或 Next.js 以外的框架，请从 [开源代码库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui-primitive/tooltip) 手动添加该原始组件。
 
-### Import styles
+### 导入样式
 
-This component requires you to import our styles which were added to `styles/keyframe-animation.scss` and `styles/_variables.scss`.
+此组件需要您导入我们添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 的样式。
 
-## Usage
+## 使用方法
 
 ```tsx
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/tiptap-ui-primitive/tooltip'
@@ -49,37 +49,37 @@ export default function MyComponent() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button data-style="ghost">Hover Me</Button>
+        <Button data-style="ghost">悬停我</Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>Tooltip content</p>
+        <p>提示工具内容</p>
       </TooltipContent>
     </Tooltip>
   )
 }
 ```
 
-## Props
+## 属性
 
 ### Tooltip
 
-| Name              | Type                    | Default   | Description                             |
-| ----------------- | ----------------------- | --------- | --------------------------------------- |
-| open              | boolean                 | undefined | Controlled open state                   |
-| onOpenChange      | (open: boolean) => void | undefined | Callback when open state changes        |
-| defaultOpen       | boolean                 | false     | Default open state                      |
-| delayDuration     | number                  | 300       | Delay before tooltip appears (ms)       |
-| skipDelayDuration | number                  | 300       | Skip delay when moving between tooltips |
+| 名称              | 类型                    | 默认值   | 描述                                   |
+|-------------------|------------------------|----------|----------------------------------------|
+| open              | boolean                | undefined| 受控的打开状态                        |
+| onOpenChange      | (open: boolean) => void| undefined| 打开状态变化时的回调                  |
+| defaultOpen       | boolean                | false    | 默认打开状态                          |
+| delayDuration     | number                 | 300      | 提示工具出现前的延时（毫秒）           |
+| skipDelayDuration | number                 | 300      | 在不同提示工具之间移动时跳过延时      |
 
 ### TooltipTrigger
 
-| Name    | Type    | Default | Description                       |
-| ------- | ------- | ------- | --------------------------------- |
-| asChild | boolean | false   | Whether to merge props with child |
+| 名称    | 类型    | 默认值 | 描述                           |
+|---------|---------|-------|---------------------------------|
+| asChild | boolean | false | 是否将属性与子元素合并         |
 
 ### TooltipContent
 
-| Name  | Type                                   | Default  | Description                       |
-| ----- | -------------------------------------- | -------- | --------------------------------- |
-| side  | 'top' \| 'right' \| 'bottom' \| 'left' | 'top'    | Preferred side to display content |
-| align | 'start' \| 'center' \| 'end'           | 'center' | Alignment along the edge          |
+| 名称  | 类型                                   | 默认值  | 描述                           |
+|-------|----------------------------------------|---------|---------------------------------|
+| side  | 'top' \| 'right' \| 'bottom' \| 'left' | 'top'   | 显示内容的首选侧面             |
+| align | 'start' \| 'center' \| 'end'           | 'center'| 边缘对齐                       |

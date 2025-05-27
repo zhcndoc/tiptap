@@ -1,84 +1,82 @@
 ---
-title: Semantic Search
+title: 语义搜索
 meta:
-  title: Semantic Search | Tiptap Editor Docs
-  description: Semantic Search across your documents. Learn how to set up and use it here in the Docs!
-  category: Collaboration
+  title: 语义搜索 | Tiptap 编辑器文档
+  description: 在您的文档中进行语义搜索。了解如何在文档中进行设置和使用它！
+  category: 协作
 ---
 
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-Tiptap Semantic Search brings AI-native search capabilities to your document library, making it easy to discover relationships and connections across all your documents through contextual understanding provided by large language models.
+Tiptap 语义搜索为您的文档库带来了原生 AI 搜索能力，使您能够通过大型语言模型提供的上下文理解，轻松发现所有文档之间的关系和连接。
 
 <Requirements>
-    <RequirementItem label="1. Subscribe to Growth plan">
-        Subscribe to the [Growth plan](https://cloud.tiptap.dev/v2/billing) to request access to the Private Beta.
+    <RequirementItem label="1. 订阅增长计划">
+        订阅 [增长计划](https://cloud.tiptap.dev/v2/billing) 以请求访问私有测试版。
     </RequirementItem>
-    <RequirementItem label="2. Start Document server">
-        [Add an Environment](https://cloud.tiptap.dev/v2/configuration/document-server) in your dashboard and configure your [Document server](https://cloud.tiptap.dev/v2/configuration/document-server).
+    <RequirementItem label="2. 启动文档服务器">
+        在您的仪表板中 [添加环境](https://cloud.tiptap.dev/v2/configuration/document-server) 并配置您的 [文档服务器](https://cloud.tiptap.dev/v2/configuration/document-server)。
     </RequirementItem>
-    <RequirementItem label="3. Join Private Beta">
-        Tell us about your use case at [humans@tiptap.dev](mailto:humans@tiptap.dev) to be considered for early access to Tiptap Semantic Search.
+    <RequirementItem label="3. 加入私有测试版">
+        请告诉我们您的使用案例，发送邮件至 [humans@tiptap.dev](mailto:humans@tiptap.dev)，以便考虑提前访问 Tiptap 语义搜索。
     </RequirementItem>
 </Requirements>
 
-Searching through large document archives can be challenging, especially if you miss the exact keywords. Semantic Search addresses this by interpreting the intent behind the search query and the contextual meaning within your documents. 
+在大型文档档案中进行搜索可能会很具挑战性，特别是当您错过确切的关键词时。语义搜索通过解释搜索查询背后的意图和文档中的上下文含义来解决这个问题。
 
-The LLM’s interpretation is encoded as numerical representations, known as vectors or embeddings, which capture the semantic meaning of both new and existing content. These embeddings can then be easily compared to retrieve the most relevant documents.
+大型语言模型的解释被编码为数值表示，称为向量或嵌入，捕捉新内容和现有内容的语义意义。这些嵌入可以轻松比较，以检索最相关的文档。
 
-<Callout title="Private Beta" variant="hint">
-  This feature is currently in private beta and available by invite only. Tell us about your use case at [humans@tiptap.dev](mailto:humans@tiptap.dev) to be considered for early access to Tiptap Semantic Search.
+<Callout title="私有测试版" variant="hint">
+  此功能目前处于私有测试阶段，仅通过邀请提供。请告诉我们您的使用案例，发送邮件至 [humans@tiptap.dev](mailto:humans@tiptap.dev)，以便考虑提前访问 Tiptap 语义搜索。
 </Callout>
 
-## Live demo
+## 实时演示
 
-Below is an interactive demo of Tiptap Semantic Search. Type into the editor on the left, and watch as the search results update in real time with the most contextually relevant pages from our public documentation. Discover more details about the demo in our [examples](https://ai-demo.tiptap.dev/preview/Examples/SemanticSearch). 
+下面是 Tiptap 语义搜索的互动演示。在左侧的编辑器中输入内容，您可以看到搜索结果实时更新，显示我们公共文档中上下文最相关的页面。更多演示详细信息，请查看我们的 [示例](https://ai-demo.tiptap.dev/preview/Examples/SemanticSearch)。
 
 <CodeDemo src="https://ai-demo.tiptap.dev/preview/Examples/SemanticSearch?hideSource=1" />
 
-## Get started
+## 开始使用
 
-### Prerequisites
+### 先决条件
 
-- Tiptap Collaboration
-- Access to private beta (request an invite [here](mailto:humans@tiptap.dev))
+- Tiptap 协作
+- 私有测试版访问权限（在 [这里](mailto:humans@tiptap.dev) 请求邀请）
 
-### How it works
+### 工作原理
 
-When you input a query, the following things happen:
-1. **Embedding**: Your query is transformed into a high-dimensional vector using a model optimized for similarity search.
-2. **Vector search**: This vector is compared with the existing vectors of your document library. The comparison process is based on similarity metrics to identify the most relevant documents.
-3. **Context-aware results**: Documents are ranked according to their semantic similarity to the query, so that even if the words don't match, the most relevant content is surfaced.
+当您输入查询时，以下事情会发生：
+1. **嵌入**：您的查询被转化为一个高维向量，使用为相似性搜索优化的模型。
+2. **向量搜索**：该向量与您文档库中现有的向量进行比较。比较过程基于相似性度量，以识别最相关的文档。
+3. **上下文感知结果**：文档根据其与查询的语义相似性进行排名，因此即使单词不匹配，最相关的内容也会被呈现。
 
-We have configured these operations in the background, making the complex process transparent to you as you set up and use this new Tiptap feature. With Tiptap Semantic Search, you can: 
+我们已在后台配置了这些操作，使复杂的过程在您设置和使用此新的 Tiptap 功能时对您透明。使用 Tiptap 语义搜索，您可以：
 
-- **Improve search relevance**: Retrieve documents that match the intent of a query, not just keywords.
-- **Understand context**: Recognize synonyms, related concepts, and varying word order to find the most pertinent results.
-- **Enhance user experience**: Deliver more accurate and meaningful search results, improving their interaction with content.
+- **提高搜索相关性**：检索与查询意图匹配的文档，而不仅仅是关键词。
+- **理解上下文**：识别同义词、相关概念和不同的词序，以找到最相关的结果。
+- **增强用户体验**：提供更准确和有意义的搜索结果，改善用户与内容的互动。
 
-This is particularly valuable for knowledge management systems, document retrieval, idea generation, or any application where precise, context-aware search results are critical.
+这对于知识管理系统、文档检索、创意生成或任何对精确、上下文感知搜索结果至关重要的应用特别有价值。
 
-### Perform a search
+### 执行搜索
 
-To perform a search, use the search endpoint as described [in the REST API documentation](/collaboration/documents/rest-api#search-documents).
+要执行搜索，请使用搜索端点，如 [REST API 文档]( /collaboration/documents/rest-api#search-documents) 中所述。
 
 ```bash
 curl -X POST https://YOUR_APP_ID.collab.tiptap.cloud/api/search \
   -H "Authorization: YOUR_SECRET_FROM_SETTINGS_AREA" \
   -H "Content-Type: application/json" \
-  -d '{"content": "Your search terms"}'
+  -d '{"content": "您的搜索词"}'
 ```
 
-<Callout title="Keeping your API key secret" variant="hint">
-  Please make sure that you handle the requests in your own backend in order to keep your API key
-  secret.
+<Callout title="保持您的 API 密钥机密" variant="hint">
+  请确保您在自己的后台处理请求，以保持您的 API 密钥的机密性。
 </Callout>
 
+## 使用检索增强生成 (RAG)
 
-## Using Retrieval-Augmented Generation (RAG)
-
-Use RAG to pull relevant information from your library and feed it into large language models, improving the quality of AI-generated content with contextually accurate data. Discover more details about the demo in our [examples](https://ai-demo.tiptap.dev/preview/Examples/RAG). 
+使用 RAG 从您的库中提取相关信息，并将其输入大型语言模型，以提高基于上下文的准确数据生成的 AI 内容质量。更多演示详细信息，请查看我们的 [示例](https://ai-demo.tiptap.dev/preview/Examples/RAG)。
 
 <CodeDemo src="https://ai-demo.tiptap.dev/preview/Examples/RAG?hideSource=1" />

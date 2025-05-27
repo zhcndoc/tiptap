@@ -1,18 +1,18 @@
 ---
-title: Create a new extension
+title: 创建一个新的扩展
 meta:
-  title: Create extensions | Tiptap Editor Docs
-  description: Create a new extension for your Tiptap editor and create a unique editor experience from scratch. Learn more in the docs!
-  category: Editor
+  title: 创建扩展 | Tiptap 编辑器文档
+  description: 为您的 Tiptap 编辑器创建一个新的扩展，从头开始创建独特的编辑器体验。在文档中了解更多信息！
+  category: 编辑器
 ---
 
-You can build your own extensions from scratch and you know what? It’s the same syntax as for extending existing extension described above.
+您可以从零开始构建自己的扩展，您知道吗？它的语法与上述扩展现有扩展是相同的。
 
-### Create an extension
+### 创建一个扩展
 
-Extensions add new capabilities to Tiptap and you’ll read the word extension here very often, even for nodes and marks. But there are literal extensions. Those can’t add to the schema (like marks and nodes do), but can add functionality or change the behaviour of the editor.
+扩展为 Tiptap 添加新的功能，您会在这里经常看到“扩展”这个词，即使是对于节点和标记。但也有字面意义上的扩展。这些不能像标记和节点那样添加到模式中，但可以添加功能或改变编辑器的行为。
 
-A good example to learn from is probably [`TextAlign`](/editor/extensions/functionality/textalign).
+一个很好的学习示例可能是 [`TextAlign`](/editor/extensions/functionality/textalign)。
 
 ```js
 import { Extension } from '@tiptap/core'
@@ -20,15 +20,15 @@ import { Extension } from '@tiptap/core'
 const CustomExtension = Extension.create({
   name: 'customExtension',
 
-  // Your code goes here.
+  // 您的代码写在这里。
 })
 ```
 
-Read more about the [Extension API](/editor/extensions/custom-extensions/create-new/extension).
+了解更多关于 [扩展 API](/editor/extensions/custom-extensions/create-new/extension)。
 
-### Create a node
+### 创建一个节点
 
-If you think of the document as a tree, then [nodes](/editor/extensions/nodes) are just a type of content in that tree. Good examples to learn from are [`Paragraph`](/editor/extensions/nodes/paragraph), [`Heading`](/editor/extensions/nodes/heading), or [`CodeBlock`](/editor/extensions/nodes/code-block).
+如果将文档视为一棵树，那么 [节点](/editor/extensions/nodes) 就是这棵树中的一种内容类型。好的学习示例包括 [`Paragraph`](/editor/extensions/nodes/paragraph)、[`Heading`](/editor/extensions/nodes/heading) 或 [`CodeBlock`](/editor/extensions/nodes/code-block)。
 
 ```js
 import { Node } from '@tiptap/core'
@@ -36,17 +36,17 @@ import { Node } from '@tiptap/core'
 const CustomNode = Node.create({
   name: 'customNode',
 
-  // Your code goes here.
+  // 您的代码写在这里。
 })
 ```
 
-Nodes don’t have to be blocks. They can also be rendered inline with the text, for example for [@mentions](/editor/extensions/nodes/mention).
+节点不必是块状的。它们也可以与文本内联渲染，例如用于 [@mentions](/editor/extensions/nodes/mention)。
 
-Read more about the [Node API](/editor/extensions/custom-extensions/create-new/node).
+了解更多关于 [节点 API](/editor/extensions/custom-extensions/create-new/node)。
 
-### Create a mark
+### 创建一个标记
 
-One or multiple marks can be applied to [nodes](/editor/extensions/nodes), for example to add inline formatting. Good examples to learn from are [`Bold`](/editor/extensions/marks/bold), [`Italic`](/editor/extensions/marks/italic) and [`Highlight`](/editor/extensions/marks/highlight).
+一个或多个标记可以应用于 [节点](/editor/extensions/nodes)，例如用于添加内联格式。好的学习示例包括 [`Bold`](/editor/extensions/marks/bold)、[`Italic`](/editor/extensions/marks/italic) 和 [`Highlight`](/editor/extensions/marks/highlight)。
 
 ```js
 import { Mark } from '@tiptap/core'
@@ -54,19 +54,18 @@ import { Mark } from '@tiptap/core'
 const CustomMark = Mark.create({
   name: 'customMark',
 
-  // Your code goes here.
+  // 您的代码写在这里。
 })
 ```
 
-Read more about the [Mark API](/editor/extensions/custom-extensions/create-new/mark).
+了解更多关于 [标记 API](/editor/extensions/custom-extensions/create-new/mark)。
 
-## Publish standalone extensions
+## 发布独立扩展
 
-If you want to create and publish your own extensions for Tiptap, you can use our CLI tool to bootstrap your project.
-Simply run `npm init tiptap-extension` and follow the instructions. The CLI will create a new folder with a pre-configured project for you including a build script running on Rollup.
+如果您想为 Tiptap 创建并发布自己的扩展，可以使用我们的 CLI 工具来引导您的项目。只需运行 `npm init tiptap-extension` 并按照说明操作。CLI 将为您创建一个包含预配置项目的新文件夹，包括运行 Rollup 的构建脚本。
 
-If you want to test your extension locally, you can run `npm link` in the project folder and then `npm link YOUR_EXTENSION` in your project (for example a Vite app).
+如果您想在本地测试您的扩展，可以在项目文件夹中运行 `npm link`，然后在您的项目中（例如 Vite 应用）运行 `npm link YOUR_EXTENSION`。
 
-## Share
+## 分享
 
-When everything is working fine, don’t forget to [share it with the community](https://github.com/ueberdosis/tiptap/issues/819) or in our [awesome-tiptap](https://github.com/ueberdosis/awesome-tiptap) repository.
+当一切正常时，不要忘记 [与社区分享](https://github.com/ueberdosis/tiptap/issues/819) 或在我们的 [awesome-tiptap](https://github.com/ueberdosis/awesome-tiptap) 仓库中分享。

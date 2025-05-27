@@ -1,45 +1,45 @@
 ---
-title: Static Renderer
+title: 静态渲染器
 meta:
-  title: Static Renderer | Tiptap Editor Docs
-  description: Use the Static Renderer to render JSON content as HTML, markdown, or React components without an editor instance. Learn more in our docs!
-  category: Editor
+  title: 静态渲染器 | Tiptap 编辑器文档
+  description: 使用静态渲染器将 JSON 内容渲染为 HTML、markdown 或 React 组件，而无需编辑器实例。在我们的文档中了解更多信息！
+  category: 编辑器
 tags:
   - type: image
     src: https://img.shields.io/npm/v/@tiptap/static-renderer/next?label=version
     url: https://www.npmjs.com/package/@tiptap/static-renderer
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/static-renderer/next?label=version
     url: https://npmcharts.com/compare/@tiptap/static-renderer
-    label: Downloads
+    label: 下载量
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 
-The Static Renderer helps render JSON content as HTML, markdown, or React components without an editor instance. All it needs is JSON content and a list of extensions.
+静态渲染器帮助将 JSON 内容渲染为 HTML、markdown 或 React 组件，而无需编辑器实例。它只需要 JSON 内容和扩展列表。
 
 <CodeDemo src="https://deploy-preview-6012--tiptap-embed.netlify.app/preview/examples/staticrendering" />
 
-## Why Static Render?
+## 为什么选择静态渲染？
 
-The main use case for static rendering is to render a Tiptap/ProseMirror JSON document on the server-side, for example within a Next.js or Nuxt.js application. This way, you can render the content of your editor to HTML before sending it to the client, which can improve the performance of your application by not having to load the editor on the client or server.
+静态渲染的主要用例是在服务器端渲染 Tiptap/ProseMirror JSON 文档，例如在 Next.js 或 Nuxt.js 应用程序中。通过这种方式，您可以在将内容发送到客户端之前将编辑器的内容渲染为 HTML，这可以通过不再需要在客户端或服务器上加载编辑器来提高应用程序的性能。
 
-Another use case is to render the content of your editor to another format like markdown, which can be useful if you want to send it to a markdown-based API. The static renderer is built in a way that the output can be anything you want, as long as you provide the correct mappings.
+另一个用例是将编辑器的内容渲染为另一种格式，比如 markdown，这在您想要将其发送到基于 markdown 的 API 时非常有用。静态渲染器的构建方式使得输出可以是您想要的任何内容，只要您提供正确的映射即可。
 
-But what makes it static? The static renderer doesn't require a browser, DOM or even an editor instance to render the content. It's a pure JavaScript function that takes a document (as JSON or Prosemirror Node instance) and returns the target format back.
+但是什么使得它是静态的呢？静态渲染器不需要浏览器、DOM 甚至编辑器实例来渲染内容。它是一个纯 JavaScript 函数，接受文档（作为 JSON 或 Prosemirror Node 实例）并返回目标格式。
 
-## Generating HTML strings from JSON
+## 从 JSON 生成 HTML 字符串
 
-Given a JSON document, the `renderToHTMLString` function will return an HTML string representing the JSON content. The function takes three arguments: the JSON document, a list of extensions, and an options object.
+给定一个 JSON 文档，`renderToHTMLString` 函数将返回一个表示 JSON 内容的 HTML 字符串。该函数接受三个参数：JSON 文档、扩展列表和一个选项对象。
 
 ```js
 import StarterKit from '@tiptap/starter-kit'
 import { renderToHTMLString } from '@tiptap/static-renderer/pm/html'
 
 renderToHTMLString({
-  extensions: [StarterKit], // using your extensions
+  extensions: [StarterKit], // 使用您的扩展
   content: {
     type: 'doc',
     content: [
@@ -48,14 +48,14 @@ renderToHTMLString({
         content: [
           {
             type: 'text',
-            text: 'Hello World!',
+            text: '你好，世界！',
           },
         ],
       },
     ],
   },
 })
-// returns: '<p>Hello World!</p>'
+// 返回: '<p>你好，世界！</p>'
 ```
 
 <CodeDemo src="https://deploy-preview-6012--tiptap-embed.netlify.app/preview/GuideContent/StaticRenderHTML" />
@@ -70,22 +70,22 @@ function renderToHTMLString(options: {
 }): string
 ```
 
-- `extensions`: An array of Tiptap extensions that are used to render the content.
-- `content`: The content to render. Can be a Prosemirror Node instance or a JSON representation of a Prosemirror document.
-- `options`: An object with additional options.
-- `options.nodeMapping`: An object that maps Prosemirror nodes to HTML strings.
-- `options.markMapping`: An object that maps Prosemirror marks to HTML strings.
-- `options.unhandledNode`: A function that is called when an unhandled node is encountered.
-- `options.unhandledMark`: A function that is called when an unhandled mark is encountered.
+- `extensions`: 用于渲染内容的 Tiptap 扩展数组。
+- `content`: 要渲染的内容。可以是 Prosemirror Node 实例或 Prosemirror 文档的 JSON 表示。
+- `options`: 带有附加选项的对象。
+- `options.nodeMapping`: 将 Prosemirror 节点映射到 HTML 字符串的对象。
+- `options.markMapping`: 将 Prosemirror 标记映射到 HTML 字符串的对象。
+- `options.unhandledNode`: 当遇到未处理的节点时调用的函数。
+- `options.unhandledMark`: 当遇到未处理的标记时调用的函数。
 
-## Generating Markdown from JSON
+## 从 JSON 生成 Markdown
 
-Given a JSON document, the `renderToMarkdown` function will return a markdown string representing the JSON content. The function takes three arguments: the JSON document, a list of extensions, and an options object.
+给定一个 JSON 文档，`renderToMarkdown` 函数将返回一个表示 JSON 内容的 markdown 字符串。该函数接受三个参数：JSON 文档、扩展列表和一个选项对象。
 
 <Callout variant="warning">
-  This package does not validate the markdown output, there are several markdown flavors and this
-  package does not enforce any of them. It&apos;s up to you to ensure that the markdown output is
-  valid.
+  此包不验证 markdown 输出，存在多种 markdown 风格，此
+  包不强制执行任何一个。确保 markdown 输出是
+  有效的责任在于您。
 </Callout>
 
 ```js
@@ -93,7 +93,7 @@ import StarterKit from '@tiptap/starter-kit'
 import { renderToMarkdown } from '@tiptap/static-renderer/pm/markdown'
 
 renderToMarkdown({
-  extensions: [StarterKit], // using your extensions
+  extensions: [StarterKit], // 使用您的扩展
   content: {
     type: 'doc',
     content: [
@@ -102,14 +102,14 @@ renderToMarkdown({
         content: [
           {
             type: 'text',
-            text: 'Hello World!',
+            text: '你好，世界！',
           },
         ],
       },
     ],
   },
 })
-// returns: 'Hello World!'
+// 返回: '你好，世界！'
 ```
 
 ### generateMarkdown API
@@ -122,24 +122,24 @@ function renderToMarkdown(options: {
 }): string
 ```
 
-- `extensions`: An array of Tiptap extensions that are used to render the content.
-- `content`: The content to render. Can be a Prosemirror Node instance or a JSON representation of a Prosemirror document.
-- `options`: An object with additional options.
-- `options.nodeMapping`: An object that maps Prosemirror nodes to markdown strings.
-- `options.markMapping`: An object that maps Prosemirror marks to markdown strings.
-- `options.unhandledNode`: A function that is called when an unhandled node is encountered.
-- `options.unhandledMark`: A function that is called when an unhandled mark is encountered.
+- `extensions`: 用于渲染内容的 Tiptap 扩展数组。
+- `content`: 要渲染的内容。可以是 Prosemirror Node 实例或 Prosemirror 文档的 JSON 表示。
+- `options`: 带有附加选项的对象。
+- `options.nodeMapping`: 将 Prosemirror 节点映射到 markdown 字符串的对象。
+- `options.markMapping`: 将 Prosemirror 标记映射到 markdown 字符串的对象。
+- `options.unhandledNode`: 当遇到未处理的节点时调用的函数。
+- `options.unhandledMark`: 当遇到未处理的标记时调用的函数。
 
-## Generating React components from JSON
+## 从 JSON 生成 React 组件
 
-Given a JSON document, the `renderToReactElement` function will return a React component representing the JSON content. The function takes three arguments: the JSON document, a list of extensions, and an options object.
+给定一个 JSON 文档，`renderToReactElement` 函数将返回一个表示 JSON 内容的 React 组件。该函数接受三个参数：JSON 文档、扩展列表和一个选项对象。
 
 ```js
 import StarterKit from '@tiptap/starter-kit'
 import { renderToReactElement } from '@tiptap/static-renderer/pm/react'
 
 renderToReactElement({
-  extensions: [StarterKit], // using your extensions
+  extensions: [StarterKit], // 使用您的扩展
   content: {
     type: 'doc',
     content: [
@@ -148,14 +148,14 @@ renderToReactElement({
         content: [
           {
             type: 'text',
-            text: 'Hello World!',
+            text: '你好，世界！',
           },
         ],
       },
     ],
   },
 })
-// returns a react node that, when evaluated, would be equivalent to: '<p>Hello World!</p>' without a Tiptap editor instance
+// 返回一个 react 节点，评估后将等同于: '<p>你好，世界！</p>' 而不需要 Tiptap 编辑器实例
 ```
 
 <CodeDemo src="https://deploy-preview-6012--tiptap-embed.netlify.app/preview/GuideContent/StaticRenderReact" />
@@ -170,17 +170,17 @@ function renderToReactElement(options: {
 }): ReactElement
 ```
 
-- `extensions`: An array of Tiptap extensions that are used to render the content.
-- `content`: The content to render. Can be a Prosemirror Node instance or a JSON representation of a Prosemirror document.
-- `options`: An object with additional options.
-- `options.nodeMapping`: An object that maps Prosemirror nodes to React components.
-- `options.markMapping`: An object that maps Prosemirror marks to React components.
-- `options.unhandledNode`: A function that is called when an unhandled node is encountered.
-- `options.unhandledMark`: A function that is called when an unhandled mark is encountered.
+- `extensions`: 用于渲染内容的 Tiptap 扩展数组。
+- `content`: 要渲染的内容。可以是 Prosemirror Node 实例或 Prosemirror 文档的 JSON 表示。
+- `options`: 带有附加选项的对象。
+- `options.nodeMapping`: 将 Prosemirror 节点映射到 React 组件的对象。
+- `options.markMapping`: 将 Prosemirror 标记映射到 React 组件的对象。
+- `options.unhandledNode`: 当遇到未处理的节点时调用的函数。
+- `options.unhandledMark`: 当遇到未处理的标记时调用的函数。
 
 ### React NodeViews
 
-The static renderer doesn't support node views automatically, so you need to provide a mapping for each node type that you want rendered as a node view. Here is an example of how you can render a node view as a React component:
+静态渲染器不自动支持节点视图，因此您需要为每个希望作为节点视图渲染的节点类型提供映射。以下是如何将节点视图渲染为 React 组件的示例：
 
 ```js
 
@@ -189,13 +189,13 @@ import { ReactNodeViewRenderer } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { renderToReactElement } from '@tiptap/static-renderer/pm/react'
 
-// This component does not have a NodeViewContent, so it does not render it's children's rich text content
+// 此组件没有 NodeViewContent，因此不渲染其子级的富文本内容
 function MyCustomComponentWithoutContent() {
   const [count, setCount] = React.useState(200)
 
   return (
     <div className='custom-component-without-content' onClick={() => setCount(a => a + 1)}>
-      {count} This is a react component!
+      {count} 这是一个 react 组件！
     </div>
   )
 }
@@ -215,7 +215,7 @@ renderToReactElement({
   extensions: [StarterKit, CustomNodeExtensionWithoutContent],
   options: {
     nodeMapping: {
-      // render the custom node with the intended node view React component
+      // 使用预期的节点视图 React 组件渲染自定义节点
       customNodeExtensionWithoutContent: MyCustomComponentWithoutContent,
     },
   },
@@ -228,10 +228,10 @@ renderToReactElement({
     ],
   },
 })
-// returns: <div class="my-custom-component-without-content">200 This is a react component!</div>
+// 返回: <div class="my-custom-component-without-content">200 这是一个 react 组件！</div>
 ```
 
-But, what if you want to render the rich text content of the node view? You can do that by providing a `NodeViewContent` component as a child of the node view component:
+但是，如果您希望渲染节点视图的富文本内容，该如何操作？您可以通过将 `NodeViewContent` 组件作为节点视图组件的子组件提供来实现：
 
 ```js
 import { Node } from '@tiptap/core'
@@ -258,7 +258,7 @@ const CustomNodeExtensionWithContent = Node.create({
 function MyCustomComponentWithContent() {
   return (
     <div className="custom-component-with-content">
-      Custom component with content in React!
+      具有内容的自定义组件！
       <NodeViewContent />
     </div>
   )
@@ -269,7 +269,7 @@ renderToReactElement({
   options: {
     nodeMapping: {
       customNodeExtensionWithContent: ({ children }) => {
-        // To pass the content down into the NodeViewContent component, we need to wrap the custom component with the ReactNodeViewContentProvider
+        // 为了将内容传递到 NodeViewContent 组件中，我们需要使用 ReactNodeViewContentProvider 包装自定义组件
         return (
           <ReactNodeViewContentProvider content={children}>
             <MyCustomComponentWithContent />
@@ -283,11 +283,11 @@ renderToReactElement({
     content: [
       {
         type: 'customNodeExtensionWithContent',
-        // rich text content
+        // 富文本内容
         content: [
           {
             type: 'text',
-            text: 'Hello, world!',
+            text: '你好，世界！',
           },
         ],
       },
@@ -295,22 +295,22 @@ renderToReactElement({
   },
 })
 
-// returns: <div class="custom-component-with-content">Custom component with content in React!<div data-node-view-content="" style="white-space:pre-wrap">Hello, world!</div></div>
-// Note: The NodeViewContent component is rendered as a div with the attribute data-node-view-content, and the rich text content is rendered inside of it
+// 返回: <div class="custom-component-with-content">具有内容的自定义组件！<div data-node-view-content="" style="white-space:pre-wrap">你好，世界！</div></div>
+// 注意: NodeViewContent 组件渲染为带有属性 data-node-view-content 的 div，富文本内容渲染在其中
 ```
 
 <CodeDemo src="https://deploy-preview-6012--tiptap-embed.netlify.app/preview/Examples/StaticRenderingAdvanced" />
 
-## Shared Options
+## 共享选项
 
-The `renderToHTMLString`, `renderToMarkdown`, and `renderToReactElement` functions take an options object as an argument. This object can be used to customize the output of the renderer by providing custom node and mark mappings, or handling unhandled nodes and marks.
+`renderToHTMLString`、`renderToMarkdown` 和 `renderToReactElement` 函数接受一个选项对象作为参数。可以使用该对象通过提供自定义节点和标记映射，或处理未处理的节点和标记，来自定义渲染器的输出。
 
 ```js
 import StarterKit from '@tiptap/starter-kit'
 import { renderToHTMLString, serializeChildrenToHTMLString } from '@tiptap/static-renderer/pm/html'
 
 renderToHTMLString({
-  extensions: [StarterKit], // using your extensions
+  extensions: [StarterKit], // 使用您的扩展
   content: {
     type: 'doc',
     content: [
@@ -319,84 +319,84 @@ renderToHTMLString({
         content: [
           {
             type: 'text',
-            text: 'Hello World!',
+            text: '你好，世界！',
           },
         ],
       },
     ],
   },
   options: {
-    // custom node mappings
+    // 自定义节点映射
     nodeMapping: {
       paragraph({ children }) {
         return `<div class="custom-paragraph">${serializeChildrenToHTMLString(children)}</div>`
       },
     },
-    // custom mark mappings
+    // 自定义标记映射
     markMapping: {
       bold({ children }) {
         return `<strong>${serializeChildrenToHTMLString(children)}</strong>`
       },
     },
-    // handle unhandled nodes
+    // 处理未处理的节点
     unhandledNode: ({ node }) => {
-      return `[unknown node ${node.type.name}]`
+      return `[未知节点 ${node.type.name}]`
     },
-    // handle unhandled marks
+    // 处理未处理的标记
     unhandledMark: ({ mark }) => {
-      return `[unknown node ${mark.type.name}]`
+      return `[未知标记 ${mark.type.name}]`
     },
   },
 })
 ```
 
-## Technical Details
+## 技术细节
 
-### Namespaced imports
+### 命名空间导入
 
-To cut down on bundle size in your application, the static renderer is split into three separate packages: `@tiptap/static-renderer/pm/html`, `@tiptap/static-renderer/pm/markdown`, and `@tiptap/static-renderer/pm/react`. This way, you only need to import the parts of the static renderer that you need. If you want the most flexibility, you can import the entire static renderer package with `@tiptap/static-renderer`.
+为了减少应用程序中的捆绑大小，静态渲染器被拆分为三个独立的包：`@tiptap/static-renderer/pm/html`、`@tiptap/static-renderer/pm/markdown` 和 `@tiptap/static-renderer/pm/react`。这样，您只需导入所需的静态渲染器部分。如果您希望获得更大的灵活性，可以使用 `@tiptap/static-renderer` 导入整个静态渲染器包。
 
 ```ts
-// Just the HTML renderer
+// 仅 HTML 渲染器
 import { renderToHTMLString } from '@tiptap/static-renderer/pm/html'
 
-// Just the markdown renderer
+// 仅 markdown 渲染器
 import { renderToMarkdown } from '@tiptap/static-renderer/pm/markdown'
 
-// Just the React renderer
+// 仅 React 渲染器
 import { renderToReactElement } from '@tiptap/static-renderer/pm/react'
 
-// The entire static renderer
+// 整个静态渲染器
 import { renderToHTMLString, renderToMarkdown, renderToReactElement } from '@tiptap/static-renderer'
 ```
 
-Packages in the `json` namespace are also available for statically rendering without a runtime dependency on any prosemirror packages. But, these packages cannot automatically map Prosemirror nodes and marks to the target format. You will need to provide custom mappings for every node and mark in these packages.
+在 `json` 命名空间中的包也可用于无运行时依赖地静态渲染。但是，这些包无法自动将 Prosemirror 节点和标记映射到目标格式。您需要为这些包中的每个节点和标记提供自定义映射。
 
 ```ts
-// Just the HTML renderer
+// 仅 HTML 渲染器
 import { renderJSONContentToString } from '@tiptap/static-renderer/json/html'
 
-// Just the React renderer
+// 仅 React 渲染器
 import { renderJSONContentToReactElement } from '@tiptap/static-renderer/json/react'
 ```
 
-These packages have the same API as the `pm` namespace, but:
+这些包与 `pm` 命名空间具有相同的 API，但是：
 
-- they require you to provide custom mappings for every node and mark
-- they do not require `extensions`, as they are not dependent on the prosemirror package
+- 需要您为每个节点和标记提供自定义映射
+- 不需要 `extensions`，因为它们不依赖于 prosemirror 包
 
-### Custom mappings
+### 自定义映射
 
-The static renderer uses default mappings for Prosemirror nodes and marks to the target format. These mappings can be overridden by providing custom mappings in the options object. This allows you to customize the output of the renderer to suit your needs.
+静态渲染器使用 Prosemirror 节点和标记到目标格式的默认映射。通过在选项对象中提供自定义映射，可以覆盖这些映射。这使您能够根据需要自定义渲染器的输出。
 
-To convert custom nodes and marks to the target format, you should provide a mapping function that takes a `node` or `mark` object as an argument and returns the appropriate target format element. If you encounter an unhandled node or mark, you can provide a function that will be called with the unhandled node or mark as an argument.
+要将自定义节点和标记转换为目标格式，您应提供一个映射函数，该函数以 `node` 或 `mark` 对象作为参数，并返回适当的目标格式元素。如果遇到未处理的节点或标记，则可以提供一个函数，该函数将与未处理的节点或标记作为参数调用。
 
-### How does this work?
+### 这是如何工作的？
 
-The static renderer packages in the `json` namespace map over the JSON content and call the appropriate mapping function for each node and mark. The `renderJSONContentToString` function returns a string representing the JSON content, while the `renderJSONContentToReactElement` function returns a React element representing the JSON content.
+`json` 命名空间中的静态渲染器包遍历 JSON 内容，并为每个节点和标记调用适当的映射函数。`renderJSONContentToString` 函数返回一个表示 JSON 内容的字符串，而 `renderJSONContentToReactElement` 函数返回表示 JSON 内容的 React 元素。
 
-The static renderer packages in the `pm` namespace, extending the packages in the `json` namespace, utilize the `renderHTML` method of Tiptap extensions to generate default mappings of Prosemirror nodes/marks to the target format. These can be completely overridden by providing custom mappings in the options.
+`pm` 命名空间中的静态渲染器包扩展了 `json` 命名空间中的包，利用 Tiptap 扩展的 `renderHTML` 方法生成 Prosemirror 节点/标记到目标格式的默认映射。这些可以通过在选项中提供自定义映射完全覆盖。
 
-## Source code
+## 源代码
 
 [packages/static-renderer/](https://github.com/ueberdosis/tiptap/blob/main/packages/static-renderer/)

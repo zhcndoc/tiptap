@@ -1,31 +1,31 @@
 ---
-title: Mark views with JavaScript
+title: 使用 JavaScript 标记视图
 meta:
-  title: JavaScript mark views | Tiptap Editor Docs
-  description: Use Vanilla JavaScript to build custom mark views in Tiptap.
-  category: Editor
+  title: JavaScript 标记视图 | Tiptap 编辑器文档
+  description: 使用原生 JavaScript 在 Tiptap 中构建自定义标记视图。
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-Using frameworks like Vue or React can feel too complex, if you’re used to work without those two. Good news: You can use Vanilla JavaScript in your mark views. There is just a little bit you need to know, but let’s go through this one by one.
+如果你习惯不使用 Vue 或 React 这类框架，使用这两者可能会觉得太复杂。好消息是：你可以在标记视图中使用原生 JavaScript。你只需要了解一些小知识点，下面我们逐一讲解。
 
-## Render a mark view with JavaScript
+## 使用 JavaScript 渲染标记视图
 
-Here is what you need to do to render a mark view inside your editor:
+要在编辑器内渲染标记视图，你需要完成以下步骤：
 
-1. [Create a mark extension](/editor/extensions/custom-extensions/create-new/mark)
-2. Register a new mark view with `addMarkView()`
-3. Write your render function
-4. [Configure Tiptap to use your new mark extension](/editor/getting-started/configure)
+1. [创建标记扩展](/editor/extensions/custom-extensions/create-new/mark)
+2. 使用 `addMarkView()` 注册新的标记视图
+3. 编写你的渲染函数
+4. [配置 Tiptap 使用你的新标记扩展](/editor/getting-started/configure)
 
-This is how your mark extension could look like:
+下面是你的标记扩展可能的写法：
 
 ```ts
 import { Mark } from '@tiptap/core'
 
 export default Mark.create({
-  // Other options...
+  // 其他选项...
   addMarkView() {
     return ({ mark, HTMLAttributes }) => {
       const dom = document.createElement('b')
@@ -42,15 +42,15 @@ export default Mark.create({
 })
 ```
 
-Got it? Let’s see it in action. Feel free to copy the below example to get started.
+理解了吗？让我们看看实际效果。你可以自由复制以下示例开始尝试。
 
 <CodeDemo path="/GuideMarkViews/JavaScript" />
 
-That mark view even interacts with the editor. Time to see how that is wired up.
+该标记视图甚至可以与编辑器交互。接下来看看这是如何实现的。
 
-## Access mark attributes
+## 访问标记属性
 
-The editor passes a few helpful things to your render function. One of them is the `mark` prop. This one enables you to access mark attributes in your mark view. Let’s say you have [added an attribute](/editor/extensions/custom-extensions/extend-existing#attributes) named `color` to your mark extension. You could access the attribute like this:
+编辑器会将一些有用的内容传入你的渲染函数，其中之一是 `mark` 属性。它让你可以在标记视图中访问标记的属性。假设你给标记扩展[添加了一个名为 `color` 的属性](/editor/extensions/custom-extensions/extend-existing#attributes)，你可以这样访问它：
 
 ```ts
 addMarkView() {
@@ -60,9 +60,9 @@ addMarkView() {
 }
 ```
 
-## Adding a content editable
+## 添加可编辑内容区域
 
-A mark is wrapping a part of the text in the editor. If you want to make the content of the mark editable, you can add the `contenteditable` attribute to the `contentDOM` element.
+标记包裹着编辑器中的部分文本。如果你想让标记内容可编辑，可以给 `contentDOM` 元素添加 `contenteditable` 属性。
 
 ```ts
 addMarkView() {
@@ -81,4 +81,4 @@ addMarkView() {
 }
 ```
 
-Got it? You’re free to do anything you like, as long as you return a container for the mark view and another one for the content.
+明白了吗？你可以随意操作，只要你返回一个标记视图的容器和一个用于内容的容器即可。

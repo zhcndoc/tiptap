@@ -2,106 +2,105 @@
 tags:
   - type: editor
 meta:
-  title: Invalid schema handling | Tiptap Editor Docs
-  description: Adjust and configure how you handle invalid schemas in Tiptap and Tiptap Collaboration. More in the docs!
-  category: Editor
-title: Invalid schema handling in Tiptap
+  title: Tiptap 中的无效架构处理 | Tiptap 编辑器文档
+  description: 调整并配置在 Tiptap 和 Tiptap 协作中处理无效架构的方式。更多信息请查阅文档！
+  category: 编辑器
+title: Tiptap 中的无效架构处理
 ---
 
-Content integrity can be a significant challenge in collaborative editing environments. Think of a scenario where users with different versions of an app are trying to edit the same document. Or a scenario common to single-page applications: some users keep their browser tabs open for long periods of time without refreshing, while others always have the latest editor version after a recent page load.
+内容完整性在协作编辑环境中可能是一个重大挑战。想象一下这样一个场景：拥有不同版本应用的用户试图编辑同一份文档。或者另一种常见场景：单页面应用中，一些用户长时间保持浏览器标签打开而不刷新，而另一些用户在最近一次页面加载后总是使用最新版本的编辑器。
 
-In both cases, a user with a newer version is creating content with features that are not available to others. When a user with an older version tries to access this document, how do we prevent data loss, maintain document structure, and ensure a smooth user experience?
+在这两种情况下，版本较新的用户可能会创造包含新功能的内容，而这些功能对旧版用户而言并不可用。当旧版本用户尝试访问此类文档时，我们如何防止数据丢失、保持文档结构完整，以及确保用户体验顺畅？
 
-This is where invalid schema handling becomes important. It allows developers to gracefully manage situations where the content structure doesn't match the editor's expectations, preventing issues like data corruption, unexpected content stripping, or editor crashes.
+这时，无效架构处理变得尤为重要。它让开发者可以优雅地管理内容结构与编辑器预期不符的场景，防止出现数据损坏、意外内容被剥除或编辑器崩溃等问题。
 
-Whether you're building a note-taking app, a content management system, or any application with rich text editing capabilities, understanding and implementing proper schema handling can significantly improve your application's reliability and user experience.
+无论你是在构建笔记应用、内容管理系统，还是任何具有丰富文本编辑功能的应用，理解并正确实现架构处理都能显著提升你应用的稳定性和用户体验。
 
-## Introducing content checking
+## 引入内容校验
 
-Tiptap has an option called `enableContentCheck`. When set to `true`, this feature activates a mechanism to validate content against the schema derived from your registered extensions. This is particularly useful for catching and responding to content errors before they cause issues in your application.
+Tiptap 提供了一个名为 `enableContentCheck` 的选项。当将其设为 `true` 时，会激活一套机制，用于根据已注册扩展的架构验证内容。这对于在内容出现错误时提前检测并处理尤为有用，可以避免错误带来的不良影响。
 
-### Enable content checking
+### 启用内容校验
 
-To enable this feature, simply add the `enableContentCheck` option when initializing your Tiptap editor:
+要启用此功能，只需在初始化 Tiptap 编辑器时添加 `enableContentCheck` 选项：
 
 ```jsx
 new Editor({
   enableContentCheck: true,
-  // ... other options
+  // ... 其他选项
 })
 ```
 
-## The contentError event
+## `contentError` 事件
 
-When content checking is enabled, Tiptap will emit a `contentError` event if the initial content provided during editor setup is incompatible with the schema. This event provides you with valuable information to handle the error appropriately.
+当启用内容校验后，如果在初始化时提供的内容与架构不兼容，Tiptap 会触发一个 `contentError` 事件。这个事件提供有价值的信息，方便你正确处理相关错误。
 
-### Handle contentError events
+### 处理 `contentError` 事件
 
-You have two options for handling these events:
+你可以通过两种方式处理这些事件：
 
-Either you can use the `onContentError` callback:
+一种是使用 `onContentError` 回调：
 
 ```jsx
 new Editor({
   enableContentCheck: true,
-  content: potentiallyInvalidContent,
+  content: 可能包含错误的内容,
   onContentError({ editor, error, disableCollaboration }) {
-    // Your error handling logic here
+    // 你的错误处理逻辑
   },
-  // ... other options
+  // ... 其他选项
 })
 ```
 
-Or you can attach a listener to the `contentError` event:
+另一种是监听 `contentError` 事件：
 
 ```jsx
 const editor = new Editor({
   enableContentCheck: true,
-  content: invalidContent,
-  // ... other options
+  content: 有问题的内容,
+  // ... 其他选项
 })
 
 editor.on('contentError', ({ editor, error, disableCollaboration }) => {
-  // Your error handling logic here
+  // 你的错误处理逻辑
 })
 ```
 
-## A note on content types
+## 关于内容类型的注意事项
 
-It's important to note that Tiptap's content checking is 100% accurate for JSON content types. However, when working with HTML content, there may be some limitations. While Tiptap does its best to alert on missing nodes, certain mark-related issues might be missed in some situations.
+需要注意的是，Tiptap 在处理 JSON 内容类型时，内容校验的准确率达 100%。但在处理 HTML 内容时，可能存在一些局限。虽然 Tiptap 会尽最大努力提示缺失的节点，但某些与标记相关的问题可能在某些情况下未被检测到。
 
-## Recommended error handling strategies
+## 推荐的错误处理策略
 
-How you handle schema errors will depend on your specific application and requirements. However, here are some general recommendations:
+你应如何应对架构错误，取决于你的具体应用和需求。以下提供一些常用的建议：
 
-### For non-collaborative editing
+### 非协作编辑
 
-If you're not using collaborative editing features, the default behavior of stripping unknown content may be sufficient. This keeps your content in a known valid state for future editing.
+如果你没有使用协作编辑功能，默认证的未知内容剥除行为可能已足够。这会确保内容保持在一个已知的有效状态，便于未来编辑。
 
-### For collaborative editing
+### 协作编辑
 
-When using collaborative features, it's crucial to handle content errors to prevent synchronization issues. Here's an example of how you might handle a content error in a collaborative environment:
+如果使用协作功能，处理内容错误尤为重要，以防同步出现问题。以下是在协作环境中处理内容错误的示例方案：
 
 ```jsx
 onContentError({ editor, error, disableCollaboration }) {
-  // Disable collaboration to prevent syncing invalid content
+  // 禁用协作，避免同步无效内容
   disableCollaboration()
 
-  // Prevent emitting updates
+  // 阻止传发更新
   const emitUpdate = false
 
-  // Disable further user input
+  // 禁用编辑器以阻止进一步操作
   editor.setEditable(false, emitUpdate)
 
-  // Notify the user about the issue
-  notifyUser("An error occurred. Please refresh the application.")
+  // 通知用户发生了错误
+  notifyUser("发生了错误。请刷新应用程序。")
 }
-
 ```
 
-This approach:
+此方法执行了以下操作：
 
-1. Disables collaboration to prevent syncing invalid content
-2. Prevents updates from being emitted
-3. Disables the editor to prevent further user input
-4. Notifies the user about the issue
+1. 禁用协作以避免同步无效内容
+2. 阻止任何内容更新的传输
+3. 禁止编辑器的进一步输入
+4. 向用户发出提示，告知问题所在

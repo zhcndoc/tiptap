@@ -1,9 +1,9 @@
 ---
-title: Styling the Editor
+title: 自定义编辑器样式
 meta:
-  title: Style your editor | Tiptap Editor Docs
-  description: Apply custom styles to your Tiptap editor using plain HTML, custom classes, or Tailwind CSS. Learn more in the docs!
-  category: Editor
+  title: 自定义你的编辑器 | Tiptap 编辑器文档
+  description: 使用简单的 HTML、自定义类或 Tailwind CSS 为你的 Tiptap 编辑器应用自定义样式。了解更多内容，请访问文档！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
@@ -14,23 +14,23 @@ import * as ImageCard from '@/components/ImageCard'
 import contentTemplatesImage from '@/assets/content-templates.png'
 
 
-Tiptap is headless, which means there is no styling provided. That also means you are in full control of how your editor looks. The following methods allow you to apply custom styles to the editor.
+Tiptap 是无头的，这意味着没有提供样式。这也意味着你可以完全控制编辑器的外观。以下方法允许你为编辑器应用自定义样式。
 
 <ImageCard.Card>
-    <ImageCard.Image src={contentTemplatesImage.src} alt="User interface templates for Tiptap" />
+    <ImageCard.Image src={contentTemplatesImage.src} alt="Tiptap 的用户界面模板" />
     <ImageCard.Content>
-        <ImageCard.Title>Wanna take a shortcut?</ImageCard.Title>
-        <ImageCard.Paragraph>Speed up your Tiptap integration into your React app with our UI template. It's ready for deployment as-is or can be customized to your needs.</ImageCard.Paragraph>
+        <ImageCard.Title>想要捷径吗？</ImageCard.Title>
+        <ImageCard.Paragraph>使用我们的 UI 模板加快 Tiptap 在你的 React 应用中的集成。它可以现成部署，也可以根据你的需要自定义。</ImageCard.Paragraph>
         <div className="flex items-center gap-2 mt-8">
             <Button asChild variant="secondary">
                 <Link href="https://templates.tiptap.dev/">
-                    Try demo
+                    试用演示
                     <ArrowRightIcon className="size-4" />
                 </Link>
             </Button>
             <Button asChild variant="tertirary">
                 <Link href="https://cloud.tiptap.dev/react-templates">
-                    Get access
+                    获取访问权限
                     <ArrowRightIcon className="size-4" />
                 </Link>
             </Button>
@@ -38,33 +38,33 @@ Tiptap is headless, which means there is no styling provided. That also means yo
     </ImageCard.Content>
 </ImageCard.Card>
 
-## Style plain HTML
+## 样式普通 HTML
 
-The entire editor is rendered inside a container with the class `.tiptap`. You can use that to scope your styling to the editor content:
+整个编辑器是在带有类名 `.tiptap` 的容器内渲染的。你可以利用这一点将样式应用于编辑器内容：
 
 ```css
-/* Scoped to the editor */
+/* 只作用于编辑器 */
 .tiptap p {
   margin: 1em 0;
 }
 ```
 
-If you're rendering the stored content elsewhere, there won't be a `.tiptap` container, so you can globally add styling to the relevant HTML tags:
+如果你在其他地方渲染存储的内容，则不会有 `.tiptap` 容器，因此你可以对相关 HTML 标签全局添加样式：
 
 ```css
-/* Global styling */
+/* 全局样式 */
 p {
   margin: 1em 0;
 }
 ```
 
-## Add custom classes
+## 添加自定义类
 
-You can control the whole rendering, including adding classes to everything.
+你可以控制整个渲染过程，包括向所有元素添加类。
 
-### Extensions
+### 扩展
 
-Most extensions allow you to add attributes to the rendered HTML through the `HTMLAttributes` option. You can use that to add a custom class (or any other attribute). That's also very helpful when you work with [Tailwind CSS](https://tailwindcss.com/).
+大多数扩展允许你通过 `HTMLAttributes` 选项向渲染的 HTML 添加属性。你可以利用这一点添加自定义类（或任何其他属性）。当你使用 [Tailwind CSS](https://tailwindcss.com/) 时，这也非常有帮助。
 
 ```js
 new Editor({
@@ -85,18 +85,18 @@ new Editor({
 })
 ```
 
-The rendered HTML will look like this:
+渲染的 HTML 将如下所示：
 
 ```html
-<h1 class="my-custom-heading">Example Text</h1>
-<p class="my-custom-paragraph">Wow, that's really custom.</p>
+<h1 class="my-custom-heading">示例文本</h1>
+<p class="my-custom-paragraph">哇，这真是自定义的。</p>
 ```
 
-If there are already classes defined by the extensions, your classes will be added.
+如果扩展已经定义了类，你的类将会被添加。
 
-### Editor
+### 编辑器
 
-You can even pass classes to the element that contains the editor:
+你甚至可以将类传递给包含编辑器的元素：
 
 ```js
 new Editor({
@@ -108,16 +108,16 @@ new Editor({
 })
 ```
 
-## Customize HTML
+## 自定义 HTML
 
-Or you can customize the markup for extensions. The following example will make a custom bold extension that doesn't render a `<strong>` tag, but a `<b>` tag:
+或者你可以自定义扩展的标记。以下示例将创建一个自定义粗体扩展，不渲染 `<strong>` 标签，而是渲染 `<b>` 标签：
 
 ```js
 import Bold from '@tiptap/extension-bold'
 
 const CustomBold = Bold.extend({
   renderHTML({ HTMLAttributes }) {
-    // Original:
+    // 原始：
     // return ['strong', HTMLAttributes, 0]
     return ['b', HTMLAttributes, 0]
   },
@@ -131,17 +131,17 @@ new Editor({
 })
 ```
 
-You should place your custom extensions in separate files for better organization, but you get the idea.
+你应该将自定义扩展放在单独的文件中以便更好地组织，但你明白这个道理。
 
-## Style using Tailwind CSS
+## 使用 Tailwind CSS 样式
 
-The editor works fine with Tailwind CSS, too. Find an example that's styled with the `@tailwindcss/typography` plugin below.
+编辑器与 Tailwind CSS 也兼容。下面是一个使用 `@tailwindcss/typography` 插件样式的示例。
 
 <CodeDemo path="/Experiments/Tailwind?inline=false" />
 
-### Intellisense
+### 智能提示
 
-If you're using [TailwindCSS Intellisense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss), add this snippet to your `.vscode/setting.json` to enable intellisense support inside Tiptap objects:
+如果你使用 [TailwindCSS 智能提示](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)，请将以下代码片段添加到你的 `.vscode/setting.json` 中，以启用 Tiptap 对象内的智能提示支持：
 
 ```json
 "tailwindCSS.experimental.classRegex": [

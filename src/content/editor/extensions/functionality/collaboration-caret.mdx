@@ -1,22 +1,22 @@
 ---
-title: CollaborationCaret extension
+title: CollaborationCaret 扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extension-collaboration-caret/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extension-collaboration-caret/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extension-collaboration-caret
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-collaboration-caret.svg
     url: https://npmcharts.com/compare/@tiptap/extension-collaboration-caret?minimal=true
-    label: Downloads
+    label: 下载量
 meta:
-  title: CollaborationCaret extension | Tiptap Editor Docs
-  description: Use the Collaboration Cursor extension in Tiptap to show other user’s carets and their names while they type. More in the docs!
-  category: Editor
+  title: CollaborationCaret 扩展 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用协作光标扩展来显示其他用户的光标和他们的名字，同时他们在输入。更多内容请见文档！
+  category: 编辑器
 extension:
-  name: Collaboration Caret
+  name: 协作光标
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-collaboration-caret
-  description: 'See other user’s carets and names while they type.'
+  description: '在他们输入时查看其他用户的光标和名字。'
   type: extension
   icon: MousePointer2
 ---
@@ -28,54 +28,54 @@ import { Button } from '@/components/ui/Button'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 
-This extension adds information about all connected users (like their name and a specified color), their current caret position and their text selection (if there’s one).
+此扩展添加了有关所有连接用户的信息（如他们的名字和指定的颜色）、他们当前的光标位置和他们的文本选择（如果有的话）。
 
-It requires a collaborative Editor, so make sure to check out the [Tiptap Collaboration Docs](/collaboration/getting-started/overview) for a fully hosted or on-premises collaboration server solution.
+它需要一个协作编辑器，因此请确保查看 [Tiptap 协作文档](/collaboration/getting-started/overview)，以获取完全托管或本地部署的协作服务器解决方案。
 
-<Callout title="Public Demo" variant="warning">
-  The content of this editor is shared with other users.
+<Callout title="公开演示" variant="warning">
+  此编辑器的内容与其他用户共享。
 </Callout>
 
 <CodeDemo path="/Extensions/CollaborationCaret?hideSource" />
 <CodeDemo path="/Extensions/CollaborationCaret" />
 
-Open this page in multiple browser windows to test it.
+在多个浏览器窗口中打开此页面进行测试。
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-collaboration-caret@next
 ```
 
-This extension requires the [`Collaboration`](/collaboration/getting-started/overview) extension.
+此扩展需要 [`Collaboration`](/collaboration/getting-started/overview) 扩展。
 
-## Settings
+## 设置
 
 ### provider
 
-A Y.js network provider, for example a [Tiptap Collaboration](/collaboration/getting-started/overview) instance.
+一个 Y.js 网络提供者，例如一个 [Tiptap 协作](/collaboration/getting-started/overview) 实例。
 
-Default: `null`
+默认值: `null`
 
 ### user
 
-Attributes of the current user, assumes to have a name and a color, but can be used with any attribute. The values are synced with all other connected clients.
+当前用户的属性，假设有名字和颜色，但可以用于任何属性。这些值与所有其他连接的客户端进行同步。
 
-Default: `{ user: null, color: null }`
+默认值: `{ user: null, color: null }`
 
 ### render
 
-A render function for the caret, look at [the extension source code](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-collaboration-caret/) for an example.
+光标的渲染函数，查看 [扩展源代码](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-collaboration-caret/) 以获取示例。
 
 ### selectionRender
 
-A render function for the selection, look at [the extension source code](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-collaboration-caret/) for an example.
+选择的渲染函数，查看 [扩展源代码](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-collaboration-caret/) 以获取示例。
 
-## Commands
+## 命令
 
 ### updateUser()
 
-Pass an object with updated attributes of the current user. It expects a `name` and a `color`, but you can add additional fields, too.
+传递一个包含当前用户更新属性的对象。它期望有一个 `name` 和一个 `color`，但你也可以添加其他字段。
 
 ```js
 editor.commands.updateUser({
@@ -85,24 +85,24 @@ editor.commands.updateUser({
 })
 ```
 
-## Source code
+## 源代码
 
 [packages/extension-collaboration-caret/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-collaboration-caret/)
 
 <CtaBox.Wrapper>
-  <CtaBox.Title>Collaboration</CtaBox.Title>
+  <CtaBox.Title>协作</CtaBox.Title>
   <CtaBox.Description>
-    Fasten your seatbelts! Make your rich text editor collaborative with Tiptap Collaboration.
+    系好安全带！使你的富文本编辑器通过 Tiptap 协作进行协作。
   </CtaBox.Description>
   <CtaBox.List>
-    <CtaBox.ListItem>Real-time everything</CtaBox.ListItem>
-    <CtaBox.ListItem>Offline-first & conflict free</CtaBox.ListItem>
-    <CtaBox.ListItem>Managed and hosted by us or on your premises</CtaBox.ListItem>
+    <CtaBox.ListItem>实时一切</CtaBox.ListItem>
+    <CtaBox.ListItem>离线优先 & 无冲突</CtaBox.ListItem>
+    <CtaBox.ListItem>由我们管理和托管或在你的场所</CtaBox.ListItem>
   </CtaBox.List>
   <CtaBox.Actions className="-mx-3">
     <Button className="text-white/80 hover:text-white/100" variant="tertiary" asChild>
       <Link href="/collaboration/getting-started/overview">
-        Learn more
+        了解更多
         <ArrowRightIcon className="w-4 h-4" />
       </Link>
     </Button>

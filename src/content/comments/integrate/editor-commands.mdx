@@ -1,39 +1,39 @@
 ---
-title: Comments editor commands
+title: 评论编辑器命令
 meta:
-  title: Editor commands | Tiptap Comments Docs
-  description: Use editor commands to integrate comments and threads into your Tiptap Editor. Learn more in the docs!
-  category: Comments
+  title: 编辑器命令 | Tiptap 评论文档
+  description: 使用编辑器命令将评论和线程集成到您的 Tiptap 编辑器中。请在文档中了解更多信息！
+  category: 评论
 ---
 
-The Comments Editor API focuses on the client-side interactions for managing comments within the editor, enabling direct manipulation and customization of comment threads.
+评论编辑器 API 专注于在编辑器内管理评论的客户端交互，允许直接操作和自定义评论线程。
 
-For server-side operations, use the [Comments REST API](/comments/integrate/rest-api) to manage thread and comments outside the editor.
+对于服务器端操作，请使用 [评论 REST API](/comments/integrate/rest-api) 来在编辑器外管理线程和评论。
 
-## All editor commands for comments
+## 所有评论的编辑器命令
 
-| Command           | Description                                                            |
-| ----------------- | ---------------------------------------------------------------------- |
-| `setThread`       | Creates a new thread with optional user and content data               |
-| `removeThread`    | Deletes a specified thread, with an option to remove it from the Yjs document |
-| `updateThread`    | Updates specific thread properties like 'seen' status                  |
-| `selectThread`    | Focuses the editor on a specified thread                               |
-| `unselectThread`  | Removes focus from the selected thread                                   |
-| `resolveThread`   | Marks a thread as resolved                                             |
-| `unresolveThread` | Reverts a thread from resolved status                                  |
-| `createComment`   | Adds a new comment to a thread with details like content and user data |
-| `updateComment`   | Modifies an existing comment's content and metadata                    |
-| `removeComment`   | Deletes a specified comment from a thread                              |
+| 命令              | 描述                                                              |
+|------------------|-------------------------------------------------------------------|
+| `setThread`      | 创建一个新线程，可选用户和内容数据                                |
+| `removeThread`   | 删除指定的线程，选项可以从 Yjs 文档中移除它                      |
+| `updateThread`   | 更新特定线程属性，如“已查看”状态                                  |
+| `selectThread`   | 将编辑器聚焦在指定的线程上                                       |
+| `unselectThread` | 取消对选定线程的聚焦                                             |
+| `resolveThread`  | 将线程标记为已解决                                               |
+| `unresolveThread`| 将线程恢复为未解决状态                                          |
+| `createComment`  | 向线程添加新评论，包含内容和用户数据等详细信息                  |
+| `updateComment`  | 修改现有评论的内容和元数据                                       |
+| `removeComment`  | 从线程中删除指定的评论                                           |
 
-## Interact with threads
+## 与线程交互
 
 ### setThread( content, data, commentData )
 
-Creates a new thread at your current selection.
+在您当前的选定位置创建一个新线程。
 
 ```js
 editor.commands.setThread({
-  content: 'This is a new thread',
+  content: '这是一个新线程',
   data: { authorId: '123' },
   commentData: { authorId: '123' },
 })
@@ -41,7 +41,7 @@ editor.commands.setThread({
 
 ### removeThread( id, deleteThread )
 
-Deletes a thread with the given ID. If no ID is provided, the thread at the current selection will be deleted. If `deleteThread` is set to `true`, the thread will also be deleted from the Yjs document.
+删除具有给定 ID 的线程。如果未提供 ID，则将删除当前选定位置的线程。如果将 `deleteThread` 设置为 `true`，则该线程也将从 Yjs 文档中删除。
 
 ```js
 editor.commands.removeThread({
@@ -52,7 +52,7 @@ editor.commands.removeThread({
 
 ### updateThread( id, data )
 
-Updates the properties of a thread with the specified ID.
+更新具有指定 ID 的线程的属性。
 
 ```js
 editor.commands.updateThread({
@@ -63,7 +63,7 @@ editor.commands.updateThread({
 
 ### selectThread( id, selectAround )
 
-Selects a thread with the specified ID. If `selectAround` is set to `true`, the editor will create a selection range spanning the entire thread.
+选择具有指定 ID 的线程。如果将 `selectAround` 设置为 `true`，编辑器将创建一个覆盖整个线程的选定范围。
 
 ```js
 editor.commands.selectThread({
@@ -74,7 +74,7 @@ editor.commands.selectThread({
 
 ### unselectThread()
 
-Deselects the currently selected thread.
+取消当前选定线程的选择。
 
 ```js
 editor.commands.unselectThread()
@@ -82,7 +82,7 @@ editor.commands.unselectThread()
 
 ### resolveThread( id )
 
-Marks the thread with the specified ID as resolved.
+将具有指定 ID 的线程标记为已解决。
 
 ```js
 editor.commands.resolveThread({
@@ -92,7 +92,7 @@ editor.commands.resolveThread({
 
 ### unresolveThread( id )
 
-Reverts the thread with the specified ID to unresolved status.
+将具有指定 ID 的线程恢复为未解决状态。
 
 ```js
 editor.commands.unresolveThread({
@@ -100,36 +100,36 @@ editor.commands.unresolveThread({
 })
 ```
 
-## Handle comments
+## 处理评论
 
 ### createComment( threadId, content, data )
 
-Creates a new comment on the thread with the specified thread ID.
+在具有指定线程 ID 的线程上创建一个新评论。
 
 ```js
 editor.commands.createComment({
   threadId: '101',
-  content: 'This is a new comment',
+  content: '这是一个新评论',
   data: { authorId: '123' },
 })
 ```
 
 ### updateComment( threadId, id, content, data )
 
-Updates a comment with the specified ID on the thread identified by a given thread ID.
+更新具有指定 ID 的评论，该评论位于具有给定线程 ID 的线程上。
 
 ```js
 editor.commands.updateComment({
   threadId: '101',
   id: '456',
-  content: 'Now this is the new content',
+  content: '现在这是新内容',
   data: { edited: true },
 })
 ```
 
 ### removeComment( threadId, id )
 
-Deletes a comment with the specified ID from the thread identified by a given thread ID.
+从具有给定线程 ID 的线程中删除具有指定 ID 的评论。
 
 ```js
 editor.commands.removeComment({

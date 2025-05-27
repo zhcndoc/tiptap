@@ -1,81 +1,80 @@
 ---
-title: Webhooks in Collaboration
+title: 协作中的 Webhook
 meta:
-  title: Webhooks | Tiptap Collaboration Docs
-  description: Set up and understand webhook payloads, and manage settings to integrate advanced features. Learn more in the docs!
-  category: Collaboration
+  title: Webhooks | Tiptap 协作文档
+  description: 设置和理解 webhook 有效载荷，并管理设置以集成高级功能。在文档中了解更多信息！
+  category: 协作
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-You can define a URL and we will call it every time a document has changed. This is useful for getting the JSON representation of the Yjs document in your own application.
+您可以定义一个 URL，我们将在每次文档更改时调用它。这对于在您自己的应用程序中获取 Yjs 文档的 JSON 表示是非常有用的。
 
-We call your webhook URL when the document is saved to our database. This operation is debounced by 2-10 seconds. So your application won't be flooded by us. Right now we're only exporting the fragment `default` of the Yjs document.
+当文档保存到我们的数据库时，我们会调用您的 webhook URL。此操作具有 2-10 秒的防抖延迟。因此，我们不会淹没您的应用程序。目前，我们仅导出 Yjs 文档的 `default` 片段。
 
-## Configure Webhooks
+## 配置 Webhooks
 
-To configure webhooks for document and comments notifications:
+要为文档和评论通知配置 webhooks，您可以按照以下步骤操作：
 
-1. Navigate to the [Collaboration settings](https://cloud.tiptap.dev/v2/configuration/document-server) in your account.
-2. Find the webhooks section and add your desired endpoint URL.
+1. 导航到您账户中的 [协作设置](https://cloud.tiptap.dev/v2/configuration/document-server)。
+2. 找到 webhooks 部分并添加您希望的端点 URL。
 
-After adding your URL, the webhook is immediately live. You'll start receiving notifications for the specified events without any delay.
+添加 URL 后，webhook 会立即生效。您将开始接收指定事件的通知，无需任何延迟。
 
-<Callout title="Add Comments support to your webhook" variant="warning">
-  If you want to add webhook support for the comments feature and your Document server was created
-  before March 2024, please upgrade your webhook as described [below](#enable-the-comments-webhook).
+<Callout title="为您的 webhook 添加评论支持" variant="warning">
+  如果您想为评论功能添加 webhook 支持，并且您的文档服务器是在 2024 年 3 月之前创建的，请按照 [下面的说明](#enable-the-comments-webhook) 升级您的 webhook。
 </Callout>
 
-## Example payload
+## 示例有效载荷
 
-All requests to your webhook URL will contain a header called `X-Hocuspocus-Signature-256` that signs the entire message with your secret. You can find it in the [settings](https://collab.tiptap.dev/apps/settings) of your Tiptap Collab app.
+所有请求到您的 webhook URL 的请求将包含一个名为 `X-Hocuspocus-Signature-256` 的头，它使用您的密钥对整个消息进行签名。您可以在您的 Tiptap Collab 应用的 [设置](https://collab.tiptap.dev/apps/settings) 中找到该密钥。
 
 ```json
 {
-  "appName": '', // name of your app
-  "name": '', // name of the document (URI encoded if necessary)
-  "time": // current time as ISOString (new Date()).toISOString())
-  "tiptapJson": {}, // JSON output from Tiptap (see https://tiptap.dev/guide/output#option-1-json): TiptapTransformer.fromYdoc()
-  "ydocState"?: {}, // optionally contains the entire yDoc as base64. Contact us to enable this property!
-  "clientsCount": 100,// number of currently connected clients
-  "type": '', // the payload type (if the document was changed, this is DOCUMENT) ; only available if you are on webhooks v2
-  "trigger": '', // what triggered the event (usually "document.saved") ; only available if you are on webhooks v2
-  "users": [] // list of users who changed the content since the last webhook ("sub" field from the JWT)
+  "appName": "", // 您应用的名称
+  "name": "", // 文档的名称（如有必要则进行 URI 编码）
+  "time": // 当前时间作为 ISOString (new Date()).toISOString())
+  "tiptapJson": {}, // 来自 Tiptap 的 JSON 输出（见 https://tiptap.dev/guide/output#option-1-json）：TiptapTransformer.fromYdoc()
+  "ydocState"?: {}, // 可选包含整个 yDoc 的 base64。请联系我们以启用此属性！
+  "clientsCount": 100, // 当前连接的客户端数量
+  "type": "", // 有效载荷类型（如果文档发生更改，则为 DOCUMENT）；仅在您使用 webhook v2 时可用
+  "trigger": "", // 触发事件的原因（通常为 "document.saved"）；仅在您使用 webhook v2 时可用
+  "users": [] // 自上次 webhook 以来更改内容的用户列表（JWT 中的 "sub" 字段）
 }
 ```
 
-## Retries
+## 重试
 
-Webhooks are not retried by default, but you can enable retries by setting `webhook_retries` to `1` (see [Configure Runtime](/collaboration/operations/configure)).
-The retry schedule is as follows:
+默认情况下，webhooks 不会重试，但您可以通过将 `webhook_retries` 设置为 `1` 来启用重试（见 [配置运行时](/collaboration/operations/configure)）。
+重试计划如下：
 
-- 1st retry: 5 seconds after the initial attempt
-- 2nd retry: 15 seconds after the last attempt
-- 3rd retry: 2 minutes after the last attempt
-- 4th retry: 10 minute after the last attempt
-- 5th retry: 30 minutes after the last attempt
-- 6th retry: 3 hours after the last attempt
+- 第一次重试：初次尝试后 5 秒
+- 第二次重试：上一次尝试后 15 秒
+- 第三次重试：上一次尝试后 2 分钟
+- 第四次重试：上一次尝试后 10 分钟
+- 第五次重试：上一次尝试后 30 分钟
+- 第六次重试：上一次尝试后 3 小时
 
-All retries include a header `X-Hocuspocus-Retry` with the current retry count. The `time` property in the payload is the timestamp of the initial attempt.
+所有重试都包含一个头 `X-Hocuspocus-Retry`，其中包含当前的重试计数。有效载荷中的 `time` 属性是初始尝试的时间戳。
 
-## Enable the Comments webhook
+## 启用评论 webhook
 
-The webhook that supports comments is automatically enabled for all users that have created their account after March, 2024.
+支持评论的 webhook 自动为所有在 2024 年 3 月之后创建账户的用户启用。
 
-If your account was created before March, 2024 and you're using an older version of the webhook system, you'll need to manually enable the new comments webhooks. Here's how:
+如果您的账户是在 2024 年 3 月之前创建的，并且您正在使用旧版本的 webhook 系统，则需要手动启用新的评论 webhook。操作方法如下：
 
-1. In case you’ve already implemented a previous Collaboration webhook, make sure to check the `type` and `trigger` fields when processing incoming webhooks.
-2. Navigate to the [Collaboration settings](https://cloud.tiptap.dev/v2/configuration/document-server) in your account.
-3. Locate the Webhook section and click on the "Update" button.
+1. 如果您已经实现了之前的协作 webhook，请确保在处理传入 webhooks 时检查 `type` 和 `trigger` 字段。
+2. 导航到您账户中的 [协作设置](https://cloud.tiptap.dev/v2/configuration/document-server)。
+3. 找到 Webhook 部分并点击“更新”按钮。
 
-This upgrade is necessary to accommodate the introduction of multiple new events being routed to the same webhook endpoint, distinguished by a new `type` and `trigger` field.
+此升级是为了适应多个新事件路由到同一个 webhook 端点的引入，由新的 `type` 和 `trigger` 字段区分。
 
-If you do not wish to use the comments webhook, no upgrade is necessary.
+如果您不希望使用评论 webhook，则无需进行升级。
 
-## Loader Webhook
+## 加载器 Webhook
 
-In order to initialize documents, you can use the `webhook_loader_url` setting (see [configure runtime](/collaboration/operations/configure)). This URL will be called if a new document is requested.
-The webhook will contain a header `Authorization` with your secret, and `document-name` with the name of the requested document.
+为了初始化文档，您可以使用 `webhook_loader_url` 设置（见 [配置运行时](/collaboration/operations/configure)）。如果请求新的文档，将调用此 URL。
+该 webhook 将包含一个头 `Authorization`，其中包含您的密钥，以及一个 `document-name`，其中包含请求文档的名称。
 
-If you return a yjs update (Y.encodeStateAsUpdate on your side), it will be applied to the document. If you return anything else, the document will be initialized with an empty document.
-Note that the loader webhook is called only once when the document is created.
+如果您返回一个 yjs 更新（在您的端使用 Y.encodeStateAsUpdate），它将应用于文档。如果您返回其他内容，文档将以空文档初始化。
+请注意，加载器 webhook 仅在文档创建时调用一次。

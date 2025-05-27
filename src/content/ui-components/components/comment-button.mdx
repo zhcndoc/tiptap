@@ -1,20 +1,20 @@
 ---
-title: Add a comment with a button
+title: 添加评论的按钮
 meta:
-  title: Comment Button | Tiptap UI Component
-  description: Integrate a button that adds a comment or an annotation to a selected text in Tiptap. More in the docs!
-  category: UI Components
+  title: 评论按钮 | Tiptap UI 组件
+  description: 集成一个按钮，用于向 Tiptap 中选定的文本添加评论或注释。更多内容请查看文档！
+  category: UI 组件
 ---
 
-A button for adding comments or annotations to selected text.
+一个用于向选定文本添加评论或注释的按钮。
 
-## Install
+## 安装
 
 ```bash
 npx @tiptap/cli add comment-button
 ```
 
-## Usage
+## 用法
 
 ```tsx
 import { CommentButton } from '@/components/tiptap-ui/comment-button'
@@ -22,7 +22,7 @@ import { useEditor, EditorContent } from '@tiptap/react'
 
 export default function MyEditor() {
   const editor = useEditor({
-    // editor configuration
+    // 编辑器配置
   })
 
   return (
@@ -30,7 +30,7 @@ export default function MyEditor() {
       <CommentButton
         editor={editor}
         hideWhenUnavailable={false}
-        onClick={() => console.log('Add comment')}
+        onClick={() => console.log('添加评论')}
       />
       <EditorContent editor={editor} />
     </div>
@@ -38,24 +38,24 @@ export default function MyEditor() {
 }
 ```
 
-## Props
+## 属性
 
-| Name                       | Type           | Default | Description                                        |
+| 名称                       | 类型           | 默认值  | 描述                                               |
 | -------------------------- | -------------- | ------- | -------------------------------------------------- |
-| editor                     | Editor \| null | null    | The Tiptap editor instance                         |
-| hideWhenUnavailable        | boolean        | false   | Whether the button should be hide if not available |
-| showOnResolvedBlockThreads | boolean        | true    | Control visibility for resolved block threads      |
+| editor                     | Editor \| null | null    | Tiptap 编辑器实例                                 |
+| hideWhenUnavailable        | boolean        | false   | 当不可用时按钮是否应隐藏                          |
+| showOnResolvedBlockThreads | boolean        | true    | 控制已解决块线程的可见性                          |
 
-## Requirements
+## 需求
 
-Used reference components
+所需的参考组件
 
-- `thread-store` (context)
-- `use-tiptap-editor` (hook)
-- `tiptap-utils` (lib)
-- `button` (primitive)
-- `message-square-plus-icon` (icon)
+- `thread-store` (上下文)
+- `use-tiptap-editor` (钩子)
+- `tiptap-utils` (库)
+- `button` (原语)
+- `message-square-plus-icon` (图标)
 
-Open source feature(s)
+开源特性
 
 - `@tiptap/react`

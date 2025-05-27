@@ -1,65 +1,65 @@
 ---
-title: Contributing to Tiptap
+title: 贡献 Tiptap
 meta:
-  title: Contributing | Tiptap
-  description: Step-by-step guide for those interested in contributing to Tiptap, from setting up your development environment to tips for successful pull requests and creating your own extensions.
-  category: Editor
+  title: 贡献 | Tiptap
+  description: 有兴趣贡献 Tiptap 的人可以参考的逐步指南，从设置开发环境到成功的拉取请求和创建自己的扩展的提示。
+  category: 编辑器
 ---
 
-Tiptap would be nothing without its lively community. Contributions have always been and will always be welcome. Here is a little bit you should know, before you send your contribution:
+Tiptap 离不开其活跃的社区。贡献一直以来都是被欢迎的，未来也将继续欢迎。以下是您在提交贡献之前需要了解的一些事项：
 
-## Welcome examples
+## 欢迎示例
 
-- Failing regression tests as bug reports
-- Documentation improvements, e. g. fix a typo, add a section
-- New features for existing extensions, e. g. a new configureable option
-- Well explained, non-breaking changes to the core
+- 作为 Bug 报告的回归测试失败
+- 文档改进，例如修复拼写错误，添加某个部分
+- 为现有扩展添加新功能，例如新的可配置选项
+- 对核心的解释清晰、不破坏现有功能的变更
 
-## Won’t merge
+## 不会合并
 
-- New extensions, which we then need to support and maintain
+- 新扩展，这将需要我们支持和维护
 
-## Submit ideas
+## 提交想法
 
-Make sure to open an issue and outline your idea first. We’ll get back to you quickly and let you know if there is a chance we can merge your contribution.
+请确保先打开一个问题并概述您的想法。我们会迅速回复您，让您知道是否有机会合并您的贡献。
 
-## Set up the development environment
+## 设置开发环境
 
-It’s not too hard to tinker around with the official repository. You’ll need [Git](https://github.com/git-guides/install-git), [Node and NPM](https://nodejs.org/en/download/) installed. Here is what you need to do then:
+对官方仓库进行修改并不难。您需要安装 [Git](https://github.com/git-guides/install-git)、[Node 和 NPM](https://nodejs.org/en/download/)。接下来您需要做的是：
 
-1. Copy the code to your local machine: `$ git clone git@github.com:ueberdosis/tiptap.git`
-2. Install dependencies: `$ npm install`
-3. Start the development environment: `$ npm run start`
-4. Open http://localhost:3000 in your favorite browser.
-5. Start playing around!
+1. 将代码复制到本地计算机：`$ git clone git@github.com:ueberdosis/tiptap.git`
+2. 安装依赖：`$ npm install`
+3. 启动开发环境：`$ npm run start`
+4. 在您喜欢的浏览器中打开 http://localhost:3000。
+5. 开始玩耍吧！
 
-## Our code style
+## 我们的代码风格
 
-There is an eslint config that ensures a consistent code style. To check for errors, run `$ npm run lint`. That’ll be checked when you send a pull request, too. Make sure it’s passing, before sending a pull request.
+有一个 eslint 配置来确保一致的代码风格。要检查错误，请运行 `$ npm run lint`。在您发送拉取请求时也会进行检查。在发送拉取请求之前，确保代码通过检查。
 
-## Test for errors
+## 检查错误
 
-Your pull request will automatically execute all our existing tests. Make sure that they all pass, before sending a pull request. Run all tests locally with `$ npm run test` or run single tests (e. g. when writing new ones) with `$ npm run test:open`.
+您的拉取请求会自动执行我们现有的所有测试。在提交拉取请求之前，请确保它们全部通过。可以使用 `$ npm run test` 在本地运行所有测试，或使用 `$ npm run test:open` 运行单个测试（例如，当编写新测试时）。
 
-## Create your own extensions
+## 创建自己的扩展
 
-If you want to create and maintain your own extensions, you can use your `create-tiptap-extension` CLI tool. It will create a new extension boilerplate with all necessary files and the build process. It's as easy as running
+如果您想创建和维护自己的扩展，可以使用 `create-tiptap-extension` CLI 工具。它会创建一个包含所有必要文件和构建过程的新扩展模板。只需运行
 
 ```bash
 npm init tiptap-extension
 ```
 
-If you want to let us know about your extension you can give us a hint on [X](https://x.com/tiptap_editor) or [Discord](https://tiptap.dev/discord).
+如果您想让我们知道您的扩展，可以在 [X](https://x.com/tiptap_editor) 或 [Discord](https://tiptap.dev/discord) 上给我们提示。
 
-## Document your contributions
+## 记录您的贡献
 
-When contributing to Tiptap, it's important to understand that Tiptap's codebase and its documentation are managed in two separate repositories. If you make changes or enhancements to Tiptap, documenting these changes is of course important for clarity and usability by others. Ensure you update the documentation repository corresponding to any alterations you make in the code.
+在贡献 Tiptap 时，重要的是要理解 Tiptap 的代码库和文档是分别管理的。如果您对 Tiptap 进行了更改或增强，记录这些更改对于他人的清晰性和可用性当然是重要的。确保您更新与您在代码中所做的任何更改相对应的文档仓库。
 
-1. Tiptap Repository: [Tiptap Code Repository](https://github.com/ueberdosis/tiptap) - Modify the code here.
-2. Documentation Repository: [Tiptap Documentation Repository](https://github.com/ueberdosis/tiptap-docs) - Update or add documentation here to reflect changes made in the Tiptap repository.
+1. Tiptap 仓库：[Tiptap 代码仓库](https://github.com/ueberdosis/tiptap) - 在此修改代码。
+2. 文档仓库：[Tiptap 文档仓库](https://github.com/ueberdosis/tiptap-docs) - 在此更新或添加文档，以反映在 Tiptap 仓库中所做的更改。
 
-In your PR to the Tiptap code repository, include a reference to the corresponding updates you've made in the Documentation repository. Alternatively, when submitting a PR to the Documentation repository, make sure to include references to any associated code changes in the Tiptap repository if they are relevant to the documentation updates.
+在您对 Tiptap 代码仓库的拉取请求中，包含对您在文档仓库中所做的相应更新的引用。或者，在向文档仓库提交拉取请求时，如果与文档更新相关，确保包含对 Tiptap 仓库中任何相关代码更改的引用。
 
-## Further questions
+## 进一步的问题
 
-Any further questions? Create a new issue or discussion in the repository. We’ll get back to you.
+还有其他问题吗？在仓库中创建一个新问题或讨论。我们会尽快回复您。

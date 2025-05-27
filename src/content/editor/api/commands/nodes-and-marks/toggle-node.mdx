@@ -1,33 +1,33 @@
 ---
-title: toggleNode command
+title: toggleNode 命令
 meta:
-  title: toggleNode command | Tiptap Editor Docs
-  description: Use the toggleNode command in your Tiptap Editor to toggle one node with another. Learn more in our docs!
-  category: Editor
+  title: toggleNode 命令 | Tiptap 编辑器文档
+  description: 在您的 Tiptap 编辑器中使用 toggleNode 命令来切换一个节点与另一个节点。了解更多信息请查看我们的文档！
+  category: 编辑器
 ---
 
-`toggleNode` will toggle a node with another node.
+`toggleNode` 将一个节点与另一个节点切换。
 
-## Parameters
+## 参数
 
 `typeOrName: string | NodeType`
 
-The type of node that should be toggled.
+应切换的节点类型。
 
 `toggleTypeOrName: string | NodeType`
 
-The type of node that should be used for the toggling.
+用于切换的节点类型。
 
 `attributes?: Record<string, any>`
 
-The attributes that should be applied to the node. **This is optional.**
+应应用于节点的属性。**这是可选的。**
 
-## Use the toggleNode command
+## 使用 toggleNode 命令
 
 ```js
-// toggle a paragraph with a heading node
+// 将段落切换为标题节点
 editor.commands.toggleNode('paragraph', 'heading', { level: 1 })
 
-// toggle a paragraph with a image node
+// 将段落切换为图像节点
 editor.commands.toggleNode('paragraph', 'image', { src: 'https://example.com/image.png' })
 ```

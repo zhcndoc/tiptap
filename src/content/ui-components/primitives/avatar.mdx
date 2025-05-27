@@ -1,32 +1,32 @@
 ---
-title: Integrate the Avatar UI component
+title: 集成头像 UI 组件
 meta:
-  title: Avatar | Tiptap UI Component
-  description: Integrate a visual representation of a user or entity into your editor. Learn more in the docs.
-  category: UI Components
+  title: 头像 | Tiptap UI 组件
+  description: 将用户或实体的视觉表示集成到您的编辑器中。请在文档中了解更多信息。
+  category: UI 组件
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-A visual representation of a user or entity, typically used in user interfaces to represent a person.
+用户或实体的视觉表示，通常用于用户界面中来代表一个人。
 
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui-primitive/avatar" />
 
-## Install
-You can add the primitive via Tiptap CLI (for Vite or Next.js)
+## 安装
+您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加这个原始组件
 
 ```bash
 npx @tiptap/cli add avatar
 ```
 
-### Manual Integration
-For frameworks other than Vite or Next.js, add the primitive manually from the [open-source repository](https://github.com/ueberdosis/tiptap-ui-components).
+### 手动集成
+对于 Vite 或 Next.js 以外的框架，可以从 [开源代码库](https://github.com/ueberdosis/tiptap-ui-components) 手动添加该组件。
 
-### Import styles
+### 导入样式
 
-This component requires you to import our styles which were added to `styles/keyframe-animation.scss` and `styles/_variables.scss`.
+此组件要求您导入我们的样式，这些样式已添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 中。
 
-## Usage
+## 用法
 
 ```tsx
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/tiptap-ui-primitive/avatar'
@@ -34,14 +34,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/tiptap-ui-prim
 export default function MyComponent() {
   return (
     <Avatar>
-      <AvatarImage src="https://via.placeholder.com/150" alt="User avatar" />
+      <AvatarImage src="https://via.placeholder.com/150" alt="用户头像" />
       <AvatarFallback>JD</AvatarFallback>
     </Avatar>
   )
 }
 ```
 
-## Avatar Group
+## 头像组
 
 ```tsx
 import {
@@ -55,19 +55,19 @@ export default function MyComponent() {
   return (
     <AvatarGroup maxVisible={3}>
       <Avatar>
-        <AvatarImage src="/avatars/user1.png" alt="User 1" />
+        <AvatarImage src="/avatars/user1.png" alt="用户 1" />
         <AvatarFallback>U1</AvatarFallback>
       </Avatar>
       <Avatar>
-        <AvatarImage src="/avatars/user2.png" alt="User 2" />
+        <AvatarImage src="/avatars/user2.png" alt="用户 2" />
         <AvatarFallback>U2</AvatarFallback>
       </Avatar>
       <Avatar>
-        <AvatarImage src="/avatars/user3.png" alt="User 3" />
+        <AvatarImage src="/avatars/user3.png" alt="用户 3" />
         <AvatarFallback>U3</AvatarFallback>
       </Avatar>
       <Avatar>
-        <AvatarImage src="/avatars/user4.png" alt="User 4" />
+        <AvatarImage src="/avatars/user4.png" alt="用户 4" />
         <AvatarFallback>U4</AvatarFallback>
       </Avatar>
     </AvatarGroup>
@@ -75,29 +75,29 @@ export default function MyComponent() {
 }
 ```
 
-## Props
+## 属性
 
-### Avatar
+### 头像
 
-| Name | Type                      | Default   | Description |
-| ---- | ------------------------- | --------- | ----------- |
-| size | 'default' \| 'sm' \| 'lg' | 'default' | Avatar size |
+| 名称 | 类型                      | 默认值   | 描述         |
+| ---- | ------------------------- | -------- | ------------ |
+| size | 'default' \| 'sm' \| 'lg' | 'default' | 头像大小     |
 
-### AvatarImage
+### 头像图片
 
-| Name | Type   | Default  | Description                         |
-| ---- | ------ | -------- | ----------------------------------- |
-| src  | string | required | Image source URL                    |
-| alt  | string | required | Alternative text for screen readers |
+| 名称 | 类型   | 默认值  | 描述                             |
+| ---- | ------ | -------- | --------------------------------- |
+| src  | string | 必需    | 图片源 URL                        |
+| alt  | string | 必需    | 屏幕阅读器的替代文本             |
 
-### AvatarFallback
+### 头像后备
 
-| Name    | Type   | Default | Description                                 |
-| ------- | ------ | ------- | ------------------------------------------- |
-| delayMs | number | 0       | Delay in ms before showing fallback content |
+| 名称    | 类型   | 默认值 | 描述                                       |
+| ------- | ------ | ------- | ----------------------------------------- |
+| delayMs | number | 0       | 显示后备内容之前的延迟（毫秒）           |
 
-### AvatarGroup
+### 头像组
 
-| Name       | Type   | Default   | Description                                  |
-| ---------- | ------ | --------- | -------------------------------------------- |
-| maxVisible | number | undefined | Maximum avatars to display before collapsing |
+| 名称       | 类型   | 默认值   | 描述                                           |
+| ---------- | ------ | -------- | ---------------------------------------------- |
+| maxVisible | number | 未定义   | 在折叠之前显示的最大头像数量                 |

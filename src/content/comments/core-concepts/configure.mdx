@@ -1,24 +1,24 @@
 ---
-title: Configure comments
+title: 配置评论
 meta:
-  title: Configure | Tiptap Comments Docs
-  description: Configure TiptapCollabProvider and customize thread classes in your Tiptap editor. More in the docs!
-  category: Comments
+  title: 配置 | Tiptap 评论文档
+  description: 配置 TiptapCollabProvider 并自定义您的 Tiptap 编辑器中的线程类。更多内容请查阅文档！
+  category: 评论
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-Comments are embedded within documents in the Collaboration Cloud. To enable comments, integrate the TiptapCollabProvider and configure your setup to support comment functionality.
+评论嵌入在协作云中的文档内。要启用评论，请集成 TiptapCollabProvider 并配置您的设置以支持评论功能。
 
-## Provider
+## 提供者
 
-The `TiptapCollabProvider` instance
+`TiptapCollabProvider` 实例
 
-Default: `null`
+默认值: `null`
 
 ```js
 const tiptapCollabProvider = new TiptapCollabProvider({
-  // your provider options
+  // 您的提供者选项
 })
 
 Comments.configure({
@@ -26,11 +26,11 @@ Comments.configure({
 })
 ```
 
-## Classes
+## 类别
 
-The classes used for the threads.
+用于线程的类。
 
-Default:
+默认值：
 
 ```js
 {
@@ -60,50 +60,47 @@ Comments.configure({
 
 ## onClickThread
 
-A callback that is called when a thread is clicked. If the thread is clicked, the thread ID is passed to the callback. If no thread is clicked, `null` is passed.
+点击线程时调用的回调。如果线程被点击，线程 ID 会传递给回调。如果没有点击任何线程，则传递 `null`。
 
-Default: `undefined`
+默认值: `undefined`
 
 ```js
 Comments.configure({
-  // ID can be a string or null
-  onClickThread: (id) => console.log('Thread clicked', id),
+  // ID 可以是字符串或 null
+  onClickThread: (id) => console.log('线程被点击', id),
 })
 ```
 
 ## deleteUnreferencedThreads
 
-A boolean option that controls whether to delete threads not referenced in the document. By default, threads are marked as deleted when they are not referenced in a document anymore. This is useful for cleaning up threads that are no longer needed.
+一个布尔选项，用于控制是否删除文档中未引用的线程。默认情况下，当线程不再被文档引用时，它们会被标记为已删除。这对于清理不再需要的线程非常有用。
 
-However, if you want to keep the threads even if they are not referenced in the document, you can set this option to `false`.
+但是，如果您想保留这些线程，即使它们未被文档引用，您可以将此选项设置为 `false`。
 
-**Default:**: `true`
+**默认值:** `true`
 
 ```js
 Comments.configure({
-  // keep threads even if they are not referenced in the document
+  // 即使未被文档引用也保留线程
   deleteUnreferencedThreads: false,
 })
 ```
 
 ## useLegacyWrapping
 
-<Callout title="Warning" variant="warning">
-  The new wrapping mechanism uses a different schema for threads on block nodes, which is not
-  compatible with the previous wrapping behavior. If this is set to `false` without mapping existing
-  thread nodes to the new schema, the threads content will be stripped from the document.
+<Callout title="警告" variant="warning">
+  新的包裹机制为块节点上的线程使用了不同的模式，这与之前的包裹行为不兼容。如果将此设置为 `false` 而未将现有线程节点映射到新模式，则线程内容将从文档中删除。
 </Callout>
 
-A boolean option that controls whether to use the legacy wrapping mechanism for multi-line comments. We suggest for new implementations to set this to `false`, and existing integrations can stay on the previous behavior. This is only required for backwards compatibility with existing comments, and it will
-be removed in the future.
+一个布尔选项，用于控制是否对多行评论使用遗留的包裹机制。我们建议新的实现将其设置为 `false`，现有集成可以保持之前的行为。这仅在与现有评论的向后兼容性方面是必要的，并且未来将被移除。
 
-The new wrapping mechanism is more flexible, allowing to wrap content more precise and supports mixed wrapping of inline and block nodes.
+新的包裹机制更加灵活，允许更精确地包裹内容，并支持内联和块节点的混合包裹。
 
-**Default:** `true`
+**默认值:** `true`
 
 ```js
 Comments.configure({
-  // enable new flexible block wrapping
+  // 启用新的灵活块包装
   useLegacyWrapping: false,
 })
 ```

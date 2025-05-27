@@ -1,45 +1,45 @@
 ---
 title: Next.js
 meta:
-  title: Next.js | Tiptap Editor Docs
-  description: Learn how to integrate Tiptap with Next.js to create a versatile and powerful rich text editor for your project.
-  category: Editor
+  title: Next.js | Tiptap 编辑器文档
+  description: 学习如何将 Tiptap 集成到 Next.js 中，为您的项目创建一个多功能且强大的富文本编辑器。
+  category: 编辑器
 ---
 
-Integrate Tiptap with your Next.js project using this step-by-step guide.
+使用此逐步指南将 Tiptap 集成到您的 Next.js 项目中。
 
-### Requirements
+### 要求
 
-- [Node](https://nodejs.org/en/download/) installed on your machine
-- Experience with [React](https://reactjs.org/)
+- 机器上已安装 [Node](https://nodejs.org/en/download/)
+- 具备 [React](https://reactjs.org/) 使用经验
 
-## Create a project (optional)
+## 创建项目（可选）
 
-If you already have an existing Next.js project, that's fine too. Just skip this step.
+如果您已有现成的 Next.js 项目，也可以跳过此步骤。
 
-For the purpose of this guide, start a new Next.js project called `my-tiptap-project`. The following command sets up everything we need to get started.
+本指南中，我们将新建一个名为 `my-tiptap-project` 的 Next.js 项目。以下命令将设置我们开始所需的一切。
 
 ```bash
-# create a project
+# 创建项目
 npx create-next-app my-tiptap-project
 
-# change directory
+# 进入项目目录
 cd my-tiptap-project
 ```
 
-### Install dependencies
+### 安装依赖
 
-Now that we have a standard boilerplate set up, we can get Tiptap up and running! For this, we will need to install three packages: `@tiptap/react`, `@tiptap/pm`, and `@tiptap/starter-kit`, which includes all the extensions you need to get started quickly.
+现在我们已有一个标准的样板项目，可以开始配置 Tiptap 了！为此，我们需要安装三个包：`@tiptap/react`、`@tiptap/pm` 和 `@tiptap/starter-kit`，后者包括所有快速入门所需的扩展。
 
 ```bash
 npm install @tiptap/react@next @tiptap/pm@next @tiptap/starter-kit@next
 ```
 
-If you followed steps 1 and 2, you can now start your project with `npm run dev` and open [http://localhost:3000/](http://localhost:3000/) in your favorite browser. This might be different if you're working with an existing project.
+如果您按照步骤 1 和 2 进行操作，现在可以运行 `npm run dev` 启动项目，并在您喜欢的浏览器中打开 [http://localhost:3000/](http://localhost:3000/)。如果您使用的是已有项目，具体方式可能有所不同。
 
-## Integrate Tiptap
+## 集成 Tiptap
 
-To start using Tiptap, you'll need to add a new component to your app. To do so, first create a directory called `components/`. Now it's time to create our component which we'll call `Tiptap`. To do this, add the following example code in `components/Tiptap.jsx`.
+要开始使用 Tiptap，您需要向应用添加一个新组件。首先创建一个名为 `components/` 的目录。接下来创建一个名为 `Tiptap` 的组件，将以下示例代码添加到 `components/Tiptap.jsx` 中。
 
 ```jsx
 'use client'
@@ -51,7 +51,7 @@ const Tiptap = () => {
   const editor = useEditor({
     extensions: [StarterKit],
     content: '<p>Hello World! 🌎️</p>',
-    // Don't render immediately on the server to avoid SSR issues
+    // 不立即在服务器端渲染以避免 SSR 问题
     immediatelyRender: false,
   })
 
@@ -61,9 +61,9 @@ const Tiptap = () => {
 export default Tiptap
 ```
 
-### Add it to your app
+### 将组件添加到应用中
 
-Now, let's replace the content of `app/page.js` (or `pages/index.js`, if you are using the Pages router) with the following example code to use the `Tiptap` component in our app.
+现在，让我们用以下示例代码替换 `app/page.js`（如果您使用的是 Pages 路由，则替换 `pages/index.js`）的内容，将 `Tiptap` 组件集成到应用里。
 
 ```jsx
 import Tiptap from '../components/Tiptap'
@@ -73,11 +73,11 @@ export default function Home() {
 }
 ```
 
-You should now see Tiptap in your browser. Time to give yourself a pat on the back! :)
+现在您应该能在浏览器中看到 Tiptap，给自己点个赞吧！:)
 
-### Using yjs with Next.js
+### 在 Next.js 中使用 yjs
 
-To avoid the error: `Yjs was already imported. This breaks constructor checks and will lead to issues!`, add the following to your next.js config file. You might have to adjust the 'node_modules/yjs' to '../node_modules/yjs' or '../../node_modules/yjs' depending on where your node_modules are installed.
+为避免出现错误：“Yjs was already imported. This breaks constructor checks and will lead to issues!”，请在您的 Next.js 配置文件中添加以下内容。根据您的 `node_modules` 目录所在位置，您可能需要将 `'node_modules/yjs'` 调整为 `'../node_modules/yjs'` 或 `'../../node_modules/yjs'`。
 
 ```js
 const path = require('path')
@@ -85,7 +85,7 @@ const path = require('path')
 module.exports = {
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      // Ensure that all imports of 'yjs' resolve to the same instance
+      // 确保所有 'yjs' 的导入都解析为同一个实例
       config.resolve.alias['yjs'] = path.resolve(__dirname, 'node_modules/yjs')
     }
     return config
@@ -93,4 +93,4 @@ module.exports = {
 }
 ```
 
-The original discussion and fix can be found on [Github](https://github.com/yjs/yjs/issues/438#issuecomment-2225079409).
+关于此问题的讨论和修复方案，请参见 [Github](https://github.com/yjs/yjs/issues/438#issuecomment-2225079409)。

@@ -1,41 +1,41 @@
 ---
-title: Table extension
+title: 表格扩展
 tags:
   - type: image
     src: https://img.shields.io/npm/v/@tiptap/extension-table/next?label=version
     url: https://www.npmjs.com/package/@tiptap/extension-table
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-table.svg
     url: https://npmcharts.com/compare/@tiptap/extension-table?minimal=true
-    label: Downloads
+    label: 下载量
 extension:
-  name: Table
+  name: 表格
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-table
-  description: 'You’re working on something really serious if you need tables inside a text editor.'
+  description: '如果你需要在文本编辑器中使用表格，那说明你正在处理一些非常严肃的事情。'
   type: node
-  icon: Table
+  icon: 表格
 meta:
-  title: Table extension | Tiptap Editor Docs
-  description: Use the Table extension in Tiptap to add tables to your documents with a range of customization options. Learn more in our docs!
-  category: Editor
+  title: 表格扩展 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用表格扩展将表格添加到你的文档中，提供各种自定义选项。请在我们的文档中了解更多信息！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-Nothing is as much fun as a good old HTML table. The `Table` extension enables you to add this holy grail of WYSIWYG editing to your editor.
+没有什么比一个老派的 HTML 表格更有趣了。`Table` 扩展使您能够将这个 WYSIWYG 编辑的圣杯添加到您的编辑器中。
 
-Don’t forget to add a `spacer.gif`. (Just joking. If you don’t know what that is, don’t listen.)
+别忘了添加一个 `spacer.gif`。 （开玩笑。如果您不知道那是什么，请忽略。）
 
 <CodeDemo path="/Nodes/Table" />
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-table@next
 ```
 
-This extension is installed by default with the `TableKit` extension, so you don’t need to install it separately.
+这个扩展在 `TableKit` 扩展中默认安装，所以你不需要单独安装它。
 
 ```ts
 import { Editor } from '@tiptap/core'
@@ -46,11 +46,11 @@ new Editor({
 })
 ```
 
-## Settings
+## 设置
 
 ### HTMLAttributes
 
-Custom HTML attributes that should be added to the rendered HTML tag.
+要添加到渲染的 HTML 标签中的自定义 HTML 属性。
 
 ```js
 Table.configure({
@@ -62,33 +62,33 @@ Table.configure({
 
 ### resizable
 
-Default: `false`
+默认值: `false`
 
 ### handleWidth
 
-Default: `5`
+默认值: `5`
 
 ### cellMinWidth
 
-Default: `25`
+默认值: `25`
 
 ### View
 
-Default: `TableView`
+默认值: `TableView`
 
 ### lastColumnResizable
 
-Default: `true`
+默认值: `true`
 
 ### allowTableNodeSelection
 
-Default: `false`
+默认值: `false`
 
-## Commands
+## 命令
 
 ### insertTable()
 
-Creates a new three-by-three table by default, including a header row. You can specify custom rows, columns, and header preferences:
+默认情况下创建一个三乘三的表格，包括一个表头行。您可以指定自定义的行、列和表头设置：
 
 ```js
 editor.commands.insertTable()
@@ -97,7 +97,7 @@ editor.commands.insertTable({ rows: 3, cols: 3, withHeaderRow: false })
 
 ### addColumnBefore()
 
-Adds a column before the current column.
+在当前列之前添加一列。
 
 ```js
 editor.commands.addColumnBefore()
@@ -105,7 +105,7 @@ editor.commands.addColumnBefore()
 
 ### addColumnAfter()
 
-Adds a column after the current column.
+在当前列之后添加一列。
 
 ```js
 editor.commands.addColumnAfter()
@@ -113,7 +113,7 @@ editor.commands.addColumnAfter()
 
 ### deleteColumn()
 
-Deletes the current column.
+删除当前列。
 
 ```js
 editor.commands.deleteColumn()
@@ -121,7 +121,7 @@ editor.commands.deleteColumn()
 
 ### addRowBefore()
 
-Adds a row above the current row.
+在当前行上方添加一行。
 
 ```js
 editor.commands.addRowBefore()
@@ -129,7 +129,7 @@ editor.commands.addRowBefore()
 
 ### addRowAfter()
 
-Adds a row below the current row.
+在当前行下方添加一行。
 
 ```js
 editor.commands.addRowAfter()
@@ -137,7 +137,7 @@ editor.commands.addRowAfter()
 
 ### deleteRow()
 
-Deletes the current row.
+删除当前行。
 
 ```js
 editor.commands.deleteRow()
@@ -145,7 +145,7 @@ editor.commands.deleteRow()
 
 ### deleteTable()
 
-Deletes the whole table.
+删除整个表格。
 
 ```js
 editor.commands.deleteTable()
@@ -153,7 +153,7 @@ editor.commands.deleteTable()
 
 ### mergeCells()
 
-Merge all selected cells to a single cell.
+将所有选定的单元格合并为一个单元格。
 
 ```js
 editor.commands.mergeCells()
@@ -161,7 +161,7 @@ editor.commands.mergeCells()
 
 ### splitCell()
 
-Splits the current cell.
+拆分当前单元格。
 
 ```js
 editor.commands.splitCell()
@@ -169,7 +169,7 @@ editor.commands.splitCell()
 
 ### toggleHeaderColumn()
 
-Makes the current column a header column.
+将当前列设为表头列。
 
 ```js
 editor.commands.toggleHeaderColumn()
@@ -177,7 +177,7 @@ editor.commands.toggleHeaderColumn()
 
 ### toggleHeaderRow()
 
-Makes the current row a header row.
+将当前行设为表头行。
 
 ```js
 editor.commands.toggleHeaderRow()
@@ -185,7 +185,7 @@ editor.commands.toggleHeaderRow()
 
 ### toggleHeaderCell()
 
-Makes the current cell a header cell.
+将当前单元格设为表头单元格。
 
 ```js
 editor.commands.toggleHeaderCell()
@@ -193,7 +193,7 @@ editor.commands.toggleHeaderCell()
 
 ### mergeOrSplit()
 
-If multiple cells are selected, they are merged. If a single cell is selected, the cell is splitted into two cells.
+如果选择了多个单元格，则将其合并。如果选择了单个单元格，则将其拆分为两个单元格。
 
 ```js
 editor.commands.mergeOrSplit()
@@ -201,7 +201,7 @@ editor.commands.mergeOrSplit()
 
 ### setCellAttribute()
 
-Sets the given attribute for the current cell. Can be whatever you define on the [`TableCell`](/editor/extensions/nodes/table-cell) extension, for example a background color. Just make sure to register [your custom attribute](/editor/extensions/custom-extensions/extend-existing#attributes) first.
+为当前单元格设置指定属性。可以是您在 [`TableCell`](/editor/extensions/nodes/table-cell) 扩展中定义的任何内容，例如背景颜色。确保首先注册 [您的自定义属性](/editor/extensions/custom-extensions/extend-existing#attributes)。
 
 ```js
 editor.commands.setCellAttribute('customAttribute', 'value')
@@ -210,7 +210,7 @@ editor.commands.setCellAttribute('backgroundColor', '#000')
 
 ### goToNextCell()
 
-Go the next cell.
+转到下一个单元格。
 
 ```js
 editor.commands.goToNextCell()
@@ -218,7 +218,7 @@ editor.commands.goToNextCell()
 
 ### goToPreviousCell()
 
-Go to the previous cell.
+转到上一个单元格。
 
 ```js
 editor.commands.goToPreviousCell()
@@ -226,17 +226,17 @@ editor.commands.goToPreviousCell()
 
 ### fixTables()
 
-Inspects all tables in the document and fixes them, if necessary.
+检查文档中的所有表格，并在必要时修复它们。
 
 ```js
 editor.commands.fixTables()
 ```
 
-## Source code
+## 源代码
 
 [packages/extension-table/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-table/)
 
-## Minimal Install
+## 最小安装
 
 ```js
 import { Editor } from '@tiptap/core'

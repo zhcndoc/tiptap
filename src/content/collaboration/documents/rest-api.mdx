@@ -1,74 +1,72 @@
 ---
-title: Document management API
+title: 文档管理 API
 meta:
-  title: REST API | Tiptap Collaboration Docs
-  description: Manage your Tiptap documents programmatically with the Collaboration Management API. Find out more in the documentation.
-  category: Collaboration
+  title: REST API | Tiptap 协作文档
+  description: 使用协作管理 API 程序化管理您的 Tiptap 文档。请在文档中了解更多信息。
+  category: 协作
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-The Collaboration Management API provides a suite of RESTful endpoints for managing documents. This API can be used for document creation, listing, retrieval, updates, deletion, and duplication.
+协作管理 API 提供了一套 RESTful 接口，用于管理文档。此 API 可用于文档的创建、列出、检索、更新、删除和复制。
 
-You can experiment with the REST API by visiting our [Postman Collection](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/collection/33042171-cc186a66-df41-4df8-9c6e-e91b20deffe5?action=share&creator=32651125).
+您可以通过访问我们的 [Postman 集合](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/collection/33042171-cc186a66-df41-4df8-9c6e-e91b20deffe5?action=share&creator=32651125) 来体验 REST API。
 
-## Rate limits
+## 速率限制
 
-To maintain system integrity and protect from misconfigured clients, our infrastructure&mdash;including the management API and websocket connections through the `TiptapCollabProvider`&mdash;is subject to rate limits.
+为维护系统的完整性并防止错误配置的客户端，我们的基础设施——包括管理 API 和通过 `TiptapCollabProvider` 的 websocket 连接——受到速率限制。
 
-### Default rate limits (per source IP):
+### 默认速率限制（每个源 IP）：
 
-  - **Requests:** 100
-  - **Time window:** 5 seconds
-  - **Burst capacity:** Up to 200 requests
+  - **请求数：** 100
+  - **时间窗口：** 5 秒
+  - **突发容量：** 最多 200 个请求
 
-If you encounter these limits under normal operation, please [email us](mailto:humans@tiptap.dev).
+如果您在正常操作下遇到这些限制，请 [给我们发邮件](mailto:humans@tiptap.dev)。
 
-## Access the API
+## 访问 API
 
-The REST API is exposed directly from your Document server at your custom URL:
+REST API 直接从您的文档服务器以自定义 URL 公开：
 
 ```bash
 https://YOUR_APP_ID.collab.tiptap.cloud/
 ```
-### Authentication
-Authenticate your API requests by including your API secret in the `Authorization` header. You can find your API secret in
-the [settings](https://cloud.tiptap.dev/v2/configuration/document-server) of your Tiptap Cloud dashboard.
+### 认证
+通过在 `Authorization` 头中包含您的 API 密钥来验证您的 API 请求。您可以在 Tiptap Cloud 控制面板的 [设置](https://cloud.tiptap.dev/v2/configuration/document-server) 中找到您的 API 密钥。
 
-### Document identifiers
-If your document identifier contains a slash (`/`), encode it as `%2F`, e.g., using `encodeURIComponent`.
+### 文档标识符
+如果您的文档标识符包含斜杠 (`/`)，请将其编码为 `%2F`，例如，使用 `encodeURIComponent`。
 
-## API endpoints overview
+## API 端点概述
 
-Access the Collaboration Management API to manage your documents efficiently. For a comprehensive view of all endpoints across Tiptap products, explore our [Postman Collection](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/collection/33042171-cc186a66-df41-4df8-9c6e-e91b20deffe5?action=share&creator=32651125), which includes detailed examples and configurations.
+访问协作管理 API 以高效管理您的文档。有关 Tiptap 产品中所有端点的全面视图，请查看我们的 [Postman 集合](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/collection/33042171-cc186a66-df41-4df8-9c6e-e91b20deffe5?action=share&creator=32651125)，其中包括详细示例和配置。
 
-| Operation          | Method     | Endpoint                                     | Description                                                                    |
+| 操作                | 方法       | 端点                                         | 描述                                                                           |
 | ------------------ | ---------- | -------------------------------------------- | ------------------------------------------------------------------------------ |
-| Create Document    | POST       | `/api/documents/:identifier`                 | Create a document using a `yjs` or `json` update message.                                  |
-| Batch Import Documents | PUT    | `/api/admin/batch-import`                    | Import multiple documents in bulk.                                             |
-| Get Document       | GET        | `/api/documents/:identifier`                 | Export a document in `json` or `yjs` format.                                   |
-| List Documents     | GET        | `/api/documents`                             | Retrieve a list of all documents with pagination options.                      |
-| Duplicate Document | POST + GET | `/api/documents/:identifier` (GET then POST) | Duplicate a document by retrieving it and then creating it with a new identifier. |
-| Encrypt Document   | POST       | `/api/documents/:identifier/encrypt`         | Encrypt a document using Base64.                                               |
-| Revert to Version  | POST       | `/api/documents/:identifier/versions`        | Import multiple documents in bulk.                                             |
-| Update Document    | PATCH      | `/api/documents/:identifier`                 | Apply a Yjs update message to an existing document.                            |
-| Delete Document    | DELETE     | `/api/documents/:identifier`                 | Delete a document from the server.                                             |
-| Search Documents     | POST     | `/api/search`                                | Execute a search on all documents.                                             |
+| 创建文档           | POST       | `/api/documents/:identifier`                 | 使用 `yjs` 或 `json` 更新消息创建文档。                                        |
+| 批量导入文档       | PUT        | `/api/admin/batch-import`                    | 批量导入多个文档。                                                            |
+| 获取文档           | GET        | `/api/documents/:identifier`                 | 以 `json` 或 `yjs` 格式导出文档。                                             |
+| 列出文档           | GET        | `/api/documents`                             | 检索带有分页选项的所有文档列表。                                              |
+| 复制文档           | POST + GET | `/api/documents/:identifier` (GET 然后 POST) | 通过检索文档然后使用新标识符创建文档来复制文档。                             |
+| 加密文档           | POST       | `/api/documents/:identifier/encrypt`         | 使用 Base64 加密文档。                                                       |
+| 回退到版本         | POST       | `/api/documents/:identifier/versions`        | 批量导入多个文档。                                                            |
+| 更新文档           | PATCH      | `/api/documents/:identifier`                 | 将 Yjs 更新消息应用于现有文档。                                              |
+| 删除文档           | DELETE     | `/api/documents/:identifier`                 | 从服务器中删除文档。                                                          |
+| 搜索文档           | POST       | `/api/search`                                | 对所有文档执行搜索。                                                          |
 
-Take a look at the [metrics and statistics endpoints](/collaboration/operations/metrics) as well!
+同时查看 [指标和统计端点](/collaboration/operations/metrics)!
 
-## Create a document
+## 创建文档
 
 ```bash
 POST /api/documents/:identifier
 ```
 
-This call lets you create a document using [binary Yjs](/collaboration/getting-started/overview#about-yjs) or JSON format (default: `yjs`). It can be used to seed documents before a user connects to the Tiptap Collaboration server.
+此调用允许您使用 [二进制 Yjs](/collaboration/getting-started/overview#about-yjs) 或 JSON 格式（默认：`yjs`）创建文档。它可用于在用户连接到 Tiptap 协作服务器之前预置文档。
 
-The endpoint returns HTTP status `204` if the document is created successfully, or `409`
-if the document already exists. To overwrite an existing document, you must [delete it](/collaboration/documents/rest-api#delete-a-document) first.
+如果文档成功创建，该端点返回 HTTP 状态 `204`，如果文档已存在，则返回 `409`。要覆盖现有文档，您必须首先 [删除它](/collaboration/documents/rest-api#delete-a-document)。
 
-- **Yjs format**: To create a document using a Yjs binary update message, first encode the Yjs document using `Y.encodeStateAsUpdate`. 
+- **Yjs 格式**：要使用 Yjs 二进制更新消息创建文档，首先使用 `Y.encodeStateAsUpdate` 编码 Yjs 文档。
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \
@@ -76,7 +74,7 @@ curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_
 --data '@yjsUpdate.binary.txt'
 ```
 
-- **JSON format**: To create a document using JSON, pass the query parameter `format=json` and include the document's content in the Tiptap JSON format.
+- **JSON 格式**：要使用 JSON 创建文档，传递查询参数 `format=json` 并在 Tiptap JSON 格式中包含文档的内容。
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json' \
@@ -90,24 +88,23 @@ curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_
         "content": [
           {
             "type": "text",
-            "text": "This is your content."
+            "text": "这是您的内容。"
           }
         ]
       }
     ]
 }'
-
 ```
 
-## Batch import documents
+## 批量导入文档
 
 ```bash
 PUT /api/admin/batch-import
 ```
 
-This call lets you import multiple documents in bulk using a predefined JSON structure. Each document must include its metadata (such as created_at, name, and version) and its content in the Tiptap JSON format.
+此调用允许您使用预定义的 JSON 结构批量导入多个文档。每个文档必须包含其元数据（如 created_at、name 和 version）以及 Tiptap JSON 格式的内容。
 
-The endpoint returns HTTP status `204` if the documents are imported successfully, or `400` if the request contains invalid data.
+如果文档成功导入，该端点返回 HTTP 状态 `204`，如果请求包含无效数据，则返回 `400`。
 
 ```bash
 curl --location --request PUT 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin/batch-import' \
@@ -118,13 +115,13 @@ curl --location --request PUT 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin
             "created_at": "2024-05-01T10:00:00Z",
             "version": 0,
             "name": "document-1",
-            "tiptap_json": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Text of document-1: v0"}]}]}
+            "tiptap_json": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "文档-1 的文本：v0"}]}]}
         },
         {
             "created_at": "2024-05-01T11:00:00Z",
             "version": 1,
             "name": "document-1",
-            "tiptap_json": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Text of document-1: v1"}]}]}
+            "tiptap_json": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "文档-1 的文本：v1"}]}]}
         }
     ],
     [
@@ -132,41 +129,36 @@ curl --location --request PUT 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin
             "created_at": "2024-06-01T10:00:00Z",
             "version": 0,
             "name": "document-2",
-            "tiptap_json": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Text of document-2: v0"}]}]}
+            "tiptap_json": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "文档-2 的文本：v0"}]}]}
         },
         {
             "created_at": "2024-06-01T11:00:00Z",
             "version": 1,
             "name": "document-2",
-            "tiptap_json": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Text of document-2: v1"}]}]}
+            "tiptap_json": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "文档-2 的文本：v1"}]}]}
         }
     ]
 ]'
-
 ```
 
-## Get a document
+## 获取文档
 
 ```bash
 GET /api/documents/:identifier?format=:format&fragment=:fragment
 ```
 
-This call lets you export the specified document with all fragments in JSON or Yjs format. If the document is currently open on your
-server, we will return the in-memory version; otherwise, we read from the database.
+此调用允许您以 JSON 或 Yjs 格式导出指定文档及其所有片段。如果文档当前在您的服务器上打开，我们将返回内存中的版本；否则，我们将从数据库读取。
 
-- `format` supports either `yjs`, `base64`, `text`, or `json` (default: `json`). If you choose the `yjs` format, you'll get the binary Yjs update message created
-with `Y.encodeStateAsUpdate`.
+- `format` 支持 `yjs`、`base64`、`text` 或 `json`（默认：`json`）。如果您选择 `yjs` 格式，您将获得使用 `Y.encodeStateAsUpdate` 创建的二进制 Yjs 更新消息。
 
-- `fragment` can be an array (e.g., `fragment=a&fragment=b`) or a single fragment you want to
-export. By default, we only export the `default` fragment. This parameter is only applicable when using
-the `json` or `text`format; with `yjs`, you'll always get the entire Yjs document.
+- `fragment` 可以是一个数组（例如，`fragment=a&fragment=b`）或您想要导出的单个片段。默认情况下，我们只导出 `default` 片段。此参数仅在使用 `json` 或 `text` 格式时适用；在使用 `yjs` 时，您将始终获得整个 Yjs 文档。
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
 ```
 
-  When using `axios`, you need to specify `responseType: arraybuffer` in the request options.
+当使用 `axios` 时，您需要在请求选项中指定 `responseType: arraybuffer`。
 
 ```typescript
 import * as Y from 'yjs'
@@ -186,7 +178,7 @@ const axiosResult = await axios.get(
 Y.applyUpdate(ydoc, axiosResult.data)
 ```
 
-When using `node-fetch`, you need to use `.arrayBuffer()` and create a Buffer from it:
+当使用 `node-fetch` 时，您需要使用 `.arrayBuffer()` 并从中创建一个 Buffer：
 
 ```typescript
 import * as Y from 'yjs'
@@ -202,28 +194,25 @@ const fetchResult = await fetch(
   },
 )
 
-Y.applyUpdate(ydoc, Buffer.from(await docUpdateAsBinaryResponse.arrayBuffer()))
+Y.applyUpdate(ydoc, Buffer.from(await fetchResult.arrayBuffer()))
 ```
 
-## List documents
+## 列出文档
 
 ```bash
 GET /api/documents?take=100&skip=0
 ```
 
-This call returns a paginated list of all documents in storage. By default, we return the first
-100 documents. Pass `take` and `skip` parameters to adjust pagination.
+此调用返回存储中所有文档的分页列表。默认情况下，我们返回前 100 个文档。传递 `take` 和 `skip` 参数以调整分页。
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents' \
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
 ```
 
+## 复制文档
 
-## Duplicate a document
-
-This call lets you copy or duplicate a document. First, retrieve the document using the `GET` endpoint and then create a new one with the
-`POST` call. Here's an example in typescript:
+此调用允许您复制或重复文档。首先，使用 `GET` 端点检索文档，然后使用 `POST` 调用创建一个新文档。以下是 TypeScript 的示例：
 
 ```typescript
 const docUpdateAsBinaryResponse = await axios.get(
@@ -247,15 +236,15 @@ await axios.post(
 )
 ```
 
-## Encrypt a document
+## 加密文档
 
 ```bash
 POST /api/documents/:identifier/encrypt
 ```
 
-This call lets you encrypt a document with the specified identifier using Base64 encryption.
+此调用允许您使用 Base64 加密指定标识符的文档。
 
-The endpoint returns HTTP status `204` if the document is successfully encrypted, or `404` if the document does not exist.
+如果文档成功加密，该端点返回 HTTP 状态 `204`，如果文档不存在，则返回 `404`。
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME/encrypt' \
@@ -272,7 +261,7 @@ curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_
         },
         "content": [
           {
-            "text": "the entire document is replaced by this (except if you changed the mode parameter to '\''append'\'')",
+            "text": "整个文档将被替换为此（除非您将模式参数更改为 '\''append'\''）",
             "type": "text"
           }
         ]
@@ -281,34 +270,31 @@ curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_
   }'
 ```
 
-## Revert to version
+## 回退到版本
 
 ```bash
 POST /api/documents/:identifier/versions
 ```
 
-This call lets you revert a document to a specific previous version by applying an update that corresponds to a prior state of the document. You must specify the version to revert to in the request body.
+此调用允许您通过应用与文档的先前状态相对应的更新将文档回退到特定的先前版本。您必须在请求体中指定要回退到的版本。
 
-The endpoint returns HTTP status `204` if the document is successfully reverted, or `404` if the document or version is not found.
+如果文档成功回退，该端点返回 HTTP 状态 `204`，如果文档或版本未找到，则返回 `404`。
 
 ```bash
 curl --location --request POST 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME/versions/VERSION_ID/revertTo' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
-
 ```
 
-
-## Update a document
+## 更新文档
 
 ```bash
 PATCH /api/documents/:identifier
 ```
 
-This call accepts a Yjs update message and applies it to the existing document on the server.
+此调用接受一个 Yjs 更新消息并将其应用于服务器上现有文档。
 
-The endpoint returns the HTTP status `204` if the document was updated successfully, `404` if
-the document does not exist, or `422` if the payload is invalid or the update cannot be applied.
+如果文档成功更新，该端点返回 HTTP 状态 `204`，如果文档不存在，则返回 `404`，如果有效负载无效或无法应用更新，则返回 `422`。
 
 ```bash
 curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \
@@ -316,62 +302,59 @@ curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/doc
 --data '@yjsUpdate.binary.txt'
 ```
 
-The API endpoint also supports JSON document updates, document history for tracking changes without replacing the entire document, and node-specific updates.
+API 端点还支持 JSON 文档更新、用于跟踪更改的文档历史记录以及特定节点的更新。
 
-For more detailed information on manipulating documents using JSON instead of Yjs, refer to our [Content injection](/collaboration/documents/content-injection) page.
+有关使用 JSON 而不是 Yjs 操作文档的更详细信息，请参阅我们的 [内容注入](/collaboration/documents/content-injection) 页面。
 
-## Delete a document
+## 删除文档
 
 ```bash
 DELETE /api/documents/:identifier
 ```
 
-This call deletes a document from the server after closing any open connection to the document.
+此调用在关闭与文档的任何连接后从服务器中删除文档。
 
-It returns either HTTP status `204` if the document was deleted successfully, or `404` if the
-document was not found.
+如果文档成功删除，它返回 HTTP 状态 `204`，如果文档未找到，则返回 `404`。
 
 ```bash
 curl --location --request DELETE 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
 ```
 
-<Callout title="Document persists after deletion" variant="hint">
-  If the endpoint returns `204` but the document still exists, make sure that no user is re-creating the document from the provider. We close all connections before deleting a document, but your error handling might recreate the provider, thus creating the document again.
+<Callout title="删除后文档仍然存在" variant="hint">
+  如果端点返回 `204` 但文档仍然存在，请确保没有用户正在从提供者重新创建文档。在删除文档之前，我们会关闭所有连接，但您的错误处理可能会重新创建提供者，从而再次创建文档。
 </Callout>
 
-
-## Search documents
+## 搜索文档
 
 ```bash
 POST /api/search
 ```
 
-When [Tiptap Semantic Search](/collaboration/documents/semantic-search) is enabled, you can perform contextually aware searches across all your documents.
+当 [Tiptap 语义搜索](/collaboration/documents/semantic-search) 启用时，您可以在所有文档中执行上下文相关的搜索。
 
-<Callout title="Keeping your API key secret" variant="hint">
-  Please handle the search requests in your backend to keep your API
-  key secret. Consider enforcing rate limits in your application as necessary.
+<Callout title="保持您的 API 密钥秘密" variant="hint">
+  请在后端处理搜索请求以保持您的 API 密钥安全。考虑根据需要在您的应用程序中强制执行速率限制。
 </Callout>
 
-### Query parameters
+### 查询参数
 
-You can use the following query parameters to adjust the search results:
+您可以使用以下查询参数来调整搜索结果：
 
-| Query parameter | Type  | Default | Description                                                                       |
-| --------------- | ----- | ------- | --------------------------------------------------------------------------------- |
-| `threshold`     | float | `0.5`   | Describes the similarity factor of documents. The value can be between `0` an `1`. |
-| `limit`         | int   | `20`    | Limit the number of results. The value can be between `1` an `100`.                |
+| 查询参数        | 类型   | 默认    | 描述                                                                   |
+| --------------- | ------ | ------- | ---------------------------------------------------------------------- |
+| `threshold`     | float  | `0.5`   | 描述文档的相似性因子。值可以在 `0` 和 `1` 之间。                       |
+| `limit`         | int    | `20`    | 限制结果数。值可以在 `1` 和 `100` 之间。                               |
 
-### Body parameters
+### 请求体参数
 
-| Body parameter | Type   | Default | Description      |
-| -------------- | ------ | ------- | ---------------- |
-| `content`      | string | -       | Your search terms. |
+| 请求体参数     | 类型    | 默认    | 描述         |
+| --------------- | ------- | ------- | ------------- |
+| `content`       | string  | -       | 您的搜索词。 |
 
 ```bash
 curl -X POST https://YOUR_APP_ID.collab.tiptap.cloud/api/search \
   -H "Authorization: YOUR_SECRET_FROM_SETTINGS_AREA" \
   -H "Content-Type: application/json" \
-  -d '{"content": "Your search terms"}'
+  -d '{"content": "您的搜索词"}'
 ```

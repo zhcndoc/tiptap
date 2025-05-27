@@ -1,9 +1,9 @@
 ---
-title: Export .docx from your editor
+title: 从编辑器导出 .docx
 meta:
-    title: Export DOCX | Tiptap Conversion
-    description: Learn how to export Tiptap editor content to DOCX (Word) files using the Export extension in our docs.
-    category: Conversion
+    title: 导出 DOCX | Tiptap 转换
+    description: 学习如何使用我们的文档中的导出扩展将 Tiptap 编辑器内容导出为 DOCX（Word）文件。
+    category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -11,197 +11,196 @@ import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅一个 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Install from private registry">
-        To install this frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 的说明认证到 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
 <CodeDemo src="https://develop--tiptap-pro.netlify.app/preview/Extensions/ExportDocx" />
 
-Use Tiptap’s `@tiptap-pro/extension-export-docx` to export the editor's content as a `.docx` file. This extension integrates `DOCX` export functionality into your editor.
+使用 Tiptap 的 `@tiptap-pro/extension-export-docx` 将编辑器的内容导出为 `.docx` 文件。此扩展将 `DOCX` 导出功能集成到您的编辑器中。
 
-You can use this extension under any JavaScript environment, including server-side applications due to the isomorphic nature of the `exportDocx` function.
+您可以在任何 JavaScript 环境下使用此扩展，包括由于 `exportDocx` 函数的同构特性而支持的服务器端应用程序。
 
-You can also use the [REST API](/conversion/import-export/docx/rest-api) instead if you'd prefer to handle the conversion on our end.
+如果您更喜欢在我们的端处理转换，您还可以使用 [REST API](/conversion/import-export/docx/rest-api)。
 
-By default, the extension maps Tiptap nodes to DOCX elements. If your content includes custom nodes, configure their [export behavior](/conversion/import-export/docx/custom-node-conversion) to ensure they’re properly converted.
+默认情况下，此扩展将 Tiptap 节点映射到 DOCX 元素。如果您的内容包含自定义节点，请配置其 [导出行为](/conversion/import-export/docx/custom-node-conversion) 以确保它们能被正确转换。
 
-<Callout title="Integrate or test Conversion" variant="warning">
-    To test or integrate this feature you need an [active trial or Tiptap subscription](https://cloud.tiptap.dev/v2/billing).
+<Callout title="集成或测试转换" variant="warning">
+    要测试或集成此功能，您需要一个 [有效的试用或 Tiptap 订阅](https://cloud.tiptap.dev/v2/billing)。
 </Callout>
 
-## Install the DOCX Export extension
+## 安装 DOCX 导出扩展
 
-The Conversion extensions are published in Tiptap’s private npm registry. Integrate the extensions by following the [private registry guide](/guides/pro-extensions).
+转换扩展发布在 Tiptap 的私有 npm 注册表中。通过遵循 [私有注册表指南](/guides/pro-extensions) 集成这些扩展。
 
-Once done you can install and import the **Export DOCX** extension package
+完成后，您可以安装并导入 **Export DOCX** 扩展包
 
 ```bash
 npm i @tiptap-pro/extension-export-docx
 ```
 
-Using the export extension does not require any Tiptap Conversion credentials, since the conversion is handled right away in the extension.
+使用导出扩展不需要任何 Tiptap 转换凭据，因为转换在扩展中立即处理。
 
 ```js
 import { ExportDocx } from '@tiptap-pro/extension-export-docx'
 ```
 
-## Configuring the extension
+## 配置扩展
 
-The `ExportDocx` extension can be configured with an `ExportDocxOptions` (`object`) as an argument to the `configure` method with the following properties:
+`ExportDocx` 扩展可以使用 `ExportDocxOptions` （`object`）作为 `configure` 方法的参数来配置，具有以下属性：
 
 ```ts
-// Import the ExportDocx extension
+// 导入 ExportDocx 扩展
 import { ExportDocx } from '@tiptap-pro/extension-export-docx'
 
 const editor = new Editor({
   extensions: [
-    // Other extensions ...
+    // 其他扩展 ...
     ExportDocx.configure({
-      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => void, // required
-      exportType: 'blob', // optional. Default: 'blob'
-      customNodes: [], // optional. Default: []
-      styleOverrides: {}, // optional. Default: {}
+      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => void, // 必需
+      exportType: 'blob', // 可选。默认: 'blob'
+      customNodes: [], // 可选。默认: []
+      styleOverrides: {}, // 可选。默认: {}
     }),
-    // Other extensions ...
+    // 其他扩展 ...
   ],
-  // Other editor settings ...
+  // 其他编辑器设置 ...
 })
 ```
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| onCompleteExport | A **required** callback function that receives the exported data. You can then handle the data as needed (e.g., prompt a file download) | `N/A` |
-| options | An object to configure some parts of the export:<br/><br/>**exportType**: The type of data returned by the method:<br/>- **buffer**: Returns a Node.js `Buffer` (server-side only)<br/>- **stream**: Returns a Node.js `Stream` (server-side only)<br/>- **string**: Returns a `String`<br/>- **blob**: Returns a `Blob` | `blob` |
-| customNodes | An array of custom node definitions. If your content includes custom nodes, pass their definitions here to ensure they're properly converted | `[]` |
-| styleOverrides | An object with custom styles to apply to the exported document. Use this to override the default export styles | `{}` |
+| 参数 | 描述 | 默认 |
+|------|------|------|
+| onCompleteExport | 一个 **必需** 的回调函数，接收导出的数据。您可以根据需要处理数据（例如，提示文件下载） | `N/A` |
+| options | 一个对象，用于配置导出的某些部分：<br/><br/>**exportType**：方法返回的数据类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅限服务器端）<br/>- **stream**：返回 Node.js `Stream`（仅限服务器端）<br/>- **string**：返回一个 `String`<br/>- **blob**：返回一个 `Blob` | `blob` |
+| customNodes | 自定义节点定义的数组。如果您的内容包含自定义节点，请将其定义传递到这里，以确保它们能被正确转换 | `[]` |
+| styleOverrides | 一个对象，包含要应用于导出文档的自定义样式。使用此选项覆盖默认导出样式 | `{}` |
 
 
-## Export a DOCX file
-With the extension installed, you can convert your editor’s content to `.docx`.
+## 导出 DOCX 文件
+安装扩展后，您可以将编辑器的内容转换为 `.docx`。
 
-Before diving into an example, let's take a look into the signature of the `exportDocx` method available in your editor's commands:
+在提供一个示例之前，让我们先看一下可在编辑器命令中使用的 `exportDocx` 方法的签名：
 
 ```ts
 /**
-* Export the current document as a .docx file
+* 导出当前文档为 .docx 文件
 *
-* Notes: 'buffer' and 'stream' export types are only available in the server environment
-* as they use the Node Buffer and Stream APIs respectively
+* 注意：'buffer' 和 'stream' 导出类型仅在服务器环境中可用
+* 因为它们分别使用 Node Buffer 和 Stream API
 *
-* @param onCompleteExport - Callback function to handle the exported file
-* @param options - Export options
-* @param customNodes - Custom node definitions to ensure proper conversion
-* @param styleOverrides - Custom styles to apply to the exported document
+* @param onCompleteExport - 回调函数以处理导出的文件
+* @param options - 导出选项
+* @param customNodes - 自定义节点定义，以确保正确转换
+* @param styleOverrides - 应用于导出文档的自定义样式
 * @example editor.commands.exportDocx((result) => {}, { exportType: 'buffer' }, [])
 *
 */
 exportDocx: (options?: ExportDocxOptions) => Promise<string | Buffer<ArrayBufferLike> | Blob | Stream>
 ```
 
-The `exportDocx` method takes an optional `ExportDocxOptions` (`object`) as an argument with the following properties that you can use to *override* the ones that you have configured with the `ExportDocx.configure` method:
+`exportDocx` 方法接受一个可选的 `ExportDocxOptions` （`object`）作为参数，具有以下属性，可以用来 *覆盖* 您通过 `ExportDocx.configure` 方法配置的属性：
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| onCompleteExport | A **required** callback function (if you haven't defined it in the configure extension call) that receives the exported data. You can then handle the data as needed (e.g., prompt a file download) | `N/A` |
-| options | An object to configure some parts of the export:<br/><br/>**exportType**: The type of data returned by the method:<br/>- **buffer**: Returns a Node.js `Buffer` (server-side only)<br/>- **stream**: Returns a Node.js `Stream` (server-side only)<br/>- **string**: Returns a `String`<br/>- **blob**: Returns a `Blob` | `blob` |
-| customNodes | An array of custom node definitions. If your content includes custom nodes, pass their definitions here to ensure they're properly converted | `[]` |
-| styleOverrides | An object with custom styles to apply to the exported document. Use this to override the default export styles | `{}` |
+| 参数 | 描述 | 默认 |
+|------|------|------|
+| onCompleteExport | 一个 **必需** 的回调函数（如果您未在配置扩展调用中定义）接收导出的数据。您可以根据需要处理数据（例如，提示文件下载） | `N/A` |
+| options | 一个对象，用于配置导出的某些部分：<br/><br/>**exportType**：方法返回的数据类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅限服务器端）<br/>- **stream**：返回 Node.js `Stream`（仅限服务器端）<br/>- **string**：返回一个 `String`<br/>- **blob**：返回一个 `Blob` | `blob` |
+| customNodes | 自定义节点定义的数组。如果您的内容包含自定义节点，请将其定义传递到这里，以确保它们能被正确转换 | `[]` |
+| styleOverrides | 一个对象，包含要应用于导出文档的自定义样式。使用此选项覆盖默认导出样式 | `{}` |
 
 ```js
-// Import the ExportDocx extension
+// 导入 ExportDocx 扩展
 import { ExportDocx } from '@tiptap-pro/extension-export-docx'
 
-// Setup you editor
+// 设置您的编辑器
 const editor = new Editor({
   extensions: [
-    // Other extensions ...
+    // 其他扩展 ...
     ExportDocx.configure({
-      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => {}, // required
-      exportType: 'blob', // optional. Default: 'blob'
-      customNodes: [], // optional. Default: []
-      styleOverrides: {}, // optional. Default: {}
+      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => {}, // 必需
+      exportType: 'blob', // 可选。默认: 'blob'
+      customNodes: [], // 可选。默认: []
+      styleOverrides: {}, // 可选。默认: {}
     }),
-    // Other extensions ...
+    // 其他扩展 ...
   ],
-  // Other editor settings ...
+  // 其他编辑器设置 ...
 })
 
-// Declare some functions that will call the exportDocx method from your editor
+// 声明一些将调用编辑器 exportDocx 方法的函数
 
 function handleExportDocx() {
-  // Call your editor's exportDocx method
+  // 调用您的编辑器的 exportDocx 方法
   editor
     .chain()
-    // Method call without any overrides
-    // It will take the configuration set in the configure method
+    // 方法调用，没有任何覆盖
+    // 将采用在配置方法中设置的配置
     .exportDocx()
     .run()
 }
 
 function handleExportDocxBuffer() {
-  // Call your editor's exportDocx method
+  // 调用您的编辑器的 exportDocx 方法
   editor
     .chain()
-    // Method call with some overrides
+    // 方法调用，带有一些覆盖
     .exportDocx({
-      // Override the onCompleteExport callback to handle the override exported type
+      // 覆盖 onCompleteExport 回调以处理覆盖的导出类型
       onCompleteExport: (result: Buffer) => {
-        // Handle the exported file in a buffer format
+        // 处理以缓冲格式导出的文件
       },
-      // Override the export type
+      // 覆盖导出类型
       exportType: 'Buffer',
     })
     .run()
 }
 
-// Call those functions at any point in your application
+// 在您的应用程序的任何点调用这些函数
 handleExportDocx()
 handleExportDocxBuffer()
 ```
 
-### How it works
+### 工作原理
 
-The above example runs entirely in the browser, generating a DOCX Blob via the ExportDocx extension since it's the default value for the `exportType` as we haven't override it. We then programmatically download the file. You can adjust this logic, for instance, to send the blob to a server instead of downloading.
+上述示例完全在浏览器中运行，通过 ExportDocx 扩展生成一个 DOCX Blob，因为在导出类型中没有任何覆盖，因此它是默认值。然后我们以编程方式下载该文件。您可以调整此逻辑，例如，将 blob 发送到服务器而不是下载。
 
-| Parameter | Description |
-|-----------|-------------|
-| onCompleteExport | When the conversion completes, we will get the `result` of the conversion as the main and only argument to the callback function which, in this case, it would be a `Blob` since we've declared that we wanted this type in the `exportType` within the `options` parameter. You can then handle it however you prefer, e.g. prompting a file download, like we showcased in the example above. |
-| exportType | We're using the default `blob` so the conversion returns a `Blob`. |
-| customNodes | We won't provide any custom node mapping since we are not providing any custom nodes. |
-| styleOverrides | We won't provide any style overrides, and therefore, a default `DOCX` style is set following some common guideliness from Microsoft Word defaults and they will be applied to the exported document. |
+| 参数 | 描述 |
+|------|------|
+| onCompleteExport | 当转换完成时，我们将获得转换的 `result`，作为回调函数的主要和唯一的参数，在这种情况下，它将是一个 `Blob`，因为我们在 `options` 参数中的 `exportType` 中声明了我们想要这种类型。您可以根据需要处理它，例如提示文件下载，如我们在上面的示例中展示的那样。 |
+| exportType | 我们使用默认的 `blob`，因此转换返回一个 `Blob`。 |
+| customNodes | 我们不会提供任何自定义节点映射，因为我们没有提供任何自定义节点。 |
+| styleOverrides | 我们不会提供任何样式覆盖，因此将应用 Microsoft Word 默认设置的一些通用指南下的默认 `DOCX` 样式到导出文档。 |
 
-## Server-side export
+## 服务器端导出
 
-For applications requiring complex document generation or to reduce client-side bundle size, you can export `.docx` files in your the server.
+对于需要复杂文档生成或减少客户端包大小的应用，您可以在服务器上导出 `.docx` 文件。
 
-In order to do so, you'd need to import the `exportDocx` function from the `@tiptap-pro/extension-export-docx` package, pass it your Tiptap JSON content, and return the resulting conversion to the client.
+为此，您需要从 `@tiptap-pro/extension-export-docx` 包中导入 `exportDocx` 函数，将 Tiptap JSON 内容传递给它，并将结果转换返回给客户端。
 
-Let's first take a look into the `exportDocx` function signature:
+让我们先看一下 `exportDocx` 函数的签名：
 
 ```ts
 /**
- * Export the current document as a .docx file
+ * 导出当前文档为 .docx 文件
  *
- * Notes: 'buffer' and 'stream' export types are only available in the server environment
- * as they use the Node Buffer and Stream APIs respectively
+ * 注意：'buffer' 和 'stream' 导出类型仅在服务器环境中可用
+ * 因为它们分别使用 Node Buffer 和 Stream API
  *
- * @param options.document - The JSON representation of the document
- * @param options.exportType - The type of export to perform
- * @param options.customNodes - Custom node definitions
- * @param options.styleOverrides - Style overrides for the exported document
+ * @param options.document - 文档的 JSON 表示
+ * @param options.exportType - 要执行的导出类型
+ * @param options.customNodes - 自定义节点定义
+ * @param options.styleOverrides - 导出文档的样式覆盖
  * @example exportDocx({ document: editor.getJSON(), exportType: 'blob', customNodes: [], styleOverrides: {} })
  */
 async function exportDocx ({ document, exportType, customNodes, styleOverrides }: ExportDocxOptions) {}
 ```
 
-The `exportDocx` function will return a `docx` document ready and converted to any format that .
+`exportDocx` 函数将返回一个准备好的 DOCX 文档，并转换为任何格式。
 
-Here you have a simple example using `Express` and `@tiptap-pro/extension-export-docx` on the server-side:
-
+这里有一个使用 `Express` 和 `@tiptap-pro/extension-export-docx` 在服务器端的简单示例：
 
 ```ts
 import { exportDocx } from '@tiptap-pro/extension-export-docx'
@@ -211,13 +210,13 @@ const app = express()
 
 app.post('/export-docx', async (req, res) => {
   try {
-    // Get Tiptap JSON content from the request or from your database
+    // 从请求中获取 Tiptap JSON 内容或从数据库中获取
     const { content } = req.body
 
-    // Convert Tiptap JSON to DOCX
+    // 将 Tiptap JSON 转换为 DOCX
     const docxBuffer = await exportDocx({ document: content })
 
-    // Send as a downloadable file
+    // 作为可下载文件发送
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     res.setHeader('Content-Disposition', 'attachment; filename="document.docx"')
     res.send(docxBuffer)
@@ -227,29 +226,29 @@ app.post('/export-docx', async (req, res) => {
 })
 ```
 
-## Support & Limitations
+## 支持与限制
 
-Exporting `.docx` files from Tiptap JSON provides a way to handle most standard Word content, but **it’s not a one-to-one mapping** due to inherent differences between DOCX formatting and Tiptap’s CSS-based styles.
+从 Tiptap JSON 导出 `.docx` 文件提供了一种处理大多数标准 Word 内容的方法，但由于 DOCX 格式和 Tiptap 基于 CSS 的样式之间固有的差异，**这并不是一对一的映射**。
 
-Currently supported features and known limitations:
+当前支持的功能和已知的限制：
 
-| **Feature**                      | **Support**                                                                |
-|----------------------------------|----------------------------------------------------------------------------|
-| **Text content**                 | ✓ Basic text, spacing, punctuation                                         |
-| **Text formatting**              | ✓ Bold, italic, underline, strikethrough, alignment, line height           |
-| **Block elements**               | ✓ Paragraphs, headings (1–6), blockquotes, ordered and unordered lists     |
-| **Tables**                       | ✓ Basic structure, header rows, colspan                                    |
-| **Links**                        | ✓ Hyperlinks                                                               |
-| **Media (Images)**               | ✓ Embedded images, size preserved                                          |
-| **Styles**                       | ✓ Font families*, Font colors, font sizes, background colors, line heights |
-| **Headers & Footers**            | ~ In development                                                           |
-| **Sections & Page Breaks**       | ~ In development                                                           |
-| **Footnotes & Endnotes**         | ~ In development                                                           |
-| **Math**                         | ~ In development                                                           |
-| **Comments & Revisions**         | ✗                                                                          |
-| **Table of Contents**            | ✗                                                                          |
-| **Advanced Formatting**          | ✗ Columns, text direction, forms, macros, embedded scripts                 |
-| **Metadata**                     | ✗                                                                          |
-| **Text Boxes, Shapes, SmartArt** | ✗                                                                          |
+| **功能**                        | **支持**                                                                |
+|---------------------------------|-------------------------------------------------------------------------|
+| **文本内容**                    | ✓ 基本文本、间距、标点                                                  |
+| **文本格式**                    | ✓ 粗体、斜体、下划线、删除线、对齐、行高                                |
+| **块元素**                      | ✓ 段落、标题（1–6）、引用、排序和无序列表                               |
+| **表格**                        | ✓ 基本结构、表头行、跨列                                             |
+| **链接**                        | ✓ 超链接                                                               |
+| **媒体（图片）**                | ✓ 嵌入图像、大小保持                                                 |
+| **样式**                        | ✓ 字体系列*、字体颜色、字体大小、背景颜色、行高                       |
+| **页眉和页脚**                  | ~ 开发中                                                                |
+| **部分和分页**                  | ~ 开发中                                                                |
+| **脚注和尾注**                  | ~ 开发中                                                                |
+| **数学**                        | ~ 开发中                                                                |
+| **评论和修订**                  | ✗                                                                       |
+| **目录**                        | ✗                                                                       |
+| **高级格式**                    | ✗ 列、文本方向、表单、宏、嵌入脚本                                     |
+| **元数据**                      | ✗                                                                       |
+| **文本框、形状、智能艺术**      | ✗                                                                       |
 
-<span style={{fontSize: '1rem'}}>* Font families are supported as long as the target font is installed on the operative system when the `.docx` file is opened.</span>
+<span style={{fontSize: '1rem'}}>* 字体系列被支持，前提是目标字体在打开 `.docx` 文件时已安装在操作系统上。</span>

@@ -1,18 +1,18 @@
 ---
-title: Add an emoji dropdown menu
+title: 添加一个表情符号下拉菜单
 meta:
-  title: Emoji dropdown | Tiptap UI Component
-  description: Add a dropdown menu that inserts emoji characters into the Tiptap editor. More in the docs!
-  category: UI Components
+  title: 表情符号下拉 | Tiptap UI 组件
+  description: 添加一个下拉菜单，将表情符号插入到 Tiptap 编辑器中。更多请查看文档！
+  category: UI 组件
 ---
 
-## Install
+## 安装
 
 ```bash
 npx @tiptap/cli add emoji-dropdown-menu
 ```
 
-## Usage
+## 使用
 
 ```tsx
 import { EmojiDropdownMenu } from '@/components/tiptap-ui/emoji-dropdown-menu'
@@ -22,9 +22,9 @@ import { Emoji } from '@tiptap-pro/extension-emoji'
 export default function MyEditor() {
   const editor = useEditor({
     extensions: [
-      // other extensions
+      // 其他扩展
       Emoji.configure({
-        // emoji configuration
+        // 表情符号配置
       }),
     ],
   })
@@ -38,26 +38,26 @@ export default function MyEditor() {
 }
 ```
 
-## Props
+## 属性
 
-| Name            | Type           | Default                      | Description                |
-| --------------- | -------------- | ---------------------------- | -------------------------- |
-| editor          | Editor \| null | null                         | The Tiptap editor instance |
-| floatingOptions | object         | -                            | Options for floating UI    |
-| selector        | string         | 'tiptap-emoji-dropdown-menu' | Selector for the target    |
-| char            | string         | ':'                          | Emoji character            |
+| 名称            | 类型           | 默认值                       | 描述                      |
+| --------------- | -------------- | ---------------------------- | ------------------------- |
+| editor          | Editor \| null | null                         | Tiptap 编辑器实例        |
+| floatingOptions | object         | -                            | 浮动 UI 的选项           |
+| selector        | string         | 'tiptap-emoji-dropdown-menu' | 目标选择器               |
+| char            | string         | ':'                          | 表情符号字符             |
 
-## Requirements
+## 需求
 
-Used reference components
+使用的参考组件
 
 - `suggestion-menu` (ui)
 - `emoji-menu` (ui)
 
-Open source feature(s)
+开源功能
 
 - `@tiptap/react`
 
-Pro feature(s)
+专业功能
 
 - `@tiptap-pro/extension-emoji`

@@ -1,14 +1,14 @@
 ---
-title: Drag Handle React extension
+title: 拖动手柄 React 扩展
 tags:
   - type: pro
 meta:
-  category: Editor
-  title: Drag Handle React | Tiptap Editor Docs
-  description: Enable dragging nodes around your React-based Tiptap Editor with the Drag Handle React Extension. Learn how to set it up here in the Docs!
+  category: 编辑器
+  title: 拖动手柄 React | Tiptap 编辑器文档
+  description: 使用拖动手柄 React 扩展在基于 React 的 Tiptap 编辑器中启用节点拖动功能。了解如何在文档中进行设置！
 extension:
-  name: Drag Handle React
-  description: Have you ever wanted to drag nodes around your react-based editor? Well, we did too.
+  name: 拖动手柄 React
+  description: 你是否曾想在基于 React 的编辑器中拖动节点？我们也想过。
   type: extension
   icon: GripVertical
   isPro: true
@@ -19,54 +19,50 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在你的账户中开始免费[试用](https://cloud.tiptap.dev/v2/billing)或订阅一个[Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Install from private registry">
-        To install this frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请通过遵循[设置指南](/guides/pro-extensions)来认证 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
+你是否曾想在基于 React 的编辑器中拖动节点？我们也想过——因此这里有一个扩展可以实现这个功能。
 
-
-Have you ever wanted to drag nodes around your react-based editor? Well, we did too—so here’s an extension for that.
-
-The `DragHandleReact` component allows you to easily handle dragging nodes around in the editor. You can define custom render functions, placement, and more.
-It essentially wraps the [DragHandle](/editor/extensions/functionality/drag-handle) extension in a React component that will automatically register/unregister the extension with the editor.
+`DragHandleReact` 组件允许你轻松处理在编辑器中拖动节点。你可以定义自定义渲染函数、放置位置等。
+它本质上是在一个 React 组件中包装了 [DragHandle](/editor/extensions/functionality/drag-handle) 扩展，该组件会自动向编辑器注册/注销扩展。
 
 <CodeDemo isPro path="/Extensions/DragHandle/" />
 
-## Install
+## 安装
 
-<Callout title="Set up access to Tiptap's private repository" variant="info">
-  Integrate this pro extension by registering for a free [Tiptap
-  account](https://cloud.tiptap.dev/register) and following our [access
-  guide](/guides/pro-extensions) to Tiptap’s private repository.
+<Callout title="设置访问 Tiptap 的私有仓库" variant="info">
+  通过注册一个免费的[Tiptap 账户](https://cloud.tiptap.dev/register)并遵循我们的[访问指南](/guides/pro-extensions)以访问 Tiptap 的私有仓库，集成此专业扩展。
 </Callout>
 
 ```bash
 npm install @tiptap-pro/extension-drag-handle-react@next @tiptap-pro/extension-drag-handle@next @tiptap-pro/extension-node-range@next @tiptap/extension-collaboration@next @tiptap/y-tiptap@next yjs y-protocols
 ```
 
-## Props
+## 属性
 
-All props follow the same structure as the [DragHandle](/editor/extensions/functionality/drag-handle) extension.
+所有属性遵循与 [DragHandle](/editor/extensions/functionality/drag-handle) 扩展相同的结构。
 
 ### children
 
-The content that should be displayed inside of the drag handle.
+应该显示在拖动手柄内部的内容。
 
 ```jsx
 <DragHandle>
-  <div>Drag Me!</div>
+  <div>拖动我！</div>
 </DragHandle>
 ```
 
 ### tippyOptions
 
-Options for tippy.js. You can pass any options that are available in the [tippy.js documentation](https://atomiks.github.io/tippyjs/v6/all-props/).
+tippy.js 的选项。你可以传递在 [tippy.js 文档](https://atomiks.github.io/tippyjs/v6/all-props/)中可用的任何选项。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```jsx
 <DragHandle
@@ -74,15 +70,15 @@ Default: `undefined`
     placement: 'left',
   }}
 >
-  <div>Drag Me!</div>
+  <div>拖动我！</div>
 </DragHandle>
 ```
 
 ### onNodeChange
 
-Returns a node or null when a node is hovered over. This can be used to highlight the node that is currently hovered over.
+当节点被悬停时返回一个节点或 null。这可以用于高亮显示当前悬停的节点。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```jsx
 function Component() {
@@ -92,10 +88,10 @@ function Component() {
     <DragHandle
       onNodeChange={({ node, editor, pos }) => {
         setSelectedNode(node)
-        // do something with the node
+        // 对节点进行某些操作
       }}
     >
-      <div>Drag Me!</div>
+      <div>拖动我！</div>
     </DragHandle>
   )
 }
@@ -103,16 +99,16 @@ function Component() {
 
 ### pluginKey
 
-The key that should be used to store the plugin in the editor. This is useful if you have multiple drag handles in the same editor.
+在编辑器中存储插件时应使用的键。如果在同一个编辑器中有多个拖动手柄，这非常有用。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```jsx
 <DragHandle pluginKey="myCustomDragHandle">
-  <div>Drag Me!</div>
+  <div>拖动我！</div>
 </DragHandle>
 ```
 
-### Commands
+### 命令
 
-See the [DragHandle](/editor/extensions/functionality/drag-handle) extension for available editor commands.
+请参见 [DragHandle](/editor/extensions/functionality/drag-handle) 扩展以获取可用的编辑器命令。

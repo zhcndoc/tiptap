@@ -1,34 +1,33 @@
 ---
-title: Authenticate and authorize in Collaboration
+title: 在协作中进行身份验证和授权
 meta:
-  title: Auth Guide | Tiptap Collaboration Docs
-  description: Secure and manage access in your collaborative editor with JWTs, covering setup, testing, and production integration.
-  category: Collaboration
+  title: 身份验证指南 | Tiptap 协作文档
+  description: 通过 JWT 安全管理协作编辑器的访问权限，涵盖设置、测试和生产集成。
+  category: 协作
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-After setting up a collaborative editor in the installation guide, it's crucial to address authentication for longer-term use. The temporary JWT provided in your [Tiptap account](https://cloud.tiptap.dev/v2/configuration/document-server) is only suitable for brief testing sessions.
+在安装指南中设置协作编辑器之后，解决长时间使用的身份验证变得至关重要。您在 [Tiptap 账户](https://cloud.tiptap.dev/v2/configuration/document-server) 中提供的临时 JWT 仅适合短期测试会话。
 
-<Callout title="Need help with JWT?" variant="hint">
-  If you need assistance with setting up server-side JWT authentication, you can find guidance at
-  the [bottom of the page](#integrate-jwt-server-side).
+<Callout title="需要 JWT 帮助吗？" variant="hint">
+  如果您需要设置服务器端 JWT 身份验证的帮助，请在
+  [页面底部](#integrate-jwt-server-side) 寻找指导。
 </Callout>
 
-## Set up authorization
+## 设置授权
 
-Setting up the right access controls is important for keeping your documents secure and workflows smooth in Tiptap Collaboration.
+设置正确的访问控制对保持文档安全和工作流程顺畅在 Tiptap 协作中非常重要。
 
-This part of the guide walks you through how to use JSON Web Tokens (JWTs) to fine-tune who gets to see and edit what. Whether you need to give someone full access, restrict them to certain documents, or block access entirely, we've got you covered with minimalistic examples.
+本指南的这一部分将引导您如何使用 JSON Web Tokens (JWT) 精细化谁可以查看和编辑什么内容。无论您是否需要给予某人完全访问权限，限制他们查看某些文档，或者完全阻塞访问，我们都为您提供了简洁的示例。
 
-<Callout title="Caution" variant="warning">
-  If you exclude the `allowedDocumentNames` property from your JWT setup, users can access all
-  documents in your system!
+<Callout title="注意" variant="warning">
+  如果您在 JWT 设置中省略 `allowedDocumentNames` 属性，用户将可以访问系统中的所有文档！
 </Callout>
 
-### Allow full access to every document
+### 允许对每个文档的完全访问
 
-Omitting the `allowedDocumentNames` property from the JWT payload grants the user access to all documents. This is useful for users who need unrestricted access.
+从 JWT 有效载荷中省略 `allowedDocumentNames` 属性会授予用户访问所有文档的权限。这对于需要无限制访问的用户非常有用。
 
 ```typescript
 import jsonwebtoken from 'jsonwebtoken'
@@ -38,9 +37,9 @@ const data = { sub: 'your_local_user_identifier' }
 const jwt = jsonwebtoken.sign(data, 'your_secret')
 ```
 
-### Limit access to specific documents
+### 限制对特定文档的访问
 
-To restrict a user's access to specific documents, include those document names in the `allowedDocumentNames` array within the JWT payload. This ensures the user can only access the listed documents.
+要限制用户对特定文档的访问，请在 JWT 有效载荷中的 `allowedDocumentNames` 数组中包含这些文档的名称。这确保用户只能访问列出的文档。
 
 ```typescript
 import jsonwebtoken from 'jsonwebtoken'
@@ -53,9 +52,9 @@ const data = {
 const jwt = jsonwebtoken.sign(data, 'your_secret')
 ```
 
-### Block access to all documents
+### 阻止对所有文档的访问
 
-To prohibit a user from accessing any documents, provide an empty array for `allowedDocumentNames` in the JWT payload. This effectively blocks access to all documents, except if granted using `readonlyDocumentNames`.
+要禁止用户访问任何文档，请在 JWT 有效载荷中为 `allowedDocumentNames` 提供一个空数组。这有效阻止了对所有文档的访问，除非通过 `readonlyDocumentNames` 赋予访问权限。
 
 ```typescript
 import jsonwebtoken from 'jsonwebtoken'
@@ -68,35 +67,35 @@ const data = {
 const jwt = jsonwebtoken.sign(data, 'your_secret')
 ```
 
-## Set Read-Only access
+## 设置只读访问
 
-The `readonlyDocumentNames` property in your JWT setup plays a crucial role when you need to allow users to view documents without the ability to edit them. This feature is particularly useful in scenarios where you want to share information with team members for review or reference purposes but need to maintain the integrity of the original document.
+JWT 设置中的 `readonlyDocumentNames` 属性在需要让用户查看文档而不能编辑时起着至关重要的作用。此功能在您希望与团队成员共享信息以供审阅或参考时特别有用，但又需要保持原始文档的完整性。
 
-By specifying document names in the `readonlyDocumentNames` array, you grant users read-only access to those documents. Users can open and read the documents, but any attempts to modify the content will be restricted. This ensures that sensitive or critical information remains unchanged while still being accessible for necessary personnel.
+通过在 `readonlyDocumentNames` 数组中指定文档名称，您可以授予用户对这些文档的只读访问权限。用户可以打开并阅读这些文档，但任何尝试修改内容的行为都会受到限制。这确保了敏感或关键的信息在必要人员可以访问的同时保持不变。
 
-In this example, we grant read-only access to two documents, `annual-report-2024` and `policy-document-v3`. Users with this JWT can view these documents but cannot make any edits.
+在这个例子中，我们授予两个文档的只读访问权限，`annual-report-2024` 和 `policy-document-v3`。具有此 JWT 的用户可以查看这些文档，但不能进行任何编辑。
 
 ```typescript
 import jsonwebtoken from 'jsonwebtoken'
 
 const data = {
   sub: 'your_local_user_identifier',
-  allowedDocumentNames: ['annual-report-2024', 'policy-document-v3'], // or [] ; if you omit "allowedDocumentNames", the user has read-write to all documents, except the ones mentioned in readonlyDocumentNames (as mentioned above!),
+  allowedDocumentNames: ['annual-report-2024', 'policy-document-v3'], // 或者 [] ; 如果您省略 "allowedDocumentNames"，用户对所有文档具有读写权限，除了在 readonlyDocumentNames 中提到的文档（如上所述！），
   readonlyDocumentNames: ['annual-report-2024', 'policy-document-v3'],
 }
 
 const jwt = jsonwebtoken.sign(data, 'your_secret')
 ```
 
-Incorporating the `readonlyDocumentNames` property into your JWT strategy improves document security by ensuring that only authorized edits are made, preserving the integrity of your critical documents.
+将 `readonlyDocumentNames` 属性纳入您的 JWT 策略通过确保只有经过授权的编辑被进行，提高了文档安全性，从而保护了关键文档的完整性。
 
-## Authorize with Wildcards
+## 使用通配符授权
 
-Wildcards in JWTs offer a dynamic way to manage document access, allowing for broader permissions within specific criteria without listing each document individually. This method is particularly useful in scenarios where documents are grouped by certain attributes, such as projects or teams.
+JWT 中的通配符提供了一种动态管理文档访问权限的方法，允许在特定条件下更广泛的权限，而无需逐个列出每个文档。这种方法在文档按某些属性（例如项目或团队）分组的情况下特别有用。
 
-### Manage project-specific documents
+### 管理项目特定文档
 
-For teams working on multiple projects, it's essential to ensure that members have access only to the documents relevant to their current projects. By using project identifiers with wildcards, you can streamline access management.
+对于参与多个项目的团队，确保成员仅访问与其当前项目相关的文档至关重要。通过使用带通配符的项目标识符，您可以简化访问管理。
 
 ```typescript
 import jsonwebtoken from 'jsonwebtoken'
@@ -109,23 +108,23 @@ const data = {
 const jwt = jsonwebtoken.sign(data, 'your_secret')
 ```
 
-In this example, users will have access to all documents under 'project-alpha' and 'project-beta', making it easier to manage permissions as new documents are added to these projects.
+在此示例中，用户将可以访问 'project-alpha' 和 'project-beta' 下的所有文档，从而更轻松地管理新文档添加到这些项目时的权限。
 
-## Integrate JWT server side
+## 服务器端集成 JWT
 
-JWT, or JSON Web Token, is a compact, URL-safe means of representing claims to be transferred between two parties. The information in a JWT is digitally signed using a cryptographic algorithm to ensure that the claims cannot be altered after the token is issued. This digital signature makes the JWT a reliable vehicle for secure information exchange in web applications, providing a method to authenticate and exchange information.
+JWT，或 JSON Web Token，是一种紧凑的、URL 安全的方式，用于表示在两个方之间传输的声明。JWT 中的信息使用加密算法进行数字签名，以确保在令牌发布后声明不能被更改。这种数字签名使 JWT 成为 Web 应用程序中安全信息交换的可靠载体，提供了身份验证和信息交换的方法。
 
-### Create a static JWT for testing
+### 创建用于测试的静态 JWT
 
-For testing purposes, you might not want to set up a complete backend system to generate JWTs. In such cases, using online tools like http://jwtbuilder.jamiekurtz.com/ can be a quick workaround. These tools allow you to create a JWT by inputting the necessary payload and signing it with a secret key.
+出于测试目的，您可能不想设置完整的后端系统来生成 JWT。在这种情况下，可以使用 http://jwtbuilder.jamiekurtz.com/ 之类的在线工具作为快速解决方案。这些工具允许您通过输入必要的有效负载并使用密钥签名来创建 JWT。
 
-When using these tools, ensure that the "Key" field is replaced with the secret key from your [Collaboration settings](https://collab.tiptap.dev/apps/settings) page. You don’t need to change any other information.
+使用这些工具时，请确保将 "Key" 字段替换为您的 [协作设置](https://collab.tiptap.dev/apps/settings) 页中的秘密密钥。您不需要更改任何其他信息。
 
-Remember, this approach is only recommended for testing due to security risks associated with exposing your secret key.
+请记住，由于暴露秘密密钥的安全风险，这种方法仅建议用于测试。
 
-### Generate JWTs server side
+### 服务器端生成 JWT
 
-For production-level applications, generating JWTs on the server side is a necessity to maintain security. Exposing your secret key in client-side code would compromise the security of your application. Here’s an example using NodeJS for creating JWTs server-side:
+对于生产级应用，服务器端生成 JWT 是维护安全的必要条件。在客户端代码中暴露秘密密钥将危及您的应用安全。以下是使用 NodeJS 在服务器端创建 JWT 的示例：
 
 ```bash
 npm install jsonwebtoken
@@ -135,22 +134,22 @@ npm install jsonwebtoken
 import jsonwebtoken from 'jsonwebtoken'
 
 const payload = {
-  // The payload contains claims like the user ID, which can be used to identify the user and their permissions.
+  // 有效载荷包含用户 ID 等声明，可用于识别用户及其权限。
   sub: 'your_local_user_identifier',
 }
 
-// The 'sign' method creates the JWT, with the payload and your secret key as inputs.
+// `sign` 方法创建 JWT，使用有效负载和您的秘密密钥作为输入。
 const jwt = jsonwebtoken.sign(payload, 'your_secret_key_here')
-// The resulting JWT is used for authentication in API requests, ensuring secure access.
-// Important: Never expose your secret key in client-side code!
+// 生成的 JWT 用于 API 请求中的身份验证，确保安全访问。
+// 重要提示：切勿在客户端代码中暴露您的秘密密钥！
 ```
 
-This JWT should be incorporated into API requests within the `token` field of your authentication provider, safeguarding user sessions and data access.
+该 JWT 应包含在身份验证提供程序的 API 请求中的 `token` 字段中，保障用户会话和数据访问。
 
-To fully integrate JWT into your application, consider setting up a dedicated server or API endpoint, such as `GET /getCollabToken`. This endpoint would dynamically generate JWTs based on a secret stored securely on the server and user-specific information, like document access permissions.
+为了充分将 JWT 集成到您的应用中，考虑设置一个专用的服务器或 API 端点，例如 `GET /getCollabToken`。此端点将根据安全存储在服务器上的秘密以及用户特定的信息（如文档访问权限）动态生成 JWT。
 
-This setup not only increases security but also provides a scalable solution for managing user sessions and permissions in your collaborative application.
+此设置不仅提高了安全性，还为在您的协作应用中管理用户会话和权限提供了可扩展的解决方案。
 
-Ensure the secret key is stored as an environment variable on the server, or define it directly in the server code. Avoid sending it from the client side.
+确保在服务器上将秘密密钥存储为环境变量，或直接在服务器代码中定义。避免从客户端发送它。
 
-A full server / API example is available [here](https://github.com/ueberdosis/tiptap-collab-replit/tree/main/src).
+完整的服务器/API 示例可在 [这里](https://github.com/ueberdosis/tiptap-collab-replit/tree/main/src) 获取。

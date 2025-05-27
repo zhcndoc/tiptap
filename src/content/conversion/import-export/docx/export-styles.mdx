@@ -1,36 +1,36 @@
 ---
-title: Export custom styles to .docx
+title: 导出自定义样式到 .docx
 meta:
-    title: Export styles | Tiptap Conversion
-    description: Learn how to export custom styles from Tiptap JSON to DOCX in our documentation.
-    category: Conversion
+    title: 导出样式 | Tiptap 转换
+    description: 在我们的文档中了解如何将 Tiptap JSON 中的自定义样式导出到 DOCX。
+    category: 转换
 ---
 
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的 [账户中启动免费试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Install from private registry">
-        To install this frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 认证到 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-When exporting to `DOCX`, you can define custom styles that will be applied to the exported document. This is useful when you want to have a consistent look and feel across your documents.
+在导出为 `DOCX` 时，您可以定义将应用于导出文档的自定义样式。这在您想要跨文档保持一致的外观和感觉时非常有用。
 
 ```ts
-// Import the ExportDocx extension
+// 导入 ExportDocx 扩展
 import { ExportDocx } from '@tiptap-pro/extension-export-docx'
 
 const editor = new Editor({
   extensions: [
-    // Other extensions ...
+    // 其他扩展 ...
     ExportDocx.configure({
-      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => {}, // required
-      styleOverrides: { // Style overrides
+      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => {}, // 必填
+      styleOverrides: { // 样式覆盖
         paragraphStyles: [
-          // Heading 1 style override
+          // 标题 1 样式覆盖
           {
             id: 'Heading1',
             name: 'Heading 1',
@@ -54,101 +54,100 @@ const editor = new Editor({
         ]
       }
     }),
-    // Other extensions ...
+    // 其他扩展 ...
   ],
-  // Other editor settings ...
+  // 其他编辑器设置 ...
 })
 ```
 
+在上面的示例中 ☝️ 我们正在导出具有自定义 `Heading 1` 样式的文档。该样式基于 `Normal` 样式，颜色为红色，并使用 `Aptos` 字体。段落前的间距设置为 `12pt`，后为 `6pt`。行高设置为 `1.15`。
 
-In the example above ☝️ we are exporting a document with a custom `Heading 1` style. The style is based on the `Normal` style, has a red color, and uses the `Aptos` font. The spacing before the paragraph is set to `12pt`, and `6pt` after it. The line height is set to `1.15`.
+您还可以为其他元素创建自定义样式，如 `Heading 2`、`Heading 3`、`List Bullet`、`List Number` 等。`paragraphStyles` 数组接受具有以下属性的对象数组：
 
-You can also create custom styling for other elements like `Heading 2`, `Heading 3`, `List Bullet`, `List Number`, etc. The `paragraphStyles` array accepts an array of objects with the following properties:
+### 段落样式对象
 
-### Paragraph style object
+一个 `paragraphStyle` 对象接受以下属性：
 
-A `paragraphStyle` object accepts the following properties:
+| 属性          | 类型    | 描述                                                           |
+|---------------|---------|------------------------------------------------------------------|
+| `id`          | `string`  | 样式的唯一标识符。                                             |
+| `name`        | `string`  | 样式的显示名称。                                              |
+| `basedOn`     | `string`  | 此样式所基于的基础样式（例如，`Normal`）。                   |
+| `next`        | `string`  | 要应用于下一个段落的样式。                                    |
+| `quickFormat` | `boolean` | 如果为 `true`，该样式将出现在快速格式菜单中。                |
+| `run`         | `object`  | 定义文本格式（字体、大小、颜色、加粗等）。                    |
+| `paragraph`   | `object`  | 定义段落格式（间距、对齐、边框等）。                          |
 
-| Property      | Type    | Description                                                       |
-|---------------|---------|-------------------------------------------------------------------|
-| `id`          | `string`  | Unique identifier for the style.                                  |
-| `name`        | `string`  | Display name of the style.                                        |
-| `basedOn`     | `string`  | The base style (e.g., `Normal`) that this style builds upon.      |
-| `next`        | `string`  | The style to apply to the following paragraph.                    |
-| `quickFormat` | `boolean` | If `true`, the style appears in the quick format menu.            |
-| `run`         | `object`  | Defines text formatting (font, size, color, bold, etc.).          |
-| `paragraph`   | `object`  | Defines paragraph formatting (spacing, alignment, borders, etc.). |
+### 运行样式属性
 
-### Run style properties
+`paragraphStyle` 中的 `run` 对象接受以下属性：
 
-The `run` object from a `paragraphStyle` accepts the following properties:
+| 属性                  | 类型           | 描述                                                              |
+|-----------------------|----------------|--------------------------------------------------------------------|
+| `font`                | `string`       | 文本的字体系列。                                                  |
+| `size`                | `number`       | 字体大小，单位为半点（例如，16点 = 32）。                        |
+| `bold`                | `boolean`      | 设置为 `true` 以使文本加粗。                                     |
+| `italics`             | `boolean`      | 设置为 `true` 以使用斜体文本。                                   |
+| `color`               | `string`       | 文本颜色，十六进制格式（例如，`FF0000` 代表红色。不需要 #）。   |
+| `kern`                | `number`       | 调整字符间距，单位为点。                                         |
+| `effect`              |                | 可以应用的特殊文本效果。                                         |
+| `emphasisMark`        | `string`       | 出现在文本上方或下方的强调标记（如 `dot`）。                     |
+| `smallCaps`           | `boolean`      | 设置为 `true` 以将文本显示为小型大写字母。                      |
+| `allCaps`             | `boolean`      | 设置为 `true` 以将文本显示为全大写。                            |
+| `strike`              | `boolean`      | 设置为 `true` 以应用单条删除线。                                |
+| `doubleStrike`        | `boolean`      | 设置为 `true` 以应用双条删除线。                                |
+| `subScript`           | `boolean`      | 设置为 `true` 以使用下标文本。                                   |
+| `superScript`         | `boolean`      | 设置为 `true` 以使用上标文本。                                   |
+| `highlight`           |                | 高亮颜色（预定义值）。                                           |
+| `characterSpacing`    | `number`       | 调整字符之间的间距，单位为 TWIPs（我们知道，TWIPs，对吧？）      |
+| `shading`             | `object`       | 为文本应用背景阴影。                                            |
+| `shading` → `type`    | `ShadingType`  | 阴影类型（`clear`、`solid`、`horizontalStripe` 等）。           |
+| `shading` → `fill`    | `string`       | 阴影填充颜色，十六进制格式（例如，`FF0000` 代表红色）。          |
+| `shading` → `color`   | `string`       | 阴影颜色，十六进制格式（例如，`FF0000` 代表红色）。             |
+| `scale`               | `number`       | 调整文本的宽度（以百分比表示）。                                 |
+| `underline`           | `object`       | 下划线样式，指定属性如 `color` 和 `type`，或为空对象以应用简单下划线。 |
+| `underline` → `color` | `string`       | 下划线颜色，十六进制格式（例如，`FF0000` 代表红色。不需要 #）。  |
+| `underline` → `type`  | `UnderlineType`| 下划线类型（`single`、`double` 或 `thick`）。                  |
 
-| Property              | Type           | Description                                                             |
-|-----------------------|----------------|-------------------------------------------------------------------------|
-| `font`                | `string`         | Font family for the text.                                               |
-| `size`                | `number`         | Font size in half-points (e.g., 16 points = 32).                        |
-| `bold`                | `boolean`        | Set to `true` to make the text bold.                                    |
-| `italics`             | `boolean`        | Set to `true` for italic text.                                          |
-| `color`               | `string`         | Text color in hex format (e.g., `FF0000` for red. No # necessary).      |
-| `kern`                | `number`         | Adjusts the spacing between characters in points.                       |
-| `effect`              |                | Special text effects that can be applied.                               |
-| `emphasisMark`        | `string`         | Emphasis marks that appear above or below text. (like `dot`)            |
-| `smallCaps`           | `boolean`        | Set to `true` to display text in small capitals.                        |
-| `allCaps`             | `boolean`        | Set to `true` to display text in all uppercase.                         |
-| `strike`              | `boolean`        | Set to `true` to apply a single strikethrough.                          |
-| `doubleStrike`        | `boolean`        | Set to `true` to apply a double strikethrough.                          |
-| `subScript`           | `boolean`        | Set to `true` for subscript text.                                       |
-| `superScript`         | `boolean`        | Set to `true` for superscript text.                                     |
-| `highlight`           |                | Highlight color (predefined values).                                    |
-| `characterSpacing`    | `number`         | Adjusts spacing between characters in TWIPs (…we know, TWIPs right?     |
-| `shading`             | `object`              | Applies background shading to the text.                                 |
-| `shading` → `type`    | `ShadingType`         | The shading type (`clear`, `solid`, `horizontalStripe`, etc.).          |
-| `shading` → `fill`    | `string`         | The shading fill color in hex format (e.g., `FF0000` for red).          |
-| `shading` → `color`   | `string`         | The shading color in hex format (e.g., `FF0000` for red).               |
-| `scale`               | `number`         | Adjusts the width of the text (as a percentage).                        |
-| `underline`           | `object` | Underline style, specify properties like `color` and `type` or and empty object for a simple underline.  |
-| `underline` → `color` | `string`         | Underline color in hex format (e.g., `FF0000` for red. No # necessary). |
-| `underline` → `type`  | `UnderlineType`         | The underline type (`single`, `double` or `thick`)                      |
+有关更高级的样式选项和详细使用信息，您可以参考我们包中公开的 `IRunStylePropertiesOptions` 类型，或参考 [docx 文档](https://docx.js.org/#/usage/styling-with-js)。
 
-For more advanced styling options and detailed usage you can refer to the `IRunStylePropertiesOptions` type exposed from our package, or refer to the [docx documentation](https://docx.js.org/#/usage/styling-with-js).
+### 段落样式属性
 
-### Paragraph style properties
+`paragraphStyle` 中的 `paragraph` 对象接受以下属性：
 
-The `paragraph` object from a `paragraphStyle` accepts the following properties:
+| 属性                      | 类型    | 描述                                                               |
+|---------------------------|---------|---------------------------------------------------------------------|
+| `spacing`                 | `object`| 控制间距：如 `before`、`after` 和 `line` 等属性。                 |
+| `alignment`               | `string`| 设置段落对齐方式（`left`、`center`、`right` 或 `justify`）。      |
+| `border`                  | `object`| 定义段落周围的边框（顶部、底部、左侧、右侧）。                     |
+| `shading`                 | `object`| 为段落应用背景阴影。                                             |
+| `indent`                  | `object`| 指定缩进（首行、悬挂、左侧、右侧）。                               |
+| `contextualSpacing`       | `boolean`| 如果为 `true`，则减少相同样式段落之间的间距。                    |
+| `keepNext`                | `boolean`| 保持此段落与下一个段落在同一页面上。                              |
+| `keepLines`               | `boolean`| 保持段落的所有行在同一页面上。                                    |
+| `outlineLevel`            | `number` | 设置文档组织的轮廓级别（通常为 1-9）。                             |
+| `thematicBreak`           | `number` | 如果设置为 `true`，则添加水平线断点。                             |
+| `rightTabStop`            | `number` | 设置右侧制表符位置，单位为 twips。                                 |
+| `leftTabStop`             | `number` | 设置左侧制表符位置，单位为 twips。                                 |
+| `numbering`               | `object` | 控制编号设置（如：引用、级别、自定义格式）。                       |
+| `numbering` → `reference` | `string` | 编号样式引用 ID。                                                |
+| `numbering` → `level`     | `number` | 编号层级（0 基）。                                               |
+| `spacing`                 | `object` | 控制段落的间距。                                                 |
+| `spacing` → `before`      | `number` | 段落之前的间距。                                               |
+| `spacing` → `after`       | `number` | 段落之后的间距。                                              |
+| `spacing` → `line`        | `number` | 段落内的行间距。                                              |
+| `spacing` → `lineRule`    | `LineRuleType` | 定义行间距的计算方式。                                        |
 
-| Property                  | Type    | Description                                                              |
-|---------------------------|---------|--------------------------------------------------------------------------|
-| `spacing`                 | `object`  | Controls spacing: properties like `before`, `after`, and `line`.         |
-| `alignment`               | `string`  | Sets paragraph alignment (`left`, `center`, `right`, or `justify`).      |
-| `border`                  | `object`  | Defines borders around the paragraph (top, bottom, left, right).         |
-| `shading`                 | `object`  | Applies background shading to the paragraph.                             |
-| `indent`                  | `object`  | Specifies indentation (first line, hanging, left, right).                |
-| `contextualSpacing`       | `boolean` | If `true`, reduces spacing between paragraphs of the same style.         |
-| `keepNext`                | `boolean` | Keeps this paragraph on the same page as the next.                       |
-| `keepLines`               | `boolean` | Keeps all lines of the paragraph together on the same page.              |
-| `outlineLevel`            | `number`  | Sets the outline level for document organization (typically 1–9).        |
-| `thematicBreak`           | `number`  | Adds a horizontal line break when set to `true`.                         |
-| `rightTabStop`            | `number`  | Sets the position of the right tab stop in twips.                        |
-| `leftTabStop`             | `number`  | Sets the position of the left tab stop in twips.                         |
-| `numbering`               | `object`  | Controls numbering settings (e.g., reference, level, custom formatting). |
-| `numbering` → `reference` | `string`       | The numbering style reference ID.                                        |
-| `numbering` → `level`     | `number`        | The level in the numbering hierarchy (0-based).                          |
-| `spacing`                 | `object`        | Controls the spacing of the paragraph.                                   |
-| `spacing` → `before`      | `number`        | Space before the paragraph.                                              |
-| `spacing` → `after`       | `number`        | Space after the paragraph.                                               |
-| `spacing` → `line`        | `number`        | Line spacing within the paragraph.                                       |
-| `spacing` → `lineRule`    | `LineRuleType`       | Defines how the line spacing is calculated.                              |
+有关更高级的样式选项和详细使用信息，您可以参考我们包中公开的 `IParagraphStylePropertiesOptions` 类型，或参考 [docx 文档](https://docx.js.org/#/usage/styling-with-js)。
 
-For more advanced styling options and detailed usage you can refer to the `IParagraphStylePropertiesOptions` type exposed from our package, or refer to the [docx documentation](https://docx.js.org/#/usage/styling-with-js).
+## Tiptap 的导出默认样式
 
-## Tiptap's export default styles
-
-Tiptap offers a sensible default styling for the exported document, but you can override these styles by providing your own custom styles. This allows you to create a consistent look and feel across your documents. 
+Tiptap 为导出的文档提供了合理的默认样式，但您可以通过提供自己的自定义样式来覆盖这些样式。这使您能够在文档之间创建一致的外观和感觉。
 
 ```ts
 {
   paragraphStyles: [
-    // Normal style (default for most paragraphs)
+    // 正常样式（大多数段落的默认样式）
     {
       id: 'Normal',
       name: 'Normal',
@@ -164,7 +163,7 @@ Tiptap offers a sensible default styling for the exported document, but you can 
         },
       },
     },
-    // List Paragraph style (used for bullets and numbering)
+    // 列表段落样式（用于项目符号和编号）
     {
       id: 'ListParagraph',
       name: 'List Paragraph',
@@ -182,7 +181,7 @@ Tiptap offers a sensible default styling for the exported document, but you can 
         },
       },
     },
-    // Heading 1 style
+    // 标题 1 样式
     {
       id: 'Heading1',
       name: 'Heading 1',
@@ -203,7 +202,7 @@ Tiptap offers a sensible default styling for the exported document, but you can 
         },
       },
     },
-    // Heading 2 style
+    // 标题 2 样式
     {
       id: 'Heading2',
       name: 'Heading 2',
@@ -224,7 +223,7 @@ Tiptap offers a sensible default styling for the exported document, but you can 
         },
       },
     },
-    // Heading 3 style
+    // 标题 3 样式
     {
       id: 'Heading3',
       name: 'Heading 3',
@@ -245,7 +244,7 @@ Tiptap offers a sensible default styling for the exported document, but you can 
         },
       },
     },
-    // Heading 4 style
+    // 标题 4 样式
     {
       id: 'Heading4',
       name: 'Heading 4',
@@ -266,7 +265,7 @@ Tiptap offers a sensible default styling for the exported document, but you can 
         },
       },
     },
-    // Heading 5 style
+    // 标题 5 样式
     {
       id: 'Heading5',
       name: 'Heading 5',
@@ -287,7 +286,7 @@ Tiptap offers a sensible default styling for the exported document, but you can 
         },
       },
     },
-    // Title style
+    // 标题样式
     {
       id: 'Title',
       name: 'Title',
@@ -309,7 +308,7 @@ Tiptap offers a sensible default styling for the exported document, but you can 
         },
       },
     },
-    // Subtitle style
+    // 副标题样式
     {
       id: 'Subtitle',
       name: 'Subtitle',
@@ -331,7 +330,7 @@ Tiptap offers a sensible default styling for the exported document, but you can 
         },
       },
     },
-    // Quote style (typically for indented, italic text)
+    // 引用样式（通常用于缩进的斜体文本）
     {
       id: 'Quote',
       name: 'Quote',
@@ -350,7 +349,7 @@ Tiptap offers a sensible default styling for the exported document, but you can 
         },
       },
     },
-    // Intense Quote style (more pronounced indentation)
+    // 强烈引用样式（更明显的缩进）
     {
       id: 'IntenseQuote',
       name: 'Intense Quote',
@@ -370,7 +369,7 @@ Tiptap offers a sensible default styling for the exported document, but you can 
         },
       },
     },
-    // No Spacing style (no extra space before or after paragraphs)
+    // 无间距样式（段落前后没有额外空间）
     {
       id: 'NoSpacing',
       name: 'No Spacing',
@@ -384,7 +383,7 @@ Tiptap offers a sensible default styling for the exported document, but you can 
         },
       },
     },
-    // Hyperlink style
+    // 超链接样式
     {
       id: 'Hyperlink',
       name: 'Hyperlink',

@@ -1,59 +1,59 @@
 ---
-title: Mention extension
+title: 提及扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extension-mention/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extension-mention/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extension-mention
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-mention.svg
     url: https://npmcharts.com/compare/@tiptap/extension-mention?minimal=true
-    label: Downloads
+    label: 下载量
 extension:
-  name: Mention
+  name: 提及
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-mention
-  description: Mention other users with a suggestion popup and full control over the rendering.
+  description: 通过建议弹出框提及其他用户，完全控制渲染。
   type: node
   icon: AtSign
 meta:
-  title: Mention extension | Tiptap Editor Docs
-  description: Use the Mention extension in Tiptap to mention other users with a suggestion popup. Learn more in our docs!
-  category: Editor
+  title: 提及扩展 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用提及扩展通过建议弹出框提及其他用户。了解更多信息，请查看我们的文档！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-Honestly, the mention node is amazing. It adds support for `@mentions`, for example to ping users, _and_ provides full control over the rendering.
+老实说，提及节点简直太棒了。它支持 `@提及`，例如可以提醒用户，并提供完全的渲染控制。
 
-Literally everything can be customized. You can pass a custom component for the rendering. All examples use `.filter()` to search through items, but feel free to send async queries to an API or add a more advanced library like [fuse.js](https://fusejs.io/) to your project.
+几乎所有内容都可以自定义。您可以传递自定义组件进行渲染。所有示例使用 `.filter()` 搜索项目，但您可以自由发送异步查询到 API 或将更高级的库添加到您的项目中，例如 [fuse.js](https://fusejs.io/)。
 
 <CodeDemo path="/Nodes/Mention" />
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-mention@next
 ```
 
-## Dependencies
+## 依赖
 
-To place the popups correctly, we’re using [tippy.js](https://atomiks.github.io/tippyjs/) in all our examples. You are free to bring your own library, but if you’re fine with it, just install what we use:
+为了正确放置弹出框，我们在所有示例中使用 [tippy.js](https://atomiks.github.io/tippyjs/)。您可以自由选择自己喜欢的库，但如果您愿意，可以直接安装我们使用的库：
 
 ```bash
 npm install tippy.js
 ```
 
-Since 2.0.0-beta.193 we marked the `@tiptap/suggestion` as a peer dependency. That means, you will need to install it manually.
+自 2.0.0-beta.193 版本起，我们将 `@tiptap/suggestion` 标记为一个同伴依赖。这意味着，您需要手动安装它。
 
 ```bash
 npm install @tiptap/suggestion@next
 ```
 
-## Settings
+## 设置
 
 ### HTMLAttributes
 
-Custom HTML attributes that should be added to the rendered HTML tag.
+应添加到渲染的 HTML 标签的自定义 HTML 属性。
 
 ```js
 Mention.configure({
@@ -65,7 +65,7 @@ Mention.configure({
 
 ### renderText
 
-Define how a mention text should be rendered.
+定义提及文本应如何渲染。
 
 ```js
 Mention.configure({
@@ -77,7 +77,7 @@ Mention.configure({
 
 ### renderHTML
 
-Define how a mention html element should be rendered, this is useful if you want to render an element other than `span` (e.g `a`)
+定义提及 HTML 元素应如何渲染，如果您想渲染的元素不是 `span`（例如 `a`），这非常有用。
 
 ```js
 Mention.configure({
@@ -93,7 +93,7 @@ Mention.configure({
 
 ### deleteTriggerWithBackspace
 
-Toggle whether the suggestion character(s) should also be deleted on deletion of a mention node. Default is `false`.
+切换是否在删除提及节点时也删除建议字符。默认值为 `false`。
 
 ```js
 Mention.configure({
@@ -103,7 +103,7 @@ Mention.configure({
 
 ### suggestion
 
-Options for the Suggestion utility. Used to define what character triggers the suggestion popup, among other parameters. [Read more](/editor/api/utilities/suggestion).
+建议工具的选项。用于定义什么字符触发建议弹出框，以及其他参数。[了解更多](/editor/api/utilities/suggestion)。
 
 ```js
 Mention.configure({
@@ -115,27 +115,27 @@ Mention.configure({
 
 ### suggestions
 
-Allows you to define multiple types of mentions within the same editor. For example, define a mention for people with the `@` trigger and one for movies with the `#` trigger. [Read more about the Suggestion utility](/editor/api/utilities/suggestion).
+允许您在同一编辑器中定义多种类型的提及。例如，使用 `@` 触发器为人定义提及，并使用 `#` 触发器为电影定义提及。[阅读更多关于建议工具的内容](/editor/api/utilities/suggestion)。
 
 ```js
 Mention.configure({
   suggestions: [
     {
       char: '@',
-      // Other options of the Suggestion utility
+      // 建议工具的其他选项
     },
     {
       char: '#',
-      // Other options of the Suggestion utility
+      // 建议工具的其他选项
     },
   ],
 })
 ```
 
-Below is an example demo:
+以下是一个示例演示：
 
 <CodeDemo path="/Examples/MultiMention" />
 
-## Source code
+## 源代码
 
 [packages/extension-mention/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-mention/)

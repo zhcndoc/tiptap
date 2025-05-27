@@ -1,14 +1,14 @@
 ---
-title: Add floating elements to editor selection
+title: 为编辑器选择添加浮动元素
 meta:
-  title: Floating element | Tiptap UI Component
-  description: Insert a floating UI element next to the selection within your Tiptap editor. More in the docs.
-  category: UI Components
+  title: 浮动元素 | Tiptap UI 组件
+  description: 在您的 Tiptap 编辑器中插入一个浮动的 UI 元素，紧靠选择。更多信息请查看文档。
+  category: UI 组件
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-A utility component for creating floating UI elements tied to editor selections.
+一个实用组件，用于创建与编辑器选择相关联的浮动 UI 元素。
 
 <CodeDemo
   isScrollable
@@ -16,13 +16,13 @@ A utility component for creating floating UI elements tied to editor selections.
   src="https://template.tiptap.dev/preview/tiptap-ui/floating-element"
 />
 
-## Install
+## 安装
 
 ```bash
 npx @tiptap/cli add floating-element
 ```
 
-## Usage
+## 使用方法
 
 ```tsx
 import { FloatingElement } from '@/components/tiptap-ui/floating-element'
@@ -30,7 +30,7 @@ import { useEditor, EditorContent } from '@tiptap/react'
 
 export default function MyEditor() {
   const editor = useEditor({
-    // editor configuration
+    // 编辑器配置
   })
 
   const [show, setShow] = React.useState(false)
@@ -39,33 +39,33 @@ export default function MyEditor() {
     <div>
       <EditorContent editor={editor} />
       <FloatingElement editor={editor} shouldShow={show} zIndex={50}>
-        <div className="floating-toolbar">{/* Toolbar content */}</div>
+        <div className="floating-toolbar">{/* 工具栏内容 */}</div>
       </FloatingElement>
     </div>
   )
 }
 ```
 
-## Props
+## 属性
 
-| Name                  | Type                                | Default                  | Description                                    |
+| 名称                  | 类型                                | 默认                     | 描述                                           |
 | --------------------- | ----------------------------------- | ------------------------ | ---------------------------------------------- |
-| editor                | Editor \| null                      | null                     | The Tiptap editor instance                     |
-| shouldShow            | boolean                             | false                    | Controls whether the element should be visible |
-| floatingOptions       | UseFloatingOptions                  | {}                       | Options for the floating UI                    |
-| zIndex                | number                              | 50                       | Z-index for the floating element               |
-| onOpenChange          | (open: boolean) => void             | -                        | Callback when visibility state changes         |
-| getBoundingClientRect | (editor: Editor) => DOMRect \| null | getSelectionBoundingRect | Tiptap util function to determine position     |
-| updateOnScroll        | boolean                             | true                     | Whether to update position on scroll events    |
+| editor                | Editor \| null                      | null                     | Tiptap 编辑器实例                             |
+| shouldShow            | boolean                             | false                    | 控制元素是否可见                               |
+| floatingOptions       | UseFloatingOptions                  | {}                       | 浮动 UI 的选项                                 |
+| zIndex                | number                              | 50                       | 浮动元素的 Z-index                             |
+| onOpenChange          | (open: boolean) => void             | -                        | 可见性状态变化时的回调                        |
+| getBoundingClientRect | (editor: Editor) => DOMRect \| null | getSelectionBoundingRect | Tiptap 工具函数以确定位置                     |
+| updateOnScroll        | boolean                             | true                     | 是否在滚动事件中更新位置                      |
 
-## Requirements
+## 需求
 
-Used reference components
+使用的参考组件
 
-- `tiptap-utils` (lib)
-- `use-tiptap-editor` (hook)
-- `use-floating-element` (hook)
+- `tiptap-utils` (库)
+- `use-tiptap-editor` (钩子)
+- `use-floating-element` (钩子)
 
-Open source feature(s)
+开源特性
 
 - `@floating-ui/react`

@@ -1,41 +1,41 @@
 ---
-title: Dropcursor extension
+title: Dropcursor 扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extensions/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extensions/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extensions
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extensions.svg
     url: https://npmcharts.com/compare/@tiptap/extensions?minimal=true
-    label: Downloads
+    label: 下载量
 meta:
-  title: Dropcursor extension | Tiptap Editor Docs
-  description: Add a cursor when dragging items inside the editor with the Dropcursor extension. Learn how to use it here in the Docs!
-  category: Editor
+  title: Dropcursor 扩展 | Tiptap 编辑器文档
+  description: 使用 Dropcursor 扩展在编辑器内拖动项目时添加光标。在文档中了解如何使用它！
+  category: 编辑器
 extension:
   name: Dropcursor
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extensions
-  description: Adds a cursor when something is dragged inside the editor.
+  description: 当在编辑器内拖动某物时，添加一个光标。
   type: extension
   icon: FoldVertical
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-This extension loads the [ProseMirror Dropcursor plugin](https://github.com/ProseMirror/prosemirror-dropcursor) by Marijn Haverbeke, which shows a cursor at the drop position when something is dragged into the editor.
+此扩展加载了 [ProseMirror Dropcursor 插件](https://github.com/ProseMirror/prosemirror-dropcursor)，该插件在将某物拖入编辑器时显示光标在放置位置。
 
-Note that Tiptap is headless, but the dropcursor needs CSS for its appearance. There are settings for the color and width, and you’re free to add a custom CSS class.
+请注意，Tiptap 是无头的，但 dropcursor 需要 CSS 来显示样式。可以设置颜色和宽度，并且可以自由添加自定义 CSS 类。
 
 <CodeDemo path="/Extensions/Dropcursor" />
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extensions@next
 ```
 
-## Usage
+## 用法
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -46,13 +46,13 @@ new Editor({
 })
 ```
 
-## Settings
+## 设置
 
 ### color
 
-Color of the dropcursor.
+dropcursor 的颜色。
 
-Default: `'currentColor'`
+默认值：`'currentColor'`
 
 ```js
 Dropcursor.configure({
@@ -62,9 +62,9 @@ Dropcursor.configure({
 
 ### width
 
-Width of the dropcursor.
+dropcursor 的宽度。
 
-Default: `1`
+默认值：`1`
 
 ```js
 Dropcursor.configure({
@@ -74,7 +74,7 @@ Dropcursor.configure({
 
 ### class
 
-One or multiple CSS classes that should be applied to the dropcursor.
+应应用于 dropcursor 的一个或多个 CSS 类。
 
 ```js
 Dropcursor.configure({
@@ -82,11 +82,11 @@ Dropcursor.configure({
 })
 ```
 
-## Source code
+## 源代码
 
 [packages/extensions/src/drop-cursor/](https://github.com/ueberdosis/tiptap/blob/main/packages/extensions/src/drop-cursor/)
 
-## Minimal Install
+## 最小安装
 
 ```js
 import { Editor } from '@tiptap/core'

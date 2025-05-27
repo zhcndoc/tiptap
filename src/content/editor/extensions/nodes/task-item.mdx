@@ -1,43 +1,43 @@
 ---
-title: TaskItem extension
+title: TaskItem 扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extension-list/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extension-list/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extension-list
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-list.svg
     url: https://npmcharts.com/compare/@tiptap/extension-list?minimal=true
-    label: Downloads
+    label: 下载量
 extension:
-  name: Task Item
+  name: 任务项
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-list
-  description: 'The actually task; without it, the task list would be nothing.'
+  description: '实际的任务；没有它，任务列表将毫无意义。'
   type: node
   icon: ListChecks
 meta:
-  title: TaskItem extension | Tiptap Editor Docs
-  description: Use the TaskItem extension to add support for task items rendered as <li data-type="taskItem"> with checkboxes. More in our docs!
-  category: Editor
+  title: TaskItem 扩展 | Tiptap 编辑器文档
+  description: 使用 TaskItem 扩展来支持渲染为 <li data-type="taskItem"> 的任务项，并带有复选框。更多内容请参见我们的文档！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-This extension renders a task item list element, which is a `<li>` tag with a `data-type` attribute set to `taskItem`. It also renders a checkbox inside the list element, which updates a `checked` attribute.
+该扩展渲染一个任务项列表元素，即一个 `<li>` 标签，其 `data-type` 属性设置为 `taskItem`。它还在列表元素内部渲染一个复选框，该复选框会更新 `checked` 属性。
 
-This extension doesn’t require any JavaScript framework, it’s based on Vanilla JavaScript.
+该扩展不需要任何 JavaScript 框架，基于原生 JavaScript。
 
 <CodeDemo path="/Nodes/TaskItem" />
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-list@next
 ```
 
-This extension requires the [`TaskList`](/editor/extensions/nodes/task-list) node.
+该扩展需要 [`TaskList`](/editor/extensions/nodes/task-list) 节点。
 
-## Usage
+## 用法
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -48,7 +48,7 @@ new Editor({
 })
 ```
 
-This extension is installed by default with the `ListKit` extension, so you don’t need to install it separately.
+该扩展与 `ListKit` 扩展一起默认安装，因此您无需单独安装它。
 
 ```ts
 import { Editor } from '@tiptap/core'
@@ -59,11 +59,11 @@ new Editor({
 })
 ```
 
-## Settings
+## 设置
 
 ### HTMLAttributes
 
-Custom HTML attributes that should be added to the rendered HTML tag.
+应添加到渲染的 HTML 标签中的自定义 HTML 属性。
 
 ```js
 TaskItem.configure({
@@ -75,7 +75,7 @@ TaskItem.configure({
 
 ### nested
 
-Whether the task items are allowed to be nested within each other.
+是否允许任务项相互嵌套。
 
 ```js
 TaskItem.configure({
@@ -85,31 +85,31 @@ TaskItem.configure({
 
 ### onReadOnlyChecked
 
-A handler for when the task item is checked or unchecked while the editor is set to `readOnly`.
-If this is not supplied, the task items are immutable while the editor is `readOnly`.
-If this function returns false, the check state will be preserved (`readOnly`).
+当任务项在编辑器处于 `readOnly` 状态时被选中或取消选中时的处理程序。
+如果未提供该处理程序，则在编辑器处于 `readOnly` 时，任务项将是不可变的。
+如果该函数返回 false，则选中状态将被保留（`readOnly`）。
 
 ```js
 TaskItem.configure({
   onReadOnlyChecked: (node, checked) => {
-    // do something
+    // 执行某些操作
   },
 })
 ```
 
-## Keyboard shortcuts
+## 快捷键
 
-| Command         | Windows/Linux                     | macOS                             |
+| 命令           | Windows/Linux                     | macOS                             |
 | --------------- | --------------------------------- | --------------------------------- |
 | splitListItem() | <kbd>Enter</kbd>                  | <kbd>Enter</kbd>                  |
 | sinkListItem()  | <kbd>Tab</kbd>                    | <kbd>Tab</kbd>                    |
 | liftListItem()  | <kbd>Shift</kbd> + <kbd>Tab</kbd> | <kbd>Shift</kbd> + <kbd>Tab</kbd> |
 
-## Source code
+## 源代码
 
 [packages/extension-list/src/task-item/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-list/src/task-item/)
 
-## Minimal Install
+## 最小安装
 
 ```js
 import { Editor } from '@tiptap/core'

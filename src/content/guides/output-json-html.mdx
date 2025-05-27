@@ -1,28 +1,28 @@
 ---
 tags:
   - type: editor
-title: Output and content handling with Tiptap
+title: 使用 Tiptap 进行输出和内容处理
 meta:
-  title: Export to JSON and HTML | Tiptap Editor Docs
-  description: Manage content formats in Tiptap Editor and export to JSON and HTML, using Y.js for advanced features. More in the docs!
-  category: Editor
+  title: 导出为 JSON 和 HTML | Tiptap 编辑器文档
+  description: 管理 Tiptap 编辑器中的内容格式，并使用 Y.js 导出为 JSON 和 HTML，以实现高级功能。详细信息请见文档！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-You can store your content as a JSON object or as a good old HTML string. Both work fine. And of course, you can pass both formats to the editor to restore your content. Here is an interactive example, that exports the content as HTML and JSON when the document is changed:
+您可以将内容存储为 JSON 对象或传统的 HTML 字符串。两者均可正常使用。当然，您可以将这两种格式传递给编辑器以恢复您的内容。以下是一个交互示例，当文档发生更改时，它将内容导出为 HTML 和 JSON：
 
-## Export
+## 导出
 
-### Option 1: JSON
+### 选项 1：JSON
 
-JSON is probably easier to loop through, for example to look for a mention and it’s more like what Tiptap uses under the hood. Anyway, if you want to use JSON to store the content we provide a method to retrieve the content as JSON:
+JSON 可能更容易遍历，比如查找提及，而且它更像是 Tiptap 在底层使用的格式。无论如何，如果您想使用 JSON 存储内容，我们提供了一种方法来以 JSON 格式检索内容：
 
 ```js
 const json = editor.getJSON()
 ```
 
-You can store that in your database (or send it to an API) and restore the document initially:
+您可以将其存储在数据库中（或发送到 API），并最初恢复文档：
 
 ```js
 new Editor({
@@ -35,7 +35,7 @@ new Editor({
 })
 ```
 
-Or if you need to wait for something, you can do it later through the editor instance:
+或者如果您需要等待某个操作，可以通过编辑器实例稍后执行：
 
 ```js
 editor.commands.setContent({
@@ -46,125 +46,125 @@ editor.commands.setContent({
 })
 ```
 
-Here is an interactive example where you can see that in action:
+这里是一个交互示例，您可以在其中看到这一操作：
 
 <CodeDemo path="/guidecontent/exportjson?hideSource=true" />
 
-### Option 2: HTML
+### 选项 2：HTML
 
-HTML can be easily rendered in other places, for example in emails and it’s widely used, so it’s probably easier to switch the editor at some point. Anyway, every editor instance provides a method to get HTML from the current document:
+HTML 可以轻松地在其他地方渲染，例如在电子邮件中，它被广泛使用，所以在某个时刻切换编辑器可能会更容易。无论如何，每个编辑器实例提供了一种方法，可以从当前文档中获取 HTML：
 
 ```js
 const html = editor.getHTML()
 ```
 
-This can then be used to restore the document initially:
+然后，这可以用于最初恢复文档：
 
 ```js
 new Editor({
-  content: `<p>Example Text</p>`,
+  content: `<p>示例文本</p>`,
 })
 ```
 
-Or if you want to restore the content later (e. g. after an API call has finished), you can do that too:
+或者，如果您想稍后恢复内容（例如，在 API 调用完成后），也可以做到这一点：
 
 ```js
-editor.commands.setContent(`<p>Example Text</p>`)
+editor.commands.setContent(`<p>示例文本</p>`)
 ```
 
-Use this interactive example to fiddle around:
+使用这个交互示例进行实验：
 
 <CodeDemo path="/guidecontent/exporthtml?hideSource=true" />
 
-### Option 3: Y.js
+### 选项 3：Y.js
 
-Our editor has top notch support for Y.js, which is amazing to add features like [realtime collaboration, offline editing, or syncing between devices](/collaboration/getting-started/overview).
+我们的编辑器对 Y.js 提供了顶级支持，非常适合添加 [实时协作、离线编辑或设备间同步](/collaboration/getting-started/overview) 等功能。
 
-Internally, Y.js stores a history of all changes. That can be in the browser, on a server, synced with other connected clients, or on a USB stick. But, it’s important to know that Y.js needs those stored changes. A simple JSON document is not enough to merge changes.
+在内部，Y.js 存储所有更改的历史记录。这可能存储在浏览器、服务器上、与其他连接的客户端同步，或者在 USB 闪存驱动器上。但重要的是要知道 Y.js 需要这些存储的更改。简单的 JSON 文档不足以合并更改。
 
-Sure, you can import existing JSON documents to get started and get a JSON out of Y.js, but that’s more like an import/export format. It won’t be your single source. That’s important to consider when adding Y.js for one of the mentioned use cases.
+当然，您可以导入现有的 JSON 文档以开始，并从 Y.js 中获取 JSON，但这更像是输入/输出格式。它不会成为您的唯一来源。这一点在添加 Y.js 以实现上述用例时非常重要。
 
-That said, it’s amazing and we’re about to provide an amazing backend, that makes all that a breeze.
+话虽如此，Y.js 的功能很强大，我们即将提供一个出色的后端，使所有操作都变得轻而易举。
 
 ### Markdown
 
-Tiptap already provides import, export, and REST API conversions for Markdown (including GitHub Flavored Markdown). This lets you:
+Tiptap 已经为 Markdown 提供了导入、导出和 REST API 转换（包括 GitHub 风格的 Markdown）。这让您可以：
 
-- **Import `.md` or GFM** files into a Tiptap editor, converting them to Tiptap JSON
-- **Export** Tiptap JSON to standard Markdown or GFM, letting you save or share your editor content as a `.md` file.
-- **Integrate server-side** (no editor required) by sending or retrieving `.md` content via our Conversion REST API.
+- **将 `.md` 或 GFM** 文件导入 Tiptap 编辑器，将其转换为 Tiptap JSON
+- **导出** Tiptap JSON 为标准 Markdown 或 GFM，让您将编辑器内容保存或分享为 `.md` 文件。
+- **集成服务器端**（无需编辑器）通过我们的转换 REST API 发送或检索 `.md` 内容。
 
-See [Markdown Conversion](/conversion/import-export/markdown) for details on how to handle other Markdown features, plus examples for both in-editor workflows and server-side usage.
+有关如何处理其他 Markdown 特性的详细信息，以及编辑器内工作流程和服务器端使用的示例，请参见 [Markdown 转换](/conversion/import-export/markdown)。
 
-**Tiptap v3 will deepen Markdown support.** We’re committed to making Markdown more robust and easier to integrate for advanced (AI) use cases.
+**Tiptap v3 将深化对 Markdown 的支持。** 我们致力于使 Markdown 更加稳健并更易于集成，以满足高级（AI）用例。
 
-If you are looking to convert ProseMirror JSON to Markdown, you can use the `@tiptap/static-renderer` package, which can convert ProseMirror JSON to Markdown. See more info and examples in it's [documentation](/editor/api/utilities/static-renderer).
+如果您希望将 ProseMirror JSON 转换为 Markdown，可以使用 `@tiptap/static-renderer` 包，该包可以将 ProseMirror JSON 转换为 Markdown。有关更多信息和示例，请参见它的 [文档](/editor/api/utilities/static-renderer)。
 
-## Listen for changes
+## 监听更改
 
-If you want to continuously store the updated content while people write, you can [hook into events](/editor/api/events). Here is an example how that could look like:
+如果您希望在人们写作时持续存储更新的内容，可以 [挂钩事件](/editor/api/events)。这里是一个可能的示例：
 
 ```js
 const editor = new Editor({
-  // intial content
-  content: `<p>Example Content</p>`,
+  // 初始内容
+  content: `<p>示例内容</p>`,
 
-  // triggered on every change
+  // 在每次更改时触发
   onUpdate: ({ editor }) => {
     const json = editor.getJSON()
-    // send the content to an API here
+    // 在这里将内容发送到 API
   },
 })
 ```
 
-## Render
+## 渲染
 
-### Option 1: Read-only instance of Tiptap
+### 选项 1：只读实例的 Tiptap
 
-To render the saved content, set the editor to read-only. That’s how you can achieve the exact same rendering as it’s in the editor, without duplicating your CSS and other code.
+要渲染保存的内容，将编辑器设置为只读。这样您就可以实现与编辑器中的完全相同的渲染，而无需重复您的 CSS 和其他代码。
 
 <CodeDemo path="/GuideContent/ReadOnly?inline=false&hideSource=false" />
 
-### Option 2: Generate HTML from ProseMirror JSON
+### 选项 2：从 ProseMirror JSON 生成 HTML
 
-If you need to render the content on the server side, for example to generate the HTML for a blog post, which has been written in Tiptap, you’ll probably want to do just that without an actual editor instance.
+如果您需要在服务器端渲染内容，例如生成已在 Tiptap 中编写的博文的 HTML，您可能希望在没有实际编辑器实例的情况下完成此操作。
 
-That’s what the `generateHTML()` is for. It’s a helper function which renders HTML without an actual editor instance.
+这就是 `generateHTML()` 的用途。它是一个助手函数，可以在没有实际编辑器实例的情况下渲染 HTML。
 
 <CodeDemo path="/GuideContent/GenerateHTML?inline=false&hideSource=false" />
 
-By the way, the other way is possible, too. The below examples shows how to generate JSON from HTML.
+顺便说一下，另一种方式也是可行的。以下示例展示了如何从 HTML 生成 JSON。
 
 <CodeDemo path="/GuideContent/GenerateJSON?inline=false&hideSource=false" />
 
-### Option 3: Static Renderer
+### 选项 3：静态渲染器
 
-Generate HTML, React Elements or Markdown from ProseMirror JSON
+从 ProseMirror JSON 生成 HTML、React 元素或 Markdown
 
-If you want to render the content in a static way, for example in a blog post, you can use the `@tiptap/static-renderer` package. It can convert ProseMirror JSON to HTML, React Elements or Markdown.
+如果您希望以静态方式渲染内容，例如在博文中，可以使用 `@tiptap/static-renderer` 包。它可以将 ProseMirror JSON 转换为 HTML、React 元素或 Markdown。
 
 ```bash
 npm install @tiptap/static-renderer@next
 ```
 
-To learn more about the static renderer, check out the [static renderer documentation](/editor/api/utilities/static-renderer).
+要了解有关静态渲染器的更多信息，请查看 [静态渲染器文档](/editor/api/utilities/static-renderer)。
 
 <CodeDemo src="https://deploy-preview-6012--tiptap-embed.netlify.app/preview/examples/staticrendering?inline=false&hideSource=false" />
 
-## Migrate
+## 迁移
 
-### From Draft.js
+### 从 Draft.js
 
-If you’re migrating from Draft.js to Tiptap, you probably have your content stored as JSON. That’s great, because Tiptap can handle that with the [draft-js-to-tiptap package](https://github.com/ueberdosis/draft-js-to-tiptap). See more info and examples in it's [documentation](https://github.com/ueberdosis/draft-js-to-tiptap/blob/main/README.md).
+如果您正在从 Draft.js 迁移到 Tiptap，您可能已经将内容存储为 JSON。这很好，因为 Tiptap 可以通过 [draft-js-to-tiptap 包](https://github.com/ueberdosis/draft-js-to-tiptap) 处理它。有关更多信息和示例，请参见它的 [文档](https://github.com/ueberdosis/draft-js-to-tiptap/blob/main/README.md)。
 
-### Others
+### 其他
 
-If you’re migrating existing content to Tiptap we would recommend to get your existing output to HTML. That’s probably the best format to get your initial content into Tiptap, because ProseMirror ensures there is nothing wrong with it. Even if there are some tags or attributes that aren’t allowed (based on your configuration), Tiptap just throws them away quietly.
+如果您正在将现有内容迁移到 Tiptap，我们建议将您现有的输出转换为 HTML。这可能是将初始内容引入 Tiptap 的最佳格式，因为 ProseMirror 确保其中没有错误。即使有一些不允许的标签或属性（基于您的配置），Tiptap 也会默默地将它们剔除。
 
-We’re about to go through a few cases to help with that, for example we provide a PHP package to convert HTML to a compatible JSON structure: [ueberdosis/prosemirror-to-html](https://github.com/ueberdosis/html-to-prosemirror).
+我们将逐步提供一些案例以帮助实现这一点，例如我们提供一个 PHP 包来将 HTML 转换为兼容的 JSON 结构：[ueberdosis/prosemirror-to-html](https://github.com/ueberdosis/html-to-prosemirror)。
 
-[Share your experiences with us!](mailto:humans@tiptap.dev) We’d like to add more information here.
+[与我们分享您的经验！](mailto:humans@tiptap.dev) 我们希望在这里添加更多信息。
 
-## Security
+## 安全
 
-There is no reason to use one or the other because of security concerns. If someone wants to send malicious content to your server, it doesn’t matter if it’s JSON or HTML. It doesn’t even matter if you’re using Tiptap or not. You should always validate user input.
+没有理由因为安全原因而使用其中一种格式。如果有人想向您的服务器发送恶意内容，无论是 JSON 还是 HTML 都无关紧要。您使用 Tiptap 与否都无关紧要。您应该始终验证用户输入。

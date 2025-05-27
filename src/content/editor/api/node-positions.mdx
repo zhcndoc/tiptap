@@ -1,103 +1,103 @@
 ---
-title: Node Positions
+title: 节点位置
 meta:
-  title: Node Positions | Tiptap Editor Docs
-  description: Learn about Node Positions in Tiptap for document navigation and manipulation. Learn more in the docs!
-  category: Editor
+  title: 节点位置 | Tiptap 编辑器文档
+  description: 了解 Tiptap 中的节点位置，以便进行文档导航和操作。请在文档中了解更多信息！
+  category: 编辑器
 ---
 
-Node Positions (`NodePos`) describe the specific position of a node, its children, and its parent, providing easy navigation between them. Node Positions are heavily inspired by the DOM and are based on ProseMirror's [ResolvedPos](https://prosemirror.net/docs/ref/#model.ResolvedPos) implementation.
+节点位置（`NodePos`）描述了节点及其子节点和父节点的具体位置，提供了它们之间的便捷导航。节点位置深受 DOM 的启发，基于 ProseMirror 的 [ResolvedPos](https://prosemirror.net/docs/ref/#model.ResolvedPos) 实现。
 
-## Use Node Positions
+## 使用节点位置
 
-The easiest way to create a new Node Position is by using the helper functions in the Editor instance. This way you always use the correct editor instance and have direct access to the API.
+创建新的节点位置的最简单方法是使用编辑器实例中的辅助函数。通过这种方式，您始终使用正确的编辑器实例，并可以直接访问 API。
 
 ```js
-// set up your editor somewhere up here
+// 在这里设置您的编辑器
 
-// The NodePosition for the outermost document node
+// 最外层文档节点的 NodePosition
 const $doc = editor.$doc
 
-// Get all nodes of type 'heading' in the document
+// 获取文档中所有类型为 'heading' 的节点
 const $headings = editor.$nodes('heading')
 
-// Filter by attributes
+// 根据属性进行筛选
 const $h1 = editor.$nodes('heading', { level: 1 })
 
-// Pick nodes directly
+// 直接选择节点
 const $firstHeading = editor.$node('heading', { level: 1 })
 
-// Create a new NodePos via the $pos method when the type is unknown
+// 当类型未知时，通过 $pos 方法创建新的 NodePos
 const $myCustomPos = editor.$pos(30)
 ```
 
-You can also create your own NodePos instances:
+您还可以创建自己的 NodePos 实例：
 
 ```js
-// You need to have an editor instance
-// and a position you want to map to
+// 您需要有一个编辑器实例
+// 和一个您想映射到的位置
 const myNodePos = new NodePos(100, editor)
 ```
 
-## What can I do with a NodePos?
+## 我可以用 NodePos 做什么？
 
-`NodePos` lets you traverse the document similarly to the document DOM in your browser. You can access parent nodes, child nodes, and sibling nodes. 
+`NodePos` 让您可以类似于浏览器中的文档 DOM 遍历文档。您可以访问父节点、子节点和兄弟节点。
 
-**Example:** Get and update the content of a `codeBlock` node
+**示例：** 获取并更新 `codeBlock` 节点的内容
 
 ```js
-// get the first codeBlock from your document
+// 从文档中获取第一个 codeBlock
 const $codeBlock = editor.$node('codeBlock')
 
-// get the previous NodePos of your codeBlock node
+// 获取 codeBlock 节点的前一个 NodePos
 const $previousItem = $codeBlock.before
 
-// easily update the content
-$previousItem.content = '<p>Updated content</p>'
+// 轻松更新内容
+$previousItem.content = '<p>更新后的内容</p>'
 ```
 
-If you are familiar with the DOM, this example will look familiar:
+如果您熟悉 DOM，则此示例会显得很熟悉：
 
-**Example:** Select list items and insert a new item in a bullet list
+**示例：** 选择列表项并在项目符号列表中插入新项
 
 ```js
-// get a bullet list from your doc
+// 从文档中获取一个项目符号列表
 const $bulletList = editor.$node('bulletList')
 
-// get all listItems from your bulletList
+// 获取所有项目符号列表中的 listItems
 const $listItems = $bulletList.querySelectorAll('listItem')
 
-// get the last listItem
+// 获取最后一个 listItem
 const $lastListItem = $listItems[0]
 
-// insert a new listItem after the last one
-editor.commands.insertContentAt($lastListItem.after, '<li>New item</li>')
+// 在最后一个之后插入一个新 listItem
+editor.commands.insertContentAt($lastListItem.after, '<li>新项</li>')
 ```
 
 ## API
 
 ### NodePos
 
-The NodePos class is the main class you will work with. It describes a specific position of a node, its children, its parent and easy ways to navigate between them. They are heavily inspired by the DOM and are based on ProseMirror's [ResolvedPos](https://prosemirror.net/docs/ref/#model.ResolvedPos) implementation.
+NodePos 类是您将要操作的主要类。它描述了节点、它的子节点、它的父节点的具体位置以及在它们之间便捷导航的方式。它们深受 DOM 的启发，并基于 ProseMirror 的 [ResolvedPos](https://prosemirror.net/docs/ref/#model.ResolvedPos) 实现。
 
-#### Methods
+#### 方法
 
-| Method           | Arguments                        | Returns               | Description                                                                                               |
-| ---------------- | --------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------- |
-| `constructor`    | `pos` (number), `editor` (object) | `NodePos`             | Creates a new `NodePos` instance at the given position (`pos`) within the specified `editor` instance     |
-| `closest`        | `nodeType` (string)              | `NodePos` or `null`   | Finds the closest matching `NodePos` going up the document structure. Returns `null` if no match is found |
-| `querySelector`  | `nodeType` (string), `attributes` (object) | `NodePos` or `null` | Finds the first matching `NodePos` going down the document structure. Can be filtered by attributes       |
-| `querySelectorAll`| `nodeType` (string), `attributes` (object) | `Array<NodePos>`     | Finds all matching `NodePos` instances going down the document structure. Can be filtered by attributes   |
-| `setAttribute`   | `attributes` (object)            | `NodePos`             | Sets the specified attributes on the current `NodePos`                                                    |
+| 方法             | 参数                             | 返回值               | 描述                                                                                                |
+| ---------------- | -------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------- |
+| `constructor`    | `pos`（数字），`editor`（对象） | `NodePos`             | 在指定的 `editor` 实例中创建给定位置（`pos`）的新的 `NodePos` 实例                              |
+| `closest`        | `nodeType`（字符串）              | `NodePos` 或 `null`   | 在文档结构中向上查找最近匹配的 `NodePos`。如果未找到匹配项，则返回 `null`                        |
+| `querySelector`  | `nodeType`（字符串），`attributes`（对象） | `NodePos` 或 `null` | 在文档结构中向下查找第一个匹配的 `NodePos`。可以通过属性进行过滤                             |
+| `querySelectorAll`| `nodeType`（字符串），`attributes`（对象） | `Array<NodePos>`     | 在文档结构中向下查找所有匹配的 `NodePos` 实例。可以通过属性进行过滤                          |
+| `setAttribute`   | `attributes`（对象）            | `NodePos`             | 在当前 `NodePos` 上设置指定的属性                                                               |
 
 ##### constructor
 
-**Arguments**
+**参数**
 
-- `pos` – The position you want to map to
-- `editor` – The editor instance you want to use
+- `pos` – 您想映射到的位置
+- `editor` – 您想使用的编辑器实例
 
-**Returns** `NodePos`
+**返回值** `NodePos`
 
 ```js
 const myNodePos = new NodePos(100, editor)
@@ -105,9 +105,9 @@ const myNodePos = new NodePos(100, editor)
 
 ##### closest
 
-The closest NodePos instance of your NodePosition going up the depth. If there is no matching NodePos, it will return `null`.
+您节点位置向上深度的最近 NodePos 实例。如果没有匹配的 NodePos，将返回 `null`。
 
-**Returns** `NodePos | null`
+**返回值** `NodePos | null`
 
 ```js
 const closest = myNodePos.closest('bulletList')
@@ -115,11 +115,11 @@ const closest = myNodePos.closest('bulletList')
 
 ##### querySelector
 
-The first matching NodePos instance of your NodePosition going down the depth. If there is no matching NodePos, it will return `null`.
+您节点位置向下深度的第一个匹配 NodePos 实例。如果没有匹配的 NodePos，将返回 `null`。
 
-You can also filter by attributes via the second attribute.
+您还可以通过第二个参数进行属性过滤。
 
-**Returns** `NodePos | null`
+**返回值** `NodePos | null`
 
 ```js
 const firstHeading = myNodePos.querySelector('heading')
@@ -128,11 +128,11 @@ const firstH1 = myNodePos.querySelector('heading', { level: 1 })
 
 ##### querySelectorAll
 
-All matching NodePos instances of your NodePosition going down the depth. If there is no matching NodePos, it will return an empty array.
+您节点位置向下深度的所有匹配 NodePos 实例。如果没有匹配的 NodePos，将返回一个空数组。
 
-You can also filter by attributes via the second attribute.
+您还可以通过第二个参数进行属性过滤。
 
-**Returns** `Array<NodePos>`
+**返回值** `Array<NodePos>`
 
 ```js
 const headings = myNodePos.querySelectorAll('heading')
@@ -141,40 +141,40 @@ const h1s = myNodePos.querySelectorAll('heading', { level: 1 })
 
 ##### setAttribute
 
-Set attributes on the current NodePos.
+在当前 NodePos 上设置属性。
 
-**Returns** `NodePos`
+**返回值** `NodePos`
 
 ```js
 myNodePos.setAttribute({ level: 1 })
 ```
 
-#### Properties
+#### 属性
 
-| Property        | Type             | Description                                                                                              |
-| --------------- | ---------------- | -------------------------------------------------------------------------------------------------------- |
-| `node`          | `Node` (ProseMirror Node) | The ProseMirror node at the current `NodePos`                                                           |
-| `parent`        | `NodePos`         | The parent node of the current `NodePos`                                                                 |
-| `children`      | `Array<NodePos>`  | The child nodes of the current `NodePos`                                                                 |
-| `firstChild`    | `NodePos` or `null` | The first child node of the current `NodePos`, or `null` if none exists                                  |
-| `lastChild`     | `NodePos` or `null` | The last child node of the current `NodePos`, or `null` if none exists                                   |
-| `pos`           | `number`          | The position of the node in the document                                                                 |
-| `from`          | `number`          | The starting position of the node                                                                        |
-| `to`            | `number`          | The ending position of the node                                                                          |
-| `range`         | `number`          | The range (from–to) of the node at the current `NodePos`                                                 |
-| `content`       | `string`          | The content of the node at the current `NodePos`. You can set this to update the node's content           |
-| `attributes`    | `Object`          | The attributes of the node at the current `NodePos`                                                      |
-| `textContent`   | `string`          | The text content of the node at the current `NodePos`                                                    |
-| `depth`         | `number`          | The depth (level) of the node in the document structure                                                  |
-| `size`          | `number`          | The size of the node at the current `NodePos`                                                            |
-| `before`        | `NodePos` or `null` | The previous node before the current `NodePos`, or `null` if none exists                                  |
-| `after`         | `NodePos` or `null` | The next node after the current `NodePos`, or `null` if none exists                                       |
+| 属性            | 类型                | 描述                                                                                               |
+| --------------- | ------------------ | -------------------------------------------------------------------------------------------------- |
+| `node`          | `Node`（ProseMirror Node） | 当前 `NodePos` 的 ProseMirror 节点                                                               |
+| `parent`        | `NodePos`          | 当前 `NodePos` 的父节点                                                                            |
+| `children`      | `Array<NodePos>`   | 当前 `NodePos` 的子节点                                                                            |
+| `firstChild`    | `NodePos` 或 `null` | 当前 `NodePos` 的第一个子节点，如果没有则返回 `null`                                            |
+| `lastChild`     | `NodePos` 或 `null` | 当前 `NodePos` 的最后一个子节点，如果没有则返回 `null`                                          |
+| `pos`           | `number`           | 文档中节点的位置                                                                                    |
+| `from`          | `number`           | 节点的起始位置                                                                                     |
+| `to`            | `number`           | 节点的结束位置                                                                                     |
+| `range`         | `number`           | 当前 `NodePos` 的节点范围（从–到）                                                                |
+| `content`       | `string`           | 当前 `NodePos` 的节点内容。您可以设置此内容来更新节点的内容                                      |
+| `attributes`    | `Object`           | 当前 `NodePos` 的节点属性                                                                          |
+| `textContent`   | `string`           | 当前 `NodePos` 的节点文本内容                                                                      |
+| `depth`         | `number`           | 节点在文档结构中的深度（级别）                                                                    |
+| `size`          | `number`           | 当前 `NodePos` 的节点大小                                                                          |
+| `before`        | `NodePos` 或 `null` | 当前 `NodePos` 之前的节点，如果没有节点则返回 `null`                                             |
+| `after`         | `NodePos` 或 `null` | 当前 `NodePos` 之后的节点，如果没有节点则返回 `null`                                            |
 
 ##### node
 
-The ProseMirror Node at the current Node Position.
+当前节点位置的 ProseMirror 节点。
 
-**Returns** `Node`
+**返回值** `Node`
 
 ```js
 const node = myNodePos.node
@@ -183,9 +183,9 @@ node.type.name // 'paragraph'
 
 ##### element
 
-The DOM element at the current Node Position.
+当前节点位置的 DOM 元素。
 
-**Returns** `Element`
+**返回值** `Element`
 
 ```js
 const element = myNodePos.element
@@ -194,20 +194,20 @@ element.tagName // 'P'
 
 ##### content
 
-The content of your NodePosition. You can set this to a new value to update the content of the node.
+您节点位置的内容。您可以设置此内容的新值以更新节点的内容。
 
-**Returns** `string`
+**返回值** `string`
 
 ```js
 const content = myNodePos.content
-myNodePos.content = '<p>Updated content</p>'
+myNodePos.content = '<p>更新后的内容</p>'
 ```
 
 ##### attributes
 
-The attributes of your NodePosition.
+您节点位置的属性。
 
-**Returns** `Object`
+**返回值** `Object`
 
 ```js
 const attributes = myNodePos.attributes
@@ -216,9 +216,9 @@ attributes.level // 1
 
 ##### textContent
 
-The text content of your NodePosition.
+您节点位置的文本内容。
 
-**Returns** `string`
+**返回值** `string`
 
 ```js
 const textContent = myNodePos.textContent
@@ -226,9 +226,9 @@ const textContent = myNodePos.textContent
 
 ##### depth
 
-The depth of your NodePosition.
+您节点位置的深度。
 
-**Returns** `number`
+**返回值** `number`
 
 ```js
 const depth = myNodePos.depth
@@ -236,9 +236,9 @@ const depth = myNodePos.depth
 
 ##### pos
 
-The position of your NodePosition.
+您节点位置的位置。
 
-**Returns** `number`
+**返回值** `number`
 
 ```js
 const pos = myNodePos.pos
@@ -246,9 +246,9 @@ const pos = myNodePos.pos
 
 ##### size
 
-The size of your NodePosition.
+您节点位置的大小。
 
-**Returns** `number`
+**返回值** `number`
 
 ```js
 const size = myNodePos.size
@@ -256,9 +256,9 @@ const size = myNodePos.size
 
 ##### from
 
-The from position of your NodePosition.
+您节点位置的 from 位置。
 
-**Returns** `number`
+**返回值** `number`
 
 ```js
 const from = myNodePos.from
@@ -266,9 +266,9 @@ const from = myNodePos.from
 
 ##### to
 
-The to position of your NodePosition.
+您节点位置的 to 位置。
 
-**Returns** `number`
+**返回值** `number`
 
 ```js
 const to = myNodePos.to
@@ -276,9 +276,9 @@ const to = myNodePos.to
 
 ##### range
 
-The range of your NodePosition.
+您节点位置的范围。
 
-**Returns** `number`
+**返回值** `number`
 
 ```js
 const range = myNodePos.range
@@ -286,9 +286,9 @@ const range = myNodePos.range
 
 ##### parent
 
-The parent NodePos of your NodePosition.
+您节点位置的父 NodePos。
 
-**Returns** `NodePos`
+**返回值** `NodePos`
 
 ```js
 const parent = myNodePos.parent
@@ -296,9 +296,9 @@ const parent = myNodePos.parent
 
 ##### before
 
-The NodePos before your NodePosition. If there is no NodePos before, it will return `null`.
+您节点位置之前的 NodePos。如果没有 NodePos 之前，将返回 `null`。
 
-**Returns** `NodePos | null`
+**返回值** `NodePos | null`
 
 ```js
 const before = myNodePos.before
@@ -306,9 +306,9 @@ const before = myNodePos.before
 
 ##### after
 
-The NodePos after your NodePosition. If there is no NodePos after, it will return `null`.
+您节点位置之后的 NodePos。如果没有 NodePos 之后，将返回 `null`。
 
-**Returns** `NodePos | null`
+**返回值** `NodePos | null`
 
 ```js
 const after = myNodePos.after
@@ -316,9 +316,9 @@ const after = myNodePos.after
 
 ##### children
 
-The child NodePos instances of your NodePosition.
+您节点位置的子 NodePos 实例。
 
-**Returns** `Array<NodePos>`
+**返回值** `Array<NodePos>`
 
 ```js
 const children = myNodePos.children
@@ -326,9 +326,9 @@ const children = myNodePos.children
 
 ##### firstChild
 
-The first child NodePos instance of your NodePosition. If there is no child, it will return `null`.
+您节点位置的第一个子 NodePos 实例。如果没有子节点，将返回 `null`。
 
-**Returns** `NodePos | null`
+**返回值** `NodePos | null`
 
 ```js
 const firstChild = myNodePos.firstChild
@@ -336,9 +336,9 @@ const firstChild = myNodePos.firstChild
 
 ##### lastChild
 
-The last child NodePos instance of your NodePosition. If there is no child, it will return `null`.
+您节点位置的最后一个子 NodePos 实例。如果没有子节点，将返回 `null`。
 
-**Returns** `NodePos | null`
+**返回值** `NodePos | null`
 
 ```js
 const lastChild = myNodePos.lastChild

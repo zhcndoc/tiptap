@@ -1,49 +1,49 @@
 ---
 title: Nuxt
 meta:
-  title: Nuxt | Tiptap Editor Docs
-  description: Learn how to set up the Tiptap Editor with Nuxt.js for a dynamic rich text editing experience. Dive into our guide in our docs!
-  category: Editor
+  title: Nuxt | Tiptap 编辑器文档
+  description: 了解如何使用 Nuxt.js 设置 Tiptap 编辑器，以实现动态富文本编辑体验。深入阅读我们的文档指南！
+  category: 编辑器
 ---
 
-This guide covers how to integrate Tiptap with your Nuxt.js project, complete with code examples.
+本指南涵盖了如何将 Tiptap 集成到你的 Nuxt.js 项目中，附带代码示例。
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-### Requirements
+### 系统要求
 
-- [Node](https://nodejs.org/en/download/) installed on your machine
-- Experience with [Vue](https://vuejs.org/v2/guide/#Getting-Started)
+- [Node](https://nodejs.org/en/download/) 已安装在你的机器上
+- 有 [Vue](https://vuejs.org/v2/guide/#Getting-Started) 使用经验
 
-## Create a project (optional)
+## 创建项目（可选）
 
-If you already have a Nuxt.js project, that's fine too. Just skip this step.
+如果你已经有一个 Nuxt.js 项目，那也没关系。可以跳过这一步。
 
-For the purpose of this project, start with a fresh Nuxt.js project called `my-tiptap-project`. The following command sets up everything we need. It asks a lot of questions, but just use what floats your boat or use the defaults.
+为了这个项目的目的，从一个名为 `my-tiptap-project` 的新 Nuxt.js 项目开始。以下命令设置了我们需要的一切。它会问很多问题，但只需选择你喜欢的选项或使用默认设置即可。
 
 ```bash
-# create a project
+# 创建一个项目
 npm init nuxt-app my-tiptap-project
 
-# change directory
+# 更改目录
 cd my-tiptap-project
 ```
 
-### Install the dependencies
+### 安装依赖
 
-Enough of the boring boilerplate work. Let's install Tiptap! For the following example, you'll need the `@tiptap/vue-3` package with a few components, the `@tiptap/pm` package, and `@tiptap/starter-kit`, which has the most common extensions to get started quickly.
+够了，这些无聊的模板工作。让我们安装 Tiptap！对于以下示例，你需要 `@tiptap/vue-3` 包以及一些组件，`@tiptap/pm` 包和 `@tiptap/starter-kit`，后者包含了最常见的扩展，可以快速入门。
 
 ```bash
 npm install @tiptap/vue-3@next @tiptap/pm@next @tiptap/starter-kit@next
 ```
 
-If you followed steps 1 and 2, you can now start your project with `npm run dev` and open [http://localhost:8080/](http://localhost:8080/) in your favorite browser. This might be different if you're working with an existing project.
+如果你按照步骤 1 和 2 使用，现在可以通过 `npm run dev` 启动项目，并在你喜欢的浏览器中打开 [http://localhost:8080/](http://localhost:8080/)。如果你在处理一个已有项目，可能会有所不同。
 
-## Integrate Tiptap
+## 集成 Tiptap
 
-To actually start using Tiptap, you'll need to add a new component to your app. Let's call it `TiptapEditor` and put the following example code in `components/TiptapEditor.vue`.
+要实际开始使用 Tiptap，你需要在你的应用中添加一个新组件。我们称之为 `TiptapEditor`，并将以下示例代码放入 `components/TiptapEditor.vue`。
 
-This is the fastest way to get Tiptap up and running with Vue. It will give you a very basic version of Tiptap, without any buttons. No worries, you will be able to add more functionality soon.
+这是让 Tiptap 与 Vue 一起快速启动的最简单方法。它将为你提供一个非常基本的 Tiptap 版本，没有任何按钮。别担心，你将很快能够添加更多功能。
 
 ```html
 <template>
@@ -67,7 +67,7 @@ This is the fastest way to get Tiptap up and running with Vue. It will give you 
 
     mounted() {
       this.editor = new Editor({
-        content: '<p>I'm running Tiptap with Vue.js. 🎉</p>',
+        content: '<p>我正在使用 Vue.js 运行 Tiptap。🎉</p>',
         extensions: [StarterKit],
       })
     },
@@ -79,9 +79,9 @@ This is the fastest way to get Tiptap up and running with Vue. It will give you 
 </script>
 ```
 
-### Add it to your app
+### 将其添加到你的应用中
 
-Now, let's replace the content of `pages/index.vue` with the following example code to use our new `TiptapEditor` component in our app.
+现在，让我们用以下示例代码替换 `pages/index.vue` 的内容，以便在我们的应用中使用新的 `TiptapEditor` 组件。
 
 ```html
 <template>
@@ -101,13 +101,13 @@ Now, let's replace the content of `pages/index.vue` with the following example c
 </script>
 ```
 
-Note that Tiptap needs to run in the client, not on the server. It's required to wrap the editor in a `<client-only>` tag. [Read more about client-only components.](https://nuxtjs.org/api/components-client-only)
+请注意，Tiptap 需要在客户端运行，而不是在服务器上。必须将编辑器包装在 `<client-only>` 标签中。[了解更多关于客户端组件的信息。](https://nuxtjs.org/api/components-client-only)
 
-You should now see Tiptap in your browser. Time to give yourself a pat on the back! :)
+现在你应该能在浏览器中看到 Tiptap。给自己一个赞吧！:)
 
-### Use v-model (optional)
+### 使用 v-model（可选）
 
-You're probably used to binding your data with `v-model` in forms. This also possible with Tiptap. Here's a working example component, that you can integrate in your project:
+你可能习惯于在表单中使用 `v-model` 绑定数据。这在 Tiptap 中也是可能的。以下是一个可以在你的项目中集成的工作示例组件：
 
 <CodeDemo path="/GuideGettingStarted/VModel" />
 

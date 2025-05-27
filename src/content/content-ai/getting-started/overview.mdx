@@ -1,9 +1,9 @@
 ---
-title: Integrate AI into your editor
+title: 将 AI 集成到您的编辑器
 meta:
-  title: AI | Tiptap Content AI
-  description: Integrate AI features into your editor like AI suggestions, autocompletion, stream responses… more in our docs.
-  category: Content AI
+  title: AI | Tiptap 内容 AI
+  description: 将 AI 功能集成到您的编辑器，例如 AI 建议、自动补全、流响应… 更多内容请参见我们的文档。
+  category: 内容 AI
 ---
 
 import contentAIIcon from '@/assets/content-ai.png'
@@ -16,57 +16,57 @@ import cardCoverUIComponents from '@/assets/card-covers/examples/components-prev
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始免费的[试用](https://cloud.tiptap.dev/v2/billing)或订阅[Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Integrate an AI provider">
-        Configure OpenAI in your [AI settings](https://cloud.tiptap.dev/v2/cloud/ai) or review the [Custom LLM guides](http://localhost:3000/content-ai/custom-llms).
+    <RequirementItem label="2. 集成 AI 提供商">
+        在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI 或查看[自定义 LLM 指南](http://localhost:3000/content-ai/custom-llms)。
     </RequirementItem>
-    <RequirementItem label="3. Install from private registry">
-        To install the frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="3. 从私有注册表安装">
+        要安装前端扩展，请按照[设置指南](/guides/pro-extensions)进行身份验证，以访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-The Content AI extensions provide an easy integration of AI features like smart autocompletion, proofreading, image generation, and more.
+内容 AI 扩展提供了 AI 功能的简单集成，如智能自动补全、校对、图像生成等。
 
-- **AI editor extensions:** Editor extensions handle the complexity of streaming, diffing, and UI decoration so you can focus on your business' logic.
-- **Plug-and-play with OpenAI:** Point the extensions to your Content AI App ID and integrate it with your OpenAI account.
-- **Custom LLM ready** Override the resolver hooks to call your custom AI LLM backend.
+- **AI 编辑器扩展:** 编辑器扩展处理流、差异和 UI 装饰的复杂性，以便您可以专注于业务逻辑。
+- **开箱即用与 OpenAI:** 将扩展指向您的内容 AI 应用 ID，并与您的 OpenAI 帐户集成。
+- **自定义 LLM 就绪** 通过重写解析器钩子来调用您的自定义 AI LLM 后端。
 
-## Content AI extensions
+## 内容 AI 扩展
 
-Our AI extensions work out-of-the-box with Tiptap Cloud, so you can deploy them without a worrying about an AI backend, but they are also easily extendable to work with your custom backend and LLMs.
+我们的 AI 扩展可以开箱即用地与 Tiptap Cloud 配合使用，因此您可以在无需担心 AI 后端的情况下部署它们，但它们也可以轻松扩展，以与您的自定义后端和 LLM 一起工作。
 
 <div className="grid sm:grid-cols-2 gap-5">
   <ProductCard
-    title="AI Generation"
-    description="In-line content generation and manipulation with your custom LLM or OpenAI."
-    tags={['Cloud', 'On premises']}
+    title="AI 生成"
+    description="使用您的自定义 LLM 或 OpenAI 进行行内内容生成和操作。"
+    tags={['云', '本地']}
     documentationUrl="/content-ai/capabilities/generation/overview"
     icon={contentAIIcon.src}
   />
   <ProductCard
-    title="AI Suggestion"
-    description="Show proofreading suggestions in your editor."
-    tags={['Beta', 'Cloud', 'On premises']}
+    title="AI 建议"
+    description="在您的编辑器中显示校对建议。"
+    tags={['测试版', '云', '本地']}
     documentationUrl="/content-ai/capabilities/suggestion/overview"
     icon={contentAIIcon.src}
   />
   <ProductCard
-    title="AI Changes"
-    description="Review AI-generated content."
-    tags={['Beta']}
+    title="AI 变更"
+    description="审核 AI 生成的内容。"
+    tags={['测试版']}
     documentationUrl="/content-ai/capabilities/changes/overview"
     icon={contentAIIcon.src}
   />
 </div>
 
-## Integrate UI components
+## 集成 UI 组件
 
-Plug in our library of ready-made React components and full-featured templates to get a polished Editor and customize from there.
+将我们的现成 React 组件库和功能齐全的模板插件化，以获得精致的编辑器，并从中定制。
 
-<Callout title="Content AI components coming soon" variant="hint">
-    UI components and templates for Content AI are on the way. If you’re already using Tiptap’s UI Components, you’ll be able to drop them in with minimal changes as soon as they ship.
+<Callout title="内容 AI 组件即将推出" variant="hint">
+    内容 AI 的 UI 组件和模板正在开发中。如果您已经使用 Tiptap 的 UI 组件，您可以在它们发布后以最小的更改轻松集成。
 </Callout>
 
 <div>
@@ -78,12 +78,12 @@ Plug in our library of ready-made React components and full-featured templates t
           src={cardCoverSimpleEditorTemplate.src}
           width={cardCoverSimpleEditorTemplate.width}
           height={cardCoverSimpleEditorTemplate.height}
-          alt="Image"
+          alt="图片"
         />
         <div>
-          <CardGrid.ItemTitle>Templates</CardGrid.ItemTitle>
+          <CardGrid.ItemTitle>模板</CardGrid.ItemTitle>
           <CardGrid.ItemParagraph>
-            Get started fast with a prebuilt editor that includes commonly used features.
+            使用包含常用功能的预构建编辑器快速入门。
           </CardGrid.ItemParagraph>
         </div>
         <CardGrid.ItemFooter />
@@ -96,12 +96,12 @@ Plug in our library of ready-made React components and full-featured templates t
           src={cardCoverUIComponents.src}
           width={cardCoverUIComponents.width}
           height={cardCoverUIComponents.height}
-          alt="Image"
+          alt="图片"
         />
         <div>
-          <CardGrid.ItemTitle>Components</CardGrid.ItemTitle>
+          <CardGrid.ItemTitle>组件</CardGrid.ItemTitle>
           <CardGrid.ItemParagraph>
-            Already using Tiptap? Drop in just the pieces you need.
+            已经在使用 Tiptap 吗？只需集成所需的部分。
           </CardGrid.ItemParagraph>
         </div>
         <CardGrid.ItemFooter />
@@ -110,14 +110,14 @@ Plug in our library of ready-made React components and full-featured templates t
   </CardGrid.Wrapper>
 </div>
 
-Tiptap’s new AI-ready UI component library and templates are in progress. Until then, you can explore our [legacy Notion-style template](https://templates.tiptap.dev/) as an inspiration for wiring AI into an editor. We no longer maintain this template or provide the source code. Migrate to the upcoming components and templates for an easier upgrade path.
+Tiptap 的新 AI 就绪 UI 组件库和模板正在开发中。在此之前，您可以探索我们的[传统 Notion 风格模板](https://templates.tiptap.dev/)，作为将 AI 集成到编辑器中的灵感。我们不再维护此模板或提供源代码。请迁移到即将推出的组件和模板，以便轻松升级。
 
-## Examples and demos
+## 示例和演示
 
-We provide examples for integrating AI features into your editor. Check our demos:
+我们提供了将 AI 功能集成到您的编辑器中的示例。查看我们的演示：
 
-- [AI Text Generation](/content-ai/capabilities/generation/overview)
-- [AI Autocompletion](/content-ai/capabilities/generation/text-generation/autocompletion)
-- [AI Suggestion](/content-ai/capabilities/suggestion/overview)
-- [AI Changes](/content-ai/capabilities/changes/overview)
-- [AI Agent](/examples/experiments/ai-agent)
+- [AI 文本生成](/content-ai/capabilities/generation/overview)
+- [AI 自动补全](/content-ai/capabilities/generation/text-generation/autocompletion)
+- [AI 建议](/content-ai/capabilities/suggestion/overview)
+- [AI 变更](/content-ai/capabilities/changes/overview)
+- [AI 代理](/examples/experiments/ai-agent)

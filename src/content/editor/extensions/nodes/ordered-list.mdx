@@ -1,49 +1,48 @@
 ---
-title: OrderedList extension
+title: 有序列表扩展
 tags:
   - type: image
     src: https://img.shields.io/npm/v/@tiptap/extension-list/next?label=version
     url: https://www.npmjs.com/package/@tiptap/extension-list
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-list.svg
     url: https://npmcharts.com/compare/@tiptap/extension-list?minimal=true
-    label: Downloads
+    label: 下载量
 extension:
-  name: Ordered List
+  name: 有序列表
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-list
-  description: If a bullet list doesn’t look serious enough, put some numbers in front of it.
+  description: 如果无序列表看起来不够严肃，可以在前面加上数字。
   type: node
   icon: List
 meta:
-  title: OrderedList extension | Tiptap Editor Docs
-  description: Use the Ordered List extension in Tiptap to enable ordered lists rendered as <ol> HTML tags. Learn more in our docs!
-  category: Editor
+  title: 有序列表扩展 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用有序列表扩展以启用渲染为 `<ol>` HTML 标签的有序列表。了解更多请参阅我们的文档！
+  category: 编辑器
 ---
 
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-This extension enables you to use ordered lists in the editor. They are rendered as `<ol>` HTML tags.
+此扩展允许您在编辑器中使用有序列表。它们被渲染为 `<ol>` HTML 标签。
 
-Type <code>1. </code> (or any other number followed by a dot) at the beginning of a new line and it will magically transform to a ordered list.
+在新行开头输入 <code>1. </code>（或任何其他数字加点），它将神奇地转换为一个有序列表。
 
 <CodeDemo path="/Nodes/OrderedList" />
 
-<Callout title="Modify backspace behavior" variant="info">
-  If you want to modify the standard behavior of backspace and delete functions for lists, you
-  should read about the [ListKeymap](/editor/extensions/functionality/listkeymap) extension.
+<Callout title="修改退格键行为" variant="info">
+  如果您想修改列表的退格和删除功能的标准行为，请阅读 [ListKeymap](/editor/extensions/functionality/listkeymap) 扩展。
 </Callout>
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-list@next
 ```
 
-This extension requires the [`ListItem`](/editor/extensions/nodes/list-item) node.
+此扩展依赖 [`ListItem`](/editor/extensions/nodes/list-item) 节点。
 
-## Usage
+## 用法
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -54,7 +53,7 @@ new Editor({
 })
 ```
 
-This extension is installed by default with the `ListKit` extension, so you don’t need to install it separately.
+此扩展默认随 `ListKit` 扩展安装，因此无需单独安装。
 
 ```ts
 import { Editor } from '@tiptap/core'
@@ -65,11 +64,11 @@ new Editor({
 })
 ```
 
-## Settings
+## 设置
 
 ### HTMLAttributes
 
-Custom HTML attributes that should be added to the rendered HTML tag.
+应添加到渲染的 HTML 标签上的自定义 HTML 属性。
 
 ```js
 OrderedList.configure({
@@ -81,9 +80,9 @@ OrderedList.configure({
 
 ### itemTypeName
 
-Specify the list item name.
+指定列表项名称。
 
-Default: `'listItem'`
+默认值：`'listItem'`
 
 ```js
 OrderedList.configure({
@@ -93,9 +92,9 @@ OrderedList.configure({
 
 ### keepMarks
 
-Decides whether to keep the marks from a previous line after toggling the list either using `inputRule` or using the button
+决定在使用 `inputRule` 或按钮切换列表后是否保留上一行的标记。
 
-Default: `false`
+默认值：`false`
 
 ```js
 OrderedList.configure({
@@ -105,9 +104,9 @@ OrderedList.configure({
 
 ### keepAttributes
 
-Decides whether to keep the attributes from a previous line after toggling the list either using `inputRule` or using the button
+决定在使用 `inputRule` 或按钮切换列表后是否保留上一行的属性。
 
-Default: `false`
+默认值：`false`
 
 ```js
 OrderedList.configure({
@@ -115,27 +114,27 @@ OrderedList.configure({
 })
 ```
 
-## Commands
+## 命令
 
 ### toggleOrderedList()
 
-Toggle an ordered list.
+切换有序列表。
 
 ```js
 editor.commands.toggleOrderedList()
 ```
 
-## Keyboard shortcuts
+## 快捷键
 
-| Command           | Windows/Linux                                        | macOS                                            |
-| ----------------- | ---------------------------------------------------- | ------------------------------------------------ |
+| 命令               | Windows/Linux                                     | macOS                                              |
+| ----------------- | ------------------------------------------------ | ------------------------------------------------- |
 | toggleOrderedList | <kbd>Control</kbd> + <kbd>Shift</kbd> + <kbd>7</kbd> | <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>7</kbd> |
 
-## Source code
+## 源代码
 
 [packages/extension-list/src/ordered-list/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-list/src/ordered-list/)
 
-## Minimal Install
+## 最小安装示例
 
 ```js
 import { Editor } from '@tiptap/core'

@@ -1,35 +1,35 @@
 ---
-title: Authenticate your conversion service
+title: 验证您的转换服务
 meta:
-    title: Authenticate | Tiptap Conversion
-    description: Retrieve your credentials to authenticate your application with Tiptap's conversion service.
-    category: Conversion
+    title: 认证 | Tiptap 转换
+    description: 获取您的凭据以验证您的应用程序与 Tiptap 转换服务的连接。
+    category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-Tiptap Conversion lets you import and export Tiptap JSON to and from `DOCX`, `ODT`, and `Markdown`. You can integrate import/export directly in your Tiptap editor with dedicated extensions, or use the Conversion REST API on your server.
+Tiptap 转换允许您将 Tiptap JSON 在 `DOCX`、`ODT` 和 `Markdown` 之间导入导出。您可以通过专用插件将导入/导出功能直接集成到 Tiptap 编辑器中，或在您的服务器上使用转换的 REST API。
 
-## Set up authorization
+## 设置授权
 
-Most conversion operations require authentication. Generate a JWT (JSON Web Token) using the `secret key` from your Tiptap Cloud account. Include this JWT in requests or extension configs.
+大多数转换操作都需要进行身份验证。使用您的 Tiptap Cloud 账户中的 `密钥` 生成一个 JWT（JSON Web Token）。在请求或扩展配置中包含此 JWT。
 
-<Callout title="Export DOCX Extension" variant="info">
-    The <code>extension-export-docx</code> package does not require authentication!
-    Feel free to [skip](/conversion/import-export/docx/editor-export) these steps if you only need that extension.
+<Callout title="导出 DOCX 扩展" variant="info">
+    `<code>extension-export-docx</code>` 包不需要进行身份验证！
+    如果您只需要此扩展，可以随意[跳过](/conversion/import-export/docx/editor-export)这些步骤。
 </Callout>
 
-1. **Activate a plan:** Begin a [free trial or choose a subscription](https://cloud.tiptap.dev/v2/billing).
-2. **Get your App ID and secret key** on the [Convert settings](https://cloud.tiptap.dev/v2/cloud/convert) page.
-3. **Generate a JWT** for testing using any JWT tool (e.g., JWT Builder). For production, always create JWTs **server-side** to keep your secret safe.
-4. **Use the JWT** in your requests or extension config. For API calls, pass it in the `Authorization` header and the App ID in `X-App-Id`.
+1. **激活计划：** 开始[免费试用或选择订阅](https://cloud.tiptap.dev/v2/billing)。
+2. **在[转换设置](https://cloud.tiptap.dev/v2/cloud/convert)页面获取您的 App ID 和密钥。**
+3. **使用任何 JWT 工具（例如 JWT Builder）生成测试用的 JWT。** 对于生产环境，请务必在**服务器端**创建 JWT，以确保您的密钥安全。
+4. **在您的请求或扩展配置中使用 JWT。** API 调用时，将其放在 `Authorization` 头中，App ID 放在 `X-App-Id`。
 
-## Explore file-type integrations
+## 探索文件类型集成
 
-Depending on which format you want to work with, each file type has its own guide to installing and configuring the relevant import and export extensions:
+根据您希望操作的格式，不同的文件类型都有自己的安装和配置相关导入导出扩展的指南：
 
-- [DOCX integration](/conversion/import-export/docx/)
-- [ODT integration](/conversion/import-export/odt)
-- [Markdown integration](/conversion/import-export/markdown)
+- [DOCX 集成](/conversion/import-export/docx/)
+- [ODT 集成](/conversion/import-export/odt)
+- [Markdown 集成](/conversion/import-export/markdown)
 
-These guides explain exactly how to integrate the respective extension and REST API endpoints into your application and configure any necessary options.
+这些指南详细说明了如何将相应的扩展和 REST API 端点集成到您的应用中，并配置任何必要的选项。

@@ -1,55 +1,55 @@
 ---
-title: AI Generation editor commands
+title: AI 生成编辑器命令
 meta:
-  title: AI Generation editor commands | Tiptap Content AI
-  description: Integrate AI into your Tiptap Editor to access preconfigured commands for text manipulation and image generation.
-  category: Content AI
+  title: AI 生成编辑器命令 | Tiptap 内容 AI
+  description: 将 AI 集成到您的 Tiptap 编辑器中，以访问预配置的文本操作和图像生成命令。
+  category: 内容 AI
 ---
 
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的帐户中开始免费[试用](https://cloud.tiptap.dev/v2/billing)或订阅[Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Integrate an AI provider">
-        Configure OpenAI in your [AI settings](https://cloud.tiptap.dev/v2/cloud/ai) or review the [Custom LLM guides](/content-ai/capabilities/generation/custom-llms).
+    <RequirementItem label="2. 集成 AI 提供者">
+        在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查看[自定义 LLM 指南](/content-ai/capabilities/generation/custom-llms)。
     </RequirementItem>
-    <RequirementItem label="3. Install from private registry">
-        To install the frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="3. 从私有注册表安装">
+        要安装前端扩展，请按照[设置指南](/guides/pro-extensions)对 Tiptap 的私有 npm 注册表进行身份验证。
     </RequirementItem>
 </Requirements>
 
-The AI Generation extension for Tiptap Editor includes a set of preconfigured commands that you can integrate into your rich text editor. These commands allow you to adjust text tone, complete text, generate images, and more, enhancing your editor's functionality.
+Tiptap 编辑器的 AI 生成扩展包含一组预配置的命令，您可以将其集成到您的富文本编辑器中。这些命令允许您调整文本语气、完成文本、生成图像等，从而增强您编辑器的功能。
 
-To see how these commands are used, check out the examples on the [overview](/content-ai/capabilities/generation/overview) page.
+要查看这些命令的用法，请查看[概述](/content-ai/capabilities/generation/overview)页面上的示例。
 
-| Command                                                                                                                         | Description                                                                                                                          |
-| ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| [`aiAdjustTone(tone: Tone, options: TextOptions)`](#aiadjusttone)                                                               | Adjusts the tone of voice of the selected text to the specified [TONE](#aitone).                                                     |
-| [`aiBloggify(options: TextOptions)`](#most-text-commands)                                                                       | Rewrite the text into a blog format                                                                                                  |
-| [`aiComplete(options: TextOptions)`](#most-text-commands)                                                                       | Completes the selected text                                                                                                          |
-| [`aiDeEmojify(options: TextOptions)`](#most-text-commands)                                                                      | Removes emojis from the selected text                                                                                                |
-| [`aiEmojify(options: TextOptions)`](#most-text-commands)                                                                        | Adds emojis ✨ to your text                                                                                                          |
-| [`aiExtend(options: TextOptions)`](#most-text-commands)                                                                         | Extends your text                                                                                                                    |
-| [`aiFixSpellingAndGrammar(options: TextOptions)`](#most-text-commands)                                                          | Fixes spelling & grammar                                                                                                             |
-| [`aiKeypoints(options: TextOptions)`](#most-text-commands)                                                                      | Summarizes your text to a list of key points                                                                                         |
-| [`aiRephrase(options: TextOptions)`](#most-text-commands)                                                                       | Rephrases the selected text                                                                                                          |
-| [`aiRestructure(options: TextOptions)`](#most-text-commands)                                                                    | Restructures the selected text to use rich text formatting                                                                           |
-| [`aiShorten(options: TextOptions)`](#most-text-commands)                                                                        | Shortens the selected text                                                                                                           |
-| [`aiSimplify(options: TextOptions)`](#most-text-commands)                                                                       | Rephrases your text in simplified words                                                                                              |
-| [`aiSummarize(options: TextOptions)`](#most-text-commands)                                                                      | Summarizes your text                                                                                                                 |
-| [`aiTextPrompt(options: TextOptions)`](#most-text-commands)                                                                     | Runs your custom prompt                                                                                                              |
-| [`aiTldr(options: TextOptions)`](#most-text-commands)                                                                           | Creates a "Too Long; Didn't Read" version text                                                                                       |
-| [`aiTranslate(language: Language, options: TextOptions)`](#aitranslate)                                                         | Translates the selected text into the specified language                                                                             |
-| **Utility**                                                                                                                     |
-| [`aiAccept(options: AcceptOptions)`](/content-ai/capabilities/generation/text-generation/manage-responses#aiaccept)             | [Accept the generated response](/content-ai/capabilities/generation/text-generation/manage-responses), and insert it into the editor |
-| [`aiReject(options: RejectOptions)`](/content-ai/capabilities/generation/text-generation/manage-responses#aireject)             | [Reject the generated Response](/content-ai/capabilities/generation/text-generation/manage-responses), resetting ai.storage state    |
-| [`aiRegenerate(options: RegenerateOptions)`](/content-ai/capabilities/generation/text-generation/manage-responses#airegenerate) | [Regenerate a response](/content-ai/capabilities/generation/text-generation/manage-responses) using the same parameters              |
+| 命令                                                                                                                             | 描述                                                                                                                                |
+| ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| [`aiAdjustTone(tone: Tone, options: TextOptions)`](#aiadjusttone)                                                               | 将选定文本的语气调整为指定的[TONE](#aitone)。                                                                                      |
+| [`aiBloggify(options: TextOptions)`](#most-text-commands)                                                                       | 将文本重写为博客格式                                                                                                             |
+| [`aiComplete(options: TextOptions)`](#most-text-commands)                                                                       | 完成所选文本                                                                                                                       |
+| [`aiDeEmojify(options: TextOptions)`](#most-text-commands)                                                                      | 从所选文本中删除表情符号                                                                                                          |
+| [`aiEmojify(options: TextOptions)`](#most-text-commands)                                                                        | 向您的文本添加表情符号 ✨                                                                                                         |
+| [`aiExtend(options: TextOptions)`](#most-text-commands)                                                                         | 扩展您的文本                                                                                                                       |
+| [`aiFixSpellingAndGrammar(options: TextOptions)`](#most-text-commands)                                                          | 修正拼写和语法                                                                                                                    |
+| [`aiKeypoints(options: TextOptions)`](#most-text-commands)                                                                      | 将您的文本总结为关键点列表                                                                                                        |
+| [`aiRephrase(options: TextOptions)`](#most-text-commands)                                                                       | 重新措词所选文本                                                                                                                  |
+| [`aiRestructure(options: TextOptions)`](#most-text-commands)                                                                    | 重新构建所选文本以使用富文本格式                                                                                                    |
+| [`aiShorten(options: TextOptions)`](#most-text-commands)                                                                        | 缩短所选文本                                                                                                                       |
+| [`aiSimplify(options: TextOptions)`](#most-text-commands)                                                                       | 用简化的词语重新措词您的文本                                                                                                        |
+| [`aiSummarize(options: TextOptions)`](#most-text-commands)                                                                      | 总结您的文本                                                                                                                       |
+| [`aiTextPrompt(options: TextOptions)`](#most-text-commands)                                                                     | 运行您的自定义提示                                                                                                                |
+| [`aiTldr(options: TextOptions)`](#most-text-commands)                                                                           | 创建 “太长；没读” 的版本文本                                                                                                      |
+| [`aiTranslate(language: Language, options: TextOptions)`](#aitranslate)                                                         | 将所选文本翻译成指定语言                                                                                                         |
+| **实用工具**                                                                                                                   |
+| [`aiAccept(options: AcceptOptions)`](/content-ai/capabilities/generation/text-generation/manage-responses#aiaccept)             | [接受生成的响应](/content-ai/capabilities/generation/text-generation/manage-responses)，并将其插入编辑器 |
+| [`aiReject(options: RejectOptions)`](/content-ai/capabilities/generation/text-generation/manage-responses#aireject)             | [拒绝生成的响应](/content-ai/capabilities/generation/text-generation/manage-responses)，重置 ai.storage 状态     |
+| [`aiRegenerate(options: RegenerateOptions)`](/content-ai/capabilities/generation/text-generation/manage-responses#airegenerate) | [重新生成响应](/content-ai/capabilities/generation/text-generation/manage-responses) 使用相同的参数              |
 
-### Most text commands
+### 大多数文本命令
 
-Most of the text commands accept the same options and their usage is similar. The following example demonstrates how to use the `aiBloggify` command:
+大多数文本命令接受相同的选项，使用方法相似。以下示例演示如何使用 `aiBloggify` 命令：
 
 ```js
 editor.chain().focus().aiBloggify(options: TextOptions)
@@ -58,46 +58,46 @@ editor.chain().focus().aiBloggify(options: TextOptions)
 ### aiAdjustTone
 
 ```js
-// Tone: 'default' | 'academic' | 'business' | 'casual' | 'childfriendly' | 'confident' | 'conversational' | 'creative' | 'emotional' | 'excited' | 'formal' | 'friendly' | 'funny' | 'humorous' | 'informative' | 'inspirational' | 'memeify' | 'narrative' | 'objective' | 'persuasive' | 'poetic' | string
+// 语气: 'default' | 'academic' | 'business' | 'casual' | 'childfriendly' | 'confident' | 'conversational' | 'creative' | 'emotional' | 'excited' | 'formal' | 'friendly' | 'funny' | 'humorous' | 'informative' | 'inspirational' | 'memeify' | 'narrative' | 'objective' | 'persuasive' | 'poetic' | string
 editor.chain().focus().aiAdjustTone(tone: Tone, options: TextOptions).run()
 ```
 
 ### aiTranslate
 
-Translates the selected text content into the given output language.
+将所选文本内容翻译成给定的输出语言。
 
-It accepts two letter ISO 639-1 language codes.
+它接受两位字母的 ISO 639-1 语言代码。
 
 ```js
-// Language: 'en' | 'de' | 'nl' | ...
+// 语言: 'en' | 'de' | 'nl' | ...
 editor.chain().focus().aiTranslate(language: Language, options: TextOptions).run()
 ```
 
-## Text command options
+## 文本命令选项
 
-On every command which supports `TextOptions`, you’re able to specify the following options:
+在每个支持 `TextOptions` 的命令上，您可以指定以下选项：
 
-| Setting          | Type                                                                   | Default         | Definition                                                                                                                                                                                                                 |
-| ---------------- | ---------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `modelName`      | see [Supported text models](#supported-text-models)                    | `gpt-3.5-turbo` | The model used at OpenAI                                                                                                                                                                                                   |
-| `format`         | `'rich-text' \| 'plain-text'`                                          | `plain-text`    | Determines the [format](/content-ai/capabilities/generation/text-generation/format) of how the model should respond                                                                                                        |
-| `stream`         | `boolean`                                                              | `false`         | Should the command stream characters to the editor? It’s like the **typewriter** behavior in ChatGPT. **This requires the newest extension version!**                                                                      |
-| `insertAt`       | `undefined \| number \| {from: number; to: number}`                    | `undefined`     | Where to insert the response into the editor, if `undefined` the response will be inserted at the current selection. If a number, the response will be inserted at that position. If an object it will replace that range. |
-| `language`       | `string` (e.g. `en`, `de`)                                             | `null`          | Although we do our best to prompt OpenAI for a response in the language of the input, sometimes it’s better to define it yourself.                                                                                         |
-| `tone`           | `string`                                                               | `null`          | A [voice of tone](#ai-adjust-tone) the response should be transformed to                                                                                                                                                   |
-| `textLength`     | `number`                                                               | `undefined`     | The number of `textLengthUnit`s the AI should respond with (e.g. the `3` in "3 paragraphs")                                                                                                                                |
-| `textLengthUnit` | `'paragraphs' \| 'words' \| 'characters'`                              | `undefined`     | The unit of `textLength`s the AI should respond with (e.g. the `paragraphs` in "3 paragraphs")                                                                                                                             |
-| `collapseToEnd`  | `boolean`                                                              | `true`          | Whether the cursor should be set to the end after the operation or the insertion should get selected.                                                                                                                      |
-| `context`        | `Array<{ type: 'text', text: string} \| { type: 'url', url: string }>` | `[]`            | [Context](/content-ai/capabilities/generation/text-generation/provide-context) to provide the model for generating a Response.                                                                                             |
-| `text`           | `string`                                                               | `undefined`     | An optional message to have the model respond to                                                                                                                                                                           |
-| `insert`         | `boolean`                                                              | `true`          | Allows disabling inserting content directly into the editor                                                                                                                                                                |
-| `append`         | `boolean`                                                              | `true`          | If `true`, the response will be appended to the end of the current selection. If `false`, the response will replace the current selection.                                                                                 |
+| 设置              | 类型                                                                   | 默认值         | 定义                                                                                                                                                                                                                  |
+| ---------------- | ---------------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `modelName`      | 查看 [支持的文本模型](#supported-text-models)                         | `gpt-3.5-turbo` | 在 OpenAI 中使用的模型                                                                                                                                                                                              |
+| `format`         | `'rich-text' \| 'plain-text'`                                         | `plain-text`    | 确定模型应如何响应的[格式](/content-ai/capabilities/generation/text-generation/format)                                                                                                                           |
+| `stream`         | `boolean`                                                              | `false`         | 命令是否应该将字符流式传输到编辑器？这类似于 ChatGPT 中的 **打字机** 行为。**这需要最新的扩展版本！**                                                                                                          |
+| `insertAt`       | `undefined \| number \| {from: number; to: number}`                   | `undefined`     | 如果为 `undefined`，则响应将插入在当前位置。如果为数字，响应将插入该位置。如果为对象，则将替换该范围。                                                                                                         |
+| `language`       | `string` (e.g. `en`, `de`)                                            | `null`          | 尽管我们尽力提示 OpenAI 以输入语言响应，有时最好是您自己定义它。                                                                                                                                                    |
+| `tone`           | `string`                                                               | `null`          | 响应应转换为的[语气](#ai-adjust-tone)                                                                                                                                            |
+| `textLength`     | `number`                                                               | `undefined`     | AI 应该响应的 `textLengthUnit` 的数量（例如，"3 段" 中的 `3`）                                                                                                                                                     |
+| `textLengthUnit` | `'paragraphs' \| 'words' \| 'characters'`                            | `undefined`     | AI 应该响应的 `textLength` 的单位（例如，"3 段" 中的 `paragraphs`）                                                                                                                                           |
+| `collapseToEnd`  | `boolean`                                                              | `true`          | 操作完成后，光标是否应设置到末尾或插入是否应被选中。                                                                                                                                                             |
+| `context`        | `Array<{ type: 'text', text: string} \| { type: 'url', url: string }>` | `[]`            | [上下文](/content-ai/capabilities/generation/text-generation/provide-context) 以便为生成响应提供模型。                                                                                                           |
+| `text`           | `string`                                                               | `undefined`     | 一个可选的消息以让模型响应                                                                                                                                                                                         |
+| `insert`         | `boolean`                                                              | `true`          | 允许禁用直接将内容插入编辑器                                                                                                                                                                                        |
+| `append`         | `boolean`                                                              | `true`          | 如果为 `true`，响应将追加到当前选择的末尾。如果为 `false`，响应将替换当前选择。                                                                                                                                 |
 
-_Unfortunately the combination of **tone** and **language** sometimes leads to responses which are not in the desired language._
+_不幸的是，**tone** 和 **language** 的组合有时会导致响应不是所需语言。_
 
-### Supported text models
+### 支持的文本模型
 
-We currently support the following OpenAI chat models:
+我们当前支持以下 OpenAI 聊天模型：
 
 - `gpt-4.1`
 - `gpt-4.1-2025-04-14`
@@ -127,13 +127,13 @@ We currently support the following OpenAI chat models:
 - `gpt-3.5-turbo-1106`
 - `gpt-3.5-turbo-16k`
 
-## Choose the right Model
+## 选择合适的模型
 
-When configuring the Tiptap AI extension, consider the specific needs of your application:
+配置 Tiptap AI 扩展时，请考虑您应用的具体需求：
 
-- **For Cost-Effective Operations:** Opt for GPT-3 or DALL-E 2 if the primary concern is budget and the tasks do not demand the most advanced capabilities.
-- **For Advanced Requirements:** Choose GPT-4o or DALL-E 3 when your application requires the highest level of language understanding or image generation quality, and budget is less of a constraint.
+- **对于成本效益的运营：** 如果主要关注预算，且任务不需要最先进的能力，请选择 GPT-3 或 DALL-E 2。
+- **对于高级需求：** 当您的应用需要最高级别的语言理解或图像生成质量，且预算不太受限制时，请选择 GPT-4o 或 DALL-E 3。
 
-The Tiptap AI extension's flexible configuration allows you to tailor the AI integration to match your specific requirements and budgetary considerations.
+Tiptap AI 扩展的灵活配置使您能够根据您的具体要求和预算考虑调整 AI 集成。
 
-_Note: The pricing details are not provided here due to variability and the need for up-to-date information. It's recommended to refer to the official OpenAI pricing page for the latest figures._
+_注意：由于价格的变化和需要最新信息，此处未提供定价细节。建议参考 OpenAI 官方定价页面以获取最新数据。_

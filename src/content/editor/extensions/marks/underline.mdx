@@ -1,50 +1,50 @@
 ---
-title: Underline extension
+title: 下划线扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extension-underline/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extension-underline/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extension-underline
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-underline.svg
     url: https://npmcharts.com/compare/@tiptap/extension-underline?minimal=true
-    label: Downloads
+    label: 下载量
 meta:
-  title: Underline extension | Tiptap Editor Docs
-  description: Add a line below your text to make it look more… underlined with the Tiptap’s… Underline extension. More in the docs!
-  category: Editor
+  title: 下划线扩展 | Tiptap 编辑器文档
+  description: 在你的文本下方添加一条线，以使其看起来更加… 下划线，使用 Tiptap 的… 下划线扩展。更多内容请查看文档！
+  category: 编辑器
 extension:
-  name: Underline
+  name: 下划线
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-underline
-  description: Add a line below your text to make it look more… underlined.
+  description: 在你的文本下方添加一条线，以使其看起来更加… 下划线。
   type: mark
-  icon: Underline
+  icon: 下划线
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 
-Use this extension to render text <u>underlined</u>. If you pass `<u>` tags, or text with inline `style` attributes setting `text-decoration: underline` in the editor’s initial content, they all will be rendered accordingly.
+使用此扩展来渲染文本 <u>下划线</u>。如果您在编辑器的初始内容中传入 `<u>` 标签或设置了 `text-decoration: underline` 的行内 `style` 属性的文本，它们都会相应地被渲染。
 
-Be aware that underlined text in the internet usually indicates that it’s a clickable link. Don’t confuse your users with underlined text.
+请注意，互联网上的下划线文本通常表示这是一个可点击的链接。不要用下划线文本让用户感到困惑。
 
-<Callout title="Restrictions" variant="default">
-    The extension will generate the corresponding `<u>` HTML tags when reading contents of the `Editor` instance. All text marked underlined, regardless of the method will be normalized to `<u>` HTML tags.
+<Callout title="限制" variant="default">
+    当读取 `Editor` 实例的内容时，扩展将生成相应的 `<u>` HTML 标签。所有标记为下划线的文本，无论采用何种方法，都会被规范化为 `<u>` HTML 标签。
 </Callout>
 
 <CodeDemo path="/Marks/Underline" />
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-underline@next
 ```
 
-## Settings
+## 设置
 
 ### HTMLAttributes
 
-Custom HTML attributes that should be added to the rendered HTML tag.
+应添加到渲染的 HTML 标签的自定义 HTML 属性。
 
 ```js
 Underline.configure({
@@ -54,11 +54,11 @@ Underline.configure({
 })
 ```
 
-## Commands
+## 命令
 
 ### setUnderline()
 
-Marks a text as underlined.
+将文本标记为下划线。
 
 ```js
 editor.commands.setUnderline()
@@ -66,7 +66,7 @@ editor.commands.setUnderline()
 
 ### toggleUnderline()
 
-Toggles an underline mark.
+切换下划线标记。
 
 ```js
 editor.commands.toggleUnderline()
@@ -74,18 +74,18 @@ editor.commands.toggleUnderline()
 
 ### unsetUnderline()
 
-Removes an underline mark.
+移除下划线标记。
 
 ```js
 editor.commands.unsetUnderline()
 ```
 
-## Keyboard shortcuts
+## 键盘快捷键
 
-| Command           | Windows/Linux                     | macOS                         |
+| 命令               | Windows/Linux                     | macOS                         |
 | ----------------- | --------------------------------- | ----------------------------- |
 | toggleUnderline() | <kbd>Control</kbd> + <kbd>U</kbd> | <kbd>Cmd</kbd> + <kbd>U</kbd> |
 
-## Source code
+## 源代码
 
 [packages/extension-underline/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-underline/)

@@ -1,26 +1,26 @@
 ---
-title: Style comments in your editor
+title: 在您的编辑器中样式化评论
 meta:
-  title: Style threads | Tiptap Comments Docs
-  description: Style and manage thread visibility in your Tiptap editor using CSS decoration classes for inline and block threads.
-  category: Comments
+  title: 评论线程 | Tiptap 评论文档
+  description: 使用 CSS 装饰类在您的 Tiptap 编辑器中样式化和管理线程的可见性。
+  category: 评论
 ---
 
-To style threads in your Tiptap editor, we use decoration classes that are wrapped around the threads. Since threads can include block nodes, we have two types of decorations: one for inline threads, which are wrapped around the text, and one for block threads, which are wrapped around the block node.
+要在您的 Tiptap 编辑器中样式化线程，我们使用包裹在线程周围的装饰类。由于线程可以包含块节点，我们有两种类型的装饰：一种是用于内联线程的，包裹在文本周围，另一种是用于块线程的，包裹在块节点周围。
 
-By default, the following css classes are used for the threads:
+默认情况下，以下 CSS 类用于线程：
 
 ```css
-.tiptap-thread {} // the thread class for any type of thread
-.tiptap-thread--inline {} // the thread class for inline threads
-.tiptap-thread--block {} // the thread class for block threads
-.tiptap-thread--hovered {} // the thread class for hovered threads
-.tiptap-thread--selected {} // the thread class for selected threads
-.tiptap-thread--resolved {} // the thread class for resolved threads
-.tiptap-thread--unresolved {} // the thread class for unresolved threads
+.tiptap-thread {} // 适用于任何类型线程的线程类
+.tiptap-thread--inline {} // 适用于内联线程的线程类
+.tiptap-thread--block {} // 适用于块线程的线程类
+.tiptap-thread--hovered {} // 适用于被悬停的线程的线程类
+.tiptap-thread--selected {} // 适用于已选择线程的线程类
+.tiptap-thread--resolved {} // 适用于已解决线程的线程类
+.tiptap-thread--unresolved {} // 适用于未解决线程的线程类
 ```
 
-Those classes can also be overwritten by passing through the classes to the `ThreadsKit` extension.
+这些类也可以通过将类传递给 `ThreadsKit` 扩展来覆盖。
 
 ```js
 const editor = new Editor({
@@ -42,9 +42,9 @@ const editor = new Editor({
 })
 ```
 
-## Handling hover events
+## 处理悬停事件
 
-Let's say you have a sidebar with a list of threads, and you want to highlight the thread currently hovered in your sidebar inside the editor. You can dispatch a transaction to the editor with the meta `threadMouseOver` or `threadMouseOut` to indicate which thread is currently hovered.
+假设您有一个侧边栏，其中有一个线程列表，您想要在编辑器中突出显示当前在侧边栏中悬停的线程。您可以通过 meta `threadMouseOver` 或 `threadMouseOut` 向编辑器分派一个事务，以指示当前悬停的线程。
 
 ```jsx
 const onHoverThread = (threadId) => {
@@ -62,6 +62,6 @@ const onUnhoverThread = (threadId) => {
 }
 
 ;<div onMouseEnter={() => onHoverThread('123')} onMouseLeave={() => onUnhoverThread('123')}>
-  Thread 123
+  线程 123
 </div>
 ```

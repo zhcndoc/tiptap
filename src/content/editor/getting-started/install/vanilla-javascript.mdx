@@ -1,38 +1,38 @@
 ---
 title: Vanilla JavaScript
 meta:
-  title: Vanilla JavaScript | Tiptap Editor Docs
-  description: Learn how to set up the Tiptap Editor with Vanilla JavaScript, install dependencies and initialize the editor in the docs!
-category: Editor
+  title: Vanilla JavaScript | Tiptap 编辑器文档
+  description: 学习如何在文档中使用 Vanilla JavaScript 设置 Tiptap 编辑器、安装依赖并初始化编辑器！
+category: 编辑器
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-Are you using plain JavaScript or a framework that isn't listed? No worries, we provide everything you need.
+你是否使用纯 JavaScript 或未列出的框架？不用担心，我们提供你所需的全部内容。
 
-<Callout title="Hint" variant="hint">
-    If you don't use a bundler like Webpack or Rollup, please follow the [CDN](/editor/getting-started/install/cdn) guide instead. Since Tiptap is built in a modular way, you will need to use `<script type="module">` in your HTML to get our CDN imports working.
+<Callout title="提示" variant="hint">
+    如果你没有使用像 Webpack 或 Rollup 这样的打包工具，请改为按照[CDN](/editor/getting-started/install/cdn)指南操作。由于 Tiptap 采用模块化构建，你需要在 HTML 中使用 `<script type="module">` 来使我们的 CDN 导入生效。
 </Callout>
 
-## Install dependencies
+## 安装依赖
 
-For the following example, you will need `@tiptap/core` (the actual editor), `@tiptap/pm` (the ProseMirror library), and `@tiptap/starter-kit`. The StarterKit doesn't include all extensions, only the most common ones.
+对于以下示例，你需要安装 `@tiptap/core`（实际的编辑器核心）、`@tiptap/pm`（ProseMirror 库）和 `@tiptap/starter-kit`。 StarterKit 不包含所有扩展，仅包含最常用的扩展。
 
 ```bash
 npm install @tiptap/core@next @tiptap/pm@next @tiptap/starter-kit@next
 ```
 
-### Add markup
+### 添加标记
 
-Add the following HTML where you'd like to mount the editor:
+在你希望挂载编辑器的位置添加以下 HTML：
 
 ```html
 <div class="element"></div>
 ```
 
-## Initialize the editor
+## 初始化编辑器
 
-Everything is in place, so let's set up the editor. Add the following code to your JavaScript:
+一切准备就绪，现在开始设置编辑器。将以下代码添加到你的 JavaScript 文件中：
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -45,4 +45,4 @@ new Editor({
 })
 ```
 
-Open your project in the browser to see Tiptap in action. Good work!
+在浏览器中打开你的项目，看看 Tiptap 的效果吧。干得漂亮！

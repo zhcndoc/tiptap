@@ -1,27 +1,27 @@
 ---
 title: Svelte
 meta:
-  title: Svelte | Tiptap Editor Docs
-  description: Discover how to set up Tiptap with Svelte for a dynamic rich text editing experience. Follow our detailed guide in our docs!
-  category: Editor
+  title: Svelte | Tiptap 编辑器文档
+  description: 了解如何使用 Svelte 设置 Tiptap，以实现动态富文本编辑体验。请查看我们文档中的详细指南！
+  category: 编辑器
 ---
 
-Learn how to integrate Tiptap with your SvelteKit project using this step-by-sep guide. Alternatively, check out our [Svelte text editor example](/examples/basics/default-text-editor).
+了解如何使用此逐步指南将 Tiptap 集成到您的 SvelteKit 项目中。或者，请查看我们的 [Svelte 文本编辑器示例](/examples/basics/default-text-editor)。
 
-## Take a shortcut: Svelte REPL with Tiptap
+## 走捷径：带 Tiptap 的 Svelte REPL
 
-If you want to jump into it right away, here is a [Svelte REPL with Tiptap](https://svelte.dev/repl/798f1b81b9184780aca18d9a005487d2?version=3.31.2).
+如果您想立即开始，这里有一个 [带 Tiptap 的 Svelte REPL](https://svelte.dev/repl/798f1b81b9184780aca18d9a005487d2?version=3.31.2)。
 
-### Requirements
+### 先决条件
 
-- [Node](https://nodejs.org/en/download/) installed on your machine
-- Experience with [Svelte](https://svelte.dev/docs#getting-started)
+- 您的机器上安装了 [Node](https://nodejs.org/en/download/)
+- 具备使用 [Svelte](https://svelte.dev/docs#getting-started) 的经验
 
-## Create a project (optional)
+## 创建项目（可选）
 
-If you already have a SvelteKit project, that's fine too. Just skip this step.
+如果您已经有一个 SvelteKit 项目，那也很好。只需跳过此步骤。
 
-For the purpose of this guide, start with a fresh SvelteKit project called `my-tiptap-project`. The following commands set up everything we need. It asks a lot of questions, but select your preferred options or use the defaults.
+为了本指南的目的，从一个名为 `my-tiptap-project` 的全新 SvelteKit 项目开始。以下命令将设置我们所需的一切。它会问很多问题，但请选择您喜欢的选项或使用默认设置。
 
 ```bash
 npm create svelte@latest my-tiptap-project
@@ -30,21 +30,21 @@ npm install
 npm run dev
 ```
 
-### Install dependencies
+### 安装依赖
 
-Now that we're done with boilerplate, let's install Tiptap! For the following example you'll need the `@tiptap/core` package, with a few components, `@tiptap/pm`, and `@tiptap/starter-kit`, which includes the most common extensions to get started quickly.
+既然我们已经完成了样板代码，让我们安装 Tiptap！在以下示例中，您需要 `@tiptap/core` 包，以及一些组件、`@tiptap/pm` 和 `@tiptap/starter-kit`，它们包括了最常用的扩展，以便快速入门。
 
 ```bash
 npm install @tiptap/core@next @tiptap/pm@next @tiptap/starter-kit@next
 ```
 
-If you followed steps 1 and 2, you can now start your project with `npm run dev` and open [http://localhost:3000/](http://localhost:3000/) in your favorite browser. This might be different if you're working with an existing project.
+如果您完成了步骤 1 和 2，现在可以使用 `npm run dev` 启动您的项目，并在您喜欢的浏览器中打开 [http://localhost:3000/](http://localhost:3000/)。如果您正在处理现有项目，这可能会有所不同。
 
-## Integrate Tiptap
+## 集成 Tiptap
 
-To start using Tiptap, you'll need to add a new component to your app. Let's call it `Tiptap` and add the following example code in `src/lib/Tiptap.svelte`.
+要开始使用 Tiptap，您需要向您的应用添加一个新组件。我们称之为 `Tiptap`，并在 `src/lib/Tiptap.svelte` 中添加以下示例代码。
 
-This is the fastest way to get Tiptap up and running with SvelteKit. It will give you a very basic version of Tiptap, without any buttons. No worries, you will be able to add more functionality soon.
+这是让 Tiptap 在 SvelteKit 上快速启动和运行的最快方法。它将为您提供一个非常基本的 Tiptap 版本，没有任何按钮。别担心，您将很快能够添加更多功能。
 
 ```svelte
 <script>
@@ -61,7 +61,7 @@ This is the fastest way to get Tiptap up and running with SvelteKit. It will giv
 			extensions: [StarterKit],
 			content: '<p>Hello World! 🌍️ </p>',
 			onTransaction: () => {
-				// force re-render so `editor.isActive` works as expected
+				// 强制重新渲染，以便 `editor.isActive` 按预期工作
 				editor = editor;
 			},
 		});
@@ -105,9 +105,9 @@ This is the fastest way to get Tiptap up and running with SvelteKit. It will giv
 </style>
 ```
 
-## Add it to your app
+## 将其添加到您的应用中
 
-Now, let's replace the content of `src/routes/+page.svelte` with the following example code to use our new `Tiptap` component in our app.
+现在，让我们将 `src/routes/+page.svelte` 的内容替换为以下示例代码，以在我们的应用中使用新的 `Tiptap` 组件。
 
 ```svelte
 <script>
@@ -119,4 +119,4 @@ Now, let's replace the content of `src/routes/+page.svelte` with the following e
 </main>
 ```
 
-Tiptap should now be visible in your browser. Time to give yourself a pat on the back! :)
+Tiptap 现在应该在您的浏览器中可见。祝贺您，给自己一个赞吧！ :)

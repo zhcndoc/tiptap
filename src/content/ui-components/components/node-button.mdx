@@ -1,12 +1,12 @@
 ---
-title: Add a button to toggle block-level nodes
+title: 添加切换块级节点的按钮
 meta:
-  title: Node button | Tiptap UI Component
-  description: Toggle through block-level nodes like code blocks and blockquotes with the node button. More in the docs.
-  category: UI Components
+  title: 节点按钮 | Tiptap UI 组件
+  description: 使用节点按钮在代码块和引用块等块级节点之间切换。更多内容请查看文档。
+  category: UI 组件
 component:
-  name: Node button
-  description: Add a button that toggles through block-level nodes like blockquotes.
+  name: 节点按钮
+  description: 添加一个可以在引用块等块级节点之间切换的按钮。
   type: component
   isFree: true
   isCloud: false
@@ -17,25 +17,25 @@ component:
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-Toggle through block-level nodes like code blocks and blockquotes with the node button.
+使用节点按钮在代码块和引用块等块级节点之间切换。
 
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/node-button" />
 
-## Installation
-You can add the component via Tiptap CLI (for Vite or Next.js)
+## 安装
+您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加该组件。
 
 ```bash
 npx @tiptap/cli add node-button
 ```
 
-### Manual Integration
-For frameworks other than Vite or Next.js, add the component manually from the [open-source repository](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/node-button).
+### 手动集成
+对于 Vite 或 Next.js 以外的框架，可以从 [开源库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/node-button) 手动添加组件。
 
-### Import styles
+### 导入样式
 
-This component requires you to import our styles which were added to `styles/keyframe-animation.scss` and `styles/_variables.scss`.
+此组件需要您导入我们添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 的样式。
 
-## Usage
+## 使用方法
 
 ```tsx
 import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
@@ -51,9 +51,9 @@ export default function MyEditor() {
     extensions: [StarterKit],
     content: `
         <blockquote>
-            <p>"The best way to predict the future is to invent it."</p><p>— Alan Kay</p>
+            <p>"预测未来的最好方法就是发明未来."</p><p>— Alan Kay</p>
         </blockquote>
-        <pre><code>console.log('Hello, World!');</code></pre>
+        <pre><code>console.log('你好，世界!');</code></pre>
         `,
   })
 
@@ -70,18 +70,18 @@ export default function MyEditor() {
 }
 ```
 
-## Props
+## 属性
 
-| Name                | Type                        | Default  | Description                                        |
+| 名称                | 类型                        | 默认值  | 描述                                              |
 | ------------------- | --------------------------- | -------- | -------------------------------------------------- |
-| editor              | Editor \| null              | null     | The Tiptap editor instance                         |
-| type                | 'codeBlock' \| 'blockquote' | required | The type of node to toggle                         |
-| hideWhenUnavailable | boolean                     | false    | Whether the button should be hide if not available |
-| text                | string                      | -        | Text to display alongside the icon                 |
+| editor              | Editor \| null              | null     | Tiptap 编辑器实例                                 |
+| type                | 'codeBlock' \| 'blockquote' | 必需      | 要切换的节点类型                                  |
+| hideWhenUnavailable | boolean                     | false    | 当不可用时按钮是否应该隐藏                        |
+| text                | string                      | -        | 要与图标一起显示的文本                            |
 
-## Requirements
+## 要求
 
-Used reference components
+使用的参考组件
 
 - `use-tiptap-editor` (hook)
 - `tiptap-utils` (lib)

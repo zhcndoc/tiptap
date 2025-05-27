@@ -1,36 +1,36 @@
 ---
-title: Tiptap Concepts
-description: Explore the foundational elements of Tiptap's API, designed for intricate rich text editing based on ProseMirror's architecture.
+title: Tiptap 概念
+description: 探索 Tiptap API 的基础元素，旨在实现基于 ProseMirror 架构的复杂丰富文本编辑。
 meta:
-  title: Tiptap Concepts | Tiptap Editor Docs
-  description: Learn how to integrate Tiptap's document schema, transaction-based state management, and editor extensions in our docs.
-  category: Editor
+  title: Tiptap 概念 | Tiptap 编辑器文档
+  description: 在我们的文档中学习如何集成 Tiptap 的文档架构、基于事务的状态管理以及编辑器扩展。
+  category: 编辑器
 ---
 
-## Structure
+## 结构
 
-ProseMirror works with a strict [Schema](/editor/core-concepts/schema), which defines the allowed structure of a document. A document is a tree of headings, paragraphs and others elements, so called nodes. Marks can be attached to a node, e. g. to emphasize part of it. [Commands](/editor/api/commands) change that document programmatically.
+ProseMirror 使用一个严格的 [Schema](/editor/core-concepts/schema)，它定义了文档允许的结构。一个文档是由标题、段落和其他元素（称为节点）组成的树状结构。标记（Marks）可以附加到节点上，例如用以强调其中的部分。 [命令](/editor/api/commands) 通过编程方式改变该文档。
 
-## Content
+## 内容
 
-The document is stored in a state. All changes are applied as transactions to the state. The state has details about the current content, cursor position and selection. You can hook into a few different [events](/editor/api/events), for example to alter transactions before they get applied.
+文档存储在一个状态中。所有的更改都是作为事务应用到这个状态上的。状态详细描述了当前的内容、光标位置和选择。你可以挂钩到几个不同的 [事件](/editor/api/events)，例如在事务应用之前对其进行修改。
 
-## Extensions
+## 扩展
 
-Extensions add [nodes](/editor/extensions/nodes), [marks](/editor/extensions/marks) and/or [functionalities](/editor/extensions/functionality) to the editor. A lot of those extensions bound their commands to common [keyboard shortcuts](/editor/core-concepts/keyboard-shortcuts).
+扩展为编辑器增加 [节点](/editor/extensions/nodes)、[标记](/editor/extensions/marks) 和/或 [功能](/editor/extensions/functionality)。许多扩展将它们的命令绑定到常用的 [键盘快捷键](/editor/core-concepts/keyboard-shortcuts)。
 
-## Vocabulary
+## 术语表
 
-ProseMirror has its own vocabulary and you’ll stumble upon all those words now and then. Here is a short overview of the most common words we use in the documentation.
+ProseMirror 有自己的术语表，你会偶尔遇到这些词。以下是我们在文档中常用词汇的简要介绍。
 
-| Word        | Description                                                              |
-| ----------- | ------------------------------------------------------------------------ |
-| Schema      | Configures the structure your content can have.                          |
-| Document    | The actual content in your editor.                                       |
-| State       | Everything to describe the current content and selection of your editor. |
-| Transaction | A change to the state (updated selection, content, …)                    |
-| Extension   | Registers new functionality.                                             |
-| Node        | A type of content, for example a heading or a paragraph.                 |
-| Mark        | Can be applied to nodes, for example for inline formatting.              |
-| Command     | Execute an action inside the editor, that somehow changes the state.     |
-| Decoration  | Styling on top of the document, for example to highlight mistakes.       |
+| 词汇        | 描述                                                              |
+| ----------- | ----------------------------------------------------------------- |
+| Schema      | 配置内容可能具有的结构。                                             |
+| Document    | 编辑器中的实际内容。                                                 |
+| State       | 描述编辑器当前内容和选择的全部信息。                                   |
+| Transaction | 对状态的更改（更新选择、内容等）。                                      |
+| Extension   | 注册新的功能。                                                      |
+| Node        | 一种内容类型，比如标题或段落。                                          |
+| Mark        | 可应用于节点的标记，例如行内格式。                                     |
+| Command     | 在编辑器内执行某个操作，某种程度上会改变状态。                              |
+| Decoration  | 文档上的样式，例如用来突出显示错误。                                       |

@@ -2,38 +2,38 @@
 tags:
   - type: editor
 meta:
-  title: Frequently Asked Questions | Tiptap Editor Docs
-  description: Frequently asked questions about Tiptap, the headless editor framework.
-  category: Editor
-title: Frequently Asked Questions
+  title: 常见问题 | Tiptap 编辑器文档
+  description: 关于 Tiptap 的常见问题，这是一个无头编辑器框架。
+  category: 编辑器
+title: 常见问题
 ---
 
-## When I copy the content of the editor, into a text field I get a bunch of newlines
+## 当我将编辑器的内容复制到文本框时，得到了一堆换行符
 
-By default, in Tiptap, the clipboard text serializer is set to produce paragraphs with 2 newlines in between (like you would do in Markdown).
+在 Tiptap 中，默认情况下，剪贴板文本序列化器设置为在段落之间生成 2 个换行符（就像你在 Markdown 中所做的那样）。
 
-So you'd paste content and it would look like this:
-
-```text
-This is a paragraph.
-
-This is another paragraph.
-```
-
-When you probably want it to look like this (with no extra newline between paragraphs):
+所以你粘贴的内容看起来是这样的：
 
 ```text
-This is a paragraph.
-This is another paragraph.
+这是一个段落。
+
+这是另一个段落。
 ```
 
-To do this you have to change the `clipboardTextSerializer` to use a single newline instead of two.
+而你可能希望它看起来是这样的（段落之间没有额外换行符）：
 
-Like this:
+```text
+这是一个段落。
+这是另一个段落。
+```
+
+要实现这一点，你需要将 `clipboardTextSerializer` 更改为使用单个换行符而不是两个。
+
+像这样：
 
 ```js
 new Editor({
-  // other options
+  // 其他选项
   coreExtensionOptions: {
     clipboardTextSerializer: {
       blockSeparator: '\n',
@@ -42,44 +42,44 @@ new Editor({
 })
 ```
 
-Which will make the clipboard serializer use a single newline as a separator between blocks.
+这将使剪贴板序列化器使用单个换行符作为块之间的分隔符。
 
-## My drag and drop isn't working
+## 我的拖放功能无法正常工作
 
-Some libraries like `react-dnd` or `react-beautiful-dnd` might interfere with the drag & drop functionality of Tiptap, by registering themselves globally.
-If you're using one of these libraries, you might have to disable them (or at least confine the elements that they listen to) for the drag and drop functionality of the editor to work properly.
+一些库，比如 `react-dnd` 或 `react-beautiful-dnd` 可能会通过全局注册干扰 Tiptap 的拖放功能。
+如果你正在使用这些库中的一个，你可能需要禁用它们（或者至少限制它们监听的元素），以使编辑器的拖放功能正常工作。
 
-## Why both `parseHTML` and `renderHTML`
+## 为什么同时有 `parseHTML` 和 `renderHTML`
 
-`parseHTML` and `renderHTML` can be thought of as opposites:
+`parseHTML` 和 `renderHTML` 可以被视为相反的操作：
 
-- `parseHTML`: HTML -> JSON, taking the HTML representation and parsing that as JSON.
-- `renderHTML`: JSON -> HTML, taking the JSON representation and outputting that as HTML to render in the editor.
+- `parseHTML`: HTML -> JSON，将 HTML 表示解析为 JSON。
+- `renderHTML`: JSON -> HTML，将 JSON 表示输出为 HTML 以在编辑器中呈现。
 
-This is what allows Tiptap to be so flexible with its content representation. You can define your content as JSON, and then render it as HTML, or you can define your content as HTML, and then parse it into JSON.
+这使得 Tiptap 能够在内容表示上非常灵活。你可以将内容定义为 JSON，然后将其渲染为 HTML，或你可以将内容定义为 HTML，然后将其解析为 JSON。
 
-Additionally, `parseHTML` and `renderHTML` can also be used in different contexts:
-`renderHTML` is used during _copy events_, because what you copy from an editor needs to be serialized as HTML to go into your clipboard.
-`parseHTML` is used during _paste events_, because that HTML in your clipboard is serialized as HTML and needs to be parsed into JSON.
+此外，`parseHTML` 和 `renderHTML` 也可以在不同的上下文中使用：
+`renderHTML` 在 _复制事件_ 中使用，因为你从编辑器中复制的内容需要序列化为 HTML 以进入剪贴板。
+`parseHTML` 在 _粘贴事件_ 中使用，因为你剪贴板中的 HTML 被序列化为 HTML，需要解析为 JSON。
 
-On initial render, if your content is defined as JSON, `parseHTML` is completely skipped, and would only be used for pastes.
-Whereas your `renderHTML` method determines how the content is represented as HTML within the editor.
+在初次渲染时，如果你的内容被定义为 JSON，`parseHTML` 将完全被跳过，仅在粘贴时使用。
+而你的 `renderHTML` 方法确定内容在编辑器内的 HTML 表示方式。
 
-`renderHTML` can be overridden within the editor view with node views and mark views, to allow for custom rendering of nodes and marks.
+`renderHTML` 可以在编辑器视图中通过节点视图和标记视图被覆盖，以允许对节点和标记的自定义渲染。
 
-## I want to edit HTML content with Tiptap
+## 我想用 Tiptap 编辑 HTML 内容
 
-Tiptap is based on Prosemirror, and it is not an arbitrary HTML editor, it is a rich text editor that needs to have full control of the HTML that it is editing to make changes to it. Prosemirror does this by attempting to parse the content in such a way that it conforms to a schema (which is derived from the nodes & marks that you specify as Tiptap extensions), this means content which does not conform to the schema WILL BE LOST. This is a tradeoff, Prosemirror can accept a fair amount of HTML content & parse it into a structured format but it cannot reliably do so with arbitrary HTML (liberal in what it accepts, strict in what it outputs).
-One common situation where this can occur, is attempting to nest marks of different types like: `<span class="my-class"><span style="color: red">editable text</span></span>` these two marks cannot be nested like this and Prosemirror will attempt to correct it by dropping one of them to abide by the rule that marks cannot be wrapping each other. To fix this, the HTML that is input into the editor should be in the format of one element with multiple attributes like: `<span class="my-class" style="color: red">editable text</span>` , this would be correctly parsed by Prosemirror as attempting to apply two marks to the text.
+Tiptap 是基于 Prosemirror构建的，并不是一个任意的 HTML 编辑器，它是一个富文本编辑器，需要对正在编辑的 HTML 拥有完全的控制权来进行更改。Prosemirror 通过尝试以符合模式的方式解析内容来实现这一点（该模式源于你作为 Tiptap 扩展指定的节点和标记），这意味着不符合模式的内容将会丢失。这是一个权衡，Prosemirror 可以接受相当数量的 HTML 内容，并将其解析为结构化格式，但无法可靠地处理任意 HTML（在接受内容时比较宽松，但在输出时却很严格）。
+一个常见的情况是试图嵌套不同类型的标记，如：`<span class="my-class"><span style="color: red">可编辑文本</span></span>` 这两个标记无法这样嵌套，Prosemirror 将通过丢弃其中一个来试图修复这一点，以遵循标记无法相互包裹的规则。要解决此问题，输入到编辑器的 HTML 应该采用一个带有多个属性的元素的格式，如：`<span class="my-class" style="color: red">可编辑文本</span>`，Prosemirror 将正确解析这一格式，因为它试图将两个标记应用于文本。
 
-There is not a way to configure this behavior in Prosemirror, as it is already complex enough to parse arbitrary HTML. Depending on the source of the HTML you are attempting to parse, you can:
+在 Prosemirror 中没有配置此行为的方法，因为解析任意 HTML 已经相当复杂。根据你试图解析的 HTML 来源，你可以：
 
-- Rely on the default behavior & drop the unknown content
-- Attempt to parse the HTML yourself with a custom HTML parser and make it conform to what Prosemirror would expect (e.g. to merge spans)
+- 依赖默认行为并丢弃未知内容
+- 尝试自己用自定义 HTML 解析器解析 HTML，并使其符合 Prosemirror 的期望（例如合并 `<span>`）
 
-## React context is not working with NodeViews
+## React 上下文在 NodeViews 中无法工作
 
-To use React context within a NodeView, you need to wrap the EditorContent component with the context provider. Within the nodeview, the context should be available within the NodeView component.
+要在 NodeView 中使用 React 上下文，你需要用上下文提供者包装 EditorContent 组件。在 nodeview 中，上下文应该可以在 NodeView 组件中使用。
 
 ```jsx
 import React from 'react'
@@ -94,10 +94,10 @@ const TiptapEditor = ({ editor }) => {
 }
 ```
 
-## Why are there extra divs when I use a React Node View
+## 为什么使用 React Node View 时会有额外的 div
 
-The reason that these divs exist is that prosemirror expects a node view to be generated synchronously, whereas React can only render asynchronously. So we inject an element, and later let React asynchronously render into that element. Causing there to be a wrapping div in the DOM.
+这些 div 存在的原因是 prosemirror 期望同步生成一个节点视图，而 React 只能异步渲染。因此，我们注入一个元素，然后让 React 异步渲染到该元素中。这导致在 DOM 中有一个包装 div。
 
-Similarly, when using a `NodeViewContent` there is an element, which has created by React, and then Prosemirror renders into that element. This has to exist as a handoff from React to Prosemirror, because React's default behavior is to clear the element that it is rendering into, and we need to not have React destroy the element that prosemirror is trying to render the rich text into.
+同样，当使用 `NodeViewContent` 时，有一个由 React 创建的元素，然后 Prosemirror 渲染到该元素中。这必须存在作为从 React 到 Prosemirror 的交接，因为 React 的默认行为是清除它正在渲染的元素，我们需要确保 React 不会销毁 prosemirror 正在尝试渲染富文本的元素。
 
-So, all of this to say, there is no good way to get rid of these intermediate elements because of how React works. You'd either have to use the JS NodeView API, or Vue because as either of those have more sane rendering approaches.
+因此，可以说，由于 React 的工作方式，没有好的方法去除这些中间元素。你只能使用 JS NodeView API 或 Vue，因为这两者的渲染方式更为合理。

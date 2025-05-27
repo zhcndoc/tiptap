@@ -1,49 +1,49 @@
 ---
-title: insertContentAt command
+title: insertContentAt 命令
 meta:
-  title: insertContentAt command | Tiptap Editor Docs
-  description: Add content to a specific position or range using plain text, HTML, or JSON with the insertContentAt command. More in the docs!
-  category: Editor
+  title: insertContentAt 命令 | Tiptap 编辑器文档
+  description: 使用 insertContentAt 命令在特定位置或范围添加内容，可以是纯文本、HTML 或 JSON。更多内容请见文档！
+  category: 编辑器
 ---
 
-The `insertContentAt` will insert an HTML string or a node at a given position or range. If a range is given, the new content will replace the content in the given range with the new content.
+`insertContentAt` 将在给定位置或范围插入一个 HTML 字符串或节点。如果给定了范围，新内容将替换该范围内的内容。
 
-## Parameters
+## 参数
 
 `position: number | Range`
 
-The position or range the content will be inserted in.
+内容将被插入的位置或范围。
 
 `value: Content`
 
-The content to be inserted. Can be plain text, an HTML string or JSON node(s).
+要插入的内容。可以是纯文本、HTML 字符串或 JSON 节点。
 
 `options: Record<string, any>`
 
-- updateSelection: controls if the selection should be moved to the newly inserted content.
-- parseOptions: Passed content is parsed by ProseMirror. To hook into the parsing, you can pass `parseOptions` which are then handled by [ProseMirror](https://prosemirror.net/docs/ref/#model.ParseOptions).
+- updateSelection: 控制选择是否移动到新插入的内容。
+- parseOptions: 传入的内容将由 ProseMirror 解析。要挂钩解析，您可以传递 `parseOptions`，它们将由 [ProseMirror](https://prosemirror.net/docs/ref/#model.ParseOptions) 处理。
 
-## Use the insertContentAt command
+## 使用 insertContentAt 命令
 
 ```js
-// Plain text
-editor.commands.insertContentAt(12, 'Example Text')
+// 纯文本
+editor.commands.insertContentAt(12, '示例文本')
 
-// Plain text, replacing a range
-editor.commands.insertContentAt({ from: 12, to: 16 }, 'Example Text')
+// 纯文本，替换范围
+editor.commands.insertContentAt({ from: 12, to: 16 }, '示例文本')
 
 // HTML
-editor.commands.insertContentAt(12, '<h1>Example Text</h1>')
+editor.commands.insertContentAt(12, '<h1>示例文本</h1>')
 
-// HTML with trim white space
-editor.commands.insertContentAt(12, '<p>Hello world</p>', {
+// 带修剪空格的 HTML
+editor.commands.insertContentAt(12, '<p>你好，世界</p>', {
   updateSelection: true,
   parseOptions: {
     preserveWhitespace: 'full',
   },
 })
 
-// JSON/Nodes
+// JSON/节点
 editor.commands.insertContentAt(12, {
   type: 'heading',
   attrs: {
@@ -52,19 +52,19 @@ editor.commands.insertContentAt(12, {
   content: [
     {
       type: 'text',
-      text: 'Example Text',
+      text: '示例文本',
     },
   ],
 })
 
-// Multiple nodes at once
+// 同时插入多个节点
 editor.commands.insertContentAt(12, [
   {
     type: 'paragraph',
     content: [
       {
         type: 'text',
-        text: 'First paragraph',
+        text: '第一段',
       },
     ],
   },
@@ -73,7 +73,7 @@ editor.commands.insertContentAt(12, [
     content: [
       {
         type: 'text',
-        text: 'Second paragraph',
+        text: '第二段',
       },
     ],
   },

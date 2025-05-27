@@ -1,61 +1,61 @@
 ---
-title: Install the AI Generation extension
+title: 安装 AI 生成扩展
 meta:
-  title: Install AI Generation | Tiptap Content AI
-  description: Set up Tiptap AI Generation in your editor, including configuring OpenAI keys and JWT authentication. More in the docs!
-  category: Content AI
+  title: 安装 AI 生成 | Tiptap 内容 AI
+  description: 在您的编辑器中设置 Tiptap AI 生成，包括配置 OpenAI 密钥和 JWT 认证。更多内容请查看文档！
+  category: 内容 AI
 ---
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始一个免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅一个 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Integrate an AI provider">
-        Configure OpenAI in your [AI settings](https://cloud.tiptap.dev/v2/cloud/ai) or review the [Custom LLM guide](/content-ai/custom-llms).
+    <RequirementItem label="2. 集成 AI 提供商">
+        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看 [自定义 LLM 指南](/content-ai/custom-llms)。
     </RequirementItem>
-    <RequirementItem label="3. Install from private registry">
-        To install the frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="3. 从私有注册表安装">
+        要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证，以便访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-This installation guide relies on using the [Tiptap Content AI backend service](https://cloud.tiptap.dev/v2/cloud/ai), if you want to configure it with your own custom LLM you need to follow [this guide](/content-ai/capabilities/generation/custom-llms) instead.
+本安装指南依赖于使用 [Tiptap 内容 AI 后端服务](https://cloud.tiptap.dev/v2/cloud/ai)，如果您想用自己的自定义 LLM 进行配置，请改为遵循 [本指南](/content-ai/capabilities/generation/custom-llms)。
 
-## Start your Content AI app
-1. **Activate a plan:** Begin a [free trial or choose a subscription](https://cloud.tiptap.dev/v2/billing).
-2. **Configure your AI app.** Add your OpenAI API key to your [Content AI app](https://cloud.tiptap.dev/v2/cloud/ai).
-3. **Set up authentication**: Generate a JWT (HS256 algorithm) with our provided secret to authenticate the extension against our service. [Get your JWT secret.](https://cloud.tiptap.dev/v2/cloud/ai)
+## 开始您的内容 AI 应用
+1. **激活计划：** 开始一个 [免费试用或选择订阅](https://cloud.tiptap.dev/v2/billing)。
+2. **配置您的 AI 应用。** 将您的 OpenAI API 密钥添加到您的 [内容 AI 应用](https://cloud.tiptap.dev/v2/cloud/ai)。
+3. **设置认证**：使用我们提供的密钥生成 JWT（HS256 算法），以便将扩展与我们的服务进行身份验证。 [获取您的 JWT 密钥。](https://cloud.tiptap.dev/v2/cloud/ai)
 
-## Access the Pro registry
-The AI Generation extension is published in Tiptap’s private npm registry. Integrate the extension by following the [private registry guide](/guides/pro-extensions). If you already authenticated your Tiptap account you can go straight to [#Install](#install).
+## 访问专业注册表
+AI 生成扩展发布在 Tiptap 的私有 npm 注册表中。通过遵循 [私有注册表指南](/guides/pro-extensions) 来集成扩展。如果您已经对 Tiptap 账户进行了身份验证，可以直接跳转到 [#安装](#install)。
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap-pro/extension-ai@next
 ```
 
-The integration into your editor instance is done like every other Tiptap extension. This is an example on how it could look like:
+将其集成到您的编辑器实例中的方式与其他 Tiptap 扩展类似。以下是一个示例：
 
 ```js
 import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import Ai from '@tiptap-pro/extension-ai'
 
-const editor = new Editor{
+const editor = new Editor({
   extensions: [
     StarterKit,
     Ai.configure({
-      // Your Tiptap Content AI app id
+      // 您的 Tiptap 内容 AI 应用 ID
       appId: 'APP_ID_HERE',
-      // This needs to be your generated JWT and MUST NOT be the OpenAI API key!
+      // 这必须是您生成的 JWT，绝对不要是 OpenAI API 密钥！
       token: 'TOKEN_HERE',
       autocompletion: true,
-      // … other options (see below)
+      // … 其他选项（见下文）
     }),
-    // … more extensions
+    // … 更多扩展
   ],
 })
 ```
 
-At this point you're good to go to use OpenAI in your Tiptap editor. Have a look at the [configuration options](/content-ai/capabilities/generation/configure) to customize your experience.
+到此，您可以在 Tiptap 编辑器中使用 OpenAI。可以查看 [配置选项](/content-ai/capabilities/generation/configure) 来定制您的体验。

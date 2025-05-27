@@ -1,12 +1,12 @@
 ---
-title: Add a dropdown menu for list types
+title: 添加下拉菜单以选择列表类型
 meta:
-  title: List menu | Tiptap UI Component
-  description: Add a dropdown menu that helps selecting different list types in your Tiptap editor. More in the docs.
-  category: UI Components
+  title: 列表菜单 | Tiptap UI 组件
+  description: 添加一个下拉菜单，以帮助在您的 Tiptap 编辑器中选择不同的列表类型。更多内容请参见文档。
+  category: UI 组件
 component:
-  name: List dropdown
-  description: Select a list type from a dropdown menu.
+  name: 列表下拉菜单
+  description: 从下拉菜单中选择列表类型。
   type: component
   isFree: true
   isCloud: false
@@ -17,25 +17,25 @@ component:
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-A dropdown menu for selecting from multiple list types.
+一个用于从多种列表类型中选择的下拉菜单。
 
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/list-dropdown-menu" />
 
-## Install
-You can add the component via Tiptap CLI (for Vite or Next.js)
+## 安装
+您可以通过 Tiptap CLI（用于 Vite 或 Next.js）添加该组件
 
 ```bash
 npx @tiptap/cli add list-dropdown-menu
 ```
 
-### Manual Integration
-For frameworks other than Vite or Next.js, add the component manually from the [open-source repository](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/list-dropdown-menu).
+### 手动集成
+对于 Vite 或 Next.js 以外的框架，您可以从 [开源仓库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/list-dropdown-menu) 手动添加组件。
 
-### Import styles
+### 导入样式
 
-This component requires you to import our styles which were added to `styles/keyframe-animation.scss` and `styles/_variables.scss`.
+该组件需要您导入我们在 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 中添加的样式。
 
-## Usage
+## 使用
 
 ```tsx
 import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
@@ -55,29 +55,29 @@ export default function MyEditor() {
     content: `
         <ul>
             <li>
-                <strong>Bold</strong> for emphasis with <code>**</code> or <code>⌘+B</code> or the <code>B</code> button.
+                <strong>粗体</strong> 用于强调，可以使用 <code>**</code> 或 <code>⌘+B</code> 或 <code>B</code> 按钮。
             </li>
             <li>
-                <em>Italic</em> for subtle nuances with <code>*</code> or <code>⌘+I</code> or the <code>I</code> button.
+                <em>斜体</em> 用于细微的差别，可以使用 <code>*</code> 或 <code>⌘+I</code> 或 <code>I</code> 按钮。
             </li>
             <li>
-                <s>Strikethrough</s> to show revisions with <code>~~</code> or the <code>~~S~~</code> button.
+                <s>删除线</s> 用于显示修改，可以使用 <code>~~</code> 或 <code>~~S~~</code> 按钮。
             </li>
         </ul>
         <ul data-type="taskList">
             <li data-type="taskItem" data-checked="true">
                 <div>
-                    Test template
+                    测试模板
                 </div>
             </li>
             <li data-type="taskItem" data-checked="false">
                 <div>
-                    <a target="_blank" rel="noopener noreferrer nofollow" href="https://tiptap.dev/pricing">Create account</a>
+                    <a target="_blank" rel="noopener noreferrer nofollow" href="https://tiptap.dev/pricing">创建帐户</a>
                 </div>
             </li>
             <li data-type="taskItem" data-checked="false">
                 <div>
-                   Download free template
+                   下载免费模板
                 </div>
             </li>
         </ul>
@@ -96,18 +96,18 @@ export default function MyEditor() {
 }
 ```
 
-## Props
+## 属性
 
-| Name                | Type                                                 | Default                                   | Description                               |
+| 名称                | 类型                                                 | 默认值                                   | 描述                                     |
 | ------------------- | ---------------------------------------------------- | ----------------------------------------- | ----------------------------------------- |
-| editor              | Editor \| null                                       | null                                      | The Tiptap editor instance                |
-| types               | `Array<'bulletList' \| 'orderedList' \| 'taskList'>` | ['bulletList', 'orderedList', 'taskList'] | The list types to include in the dropdown |
-| hideWhenUnavailable | boolean                                              | false                                     | Whether the menu is in a floating context |
-| onOpenChange        | (isOpen: boolean) => void                            | -                                         | Callback when dropdown open state changes |
+| editor              | Editor \| null                                       | null                                      | Tiptap 编辑器实例                        |
+| types               | `Array<'bulletList' \| 'orderedList' \| 'taskList'>` | ['bulletList', 'orderedList', 'taskList'] | 下拉菜单中包含的列表类型                |
+| hideWhenUnavailable | boolean                                              | false                                     | 菜单是否在浮动上下文中                  |
+| onOpenChange        | (isOpen: boolean) => void                            | -                                         | 下拉菜单打开状态更改时的回调           |
 
-## Requirements
+## 要求
 
-Used reference components
+使用的参考组件
 
 - `use-tiptap-editor` (hook)
 - `tiptap-utils` (lib)
@@ -117,7 +117,7 @@ Used reference components
 - `list-icon` (icon)
 - `chevron-down-icon` (icon)
 
-Open source feature(s)
+开源特性
 
 - `@tiptap/extension-task-list`
 - `@tiptap/extension-task-item`

@@ -1,12 +1,12 @@
 ---
-title: Integrate a popover UI component
+title: 集成弹出式 UI 组件
 meta:
-  title: Popover | Tiptap UI Component
-  description: Add a pop-up UI element appearing when a user clicks on a trigger element. More in the docs!
-  category: UI Components
+  title: 弹出式 | Tiptap UI 组件
+  description: 添加一个在用户点击触发元素时显示的弹出式 UI 元素。更多内容见文档！
+  category: UI 组件
 component:
-  name: Popover
-  description: Integrate a pop-up UI element next a selection.
+  name: 弹出式
+  description: 在选择旁边集成一个弹出式 UI 元素。
   type: primitive
   isFree: true
   isCloud: false
@@ -17,25 +17,25 @@ component:
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-A popover element that appears when a user clicks on a trigger element.
+一个在用户点击触发元素时出现的弹出式元素。
 
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui-primitive/popover" />
 
-## Install
-You can add the primitive via Tiptap CLI (for Vite or Next.js)
+## 安装
+您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加该组件。
 
 ```bash
 npx @tiptap/cli add popover
 ```
 
-### Manual Integration
-For frameworks other than Vite or Next.js, add the primitive manually from the [open-source repository](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui-primitive/popover).
+### 手动集成
+对于 Vite 或 Next.js 以外的框架，请从 [开源代码库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui-primitive/popover) 手动添加该组件。
 
-### Import styles
+### 导入样式
 
-This component requires you to import our styles which were added to `styles/keyframe-animation.scss` and `styles/_variables.scss`.
+此组件要求您导入我们的样式，这些样式已添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 中。
 
-## Usage
+## 使用
 
 ```tsx
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/tiptap-ui-primitive/popover'
@@ -45,10 +45,10 @@ export default function MyComponent() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button data-style="ghost">Open Popover</Button>
+        <Button data-style="ghost">打开弹出式</Button>
       </PopoverTrigger>
       <PopoverContent>
-        <p>Popover content goes here</p>
+        <p>弹出内容在这里</p>
       </PopoverContent>
     </Popover>
   )
@@ -59,23 +59,23 @@ export default function MyComponent() {
 
 ### Popover
 
-| Name         | Type                    | Default   | Description                          |
-| ------------ | ----------------------- | --------- | ------------------------------------ |
-| open         | boolean                 | undefined | Controlled open state                |
-| onOpenChange | (open: boolean) => void | undefined | Callback when open state changes     |
-| defaultOpen  | boolean                 | false     | Default open state                   |
-| modal        | boolean                 | false     | Whether to render in a modal context |
+| 名称         | 类型                    | 默认值   | 描述                               |
+| ------------ | ----------------------- | -------- | ---------------------------------- |
+| open         | boolean                 | undefined | 控制打开状态                       |
+| onOpenChange | (open: boolean) => void | undefined | 打开状态变化时的回调               |
+| defaultOpen  | boolean                 | false    | 默认打开状态                       |
+| modal        | boolean                 | false    | 是否在模态上下文中渲染             |
 
 ### PopoverTrigger
 
-| Name    | Type    | Default | Description                       |
-| ------- | ------- | ------- | --------------------------------- |
-| asChild | boolean | false   | Whether to merge props with child |
+| 名称    | 类型    | 默认值 | 描述                           |
+| ------- | ------- | ------- | ------------------------------- |
+| asChild | boolean | false   | 是否与子组件合并 props        |
 
 ### PopoverContent
 
-| Name   | Type                                   | Default  | Description                       |
-| ------ | -------------------------------------- | -------- | --------------------------------- |
-| side   | 'top' \| 'right' \| 'bottom' \| 'left' | 'bottom' | Preferred side to display content |
-| align  | 'start' \| 'center' \| 'end'           | 'center' | Alignment along the edge          |
-| portal | boolean                                | true     | Whether to render in a portal     |
+| 名称   | 类型                                   | 默认值  | 描述                               |
+| ------ | -------------------------------------- | -------- | ---------------------------------- |
+| side   | 'top' \| 'right' \| 'bottom' \| 'left' | 'bottom' | 显示内容的首选侧面               |
+| align  | 'start' \| 'center' \| 'end'           | 'center' | 沿边缘的对齐                     |
+| portal | boolean                                | true     | 是否在门户中渲染                  |

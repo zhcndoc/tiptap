@@ -1,37 +1,37 @@
 ---
-title: Add a spacer UI component into Tiptap
+title: 在 Tiptap 中添加一个间隔 UI 组件
 meta:
-  title: Spacer | Tiptap UI Component
-  description: Use the spacer UI component to create layouts. More about the UI component in our documentation!
-  category: UI Components
+  title: 间隔 | Tiptap UI 组件
+  description: 使用间隔 UI 组件创建布局。有关该 UI 组件的更多信息，请查看我们的文档！
+  category: UI 组件
 component:
-  name: Spacer
-  description: Add some space between your menu items.
+  name: 间隔
+  description: 在菜单项之间添加一些空间。
   type: primitive
   isFree: true
   isCloud: false
   isOpen: true
   isNew: false
-  icon: SeparatorVertical
+  icon: 垂直分隔符
 ---
 
-A flexible space component used for layout spacing.
+一个用于布局间距的灵活空间组件。
 
-## Install
-You can add the primitive via Tiptap CLI (for Vite or Next.js)
+## 安装
+您可以通过 Tiptap CLI 添加这个基础组件（适用于 Vite 或 Next.js）
 
 ```bash
 npx @tiptap/cli add spacer
 ```
 
-### Manual Integration
-For frameworks other than Vite or Next.js, add the primitive manually from the [open-source repository](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui-primitive/spacer).
+### 手动集成
+对于除了 Vite 或 Next.js 以外的框架，请从 [开源仓库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui-primitive/spacer) 手动添加该基础组件。
 
-### Import styles
+### 导入样式
 
-This component requires you to import our styles which were added to `styles/keyframe-animation.scss` and `styles/_variables.scss`.
+该组件需要您导入我们的样式，这些样式已添加至 `styles/keyframe-animation.scss` 和 `styles/_variables.scss`。
 
-## Usage
+## 用法
 
 ```tsx
 import { Spacer } from '@/components/tiptap-ui-primitive/spacer'
@@ -39,9 +39,9 @@ import { Spacer } from '@/components/tiptap-ui-primitive/spacer'
 export default function MyComponent() {
   return (
     <div className="toolbar">
-      <button>Left Button</button>
+      <button>左侧按钮</button>
       <Spacer />
-      <button>Right Button</button>
+      <button>右侧按钮</button>
     </div>
   )
 }

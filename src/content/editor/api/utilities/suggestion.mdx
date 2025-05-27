@@ -1,99 +1,97 @@
 ---
-title: Suggestion utility
+title: 建议工具
 meta:
-  title: Suggestion utility | Tiptap Editor Docs
-  description: Customize autocomplete suggestions using nodes like Mention and Emoji. Explore settings and configurations in our docs.
-  category: Editor
+  title: 建议工具 | Tiptap 编辑器文档
+  description: 使用提及和表情符号等节点自定义自动补全建议。在我们的文档中探索设置和配置。
+  category: 编辑器
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/suggestion/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/suggestion/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/suggestion
-    label: Version
+    label: 版本
   - type: image
-    src: https://img.shields.io/npm/dm/@tiptap/suggestion/next?label=version
+    src: https://img.shields.io/npm/dm/@tiptap/suggestion/next?label=下载量
     url: https://npmcharts.com/compare/@tiptap/suggestion
-    label: Downloads
+    label: 下载量
 ---
 
-This utility helps with all kinds of suggestions in the editor. Have a look at the [`Mention`](/editor/extensions/nodes/mention) or [`Emoji`](/editor/extensions/nodes/emoji) node to see it in action.
+此工具帮助处理编辑器中的各种建议。查看 [`Mention`](/editor/extensions/nodes/mention) 或 [`Emoji`](/editor/extensions/nodes/emoji) 节点以查看其实际效果。
 
-## Settings
+## 设置
 
 ### char
 
-The character that triggers the autocomplete popup.
+触发自动补全弹出窗口的字符。
 
-Default: `'@'`
+默认：`'@'`
 
 ### pluginKey
 
-A ProseMirror PluginKey.
+一个 ProseMirror PluginKey。
 
-Default: `SuggestionPluginKey`
+默认：`SuggestionPluginKey`
 
 ### allow
 
-A function that returns a boolean to indicate if the suggestion should be active.
+一个返回布尔值的函数，指示建议是否应处于活动状态。
 
-Default: `(props: { editor: Editor; state: EditorState; range: Range, isActive?: boolean }) => true`
+默认：`(props: { editor: Editor; state: EditorState; range: Range, isActive?: boolean }) => true`
 
 ### allowSpaces
 
-Allows or disallows spaces in suggested items.
+允许或不允许建议项目中出现空格。
 
-Default: `false`
+默认：`false`
 
 ### allowedPrefixes
 
-The prefix characters that are allowed to trigger a suggestion. Set to `null` to allow any prefix character.
+允许触发建议的前缀字符。设置为 `null` 以允许任何前缀字符。
 
-Default: `[' ']`
+默认：`[' ']`
 
 ### startOfLine
 
-Trigger the autocomplete popup at the start of a line only.
+仅在行首触发自动补全弹出窗口。
 
-Default: `false`
+默认：`false`
 
 ### decorationTag
 
-The HTML tag that should be rendered for the suggestion.
+应为建议呈现的 HTML 标签。
 
-Default: `'span'`
+默认：`'span'`
 
 ### decorationClass
 
-A CSS class that should be added to the suggestion.
+应添加到建议的 CSS 类。
 
-Default: `'suggestion'`
+默认：`'suggestion'`
 
 ### command
 
-Executed when a suggestion is selected.
+选择建议时执行的操作。
 
-Default: `() => {}`
+默认：`() => {}`
 
 ### items
 
-Pass an array of filtered suggestions, can be async.
+传递一个过滤后的建议数组，可以是异步的。
 
-Default: `({ editor, query }) => []`
+默认：`({ editor, query }) => []`
 
 ### render
 
-A render function for the autocomplete popup.
+自动补全弹出窗口的渲染函数。
 
-Default: `() => ({})`
+默认：`() => ({})`
 
 ### findSuggestionMatch
 
-Optional param to replace the built-in regex matching of editor content that triggers a suggestion.
-See [the
-source](https://github.com/ueberdosis/tiptap/blob/main/packages/suggestion/src/findSuggestionMatch.ts#L18)
-for more detail.
+可选参数，用于替换触发建议的编辑器内容内置正则匹配。
+有关更多详细信息，请参见 [源代码](https://github.com/ueberdosis/tiptap/blob/main/packages/suggestion/src/findSuggestionMatch.ts#L18)。
 
-Default: `findSuggestionMatch(config: Trigger): SuggestionMatch`
+默认：`findSuggestionMatch(config: Trigger): SuggestionMatch`
 
-## Source code
+## 源代码
 
 [packages/suggestion/](https://github.com/ueberdosis/tiptap/blob/main/packages/suggestion/)

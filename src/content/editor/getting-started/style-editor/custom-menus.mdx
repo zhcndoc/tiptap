@@ -1,127 +1,127 @@
 ---
-title: How to develop a custom menu
+title: 如何开发自定义菜单
 meta:
-  title: Custom menu | Tiptap Editor Docs
-  description: Learn how to develop a custom bubble or floating menu in your Tiptap editor. Learn more in our documentation!
-  category: Editor
+  title: 自定义菜单 | Tiptap 编辑器文档
+  description: 了解如何在 Tiptap 编辑器中开发自定义气泡或浮动菜单。更多内容请阅读我们的文档！
+  category: 编辑器
 ---
 
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-Tiptap comes very raw, but that's a good thing. You have full control over the editor's appearance.
+Tiptap 的初始状态非常原始，但这也是一件好事。您可以完全控制编辑器的外观。
 
-When we say full control, we mean it. You can (and have to) build a menu on your own, although Tiptap will help you wire everything up.
+当我们说完全控制时，我们是认真的。您可以（也必须）自己构建一个菜单，尽管 Tiptap 会帮助您连接一切。
 
-## Menus
+## 菜单
 
-The editor provides a fluent API to trigger commands and add active states. You can use any markup you like. To simplify menu positioning, Tiptap provides a few utilities and components. Let's go through the most typical use cases one by one.
+编辑器提供了一个流畅的 API 来触发命令并添加活动状态。您可以使用任何您喜欢的标记。为简化菜单定位，Tiptap 提供了一些实用工具和组件。让我们逐个了解最典型的用例。
 
-### Fixed menu
+### 固定菜单
 
-A fixed menu is one that permanently sits in one location. For example, it's popular to place a fixed menu above the editor. Tiptap doesn't come with a fixed menu, but you can build one by creating a `<div>` element and filling it with `<button>` elements. [See below](#buttons) to learn how those buttons can trigger [commands](/editor/api/commands) in the editor, for example bolding or italicizing text.
+固定菜单是一个永久固定在某个位置的菜单。例如，将固定菜单放在编辑器上方非常常见。Tiptap 并不自带固定菜单，但您可以通过创建一个 `<div>` 元素并在其中填充 `<button>` 元素来构建一个。[见下文](#buttons) 了解这些按钮如何触发编辑器中的 [命令](/editor/api/commands)，例如加粗或斜体文本。
 
-### Bubble menu
+### 气泡菜单
 
-A [bubble menu](/editor/extensions/functionality/bubble-menu) is one that appears when selecting text. The markup and styling are entirely up to you.
+[气泡菜单](/editor/extensions/functionality/bubble-menu) 是在选择文本时出现的菜单。标记和样式完全由您决定。
 
 <CodeDemo path="/Extensions/BubbleMenu?inline=false&hideSource=true" />
 
-### Floating menu
+### 浮动菜单
 
-A [floating menu](/editor/extensions/functionality/floatingmenu) appears in the editor when you place your cursor on an empty line. Again, the markup and styling are entirely up to you.
+[浮动菜单](/editor/extensions/functionality/floatingmenu) 是在您将光标放在空行时出现在编辑器中的菜单。同样，标记和样式完全由您决定。
 
 <CodeDemo path="/Extensions/FloatingMenu?inline=false&hideSource=true" />
 
-### Slash commands (work in progress)
+### 斜杠命令（进行中）
 
-Although there isn't an official extension yet, there is [an experiment](/examples/experiments/slash-commands) that allows you to use "slash commands." With slash commands, typing `/` at the beginning of a new line will reveal a popup menu.
+虽然尚未有正式的扩展，但有一个 [实验](/examples/experiments/slash-commands) 允许您使用“斜杠命令”。通过斜杠命令，在新行开头输入 `/` 会显示一个弹出菜单。
 
-## Buttons
+## 按钮
 
-Okay, you've got your menu. But how do you wire things up?
+好的，您已经有了菜单。但是如何连接这些功能呢？
 
-### Commands
+### 命令
 
-You've got the editor running already and want to add your first button. You need a `<button>` HTML tag with a click handler. Depending on your setup, that can look like the following example:
+您已经让编辑器运行并希望添加第一个按钮。您需要一个带有点击处理程序的 `<button>` HTML 标签。根据您的设置，这可能看起来像以下示例：
 
 ```html
-<button onclick="editor.chain().focus().toggleBold().run()">Bold</button>
+<button onclick="editor.chain().focus().toggleBold().run()">加粗</button>
 ```
 
-Oh, that's a long command, right? Actually, it's a [chain of commands](/editor/api/commands). Let's go through this one by one:
+哦，这个命令很长，对吧？实际上，这是一个 [命令链](/editor/api/commands)。我们逐个了解一下：
 
 ```js
 editor.chain().focus().toggleBold().run()
 ```
 
-1. `editor` should be a Tiptap instance,
-2. `chain()` is used to tell the editor you want to execute multiple commands,
-3. `focus()` sets the focus back to the editor,
-4. `toggleBold()` marks the selected text bold. If the text is already bold, it removes the bold mark.
-5. `run()` will execute the chain.
+1. `editor` 应该是一个 Tiptap 实例，
+2. `chain()` 用于告诉编辑器您想执行多个命令，
+3. `focus()` 将焦点重新设置到编辑器上，
+4. `toggleBold()` 将选定的文本加粗。如果文本已经是加粗状态，则取消加粗。
+5. `run()` 将执行这一连串命令。
 
-In other words: This will be a typical **Bold** button for your text editor.
+换句话说：这将是您文本编辑器的一个典型 **加粗** 按钮。
 
-The available commands depend on the extensions registered with the editor. Most extensions come with a `set…()`, `unset…()`, and `toggle…()` command. Read the extension documentation to see what's actually available or just surf through your code editor's autocomplete.
+可用命令取决于注册到编辑器的扩展。大多数扩展都带有 `set…()`、`unset…()` 和 `toggle…()` 命令。请查看扩展文档以了解实际可用的内容，或直接在代码编辑器的自动补全中浏览。
 
-### Keep the focus
+### 保持焦点
 
-You have already seen the `focus()` command in the above example. When you click on the button, the browser focuses that DOM element and the editor loses focus. It's likely you want to add `focus()` to all your menu buttons, so the writing flow of your users isn't interrupted.
+您在上面的示例中已经看到 `focus()` 命令。当您点击按钮时，浏览器将焦点放到该 DOM 元素上，编辑器便失去了焦点。您可能想要将 `focus()` 添加到所有菜单按钮，这样用户的写作流程就不会被打断。
 
-### The active state
+### 活动状态
 
-The editor provides an `isActive()` method to check if something is applied to the selected text already. In Vue.js you can toggle a CSS class with help of that function:
+编辑器提供了一个 `isActive()` 方法来检查某些内容是否已应用于所选文本。在 Vue.js 中，您可以利用该函数切换 CSS 类：
 
 ```html
 <button
   :class="{ 'is-active': editor.isActive('bold') }"
   @click="editor.chain().focus().toggleBold().run()"
 >
-  Bold
+  加粗
 </button>
 ```
 
-This toggles the `.is-active` class for nodes and marks. You can even check for specific attributes. Here is an example with the [`Highlight`](/editor/extensions/marks/highlight) mark that ignores different attributes:
+这会为节点和标记切换 `.is-active` 类。您甚至可以检查特定的属性。以下是一个忽略不同属性的 [`Highlight`](/editor/extensions/marks/highlight) 标记示例：
 
 ```js
 editor.isActive('highlight')
 ```
 
-And an example that compares the given attribute(s):
+还有一个比较给定属性的示例：
 
 ```js
 editor.isActive('highlight', { color: '#ffa8a8' })
 ```
 
-There is even support for regular expressions:
+甚至支持正则表达式：
 
 ```js
 editor.isActive('textStyle', { color: /.*/ })
 ```
 
-You can even check nodes and marks, but check for the attributes only. Here is an example with the [`TextAlign`](/editor/extensions/functionality/textalign) extension:
+您甚至可以检查节点和标记，但仅检查属性。以下是使用 [`TextAlign`](/editor/extensions/functionality/textalign) 扩展的示例：
 
 ```js
 editor.isActive({ textAlign: 'right' })
 ```
 
-If your selection spans multiple nodes or marks, or only part of the selection has a mark, `isActive()` will return `false` and indicate nothing is active. This behavior is intentional, as it allows users to apply a new node or mark to the selection right away.
+如果您的选择跨越多个节点或标记，或选择的仅部分有标记，则 `isActive()` 将返回 `false`，表示没有活动状态。这种行为是故意的，因为它允许用户立即将新的节点或标记应用于所选内容。
 
-## User experience
+## 用户体验
 
-When designing a great user experience you should consider a few things.
+在设计良好的用户体验时，您需要考虑几个方面。
 
-### Accessibility
+### 可访问性
 
-- Make sure users can navigate the menu with their keyboard
-- Use [title attributes](https://developer.mozilla.org/de/docs/Web/HTML/Global_attributes/title)
-- Use [ARIA attributes](https://developer.mozilla.org/en-US/docs/Learn/Accessibility/WAI-ARIA_basics)
-- List available keyboard shortcuts
+- 确保用户可以使用键盘导航菜单
+- 使用 [title 属性](https://developer.mozilla.org/de/docs/Web/HTML/Global_attributes/title)
+- 使用 [ARIA 属性](https://developer.mozilla.org/en-US/docs/Learn/Accessibility/WAI-ARIA_basics)
+- 列出可用的键盘快捷键
 
-### Icons
+### 图标
 
-Most editor menus use icons for their buttons. In some of our demos, we use the open source icon set [Remix Icon](https://remixicon.com/). However, you can use any icon set you prefer. Here are a few suggestions:
+大多数编辑器菜单为其按钮使用图标。在我们的一些演示中，我们使用了开源图标集 [Remix Icon](https://remixicon.com/)。但是，您可以使用任何您喜欢的图标集。以下是一些建议：
 
 - [Remix Icon](https://remixicon.com/#editor)
 - [Font Awesome](https://fontawesome.com/icons?c=editors)

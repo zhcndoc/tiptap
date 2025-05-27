@@ -1,16 +1,16 @@
 ---
 title: PHP
 meta:
-  title: PHP | Tiptap Editor Docs
-  description: Discover how to utilize Tiptap within PHP environments, including Laravel and Livewire. Access the guide in our docs!
-  category: Editor
+  title: PHP | Tiptap 编辑器文档
+  description: 了解如何在 PHP 环境中使用 Tiptap，包括 Laravel 和 Livewire。访问我们的文档指南！
+  category: 编辑器
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-You can use Tiptap with Laravel, Livewire, Inertia.js, Alpine.js, Tailwind CSS, and even—yes, you read that right—inside PHP.
+您可以在 Laravel、Livewire、Inertia.js、Alpine.js、Tailwind CSS，甚至——是的，您没有听错——在 PHP 中使用 Tiptap。
 
-We provide [an official PHP package to work with Tiptap content](/editor/api/utilities/tiptap-for-php). You can transform Tiptap-compatible JSON to HTML and vice versa, sanitize your content, or just modify it.
+我们提供了[一个官方的 PHP 包来处理 Tiptap 内容](/editor/api/utilities/tiptap-for-php)。您可以将 Tiptap 兼容的 JSON 转换为 HTML，反之亦然，对您的内容进行消毒，或者只需修改它。
 
 ## Laravel Livewire
 
@@ -18,16 +18,16 @@ We provide [an official PHP package to work with Tiptap content](/editor/api/uti
 
 ```html
 <!--
-  In your livewire component you could add an
-  autosave method to handle saving the content
-  from the editor every 10 seconds if you wanted
+  在您的 livewire 组件中，您可以添加一个
+  自动保存方法，以便每 10 秒保存一次编辑器的内容，
+  如果您愿意的话
 -->
 <x-editor wire:model="foo" wire:poll.10000ms="autosave"></x-editor>
 ```
 
-<Callout variant="default" title="Hint">
+<Callout variant="default" title="提示">
 
-    The `.defer` modifier is no longer available in Livewire v3, as updating the state is deferred by default. Use the `.live` modifier if you need to update the state server-side, as it changes.
+    在 Livewire v3 中，`.defer` 修饰符不再可用，因为更新状态默认是延迟的。如果您需要在服务器端更新状态，请使用 `.live` 修饰符，因为它会发生变化。
 
 </Callout>
 
@@ -69,16 +69,16 @@ window.setupEditor = function (content) {
       })
 
       this.$watch('content', (content) => {
-        // If the new content matches Tiptap's then we just skip.
+        // 如果新内容与 Tiptap 的匹配，则我们跳过。
         if (content === editor.getHTML()) return
 
         /*
-          Otherwise, it means that an external source
-          is modifying the data on this Alpine component,
-          which could be Livewire itself.
-          In this case, we only need to update Tiptap's
-          content and we're done.
-          For more information on the `setContent()` method, see:
+          否则，意味着一个外部源
+          正在修改这个 Alpine 组件上的数据，
+          可能是 Livewire 本身。
+          在这种情况下，我们只需要更新 Tiptap 的
+          内容，然后就可以了。
+          有关 `setContent()` 方法的更多信息，请参见：
             https://www.tiptap.dev/api/commands/set-content
         */
         editor.commands.setContent(content, false)

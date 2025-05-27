@@ -1,39 +1,39 @@
 ---
-title: CharacterCount extension
+title: 字符计数扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extensions/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extensions/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extensions
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extensions.svg
     url: https://npmcharts.com/compare/@tiptap/extensions?minimal=true
-    label: Downloads
+    label: 下载次数
 meta:
-  title: CharacterCount extension | Tiptap Editor Docs
-  description: Count and limit the number of characters in your editor with the Character Count extension. Learn more in our docs!
-  category: Editor
+  title: 字符计数扩展 | Tiptap 编辑器文档
+  description: 使用字符计数扩展计算和限制编辑器中的字符数量。在我们的文档中了解更多信息！
+  category: 编辑器
 extension:
-  name: Character Count
+  name: 字符计数
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extensions
-  description: Limit the number of characters in your editor, or at least count them.
+  description: 限制编辑器中允许的字符数量，或者至少计数。
   type: extension
-  icon: Calculator
+  icon: 计算器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-The `CharacterCount` extension limits the number of allowed characters to a specific length and is able to return the number of characters and words. That’s it, that’s all.
+`CharacterCount` 扩展限制允许的字符数量为特定长度，并能够返回字符和单词的数量。就这些，没有别的。
 
 <CodeDemo path="/Extensions/CharacterCount" />
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extensions@next
 ```
 
-## Usage
+## 使用
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -44,13 +44,13 @@ new Editor({
 })
 ```
 
-## Settings
+## 设置
 
 ### limit
 
-The maximum number of characters that should be allowed.
+应该允许的最大字符数。
 
-Default: `null`
+默认值: `null`
 
 ```js
 CharacterCount.configure({
@@ -60,9 +60,9 @@ CharacterCount.configure({
 
 ### mode
 
-The mode by which the size is calculated.
+计算大小所使用的模式。
 
-Default: `'textSize'`
+默认值: `'textSize'`
 
 ```js
 CharacterCount.configure({
@@ -72,9 +72,9 @@ CharacterCount.configure({
 
 ### textCounter
 
-The text counter function to use. Defaults to a simple character count.
+要使用的文本计数器函数。默认为简单的字符计数。
 
-Default: `(text) => text.length`
+默认值: `(text) => text.length`
 
 ```js
 CharacterCount.configure({
@@ -84,9 +84,9 @@ CharacterCount.configure({
 
 ### wordCounter
 
-The word counter function to use. Defaults to a simple word count.
+要使用的单词计数器函数。默认为简单的单词计数。
 
-Default: `(text) => text.split(' ').filter((word) => word !== '').length`
+默认值: `(text) => text.split(' ').filter((word) => word !== '').length`
 
 ```js
 CharacterCount.configure({
@@ -94,38 +94,38 @@ CharacterCount.configure({
 })
 ```
 
-## Storage
+## 存储
 
 ### characters()
 
-Get the number of characters for the current document.
+获取当前文档的字符数。
 
 ```js
 editor.storage.characterCount.characters()
 
-// Get the size of a specific node.
+// 获取特定节点的大小。
 editor.storage.characterCount.characters({ node: someCustomNode })
 
-// Overwrite the default `mode`.
+// 重写默认的 `mode`。
 editor.storage.characterCount.characters({ mode: 'nodeSize' })
 ```
 
 ### words()
 
-Get the number of words for the current document.
+获取当前文档的单词数。
 
 ```js
 editor.storage.characterCount.words()
 
-// Get the number of words for a specific node.
+// 获取特定节点的单词数。
 editor.storage.characterCount.words({ node: someCustomNode })
 ```
 
-## Source code
+## 源代码
 
 [packages/extensions/src/character-count/](https://github.com/ueberdosis/tiptap/blob/main/packages/extensions/src/character-count/)
 
-## Minimal Install
+## 最小安装
 
 ```js
 import { Editor } from '@tiptap/core'

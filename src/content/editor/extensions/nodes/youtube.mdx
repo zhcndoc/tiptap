@@ -1,45 +1,45 @@
 ---
-title: Youtube extension
+title: Youtube 扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extension-youtube/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extension-youtube/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extension-youtube
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-youtube.svg
     url: https://npmcharts.com/compare/@tiptap/extension-youtube?minimal=true
-    label: Downloads
+    label: 下载量
 extension:
   name: Youtube
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-youtube
-  description: Easily embed YouTube videos into your documents.
+  description: 轻松将 YouTube 视频嵌入到您的文档中。
   type: node
   icon: Youtube
 meta:
-  title: Youtube extension | Tiptap Editor Docs
-  description: Use the Youtube extension in Tiptap to easily embed Youtube videos in your documents. Learn more in our docs!
-  category: Editor
+  title: Youtube 扩展 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用 Youtube 扩展，轻松将 Youtube 视频嵌入到您的文档中。详细信息请查看我们的文档！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-This extension adds a new YouTube embed node to the editor.
+此扩展为编辑器添加了一个新的 YouTube 嵌入节点。
 
 <CodeDemo path="/Nodes/YouTube" />
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-youtube@next
 ```
 
-## Settings
+## 设置
 
 ### inline
 
-Controls if the node should be handled inline or as a block.
+控制节点是作为行内还是块处理。
 
-Default: `false`
+默认: `false`
 
 ```js
 Youtube.configure({
@@ -49,9 +49,9 @@ Youtube.configure({
 
 ### width
 
-Controls the default width of added videos
+控制添加视频的默认宽度
 
-Default: `640`
+默认: `640`
 
 ```js
 Youtube.configure({
@@ -61,9 +61,9 @@ Youtube.configure({
 
 ### height
 
-Controls the default height of added videos
+控制添加视频的默认高度
 
-Default: `480`
+默认: `480`
 
 ```js
 Youtube.configure({
@@ -73,9 +73,9 @@ Youtube.configure({
 
 ### controls
 
-Enables or disables YouTube video controls
+启用或禁用 YouTube 视频控制
 
-Default: `true`
+默认: `true`
 
 ```js
 Youtube.configure({
@@ -85,9 +85,9 @@ Youtube.configure({
 
 ### nocookie
 
-Enables the nocookie mode for YouTube embeds
+启用 YouTube 嵌入的 nocookie 模式
 
-Default: `false`
+默认: `false`
 
 ```js
 Youtube.configure({
@@ -97,9 +97,9 @@ Youtube.configure({
 
 ### allowFullscreen
 
-Allows the iframe to be played in fullscreen
+允许 iframe 以全屏模式播放
 
-Default: `true`
+默认: `true`
 
 ```js
 Youtube.configure({
@@ -109,9 +109,9 @@ Youtube.configure({
 
 ### autoplay
 
-Allows the iframe to start playing after the player is loaded
+允许 iframe 在播放器加载后自动播放
 
-Default: `false`
+默认: `false`
 
 ```js
 Youtube.configure({
@@ -121,9 +121,9 @@ Youtube.configure({
 
 ### ccLanguage
 
-Specifies the default language that the player will use to display closed captions. Set the parameter’s value to an ISO 639-1 two-letter language code. For example, setting it to `es` will cause the captions to be in spanish
+指定播放器将用于显示字幕的默认语言。将参数的值设置为 ISO 639-1 两个字母的语言代码。例如，将其设置为 `es` 将导致字幕为西班牙语。
 
-Default: `undefined`
+默认: `undefined`
 
 ```js
 Youtube.configure({
@@ -133,9 +133,9 @@ Youtube.configure({
 
 ### ccLoadPolicy
 
-Setting this parameter’s value to `true` causes closed captions to be shown by default, even if the user has turned captions off
+将此参数的值设置为 `true` 会导致默认显示字幕，即便用户已关闭字幕。
 
-Default: `false`
+默认: `false`
 
 ```js
 Youtube.configure({
@@ -145,9 +145,9 @@ Youtube.configure({
 
 ### disableKBcontrols
 
-Disables the keyboards controls for the iframe player
+禁用 iframe 播放器的键盘控制
 
-Default: `false`
+默认: `false`
 
 ```js
 Youtube.configure({
@@ -157,9 +157,9 @@ Youtube.configure({
 
 ### enableIFrameApi
 
-Enables the player to be controlled via IFrame Player API calls
+允许通过 IFrame Player API 调用控制播放器
 
-Default: `false`
+默认: `false`
 
 ```js
 Youtube.configure({
@@ -169,9 +169,9 @@ Youtube.configure({
 
 ### origin
 
-This parameter provides an extra security measure for the IFrame API and is only supported for IFrame embeds. If you are using the IFrame API, which means you are setting the `enableIFrameApi` parameter value to `true`, you should always specify your domain as the `origin` parameter value.
+该参数为 IFrame API 提供了额外的安全措施，仅支持 IFrame 嵌入。如果您正在使用 IFrame API，这意味着您将 `enableIFrameApi` 参数的值设置为 `true`，您应始终将您的域指定为 `origin` 参数的值。
 
-Default: `''`
+默认: `''`
 
 ```js
 Youtube.configure({
@@ -181,10 +181,10 @@ Youtube.configure({
 
 ### endTime
 
-This parameter specifies the time, measured in seconds from the start of the video, when the player should stop playing the video.
-For example, setting it to `15` will make the video stop at the 15 seconds mark
+该参数指定播放器在视频开始后的秒数时应停止播放视频。
+例如，将其设置为 `15` 将使视频在 15 秒处停止。
 
-Default: `0`
+默认: `0`
 
 ```js
 Youtube.configure({
@@ -194,9 +194,9 @@ Youtube.configure({
 
 ### interfaceLanguage
 
-Sets the player’s interface language. The parameter value is an ISO 639-1 two-letter language code. For example, setting it to `fr` will cause the interface to be in french
+设置播放器的界面语言。参数值为 ISO 639-1 两个字母的语言代码。例如，将其设置为 `fr` 将使界面为法语。
 
-Default: `undefined`
+默认: `undefined`
 
 ```js
 Youtube.configure({
@@ -206,9 +206,9 @@ Youtube.configure({
 
 ### ivLoadPolicy
 
-Setting this to 1 causes video annotations to be shown by default, whereas setting to 3 causes video annotations to not be shown by default
+将其设置为 1 会导致默认显示视频注释，而设置为 3 会导致默认不显示视频注释。
 
-Default: `0`
+默认: `0`
 
 ```js
 Youtube.configure({
@@ -218,9 +218,9 @@ Youtube.configure({
 
 ### loop
 
-This parameter has limited support in IFrame embeds. To loop a single video, set the loop parameter value to `true` and set the playlist parameter value to the same video ID already specified in the Player API URL.
+该参数在 IFrame 嵌入中支持有限。要循环播放单个视频，请将循环参数值设置为 `true`，并将播放列表参数值设置为在播放器 API URL 中指定的同一视频 ID。
 
-Default: `false`
+默认: `false`
 
 ```js
 Youtube.configure({
@@ -230,9 +230,9 @@ Youtube.configure({
 
 ### playlist
 
-This parameter specifies a comma-separated list of video IDs to play.
+该参数指定要播放的视频 ID 的以逗号分隔的列表。
 
-Default: `''`
+默认: `''`
 
 ```js
 Youtube.configure({
@@ -242,9 +242,9 @@ Youtube.configure({
 
 ### modestBranding
 
-Disables the Youtube logo on the control bar of the player. Note that a small YouTube text label will still display in the upper-right corner of a paused video when the user's mouse pointer hovers over the player
+禁用播放器控制栏上的 YouTube logo。请注意，当用户的鼠标指针悬停在播放器上时，暂停视频的右上角仍会显示小的 YouTube 文本标签。
 
-Default: `false`
+默认: `false`
 
 ```js
 Youtube.configure({
@@ -254,9 +254,9 @@ Youtube.configure({
 
 ### progressBarColor
 
-This parameter specifies the color that will be used in the player's video progress bar. Note that setting the color parameter to `white` will disable the `modestBranding` parameter
+该参数指定播放器视频进度条中使用的颜色。请注意，将颜色参数设置为 `white` 将禁用 `modestBranding` 参数。
 
-Default: `undefined`
+默认: `undefined`
 
 ```js
 Youtube.configure({
@@ -264,11 +264,11 @@ Youtube.configure({
 })
 ```
 
-## Commands
+## 命令
 
 ### setYoutubeVideo(options)
 
-Inserts a YouTube iframe embed at the current position
+在当前位置插入一个 YouTube iframe 嵌入
 
 ```js
 editor.commands.setYoutubeVideo({
@@ -278,14 +278,14 @@ editor.commands.setYoutubeVideo({
 })
 ```
 
-#### Options
+#### 选项
 
-| Option | Description                                                          | Optional |
-| ------ | -------------------------------------------------------------------- | -------- |
-| src    | The url of the youtube video. Can be a YouTube or YouTube Music link |
-| width  | The embed width (overrides the default option, optional)             | ✅       |
-| height | The embed height (overrides the default option, optional)            | ✅       |
+| 选项  | 描述                                                                  | 可选  |
+| ----- | --------------------------------------------------------------------- | ----- |
+| src   | YouTube 视频的 URL。可以是 YouTube 或 YouTube Music 链接           |
+| width | 嵌入的宽度（覆盖默认选项，可选）                                     | ✅    |
+| height| 嵌入的高度（覆盖默认选项，可选）                                     | ✅    |
 
-## Source code
+## 源代码
 
 [packages/extension-youtube/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-youtube/)

@@ -1,26 +1,26 @@
 ---
-title: clearContent command
+title: clearContent 命令
 meta:
-  title: clearContent command | Tiptap Editor Docs
-  description: Delete all content in the editor with the clearContent command in your Tiptap Editor. Learn more in the docs.
-  category: Editor
+  title: clearContent 命令 | Tiptap 编辑器文档
+  description: 使用 Tiptap 编辑器中的 clearContent 命令删除编辑器中的所有内容。了解更多信息，请查看文档。
+  category: 编辑器
 ---
 
-The `clearContent` command deletes the current document. The editor will maintain at least one empty paragraph due to schema requirements.
+`clearContent` 命令用于删除当前文档。编辑器将保持至少一个空段落，以满足架构要求。
 
-See also: [setContent](/editor/api/commands/content/set-content), [insertContent](/editor/api/commands/content/insert-content)
+另见：[setContent](/editor/api/commands/content/set-content)、[insertContent](/editor/api/commands/content/insert-content)
 
-## Parameters
+## 参数
 
 `emitUpdate?: boolean (true)`
-Whether to emit an update event. Defaults to `true` (Note: This changed from `false` in v2).
+是否发出更新事件。默认为 `true`（注意：在 v2 中从 `false` 更改为此）。
 
-## Examples
+## 示例
 
 ```js
-// Clear content (emits update event by default)
+// 清除内容（默认发出更新事件）
 editor.commands.clearContent()
 
-// Clear content without emitting update
+// 清除内容而不发出更新
 editor.commands.clearContent(false)
 ```

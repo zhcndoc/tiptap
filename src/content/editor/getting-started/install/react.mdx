@@ -1,48 +1,48 @@
 ---
 title: React
 meta:
-  title: React | Tiptap Editor Docs
-  description: Learn how to integrate the Tiptap Editor with a React app and develop your custom editor experience.
-  category: Editor
+  title: React | Tiptap 编辑器文档
+  description: 学习如何将 Tiptap 编辑器与 React 应用集成，并开发自定义编辑器体验。
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-This guide describes how to integrate Tiptap with your React project. We're using Vite, but the workflow should be similar with other setups.
+本指南描述了如何将 Tiptap 与您的 React 项目集成。我们使用 Vite，但其他设置的工作流程应该类似。
 
 <CodeDemo path="/Examples/Default" />
 
-### Create a React project (optional)
+### 创建一个 React 项目（可选）
 
-Start with a fresh React project called `my-tiptap-project`. [Vite](https://vitejs.dev/guide/) will set up everything we need.
+以一个名为 `my-tiptap-project` 的新 React 项目开始。 [Vite](https://vitejs.dev/guide/) 将设置我们所需的一切。
 
 ```bash
-# create a project with npm
+# 使用 npm 创建项目
 npm create vite@latest my-tiptap-project -- --template react-ts
 
-# OR, create a project with pnpm
+# 或者，使用 pnpm 创建项目
 pnpm create vite@latest my-tiptap-project --template react-ts
 
-# OR, create a project with yarn
+# 或者，使用 yarn 创建项目
 yarn create vite my-tiptap-project --template react-ts
 
-# change directory
+# 进入目录
 cd my-tiptap-project
 ```
 
-### Install dependencies
+### 安装依赖
 
-Next, install the `@tiptap/react` package, `@tiptap/pm` (the ProseMirror library), and `@tiptap/starter-kit`, which includes the most common extensions to get started quickly.
+接下来，安装 `@tiptap/react` 包，`@tiptap/pm`（ProseMirror 库）和 `@tiptap/starter-kit`，它包括启动时常用的扩展。
 
 ```bash
 npm install @tiptap/react@next @tiptap/pm@next @tiptap/starter-kit@next
 ```
 
-If you followed steps 1 and 2, you can now start your project with `npm run dev` and open [http://localhost:3000](http://localhost:3000) in your browser.
+如果您按照步骤 1 和 2 操作，现在可以通过 `npm run dev` 启动项目，并在浏览器中打开 [http://localhost:3000](http://localhost:3000)。
 
-## Integrate Tiptap
+## 集成 Tiptap
 
-To actually start using Tiptap we need to create a new component. Let's call it `Tiptap` and add the following example code in `src/Tiptap.tsx`.
+要实际开始使用 Tiptap，我们需要创建一个新组件。我们称其为 `Tiptap`，并在 `src/Tiptap.tsx` 中添加以下示例代码。
 
 ```jsx
 // src/Tiptap.tsx
@@ -50,7 +50,7 @@ import { EditorProvider } from '@tiptap/react'
 import { FloatingMenu, BubbleMenu } from '@tiptap/react/menus'
 import StarterKit from '@tiptap/starter-kit'
 
-// define your extension array
+// 定义您的扩展数组
 const extensions = [StarterKit]
 
 const content = '<p>Hello World!</p>'
@@ -58,8 +58,8 @@ const content = '<p>Hello World!</p>'
 const Tiptap = () => {
   return (
     <EditorProvider extensions={extensions} content={content}>
-      <FloatingMenu editor={null}>This is the floating menu</FloatingMenu>
-      <BubbleMenu editor={null}>This is the bubble menu</BubbleMenu>
+      <FloatingMenu editor={null}>这是浮动菜单</FloatingMenu>
+      <BubbleMenu editor={null}>这是气泡菜单</BubbleMenu>
     </EditorProvider>
   )
 }
@@ -67,7 +67,7 @@ const Tiptap = () => {
 export default Tiptap
 ```
 
-**Important Note**: You can always use the `useEditor` hook if you want to avoid using the Editor context.
+**重要提示**：如果您希望避免使用 Editor 上下文，可以随时使用 `useEditor` 钩子。
 
 ```jsx
 // src/Tiptap.tsx
@@ -75,7 +75,7 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import { FloatingMenu, BubbleMenu } from '@tiptap/react/menus'
 import StarterKit from '@tiptap/starter-kit'
 
-// define your extension array
+// 定义您的扩展数组
 const extensions = [StarterKit]
 
 const content = '<p>Hello World!</p>'
@@ -89,8 +89,8 @@ const Tiptap = () => {
   return (
     <>
       <EditorContent editor={editor} />
-      <FloatingMenu editor={editor}>This is the floating menu</FloatingMenu>
-      <BubbleMenu editor={editor}>This is the bubble menu</BubbleMenu>
+      <FloatingMenu editor={editor}>这是浮动菜单</FloatingMenu>
+      <BubbleMenu editor={editor}>这是气泡菜单</BubbleMenu>
     </>
   )
 }
@@ -98,9 +98,9 @@ const Tiptap = () => {
 export default Tiptap
 ```
 
-### Add it to your app
+### 将其添加到您的应用中
 
-Finally, replace the content of `src/App.tsx` with our new `Tiptap` component.
+最后，用我们的新 `Tiptap` 组件替换 `src/App.tsx` 的内容。
 
 ```jsx
 import Tiptap from './Tiptap'
@@ -116,9 +116,9 @@ const App = () => {
 export default App
 ```
 
-### Consume the Editor context in child components
+### 在子组件中消费编辑器上下文
 
-If you use the `EditorProvider` to set up your Tiptap editor, you can now access your editor instance from any child component using the `useCurrentEditor` hook.
+如果您使用 `EditorProvider` 来设置您的 Tiptap 编辑器，则现在可以使用 `useCurrentEditor` 钩子从任何子组件访问您的编辑器实例。
 
 ```tsx
 import { useCurrentEditor } from '@tiptap/react'
@@ -130,13 +130,13 @@ const EditorJSONPreview = () => {
 }
 ```
 
-**Important**: This won't work if you use the `useEditor` hook to setup your editor.
+**重要**：如果您使用 `useEditor` 钩子来设置您的编辑器，则此方法无效。
 
-You should now see a pretty barebones example of Tiptap in your browser.
+您现在应该在浏览器中看到一个非常基础的 Tiptap 示例。
 
-### Add before or after slots
+### 添加开始或结束插槽
 
-Since the EditorContent component is rendered by the `EditorProvider` component, we now can't directly define where to render before or after content of our editor. For that, we can use the `slotBefore` and `slotAfter` props on the `EditorProvider` component.
+由于 EditorContent 组件是由 `EditorProvider` 组件渲染的，因此我们现在无法直接定义在编辑器内容之前或之后渲染的位置。为此，我们可以在 `EditorProvider` 组件上使用 `slotBefore` 和 `slotAfter` 属性。
 
 ```tsx
 <EditorProvider
@@ -147,9 +147,9 @@ Since the EditorContent component is rendered by the `EditorProvider` component,
 />
 ```
 
-### Container props
+### 容器属性
 
-The `EditorProvider` component accepts an `editorContainerProps` prop to pass attributes to the container element of the editor provider.
+`EditorProvider` 组件接受一个 `editorContainerProps` 属性来传递属性到编辑器提供器的容器元素。
 
 ```tsx
 <EditorProvider
@@ -159,6 +159,6 @@ The `EditorProvider` component accepts an `editorContainerProps` prop to pass at
 />
 ```
 
-## Optimize your performance
+## 优化性能
 
-We recommend visiting the [React Performance Guide](/guides/performance) to integrate the Tiptap Editor efficiently. This will help you avoid potential issues as your app scales.
+我们建议访问 [React 性能指南](/guides/performance) 来有效地集成 Tiptap 编辑器。这将帮助您在应用程序扩展时避免潜在的问题。

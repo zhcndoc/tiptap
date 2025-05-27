@@ -1,36 +1,36 @@
 ---
 title: JSX
 meta:
-  title: JSX | Tiptap Editor Docs
-  description: Use JSX to control the way your extensions render to HTML.
-  category: Editor
+  title: JSX | Tiptap 编辑器文档
+  description: 使用 JSX 来控制您的扩展如何渲染为 HTML。
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-When creating custom extensions, you often have to define how they should be rendered to HTML. Usually, this is done by defining a `renderHTML` function that returns Prosemirror render array including the tag name, attributes and content holes.
+在创建自定义扩展时，您通常需要定义它们如何渲染为 HTML。通常，可以通过定义一个 `renderHTML` 函数来完成，该函数返回 Prosemirror 渲染数组，包括标签名称、属性和内容孔。
 
-With the Tiptap JSX renderer, you can use JSX to define how your extensions should be rendered.
+使用 Tiptap 的 JSX 渲染器，您可以使用 JSX 来定义您的扩展应如何渲染。
 
 <CodeDemo path="/Examples/JSX" />
 
-## Using JSX in your extension
+## 在扩展中使用 JSX
 
-To use JSX in your extension, you will need a bundler that can handle **JSX** or **TSX** files like Vite or Webpack. Most frameworks like Next.js, Remix or Nuxt already should be able to handle this.
+要在扩展中使用 JSX，您需要一个可以处理 **JSX** 或 **TSX** 文件的打包工具，比如 Vite 或 Webpack。大多数框架，如 Next.js、Remix 或 Nuxt，应该已经能够处理这个问题。
 
-By default, the JSX runtime of React is used if not configured otherwise. This will cause issues if you are trying to use JSX in a non-React environment like a Tiptap extension.
+如果没有其他配置，默认使用 React 的 JSX 运行时。这在您尝试在非 React 环境中使用 JSX（如 Tiptap 扩展）时会导致问题。
 
-To handle this, you can add a comment to the top of your file to specify which JSX runtime the bundler should use. Tiptap comes with it's own bundler from `@tiptap/core`.
+为了处理这个问题，您可以在文件顶部添加一条注释，以指定打包工具应使用哪个 JSX 运行时。Tiptap 附带了来自 `@tiptap/core` 的自己的打包工具。
 
 ```jsx
 /** @jsxImportSource @tiptap/core */
 
-// your code here
+// 在此处编写您的代码
 ```
 
-## Writing JSX in the `renderHTML` function
+## 在 `renderHTML` 函数中编写 JSX
 
-Now that the bundler should be able to handle JSX for Tiptap, you can use JSX in your `renderHTML` function.
+现在，打包工具应该能够为 Tiptap 处理 JSX，您可以在 `renderHTML` 函数中使用 JSX。
 
 ```jsx
 /** @jsxImportSource @tiptap/core */
@@ -38,12 +38,12 @@ Now that the bundler should be able to handle JSX for Tiptap, you can use JSX in
 import { Node } from '@tiptap/core'
 
 const MyNode = Node.create({
-  // ... your node configuration
+  // ... 您的节点配置
 
   renderHTML({ HTMLAttributes }) {
     return (
       <div {...HTMLAttributes}>
-        <p>This is your custom node. And here is your content hole:</p>
+        <p>这是您的自定义节点。这里是您的内容孔：</p>
         <slot />
       </div>
     )
@@ -51,6 +51,6 @@ const MyNode = Node.create({
 })
 ```
 
-The `<slot />` tag is used to define a content hole for Prosemirror via JSX. This is the position your editable content will be rendered into.
+`<slot />` 标签用于通过 JSX 定义 Prosemirror 的内容孔。这是您的可编辑内容将被渲染的位置。
 
-**Note** that this is not using any component library like React or Vue under the hood and won't support hooks, states or other library specific features.
+**注意**，这并没有使用任何组件库，如 React 或 Vue 的底层实现，并且不会支持钩子、状态或其他特定于库的功能。

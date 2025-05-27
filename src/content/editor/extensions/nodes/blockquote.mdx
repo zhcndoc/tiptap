@@ -1,59 +1,59 @@
 ---
-title: Blockquote extension
+title: 引用块扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extension-blockquote/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extension-blockquote/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extension-blockquote
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-blockquote.svg
     url: https://npmcharts.com/compare/@tiptap/extension-blockquote?minimal=true
-    label: Downloads
+    label: 下载量
 extension:
-  name: Blockquote
+  name: 引用块
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-blockquote
-  description: Quoting other people will make you look clever.
+  description: 引用他人内容会让你看起来更聪明。
   type: node
   icon: TextQuote
 meta:
-  title: Blockquote extension | Tiptap Editor Docs
-  description: Use the Blockquote extension in Tiptap to enable the quote HTML tag in the editor. Learn more in our docs!
-  category: Editor
+  title: 引用块扩展 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用引用块扩展，启用编辑器中的 `<blockquote>` HTML 标签。详细信息请查阅我们的文档！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-The Blockquote extension enables you to use the `<blockquote>` HTML tag in the editor. This is great to … show quotes in the editor, you know?
+引用块扩展允许你在编辑器中使用 `<blockquote>` HTML 标签。这对于……展示引用内容非常有用，对吧？
 
-Type <code>&gt;&nbsp;</code> at the beginning of a new line and it will magically transform to a blockquote.
+在新行开头输入 `<` 之后跟着 `&gt; `，就会神奇地变成引用块。
 
 <CodeDemo path="/Nodes/Blockquote" />
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-blockquote@next
 ```
 
-## Settings
+## 配置
 
 ### HTMLAttributes
 
-Custom HTML attributes that should be added to the rendered HTML tag.
+自定义要添加到渲染HTML标签中的HTML属性。
 
 ```js
 Blockquote.configure({
   HTMLAttributes: {
-    class: 'my-custom-class',
+    class: '我的自定义类',
   },
 })
 ```
 
-## Commands
+## 命令
 
 ### setBlockquote()
 
-Wrap content in a blockquote.
+将内容包裹在引用块中。
 
 ```js
 editor.commands.setBlockquote()
@@ -61,7 +61,7 @@ editor.commands.setBlockquote()
 
 ### toggleBlockquote()
 
-Wrap or unwrap a blockquote.
+切换引用块的显示与隐藏（包裹或解包引用块）。
 
 ```js
 editor.commands.toggleBlockquote()
@@ -69,18 +69,18 @@ editor.commands.toggleBlockquote()
 
 ### unsetBlockquote()
 
-Unwrap a blockquote.
+移除引用块包裹。
 
 ```js
 editor.commands.unsetBlockquote()
 ```
 
-## Keyboard shortcuts
+## 键盘快捷键
 
-| Command           | Windows/Linux                                        | macOS                                            |
-| ----------------- | ---------------------------------------------------- | ------------------------------------------------ |
-| Toggle Blockquote | <kbd>Control</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> | <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> |
+| 命令             | Windows/Linux                                            | macOS                                               |
+| ---------------- | -------------------------------------------------------- | --------------------------------------------------- |
+| 切换引用块       | <kbd>Control</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>   | <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>    |
 
-## Source code
+## 源码
 
 [packages/extension-blockquote/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-blockquote/)

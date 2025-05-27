@@ -1,24 +1,24 @@
 ---
-title: Collaboration extension
+title: 协作扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extension-collaboration/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extension-collaboration/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extension-collaboration
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-collaboration.svg
     url: https://npmcharts.com/compare/@tiptap/extension-collaboration?minimal=true
-    label: Downloads
+    label: 下载次数
 meta:
-  category: Editor
-  title: Collaboration extension | Tiptap Editor Docs
-  description: Learn how to set up and use collaborative editing with the Collaboration extension in Tiptap.
+  category: 编辑器
+  title: 协作扩展 | Tiptap 编辑器文档
+  description: 了解如何在 Tiptap 中使用协作扩展来设置和使用协作编辑。
 extension:
-  name: Collaboration
+  name: 协作
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-collaboration
-  description: Collaborative text editing can be fricking complex, but it doesn’t have to be that way.
+  description: 协作文本编辑可能非常复杂，但不必如此。
   type: extension
-  icon: Radio
+  icon: 收音机
 ---
 
 import { ArrowRightIcon } from 'lucide-react'
@@ -28,29 +28,27 @@ import { Button } from '@/components/ui/Button'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 
-This small guide quickly shows how to integrate basic collaboration functionality into your editor. For a proper collaboration integration, review the documentation of [Tiptap Collaboration](/collaboration/getting-started/overview), which is a cloud and on-premises collaboration server solution.
+这个小指南将快速演示如何将基本的协作功能集成到您的编辑器中。有关适当的协作集成，请查看[Tiptap 协作](/collaboration/getting-started/overview)的文档，这是一个云和本地的协作服务器解决方案。
 
 <CodeDemo path="/Demos/CollaborationSplitPane" />
 
-## Install
+## 安装
 
-<Callout title="More details" variant="hint">
-  For more detailed information on how to integrate, install, and configure the Collaboration
-  extension with the Tiptap Collaboration product, please visit our [feature
-  page](/collaboration/getting-started/overview).
+<Callout title="更多详细信息" variant="hint">
+  有关如何与 Tiptap 协作产品集成、安装和配置协作扩展的更详细信息，请访问我们的[功能页面](/collaboration/getting-started/overview)。
 </Callout>
 
 ```bash
 npm install @tiptap/extension-collaboration@next @tiptap/y-tiptap@next yjs y-websocket
 ```
 
-## Settings
+## 设置
 
 ### document
 
-An initialized Y.js document.
+初始化的 Y.js 文档。
 
-Default: `null`
+默认值: `null`
 
 ```js
 Collaboration.configure({
@@ -60,9 +58,9 @@ Collaboration.configure({
 
 ### field
 
-Name of a Y.js fragment, can be changed to sync multiple fields with one Y.js document.
+Y.js 片段的名称，可以更改为与一个 Y.js 文档同步多个字段。
 
-Default: `'default'`
+默认值: `'default'`
 
 ```js
 Collaboration.configure({
@@ -73,9 +71,9 @@ Collaboration.configure({
 
 ### fragment
 
-A raw Y.js fragment, can be used instead of `document` and `field`.
+原始的 Y.js 片段，可以替代 `document` 和 `field` 使用。
 
-Default: `null`
+默认值: `null`
 
 ```js
 Collaboration.configure({
@@ -83,13 +81,13 @@ Collaboration.configure({
 })
 ```
 
-## Commands
+## 命令
 
-The `Collaboration` extension comes with its own history extension. Make sure to disable the `UndoRedo` extension, if you’re working with the `StarterKit`.
+`Collaboration` 扩展带有其自己的历史扩展。如果您使用的是 `StarterKit`，请确保禁用 `UndoRedo` 扩展。
 
 ### undo()
 
-Undo the last change.
+撤销最后一次更改。
 
 ```js
 editor.commands.undo()
@@ -97,41 +95,41 @@ editor.commands.undo()
 
 ### redo()
 
-Redo the last change.
+重做最后一次更改。
 
 ```js
 editor.commands.redo()
 ```
 
-## Keyboard shortcuts
+## 快捷键
 
-| Command | Windows/Linux                                                                             | macOS                                                                             |
-| ------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| undo()  | <kbd>Control</kbd> + <kbd>Z</kbd>                                                         | <kbd>Cmd</kbd> + <kbd>Z</kbd>                                                     |
-| redo()  | <kbd>Shift</kbd> + <kbd>Control</kbd> + <kbd>Z</kbd> or <kbd>Control</kbd> + <kbd>Y</kbd> | <kbd>Shift</kbd> + <kbd>Cmd</kbd> + <kbd>Z</kbd> or <kbd>Cmd</kbd> + <kbd>Y</kbd> |
+| 命令   | Windows/Linux                                                                             | macOS                                                                             |
+| ------ | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| undo() | <kbd>Control</kbd> + <kbd>Z</kbd>                                                         | <kbd>Cmd</kbd> + <kbd>Z</kbd>                                                     |
+| redo() | <kbd>Shift</kbd> + <kbd>Control</kbd> + <kbd>Z</kbd> 或 <kbd>Control</kbd> + <kbd>Y</kbd> | <kbd>Shift</kbd> + <kbd>Cmd</kbd> + <kbd>Z</kbd> 或 <kbd>Cmd</kbd> + <kbd>Y</kbd> |
 
-## Source code
+## 源代码
 
 [packages/extension-collaboration/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-collaboration/)
 
-## You Did It!
+## 你做到了！
 
-Your editor is now collaborative! Invite your friends and start typing together 🙌🏻 If you want to continue building out your collaborative editing features, make sure to check out the [Tiptap Collaboration Docs](/collaboration/getting-started/overview) for a fully hosted on on-premises collaboration server solution.
+您的编辑器现在是协作的！邀请您的朋友，一起开始打字 🙌🏻 如果您想继续构建协作编辑功能，请确保查看[Tiptap 协作文档](/collaboration/getting-started/overview)，以获取完全托管的本地协作服务器解决方案。
 
 <CtaBox.Wrapper>
-  <CtaBox.Title>Collaboration</CtaBox.Title>
+  <CtaBox.Title>协作</CtaBox.Title>
   <CtaBox.Description>
-    Fasten your seatbelts! Make your rich text editor collaborative with Tiptap Collaboration.
+    系好安全带！让您的富文本编辑器与 Tiptap 协作功能一起工作。
   </CtaBox.Description>
   <CtaBox.List>
-    <CtaBox.ListItem>Real-time everything</CtaBox.ListItem>
-    <CtaBox.ListItem>Offline-first & conflict free</CtaBox.ListItem>
-    <CtaBox.ListItem>Managed and hosted by us or on your premises</CtaBox.ListItem>
+    <CtaBox.ListItem>实时一切</CtaBox.ListItem>
+    <CtaBox.ListItem>优先离线和无冲突</CtaBox.ListItem>
+    <CtaBox.ListItem>由我们管理和托管或在您本地</CtaBox.ListItem>
   </CtaBox.List>
   <CtaBox.Actions className="-mx-3">
     <Button className="text-white/80 hover:text-white/100" variant="tertiary" asChild>
       <Link href="/collaboration/getting-started/overview">
-        Learn more
+        了解更多
         <ArrowRightIcon className="w-4 h-4" />
       </Link>
     </Button>

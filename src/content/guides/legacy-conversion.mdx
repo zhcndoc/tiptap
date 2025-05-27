@@ -1,31 +1,31 @@
 ---
 tags:
   - type: editor
-title: Legacy DOCX Import & Export
+title: 旧版 DOCX 导入与导出
 meta:
-    title: Legacy DOCX | Tiptap Editor Docs
-    description: Review how to configure the legacy import and export extensions and REST API endpoints. More in the docs.
+    title: 旧版 DOCX | Tiptap 编辑器文档
+    description: 了解如何配置旧版导入和导出扩展及 REST API 端点。更多内容请查看文档。
     category: Editor
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-The original `extension-import` and `extension-export` packages for Tiptap provide reliable methods to import and export DOCX files.
+Tiptap 原始的 `extension-import` 和 `extension-export` 包提供了可靠的方法来导入和导出 DOCX 文件。
 
-These extensions, and associated endpoints remain available to anyone with a Tiptap account but are no longer actively developed.
+这些扩展及相关端点仍对所有拥有 Tiptap 账户的用户开放，但已不再积极开发。
 
-They will be officially sunset later in 2025 and replaced by the new [Tiptap Conversion](/conversion/getting-started/overview) extensions and services.
+它们将于 2025 年晚些时候正式退役，并由新的 [Tiptap 转换](/conversion/getting-started/overview) 扩展和服务取代。
 
-The following guide focuses on configuring the legacy extensions.
+以下指南重点介绍如何配置旧版扩展。
 
-## Import legacy extension
+## 导入旧版扩展
 
-<Callout title="Legacy Import Extension Deprecation" variant="warning">
-    The **extension-import** package will no longer be supported later 2025. Please plan to migrate to our [newer solutions](/conversion/getting-started/overview) or alternative endpoints before then to ensure uninterrupted service.
+<Callout title="旧版导入扩展即将废弃" variant="warning">
+    **extension-import** 包将于 2025 年晚些时候停止支持。请规划迁移至我们的[新版解决方案](/conversion/getting-started/overview)或其他端点，以确保服务不中断。
 </Callout>
 
 ```js
-// Start with importing the extension
+// 首先导入扩展
 import { Import } from '@tiptap-pro/extension-import'
 
 const editor = new Editor({
@@ -33,35 +33,34 @@ const editor = new Editor({
   extensions: [
     // ...
     Import.configure({
-      // The Convert App-ID from the Convert settings page: https://cloud.tiptap.dev/convert-settings
+      // 从转换设置页面获取的 Convert App-ID：https://cloud.tiptap.dev/convert-settings
       appId: 'your-app-id',
 
-      // The JWT token you generated in the previous step
+      // 之前步骤生成的 JWT 令牌
       token: 'your-jwt',
 
-      // The URL to upload images to, if not provided, images will be stripped from the document
+      // 图片上传的 URL，若未提供，文档中的图片将被移除
       imageUploadCallbackUrl: 'https://your-image-upload-url.com',
 
-      // Enables the experimental DOCX import which should better preserve content styling
+      // 启用实验性的 DOCX 导入功能，更好地保留内容样式
       experimentalDocxImport: true,
     }),
   ],
 })
 ```
 
-### Import your first document
+### 导入第一个文档
 
 ```js
-// The most simple way to import a file
-// This will import the uploaded file, replace the editor content
-// and focus the editor
+// 最简单的文件导入方式
+// 导入上传的文件，替换编辑器内容并聚焦编辑器
 editor.chain().focus().import({ file }).run()
 ```
 
-#### Customize the import behavior
+#### 自定义导入行为
 
 ```js
-// You can also use the onImport callback to customize the import behavior
+// 也可以使用 onImport 回调自定义导入行为
 editor
   .chain()
   .import({
@@ -69,21 +68,20 @@ editor
     onImport(context) {
       const { setEditorContent, content, error } = context
 
-      // add error handling
+      // 添加错误处理
       if (error) {
         showErrorToast({ message: error.message })
       }
 
-      // You could also modify the content before inserting it
+      // 也可以在插入前修改内容
       content.doc.content.push({ type: 'paragraph', content: [{ type: 'text', text: 'Hello!' }] })
 
-      // you can change the loading state of your application for example
+      // 例如，你可以更改应用程序的加载状态
       isLoading = false
 
-      // make sure you call the setEditorContent function if you want to run
-      // the default insertion behavior of the extension
+      // 如果希望运行扩展的默认插入行为，确保调用 setEditorContent 函数
       // setEditorContent()
-      // but since we modified the content, we need to do the insertion manually
+      // 由于我们修改了内容，需要手动插入
       editor.commands.setContent(content)
     },
   })
@@ -91,56 +89,55 @@ editor
   .run()
 ```
 
-### Import options
+### 导入选项
 
-| Name                     | Type       | Default     | Description                                                                                                                                                                                     |
-| ------------------------ | ---------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `appId`                  | `string`   | `undefined` | The convert app ID from the Convert settings page: [https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings)                                                       |
-| `token`                  | `string`   | `undefined` | The JWT token generated from your server via secret                                                                                                                                             |
-| `imageUploadCallbackUrl` | `string`   | `undefined` | The URL to upload images to, if not provided, images will be stripped from the document, [see more info](/collaboration/documents/conversion#image-uploading)                                   |
-| `experimentalDocxImport` | `boolean ` | `false`     | Enables the experimental DOCX import which should better preserve content styling (experimental, and this API may not be completely stable while in alpha), only applies to DOCX files uploaded |
+| 名称                      | 类型        | 默认值       | 描述                                                                                                                                                                                           |
+| ------------------------- | ----------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `appId`                   | `string`    | `undefined`  | 从转换设置页面获取的 Convert App ID：[https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings)                                                                      |
+| `token`                   | `string`    | `undefined`  | 通过服务端密钥生成的 JWT 令牌                                                                                                                                                                   |
+| `imageUploadCallbackUrl`  | `string`    | `undefined`  | 图片上传的 URL，若未提供，文档内的图片将被移除，[查看更多信息](/collaboration/documents/conversion#image-uploading)                                                                               |
+| `experimentalDocxImport`  | `boolean`  | `false`      | 启用实验性的 DOCX 导入功能，更好地保留内容样式（实验性功能，此 API 在 alpha 期间可能不稳定），仅适用于上传的 DOCX 文件                                                                         |
 
-### Commands
+### 命令
 
-| Name     | Description                   |
-| -------- | ----------------------------- |
-| `import` | Import a file into the editor |
+| 名称       | 描述                 |
+| ---------- | -------------------- |
+| `import`   | 将文件导入编辑器     |
 
 #### `import`
 
-##### Arguments
+##### 参数
 
-| Name       | Type       | Default     | Options       | Description                                                                                                                                                                   |
-| ---------- | ---------- | ----------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `file`     | `File`     | `undefined` | Any file      | The file to import                                                                                                                                                            |
-| `format`   | `string`   | `undefined` | `gfm`         | Is used for special cases where the format is not clear, for example markdown gfm                                                                                             |
-| `onImport` | `Function` | `undefined` | `fn(context)` | A callback used to customize the import behavior. The context argument includes information about the content, errors and a `setEditorContent` function to modify the content |
+| 名称        | 类型        | 默认值       | 选项           | 描述                                                                                                                                        |
+| ----------- | ----------- | ------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file`      | `File`      | `undefined`  | 任意文件       | 要导入的文件                                                                                                                               |
+| `format`    | `string`    | `undefined`  | `gfm`          | 用于格式不明确的特殊情况，比如 GitHub Flavored Markdown                                                                                     |
+| `onImport`  | `Function`  | `undefined`  | `fn(context)`  | 用于自定义导入行为的回调函数。context 包含内容、错误信息以及用于修改内容的 `setEditorContent` 函数                                          |
 
-### Supported formats
+### 支持的格式
 
-- `docx` - Microsoft Word, Google Docs, OpenOffice, LibreOffice and others
-- `odt` - OpenDocument Text format used by OpenOffice, LibreOffice and others
-- `rtf` - Rich Text Format used by Microsoft Word, Google Docs and others
-- Commonmark `markdown` - Markdown format used by various editors and platforms
-- GFM `markdown` - GitHub Flavored Markdown used by GitHub
+- `docx` - Microsoft Word、Google Docs、OpenOffice、LibreOffice 等
+- `odt` - OpenDocument 文本文档格式，OpenOffice、LibreOffice 等使用
+- `rtf` - Microsoft Word、Google Docs 等使用的富文本格式
+- Commonmark `markdown` - 多种编辑器和平台使用的 Markdown 格式
+- GFM `markdown` - GitHub 风格 Markdown 格式
 
-### Caveats and limitations
+### 注意事项与限制
 
-- **Image upload** - Images are assumed to be inline within the document so, your editor should be setup with `Image.configure({ inline: true })` to display them correctly, otherwise they will be stripped from the document
-- **Unsupported docx elements on import** - Importing docx files currently does not support page breaks, page headers and footers, horizontal rules or text styles
-- **Content added via suggestion mode** - Content added via suggestion mode is not included in the imported prosemirror document
-- **PDF import & export** - Importing and exporting PDF files is not yet supported
-- **Inline styles** - Inline styles are currently not parsed and are not available in import & export
+- **图片上传** - 假设图片是文档内联的，因此需要编辑器配置 `Image.configure({ inline: true })` 以正确显示，否则会被移除
+- **导入时不支持的 DOCX 元素** - 当前导入时不支持分页符、页眉页脚、水平分割线或文本样式
+- **建议模式中添加的内容** - 建议模式添加的内容不会包含在导入的 ProseMirror 文档中
+- **PDF 导入与导出** - 目前不支持 PDF 文件的导入和导出
+- **内联样式** - 当前不解析内联样式，导入导出中不可用
 
-## Export legacy extension
+## 导出旧版扩展
 
-
-<Callout title="Legacy Export Extension Deprecation" variant="warning">
-    The **extension-export** package will no longer be supported later 2025. We strongly recommend transitioning to our updated [export extension](/conversion/getting-started/overview), which offer improved customization and ongoing support.
+<Callout title="旧版导出扩展即将废弃" variant="warning">
+    **extension-export** 包将于 2025 年晚些时候停止支持。我们强烈建议迁移至更新的[导出扩展](/conversion/getting-started/overview)，享受更好的自定义功能和持续支持。
 </Callout>
 
 ```js
-// Start with importing the extension
+// 首先导入扩展
 import { Export } from '@tiptap-pro/extension-export'
 
 const editor = new Editor({
@@ -148,235 +145,235 @@ const editor = new Editor({
   extensions: [
     // ...
     Export.configure({
-      // The Convert App-ID from the convert settings page: https://cloud.tiptap.dev/convert-settings
+      // 从转换设置页面获取的 Convert App-ID：https://cloud.tiptap.dev/convert-settings
       appId: 'your-app-id',
 
-      // The JWT token you generated in the previous step
+      // 之前步骤生成的 JWT 令牌
       token: 'your-jwt',
     }),
   ],
 })
 ```
 
-### Export a document
+### 导出文档
 
 ```js
-// Do a simple export to docx
-// Supported formats: docx, odt, md and gfm
+// 简单导出为 docx
+// 支持格式: docx, odt, md 和 gfm
 editor.chain().focus().export({ format: 'docx' }).run()
 ```
 
-### Customize the export behavior
+### 自定义导出行为
 
 ```js
-// You can also use the onExport callback to customize the export behavior
+// 也可以使用 onExport 回调自定义导出行为
 editor.chain().export({
   format: 'docx',
   onExport(context) {
     const { blob, error, download, filename } = context
 
-    // add error handling
+    // 添加错误处理
     if (error) {
       showErrorToast({ message: error.message })
     }
 
-    // you can change the loading state of your application for example
+    // 例如，可以更改应用程序的加载状态
     isLoading = false
 
-    // you could modify the filename or handle the blob differently here
-    // but we will keep them as they are
+    // 这里可以修改文件名或以其他方式处理 blob
+    // 但此处保持不变
 
-    // you can trigger a download directly by calling the download method
+    // 可以直接调用 download 方法触发下载
     download()
 
-    // keep in mind that the download method will only work in the browser
-    // and if the blob and filename was changed before must be managed manually
+    // 请注意，download 方法仅在浏览器中有效
+    // 如果对 blob 或 filename 做了修改，需要手动处理下载
   },
 })
 ```
 
-### Export options
+### 导出选项
 
-| Name    | Type     | Default     | Description                                                                                                                               |
-| ------- | -------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `appId` | `string` | `undefined` | The convert app ID from the Convert settings page: [https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings) |
-| `token` | `string` | `undefined` | The JWT token generated from your server via secret                                                                                       |
+| 名称    | 类型     | 默认值       | 描述                                                                                                                                     |
+| ------- | -------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `appId` | `string` | `undefined`  | 从转换设置页面获取的 Convert App ID：[https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings)               |
+| `token` | `string` | `undefined`  | 通过服务端密钥生成的 JWT 令牌                                                                                                           |
 
-### Commands
+### 命令
 
-| Name     | Description               |
-| -------- | ------------------------- |
-| `export` | Export the editor content |
+| 名称       | 描述                     |
+| ---------- | ------------------------ |
+| `export`   | 导出编辑器内容           |
 
 #### `export`
 
-##### Arguments
+##### 参数
 
-| Name       | Type          | Default     | Options           | Description                                                                                                                                                                              |
-| ---------- | ------------- | ----------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `format`   | `string`      | `undefined` | `docx,odt,md,gfm` | The format you want to export to                                                                                                                                                         |
-| `content`  | `JSONContent` | `undefined` | Any Tiptap JSON   | The Tiptap JSON content you want to export                                                                                                                                               |
-| `onExport` | `Function`    | `undefined` | `fn(context)`     | A callback used to customize the export behavior. The context argument includes information about the blob, filename, errors and a `download` function to download the document directly |
+| 名称         | 类型           | 默认值       | 选项                 | 描述                                                                                                                                            |
+| ------------ | -------------- | ------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `format`     | `string`       | `undefined`  | `docx,odt,md,gfm`    | 要导出的格式                                                                                                                                   |
+| `content`    | `JSONContent`  | `undefined`  | 任意 Tiptap JSON     | 要导出的 Tiptap JSON 内容                                                                                                                     |
+| `onExport`   | `Function`     | `undefined`  | `fn(context)`        | 用于自定义导出行为的回调函数。context 包含关于 blob、文件名、错误信息以及用于直接下载文档的 `download` 函数                                     |
 
-### Supported formats
+### 支持的格式
 
-- `docx` - Microsoft Word, Google Docs, OpenOffice, LibreOffice and others
-- `odt` - OpenDocument Text format used by OpenOffice, LibreOffice and others
-- Commonmark `markdown` - Markdown format used by various editors and platforms
-- GFM `markdown` - GitHub Flavored Markdown used by GitHub
+- `docx` - Microsoft Word、Google Docs、OpenOffice、LibreOffice 等
+- `odt` - OpenDocument 文本文档格式，OpenOffice、LibreOffice 等使用
+- Commonmark `markdown` - 多种编辑器和平台使用的 Markdown 格式
+- GFM `markdown` - GitHub 风格 Markdown 格式
 
-### Caveats and limitations
+### 注意事项与限制
 
-- **Custom Node exports** - Exporting custom nodes or marks is supported in the new [Conversion](/conversion/getting-started/overview) extensions and endpoints.
-- **Custom docx templates** - Review our new [Conversion](/conversion/getting-started/overview) extensions and endpoints to integrate docx templates.
-- **PDF import & export** - Exporting PDF files is not yet supported
-- **Inline styles** - Review our new [Conversion](/conversion/getting-started/overview) extensions and endpoints to integrate inline styles.
+- **自定义节点导出** - 自定义节点或标记的导出支持请参考新版 [Conversion](/conversion/getting-started/overview) 扩展和端点
+- **自定义 DOCX 模板** - 请查看我们的新版 [Conversion](/conversion/getting-started/overview) 扩展和端点以集成 DOCX 模板
+- **PDF 导入与导出** - 目前不支持 PDF 文件的导入和导出
+- **内联样式** - 详情请参考新版 [Conversion](/conversion/getting-started/overview) 扩展和端点以集成内联样式
 
-## Legacy REST API
+## 旧版 REST API
 
-<Callout title="Legacy /v1/ Conversion REST API Deprecation" variant="warning">
-    The **/v1/ Document Conversion REST API** will not be supported later 2025. For continued updates and maintenance, migrate to newer [API endpoints](/conversion/getting-started/overview) or check out our [Postman Collection](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/collection/33042171-cc186a66-df41-4df8-9c6e-e91b20deffe5?action=share&creator=32651125) for the latest resources.
+<Callout title="旧版 /v1/ 转换 REST API 即将废弃" variant="warning">
+    **/v1/ 文档转换 REST API** 将于 2025 年晚些时候停止支持。请迁移至新版 [API 端点](/conversion/getting-started/overview) 以获得持续更新和维护，或查阅我们的 [Postman 集合](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/collection/33042171-cc186a66-df41-4df8-9c6e-e91b20deffe5?action=share&creator=32651125) 获取最新资源。
 </Callout>
 
-The legacy document conversion API supports DOCX, ODT, and Markdown conversion from and to Tiptap’s JSON format.
+旧版文档转换 API 支持 DOCX、ODT 和 Markdown 与 Tiptap JSON 格式之间的转换。
 
-### /import endpoint
+### /import 端点
 
-The `/import` endpoint enables the conversion of `docx`, `odt`, or `markdown` files into Tiptap’s JSON format. Users can POST documents to this endpoint and use various parameters to customize how different document elements are handled during the conversion process.
+`/import` 端点支持将 `docx`、`odt` 或 `markdown` 文件转换为 Tiptap 的 JSON 格式。用户可以向该端点 POST 文档，并使用多种参数自定义不同文档元素在转换过程中的处理方式。
 
-- **Method**: `POST`
+- **请求方法**：`POST`
 
-#### Required headers
+#### 必需请求头
 
-| Name            | Description                                                                                                                                     |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization` | The JWT token to authenticate the request. Example: `Bearer your-jwt-token`                                                                     |
-| `X-App-Id`      | The Convert App-ID from the Collaboration settings page: [https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings) |
+| 名称             | 描述                                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| `Authorization`  | 用于认证请求的 JWT 令牌。例如：`Bearer your-jwt-token`                                                        |
+| `X-App-Id`       | 来自协作设置页面的 Convert App-ID：[https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings) |
 
-#### Body
+#### 请求体
 
-| Name                     | Type     | Description                                                                                                                  |
-| ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `file`                   | `File`   | The file to convert                                                                                                          |
-| `imageUploadCallbackUrl` | `string` | The callback endpoint to upload images that were encountered within the uploaded document, [see more info](#image-uploading) |
+| 名称                    | 类型     | 描述                                                                                  |
+| ----------------------- | -------- | ------------------------------------------------------------------------------------- |
+| `file`                  | `File`   | 要转换的文件                                                                         |
+| `imageUploadCallbackUrl`| `string` | 上传文档中遇到的图片的回调端点，[查看详情](#image-uploading)                           |
 
-#### Query parameters
+#### 查询参数
 
-Specify how source document elements are mapped to ProseMirror nodes or marks, and adjust the conversion to meet your specific styling and structural preferences.
+指定源文档元素如何映射到 ProseMirror 的节点或标记，并调整转换以满足具体的样式和结构偏好。
 
-| Name             | Default          | Description                                                          |
-| ---------------- | ---------------- | -------------------------------------------------------------------- |
-| `paragraph`      | `paragraph`      | Defines which prosemirror type is used for paragraph conversion      |
-| `heading`        | `heading`        | Defines which prosemirror type is used for heading conversion        |
-| `blockquote`     | `blockquote`     | Defines which prosemirror type is used for blockquote conversion     |
-| `codeblock`      | `codeblock`      | Defines which prosemirror type is used for codeblock conversion      |
-| `bulletlist`     | `bulletlist`     | Defines which prosemirror type is used for bulletList conversion     |
-| `orderedlist`    | `orderedlist`    | Defines which prosemirror type is used for orderedList conversion    |
-| `listitem`       | `listitem`       | Defines which prosemirror type is used for listItem conversion       |
-| `hardbreak`      | `hardbreak`      | Defines which prosemirror type is used for hardbreak conversion      |
-| `horizontalrule` | `horizontalrule` | Defines which prosemirror type is used for horizontalRule conversion |
-| `table`          | `table`          | Defines which prosemirror type is used for table conversion          |
-| `tablecell`      | `tablecell`      | Defines which prosemirror type is used for tableCell conversion      |
-| `tableheader`    | `tableheader`    | Defines which prosemirror type is used for tableHeader conversion    |
-| `tablerow`       | `tablerow`       | Defines which prosemirror type is used for tableRow conversion       |
-| `bold`           | `bold`           | Defines which prosemirror mark is used for bold conversion           |
-| `italic`         | `italic`         | Defines which prosemirror mark is used for italic conversion         |
-| `underline`      | `underline`      | Defines which prosemirror mark is used for underline conversion      |
-| `strikethrough`  | `strike`         | Defines which prosemirror mark is used for strikethrough conversion  |
-| `link`           | `link`           | Defines which prosemirror mark is used for link conversion           |
-| `code`           | `code`           | Defines which prosemirror mark is used for code conversion           |
-| `image`          | `image`          | Defines which prosemirror mark is used for image conversion          |
+| 名称             | 默认值          | 描述                                                                |
+| ---------------- | --------------- | ------------------------------------------------------------------- |
+| `paragraph`      | `paragraph`     | 用于段落转换的 ProseMirror 类型                                     |
+| `heading`        | `heading`       | 用于标题转换的 ProseMirror 类型                                     |
+| `blockquote`     | `blockquote`    | 用于引用块转换的 ProseMirror 类型                                   |
+| `codeblock`      | `codeblock`     | 用于代码块转换的 ProseMirror 类型                                   |
+| `bulletlist`     | `bulletlist`    | 用于无序列表转换的 ProseMirror 类型                                 |
+| `orderedlist`    | `orderedlist`   | 用于有序列表转换的 ProseMirror 类型                                 |
+| `listitem`       | `listitem`      | 用于列表项转换的 ProseMirror 类型                                   |
+| `hardbreak`      | `hardbreak`     | 用于硬换行转换的 ProseMirror 类型                                   |
+| `horizontalrule` | `horizontalrule`| 用于水平分割线转换的 ProseMirror 类型                               |
+| `table`          | `table`         | 用于表格转换的 ProseMirror 类型                                     |
+| `tablecell`      | `tablecell`     | 用于表格单元格转换的 ProseMirror 类型                               |
+| `tableheader`    | `tableheader`   | 用于表格头部转换的 ProseMirror 类型                                 |
+| `tablerow`       | `tablerow`      | 用于表格行转换的 ProseMirror 类型                                   |
+| `bold`           | `bold`          | 用于加粗转换的 ProseMirror 标记                                     |
+| `italic`         | `italic`        | 用于斜体转换的 ProseMirror 标记                                     |
+| `underline`      | `underline`     | 用于下划线转换的 ProseMirror 标记                                   |
+| `strikethrough`  | `strike`        | 用于删除线转换的 ProseMirror 标记                                   |
+| `link`           | `link`          | 用于链接转换的 ProseMirror 标记                                     |
+| `code`           | `code`          | 用于代码转换的 ProseMirror 标记                                     |
+| `image`          | `image`         | 用于图片转换的 ProseMirror 标记                                     |
 
-### /import-docx endpoint (experimental)
+### /import-docx 端点（实验性）
 
-The `/import-docx` endpoint enables the conversion of docx files into Tiptap's JSON format and allows for more docx-specific functions than the /import endpoint. Users can POST documents to this endpoint and use various parameters to customize how different document elements are handled during the conversion process.
+`/import-docx` 端点支持将 docx 文件转换为 Tiptap 的 JSON 格式，允许更多针对 docx 的特定功能，相较于 `/import` 端点具有更丰富的参数。用户可以向该端点 POST 文档，并使用各种参数自定义不同文档元素在转换过程中的处理方式。
 
-- **Method**: `POST`
+- **请求方法**：`POST`
 
-#### Required headers
+#### 必需请求头
 
-| Name            | Description                                                                                                                                     |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization` | The JWT token to authenticate the request. Example: `Bearer your-jwt-token`                                                                     |
-| `X-App-Id`      | The Convert App-ID from the Collaboration settings page: [https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings) |
+| 名称             | 描述                                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| `Authorization`  | 用于认证请求的 JWT 令牌。例如：`Bearer your-jwt-token`                                                        |
+| `X-App-Id`       | 来自协作设置页面的 Convert App-ID：[https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings) |
 
-#### Body
+#### 请求体
 
-| Name                     | Type     | Description                                                                                                                  |
-| ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `file`                   | `File`   | The file to convert                                                                                                          |
-| `imageUploadCallbackUrl` | `string` | The callback endpoint to upload images that were encountered within the uploaded document, [see more info](#image-uploading) |
+| 名称                    | 类型     | 描述                                                                                  |
+| ----------------------- | -------- | ------------------------------------------------------------------------------------- |
+| `file`                  | `File`   | 要转换的文件                                                                         |
+| `imageUploadCallbackUrl`| `string` | 上传文档中遇到的图片的回调端点，[查看详情](#image-uploading)                           |
 
-#### Query parameters
+#### 查询参数
 
-Specify how source document elements are mapped to ProseMirror nodes or marks, and adjust the conversion to meet your specific styling and structural preferences.
+同 `/import`，指定源文档元素映射规则和转换行为。
 
-| Name             | Default          | Description                                                          |
-| ---------------- | ---------------- | -------------------------------------------------------------------- |
-| `paragraph`      | `paragraph`      | Defines which prosemirror type is used for paragraph conversion      |
-| `heading`        | `heading`        | Defines which prosemirror type is used for heading conversion        |
-| `blockquote`     | `blockquote`     | Defines which prosemirror type is used for blockquote conversion     |
-| `codeblock`      | `codeblock`      | Defines which prosemirror type is used for codeblock conversion      |
-| `bulletlist`     | `bulletlist`     | Defines which prosemirror type is used for bulletList conversion     |
-| `orderedlist`    | `orderedlist`    | Defines which prosemirror type is used for orderedList conversion    |
-| `listitem`       | `listitem`       | Defines which prosemirror type is used for listItem conversion       |
-| `hardbreak`      | `hardbreak`      | Defines which prosemirror type is used for hardbreak conversion      |
-| `horizontalrule` | `horizontalrule` | Defines which prosemirror type is used for horizontalRule conversion |
-| `table`          | `table`          | Defines which prosemirror type is used for table conversion          |
-| `tablecell`      | `tablecell`      | Defines which prosemirror type is used for tableCell conversion      |
-| `tableheader`    | `tableheader`    | Defines which prosemirror type is used for tableHeader conversion    |
-| `tablerow`       | `tablerow`       | Defines which prosemirror type is used for tableRow conversion       |
-| `bold`           | `bold`           | Defines which prosemirror mark is used for bold conversion           |
-| `italic`         | `italic`         | Defines which prosemirror mark is used for italic conversion         |
-| `underline`      | `underline`      | Defines which prosemirror mark is used for underline conversion      |
-| `strikethrough`  | `strike`         | Defines which prosemirror mark is used for strikethrough conversion  |
-| `link`           | `link`           | Defines which prosemirror mark is used for link conversion           |
-| `code`           | `code`           | Defines which prosemirror mark is used for code conversion           |
-| `image`          | `image`          | Defines which prosemirror mark is used for image conversion          |
+| 名称             | 默认值          | 描述                                                                |
+| ---------------- | --------------- | ------------------------------------------------------------------- |
+| `paragraph`      | `paragraph`     | 用于段落转换的 ProseMirror 类型                                     |
+| `heading`        | `heading`       | 用于标题转换的 ProseMirror 类型                                     |
+| `blockquote`     | `blockquote`    | 用于引用块转换的 ProseMirror 类型                                   |
+| `codeblock`      | `codeblock`     | 用于代码块转换的 ProseMirror 类型                                   |
+| `bulletlist`     | `bulletlist`    | 用于无序列表转换的 ProseMirror 类型                                 |
+| `orderedlist`    | `orderedlist`   | 用于有序列表转换的 ProseMirror 类型                                 |
+| `listitem`       | `listitem`      | 用于列表项转换的 ProseMirror 类型                                   |
+| `hardbreak`      | `hardbreak`     | 用于硬换行转换的 ProseMirror 类型                                   |
+| `horizontalrule` | `horizontalrule`| 用于水平分割线转换的 ProseMirror 类型                               |
+| `table`          | `table`         | 用于表格转换的 ProseMirror 类型                                     |
+| `tablecell`      | `tablecell`     | 用于表格单元格转换的 ProseMirror 类型                               |
+| `tableheader`    | `tableheader`   | 用于表格头部转换的 ProseMirror 类型                                 |
+| `tablerow`       | `tablerow`      | 用于表格行转换的 ProseMirror 类型                                   |
+| `bold`           | `bold`          | 用于加粗转换的 ProseMirror 标记                                     |
+| `italic`         | `italic`        | 用于斜体转换的 ProseMirror 标记                                     |
+| `underline`      | `underline`     | 用于下划线转换的 ProseMirror 标记                                   |
+| `strikethrough`  | `strike`        | 用于删除线转换的 ProseMirror 标记                                   |
+| `link`           | `link`          | 用于链接转换的 ProseMirror 标记                                     |
+| `code`           | `code`          | 用于代码转换的 ProseMirror 标记                                     |
+| `image`          | `image`         | 用于图片转换的 ProseMirror 标记                                     |
 
-### /export endpoint
+### /export 端点
 
-The `/export` endpoint converts Tiptap documents back into formats like `docx`, `odt`, or `markdown`.
+`/export` 端点支持将 Tiptap 文档转换回 `docx`、`odt` 或 `markdown` 等格式。
 
-- **Method**: `POST`
+- **请求方法**：`POST`
 
-Convert a Tiptap document to a different format.
+将 Tiptap 文档转换为指定格式。
 
-#### Required headers
+#### 必需请求头
 
-| Name            | Description                                                                                                                                     |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization` | The JWT token to authenticate the request. Example: `Bearer your-jwt-token`                                                                     |
-| `X-App-Id`      | The Convert App-ID from the Collaboration settings page: [https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings) |
+| 名称             | 描述                                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| `Authorization`  | 用于认证请求的 JWT 令牌。例如：`Bearer your-jwt-token`                                                        |
+| `X-App-Id`       | 来自协作设置页面的 Convert App-ID：[https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings) |
 
-#### Body
+#### 请求体
 
-| Name      | Type     | Description                                                  |
-| --------- | -------- | ------------------------------------------------------------ |
-| `content` | `Object` | The Tiptap document                                          |
-| `format`  | `string` | The format to convert to, can be `docx`, `odt` or `markdown` |
+| 名称      | 类型     | 描述                               |
+| --------- | -------- | ---------------------------------- |
+| `content` | `Object` | Tiptap 文档                        |
+| `format`  | `string` | 要转换的格式，可为 `docx`、`odt` 或 `markdown` |
 
-#### Query parameters
+#### 查询参数
 
-| Name             | Default          | Description                                                          |
-| ---------------- | ---------------- | -------------------------------------------------------------------- |
-| `gfm`            | `0`              | Use Github Flavored Markdown for markdown export                     |
-| `paragraph`      | `paragraph`      | Defines which prosemirror type is used for paragraph conversion      |
-| `heading`        | `heading`        | Defines which prosemirror type is used for heading conversion        |
-| `blockquote`     | `blockquote`     | Defines which prosemirror type is used for blockquote conversion     |
-| `codeblock`      | `codeblock`      | Defines which prosemirror type is used for codeblock conversion      |
-| `bulletlist`     | `bulletlist`     | Defines which prosemirror type is used for bulletList conversion     |
-| `orderedlist`    | `orderedlist`    | Defines which prosemirror type is used for orderedList conversion    |
-| `listitem`       | `listitem`       | Defines which prosemirror type is used for listItem conversion       |
-| `hardbreak`      | `hardbreak`      | Defines which prosemirror type is used for hardbreak conversion      |
-| `horizontalrule` | `horizontalrule` | Defines which prosemirror type is used for horizontalRule conversion |
-| `table`          | `table`          | Defines which prosemirror type is used for table conversion          |
-| `tablecell`      | `tablecell`      | Defines which prosemirror type is used for tableCell conversion      |
-| `tableheader`    | `tableheader`    | Defines which prosemirror type is used for tableHeader conversion    |
-| `tablerow`       | `tablerow`       | Defines which prosemirror type is used for tableRow conversion       |
-| `bold`           | `bold`           | Defines which prosemirror mark is used for bold conversion           |
-| `italic`         | `italic`         | Defines which prosemirror mark is used for italic conversion         |
-| `underline`      | `underline`      | Defines which prosemirror mark is used for underline conversion      |
-| `strikethrough`  | `strike`         | Defines which prosemirror mark is used for strikethrough conversion  |
-| `link`           | `link`           | Defines which prosemirror mark is used for link conversion           |
-| `code`           | `code`           | Defines which prosemirror mark is used for code conversion           |
+| 名称             | 默认值        | 描述                                                                |
+| ---------------- | ------------- | ------------------------------------------------------------------- |
+| `gfm`            | `0`           | 使用 GitHub 风格 Markdown 导出                                      |
+| `paragraph`      | `paragraph`   | 用于段落转换的 ProseMirror 类型                                     |
+| `heading`        | `heading`     | 用于标题转换的 ProseMirror 类型                                     |
+| `blockquote`     | `blockquote`  | 用于引用块转换的 ProseMirror 类型                                   |
+| `codeblock`      | `codeblock`   | 用于代码块转换的 ProseMirror 类型                                   |
+| `bulletlist`     | `bulletlist`  | 用于无序列表转换的 ProseMirror 类型                                 |
+| `orderedlist`    | `orderedlist` | 用于有序列表转换的 ProseMirror 类型                                 |
+| `listitem`       | `listitem`    | 用于列表项转换的 ProseMirror 类型                                   |
+| `hardbreak`      | `hardbreak`   | 用于硬换行转换的 ProseMirror 类型                                   |
+| `horizontalrule` | `horizontalrule` | 用于水平分割线转换的 ProseMirror 类型                             |
+| `table`          | `table`      | 用于表格转换的 ProseMirror 类型                                     |
+| `tablecell`      | `tablecell`  | 用于表格单元格转换的 ProseMirror 类型                               |
+| `tableheader`    | `tableheader`| 用于表格头部转换的 ProseMirror 类型                                 |
+| `tablerow`       | `tablerow`   | 用于表格行转换的 ProseMirror 类型                                   |
+| `bold`           | `bold`      | 用于加粗转换的 ProseMirror 标记                                     |
+| `italic`         | `italic`    | 用于斜体转换的 ProseMirror 标记                                     |
+| `underline`      | `underline` | 用于下划线转换的 ProseMirror 标记                                   |
+| `strikethrough`  | `strike`    | 用于删除线转换的 ProseMirror 标记                                   |
+| `link`           | `link`      | 用于链接转换的 ProseMirror 标记                                     |
+| `code`           | `code`      | 用于代码转换的 ProseMirror 标记                                     |

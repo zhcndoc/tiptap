@@ -1,25 +1,25 @@
 ---
-title: splitBlock command
+title: splitBlock 命令
 meta:
-  title: splitBlock Command | Tiptap Editor Docs
-  description: Use the splitBlock command in Tiptap to split the current node into two at the current NodeSelection. Learn more in our docs!
-  category: Editor
+  title: splitBlock 命令 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用 splitBlock 命令将当前节点在当前 NodeSelection 处分割为两个。了解更多内容请查看我们的文档！
+  category: 编辑器
 ---
 
-`splitBlock` will split the current node into two nodes at the current [NodeSelection](https://prosemirror.net/docs/ref/#state.NodeSelection). If the current selection is not splittable, the command will be ignored.
+`splitBlock` 会在当前 [NodeSelection](https://prosemirror.net/docs/ref/#state.NodeSelection) 的位置将当前节点分割为两个节点。如果当前选择不可分割，则此命令将被忽略。
 
-## Parameters
+## 参数
 
 `options: Record<string, any>`
 
-- `keepMarks: boolean` - Defines if the marks should be kept or removed. Defaults to `true`.
+- `keepMarks: boolean` - 定义是否保留标记或移除标记。默认值为 `true`。
 
-## Use the splitBlock command
+## 使用 splitBlock 命令
 
 ```js
-// split the current node and keep marks
+// 分割当前节点并保留标记
 editor.commands.splitBlock()
 
-// split the current node and don't keep marks
+// 分割当前节点并不保留标记
 editor.commands.splitBlock({ keepMarks: false })
 ```

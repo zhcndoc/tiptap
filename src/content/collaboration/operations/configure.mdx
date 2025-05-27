@@ -1,43 +1,43 @@
 ---
-title: Runtime configuration
+title: 运行时配置
 meta:
-  title: Configure runtime | Tiptap Collaboration Docs
-  description: Dynamically adjust collaboration settings in your app with straightforward API calls. Adjust secrets, webhook URLs, and more.
-  category: Collaboration
+  title: 配置运行时 | Tiptap 协作文档
+  description: 通过简单的 API 调用动态调整应用中的协作设置。调整密钥、Webhook URL 等。
+  category: 协作
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-Configure runtime settings in Tiptap Collaboration to manage your collaboration environment directly via the REST API.
+在 Tiptap 协作中配置运行时设置，以通过 REST API 直接管理您的协作环境。
 
-These settings let you modify secrets, webhook URLs, and more, particularly when adapting to changes in your project requirements or security protocols, without restarting your application.
+这些设置允许您在不重新启动应用程序的情况下，修改密钥、Webhook URL 等，特别是在适应项目需求或安全协议变化时。
 
-## Settings overview
+## 设置概述
 
-Several settings can be adjusted dynamically:
+可以动态调整多个设置：
 
-| Key                            | Description                                                                                                                                                                 |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `secret`                       | [JWT token secret](/collaboration/getting-started/authenticate), auto-generated on the first launch                                                                                                           |
-| `api_secret`                   | API secret to use in the Authorization header, auto-generated on the first launch                                                                               |
-| `allowed_origins`              | Validates `Origin` headers against the provided values (comma separated), e.g., `https://test.tiptap.dev,https://prod.tiptap.dev`; If not set, validation is disabled           |
-| `authentication_disabled`      | Set to `1` to disable authentication, `0` to enable (default: `0`)                                                                                                          |
-| `webhook_url`                  | URL for receiving webhook callbacks                                                                                                                                |
-| `webhook_loader_url`           | Optional webhook URL for initially loading documents. See [webhooks](/collaboration/core-concepts/webhooks#loader-webhook) for more information. | 
-| `webhook_version`              | Version of the webhook                                                                                                                                 |
-| `webhook_awareness`            | Enable awareness webhooks for user activity, tracking `user.connected` and `user.disconnected` events (`1` for enabled, `0` for disabled)                                    |
-| `webhook_log_errors_only`      | Log only webhook errors; successful webhook logs are disabled                                                                                            |
-| `default_auto_versioning`      | Set to `1` to enable auto versioning, `0` to disable (default: `0`)                                                                                                    |
-| `default_auto_versioning_interval` | Interval for auto versioning in seconds (default: `30` seconds)                                                                                               |
-| `name`                         | Instance name for identification                                                                                                                       |
+| 键                             | 描述                                                                                                                                                               |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `secret`                        | [JWT 令牌密钥](/collaboration/getting-started/authenticate)，首次启动时自动生成                                                                                                                 |
+| `api_secret`                    | 用于授权头的 API 密钥，首次启动时自动生成                                                                                                                      |
+| `allowed_origins`               | 根据提供的值（以逗号分隔）验证 `Origin` 头，例如 `https://test.tiptap.dev,https://prod.tiptap.dev`；如果未设置，则禁用验证                                                   |
+| `authentication_disabled`       | 设置为 `1` 以禁用身份验证，设置为 `0` 以启用（默认值：`0`）                                                                                                             |
+| `webhook_url`                   | 用于接收 webhook 回调的 URL                                                                                                                                  |
+| `webhook_loader_url`            | 可选的 webhook URL，用于初始加载文档。有关更多信息，请参见 [webhooks](/collaboration/core-concepts/webhooks#loader-webhook)。 | 
+| `webhook_version`               | Webhook 的版本                                                                                                                                                  |
+| `webhook_awareness`             | 启用用户活动的意识 webhook，跟踪 `user.connected` 和 `user.disconnected` 事件（`1` 为启用，`0` 为禁用）                                                             |
+| `webhook_log_errors_only`       | 仅记录 webhook 错误；成功的 webhook 日志被禁用                                                                                                           |
+| `default_auto_versioning`       | 设置为 `1` 以启用自动版本控制，设置为 `0` 以禁用（默认值：`0`）                                                                                                   |
+| `default_auto_versioning_interval` | 自动版本控制的时间间隔（以秒为单位，默认值：`30` 秒）                                                                                                    |
+| `name`                          | 用于标识的实例名称                                                                                                                                             |
 
-## Managing settings via API
+## 通过 API 管理设置
 
-The collaboration platform offers a straightforward API for managing these settings. Replace `:key` with the setting key you wish to update.
+协作平台提供了一个简单的 API 来管理这些设置。将 `:key` 替换为您希望更新的设置键。
 
-### Create or overwrite settings
+### 创建或覆盖设置
 
-Use this call to add or update settings:
+使用此调用添加或更新设置：
 
 ```bash
 curl --location --request PUT 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin/settings/:key' \
@@ -45,37 +45,37 @@ curl --location --request PUT 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin
 -d 'your value'
 ```
 
-### List current settings
+### 列出当前设置
 
-Use this call to retrieve a list of all current settings:
+使用此调用检索所有当前设置的列表：
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin/settings' \
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
 ```
 
-### Retrieve a specific setting
+### 检索特定设置
 
-Use this call to retrieve the value of a particular setting:
+使用此调用检索特定设置的值：
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin/settings/:key' \
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
 ```
 
-### Delete a setting
+### 删除设置
 
-Use this call to delete a setting:
+使用此调用删除设置：
 
 ```bash
 curl --location --request DELETE 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin/settings/:key' \
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
 ```
 
-## Server performance metrics
+## 服务器性能指标
 
-Use the `/api/statistics` endpoint to gather server performance data, including total document count, peak concurrent connections, total connections over the last 30 days, and lifetime connection counts.
-Review the [metrics](/collaboration/operations/metrics) page for additional information.
+使用 `/api/statistics` 端点收集服务器性能数据，包括文档总数、峰值并发连接、过去 30 天的总连接数以及生命周期连接计数。
+有关更多信息，请查看 [指标](/collaboration/operations/metrics) 页面。
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/statistics' \

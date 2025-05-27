@@ -1,9 +1,9 @@
 ---
-title: Manage Documents with Tiptap
+title: 使用 Tiptap 管理文档
 meta:
-  title: Documents | Tiptap Collaboration
-  description: Use Tiptap Collaboration to store, manage, and track documents. Integrate with our REST API and webhooks for real-time updates.
-  category: Collaboration
+  title: 文档 | Tiptap 协作
+  description: 使用 Tiptap 协作存储、管理和跟踪文档。通过我们的 REST API 和 Webhooks 实现实时更新。
+  category: 协作
 ---
 
 import { ArrowRightIcon } from 'lucide-react'
@@ -12,65 +12,65 @@ import * as CtaBox from '@/components/CtaBox'
 import { Button } from '@/components/ui/Button'
 import { Callout } from '@/components/ui/Callout'
 
-Collaboration Documents form the backbone of Tiptap Collaboration, storing everything from content and comments to versions and metadata using the Yjs format.
+协作文档是 Tiptap 协作的核心，使用 Yjs 格式存储从内容和评论到版本和元数据的所有信息。
 
-Typically, users manage these documents using the REST API or track changes with the Collaboration Webhook, which sends detailed updates. Tiptap converts the documents into HTML or JSON for you, so you don't have to deal directly with the Yjs format.
+通常，用户通过 REST API 管理这些文档，或通过协作 Webhook 跟踪更改，该 Webhook 会发送详细的更新。Tiptap 会将文档转换为 HTML 或 JSON 格式，因此您无需直接处理 Yjs 格式。
 
-- **Host your documents:** Choose between cloud, dedicated cloud or on-premises deployment.
-- **Document REST API:** Create, update, and delete documents programmatically.
-- **Webhooks:** Automate responses to real-time document and comment events.
-- **Document versioning and comparison:** Track changes in documents through automatic or manual versioning, and visually compare differences between snapshots.
-- **Content injection:** Modify document content server-side with the REST API, even during active collaboration sessions.
+- **托管您的文档：** 选择云、专用云或本地部署。
+- **文档 REST API：** 以编程方式创建、更新和删除文档。
+- **Webhooks：** 自动响应实时文档和评论事件。
+- **文档版本管理与比较：** 通过自动或手动版本控制跟踪文档中的更改，直观地比较快照之间的差异。
+- **内容注入：** 通过 REST API 在服务器端修改文档内容，即使在活跃的协作会话期间也可以进行修改。
 
 <CtaBox.Wrapper className="mt-12">
-  <CtaBox.Title>Enterprise on-premises solution</CtaBox.Title>
+  <CtaBox.Title>企业本地解决方案</CtaBox.Title>
   <CtaBox.Description>
-    Integrate Collaboration and all other Tiptap features into your infrastructure.
+    将协作及所有其他 Tiptap 特性集成到您的基础设施中。
   </CtaBox.Description>
   <CtaBox.List>
-    <CtaBox.ListItem title="On-premises: ">
-      Deploy our docker images in your own stack
+    <CtaBox.ListItem title="本地部署：">
+      在您的堆栈中部署我们的 Docker 镜像
     </CtaBox.ListItem>
-    <CtaBox.ListItem title="High availability cluster: ">
-      Scale confidently to millions of users
+    <CtaBox.ListItem title="高可用集群：">
+      自信扩展到数百万用户
     </CtaBox.ListItem>
-    <CtaBox.ListItem title="Dedicated support: ">
-      Custom development and integration support in Chat
+    <CtaBox.ListItem title="专用支持：">
+      聊天中的自定义开发和集成支持
     </CtaBox.ListItem>
   </CtaBox.List>
   <CtaBox.Actions className="-mx-3">
     <Button className="text-white/80 hover:text-white/100" variant="tertiary" asChild>
       <Link href="https://tiptap.dev/contact-sales">
-        Let's talk
+        让我们谈谈
         <ArrowRightIcon className="w-4 h-4" />
       </Link>
     </Button>
   </CtaBox.Actions>
 </CtaBox.Wrapper>
 
-## Integrate documents
+## 集成文档
 
-Integrating documents into your editor and application with Tiptap is straightforward. By adding the Tiptap Collaboration provider to your setup, documents are automatically stored and managed within the Tiptap Collaboration framework.
+将文档集成到您的编辑器和应用程序中是非常简单的。通过将 Tiptap 协作提供程序添加到您的设置，文档会自动存储和管理在 Tiptap 协作框架内。
 
-This integration immediately enables you to use all document features, like storing collaborative documents, managing version histories, using the REST API, and injecting content.
+此集成立即启用您使用所有文档功能，例如存储协作文档、管理版本历史、使用 REST API 和注入内容。
 
-<Callout title="Note" variant="hint">
-  You can easily migrate your documents from our cloud to an on-premises server at a later time.
+<Callout title="注意" variant="hint">
+  您可以轻松地将文档从我们的云迁移到本地服务器。
 </Callout>
 
-1. **Integrate the Tiptap Editor:** Follow the [installation guide](/collaboration/getting-started/install) to setup an editor.
-2. **Activate a plan:** Begin a [free trial or choose a subscription](https://cloud.tiptap.dev/v2/billing).
-3. **Add an environment.** On your [Dashboard](https://cloud.tiptap.dev/), click the »Add environment« button, enter a name and pick the region that is closest to your users.
-4. **Check the configuration.** As soon as you save the environment, your app boots up. Visit the [configuration page](https://cloud.tiptap.dev/v2/configuration/document-server) to copy your AppID, API keys, and other connection details.
+1. **集成 Tiptap 编辑器：** 按照 [安装指南](/collaboration/getting-started/install) 设置编辑器。
+2. **激活计划：** 开始 [免费试用或选择订阅](https://cloud.tiptap.dev/v2/billing)。
+3. **添加环境：** 在您的 [仪表板](https://cloud.tiptap.dev/)，点击“添加环境”按钮，输入名称并选择离您的用户最近的区域。
+4. **检查配置：** 保存环境后，您的应用程序会启动。访问 [配置页面](https://cloud.tiptap.dev/v2/configuration/document-server) 以复制您的 AppID、API 密钥和其他连接详细信息。
 
-And now, you are all set to use the document features.
+现在，您已准备好使用文档功能。
 
-## Retrieve and manage documents
+## 检索和管理文档
 
-Use the [REST API](/collaboration/documents/rest-api) to fetch documents in `JSON` or `HTML` format for easy integration with your system. For immediate updates on changes, configure [webhooks](/collaboration/core-concepts/webhooks) to receive real-time notifications.
+使用 [REST API](/collaboration/documents/rest-api) 以 `JSON` 或 `HTML` 格式获取文档，便于与您的系统集成。要获取更改的即时更新，请配置 [webhooks](/collaboration/core-concepts/webhooks) 以接收实时通知。
 
-**Track changes in documents:** The [Snapshot](/collaboration/documents/snapshot) extension in Tiptap Collaboration automatically captures and stores snapshots of documents at designated intervals. It also allows for manual versioning, enabling users to track detailed changes and document evolution.
+**跟踪文档中的更改：** Tiptap 协作中的 [快照](/collaboration/documents/snapshot) 扩展会自动捕捉并存储文档在指定间隔的快照。它还允许手动版本控制，使用户能够跟踪详细的更改和文档演变。
 
-**Compare snapshots:** The [compare snapshots](/collaboration/documents/snapshot-compare) extension lets you visually compare two versions of a document, highlighting changes and their authors, helping you see modifications over time.
+**比较快照：** [比较快照](/collaboration/documents/snapshot-compare) 扩展让您可以直观地比较文档的两个版本，突出显示更改及其作者，帮助您查看随时间而来的修改。
 
-**Inject content:** Update the content of active documents with an [Patch Document endpoint](/collaboration/documents/content-injection), which allows server-side modifications even during active user collaboration.
+**注入内容：** 使用 [Patch Document endpoint](/collaboration/documents/content-injection) 更新活动文档的内容，允许即使在用户协作期间也进行服务器端修改。

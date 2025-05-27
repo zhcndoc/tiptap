@@ -1,16 +1,16 @@
 ---
-title: FileHandler extension
+title: FileHandler 扩展
 tags:
   - type: pro
 meta:
-  category: Editor
-  title: FileHandler extension | Tiptap Editor Docs
-  description: Handle file drops and pastes in your Tiptap editor with the FileHandler extension. Learn how to set it up here in the Docs!
+  category: 编辑器
+  title: FileHandler 扩展 | Tiptap 编辑器文档
+  description: 使用 FileHandler 扩展处理文件拖放和粘贴到 Tiptap 编辑器中。了解如何在文档中设置它！
 extension:
-  name: File Handler
-  description: Have you ever wanted to drag and drop or paste files into your editor? Well, we did too.
+  name: 文件处理器
+  description: 您是否想过将文件拖放或粘贴到编辑器中？我们也有这个需求。
   type: extension
-  icon: File
+  icon: 文件
   isPro: true
 ---
 
@@ -19,82 +19,80 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Install from private registry">
-        To install this frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证，以访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
 
 
-Have you ever wanted to drag and drop or paste files into your editor? Well, we did too—so here’s an extension for that.
+您是否想过将文件拖放或粘贴到编辑器中？我们也有这个需求——所以这里有一个扩展可以实现。
 
-The `FileHandler` extension allows you to easily handle file drops and pastes in the editor. You can define custom handlers for both events & manage allowed file types.
+`FileHandler` 扩展允许您轻松处理编辑器中的文件拖放和粘贴。您可以为这两种事件定义自定义处理程序并管理允许的文件类型。
 
-By default, the extension does not display the uploaded file when it is pasted or dropped. Instead, it triggers an event that you can respond to by inserting a new Node into the editor. For example, to display the uploaded image file, use the [image extension](/editor/extensions/nodes/image).
+默认情况下，当文件被粘贴或拖放时，该扩展不会显示上传的文件。相反，它会触发一个事件，您可以通过在编辑器中插入一个新的节点来响应该事件。例如，要显示上传的图像文件，请使用 [图像扩展](/editor/extensions/nodes/image)。
 
-<Callout title="No Server Upload Functionality" variant="info">
-  This extension is only responsible for handling the event of dropping or pasting a file into the
-  editor. It does not implement server file uploads.
+<Callout title="没有服务器上传功能" variant="info">
+  此扩展仅负责处理将文件拖放或粘贴到编辑器中的事件。它不实现服务器文件上传。
 </Callout>
 
 <CodeDemo isPro path="/Extensions/FileHandler" />
 
-## Install
+## 安装
 
-<Callout title="Set up access to Tiptap's private repository" variant="info">
-  Integrate this pro extension by registering for a free [Tiptap
-  account](https://cloud.tiptap.dev/register) and following our [access
-  guide](/guides/pro-extensions) to Tiptap’s private repository.
+<Callout title="设置访问 Tiptap 的私有库" variant="info">
+  通过注册一个免费的 [Tiptap
+  账户](https://cloud.tiptap.dev/register) 并按照我们的 [访问指南](/guides/pro-extensions) 访问 Tiptap 的私有库。
 </Callout>
 
 ```bash
 npm install @tiptap-pro/extension-file-handler@next
 ```
 
-## Settings
+## 设置
 
 ### onPaste
 
-The callback function that will be called when a file is pasted into the editor. You will have access to the editor instance & the files pasted.
+当文件粘贴到编辑器中时，将调用的回调函数。您将可以访问编辑器实例和粘贴的文件。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```js
 FileHandler.configure({
   onPaste: (editor, files, htmlContent) => {
-    // do something with the files
-    // and insert the file into the editor
-    // in some cases (for example copy / pasted gifs from other apps) you should probably not use the file directly
-    // as the file parser will only have a single gif frame as png
-    // in this case, you can extract the url from the htmlContent and use it instead, let other inputRules handle insertion
-    // or do anything else with the htmlContent pasted into here
+    // 对文件做一些操作
+    // 并将文件插入到编辑器中
+    // 在某些情况下（例如，从其他应用程序复制/粘贴的 gif），您可能不应直接使用该文件
+    // 因为文件解析器将只有单个 gif 帧作为 png
+    // 在这种情况下，您可以从 htmlContent 中提取 URL 并使用它， 让其他输入规则处理插入
+    // 或对粘贴到这里的 htmlContent 做其他任何事情
   },
 })
 ```
 
 ### onDrop
 
-The callback function that will be called when a file is dropped into the editor. You will have access to the editor instance, the files dropped and the position the file was dropped at.
+当文件拖放到编辑器中时，将调用的回调函数。您将可以访问编辑器实例、被拖放的文件以及文件被拖放的位置。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```js
 FileHandler.configure({
   onDrop: (editor, files, pos) => {
-    // do something with the files
-    // and insert the file into the editor
+    // 对文件做一些操作
+    // 并将文件插入到编辑器中
   },
 })
 ```
 
 ### allowedMimeTypes
 
-This option controls which file types are allowed to be dropped or pasted into the editor. You can define a list of mime types or a list of file extensions. If no mime types or file extensions are defined, all files will be allowed.
+此选项控制允许被拖放或粘贴到编辑器中的文件类型。您可以定义 MIME 类型列表或文件扩展名列表。如果未定义 MIME 类型或文件扩展名，则所有文件均被允许。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```js
 FileHandler.configure({

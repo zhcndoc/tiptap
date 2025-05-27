@@ -1,9 +1,9 @@
 ---
-title: Import custom marks with .docx
+title: 导入自定义标记与 .docx
 meta:
-    title: DOCX mark import | Tiptap Conversion
-    description: Learn how to import custom marks from DOCX (Word) files using the Import extension in our docs.
-    category: Conversion
+    title: DOCX 标记导入 | Tiptap 转换
+    description: 了解如何使用我们的文档中的导入扩展从 DOCX（Word）文件中导入自定义标记。
+    category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -11,47 +11,46 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的帐户中开始一个免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅一个 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Install from private registry">
-        To install this frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 登录 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-When importing a DOCX file, you can also define how custom marks should be converted back to Tiptap nodes. This is done by passing an array of custom mark definitions to the `import` command. You could use this feature to convert your custom stylings from Word into Titap with ease.
+在导入 DOCX 文件时，您还可以定义如何将自定义标记转换回 Tiptap 节点。这是通过将自定义标记定义的数组传递给 `import` 命令来完成的。您可以使用此功能轻松地将 Word 中的自定义样式转换为 Tiptap。
 
 ```ts
 import { Import } from '@tiptap-pro/extension-import-docx'
 
 const editor = new Editor({
   extensions: [
-    // Other extensions ...
+    // 其他扩展 ...
     Import.configure({
       appId: 'your-app-id',
       token: 'your-jwt',
-      // ATTENTION: This is for demo purposes only
+      // 注意：仅用于演示目的
       endpoint: 'https://your-endpoint.com',
       imageUploadCallbackUrl: 'https://your-endpoint.com/image-upload',
-      // Promisemirror custom mark mapping
+      // Promisemirror 自定义标记映射
       prosemirrorMarks: {
         bold: 'strong',
         italic: 'em',
       }
     }),
-    // Other extensions ...
+    // 其他扩展 ...
   ],
-  // Other editor settings ...
+  // 其他编辑器设置 ...
 })
 ```
 
-The latest version of the `@tiptap-pro/extension-import-docx` has the `prosemirrorMarks` configuration option available.
+最新版本的 `@tiptap-pro/extension-import-docx` 提供了 `prosemirrorMarks` 配置选项。
 
-This option allows you to map custom nodes from the DOCX to your Tiptap schema. In the example above, we are mapping the `bold` and `italic` nodes from the DOCX to the `strong` and `em` nodes in our Tiptap schema.
+此选项允许您将 DOCX 中的自定义节点映射到您的 Tiptap 架构。在上面的示例中，我们将 DOCX 中的 `bold` 和 `italic` 节点映射到 Tiptap 架构中的 `strong` 和 `em` 节点。
 
-By doing so, whenever the DOCX contains a `bold` or `italic` node, it will be converted to a `strong` or `italic` node in Tiptap when imported.
+通过这样做，每当 DOCX 包含 `bold` 或 `italic` 节点时，它将在导入时转换为 Tiptap 中的 `strong` 或 `italic` 节点。
 
-<Callout title='DOCX, "prosemirrorNodes" and "prosemirrorMarks"' variant="info">
-  Please note that the `promisemirrorNodes` and `prosemirrorMarks` options will only work if you're importing a `.docx` file. If you're importing another type of file, eg: an `.odt` file, the `/import` endpoint will be used instead of the `/import` endpoint, and the `promisemirrorNodes` and `prosemirrorMarks` options will not be available.
+<Callout title='DOCX、"prosemirrorNodes" 和 "prosemirrorMarks"' variant="info">
+  请注意，`promisemirrorNodes` 和 `prosemirrorMarks` 选项仅在导入 `.docx` 文件时有效。如果您导入其他类型的文件，例如 `.odt` 文件，将使用 `/import` 端点而不是 `/import` 端点，且 `promisemirrorNodes` 和 `prosemirrorMarks` 选项将不可用。
 </Callout>
-

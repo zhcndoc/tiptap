@@ -1,75 +1,75 @@
 ---
-title: Using the Tiptap CLI
+title: 使用 Tiptap CLI
 meta:
   title: Tiptap CLI
-  description: A command-line interface to quickly install and configure Tiptap UI components. Learn how to get started in the docs!
-  category: UI Components
+  description: 这是一个命令行接口，用于快速安装和配置 Tiptap UI 组件。了解如何在文档中入门！
+  category: UI 组件
 ---
 
-The Tiptap CLI helps you scaffold editors, install UI components or primitives, and configure Tiptap faster. It removes much of the manual work so you can start building editor features faster.
+Tiptap CLI 帮助您快速搭建编辑器，安装 UI 组件或原件，并更快地配置 Tiptap。它消除了大量的手动工作，让您能够更快地开始构建编辑器功能。
 
-It’s designed for Vite or Next.js projects. If you use another framework, you’ll need to integrate Tiptap manually from the [open-source repository](https://github.com/ueberdosis/tiptap-ui-components).
+它是为 Vite 或 Next.js 项目设计的。如果您使用其他框架，您需要从 [开源代码库](https://github.com/ueberdosis/tiptap-ui-components) 手动集成 Tiptap。
 
-## Usage
+## 使用方法
 
 ```bash
-npx @tiptap/cli [command] [options]
+npx @tiptap/cli [命令] [选项]
 ```
 
-## Commands
+## 命令
 
 ### `init`
 
-Initialize your project and install dependencies. This command sets up your project configuration and adds any specified components.
+初始化您的项目并安装依赖项。此命令设置您的项目配置并添加任何指定的组件。
 
 ```bash
 npx @tiptap/cli init
 ```
 
-#### Arguments
+#### 参数
 
-- components: the components to add
+- components: 要添加的组件
 
-#### Options
+#### 选项
 
 ```bash
-Usage: @tiptap/cli init [options] [components...]
+用法: @tiptap/cli init [选项] [组件...]
 
-Options:
--f, --framework <framework>   The framework to use (e.g., next, vite)
--f, --force                   Force overwrite of existing configuration
--c, --cwd <cwd>               The working directory (defaults to current directory)
--s, --silent                  Mute output
---src-dir                     Default: Use the src directory when creating a new project
---no-src-dir                  Do not use the src directory when creating a new project
+选项:
+-f, --framework <framework>   要使用的框架（例如：next, vite）
+-f, --force                   强制覆盖现有配置
+-c, --cwd <cwd>               工作目录（默认为当前目录）
+-s, --silent                  静默输出
+--src-dir                     默认：创建新项目时使用 src 目录
+--no-src-dir                  创建新项目时不使用 src 目录
 ```
 
 ### `add`
 
-Add one or more components to your project.
+向您的项目添加一个或多个组件。
 
 ```bash
-npx @tiptap/cli add [components]
+npx @tiptap/cli add [组件]
 ```
 
-#### Example
+#### 示例
 
 ```bash
 npx @tiptap/cli add button
 ```
 
-#### Options
+#### 选项
 
 ```bash
-Usage: @tiptap/cli add [options] [components...]
+用法: @tiptap/cli add [选项] [组件...]
 
-Arguments
+参数
 
-    components          the components to add
+    components          要添加的组件
 
-Options
+选项
 
-    -c, --cwd <cwd>     the working directory (defaults to current directory)
-    -p, --path <path>   the path to add the component to
-    -s, --silent        mute output
+    -c, --cwd <cwd>     工作目录（默认为当前目录）
+    -p, --path <path>   添加组件的路径
+    -s, --silent        静默输出
 ```

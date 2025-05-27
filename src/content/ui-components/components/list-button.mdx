@@ -1,12 +1,12 @@
 ---
-title: Toggle button to change the list type
+title: 切换按钮以更改列表类型
 meta:
-  title: List button | Tiptap UI Component
-  description: Add a button to your Tiptap editor that toggles through bullet, ordered or task lists. More in the docs.
-  category: UI Components
+  title: 列表按钮 | Tiptap UI 组件
+  description: 添加一个按钮到您的 Tiptap 编辑器中，可以在无序列表、有序列表或任务列表之间切换。详细信息请查看文档。
+  category: UI 组件
 component:
-  name: List button
-  description: Toggle through bullet, ordered or task lists with a button.
+  name: 列表按钮
+  description: 通过按钮在无序、有序或任务列表之间切换。
   type: component
   isFree: true
   isCloud: false
@@ -17,25 +17,25 @@ component:
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-A button for toggling through different list types like bullet, ordered and task lists.
+一个用于切换不同列表类型（如无序列表、有序列表和任务列表）的按钮。
 
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/list-button" />
 
-## Install
-You can add the component via Tiptap CLI (for Vite or Next.js)
+## 安装
+您可以通过 Tiptap CLI (适用于 Vite 或 Next.js) 添加组件。
 
 ```bash
 npx @tiptap/cli add list-button
 ```
 
-### Manual Integration
-For frameworks other than Vite or Next.js, add the component manually from the [https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/list-button).
+### 手动集成
+对于 Vite 或 Next.js 以外的框架，可以手动从 [https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/list-button) 添加组件。
 
-### Import styles
+### 导入样式
 
-This component requires you to import our styles which were added to `styles/keyframe-animation.scss` and `styles/_variables.scss`.
+此组件需要您导入我们的样式，这些样式已添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 中。
 
-## Usage
+## 用法
 
 ```tsx
 import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
@@ -55,26 +55,26 @@ export default function MyEditor() {
     content: `
         <ul>
             <li>
-                <strong>Bold</strong> for emphasis with <code>**</code> or <code>⌘+B</code> or the <code>B</code> button.
+                <strong>粗体</strong> 用于强调，使用 <code>**</code> 或 <code>⌘+B</code> 或 <code>B</code> 按钮。
             </li>
             <li>
-                <em>Italic</em> for subtle nuances with <code>*</code> or <code>⌘+I</code> or the <code>I</code> button.
+                <em>斜体</em> 用于细微的区别，使用 <code>*</code> 或 <code>⌘+I</code> 或 <code>I</code> 按钮。
             </li>
             <li>
-                <s>Strikethrough</s> to show revisions with <code>~~</code> or the <code>~~S~~</code> button.
+                <s>删除线</s> 用于显示修订，使用 <code>~~</code> 或 <code>~~S~~</code> 按钮。
             </li>
         </ul>
         <ul data-type="taskList">
           <li data-type="taskItem" data-checked="true">
-            <div>Test template</div>
+            <div>测试模板</div>
           </li>
           <li data-type="taskItem" data-checked="false">
             <div>
-              <a target="_blank" rel="noopener noreferrer nofollow" href="https://tiptap.dev/pricing">Create account</a>
+              <a target="_blank" rel="noopener noreferrer nofollow" href="https://tiptap.dev/pricing">创建账户</a>
             </div>
           </li>
           <li data-type="taskItem" data-checked="false">
-            <div>Download free template</div>
+            <div>下载免费模板</div>
           </li>
         </ul>
         `,
@@ -94,18 +94,18 @@ export default function MyEditor() {
 }
 ```
 
-## Props
+## 属性
 
-| Name                | Type                                        | Default  | Description                                        |
+| 名称                | 类型                                        | 默认值   | 描述                                              |
 | ------------------- | ------------------------------------------- | -------- | -------------------------------------------------- |
-| editor              | Editor \| null                              | null     | The Tiptap editor instance                         |
-| type                | 'bulletList' \| 'orderedList' \| 'taskList' | required | The type of list to toggle                         |
-| hideWhenUnavailable | boolean                                     | false    | Whether the button should be hide if not available |
-| text                | string                                      | -        | Text to display alongside the icon                 |
+| editor              | Editor \| null                              | null     | Tiptap 编辑器实例                                 |
+| type                | 'bulletList' \| 'orderedList' \| 'taskList' | 必需     | 要切换的列表类型                                  |
+| hideWhenUnavailable | boolean                                     | false    | 当不可用时，按钮是否应隐藏                        |
+| text                | string                                      | -        | 显示在图标旁边的文本                               |
 
-## Requirements
+## 需求
 
-Used reference components
+使用的参考组件
 
 - `use-tiptap-editor` (hook)
 - `tiptap-utils` (lib)
@@ -114,7 +114,7 @@ Used reference components
 - `list-todo-icon` (icon)
 - `list-ordered-icon` (icon)
 
-Open source feature(s)
+开源功能
 
 - `@tiptap/extension-task-list`
 - `@tiptap/extension-task-item`

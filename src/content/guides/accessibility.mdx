@@ -1,77 +1,77 @@
 ---
 tags:
   - type: editor
-title: How to make your editor accessible
+title: 如何使你的编辑器可访问
 meta:
-  title: Accessibility | Tiptap Editor Docs
-  description: Quick notes on ensuring accessibility by providing semantic markup, keyboard accessibility, and guidelines. More in the docs!
-  category: Editor
+  title: 可访问性 | Tiptap 编辑器文档
+  description: 确保可访问性的快速笔记，通过提供语义标记、键盘可访问性和指导方针。文档中有更多信息！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-We strive to make Tiptap accessible to everyone. But this is at odds with the fact that we are a headless editor. We don’t provide an interface, so it’s up to you to make sure that the editor is accessible. Here are some guidelines to help you with that.
+我们努力使 Tiptap 对每个人都可访问。但这与我们作为无头编辑器的事实是相悖的。我们不提供界面，因此确保编辑器可访问性完全依赖于你。以下是一些帮助你的指导方针。
 
-## Demo of an accessible editor
+## 可访问编辑器演示
 
 <CodeDemo src="/Examples/Accessibility" />
 
-## Guidelines
+## 指导方针
 
-Here are a non-exhaustive list of guidelines to make your editor accessible:
+以下是使你的编辑器可访问的非详尽指导方针清单：
 
-### Keyboard accessibility
+### 键盘可访问性
 
-Make sure that all editor features are accessible via the keyboard. This includes navigating the editor, selecting text, menus, and using all editor features.
-If you look at the demo above, you can see that you can navigate the editor with the keyboard by:
+确保所有编辑器功能都可以通过键盘访问。这包括在编辑器中导航、选择文本、菜单，以及使用所有编辑器功能。
+如果你查看上面的演示，你会发现可以通过键盘导航编辑器，具体方法如下：
 
-- `Tab` to focus within the editor
-- `Alt + F10` to focus the editor's toolbar
-  - Arrow keys to navigate the toolbar
-  - `Enter` to select a menu item
-  - `Tab` or `Esc` to navigate back the editor content
-- `Shift + Arrow keys` to select text
-  - `Tab` to navigate to the text selection menu
-  - `Enter` to select a menu item
-  - `Tab` or `Esc` to navigate back to the editor content
-- `Enter` to create a new paragraph
-  - `Tab` to navigate to the insert content menu
-    - Arrow keys to navigate the toolbar
-    - `Enter` to select a menu item, inserting the content
-    - `Tab` or `Esc` to navigate back to the editor content
-- All other editor keyboard shortcuts as described in the [keyboard shortcuts](/editor/core-concepts/keyboard-shortcuts)
+- 使用 `Tab` 在编辑器内聚焦
+- 使用 `Alt + F10` 聚焦于编辑器的工具栏
+  - 使用箭头键在工具栏中导航
+  - 使用 `Enter` 选择菜单项
+  - 使用 `Tab` 或 `Esc` 导航返回编辑器内容
+- 使用 `Shift + 箭头键` 选择文本
+  - 使用 `Tab` 导航到文本选择菜单
+  - 使用 `Enter` 选择菜单项
+  - 使用 `Tab` 或 `Esc` 导航返回编辑器内容
+- 使用 `Enter` 创建一个新段落
+  - 使用 `Tab` 导航到插入内容菜单
+    - 使用箭头键在工具栏中导航
+    - 使用 `Enter` 选择菜单项，插入内容
+    - 使用 `Tab` 或 `Esc` 导航返回编辑器内容
+- 所有其他编辑器快捷键，如 [键盘快捷键](/editor/core-concepts/keyboard-shortcuts) 中所述
 
-### Semantic markup & Aria Roles
+### 语义标记和 Aria 角色
 
-All of the default Tiptap extensions produce semantic markup. This means that the editor produces HTML that is easy to understand for screen readers.
+所有默认的 Tiptap 扩展都生成语义标记。这意味着编辑器生成的 HTML 对于屏幕阅读器来说易于理解。
 
-To help screen readers even more, your editor & menus should provide appropriate Aria roles. Some examples are:
+为了进一步帮助屏幕阅读器，您的编辑器和菜单应提供适当的 Aria 角色。以下是一些示例：
 
-- The editor should have the `role="textbox"`
-- The toolbar should have the `role="toolbar"`
-- The menu should have the `role="menu"`
-- The menu items should have the `role="menuitem"`
+- 编辑器应具有 `role="textbox"`
+- 工具栏应具有 `role="toolbar"`
+- 菜单应具有 `role="menu"`
+- 菜单项应具有 `role="menuitem"`
 
-### Interface
+### 界面
 
-An interface needs to have well-defined contrasts, big enough click areas. Currently, we don’t provide an interface, so for now that’s totally up to you.
+界面需要具有明确定义的对比度及足够大的点击区域。目前，我们不提供界面，因此这完全取决于你。
 
-### Gotchas
+### 注意事项
 
-We've found a few gotchas, when implementing accessibility, that you should be aware of:
+在实现可访问性时，我们发现了一些需要注意的事项：
 
-#### VoiceOver concatenates words across block elements
+#### VoiceOver 连接跨块元素的单词
 
-When using VoiceOver on macOS, it is important to be aware that it may concatenate words across block elements. This can lead to unexpected reading experiences for users relying on screen readers.
+在 macOS 上使用 VoiceOver 时，需要注意它可能会连接跨越块元素的单词。这可能导致依赖屏幕阅读器的用户出现意外的阅读体验。
 
-For example, consider the following HTML structure:
+例如，考虑以下 HTML 结构：
 
 ```html
-<h1>Heading</h1>
-<p>Paragraph</p>
+<h1>标题</h1>
+<p>段落</p>
 ```
 
-VoiceOver would read this as "HeadingParagraph" instead of "Heading Paragraph" (notice the space). To fix this, you can add a zero-width space after each block element:
+VoiceOver 会将其读作 "标题段落"，而不是 "标题 段落"（注意空格）。要解决此问题，可以在每个块元素后添加一个零宽空格：
 
 ```css
 .tiptap {
@@ -87,22 +87,22 @@ VoiceOver would read this as "HeadingParagraph" instead of "Heading Paragraph" (
 }
 ```
 
-#### Keyboard traps
+#### 键盘陷阱
 
-A keyboard trap is a situation where a user can’t navigate away from a certain element using the keyboard. This can be a problem if you have a modal or a menu that can be opened with the keyboard. Make sure that the user can always navigate away from these elements.
+键盘陷阱是指用户无法使用键盘从某个元素导航离开的情况。如果你有可以通过键盘打开的模态或菜单，这可能是一个问题。确保用户始终能够离开这些元素。
 
-### Writing assistance (optional)
+### 写作辅助（可选）
 
-An optional writing assitance could help people writing content semanticly correct, for example pointing out an incorrect usage of heading levels. With that kind of assistance provided by the core developers, we could help to improve the content of a lot of applications.
+可选的写作辅助可以帮助人们书写语义上正确的内容，例如指出标题级别的错误使用。通过由核心开发者提供这样的辅助，我们可以帮助改善许多应用程序的内容。
 
-## Resources
+## 资源
 
-| Document | Section | Heading                                                                                |
-| -------- | ------- | -------------------------------------------------------------------------------------- |
-| WCAG 3.0 | 7.1     | [Text Alternatives](https://www.w3.org/TR/wcag-3.0/#text-alternatives)                 |
-| WCAG 2.1 | 1.1.1   | [Non-text Content](https://www.w3.org/WAI/WCAG21/Understanding/non-text-content)       |
-| WCAG 2.1 | 2.1     | [Keyboard Accessible](https://www.w3.org/WAI/WCAG21/Understanding/keyboard-accessible) |
-| WCAG 2.1 | 2.1.1   | [Keyboard](https://www.w3.org/WAI/WCAG21/Understanding/keyboard)                       |
-| WCAG 2.1 | 4.1.1   | [Parsing](https://www.w3.org/WAI/WCAG21/Understanding/parsing)                         |
-| WCAG 2.1 | 4.1.2   | [Name, Role, Value](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)       |
-| WCAG 2.1 | 2.1.2   | [No Keyboard Trap](https://www.w3.org/TR/WCAG21/#no-keyboard-trap)                     |
+| 文档      | 章节  | 标题                                                                                |
+| --------- | ----- | ---------------------------------------------------------------------------------- |
+| WCAG 3.0  | 7.1   | [文本替代](https://www.w3.org/TR/wcag-3.0/#text-alternatives)                       |
+| WCAG 2.1  | 1.1.1 | [非文本内容](https://www.w3.org/WAI/WCAG21/Understanding/non-text-content)         |
+| WCAG 2.1  | 2.1   | [键盘可访问](https://www.w3.org/WAI/WCAG21/Understanding/keyboard-accessible)     |
+| WCAG 2.1  | 2.1.1 | [键盘](https://www.w3.org/WAI/WCAG21/Understanding/keyboard)                       |
+| WCAG 2.1  | 4.1.1 | [解析](https://www.w3.org/WAI/WCAG21/Understanding/parsing)                         |
+| WCAG 2.1  | 4.1.2 | [名称、角色、值](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)     |
+| WCAG 2.1  | 2.1.2 | [无键盘陷阱](https://www.w3.org/TR/WCAG21/#no-keyboard-trap)                       |

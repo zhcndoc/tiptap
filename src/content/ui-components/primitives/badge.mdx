@@ -1,14 +1,14 @@
 ---
-title: Add a badge UI component to your Editor
+title: 将徽章 UI 组件添加到你的编辑器
 meta:
-  title: Badges | Tiptap UI Component
-  description: Integrate a small visual indicator into your Tiptap Editor to highlight status, counts or categories. More in the docs.
-  category: UI Components
+  title: 徽章 | Tiptap UI 组件
+  description: 在你的 Tiptap 编辑器中集成一个小型视觉指示器，以突出显示状态、计数或类别。更多信息请参见文档。
+  category: UI 组件
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-A small visual indicator, typically used to highlight status, counts, or categories.
+一个小型视觉指示器，通常用于突出显示状态、计数或类别。
 
 <CodeDemo
   isScrollable
@@ -16,21 +16,21 @@ A small visual indicator, typically used to highlight status, counts, or categor
   src="https://template.tiptap.dev/preview/tiptap-ui-primitive/badge"
 />
 
-## Install
-You can add the primitive via Tiptap CLI (for Vite or Next.js)
+## 安装
+你可以通过 Tiptap CLI （用于 Vite 或 Next.js）添加该组件
 
 ```bash
 npx @tiptap/cli add badge
 ```
 
-### Manual Integration
-For frameworks other than Vite or Next.js, add the primitive manually from the [open-source repository](https://github.com/ueberdosis/tiptap-ui-components).
+### 手动集成
+对于 Vite 或 Next.js 以外的框架，请从 [开源仓库](https://github.com/ueberdosis/tiptap-ui-components) 手动添加该组件。
 
-### Import styles
+### 导入样式
 
-This component requires you to import our styles which were added to `styles/keyframe-animation.scss` and `styles/_variables.scss`.
+此组件要求你导入我们添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 的样式。
 
-## Usage
+## 使用方法
 
 ```tsx
 import { Badge } from '@/components/tiptap-ui-primitive/badge'
@@ -40,16 +40,16 @@ export default function MyComponent() {
   return (
     <Badge data-style="gray">
       <CheckIcon className="tiptap-badge-icon" />
-      <span className="tiptap-badge-text">Resolved</span>
+      <span className="tiptap-badge-text">已解决</span>
     </Badge>
   )
 }
 ```
 
-## Props
+## 属性
 
 ### Badge
 
-| Name       | Type   | Default   | Description                             |
-| ---------- | ------ | --------- | --------------------------------------- |
-| data-style | string | undefined | Style variant (e.g., 'gray', 'primary') |
+| 名称        | 类型    | 默认值    | 描述                                   |
+| ----------- | ------- | --------- | -------------------------------------- |
+| data-style  | string  | undefined | 风格变体（例如：'gray', 'primary'） |

@@ -1,32 +1,32 @@
 ---
-title: Convert Markdown via REST API
+title: 通过 REST API 转换 Markdown
 meta:
-    title: Markdown REST API | Tiptap Conversion
-    description: Learn how to handle Markdown files in a Tiptap editor, including in-editor import/export and REST API usage.
-    category: Conversion
+    title: Markdown REST API | Tiptap 转换
+    description: 了解如何在 Tiptap 编辑器中处理 Markdown 文件，包括编辑器内的导入/导出和 REST API 的使用。
+    category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始免费的[试用](https://cloud.tiptap.dev/v2/billing)或订阅[Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Configure Convert app">
-        In case you want to integrate the REST API retrieve your App ID and Convert secret from [your dashboard](https://cloud.tiptap.dev/v2/cloud/convert).
+    <RequirementItem label="2. 配置 Convert 应用">
+        如果您想集成 REST API，请从[您的仪表板](https://cloud.tiptap.dev/v2/cloud/convert)中获取您的应用 ID 和 Convert 密钥。
     </RequirementItem>
-    <RequirementItem label="3. Install from private registry">
-        To install the frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="3. 从私有注册表安装">
+        要安装前端扩展，请按照[设置指南](/guides/pro-extensions)对 Tiptap 的私有 npm 注册表进行身份验证。
     </RequirementItem>
 </Requirements>
 
-<Callout title="Use Postman" variant="hint"> Experiment with the Conversion API in our <a href="https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/collection/33042171-cc186a66-df41-4df8-9c6e-e91b20deffe5?action=share&creator=32651125">Postman collection</a>. </Callout>
+<Callout title="使用 Postman" variant="hint"> 在我们的<a href="https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/collection/33042171-cc186a66-df41-4df8-9c6e-e91b20deffe5?action=share&creator=32651125">Postman 集合</a>中实验转换 API。 </Callout>
 
-## Import API endpoint
+## 导入 API 端点
 `POST /import`
 
-Converts .md files (or gfm) to Tiptap JSON.
+将 .md 文件（或 gfm）转换为 Tiptap JSON。
 
 ```bash
 curl -X POST "https://api.tiptap.dev/v1/import?format=md" \
@@ -35,22 +35,22 @@ curl -X POST "https://api.tiptap.dev/v1/import?format=md" \
   -F "file=@/path/to/file.md"
 ```
 
-### Import API Headers
-| Header          | Description                                                                                                |
-|-----------------|------------------------------------------------------------------------------------------------------------|
-| `Authorization` | `Bearer <your-jwt-token>`                                                                                  |
-| `X-App-Id`      | Convert App ID from [https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings) |
+### 导入 API 头部
+| 头部             | 描述                                                                                           |
+|------------------|------------------------------------------------------------------------------------------------|
+| `Authorization`  | `Bearer <your-jwt-token>`                                                                      |
+| `X-App-Id`       | 来自[https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings)的 Convert 应用 ID |
 
-### Import API Fields
-| Field                    | Description                                                                        |
-|--------------------------|------------------------------------------------------------------------------------|
-| `file`                   | The markdown file to convert                                                       |
-| `imageUploadCallbackUrl` | Optional endpoint for handling images if the markdown file references local images |
+### 导入 API 字段
+| 字段                       | 描述                                                                                 |
+|---------------------------|--------------------------------------------------------------------------------------|
+| `file`                    | 要转换的 Markdown 文件                                                              |
+| `imageUploadCallbackUrl`  | 可选端点，用于处理 Markdown 文件引用的本地图像                                        |
 
-## Export API endpoint
+## 导出 API 端点
 `POST /export`
 
-Converts Tiptap JSON to .md or .gfm.
+将 Tiptap JSON 转换为 .md 或 .gfm。
 
 ```bash
 curl -X POST "https://api.tiptap.dev/v1/export" \
@@ -61,14 +61,14 @@ curl -X POST "https://api.tiptap.dev/v1/export" \
   --output document.md
 ```
 
-#### Export API Headers
-| Header          | Description                                                                                                |
-|-----------------|------------------------------------------------------------------------------------------------------------|
-| `Authorization` | `Bearer <your-jwt-token>`                                                                                  |
-| `X-App-Id`      | Convert App ID from [https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings) |
+#### 导出 API 头部
+| 头部             | 描述                                                                                           |
+|------------------|------------------------------------------------------------------------------------------------|
+| `Authorization`  | `Bearer <your-jwt-token>`                                                                      |
+| `X-App-Id`       | 来自[https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings)的 Convert 应用 ID |
 
-#### Export API Fields
-| Field     | Description                                               |
-|-----------|-----------------------------------------------------------|
-| `content` | Tiptap JSON content                                       |
-| `format`  | Target format, `md` or `gfm` for GitHub Flavored Markdown |
+#### 导出 API 字段
+| 字段      | 描述                                              |
+|-----------|---------------------------------------------------|
+| `content` | Tiptap JSON 内容                                  |
+| `format`  | 目标格式，`md` 或 `gfm`，用于 GitHub 风格 Markdown |

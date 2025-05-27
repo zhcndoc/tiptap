@@ -1,31 +1,31 @@
 ---
 tags:
   - type: editor
-title: Integrating Tiptap performantly in your app
+title: 在应用中高效整合 Tiptap
 meta:
-  title: Integration performance | Tiptap Editor Docs
-  description: Learn how to integrate Tiptap Editor performantly in your app. More in the docs!
-  category: Editor
+  title: 集成性能 | Tiptap 编辑器文档
+  description: 了解如何在应用中高效整合 Tiptap 编辑器。文档中有更多信息！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
 <CodeDemo path="/Examples/Book" />
 
-Tiptap is a very performant editor (even able to edit an entire book!), often when you run into performance issues, it's not Tiptap itself, but the way you integrate it into your app. Here are some tips to make sure your editor runs smoothly.
+Tiptap 是一个非常高效的编辑器（甚至能够编辑整本书！），当你遇到性能问题时，往往不是 Tiptap 本身的问题，而是你将其整合进应用中的方式。以下是一些确保你的编辑器平稳运行的提示。
 
-## React Tiptap Editor Integration
+## React Tiptap 编辑器整合
 
 <CodeDemo path="/Examples/Performance?hideSource=true" />
 
-When using Tiptap with React, the most common performance issue is that the editor is re-rendered too often. This can happen for several reasons:
+在使用 Tiptap 和 React 时，最常见的性能问题是编辑器的重新渲染次数过于频繁。这可能由于以下几个原因：
 
-- When using the `useEditor` hook, it by default will re-render the editor on every change. So, you should isolate the editor (and things that depend on it) in a separate component to prevent unnecessary re-renders.
-- The editor should be isolated from renders that don't affect it. For example, if you have a sidebar that doesn't interact with the editor, it should be in a separate component.
+- 当使用 `useEditor` 钩子时，默认情况下，它会在每次更改时重新渲染编辑器。因此，你应该将编辑器（以及依赖它的内容）隔离在一个单独的组件中，以防止不必要的重新渲染。
+- 编辑器应该与不会影响它的渲染隔离。例如，如果你有一个不与编辑器交互的侧边栏，它应该放在一个单独的组件中。
 
-Luckily, the solution for most of these issues is the same: isolate the editor in a separate component. Here is an example of how you can do this:
+幸运的是，解决这些问题的大部分方法都是一样的：将编辑器隔离在一个单独的组件中。下面是你可以这样做的一个示例：
 
-DO: isolate the editor in a separate component
+做：将编辑器隔离在一个单独的组件中
 
 ```jsx
 import { EditorContent, useEditor } from '@tiptap/react'
@@ -39,7 +39,7 @@ const TiptapEditor = () => {
   return (
     <>
       <EditorContent editor={editor} />
-      {/* Other components that depend on the editor instance */}
+      {/* 依赖于编辑器实例的其他组件 */}
       <MenuComponent editor={editor} />
     </>
   )
@@ -48,7 +48,7 @@ const TiptapEditor = () => {
 export default TiptapEditor
 ```
 
-DON'T: render the editor in the same component as other components
+不要：在与其他组件相同的组件中渲染编辑器
 
 ```jsx
 import { EditorContent, useEditor } from '@tiptap/react'
@@ -75,23 +75,23 @@ const App = () => {
 export default App
 ```
 
-These unrelated components will cause the editor to re-render more often than necessary, and make each render more expensive.
+这些无关的组件会导致编辑器比必要时更频繁地重新渲染，并使每次渲染的开销更大。
 
-### Track down performance issues
+### 追踪性能问题
 
-You can use the React DevTools Profiler to see which components are re-rendering and why. Another strategy is to put a `console.count('editor render')` in the editor component and see how often it is re-rendered. This can help you identify which components are causing unnecessary re-renders.
+你可以使用 React DevTools Profiler 来查看哪些组件正在重新渲染以及原因。另一种策略是在编辑器组件中放置一个 `console.count('editor render')`，查看它的重新渲染次数。这可以帮助你识别哪些组件导致了不必要的重新渲染。
 
-If it is re-rendered more often than you expect, you can take the following steps:
+如果它的重新渲染次数超过了你的预期，你可以采取以下步骤：
 
-- Check if the editor is rendering because of its parent component.
-- Isolate the editor from unrelated state changes (e.g. opening a sidebar should not cause the editor to re-render).
-- Use `useEditorState` to prevent unnecessary re-renders within the editor component.
+- 检查编辑器是否因为其父组件而重新渲染。
+- 将编辑器与无关的状态变化隔离（例如，打开侧边栏不应导致编辑器重新渲染）。
+- 使用 `useEditorState` 来防止编辑器组件内部的不必要重新渲染。
 
-Hopefully, these tips will help you track down and fix any performance issues you encounter.
+希望这些提示能帮助你追踪和修复遇到的任何性能问题。
 
-### Use `useEditorState` to prevent unnecessary re-renders
+### 使用 `useEditorState` 防止不必要的重新渲染
 
-The `useEditorState` hook allows you to subscribe to changes in the editor state and re-render only when necessary. This can help you prevent unnecessary re-renders of the editor and its components.
+`useEditorState` 钩子允许你订阅编辑器状态的变化，并仅在必要时重新渲染。这可以帮助你防止编辑器及其组件的不必要重新渲染。
 
 ```tsx
 import { useEditor, useEditorState } from '@tiptap/react'
@@ -104,9 +104,9 @@ function Component() {
 
   const editorState = useEditorState({
     editor,
-    // This function will be called every time the editor state changes
+    // 每当编辑器状态变化时，都会调用此函数
     selector: ({ editor }: { editor: Editor }) => ({
-      // It will only re-render if the bold or italic state changes
+      // 仅在粗体或斜体状态变化时重新渲染
       isBold: editorInstance.isActive('bold'),
       isItalic: editorInstance.isActive('italic'),
     }),
@@ -119,24 +119,24 @@ function Component() {
         onClick={() => editor.chain().focus().toggleBold().run()}
         className={editorState.isBold ? 'primary' : ''}
       >
-        Bold
+        粗体
       </button>
       <button
         onClick={() => editor.chain().focus().toggleItalic().run()}
         className={editorState.isItalic ? 'primary' : ''}
       >
-        Italic
+        斜体
       </button>
     </>
   )
 }
 ```
 
-The `selector` function allows you to specify which parts of the editor state you want to subscribe to. By default this will be deeply compared with the previous selected state, and only re-render if it has changed. You can select any part of the editor state, or even derive new values from it.
+`selector` 函数允许你指定想要订阅的编辑器状态的哪些部分。默认情况下，这将与之前选定的状态进行深度比较，并仅在其变化时重新渲染。你可以选择编辑器状态的任何部分，或甚至从中派生出新值。
 
-### Gain more control over rendering
+### 获取更多渲染控制
 
-As of Tiptap v2.5.0, you can gain more control over rendering by using the `immediatelyRender` and `shouldRerenderOnTransaction` options. This can be useful if you want to prevent the editor from rendering immediately or on every transaction.
+从 Tiptap v2.5.0 开始，你可以通过使用 `immediatelyRender` 和 `shouldRerenderOnTransaction` 选项获得更多的渲染控制。如果你想防止编辑器立即渲染或在每次事务时渲染，这可能会很有用。
 
 ```tsx
 import { useEditor } from '@tiptap/react'
@@ -146,11 +146,11 @@ function Component() {
     extensions,
     content,
     /**
-     * This option gives us the control to enable the default behavior of rendering the editor immediately.
+     * 此选项使我们能够控制启用编辑器立即渲染的默认行为。
      */
     immediatelyRender: true,
     /**
-     * This option gives us the control to disable the default behavior of re-rendering the editor on every transaction.
+     * 此选项使我们能够控制禁用在每次事务期间重新渲染编辑器的默认行为。
      */
     shouldRerenderOnTransaction: false,
   })
@@ -159,10 +159,10 @@ function Component() {
 }
 ```
 
-## React node views performance
+## React 节点视图性能
 
-Node views allow you to render custom components in place of nodes within the editor. This enables you to embed any kind of content in your editor. However, when using React components, be aware of potential performance implications.
+节点视图允许你在编辑器中替换节点渲染自定义组件。这使你能够在编辑器中嵌入任何类型的内容。但是，在使用 React 组件时，要注意可能的性能影响。
 
-For technical reasons, node views are expected to be rendered synchronously. Tiptap will create new elements for each node view and mount your React component in them. This can be expensive, especially if you have many instances of node views throughout your editor.
+出于技术原因，节点视图预计会同步渲染。Tiptap 会为每个节点视图创建新元素并在其中挂载你的 React 组件。这可能会很昂贵，特别是如果你在编辑器中有多个节点视图的实例。
 
-We've optimized as much as possible on our side, but if you find that rendering node views is causing performance issues, consider using plain HTML elements or a different approach to render your content within your node view.
+我们尽可能地在我们的端进行优化，但是如果你发现渲染节点视图会造成性能问题，可以考虑使用普通的 HTML 元素或其他方法在你的节点视图中渲染内容。

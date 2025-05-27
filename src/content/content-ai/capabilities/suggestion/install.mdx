@@ -1,74 +1,73 @@
 ---
-title: Install the AI Suggestion extension
+title: 安装 AI 建议扩展
 meta:
-  title: Install AI Suggestion | Tiptap AI Suggestion
-  description: Integrate the AI Suggestion extension into your application with this setup guide. More in the docs.
-  category: Content AI
+  title: 安装 AI 建议 | Tiptap AI 建议
+  description: 使用本设置指南将 AI 建议扩展集成到您的应用程序中。更多信息见文档。
+  category: 内容 AI
 ---
 
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to the [Team plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [团队计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Integrate an AI provider">
-        Configure OpenAI in your [AI settings](https://cloud.tiptap.dev/v2/cloud/ai) or review the [Custom LLM guide](/content-ai/capabilities/suggestion/custom-llms).
+    <RequirementItem label="2. 集成 AI 提供者">
+        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看 [自定义 LLM 指南](/content-ai/capabilities/suggestion/custom-llms)。
     </RequirementItem>
-    <RequirementItem label="3. Install from private registry">
-        To install the frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="3. 从私有注册表安装">
+        要安装前端扩展，请通过遵循 [设置指南](/guides/pro-extensions) 进行身份验证以访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-This setup guide will help you integrate the AI Suggestion Extension from scratch into your application.
+本设置指南将帮助您从头开始将 AI 建议扩展集成到您的应用程序中。
 
-<Callout title="Integrate or test AI Suggestion" variant="warning">
-    To test or integrate this feature you need an [active trial or Tiptap Team subscription](https://cloud.tiptap.dev/v2/billing).
+<Callout title="集成或测试 AI 建议" variant="warning">
+    要测试或集成此功能，您需要一个 [有效的试用或 Tiptap 团队订阅](https://cloud.tiptap.dev/v2/billing)。
 </Callout>
 
+## 安装
+AI 建议扩展已发布在 Tiptap 的私有 npm 注册表中。按照 [私有注册表指南](/guides/pro-extensions) 集成扩展。
 
-## Install
-The AI Suggestion extension is published in Tiptap’s private npm registry. Integrate the extension by following the [private registry guide](/guides/pro-extensions).
-
-Once you're ready you can install it like any other Tiptap Pro extension.
+一旦准备就绪，您可以像安装任何其他 Tiptap Pro 扩展一样进行安装。
 
 ```bash
 npm install @tiptap-pro/extension-ai-suggestion@next
 ```
 
-## Import the extension in your editor
+## 在编辑器中导入扩展
 
-Add the `AiSuggestion` to the list of extensions.
+将 `AiSuggestion` 添加到扩展列表中。
 
 ```ts
 import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import AiSuggestion from '@tiptap-pro/extension-ai-suggestion'
 
-// Initialize the editor
-const editor = new Editor{
+// 初始化编辑器
+const editor = new Editor({
   extensions: [
     StarterKit,
     AiSuggestion.configure({
-      // Define suggestion rules
+      // 定义建议规则
       rules: [
         {
           id: '1',
-          title: 'Spell Check',
-          prompt: 'Identify and correct any spelling mistakes',
+          title: '拼写检查',
+          prompt: '识别并纠正任何拼写错误',
           color: '#DC143C',
           backgroundColor: 'FFE6E6',
         },
       ],
-      // Configure Content AI Cloud (see next section)
+      // 配置内容 AI 云（见下一部分）
       appId: 'APP_ID_HERE',
       token: 'TOKEN_HERE',
-      // … other options
+      // … 其他选项
     }),
-    // … more extensions
+    // … 更多扩展
   ],
-  // Recommended: disable spellcheck to avoid conflicts
+  // 推荐：禁用拼写检查以避免冲突
   editorProps: {
     attributes: {
       spellcheck: false,
@@ -77,19 +76,19 @@ const editor = new Editor{
 })
 ```
 
-## Decide how suggestions are generated
+## 决定建议生成方式
 
-The next step is to configure a way to generate the suggestions that will be displayed in the editor.
+下一步是配置生成将在编辑器中显示的建议的方式。
 
-The easiest way to get started with the AI Suggestion extension is to use Tiptap Content AI Cloud. Our API will generate suggestions from your rules and content. Follow this setup guide: [Use Tiptap Content AI Cloud](/content-ai/capabilities/suggestion/use-with-content-ai-cloud).
+开始使用 AI 建议扩展的最简单方法是使用 Tiptap 内容 AI 云。我们的 API 将根据您的规则和内容生成建议。请按照此设置指南：[使用 Tiptap 内容 AI 云](/content-ai/capabilities/suggestion/use-with-content-ai-cloud)。
 
-You can also use your own backend and LLMs to generate proofreading suggestions. You can find a guide here: [Integrate your own backend and LLMs](/content-ai/capabilities/suggestion/custom-llms).
+您也可以使用自己的后端和 LLM 生成校对建议。您可以在这里找到指南：[集成您的专用后端和 LLM](/content-ai/capabilities/suggestion/custom-llms)。
 
-## Customize the User Interface
+## 自定义用户界面
 
-Finally, you’ll need to configure the editor styles so that the suggestions are displayed in the UI.
+最后，您需要配置编辑器样式，以便在 UI 中显示建议。
 
-By default, the AI Suggestions have CSS classes and color attributes to help you style them. Use these CSS styles to show a colored underline below the suggestions.
+默认情况下，AI 建议具有 CSS 类和颜色属性，以帮助您为其样式化。使用这些 CSS 样式在建议下方显示彩色下划线。
 
 ```css
 .tiptap-ai-suggestion {
@@ -103,4 +102,4 @@ By default, the AI Suggestions have CSS classes and color attributes to help you
 }
 ```
 
-You can customize the suggestions' appearance even more by providing custom decorations. To show a tooltip or a popover when you select a suggestion, [follow this guide](/content-ai/capabilities/suggestion/features/display-suggestions#show-a-popover-when-you-select-a-suggestion).
+您可以通过提供自定义装饰进一步自定义建议的外观。要在选择建议时显示工具提示或弹出窗口，请 [遵循此指南](/content-ai/capabilities/suggestion/features/display-suggestions#show-a-popover-when-you-select-a-suggestion)。

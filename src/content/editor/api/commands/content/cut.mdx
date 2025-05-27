@@ -1,15 +1,15 @@
 ---
-title: cut command
+title: cut 命令
 meta:
-  title: cut command | Tiptap Editor Docs
-  description: Use the cut command in Tiptap to cut out content from a range and place it at a given position. Learn more in our docs!
+  title: cut 命令 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用 cut 命令将内容从一个范围剪切并放置到指定位置。查看我们的文档以了解更多信息！
 ---
 
-This command cuts out content and places it into the given position.
+该命令剪切内容并将其放置到指定位置。
 
-See also: [focus](/editor/api/commands/selection/focus)
+另请参见: [focus](/editor/api/commands/selection/focus)
 
-## Use the cut command
+## 使用 cut 命令
 
 ```js
 const from = editor.state.selection.from
@@ -17,6 +17,6 @@ const to = editor.state.selection.to
 
 const endPos = editor.state.doc.nodeSize - 2
 
-// Cut out content from range and put it at the end of the document
+// 从范围中剪切内容并将其放置在文档的末尾
 editor.commands.cut({ from, to }, endPos)
 ```

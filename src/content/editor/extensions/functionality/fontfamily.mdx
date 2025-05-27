@@ -1,44 +1,44 @@
 ---
-title: FontFamily extension
+title: FontFamily 扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extension-font-family/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extension-font-family/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extension-font-family
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-font-family.svg
     url: https://npmcharts.com/compare/@tiptap/extension-font-family?minimal=true
-    label: Downloads
+    label: 下载量
 meta:
-  title: FontFamily extension | Tiptap Editor Docs
-  description: Set custom font families using the Font Family extension in your Tiptap Editor. Learn more in our documentation.
-  category: Editor
+  title: FontFamily 扩展 | Tiptap 编辑器文档
+  description: 使用 Font Family 扩展在您的 Tiptap 编辑器中设置自定义字体系列。阅读我们的文档以了解更多信息。
+  category: 编辑器
 extension:
-  name: Font Family
+  name: 字体系列
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-font-family
-  description: Doesn’t have support for Comic Sans, but for all other fonts.
+  description: 不支持 Comic Sans，但支持其他所有字体。
   type: extension
-  icon: Type
+  icon: 类型
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 
-This extension enables you to set the font family in the editor. It uses the [`TextStyle`](/editor/extensions/marks/text-style) mark, which renders a `<span>` tag. The font family is applied as inline style, for example `<span style="font-family: Arial">`.
+此扩展使您能够在编辑器中设置字体系列。它使用 [`TextStyle`](/editor/extensions/marks/text-style) 标记，渲染一个 `<span>` 标签。字体系列作为内联样式应用，例如 `<span style="font-family: Arial">`。
 
 <CodeDemo path="/Extensions/FontFamily" />
 
-<Callout title="Heads-up!" variant="hint">
-  Be aware that `editor.isActive('textStyle', { fontFamily: 'Font Family' })` will return the font family as set by the [browser's CSS rules](https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#family-name) and not as you would have expected when setting the font family.
+<Callout title="注意！" variant="hint">
+  请注意，`editor.isActive('textStyle', { fontFamily: '字体系列' })` 将返回由 [浏览器的 CSS 规则](https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#family-name) 设置的字体系列，而不是您在设置字体系列时预期的结果。
 </Callout>
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-text-style@next
 ```
 
-This extension requires the [`TextStyle`](/editor/extensions/marks/text-style) mark.
+此扩展需要 [`TextStyle`](/editor/extensions/marks/text-style) 标记。
 
 ```ts
 import { Editor } from '@tiptap/core'
@@ -49,7 +49,7 @@ new Editor({
 })
 ```
 
-This extension is installed by default with the `TextStyleKit` extension, so you don’t need to install it separately.
+此扩展默认随 `TextStyleKit` 扩展一起安装，因此您无需单独安装。
 
 ```ts
 import { Editor } from '@tiptap/core'
@@ -60,13 +60,13 @@ new Editor({
 })
 ```
 
-## Settings
+## 设置
 
 ### types
 
-A list of marks to which the font family attribute should be applied to.
+要应用字体系列属性的标记列表。
 
-Default: `['textStyle']`
+默认值： `['textStyle']`
 
 ```js
 FontFamily.configure({
@@ -74,11 +74,11 @@ FontFamily.configure({
 })
 ```
 
-## Commands
+## 命令
 
 ### setFontFamily()
 
-Applies the given font family as inline style.
+将给定的字体系列作为内联样式应用。
 
 ```js
 editor.commands.setFontFamily('Inter')
@@ -86,17 +86,17 @@ editor.commands.setFontFamily('Inter')
 
 ### unsetFontFamily()
 
-Removes any font family.
+移除任何字体系列。
 
 ```js
 editor.commands.unsetFontFamily()
 ```
 
-## Source code
+## 源代码
 
 [packages/extension-text-style/src/font-family/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-text-style/src/font-family)
 
-## Minimal Install
+## 最小安装
 
 ```js
 import { Editor } from '@tiptap/core'

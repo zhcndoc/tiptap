@@ -1,49 +1,48 @@
 ---
-title: Convert ODT with Tiptap
+title: 使用 Tiptap 转换 ODT
 meta:
-    title: ODT | Tiptap Conversion
-    description: Learn how to handle ODT files (OpenDocument Text) in a Tiptap editor, including in-editor import/export and REST API usage.
-    category: Conversion
+    title: ODT | Tiptap 转换
+    description: 学习如何在 Tiptap 编辑器中处理 ODT 文件（OpenDocument 文字），包括在编辑器中的导入/导出和 REST API 使用。
+    category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
-OpenDocument Text `.odt` is a widely used format in LibreOffice and OpenOffice. Tiptap’s Conversion tools provide three ways to work with ODT files:
+OpenDocument 文字 `.odt` 是在 LibreOffice 和 OpenOffice 中广泛使用的格式。Tiptap 的转换工具提供了三种处理 ODT 文件的方法：
 
-- **Editor Import** – Convert `.odt` files directly into Tiptap JSON for in-editor editing.
-- **Editor Export** – Convert the current Tiptap editor content into an `.odt` file.
-- **REST API** – Integrate ODT conversions on the server side or from external services with the [ODT Conversion REST API](/conversion/import-export/odt/rest-api).
-
+- **编辑器导入** – 将 `.odt` 文件直接转换为 Tiptap JSON，以便在编辑器中编辑。
+- **编辑器导出** – 将当前 Tiptap 编辑器内容转换为 `.odt` 文件。
+- **REST API** – 在服务器端或从外部服务集成 ODT 转换，使用 [ODT 转换 REST API](/conversion/import-export/odt/rest-api)。
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始一个免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅一个 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Install from private registry">
-        To install this frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装这个前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证，以访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-<Callout title="Integrate or test Conversion" variant="warning">
-    To test or integrate this feature you need an [active trial or Tiptap subscription](https://cloud.tiptap.dev/v2/billing).
+<Callout title="集成或测试转换" variant="warning">
+    要测试或集成此功能，您需要一个 [有效的试用或 Tiptap 订阅](https://cloud.tiptap.dev/v2/billing)。
 </Callout>
 
-## Editor ODT Import
-The Conversion extensions are published in Tiptap’s private npm registry. Integrate the extensions by following the [private registry guide](/guides/pro-extensions).
+## 编辑器 ODT 导入
+转换扩展已在 Tiptap 的私有 npm 注册表中发布。按照 [私有注册表指南](/guides/pro-extensions) 集成扩展。
 
-To import `.odt` documents into your editor install the Import extension
+要将 `.odt` 文档导入编辑器，请安装导入扩展
 
 ```bash
 npm i @tiptap-pro/extension-import
 ```
 
-Add and configure the extension in your editor setup
+在编辑器设置中添加并配置扩展
 
-### Configure the extension
+### 配置扩展
 
 ```js
-// Start with importing the extension
+// 开始导入扩展
 import { Import } from '@tiptap-pro/extension-import'
 
 const editor = new Editor({
@@ -51,32 +50,32 @@ const editor = new Editor({
   extensions: [
     // ...
     Import.configure({
-      // The Convert App-ID from the Convert settings page: https://cloud.tiptap.dev/convert-settings
+      // 从转换设置页面获取的转换 App-ID: https://cloud.tiptap.dev/convert-settings
       appId: 'your-app-id',
 
-      // The JWT token you generated in the previous step
+      // 您在上一步中生成的 JWT 令牌
       token: 'your-jwt',
 
-      // The URL to upload images to, if not provided, images will be stripped from the document
+      // 上传图像的 URL，如果未提供，图像将从文档中剥离
       imageUploadCallbackUrl: 'https://your-image-upload-url.com',
     }),
   ],
 })
 ```
 
-### Import your first document
+### 导入您的第一个文档
 
 ```js
-// The most simple way to import a file
-// This will import the uploaded file, replace the editor content
-// and focus the editor
+// 导入文件的最简单方法
+// 这将导入上传的文件，替换编辑器内容
+// 并聚焦编辑器
 editor.chain().focus().import({ file }).run()
 ```
 
-### Customize the import behavior
+### 自定义导入行为
 
 ```js
-// You can also use the onImport callback to customize the import behavior
+// 您还可以使用 onImport 回调来自定义导入行为
 editor
   .chain()
   .import({
@@ -84,21 +83,20 @@ editor
     onImport(context) {
       const { setEditorContent, content, error } = context
 
-      // add error handling
+      // 添加错误处理
       if (error) {
         showErrorToast({ message: error.message })
       }
 
-      // You could also modify the content before inserting it
-      content.doc.content.push({ type: 'paragraph', content: [{ type: 'text', text: 'Hello!' }] })
+      // 您还可以在插入之前修改内容
+      content.doc.content.push({ type: 'paragraph', content: [{ type: 'text', text: '你好！' }] })
 
-      // you can change the loading state of your application for example
+      // 例如，您可以更改应用程序的加载状态
       isLoading = false
 
-      // make sure you call the setEditorContent function if you want to run
-      // the default insertion behavior of the extension
+      // 如果您想运行扩展的默认插入行为，请确保调用 setEditorContent 函数
       // setEditorContent()
-      // but since we modified the content, we need to do the insertion manually
+      // 但由于我们修改了内容，我们需要手动进行插入
       editor.commands.setContent(content)
     },
   })
@@ -106,41 +104,41 @@ editor
   .run()
 ```
 
-### Options
+### 选项
 
-| Name                     | Type       | Default     | Description                                                                                                                                                                                     |
-| ------------------------ | ---------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `appId`                  | `string`   | `undefined` | The convert app ID from the Convert settings page: [https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings)                                                       |
-| `token`                  | `string`   | `undefined` | The JWT token generated from your server via secret                                                                                                                                             |
-| `imageUploadCallbackUrl` | `string`   | `undefined` | The URL to upload images to, if not provided, images will be stripped from the document, [see more info](/conversion/import-export/docx/preserve-images)                                   |
+| 名称                     | 类型       | 默认值     | 描述                                                                                                                                                                                      |
+|--------------------------|------------|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `appId`                  | `string`   | `undefined` | 从转换设置页面获取的转换 App ID: [https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings)                                                               |
+| `token`                  | `string`   | `undefined` | 从您的服务器通过密钥生成的 JWT 令牌                                                                                                                                                    |
+| `imageUploadCallbackUrl` | `string`   | `undefined` | 上传图像的 URL，如果未提供，图像将从文档中剥离，[查看更多信息](/conversion/import-export/docx/preserve-images)                                                                         |
 
-### Commands
+### 命令
 
-| Name     | Description                   |
-| -------- | ----------------------------- |
-| `import` | Import a file into the editor |
+| 名称     | 描述                       |
+|----------|---------------------------|
+| `import` | 将文件导入到编辑器中     |
 
 ### `import`
 
-#### Arguments
+#### 参数
 
-| Name       | Type       | Default     | Options       | Description                                                                                                                                                                   |
-|------------|------------|-------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `file`     | `File`     | `undefined` | Any file      | The file to import                                                                                                                                                            |
-| `format`   | `string`   | `undefined` | `gfm`         | Not relevant for the ODT file type                                                                                                                                            |
-| `onImport` | `Function` | `undefined` | `fn(context)` | A callback used to customize the import behavior. The context argument includes information about the content, errors and a `setEditorContent` function to modify the content |
+| 名称       | 类型       | 默认值     | 选项         | 描述                                                                                                                                                                 |
+|------------|------------|-------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `file`     | `File`     | `undefined` | 任意文件      | 要导入的文件                                                                                                                                                        |
+| `format`   | `string`   | `undefined` | `gfm`         | 对于 ODT 文件类型不相关                                                                                                                                           |
+| `onImport` | `Function` | `undefined` | `fn(context)` | 用于自定义导入行为的回调。上下文参数包括有关内容、错误的信息和一个 `setEditorContent` 函数来修改内容                                                             |
 
-## Editor ODT Export
-To use the convert extension, you need to install the `@tiptap-pro/extension-export` package:
+## 编辑器 ODT 导出
+要使用转换扩展，您需要安装 `@tiptap-pro/extension-export` 包：
 
 ```bash
 npm i @tiptap-pro/extension-export
 ```
 
-### Configure the extension
+### 配置扩展
 
 ```js
-// Start with importing the extension
+// 开始导入扩展
 import { Export } from '@tiptap-pro/extension-export'
 
 const editor = new Editor({
@@ -148,72 +146,72 @@ const editor = new Editor({
   extensions: [
     // ...
     Export.configure({
-      // The Convert App-ID from the convert settings page: https://cloud.tiptap.dev/convert-settings
+      // 从转换设置页面获取的转换 App-ID: https://cloud.tiptap.dev/convert-settings
       appId: 'your-app-id',
 
-      // The JWT token you generated in the previous step
+      // 您在上一步中生成的 JWT 令牌
       token: 'your-jwt',
     }),
   ],
 })
 ```
 
-### Export a document
+### 导出文档
 
 ```js
-// Do a simple export to docx
-// Supported formats: docx, odt, md and gfm
+// 进行简单的导出到 docx
+// 支持的格式: docx, odt, md 和 gfm
 editor.chain().focus().export({ format: 'docx' }).run()
 ```
 
-### Customize the export behavior
+### 自定义导出行为
 
 ```js
-// You can also use the onExport callback to customize the export behavior
+// 您还可以使用 onExport 回调来自定义导出行为
 editor.chain().export({
   format: 'docx',
   onExport(context) {
     const { blob, error, download, filename } = context
 
-    // add error handling
+    // 添加错误处理
     if (error) {
       showErrorToast({ message: error.message })
     }
 
-    // you can change the loading state of your application for example
+    // 例如，您可以更改应用程序的加载状态
     isLoading = false
 
-    // you could modify the filename or handle the blob differently here
-    // but we will keep them as they are
+    // 您可以在这里修改文件名或以不同方式处理 blob
+    // 但我们将保持它们不变
 
-    // you can trigger a download directly by calling the download method
+    // 通过调用下载方法直接触发下载
     download()
 
-    // keep in mind that the download method will only work in the browser
-    // and if the blob and filename was changed before must be managed manually
+    // 请记住，下载方法只在浏览器中有效
+    // 如果 blob 和文件名在之前被修改，则必须手动管理
   },
 })
 ```
 
-### Options
+### 选项
 
-| Name    | Type     | Default     | Description                                                                                                                               |
-| ------- | -------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `appId` | `string` | `undefined` | The convert app ID from the Convert settings page: [https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings) |
-| `token` | `string` | `undefined` | The JWT token generated from your server via secret                                                                                       |
+| 名称    | 类型     | 默认值     | 描述                                                                                                                         |
+|---------|----------|-------------|------------------------------------------------------------------------------------------------------------------------------|
+| `appId` | `string` | `undefined` | 从转换设置页面获取的转换 App ID: [https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings) |
+| `token` | `string` | `undefined` | 从您的服务器通过密钥生成的 JWT 令牌                                                                                       |
 
-### Commands
+### 命令
 
-| Name     | Description               |
-| -------- | ------------------------- |
-| `export` | Export the editor content |
+| 名称     | 描述                      |
+|----------|--------------------------|
+| `export` | 导出编辑器内容          |
 
 #### `export`
 
-#### Arguments
+#### 参数
 
-| Name       | Type          | Default     | Options           | Description                                                                                                                                                                              |
-| ---------- | ------------- | ----------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `format`   | `string`      | `undefined` | `docx,odt,md,gfm` | The format you want to export to                                                                                                                                                         |
-| `content`  | `JSONContent` | `undefined` | Any Tiptap JSON   | The Tiptap JSON content you want to export                                                                                                                                               |
-| `onExport` | `Function`    | `undefined` | `fn(context)`     | A callback used to customize the export behavior. The context argument includes information about the blob, filename, errors and a `download` function to download the document directly |
+| 名称       | 类型          | 默认值     | 选项           | 描述                                                                                                                                                                        |
+|------------|---------------|-------------|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `format`   | `string`      | `undefined` | `docx,odt,md,gfm` | 您希望导出的格式                                                                                                                                                           |
+| `content`  | `JSONContent` | `undefined` | 任意 Tiptap JSON | 您希望导出的 Tiptap JSON 内容                                                                                                                                             |
+| `onExport` | `Function`    | `undefined` | `fn(context)`     | 用于自定义导出行为的回调。上下文参数包括有关 blob、文件名、错误的信息以及一个直接下载文档的 `download` 函数                                                            |

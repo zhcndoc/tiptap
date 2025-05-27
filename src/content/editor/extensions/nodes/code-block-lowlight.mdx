@@ -1,53 +1,53 @@
 ---
-title: CodeBlockLowlight extension
+title: CodeBlockLowlight 扩展
 tags:
   - type: image
     src: https://img.shields.io/npm/v/@tiptap/extension-code-block-lowlight/next?label=version
     url: https://www.npmjs.com/package/@tiptap/extension-code-block-lowlight
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-code-block-lowlight.svg
     url: https://npmcharts.com/compare/@tiptap/extension-code-block-lowlight?minimal=true
-    label: Downloads
+    label: 下载量
 extension:
   name: CodeBlock Lowlight
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-code-block-lowlight
-  description: Add some colorful syntax highlighting to your code blocks.
+  description: 为您的代码块添加一些彩色的语法高亮。
   type: node
-  icon: Code
+  icon: 代码
 meta:
-  title: CodeBlockLowlight extension | Tiptap Editor Docs
-  description: Use the CodeBlockLowlight extension to add code blocks with syntax highlighting to your documents. Learn more in our docs!
-  category: Editor
+  title: CodeBlockLowlight 扩展 | Tiptap 编辑器文档
+  description: 使用 CodeBlockLowlight 扩展为您的文档添加带有语法高亮的代码块。欲了解更多信息，请查看我们的文档！
+  category: 编辑器
 ---
 
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-With the CodeBlockLowlight extension you can add fenced code blocks to your documents. It’ll wrap the code in `<pre>` and `<code>` HTML tags.
+使用 CodeBlockLowlight 扩展，您可以向文档中添加围栏代码块。它将用 `<pre>` 和 `<code>` HTML 标签包装代码。
 
-<Callout title="Syntax highlight dependency" variant="warning">
-  This extension relies on the [lowlight](https://github.com/wooorm/lowlight) library to apply
-  syntax highlight to the code block’s content.
+<Callout title="语法高亮依赖" variant="warning">
+  此扩展依赖于 [lowlight](https://github.com/wooorm/lowlight) 库来对代码块的内容应用
+  语法高亮。
 </Callout>
 
-Type <code>&grave;&grave;&grave; </code> (three backticks and a space) or <code>&Tilde;&Tilde;&Tilde; </code> (three tildes and a space) and a code block is instantly added for you. You can even specify the language, try writing <code>&grave;&grave;&grave;css </code>. That should add a `language-css` class to the `<code>`-tag.
+输入 <code>&grave;&grave;&grave; </code>（三个反引号和一个空格）或 <code>&Tilde;&Tilde;&Tilde; </code>（三个波浪号和一个空格），则会立即为您添加一个代码块。您甚至可以指定语言，尝试输入 <code>&grave;&grave;&grave;css </code>。这将为 `<code>` 标签添加一个 `language-css` 类。
 
 <CodeDemo path="/Nodes/CodeBlockLowlight" />
 
-## Install
+## 安装
 
 ```bash
 npm install lowlight @tiptap/extension-code-block-lowlight@next
 ```
 
-## Settings
+## 设置
 
 ### lowlight
 
-You should provide the `lowlight` module to this extension. Decoupling the `lowlight`
-package from the extension allows the client application to control which
-version of lowlight it uses and which programming language packages it needs to load.
+您应该向此扩展提供 `lowlight` 模块。将 `lowlight`
+包与扩展解耦允许客户端应用程序控制其使用的
+lowlight 版本及其需要加载的编程语言包。
 
 ```js
 import { lowlight } from 'lowlight/lib/core'
@@ -59,7 +59,7 @@ CodeBlockLowlight.configure({
 
 ### HTMLAttributes
 
-Custom HTML attributes that should be added to the rendered HTML tag.
+自定义 HTML 属性，这些属性应添加到渲染的 HTML 标签中。
 
 ```js
 CodeBlockLowlight.configure({
@@ -71,9 +71,9 @@ CodeBlockLowlight.configure({
 
 ### languageClassPrefix
 
-Adds a prefix to language classes that are applied to code tags.
+为应用于代码标签的语言类添加前缀。
 
-Default: `'language-'`
+默认值: `'language-'`
 
 ```js
 CodeBlockLowlight.configure({
@@ -83,9 +83,9 @@ CodeBlockLowlight.configure({
 
 ### defaultLanguage
 
-Define a default language instead of the automatic detection of lowlight.
+定义一个默认语言，而不是自动检测 lowlight。
 
-Default: `null`
+默认值: `null`
 
 ```js
 CodeBlockLowlight.configure({
@@ -93,11 +93,11 @@ CodeBlockLowlight.configure({
 })
 ```
 
-## Commands
+## 命令
 
 ### setCodeBlock()
 
-Wrap content in a code block.
+将内容包装在代码块中。
 
 ```js
 editor.commands.setCodeBlock()
@@ -105,18 +105,18 @@ editor.commands.setCodeBlock()
 
 ### toggleCodeBlock()
 
-Toggle the code block.
+切换代码块。
 
 ```js
 editor.commands.toggleCodeBlock()
 ```
 
-## Keyboard shortcuts
+## 键盘快捷键
 
-| Command         | Windows/Linux                                      | macOS                                          |
+| 命令            | Windows/Linux                                      | macOS                                          |
 | --------------- | -------------------------------------------------- | ---------------------------------------------- |
 | toggleCodeBlock | <kbd>Control</kbd> + <kbd>Alt</kbd> + <kbd>C</kbd> | <kbd>Cmd</kbd> + <kbd>Alt</kbd> + <kbd>C</kbd> |
 
-## Source code
+## 源代码
 
 [packages/extension-code-block-lowlight/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-code-block-lowlight/)

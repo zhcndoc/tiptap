@@ -1,36 +1,36 @@
 ---
-title: Rich text AI responses
+title: 丰富文本 AI 响应
 meta:
-  title: Format | Tiptap Content AI Docs
-  description: Enable AI to automatically format generated content in your Tiptap editor with rich text, lists, and more. Learn how in our docs!
-  category: Content AI
+  title: 格式 | Tiptap 内容 AI 文档
+  description: 让 AI 自动在您的 Tiptap 编辑器中以丰富文本、列表等格式化生成的内容。在我们的文档中了解如何操作！
+  category: 内容 AI
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Integrate an AI provider">
-        Configure OpenAI in your [AI settings](https://cloud.tiptap.dev/v2/cloud/ai) or review the [Custom LLM guides](/content-ai/capabilities/generation/custom-llms).
+    <RequirementItem label="2. 集成一个 AI 提供商">
+        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看 [自定义 LLM 指南](/content-ai/capabilities/generation/custom-llms)。
     </RequirementItem>
-    <RequirementItem label="3. Install from private registry">
-        To install the frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="3. 从私有注册表安装">
+        要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 验证到 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
 <CodeDemo isPro path="/Extensions/AiFormattedResponse" />
 
-With the `format: 'rich-text'` option, you can generate AI responses that apply formatting to the content. This is especially useful when you want to generate content that includes rich text formatting like bold, italic, links, and more.
+通过 `format: 'rich-text'` 选项，您可以生成应用格式化内容的 AI 响应。这在您想生成包含粗体、斜体、链接等丰富文本格式的内容时特别有用。
 
 ```ts
-// Steams the response as rich text into the editor
+// 将响应作为丰富文本流入编辑器
 editor
   .chain()
   .aiTextPrompt({
-    text: 'Write a list of popular programming languages',
+    text: '写出一份流行编程语言的列表',
     stream: true,
     format: 'rich-text',
   })

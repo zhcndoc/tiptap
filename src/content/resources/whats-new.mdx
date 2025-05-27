@@ -1,86 +1,83 @@
 ---
-title: What's new in Tiptap V3
+title: Tiptap V3 中的新功能
 meta:
-  title: What's new | Tiptap Resources
-  description: Discover what’s new in Tiptap V3. New features, important improvements, and breaking changes clearly explained.
+  title: 更新内容 | Tiptap 资源
+  description: 发现 Tiptap V3 中的新功能。新的特性、重要的改进和重大变更都有明确的说明。
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-Tiptap V3 introduces significant updates to the core editor. This guide highlights important changes clearly, making your upgrade straightforward. Use it to quickly find everything essential to update your integration.
+Tiptap V3 对核心编辑器进行了重大更新。本指南清晰地突出重要更改，使您的升级变得简单。使用它可以快速找到更新您集成所需的所有重要信息。
 
-<Callout title="Beta Support" variant="hint">
-  Tiptap V3 is currently in Beta, with a stable release scheduled for later in 2025. Please support
-  the open source release by submitting issues in the [GitHub
-  repository](https://github.com/ueberdosis/tiptap/tree/next).
+<Callout title="Beta 支持" variant="hint">
+  Tiptap V3 当前处于 Beta 阶段，稳定版本预计将在 2025 年稍晚发布。请通过在 [GitHub 代码库](https://github.com/ueberdosis/tiptap/tree/next) 提交问题来支持开源版本。
 </Callout>
 
-## Upgrade guide
+## 升级指南
 
-If you’re upgrading from Tiptap 2.x to 3.x, refer to our [upgrade guide](/guides/upgrade-tiptap-v2). It covers breaking changes, important updates, and new features clearly—ensuring your migration process is efficient.
+如果您正在从 Tiptap 2.x 升级到 3.x，请参考我们的 [升级指南](/guides/upgrade-tiptap-v2)。该指南涵盖了重大变更、重要更新和新特性，确保您的迁移过程高效。
 
-## Updating beta packages
+## 更新 Beta 包
 
-When updating any of the Tiptap or Tiptap Pro beta packages, please ensure that all related packages are upgraded simultaneously using the `@next` tag. This guarantees that you are installing the latest beta versions across the board. Partial updates may lead to peer dependency conflicts, as we currently enforce strict version alignment across all Tiptap packages during the beta phase.
+在更新任何 Tiptap 或 Tiptap Pro Beta 包时，请确保所有相关包同时使用 `@next` 标签进行升级。这确保您在各个方面都安装了最新的 Beta 版本。部分更新可能会导致对等依赖冲突，因为我们当前在 Beta 阶段强制执行所有 Tiptap 包之间的严格版本对齐。
 
-### Breaking Changes
+### 重大变更
 
-| **Change**                                                         | **Description**                                                                                                                                                                                                                                                  |
-| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Removed UMD builds**                                             | UMD builds have been removed. We recommend using ESM builds instead. UMD builds are not compatible with the new `@tiptap/extension-*` packages.                                                                                                                  |
-| **New `shouldRerenderOnTransaction` option with `false` default**  | The new `shouldRerenderOnTransaction` option is disabled by default to minimize rerendering with React components. This can cause your editor component to not rerender as expected. [Read more](/examples/advanced/react-performance).                          |
-| **Migration from `tippy.js` to `floating-ui`**                     | We replaced the outdated `tippy.js` library with the new `floating-ui` library. This change improves the performance and reliability of our menus and tooltips.                                                                                                  |
-| **Changes to our Text Style API**                                  | The `@tiptap/extension-text-style` package has seen API updates providing a new `TextStyleKit` extension that encapsulates all possible text styling functionalities in one extension. Default options were also updated.                                        |
-| **Commands were changed**                                          | The behavior or names of commands were changed. `clearContent` and `setContent` now emit updates correctly while `setContent` also received a change to its parameters. `insertContent` was changed to prevent unwanted text splitting.                          |
-| **NodeView `getPos` now can return `undefined`**                   | `nodeView.getPos()` can now return `undefined` making a check for `undefined` necessary to handle this case properly.                                                                                                                                            |
-| **`editor.getCharacterCount()` was removed**                       | The `editor.getCharacterCount()` method was removed. It was marked as deprecated in the previous version and is now removed. You can use `editor.storage.characterCount.characters()` instead while using the `CharacterCount` extension.                        |
-| **`considerAnyAsEmpty` option removed from placeholder extension** | The `considerAnyAsEmpty` option was removed from the placeholder extension as it was deprecated already and wasn't respected in the previous version.                                                                                                            |
-| **Stricter Typing**                                                | 3.0.0 brings stricter typing to the editor. This change improves the overall type safety of the editor and makes it easier to work with but might require some adjustments in your code. We recommend using TypeScript to benefit from the improved type safety. |
-| **Moved Utility Extensions**                                       | We moved all our utility extensions like `History`, `Placeholder`, `CharacterCount`, `DropCursor`, `GapCursor`, `TrailingNode`, `Focus`, and `Selection` to the new `@tiptap/extensions` package.                                                                |
-| **Renamed Collaboration Cursor**                                   | The `CollaborationCursor` extension was renamed to `CollaborationCaret` as we felt cursors was to general and could clash with potential other cursor types in the future.                                                                                       |
-| **Renamed History Extension**                                      | The `History` extension was renamed to `UndoRedo` to better reflect its purpose and avoid confusion with the collaborative History feature. This also includes the `history` option on the `StarterKit`.                                                         |
+| **更改**                                                           | **描述**                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **移除了 UMD 构建**                                               | 已移除 UMD 构建。我们建议使用 ESM 构建。UMD 构建与新的 `@tiptap/extension-*` 包不兼容。                                                                                                                                                                 |
+| **新的 `shouldRerenderOnTransaction` 选项，默认值为 `false`**   | 新的 `shouldRerenderOnTransaction` 选项默认禁用，以减少与 React 组件的重新渲染。这可能导致您的编辑器组件未按预期重新渲染。[阅读更多](/examples/advanced/react-performance)。                                                                 |
+| **从 `tippy.js` 迁移到 `floating-ui`**                        | 我们用新的 `floating-ui` 库替换了过时的 `tippy.js` 库。此更改提高了我们的菜单和工具提示的性能和可靠性。                                                                                                                                              |
+| **文本样式 API 的更改**                                          | `@tiptap/extension-text-style` 包进行了 API 更新，提供了一个新的 `TextStyleKit` 扩展，将所有可能的文本样式功能封装在一个扩展中。默认选项也进行了更新。                                                                                                  |
+| **命令发生了变化**                                                | 命令的行为或名称发生了变化。`clearContent` 和 `setContent` 现在正确发出更新，同时 `setContent` 的参数也进行了更改。`insertContent` 被更改以防止不必要的文本分割。                                                                                  |
+| **NodeView `getPos` 现在可以返回 `undefined`**                  | `nodeView.getPos()` 现在可以返回 `undefined`，这使得检查 `undefined` 变得必要，以正确处理这种情况。                                                                                                                                                 |
+| **已移除 `editor.getCharacterCount()`**                         | 已移除 `editor.getCharacterCount()` 方法。它在之前版本中被标记为已弃用，现在被移除。您可以在使用 `CharacterCount` 扩展时使用 `editor.storage.characterCount.characters()` 代替。                                                                                      |
+| **已移除 placeholder 扩展中的 `considerAnyAsEmpty` 选项**      | `considerAnyAsEmpty` 选项已从 placeholder 扩展中移除，因为它已被弃用且在之前版本中未被遵循。                                                                                                                                                              |
+| **严格类型**                                                      | 3.0.0 为编辑器带来了更严格的类型。这一变化提高了编辑器的整体类型安全性，使工作更容易，但可能需要您在代码中进行一些调整。我们建议使用 TypeScript 以受益于改进的类型安全性。                                                                                              |
+| **移动了实用工具扩展**                                            | 我们将所有实用工具扩展，如 `History`、`Placeholder`、`CharacterCount`、`DropCursor`、`GapCursor`、`TrailingNode`、`Focus` 和 `Selection` 移到了新的 `@tiptap/extensions` 包中。                                                                                  |
+| **重命名协作光标**                                                | `CollaborationCursor` 扩展被重命名为 `CollaborationCaret`，因为我们认为光标太过于通用，可能与未来其他光标类型发生冲突。                                                                                                                                     |
+| **重命名历史扩展**                                               | `History` 扩展被重命名为 `UndoRedo`，以更好地反映其用途并避免与协作历史功能的混淆。这也包括 `StarterKit` 中的 `history` 选项。                                                                                                                              |
 
-## New features
+## 新功能
 
-- **New `@tiptap/extensions` extension** - The new `@tiptap/extensions` package includes and combines multiple utility extensions. [Read more](/guides/upgrade-tiptap-v2#extensions-package).
-- **New [MarkView](https://prosemirror.net/docs/ref/#view.MarkView) support** - MarkViews are now supported by Tiptap. This can be useful to render custom HTML for marks. [Read more](/editor/extensions/custom-extensions/mark-views).
-- **Improved Server-Side Rendering** - The editor can now run on SSR environments without rendering the editor content. [Read more](/guides/upgrade-tiptap-v2#server-side-rendering).
-- **Deletes can now be tracked as an event** - Editor deletions can now be tracked as an event. [Read more](/editor/api/events#list-of-available-events).
-- **Nodes and marks have new attribute validation support** - Validating attributes on nodes or marks is now supported.
-- **StarterKit updates** - The StarterKit was made more powerful now including more extensions by default. [Read more](/guides/upgrade-tiptap-v2#starterkit-updates).
-- **TableKit** - The new `TableKit` extension allows you to register all important table extensions in one package. [Read more](/editor/extensions/functionality/table-kit).
-- **ListKit** - The new `ListKit` extension allows you to register all important list extensions in one package. [Read more](/editor/extensions/functionality/list-kit).
-- **TextStyleKit** - The new `TextStyleKit` extension registers all important text-style extensions in one package. [Read more](/editor/extensions/functionality/text-style-kit).
-- **New `rewriteUnknownContent` helper** - This helper function can be imported from the `@tiptap/core`.
-- **New `unmount` as an alternative to destroying the editor** - The editor instance now supports an `unmount` method which allows for mounting and unmounting the editor to the DOM. This encourages re-use of editor instances by preserving all the same options between instances. This is different from the `destroy` method, which will unmount, emit the `destroy` event, and remove all event listeners.
-- **New `toggleTextStyle` command for text styles** - The `toggleTextStyle` command allows you to toggle text styles on and off. This is useful for toggling text styles like bold or italic.
+- **新的 `@tiptap/extensions` 扩展** - 新的 `@tiptap/extensions` 包包含和结合了多个实用工具扩展。[阅读更多](/guides/upgrade-tiptap-v2#extensions-package)。
+- **新支持的 [MarkView](https://prosemirror.net/docs/ref/#view.MarkView)** - Tiptap 现在支持 MarkViews。这对于渲染标记的自定义 HTML 非常有用。[阅读更多](/editor/extensions/custom-extensions/mark-views)。
+- **改进的服务器端渲染** - 该编辑器现在可以在 SSR 环境中运行，而无需渲染编辑器内容。[阅读更多](/guides/upgrade-tiptap-v2#server-side-rendering)。
+- **删除操作现在可以作为事件跟踪** - 现在可以将编辑器删除操作作为事件进行跟踪。[阅读更多](/editor/api/events#list-of-available-events)。
+- **节点和标记具有新的属性验证支持** - 现在支持对节点或标记的属性进行验证。
+- **StarterKit 更新** - StarterKit 现在更强大，默认包括更多扩展。[阅读更多](/guides/upgrade-tiptap-v2#starterkit-updates)。
+- **TableKit** - 新的 `TableKit` 扩展允许您在一个包中注册所有重要的表格扩展。[阅读更多](/editor/extensions/functionality/table-kit)。
+- **ListKit** - 新的 `ListKit` 扩展允许您在一个包中注册所有重要的列表扩展。[阅读更多](/editor/extensions/functionality/list-kit)。
+- **TextStyleKit** - 新的 `TextStyleKit` 扩展在一个包中注册了所有重要的文本样式扩展。[阅读更多](/editor/extensions/functionality/text-style-kit)。
+- **新的 `rewriteUnknownContent` 助手** - 该辅助函数可以从 `@tiptap/core` 导入。
+- **新的 `unmount` 方法作为销毁编辑器的替代方式** - 编辑器实例现在支持 `unmount` 方法，允许将编辑器挂载和卸载到 DOM。这鼓励通过在实例之间保留所有相同选项来重用编辑器实例。这与 `destroy` 方法不同，后者将卸载，发出 `destroy` 事件，并删除所有事件监听器。
+- **新的 `toggleTextStyle` 命令用于文本样式** - `toggleTextStyle` 命令允许您切换文本样式的开关。这对于切换文本样式（如粗体或斜体）非常有用。
 
-- **Static Renderer** - The Static Renderer helps render JSON content as HTML, Markdown, or React components without an editor instance. [Read more](/editor/api/utilities/static-renderer).
-- **JSX Renderer** - With 3.0.0 you will have the ability to use **framework agnostic** JSX for the `renderHTML` function of your extensions. [Read more](/editor/api/utilities/jsx).
+- **静态渲染器** - 静态渲染器帮助将 JSON 内容渲染为 HTML、Markdown 或 React 组件，而无需编辑器实例。[阅读更多](/editor/api/utilities/static-renderer)。
+- **JSX 渲染器** - 利用 3.0.0，您将能够使用 **框架无关** 的 JSX 作为您扩展的 `renderHTML` 函数。[阅读更多](/editor/api/utilities/jsx)。
 
-### Improvements
+### 改进
 
-- **Improved transaction handling** - Transactions are now handled more efficiently and reliably. This change improves the overall performance of the editor.
-- **`focusEvent` plugin key is exported** - You can now import the `focusEvent` plugin key if needed from the core package.
-- **Improvements on mobile devices** - The 3.0.0 release brings improvements for mobile devices primarily focusing on touch events.
-- **Minor IME bugfixes** - The 3.0.0 release includes a few minor bugfixes for IME input handling.
-- **TextStyle can now consume style attributes** - The `TextStyle` extension can now consume styles from the style attribute and will skip parsing of other styles if there was an override defined in the style attribute. See [this Github Comment](https://github.com/ueberdosis/tiptap/discussions/5912#discussioncomment-11716337).
-- **TableView on `Table` extension is now importable** - The `TableView` class on the `Table` extension is now importable to allow for custom table views that still are resizable.
+- **改进的事务处理** - 现在事务的处理效率和可靠性有所提高。这一改变提升了编辑器的整体性能。
+- **导出了 `focusEvent` 插件键** - 如果需要，您现在可以从核心包中导入 `focusEvent` 插件键。
+- **针对移动设备的改进** - 3.0.0 版本为移动设备带来了改进，主要关注于触摸事件。
+- **小型 IME 错误修复** - 3.0.0 版本包括了一些关于 IME 输入处理的小型错误修复。
+- **TextStyle 现在可以消耗样式属性** - `TextStyle` 扩展现在可以消耗来自样式属性的样式，如果样式属性中定义了覆盖样式，则会跳过对其他样式的解析。请参见 [这条 GitHub 评论](https://github.com/ueberdosis/tiptap/discussions/5912#discussioncomment-11716337)。
+- **`Table` 扩展上的 TableView 现在可以导入** - `Table` 扩展上的 `TableView` 类现在可以导入，以允许仍然可调整大小的自定义表格视图。
 
-### Additional changes
+### 其他变化
 
-- **HTML parsing with `happy-dom-without-node`** - We now use `happy-dom-without-node` to parse HTML as a lightweight alternative to `zeed-dom`.
-- **Various smaller bugfixes** - The 3.0.0 release includes various smaller bugfixes and improvements to the overall performance of the editor.
+- **使用 `happy-dom-without-node` 进行 HTML 解析** - 现在我们使用 `happy-dom-without-node` 来解析 HTML，作为对 `zeed-dom` 的轻量级替代方案。
+- **各种较小的错误修复** - 3.0.0 版本包括了各种较小的错误修复和对编辑器整体性能的改进。
 
-## What's next in Tiptap 3.X?
+## Tiptap 3.X 的未来计划？
 
-We're already exploring future features for releases beyond Tiptap 3.0.
+我们已经在探索 Tiptap 3.0 之后版本的未来功能。
 
-<Callout title="Provide Feedback" variant="info">
-  If you have any feedback on an additional use case you’d like us to consider, please [let us
-  know](https://tiptap-suite.notion.site/1b601ffa3ebc80a281a8ea0b03b19bdd?pvs=105).
+<Callout title="提供反馈" variant="info">
+  如果您有任何希望我们考虑的其他用例，请 [告诉我们](https://tiptap-suite.notion.site/1b601ffa3ebc80a281a8ea0b03b19bdd?pvs=105)。
 </Callout>
 
-- **Content migrations**: Migrations allow you to rewrite your document JSON to align with your current schema, facilitating document updates during schema changes with fully customizable solutions tailored to your needs.
-- **Markdown support**: Enhance your editing capabilities by enabling the editor to both accept and output content in markdown, meeting the demands of modern applications and leveraging the strengths of LLMs in markdown generation.
-- **Decorations API**: The new Decorations API allows you to influence document presentation without altering its content, providing an intuitive way to add visual enhancements beyond complex ProseMirror internals.
+- **内容迁移**：迁移允许您重写文档 JSON 以与当前架构对齐，使得在架构更改期间帮助文档更新，提供完全可定制的解决方案以满足您的需求。
+- **Markdown 支持**：通过允许编辑器接受和输出 Markdown 内容，增强您的编辑能力，满足现代应用程序的需求，并利用 LLM 在 Markdown 生成中的优势。
+- **装饰 API**：新的装饰 API 允许您影响文档呈现而不改变其内容，提供了超越复杂 ProseMirror 内部操作的直观方式来添加视觉增强。

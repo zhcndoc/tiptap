@@ -1,30 +1,30 @@
 ---
-title: AI Suggestion extension configuration options
+title: AI 建议扩展配置选项
 meta:
-  title: Configure AI Suggestion | Tiptap AI Suggestion
-  description: Configure the AI Suggestion extension with rules, initial suggestions, and custom styles.
-  category: Content AI
+  title: 配置 AI 建议 | Tiptap AI 建议
+  description: 用规则、初始建议和自定义样式配置 AI 建议扩展。
+  category: 内容 AI
 ---
 
-The AI Suggestion extension for Tiptap accepts different settings to configure the global behavior of the extension and the commands.
+Tiptap 的 AI 建议扩展接受不同的设置，以配置扩展和命令的全局行为。
 
-## Rules
+## 规则
 
-An array of rules to be applied during proofreading. Each rule contains
+在校对过程中应用的一组规则。每个规则包含
 
-- A unique `id`
-- The `prompt` property, a text that will be read by the AI model to generate suggestions
-- Parameters that decide how the rule is displayed in the UI, like `title`, `color` and `backgroundColor`
+- 唯一的 `id`
+- `prompt` 属性，该文本将由 AI 模型读取以生成建议
+- 决定规则在 UI 中如何显示的参数，如 `title`、`color` 和 `backgroundColor`
 
-You can change the rules at any time without having to reload the editor, by using the `setAiSuggestionRules` command
+您可以随时更改规则，无需重新加载编辑器，使用 `setAiSuggestionRules` 命令。
 
 ```ts
 AiSuggestion.configure({
   rules: [
     {
       id: '1',
-      title: 'Spell Check',
-      prompt: 'Identify and correct any spelling mistakes',
+      title: '拼写检查',
+      prompt: '识别并纠正任何拼写错误',
       color: '#DC143C',
       backgroundColor: 'FFE6E6',
     },
@@ -32,11 +32,11 @@ AiSuggestion.configure({
 })
 ```
 
-You can learn more about rules in this guide: [Define rules](/content-ai/capabilities/suggestion/features/define-rules)
+您可以在此指南中了解更多关于规则的信息： [定义规则](/content-ai/capabilities/suggestion/features/define-rules)
 
-## Initial Suggestions
+## 初始建议
 
-An array of initial suggestions to display before any proofreading is done. This can be used as a performance optimization to avoid waiting for the first suggestions to be generated.
+在进行任何校对之前展示的一组初始建议。这可以作为性能优化，避免等待首次生成建议。
 
 ```ts
 export const suggestions: Suggestion[] = [
@@ -52,8 +52,8 @@ export const suggestions: Suggestion[] = [
     ],
     rule: {
       id: '1',
-      title: 'Spell Check',
-      prompt: 'Identify and correct any spelling mistakes',
+      title: '拼写检查',
+      prompt: '识别并纠正任何拼写错误',
       color: '#DC143C',
       backgroundColor: 'FFE6E6',
     },
@@ -66,23 +66,23 @@ AiSuggestion.configure({
 })
 ```
 
-To learn more about the data that a suggestion object should contain, check the [API reference](/content-ai/capabilities/suggestion/api-reference#proofreading-suggestions).
+要了解建议对象应包含的数据，请查看 [API 参考](/content-ai/capabilities/suggestion/api-reference#proofreading-suggestions)。
 
-## Custom Suggestion Styles
+## 自定义建议样式
 
-The `getCustomSuggestionDecoration` function allows you to control the appearance of suggestions and provide visual cues to the user. You can add custom CSS classes to the suggestions, and add custom elements before and after them. Useful for adding popovers, tooltips, or icons to suggestions.
+`getCustomSuggestionDecoration` 函数允许您控制建议的外观并为用户提供视觉提示。您可以为建议添加自定义 CSS 类，并在建议前后添加自定义元素。对于添加弹出窗口、工具提示或图标到建议非常有用。
 
-The custom styles and elements are implemented with the [Prosemirror Decorations API](https://prosemirror.net/docs/ref/#view.Decorations).
+自定义样式和元素是使用 [Prosemirror Decorations API](https://prosemirror.net/docs/ref/#view.Decorations) 实现的。
 
-To learn how to show a popover when you select a suggestion, follow [this guide](/content-ai/capabilities/suggestion/features/display-suggestions#show-a-popover-when-you-select-a-suggestion).
+要了解如何在选择建议时显示弹出窗口，请遵循 [此指南](/content-ai/capabilities/suggestion/features/display-suggestions#show-a-popover-when-you-select-a-suggestion)。
 
 ```ts
 AiSuggestion.configure({
   getCustomSuggestionDecoration({ suggestion, isSelected, getDefaultDecorations }) {
-    // You can combine the default decorations of the AI Suggestion extension with your custom ones
+    // 您可以将 AI 建议扩展的默认装饰与自定义装饰结合使用
     const decorations = getDefaultDecorations()
 
-    // Add a custom element before the suggestion text
+    // 在建议文本前添加一个自定义元素
     Decoration.widget(suggestion.deleteRange.from, () => {
       const element = document.createElement('span')
       element.textContent = '⚠️'
@@ -93,9 +93,9 @@ AiSuggestion.configure({
 })
 ```
 
-## Customize When to Load Suggestions
+## 自定义加载建议的时机
 
-By default, the AI Suggestion extension will automatically load suggestions when the editor is ready. You can disable this behavior with the `loadOnStart` option
+默认情况下，AI 建议扩展将在编辑器准备好时自动加载建议。您可以使用 `loadOnStart` 选项禁用此行为。
 
 ```ts
 AiSuggestion.configure({
@@ -103,7 +103,7 @@ AiSuggestion.configure({
 })
 ```
 
-By default, the AI Suggestion extension will reload suggestions when the editor's content changes. You can disable this behavior with the `reloadOnUpdate` option.
+默认情况下，当编辑器的内容发生变化时，AI 建议扩展将重新加载建议。您可以使用 `reloadOnUpdate` 选项禁用此行为。
 
 ```ts
 AiSuggestion.configure({
@@ -111,11 +111,11 @@ AiSuggestion.configure({
 })
 ```
 
-You can learn to configure when to load suggestions in [this guide](/content-ai/capabilities/suggestion/features/configure-when-to-load-suggestions).
+您可以在 [此指南](/content-ai/capabilities/suggestion/features/configure-when-to-load-suggestions) 中学习如何配置加载建议的时机。
 
-## Customize the Debounce Timeout
+## 自定义去抖超时
 
-By default, the AI Suggestion extension will wait 800ms after the user stops typing to reload suggestions. This prevents the API from being called too frequently. You can configure this timeout with the `debounceTimeout` option.
+默认情况下，AI 建议扩展将在用户停止输入后等待 800 毫秒再重新加载建议。这防止了 API 被频繁调用。您可以使用 `debounceTimeout` 选项配置此超时。
 
 ```ts
 AiSuggestion.configure({
@@ -123,39 +123,38 @@ AiSuggestion.configure({
 })
 ```
 
-## Handle Errors When Loading Suggestions
+## 处理加载建议时的错误
 
-You can provide a callback for handling errors when loading suggestions. This allows you to log errors, display error messages to the user, or take other actions when an error occurs.
+您可以提供一个回调函数来处理加载建议时的错误。这允许您记录错误、向用户显示错误信息或在发生错误时采取其他措施。
 
-A complete guide on how to handle loading and error states in the UI can be found here:
+关于如何在 UI 中处理加载和错误状态的完整指南可以在这里找到：
 
 ```ts
 AiSuggestion.configure({
   onLoadSuggestionsError(error) {
-    console.error('An error occurred while loading suggestions', error)
+    console.error('加载建议时发生错误', error)
   },
 })
 ```
 
-## Tiptap Content AI Cloud Options
+## Tiptap 内容 AI 云选项
 
-If you do not [provide your own backend](/content-ai/capabilities/suggestion/custom-llms), the AI Suggestion extension will use the Tiptap Content AI cloud to generate suggestions.
+如果您没有 [提供自己的后端](/content-ai/capabilities/suggestion/custom-llms)，AI 建议扩展将使用 Tiptap 内容 AI 云生成建议。
 
-You can configure the OpenAI model to use for generating suggestions with the `model` option. The default model is `gpt-4o-mini`. We recommend it for most use cases,
-as it provides a good balance between speed, cost and accuracy.
+您可以使用 `model` 选项配置用于生成建议的 OpenAI 模型。默认模型为 `gpt-4o-mini`。我们推荐它用于大部分用例，因为它在速度、成本和准确性之间提供了良好的平衡。
 
 ```ts
 AiSuggestion.configure({
-  // Your Tiptap Content AI app id
+  // 您的 Tiptap 内容 AI 应用 ID
   appId: 'APP_ID_HERE',
-  // This needs to be your generated JWT and MUST NOT be the OpenAI API key!
+  // 这需要是您生成的 JWT，且绝对不能是 OpenAI API 密钥！
   token: 'YOUR_TOKEN',
-  // The model to use for generating suggestions. Defaults to "gpt-4o-mini"
+  // 用于生成建议的模型。默认为 "gpt-4o-mini"
   model: 'gpt-4o',
 })
 ```
 
-We currently support these OpenAI models:
+我们目前支持以下 OpenAI 模型：
 
 - `gpt-4.1`
 - `gpt-4.1-2025-04-14`
@@ -185,58 +184,58 @@ We currently support these OpenAI models:
 - `gpt-3.5-turbo-1106`
 - `gpt-3.5-turbo-16k`
 
-## Integrate Your Own Backend and LLMs
+## 集成您自己的后端和 LLMs
 
-If you want to use your own backend and LLMs to generate suggestions, you can provide a custom `resolver` function. This function should return an array of suggestions based on the editor's content and rules.
+如果您想使用自己的后端和 LLMs 来生成建议，可以提供自定义 `resolver` 函数。此函数应根据编辑器的内容和规则返回一组建议。
 
-You will find a more comprehensive guide on how to integrate your own backend and LLMs [in this guide](/content-ai/capabilities/suggestion/custom-llms).
+您可以在 [此指南](/content-ai/capabilities/suggestion/custom-llms) 中找到关于如何集成您自己的后端和 LLMs 的更全面指南。
 
 ```ts
 AiSuggestion.configure({
   resolver: async ({ content, rules }) => {
-    // Your custom logic to generate suggestions
+    // 您自定义生成建议的逻辑
     return suggestions
   },
 })
 ```
 
-## Provide Extra Context to the LLM
+## 向 LLM 提供额外上下文
 
-If you want to provide extra information to the LLM, you can use the `context` option. This option allows you to pass additional data which can be used to improve the quality of the suggestions.
+如果您想向 LLM 提供额外信息，可以使用 `context` 选项。此选项允许您传递可以用来提高建议质量的附加数据。
 
-The `context` option is a string that will be added to the LLM as part of the prompt. It will be applied to all rules.
+`context` 选项是一个将作为提示的一部分添加到 LLM 的字符串。它将应用于所有规则。
 
 ```ts
 AiSuggestion.configure({
-  context: 'The tone should be formal and professional.',
+  context: '语气应正式且专业。',
 })
 ```
 
-You can learn more about providing context in [this guide](/content-ai/capabilities/suggestion/features/provide-llm-context).
+您可以在 [此指南](/content-ai/capabilities/suggestion/features/provide-llm-context) 中了解更多关于提供上下文的信息。
 
-## Configure Caching
+## 配置缓存
 
-The AI Suggestion extension caches suggestions to minimize API calls. It splits the editor content into chunks and stores the generated suggestions for each chunk. When reloading suggestions, only modified chunks are re-fetched. This behavior is enabled by default, but you can customize it.
+AI 建议扩展缓存建议以最小化 API 调用。它将编辑器内容分块并存储每个块生成的建议。在重新加载建议时，仅重新获取已修改的块。此行为默认启用，但您可以自定义它。
 
-You can disable the cache by setting `enableCache` to `false`. This will make the AI Suggestion extension call the API for all chunks when the editor content changes.
+通过将 `enableCache` 设置为 `false`，您可以禁用缓存。这将使 AI 建议扩展在编辑器内容更改时对所有块调用 API。
 
 ```ts
 AiSuggestion.configure({
-  // Disable caching
+  // 禁用缓存
   enableCache: false,
 })
 ```
 
-You can configure the chunk size with the `chunkSize` option. This option controls how many top-level nodes of the document are included in each chunk. The default value is `2`, meaning that, for a document with 10 paragraphs, the AI Suggestion will create 5 chunks of 2 paragraphs each.
+您可以使用 `chunkSize` 选项配置块大小。此选项控制每个块中包含多少个顶级节点。默认值为 `2`，这意味着对于一个包含 10 个段落的文档，AI 建议将创建 5 个包含 2 个段落的块。
 
 ```ts
 AiSuggestion.configure({
-  // Each chunk will contain 3 top-level HTML nodes
+  // 每个块将包含 3 个顶级 HTML 节点
   chunkSize: 3,
 })
 ```
 
-You can customize chunk generation by overriding the `chunkHtml` function. This function receives the editor content and should return an array of HTML strings, each representing a chunk. This gives you fine-grained control over how the content is split into chunks.
+通过重写 `chunkHtml` 函数，您可以自定义块的生成。此函数接收编辑器内容并应返回一个 HTML 字符串数组，每个字符串表示一个块。这使您可以精细控制内容如何拆分成块。
 
 ```ts
 AiSuggestion.configure({

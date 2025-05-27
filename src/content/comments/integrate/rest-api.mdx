@@ -1,87 +1,84 @@
 ---
-title: Comments REST API
+title: 评论 REST API
 meta:
-  title: REST API | Tiptap Comments Docs
-  description: Use the Tiptap Comments REST API to manage threads and comments from outside the editor. More in the docs!
-  category: Comments
+  title: REST API | Tiptap 评论文档
+  description: 使用 Tiptap 评论 REST API 从编辑器外部管理线程和评论。更多内容请查看文档！
+  category: 评论
 ---
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
-The Comments REST API lets users manage comment threads and individual comments from outside the Tiptap Editor. It supports creating, updating, deleting, and retrieving threads and comments.
+评论 REST API 允许用户从 Tiptap 编辑器外部管理评论线程和单个评论。它支持创建、更新、删除和检索线程与评论。
 
-Use the [Comments Postman Collection](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/folder/33042171-01d1c110-e913-4d99-b47a-fc95aad877c9?ctx=documentation) for hands-on experimentation.
+使用 [评论 Postman 集合](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/folder/33042171-01d1c110-e913-4d99-b47a-fc95aad877c9?ctx=documentation) 进行动手实验。
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to the [Team plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [团队计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Start Document server">
-        To use the Comments REST API [Add an Environment](https://cloud.tiptap.dev/v2/configuration/document-server) in your dashboard and configure your [Document server](https://cloud.tiptap.dev/v2/configuration/document-server).
+    <RequirementItem label="2. 启动文档服务器">
+        要使用评论 REST API，请在您的仪表板中 [添加环境](https://cloud.tiptap.dev/v2/configuration/document-server) 并配置您的 [文档服务器](https://cloud.tiptap.dev/v2/configuration/document-server)。
     </RequirementItem>
 </Requirements>
 
-## Access the API
+## 访问 API
 
-The REST API is exposed directly from your Document server, available at your custom URL:
+REST API 直接从您的文档服务器提供，位于您的自定义 URL：
 
 ```bash
 https://YOUR_APP_ID.collab.tiptap.cloud/
 ```
 
-Authentication is done using an API secret which you can find in
-the [settings](https://cloud.tiptap.dev/v2/configuration/document-server) of your Document server. The secret must be sent as
-an `Authorization` header.
+身份验证使用 API 密钥，您可以在文档服务器的 [设置](https://cloud.tiptap.dev/v2/configuration/document-server) 中找到。密钥必须作为 `Authorization` 头发送。
 
-If your document identifier contains a slash (`/`), encode it as `%2F`, e.g.
-using `encodeURIComponent`.
+如果您的文档标识符包含斜杠 (`/`)，请将其编码为 `%2F`，例如使用 `encodeURIComponent`。
 
-## Review all API endpoints
+## 查看所有 API 端点
 
-| Operation      | Method | Endpoint                                                                         | Description                                 |
-|----------------|--------|----------------------------------------------------------------------------------|---------------------------------------------|
-| Create thread  | POST   | /api/documents/:identifier/threads                                               | Create a new thread within a document       |
-| Get threads    | GET    | /api/documents/:identifier/threads                                               | List all threads and view their details     |
-| Get thread     | GET    | /api/documents/:identifier/threads/:threadIdentifier                             | Retrieve a specific thread                  |
-| Update thread  | PATCH  | /api/documents/:identifier/threads/:threadIdentifier                             | Modify attributes of an existing thread     |
-| Update comment | PATCH  | /api/documents/:identifier/threads/:threadIdentifier/comments/:commentIdentifier | Update the content or metadata of a comment |
-| Delete thread  | DELETE | /api/documents/:identifier/threads/:threadIdentifier                             | Remove a specific thread from a document    |
-| Delete comment | DELETE | /api/documents/:identifier/threads/:threadIdentifier/comments/:commentIdentifier | Remove a specific comment from a thread     |
+| 操作           | 方法   | 端点                                                                             | 描述                                     |
+|----------------|--------|----------------------------------------------------------------------------------|------------------------------------------|
+| 创建线程       | POST   | /api/documents/:identifier/threads                                               | 在文档中创建一个新线程                 |
+| 获取线程       | GET    | /api/documents/:identifier/threads                                               | 列出所有线程并查看其详细信息           |
+| 获取线程       | GET    | /api/documents/:identifier/threads/:threadIdentifier                             | 检索特定线程                            |
+| 更新线程       | PATCH  | /api/documents/:identifier/threads/:threadIdentifier                             | 修改现有线程的属性                      |
+| 更新评论       | PATCH  | /api/documents/:identifier/threads/:threadIdentifier/comments/:commentIdentifier | 更新评论的内容或元数据                 |
+| 删除线程       | DELETE | /api/documents/:identifier/threads/:threadIdentifier                             | 从文档中删除特定线程                   |
+| 删除评论       | DELETE | /api/documents/:identifier/threads/:threadIdentifier/comments/:commentIdentifier | 从线程中删除特定评论                   |
 
-## Thread REST API endpoints
+## 线程 REST API 端点
 
-### Get threads
+### 获取线程
 
 ```bash
 GET /api/documents/:identifier/threads
 ```
 
-Retrieve all comment threads associated with a specific document. Use this endpoint to list all threads and view their details.
+检索与特定文档相关的所有评论线程。使用此端点列出所有线程并查看它们的详细信息。
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/{document_id}/threads' \
 --header 'Authorization: {{Authorization}}'
 ```
 
-### Get thread
+### 获取线程
 
 ```bash
 GET /api/documents/:identifier/threads/:threadIdentifier
 ```
 
-Fetch details of a specific thread using its unique identifier within a document. This is useful for retrieving specific discussion threads.
+使用文档中唯一标识符获取特定线程的详细信息。这对于检索特定讨论线程很有用。
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/{document_id}/threads/{thread_id}' \
 --header 'Authorization: {{Authorization}}'
 ```
 
-### Create thread
+### 创建线程
 
 ```bash
 POST /api/documents/:identifier/threads
 ```
 
-Create a new thread within a document. You can specify the initial content and additional data like user metadata.
+在文档中创建一个新线程。您可以指定初始内容和用户元数据等附加数据。
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/{document_id}/threads' \
@@ -93,13 +90,13 @@ curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/{document
 }'
 ```
 
-### Update thread
+### 更新线程
 
 ```bash
 PATCH /api/documents/:identifier/threads/:threadIdentifier
 ```
 
-Modify attributes of an existing thread, such as marking it as resolved or updating its metadata.
+修改现有线程的属性，例如将其标记为已解决或更新其元数据。
 
 ```bash
 curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/{document_id}/threads/{thread_id}' \
@@ -110,28 +107,28 @@ curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/doc
 }'
 ```
 
-### Delete thread
+### 删除线程
 
 ```bash
 DELETE /api/documents/:identifier/threads/:threadIdentifier
 ```
 
-Remove a specific thread from a document, effectively deleting all nested comments.
+从文档中删除特定线程，有效地删除所有嵌套评论。
 
 ```bash
 curl --location --request DELETE 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/{document_id}/threads/{thread_id}' \
 --header 'Authorization: {{Authorization}}'
 ```
 
-## Comment REST API endpoints
+## 评论 REST API 端点
 
-### Create comment
+### 创建评论
 
 ```bash
 POST /api/documents/:identifier/threads/:threadIdentifier/comments
 ```
 
-Add a new comment to an existing thread. Specify the content and any associated data.
+向现有线程添加新评论。指定内容和任何相关数据。
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/{document_id}/threads/{thread_id}/comments' \
@@ -143,13 +140,13 @@ curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/{document
 }'
 ```
 
-### Update comment
+### 更新评论
 
 ```bash
 PATCH /api/documents/:identifier/threads/:threadIdentifier/comments/:commentIdentifier
 ```
 
-Update the content or metadata of an existing comment within a thread.
+更新线程中现有评论的内容或元数据。
 
 ```bash
 curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/{document_id}/threads/{thread_id}/comments/{comment_id}' \
@@ -160,19 +157,19 @@ curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/doc
 }'
 ```
 
-### Delete comment
+### 删除评论
 
 ```bash 
 DELETE /api/documents/:identifier/threads/:threadIdentifier/comments/:commentIdentifier
 ```
 
-Remove a specific comment from a thread. Use this to manage individual comments.
+从线程中删除特定评论。使用此功能来管理单个评论。
 
 ```bash
 curl --location --request DELETE 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/{document_id}/threads/{thread_id}/comments/{comment_id}' \
 --header 'Authorization: {{Authorization}}'
 ```
 
-## Review Postman Collection
+## 查看 Postman 集合
 
-Use the [Comments Postman Collection](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/folder/33042171-01d1c110-e913-4d99-b47a-fc95aad877c9?ctx=documentation) for hands-on experimentation.
+使用 [评论 Postman 集合](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/folder/33042171-01d1c110-e913-4d99-b47a-fc95aad877c9?ctx=documentation) 进行动手实验。

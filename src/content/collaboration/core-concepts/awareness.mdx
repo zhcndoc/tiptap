@@ -1,65 +1,65 @@
 ---
-title: Awareness in Collaboration
+title: 协作中的感知
 meta:
-  title: Awareness | Tiptap Collaboration Docs
-  description: Integrate real-time user activity tracking with Collaboration. Add user presence and cursor positions to your editor.
-  category: Collaboration
+  title: 感知 | Tiptap 协作文档
+  description: 与协作结合，集成实时用户活动跟踪。将用户存在和光标位置添加到您的编辑器中。
+  category: 协作
 ---
 
-Awareness in Tiptap Collaboration, powered by Yjs, is helping you share real-time info on users' activities within a collaborative space. This can include details like user presence, cursor positions, and custom user states.
+Tiptap 协作中的感知，由 Yjs 提供支持，帮助您共享协作空间内用户活动的实时信息。这可以包括用户存在、光标位置以及自定义用户状态等详细信息。
 
-At its core, awareness utilizes its own Conflict-Free Replicated Data Type (CRDT) to ensure that this shared meta-information remains consistent and immediate across all users, without maintaining a historical record of these states.
+在其核心，感知利用自身的无冲突复制数据类型（CRDT）来确保这一共享元信息在所有用户之间保持一致和即时，而无需维护这些状态的历史记录。
 
-You can read more about Awareness in the [Yjs documentation on awareness](https://docs.yjs.dev/getting-started/adding-awareness).
+您可以在[Yjs 的感知文档](https://docs.yjs.dev/getting-started/adding-awareness)中了解有关感知的更多信息。
 
-## Necessary provider events
+## 必需的提供者事件
 
-Awareness updates trigger specific [provider events](/collaboration/provider/events) to develop interactive features based on user actions and presence:
+感知更新会触发特定的[提供者事件](/collaboration/provider/events)，以根据用户的操作和存在开发交互式功能：
 
-- `awarenessUpdate`: This event signals that a user is active. It triggers without actual state changes, serving as a 'heartbeat' to inform others the user is in the document.
-- `awarenessChange`: This event alerts you to any additions, updates, or deletions in the awareness state, reflecting both your local changes and those from remote users.
+- `awarenessUpdate`：此事件表示用户处于活动状态。即使没有实际状态变化，它也会触发，充当“心跳”以通知其他用户该用户正在文档中。
+- `awarenessChange`：此事件提醒您感知状态中的任何新增、更新或删除，反映了您的本地更改以及远程用户的更改。
 
-These events serve as hooks for integrating custom Awareness features.
+这些事件可以作为集成自定义感知功能的钩子。
 
-## Integrate awareness
+## 集成感知
 
-With your [collaborative environment](/collaboration/getting-started/install) set up, you're all set to integrate Awareness, which is natively supported by the Collaboration Provider.
+在设置好您的[协作环境](/collaboration/getting-started/install)后，您可以集成感知功能，协作提供者原生支持该功能。
 
-To kick things off, update the Awareness state with any relevant information. As an example we'll use a user's name, cursor color, and mouse position as examples.
+要开始，更新感知状态，提供任何相关信息。作为示例，我们将使用用户的姓名、光标颜色和鼠标位置。
 
-### Set the awareness field
+### 设置感知字段
 
-Let's assign a name, color, and mouse position to the user. This is just an example; feel free to use any data relevant to your application.
+让我们为用户分配一个姓名、颜色和鼠标位置。这只是一个示例，您可以自由使用与您的应用相关的任何数据。
 
 ```typescript
-// Set the awareness field for the current user
+// 为当前用户设置感知字段
 provider.setAwarenessField('user', {
-  // Share any information you like
+  // 分享您喜欢的任何信息
   name: 'Kevin James',
   color: '#ffcc00',
 })
 ```
 
-### Listen for changes
+### 监听变化
 
-Set up an event listener to track changes in the Awareness states across all connected users:
+设置事件监听器以跟踪所有连接用户的感知状态变化：
 
 ```typescript
-// Listen for updates to the states of all users
+// 监听所有用户状态的更新
 provider.on('awarenessChange', ({ states }) => {
   console.log(states)
 })
 ```
 
-You can now view these updates in your browser's console as you move on to the next step.
+您现在可以在浏览器的控制台中查看这些更新，继续进行下一步。
 
-### Track mouse movement
+### 跟踪鼠标移动
 
-Next, we'll add an event listener to our app to track mouse movements and update the awareness' information accordingly.
+接下来，我们将为我们的应用添加一个事件监听器，以跟踪鼠标移动并相应更新感知的信息。
 
 ```typescript
 document.addEventListener('mousemove', (event) => {
-  // Share any information you like
+  // 分享您喜欢的任何信息
   provider.setAwarenessField('user', {
     name: 'Kevin James',
     color: '#ffcc00',
@@ -69,8 +69,8 @@ document.addEventListener('mousemove', (event) => {
 })
 ```
 
-Check your browser's console to see the stream of events as users move their mice.
+检查您浏览器的控制台，查看用户移动鼠标时的事件流。
 
-## Add carets and selections
+## 添加光标和选择
 
-With basic Awareness in place, consider adding the [Collaboration Caret](/editor/extensions/functionality/collaboration-caret) extension to your editor. This extension adds caret positions, text selections, and personalized details (such as names and colors) of all participating users to your editor.
+在建立基本感知之后，考虑将[协作光标](/editor/extensions/functionality/collaboration-caret)扩展添加到您的编辑器中。此扩展将所有参与用户的光标位置、文本选择以及个性化详细信息（如姓名和颜色）添加到您的编辑器中。

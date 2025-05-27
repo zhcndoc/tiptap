@@ -1,52 +1,52 @@
 ---
-title: Manage threads in your editor
+title: 在你的编辑器中管理线程
 meta:
-  title: Manage threads | Tiptap Comments Docs
-  description: Manage discussions in Tiptap Editor using threads and comments with editor commands. More in our docs!
-  category: Comments
+  title: 管理线程 | Tiptap 评论文档
+  description: 使用编辑器命令在 Tiptap 编辑器中管理讨论、线程和评论。更多信息请见我们的文档！
+  category: 评论
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-Use this guide to integrate comments directly into your editor. For a complete list of all Comments editor commands, see the [Editor Commands](/comments/integrate/editor-commands) page.
+使用本指南将评论直接集成到你的编辑器中。有关所有评论编辑器命令的完整列表，请参见 [编辑器命令](/comments/integrate/editor-commands) 页面。
 
-You can also interact with comments from outside your editor via our [Comments REST API](/comments/integrate/rest-api).
+你还可以通过我们的 [评论 REST API](/comments/integrate/rest-api) 从编辑器外部与评论进行交互。
 
-## Learn about threads
+## 了解线程
 
-Tiptap's Comments feature organizes discussions into threads, enabling clear and context-relevant collaboration by distinguishing between threads and individual comments.
+Tiptap 的评论功能将讨论组织成线程，通过区分线程和单个评论，使协作变得清晰且相关。
 
-Threads serve as containers for discussions related to specific document sections, while comments represent individual contributions within those threads.
+线程作为与特定文档部分相关的讨论容器，而评论表示在这些线程中的个体贡献。
 
-## Create a new thread
+## 创建新线程
 
-Let's assume you have a button to create a new thread. You can use the `setThread` command to create a new thread at the current selection.
+假设你有一个按钮用于创建新线程。你可以使用 `setThread` 命令在当前选中位置创建一个新线程。
 
 ```js
 const createThread = () => {
   editor
     .chain()
     .setThread({
-      content: 'This is a new thread', // the content of the threads first inital comment
+      content: '这是一个新线程', // 线程初始评论的内容
     })
     .run()
 }
 ```
 
-This will create a new thread at the current selection and add a comment with the given content. By default comments and threads don't have a user or any other metadata assigned. Let's say you want to add the author to the thread **and** the comment. You can do this by passing through the `data` and `commentData` property to the `setThread` command.
+这将会在当前选中位置创建一个新线程，并添加一个带有给定内容的评论。默认情况下，评论和线程没有分配用户或任何其他元数据。假设你想将作者添加到线程 **和** 评论中。你可以通过将 `data` 和 `commentData` 属性传递给 `setThread` 命令来实现。
 
 ```js
 const createThread = () => {
   const user = {
-    id: '123', // the user id of the author
-    name: 'John Doe', // the name of the author
-    avatarUrl: 'https://example.com/avatar.jpg', // the avatar of the author
+    id: '123', // 作者的用户 ID
+    name: 'John Doe', // 作者的名字
+    avatarUrl: 'https://example.com/avatar.jpg', // 作者的头像
   }
 
   editor
     .chain()
     .setThread({
-      content: 'This is a new thread', // the content of the threads first inital comment
+      content: '这是一个新线程', // 线程初始评论的内容
       data: {
         user,
       },
@@ -58,60 +58,60 @@ const createThread = () => {
 }
 ```
 
-Now the thread and comment will have a user assigned to it.
+现在线程和评论将会被分配给用户。
 
-## Receive and watch threads and comments
+## 接收和监视线程及评论
 
-Receiving and watching the threads on your current document can easily be done by using the `subscribeToThreads` function. This function will register a watcher, fetch the first initial list of threads and keep the list up to date.
+接收和监视当前文档上的线程可以通过使用 `subscribeToThreads` 函数轻松完成。该函数将注册一个监视器，获取初始线程列表并保持列表的最新状态。
 
-To unsubscribe from the threads, you can call the callback function returned by the `subscribeToThreads` function.
+要取消订阅线程，可以调用 `subscribeToThreads` 函数返回的回调函数。
 
 ```js
-// Subscribe to threads
+// 订阅线程
 const unsubscribe = subscribeToThreads({
   provider: yourTiptapCollabProvider,
   callback: (threads) => {
-    // do something with threads, store in a state or variable from here
+    // 处理线程，可以将其存储在状态或变量中
   },
-  // optional options
+  // 可选选项
   getThreadsOptions: {
-    // only threads with the specific type will be fetched/watched, possible values are 'archived' and 'unarchived',
-    // if not set, only unarchived threads will be handled
-    // archived and unarchived threads represent soft-deleted threads
+    // 只有具有特定类型的线程会被获取/监视，可能的值为 'archived' 和 'unarchived'，
+    // 如果未设置，仅处理未归档的线程
+    // 归档和未归档的线程表示软删除的线程
     types: ['archived', 'unarchived'],
   },
 })
 ```
 
-## Receive and render threads manually
+## 手动接收和渲染线程
 
-To receive the list of threads on your current document manually, you can simply call `provider.getThreads()`. This will return an array of threads on the document connected to your provider.
+要手动接收当前文档上的线程列表，你只需调用 `provider.getThreads()`。这将返回一个与您的提供者连接的文档中的线程数组。
 
-This is a static array which won't update on its own. If you want to keep the list of threads up to date, you can listen to changes via the `provider.watchThreads` and `provider.unwatchThreads` functions.
+这是一个静态数组，不会自动更新。如果你想保持线程列表的最新状态，你可以通过 `provider.watchThreads` 和 `provider.unwatchThreads` 函数监听更改。
 
 ```js
-// let's save threads in a variable
+// 将线程保存到一个变量中
 let threads = []
 
-// this function is called whenever the threads change
+// 每当线程发生变化时调用此函数
 const getThreads = () => {
   threads = provider.getThreads()
 }
 
-// initial call to get the threads
+// 初始调用以获取线程
 getThreads()
 
-// watch for changes
+// 监视更改
 provider.watchThreads(getThreads)
 ```
 
-To unwatch the threads you can call `provider.unwatchThreads(getThreads)`.
+要取消监视线程，你可以调用 `provider.unwatchThreads(getThreads)`。
 
 ```js
 provider.unwatchThreads(getThreads)
 ```
 
-Let's say you want to write a react hook to get the threads and keep them up to date, you could write a hook like this.
+假设你想编写一个 React 钩子以获取线程并保持其最新状态，可以这样编写钩子。
 
 ```jsx
 const useThreads = (provider) => {
@@ -139,32 +139,30 @@ const useThreads = (provider) => {
 }
 ```
 
-Now those threads will be reactive and can be used to render the threads in your UI.
+现在这些线程将是响应式的，可以用来在你的 UI 中渲染线程。
 
-## Update a thread
+## 更新线程
 
-To update a thread you can use the `updateThread` command. This command will update the thread with the given id and update the content of the thread.
+要更新线程，你可以使用 `updateThread` 命令。该命令将使用给定 ID 更新线程并更新线程内容。
 
 ```js
 editor.commands.updateThread({
   id: '123',
-  {
-    data: {
-      seen: true,
-    }
+  data: {
+    seen: true,
   }
 })
 ```
 
-This will update the thread with the ID `123` and set the `seen` property to `true`.
+这将更新 ID 为 `123` 的线程，并将 `seen` 属性设置为 `true`。
 
-## Delete a thread
+## 删除线程
 
-To delete a thread you can use the `removeThread` command. This command will delete the thread with the given ID.
+要删除线程，你可以使用 `removeThread` 命令。该命令将删除具有给定 ID 的线程。
 
-<Callout title="How to delete threads" variant="default">
-  By default, threads removed won't be deleted from the yjs document. To do this, you can pass
-  through the `deleteThread` option to the `removeThread` command.
+<Callout title="如何删除线程" variant="default">
+  默认情况下，已删除的线程不会从 yjs 文档中删除。要做到这一点，可以将
+  `deleteThread` 选项传递给 `removeThread` 命令。
 </Callout>
 
 ```js
@@ -174,40 +172,40 @@ editor.commands.removeThread({
 })
 ```
 
-## Create, update and delete comments
+## 创建、更新和删除评论
 
-Comments can be added, edited, and removed within threads but cannot be marked as resolved, as they are considered parts of the thread discussions.
+评论可以在线程内添加、编辑和删除，但不能标记为已解决，因为它们被视为线程讨论的一部分。
 
-To create a comment on a thread you can use the `createComment` command. This command will create a new comment on the thread with the given ID.
+要在线程上创建评论，你可以使用 `createComment` 命令。该命令将在具有给定 ID 的线程上创建一条新评论。
 
 ```js
 editor.commands.createComment({
   threadId: '123',
-  content: 'This is a new comment', // this could also be tiptap JSON or any other type of content
+  content: '这是一个新评论', // 这也可以是 tiptap JSON 或任何其他类型的内容
   data: {
-    user, // pass through any meta data you want - in this case the user
+    user, // 传递任何你想要的元数据 - 在这种情况下是用户
   },
 })
 ```
 
-This will create a new comment on the thread with the ID `123` and set the content to `This is a new comment`. You can also pass through any metadata you want to the comment.
+这将在 ID 为 `123` 的线程上创建一条新评论，并将内容设置为 `这是一个新评论`。你还可以将任何元数据传递给评论。
 
-To update a comment you can use the `updateComment` command. This command will update the comment with the given ID and update the content of the comment.
+要更新评论，你可以使用 `updateComment` 命令。该命令将更新具有给定 ID 的评论并更新评论内容。
 
 ```js
 editor.commands.updateComment({
-  threadId: '123', // the thread ID
-  id: '456', // the comment ID
-  content: 'Now this is the new content', // the new content of the comment
+  threadId: '123', // 线程 ID
+  id: '456', // 评论 ID
+  content: '现在这是新内容', // 评论的新内容
   data: {
-    edited: true, // set the edited property to true
+    edited: true, // 将 edited 属性设置为 true
   },
 })
 ```
 
-This will update the comment with the ID `456` on the thread with the ID `123` and set the content to `Now this is the new content`. You can also pass through any metadata you want to the comment.
+这将更新 ID 为 `456` 的评论，并将其内容设置为 `现在这是新内容`。你也可以传递任何你想要的元数据。
 
-Finally you can delete a comment by using the `deleteComment` command. This command will delete the comment with the given ID.
+最后，你可以通过使用 `deleteComment` 命令删除评论。该命令将删除具有给定 ID 的评论。
 
 ```js
 editor.commands.deleteComment({
@@ -216,9 +214,9 @@ editor.commands.deleteComment({
 })
 ```
 
-## Resolve and unresolve threads
+## 解决和取消解决线程
 
-To resolve a thread you can use the `resolveThread` command. This command will resolve the thread with the given ID.
+要解决线程，你可以使用 `resolveThread` 命令。该命令将解决具有给定 ID 的线程。
 
 ```js
 editor.commands.resolveThread({
@@ -226,9 +224,9 @@ editor.commands.resolveThread({
 })
 ```
 
-This will resolve the thread with the ID `123`. To unresolve a thread you can use the `unresolveThread` command. This command will unresolve the thread with the given ID.
+这将解决 ID 为 `123` 的线程。要取消解决线程，你可以使用 `unresolveThread` 命令。该命令将取消解决具有给定 ID 的线程。
 
-If you want to resolve a thread and add information on which user resolved the thread, you can set the threads data to include the user who resolved the thread. Be sure to clear the data when unresolving the thread.
+如果你想解决一个线程并添加有关解决该线程的用户的信息，可以设置线程数据以包含解决该线程的用户。在取消解决线程时，请务必清除数据。
 
 ```js
 editor.commands.unresolveThread({
@@ -236,9 +234,9 @@ editor.commands.unresolveThread({
 })
 ```
 
-## Select a thread
+## 选择线程
 
-To select a thread you can use the `selectThread` command. This command selects the thread with the specified ID.
+要选择线程，你可以使用 `selectThread` 命令。该命令选择具有指定 ID 的线程。
 
 ```js
 editor.commands.selectThread({
@@ -246,9 +244,9 @@ editor.commands.selectThread({
 })
 ```
 
-This will move the cursor to the thread with the ID `123`.
+这将光标移动到 ID 为 `123` 的线程。
 
-To deselect a thread you can use the `unselectThread` command. This command deselects the thread with the specified ID.
+要取消选择线程，你可以使用 `unselectThread` 命令。该命令取消选择具有指定 ID 的线程。
 
 ```js
 editor.commands.unselectThread({
@@ -256,4 +254,4 @@ editor.commands.unselectThread({
 })
 ```
 
-You can also select or unselect threads without ID. In that case, the editor will select or unselect the thread at the current selection.
+你还可以选择或取消选择没有 ID 的线程。在这种情况下，编辑器将选择或取消选择当前选中的线程。

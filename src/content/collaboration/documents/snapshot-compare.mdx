@@ -1,12 +1,12 @@
 ---
-title: Compare document versions
+title: 比较文档版本
 meta:
-  title: Snapshot Compare extension | Tiptap Editor Docs
-  description: Compare snapshots of your documents to see changes made between two versions.
-  category: Collaboration
+  title: Snapshot Compare 扩展 | Tiptap 编辑器文档
+  description: 比较文档快照，查看两个版本之间的更改。
+  category: 协作
 extension:
   name: SnapshotCompare
-  description: 'Compare snapshots of your documents to see changes made between two versions.'
+  description: '比较文档快照，查看两个版本之间的更改。'
   type: extension
   icon: FileStack
   isPro: true
@@ -18,44 +18,43 @@ import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
-Snapshot Compare lets you line-up two document versions and highlights everything that changed. Use it to track edits, review contributions, and restore earlier states.
+Snapshot Compare 允许你并排查看两个文档版本并突出显示所有更改。使用它来跟踪编辑，审查贡献，并恢复早期状态。
 
-The Snapshot Compare extension adds extra functionality to the [Snapshots](/collaboration/documents/snapshot) by allowing you to visually compare changes made between two versions of a document so you can track what’s been added, removed, or modified. These comparisons are called _diffs_.
-
+Snapshot Compare 扩展为 [快照](/collaboration/documents/snapshot) 添加了额外的功能，允许你可视化比较两个版本之间的更改，以便跟踪添加、删除或修改的内容。这些比较称为 _diffs_。
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to the [Team plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在你的账号中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [团队计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Start Document server">
-        [Add an Environment](https://cloud.tiptap.dev/v2/configuration/document-server) in your dashboard and configure your [Document server](https://cloud.tiptap.dev/v2/configuration/document-server).
+    <RequirementItem label="2. 启动文档服务器">
+        在你的仪表板中 [添加环境](https://cloud.tiptap.dev/v2/configuration/document-server) 并配置你的 [文档服务器](https://cloud.tiptap.dev/v2/configuration/document-server)。
     </RequirementItem>
-    <RequirementItem label="3. Install from private registry">
-        To install this extension, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="3. 从私有注册表安装">
+        要安装此扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证以访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
 <CodeDemo isPro path="/Extensions/SnapshotCompare" />
 
-## Access the Pro registry
-The Snapshot Compare extension is published in Tiptap’s private npm registry. Integrate the extension by following the [private registry guide](/guides/pro-extensions). If you already authenticated your Tiptap account you can go straight to [#Install](#install).
+## 访问专业注册表
+Snapshot Compare 扩展已发布在 Tiptap 的私有 npm 注册表中。通过遵循 [私有注册表指南](/guides/pro-extensions) 集成该扩展。如果你已经验证了你的 Tiptap 账号，可以直接进入 [#安装](#install)。
 
-## Install
+## 安装
 
-Install the extension from our private registry:
+从我们的私有注册表安装扩展：
 
 ```bash
 npm install @tiptap-pro/extension-snapshot-compare@next
 ```
 
-## Settings
+## 设置
 
-You can configure the `SnapshotCompare` extension with the following options:
+你可以使用以下选项配置 `SnapshotCompare` 扩展：
 
-| Setting              | Type                   | Default    | Description                                                       |
-| -------------------- | ---------------------- | ---------- | ----------------------------------------------------------------- |
-| provider             | `TiptapCollabProvider` | `null`     | The Collaboration provider instance                               |
-| mapDiffToDecorations | `function`             | `() => {}` | Control mapping a diff into a decoration to display their content |
+| 设置                | 类型                    | 默认值    | 描述                                                        |
+| ------------------- | ----------------------- | --------- | ----------------------------------------------------------- |
+| provider            | `TiptapCollabProvider`  | `null`    | 协作提供者实例                                            |
+| mapDiffToDecorations| `function`              | `() => {}`| 控制将 diff 映射到装饰以显示其内容                          |
 
 ```js
 const provider = new TiptapCollabProvider({
@@ -73,18 +72,18 @@ const editor = new Editor({
 })
 ```
 
-#### Using `mapDiffToDecorations` for diff decorations
+#### 使用 `mapDiffToDecorations` 进行 diff 装饰
 
-The extension has a default mapping (`defaultMapDiffToDecorations`) to represent diffs as ProseMirror decorations.
-For more complex integrations and control, you can customize this mapping with the `mapDiffToDecorations` option.
+该扩展具有默认映射 (`defaultMapDiffToDecorations`) 来表示 diffs 作为 ProseMirror 装饰。
+对于更复杂的集成和控制，你可以使用 `mapDiffToDecorations` 选项自定义此映射。
 
-**Example:** Applying custom predefined background colors to inline inserts
+**示例：** 对内联插入应用自定义预定义背景颜色
 
 ```ts
 SnapshotCompare.configure({
   mapDiffToDecorations: ({ diff, tr, editor, defaultMapDiffToDecorations }) => {
     if (diff.type === 'inline-insert') {
-      // return prosemirror decoration(s) or null
+      // 返回 prosemirror 装饰或 null
       return Decoration.inline(
         diff.from,
         diff.to,
@@ -94,18 +93,18 @@ SnapshotCompare.configure({
             backgroundColor: diff.attribution.color.backgroundColor,
           },
         },
-        // pass the diff as the decoration's spec, this is required for `extractAttributeChanges`
+        // 将 diff 作为装饰的规格传递，这对于 `extractAttributeChanges` 是必需的
         { diff },
       )
     }
 
-    // fallback to the default mapping
+    // 回退到默认映射
     return defaultMapDiffToDecorations({
       diff,
       tr,
       editor,
       attributes: {
-        // add custom attributes to the decorations
+        // 为装饰添加自定义属性
         'data-tiptap-user-id': myUserIdMapping[diff.attribution.userId],
       },
     })
@@ -113,43 +112,43 @@ SnapshotCompare.configure({
 })
 ```
 
-## Storage
+## 存储
 
-The `SnapshotCompare` storage object contains the following properties:
+`SnapshotCompare` 存储对象包含以下属性：
 
-| Key             | Type                  | Description                                   |
-| --------------- | --------------------- | --------------------------------------------- |
-| isPreviewing    | `boolean`             | Indicates whether the diff view is active     |
-| diffs           | `Diff[]`              | The diffs that are displayed in the diff view |
-| previousContent | `JSONContent \| null` | The content before the diff view was applied  |
+| 键               | 类型                   | 描述                                     |
+| ---------------- | ---------------------- | ---------------------------------------- |
+| isPreviewing     | `boolean`             | 指示 diff 视图是否处于激活状态          |
+| diffs            | `Diff[]`              | 在 diff 视图中显示的 diffs              |
+| previousContent  | `JSONContent \| null` | 应用 diff 视图之前的内容                |
 
-Use the `isPreviewing` property to check if the diff view is currently active:
+使用 `isPreviewing` 属性检查 diff 视图是否当前处于激活状态：
 
 ```ts
 if (editor.storage.snapshotCompare.isPreviewing) {
-  // The diff view is currently active
+  // diff 视图当前处于激活状态
 }
 ```
 
-Use the `diffs` property to access the diffs displayed in the diff view:
+使用 `diffs` 属性访问在 diff 视图中显示的 diffs：
 
 ```ts
 editor.storage.snapshotCompare.diffs
 ```
 
-The property `previousContent` is used internally by the extension to restore the content when exiting the diff view. Typically, you do not need to interact with it directly.
+属性 `previousContent` 由扩展内部使用，用于在退出 diff 视图时恢复内容。通常，你不需要直接与之交互。
 
-## Commands
+## 命令
 
-| Command           | Description                                                        |
-| ----------------- | ------------------------------------------------------------------ |
-| `compareVersions` | Diffs two versions and renders the diff within the editor          |
-| `showDiff`        | Given a change tracking transform, show the diff within the editor |
-| `hideDiff`        | Hide the diff and restore the previous content                     |
+| 命令              | 描述                                                      |
+| ------------------| --------------------------------------------------------- |
+| `compareVersions`  | 比较两个版本并在编辑器中渲染 diff                        |
+| `showDiff`        | 给定更改跟踪变换，在编辑器中显示 diff                    |
+| `hideDiff`        | 隐藏 diff 并恢复之前的内容                              |
 
 ### compareVersions
 
-Use the `compareVersions` command to compute and display the differences between two document versions.
+使用 `compareVersions` 命令计算并显示两个文档版本之间的差异。
 
 ```ts
 editor.chain().compareVersions({
@@ -157,30 +156,27 @@ editor.chain().compareVersions({
 })
 ```
 
-#### Options
+#### 选项
 
-You can pass in additional options for more control over the diffing process:
+你可以传入额外的选项以更好地控制 diff 过程：
 
-| Key               | Description                                                                              |
-| ----------------- | ---------------------------------------------------------------------------------------- |
-| `fromVersion`     | The version to compare from. The order between `fromVersion` and `toVersion` is flexible |
-| `toVersion`       | The version to compare to (default: latest version)                                      |
-| `hydrateUserData` | Add contextual data to each user's changes                                               |
-| `onCompare`       | Handle the diffing result manually                                                       |
-| `enableDebugging` | Enable verbose logging for troubleshooting                                               |
+| 键                 | 描述                                                                                   |
+| -------------------| -------------------------------------------------------------------------------------- |
+| `fromVersion`      | 比较的起始版本。`fromVersion` 和 `toVersion` 之间的顺序是灵活的                      |
+| `toVersion`        | 要比较的结束版本（默认：最新版本）                                                     |
+| `hydrateUserData`  | 向每个用户的更改添加上下文数据                                                        |
+| `onCompare`        | 手动处理 diff 结果                                                                      |
+| `enableDebugging`  | 启用详细日志记录以进行故障排查                                                          |
 
-#### Using `hydrateUserData` to add metadata
+#### 使用 `hydrateUserData` 添加元数据
 
-Each diff has an `attribution` field, which allows you to add additional metadata with the `hydrateUserData` callback function.
+每个 diff 具有 `attribution` 字段，允许你使用 `hydrateUserData` 回调函数添加附加元数据。
 
-<Callout title="Note" variant="info">
-  Do note that the `userId` is populated by the `TiptapCollabProvider` and should be used to
-  identify the user who made the change. Without the `user` field provided by the provider, the
-  `userId` will be `null`. [See more information in the TiptapCollabProvider
-  documentation](/collaboration/provider/integration).
+<Callout title="注意" variant="info">
+  请注意，`userId` 由 `TiptapCollabProvider` 填充，应该用于识别进行更改的用户。如果提供者未提供 `user` 字段，则 `userId` 将为 `null`。[有关更多信息，请参见 TiptapCollabProvider 文档](/collaboration/provider/integration)。
 </Callout>
 
-**Example:** Color-coding diffs based on user
+**示例：** 基于用户为 diffs 着色
 
 ```ts
 const colorMapping = new Map([
@@ -204,11 +200,11 @@ editor.chain().compareVersions({
 editor.storage.snapshotCompare.diffs[0].attribution.color.backgroundColor // '#ff0000'
 ```
 
-#### Using `onCompare` to customize the diffing process
+#### 使用 `onCompare` 自定义 diff 过程
 
-If you need more control over the diffing process, use the `onCompare` option to receive the result and handle it yourself.
+如果你需要更好地控制 diff 过程，可以使用 `onCompare` 选项接收结果并自行处理。
 
-**Example:** Filtering diffs by user
+**示例：** 按用户过滤 diffs
 
 ```ts
 editor.chain().compareVersions({
@@ -216,12 +212,12 @@ editor.chain().compareVersions({
   toVersion: 3,
   onCompare: (ctx) => {
     if (ctx.error) {
-      // handle errors that occurred in the diffing process
+      // 处理 diff 过程中的错误
       console.error(ctx.error)
       return
     }
 
-    // filter the diffs to display only the changes made by a specific user
+    // 过滤 diffs 以仅显示特定用户的更改
     const diffsToDisplay = ctx.diffSet.filter((diff) => diff.attribution.userId === 'user-1')
 
     editor.commands.showDiff(ctx.tr, { diffs: diffsToDisplay })
@@ -231,29 +227,29 @@ editor.chain().compareVersions({
 
 ### showDiff
 
-Use the `showDiff` command to display the diff within the editor using a change tracking transform (`tr`). This represents all of the changes made to the document since the last snapshot. You can use this transform to show the diff in the editor.
+使用 `showDiff` 命令在编辑器中显示 diff，使用更改跟踪变换 (`tr`)。这代表自上一个快照以来对文档所做的所有更改。你可以使用此变换在编辑器中显示 diff。
 
-Typically, you use this command after customizing or filtering diffs with `compareVersions`, `onCompare`.
+通常，在使用 `compareVersions`、`onCompare` 自定义或过滤 diffs 后使用此命令。
 
-The `showDiff` command temporarily replaces the current editor content with the diff view, showing the differences between versions. It also stashes the content currently displayed in editor so that you can restore it later.
+`showDiff` 命令临时替换当前编辑器内容为 diff 视图，显示版本之间的差异。它还会缓存当前在编辑器中显示的内容，以便你稍后可以恢复它。
 
 ```ts
-// This will display the changes that change tracking transform recorded in the editor
+// 这将显示在编辑器中记录的更改跟踪变换的变更
 editor.commands.showDiff(tr)
 ```
 
-### Options
+### 选项
 
-You can pass additional options to control how the diffs are displayed:
+你可以传入额外的选项以控制如何显示 diffs：
 
-| Key   | Description                    |
-| ----- | ------------------------------ |
-| diffs | An array of diffs to visualize |
+| 键     | 描述                     |
+| ------- | ------------------------- |
+| diffs   | 一个要可视化的 diffs 数组 |
 
-**Example:** Displaying specific diffs
+**示例：** 显示特定的 diffs
 
 ```ts
-// This will display only the diffs made by the user with the ID 'user-1'
+// 这将仅显示由 ID 为 'user-1' 的用户所做的 diffs
 const diffsToDisplay = tr.toDiff().filter((diff) => diff.attribution.userId === 'user-1')
 
 editor.commands.showDiff(tr, { diffs: diffsToDisplay })
@@ -261,25 +257,24 @@ editor.commands.showDiff(tr, { diffs: diffsToDisplay })
 
 ### hideDiff
 
-Use the `hideDiff` command to hide the diff and restore the previous content.
+使用 `hideDiff` 命令隐藏 diff 并恢复之前的内容。
 
 ```ts
-// This will hide the diff view and restore the previous content
+// 这将隐藏 diff 视图并恢复之前的内容
 editor.commands.hideDiff()
 ```
 
-## Working with NodeView (Advanced)
+## 使用 NodeView （高级）
 
-When using [custom node views](/editor/extensions/custom-extensions/node-views), the default diff mapping may not work as expected. You can customize the mapping and render the diffs directly within the custom node view.
+在使用 [自定义节点视图](/editor/extensions/custom-extensions/node-views) 时，默认的 diff 映射可能无法按预期工作。你可以自定义映射并直接在自定义节点视图中渲染 diffs。
 
-Use the `extractAttributeChanges` helper to extract attribute changes in nodes. This allows you to access the previous and current attributes of a node, making it possible to highlight attribute changes within your custom node views.
+使用 `extractAttributeChanges` 助手提取节点中的属性更改。这使你能够访问节点的先前和当前属性，从而可能突出显示自定义节点视图中的属性更改。
 
-<Callout title="Note" variant="info">
-  When mapping the diffs into decorations yourself, you need to pass the `diff` as the
-  decoration&apos;s `spec`. This is required for `extractAttributeChanges` to work correctly.
+<Callout title="注意" variant="info">
+  当将 diffs 映射到装饰时，你需要将 `diff` 作为装饰的 `spec` 传递。这对于 `extractAttributeChanges` 的正常工作是必需的。
 </Callout>
 
-**Example:** Customizing a heading node view to display changes
+**示例：** 自定义标题节点视图以显示更改
 
 ```ts
 import { extractAttributeChanges } from '@tiptap-pro/extension-snapshot-compare'
@@ -300,7 +295,7 @@ const Heading = BaseHeading.extend({
                 color: '#999',
                 backgroundColor: '#f0f0f070',
               }}
-              // Display the difference in level attribute
+              // 显示级别属性的变化
             >
               #<s>{before.level}</s>
               {after.level}
@@ -314,44 +309,44 @@ const Heading = BaseHeading.extend({
 })
 ```
 
-## Technical details
+## 技术细节
 
 ### Diff
 
-A `Diff` is an object that represents a change made to the document. It contains the following properties:
+`Diff` 是一个表示文档中所做更改的对象。它包含以下属性：
 
-| Property              | Type                                                                                                                    | Description                                                                                           |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `type`                | `'inline-insert'` \| `'inline-delete'` \| `'block-insert'` \| `'block-delete'` \| `'inline-update'` \| `'block-update'` | The type of change made                                                                               |
-| `from`                | `number`                                                                                                                | The start position of the change                                                                      |
-| `to`                  | `number`                                                                                                                | The end position of the change                                                                        |
-| `content`             | `Fragment`                                                                                                              | The content that was added or removed                                                                 |
-| `attribution`         | `Attribution`                                                                                                           | Metadata about the change, such as the user who made the change                                       |
-| `attributes?`         | `Record<string, any>`                                                                                                   | The attributes **after** the change; only available for `'inline-update'` and `'block-update'` diffs  |
-| `previousAttributes?` | `Record<string, any>`                                                                                                   | The attributes **before** the change; only available for `'inline-update'` and `'block-update'` diffs |
+| 属性                | 类型                                                                                                                    | 描述                                                                                              |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `type`              | `'inline-insert'` \| `'inline-delete'` \| `'block-insert'` \| `'block-delete'` \| `'inline-update'` \| `'block-update'` | 所做更改的类型                                                                                     |
+| `from`              | `number`                                                                                                                | 更改的起始位置                                                                                    |
+| `to`                | `number`                                                                                                                | 更改的结束位置                                                                                    |
+| `content`           | `Fragment`                                                                                                              | 添加或删除的内容                                                                                    |
+| `attribution`       | `Attribution`                                                                                                           | 有关更改的元数据，例如执行更改的用户                                                             |
+| `attributes?`       | `Record<string, any>`                                                                                                   | 更改 **后** 的属性；仅对 `'inline-update'` 和 `'block-update'` diffs 可用                         |
+| `previousAttributes?` | `Record<string, any>`                                                                                                   | 更改 **前** 的属性；仅对 `'inline-update'` 和 `'block-update'` diffs 可用                     |
 
 ### DiffSet
 
-A `DiffSet` is an array of `Diff` objects, each corresponding to a specific change, like insertion, deletion, or update. You can iterate over the array to inspect individual changes or apply custom logic based on the diff types.
+`DiffSet` 是一个 `Diff` 对象数组，每个对象对应于特定的更改，例如插入、删除或更新。你可以迭代数组以检查单个更改或基于 diff 类型应用自定义逻辑。
 
 ```ts
 const diffsToDisplay = diffSet.filter((diff) => diff.attribution.userId === 'user-1')
 
-// Show the filtered diffs in the editor
+// 在编辑器中显示过滤后的 diffs
 editor.commands.showDiff(tr, { diffs: diffsToDisplay })
 ```
 
 ### Attribution
 
-The `Attribution` object contains metadata about a change. It includes the following properties:
+`Attribution` 对象包含有关更改的元数据。它包括以下属性：
 
-| Property | Type                     | Description                                        |
-| -------- | ------------------------ | -------------------------------------------------- |
-| `type`   | `'added'` \| `'removed'` | Indicates the type of change made                  |
-| `userId` | `string` \| `undefined`  | The ID of the user who made the change             |
-| `id`     | `Y.ID` \| `undefined`    | The Y.js client ID of the user who made the change |
+| 属性    | 类型                    | 描述                                         |
+| ------- | ----------------------- | -------------------------------------------- |
+| `type`  | `'added'` \| `'removed'` | 指示所做更改的类型                           |
+| `userId`| `string` \| `undefined`  | 执行更改的用户的 ID                          |
+| `id`    | `Y.ID` \| `undefined`    | 执行更改的用户的 Y.js 客户端 ID             |
 
-You can extend the `Attribution` interface to include additional properties:
+你可以扩展 `Attribution` 接口以包括其他属性：
 
 ```ts
 declare module '@tiptap-pro/extension-snapshot-compare' {
@@ -363,90 +358,90 @@ declare module '@tiptap-pro/extension-snapshot-compare' {
 
 ### ChangeTrackingTransform
 
-The `ChangeTrackingTransform` is a class that records changes made to the document (based on ProseMirror's `Transform`).
-It represents a transform whose steps describe all of the changes made to go from one version of the document to another. It has the following properties:
+`ChangeTrackingTransform` 是一个记录对文档所做更改的类（基于 ProseMirror 的 `Transform`）。
+它表示一个变换，其步骤描述了从文档的一个版本到另一个版本所做的所有更改。它具有以下属性：
 
-| Property | Type                   | Description                                                       |
-| -------- | ---------------------- | ----------------------------------------------------------------- |
-| `steps`  | `ChangeTrackingStep[]` | An array of steps that represent the changes made to the document |
-| `doc`    | `Node`                 | The document **after** the changes have been applied              |
-| `before` | `Node`                 | The document **before** the changes have been applied             |
+| 属性      | 类型                   | 描述                                                        |
+| --------- | ---------------------- | ------------------------------------------------------------ |
+| `steps`   | `ChangeTrackingStep[]` | 表示对文档所做更改的步骤数组                               |
+| `doc`     | `Node`                 | 应用更改后文档的状态                                        |
+| `before`  | `Node`                 | 应用更改前文档的状态                                        |
 
 ### ChangeTrackingStep
 
-The `ChangeTrackingStep` is a class that represents a single change made to the document, based on ProseMirror's `ReplaceStep` class. It has the following property:
+`ChangeTrackingStep` 是一个基于 ProseMirror 的 `ReplaceStep` 类表示的类，代表对文档所做的单个更改。它具有以下属性：
 
-| Property      | Type          | Description                                             |
-| ------------- | ------------- | ------------------------------------------------------- |
-| `attribution` | `Attribution` | Metadata about the change, such as the user who made it |
+| 属性         | 类型          | 描述                                           |
+| ------------ | ------------- | ---------------------------------------------- |
+| `attribution`| `Attribution` | 有关更改的元数据，例如执行更改的用户         |
 
-### Types
+### 类型
 
-Here is the full TypeScript definition for the `SnapshotCompare` extension:
+以下是 `SnapshotCompare` 扩展的完整 TypeScript 定义：
 
 ```ts
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     snapshotCompare: {
       /**
-       * Given a change tracking transform, show the diff within the editor
+       * 给定更改跟踪变换，在编辑器内显示 diff
        */
       showDiff: (tr: ChangeTrackingTransform, options?: { diffs?: DiffSet }) => ReturnType
       /**
-       * Hide the diff and restore the previous content
+       * 隐藏 diff 并恢复之前的内容
        */
       hideDiff: () => ReturnType
       /**
-       * Diffs two versions and renders the diff into the editor
+       * 比较两个版本并将 diff 渲染到编辑器中
        */
       compareVersions: <
         T extends Pick<Attribution, 'color'> & Record<string, any> = Pick<Attribution, 'color'> &
           Record<string, any>,
       >(options: {
         /**
-         * The version to start the diff from
+         * 开始 diff 的版本
          */
         fromVersion: number
         /**
-         * The version to end the diff at
-         * If not provided, the latest snapshot will be used
+         * 结束 diff 的版本
+         * 如果未提供，将使用最新快照
          */
         toVersion?: number
         /**
-         * Allows adding contextual data to each users changes
+         * 允许为每个用户的更改添加上下文数据
          */
         hydrateUserData?: (context: {
           /**
-           * The type of event
+           * 事件的类型
            */
           type: 'added' | 'removed'
           /**
-           * The userId that manipulated this content
+           * 操作此内容的 userId
            */
           userId: string | undefined
           /**
-           * The yjs identifier of the content
+           * 内容的 yjs 标识符
            */
           id?: y.ID
         }) => T
         /**
-         * If provided, allows customizing the behavior of rendering the diffs to the editor.
-         * @note The default behavior would be to just display the diff immediately.
+         * 如果提供，允许自定义渲染 diffs 到编辑器的行为。
+         * @note 默认行为是立即显示 diff。
          */
         onCompare?: (
           context:
             | {
                 error?: undefined
                 /**
-                 * The editor instance
+                 * 编辑器实例
                  */
                 editor: Editor
                 /**
-                 * All of the changes as a transform with attribution metadata
+                 * 带有归属元数据的变换所有更改
                  */
                 tr: ChangeTrackingTransform<Attribution & T>
                 /**
-                 * The changes represented as an array of diffs
+                 * 作为 diffs 数组表示的更改
                  */
                 diffSet: DiffSet<Attribution & T>
               }
@@ -455,7 +450,7 @@ declare module '@tiptap/core' {
               },
         ) => void
         /**
-         * Verbosely log the diffing process to help track down where things went wrong
+         * 详细记录 diffing 过程以帮助追踪错误
          */
         enableDebugging?: boolean
       }) => ReturnType
@@ -465,28 +460,28 @@ declare module '@tiptap/core' {
 
 export type SnapshotCompareOptions = {
   /**
-   * The tiptap provider instance. This is required for the extension to compute the diffs, but not to display them.
-   * It is also possible to pass a TiptapCollabProvider instance.
+   * tiptap 提供者实例。这对于扩展示计算 diffs 是必需的，但不是必需的以显示它们。
+   * 也可以传递 TiptapCollabProvider 实例。
    */
   provider: TiptapCollabProvider | null
   /**
-   * This allows you to control mapping of a diff into a decoration to display the content of that diff
+   * 这允许你控制将 diff 映射到装饰以显示该 diff 内容的方式
    */
   mapDiffToDecorations?: (options: {
     /**
-     * The diff to map to a decoration
+     * 要映射到装饰的 diff
      */
     diff: Diff
     /**
-     * The editor instance
+     * 编辑器实例
      */
     editor: Editor
     /**
-     * The change tracking transform
+     * 更改跟踪变换
      */
     tr: ChangeTrackingTransform
     /**
-     * The default implementation of how to map a diff to a decoration
+     * 将 diff 映射到装饰的默认实现
      */
     defaultMapDiffToDecorations: typeof defaultMapDiffToDecorations
   }) => ReturnType<typeof defaultMapDiffToDecorations>
@@ -494,39 +489,39 @@ export type SnapshotCompareOptions = {
 
 export type SnapshotCompareStorageInactive = {
   /**
-   * Whether the diff view is currently active
+   * diff 视图当前是否处于激活状态
    */
   isPreviewing: false
   /**
-   * The content before the diff view was applied
+   * diff 视图应用之前的内容
    */
   previousContent: null
   /**
-   * The change tracking transform that was applied
-   * It is currently empty because the diff view is not active
+   * 已应用的更改跟踪变换
+   * 因为 diff 视图没有激活，它当前是空的
    */
   diffs: DiffSet
   /**
-   * The change tracking transform that was applied
+   * 已应用的更改跟踪变换
    */
   tr: null
 }
 
 export type SnapshotCompareStorageActive = {
   /**
-   * Whether the diff view is currently active
+   * diff 视图当前是否处于激活状态
    */
   isPreviewing: true
   /**
-   * The content before the diff view was applied
+   * diff 视图应用之前的内容
    */
   previousContent: JSONContent
   /**
-   * The change tracking transform that was applied
+   * 已应用的更改跟踪变换
    */
   diffs: DiffSet
   /**
-   * The change tracking transform that was applied
+   * 已应用的更改跟踪变换
    */
   tr: ChangeTrackingTransform
 }

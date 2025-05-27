@@ -1,38 +1,38 @@
 ---
-title: Configure when to load suggestions
+title: 配置何时加载建议
 meta:
-  title: Load Suggestions | Tiptap AI Suggestion
-  description: Customize when the AI Suggestion extension loads suggestions with options like loadOnStart and reloadOnUpdate.
-  category: Content AI
+  title: 加载建议 | Tiptap AI 建议
+  description: 通过 loadOnStart 和 reloadOnUpdate 等选项自定义 AI 建议扩展加载建议的时机。
+  category: 内容 AI
 ---
 
-You can customize when the AI Suggestion extension calls the LLM to generate suggestions. This allows you to control when new suggestions are loaded, and how often they are reloaded.
+您可以自定义 AI 建议扩展调用大语言模型（LLM）生成建议的时机。这允许您控制何时加载新建议，以及重新加载的频率。
 
-## Load Suggestions on Start
+## 启动时加载建议
 
-By default, the AI Suggestion extension will automatically load suggestions when the editor is ready. You can disable this behavior with the `loadOnStart` option.
+默认情况下，AI 建议扩展会在编辑器就绪时自动加载建议。您可以通过 `loadOnStart` 选项禁用此行为。
 
 ```ts
 AiSuggestion.configure({
-  // Disable automatic loading of suggestions
+  // 禁用自动加载建议
   loadOnStart: false,
 })
 ```
 
-## Reload Suggestions on Content Update
+## 内容更新时重新加载建议
 
-By default, the AI Suggestion extension will reload suggestions when the editor's content changes. You can disable this behavior with the `reloadOnUpdate` option.
+默认情况下，AI 建议扩展会在编辑器内容变化时重新加载建议。您可以通过 `reloadOnUpdate` 选项禁用此行为。
 
 ```ts
 AiSuggestion.configure({
-  // Disable automatic loading of suggestions
+  // 禁用自动重新加载建议
   reloadOnUpdate: false,
 })
 ```
 
-## Debounce Timeout
+## 防抖超时
 
-By default, the AI Suggestion extension will wait 800 milliseconds after the user stops typing to reload suggestions. This prevents the API from being called too frequently. You can configure this timeout with the `debounceTimeout` option.
+默认情况下，AI 建议扩展会在用户停止输入后等待 800 毫秒才重新加载建议。这样可以防止频繁调用 API。您可以使用 `debounceTimeout` 选项配置该超时。
 
 ```ts
 AiSuggestion.configure({
@@ -40,32 +40,32 @@ AiSuggestion.configure({
 })
 ```
 
-However, there are cases where you may want to force suggestions to reload. For example, you may want to reload suggestions when the user clicks a "refresh" button.
+但是，有时您可能想强制重新加载建议。例如，用户点击“刷新”按钮时可能想重新加载建议。
 
-To reload suggestions manually, use the `loadAiSuggestions` command.
+要手动重新加载建议，请使用 `loadAiSuggestions` 命令。
 
 ```ts
 editor.commands.loadAiSuggestions()
 ```
 
-To load suggestions after a delay, use the `loadAiSuggestionsDebounced` command. The delay is determined by the `debounceTimeout` option.
+要延迟加载建议，请使用 `loadAiSuggestionsDebounced` 命令。延迟时间由 `debounceTimeout` 选项决定。
 
-This command is used internally to reload the suggestions after the editor content changes (for example, when the user types on the editor). The function is debounced so that, if called multiple times within the debounce timeout, only the last call will be executed.
+此命令在内部用于在编辑器内容更改后重新加载建议（例如用户输入时）。该函数经过防抖处理，因此如果在防抖时间内被多次调用，只有最后一次调用会被执行。
 
 ```ts
 editor.commands.loadAiSuggestionsDebounced()
 ```
 
-## Set Suggestions Programmatically
+## 编程方式设置建议
 
-If you want to set the suggestions to a certain value, without loading them with the configured API, you can use the `setAiSuggestions` command. This is useful in the following scenarios:
+如果您想将建议设置为特定值，而不通过配置的 API 加载它们，可以使用 `setAiSuggestions` 命令。以下情况特别有用：
 
-- When you have a list of suggestions that you want to display immediately.
-- When you want to clear the suggestions.
-- When you want to display suggestions from a different source than the API you configured in the extension's options.
+- 您已经有一组建议，并希望立即显示。
+- 您想清空建议。
+- 您想显示来自不同于扩展选项中配置的 API 的建议。
 
 ```ts
 editor.commands.setAiSuggestions(suggestions)
 ```
 
-To learn more about the data that a suggestion object should contain, check the [API reference](/content-ai/capabilities/suggestion/api-reference#proofreading-suggestions).
+想了解建议对象应包含的数据详情，请参考 [API 参考](/content-ai/capabilities/suggestion/api-reference#proofreading-suggestions)。

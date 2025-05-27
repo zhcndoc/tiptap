@@ -1,56 +1,55 @@
 ---
-title: Stream content into the editor
+title: 将内容流式传输到编辑器
 meta:
-  title: Stream Content | Tiptap Content AI
-  description: Low-level API for streaming content directly into the editor content. Learn more in our docs.
-  category: Content AI
+  title: 流式内容 | Tiptap 内容 AI
+  description: 用于将内容直接流式传输到编辑器内容的底层 API。更多信息请查看我们的文档。
+  category: 内容 AI
 ---
 
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的[账户](https://cloud.tiptap.dev/v2/billing)中开始免费试用，或订阅一个[Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Integrate an AI provider">
-        Configure OpenAI in your [AI settings](https://cloud.tiptap.dev/v2/cloud/ai) or review the [Custom LLM guides](/content-ai/capabilities/generation/custom-llms).
+    <RequirementItem label="2. 集成 AI 提供商">
+        在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查看[自定义 LLM 指南](/content-ai/capabilities/generation/custom-llms)。
     </RequirementItem>
-    <RequirementItem label="3. Install from private registry">
-        To install the frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="3. 从私有仓库安装">
+        若要安装前端扩展，请按照[设置指南](/guides/pro-extensions)认证登录 Tiptap 的私有 npm 仓库。
     </RequirementItem>
 </Requirements>
 
-The `streamContent` command is a low-level API to stream content into the editor. It supports both appending content and replacing a specified range of content. This command is useful when you need to stream something like an LLM model response into the editor.
+`streamContent` 命令是一个将内容流式传输到编辑器的底层 API。它支持追加内容和替换指定范围的内容。当您需要将类似 LLM 模型响应的内容流式传输到编辑器时，此命令非常有用。
 
-<Callout title="Advanced Integration">
-  This command is useful for advanced integrations where you need to stream content into the editor
-  from a URL or a response body.
+<Callout title="高级集成">
+  该命令适用于需要从 URL 或响应体中流式传输内容到编辑器的高级集成场景。
 </Callout>
 
-### Parameters
+### 参数
 
-**range**: Either a single position to insert from or an object specifying the range to replace, with `from` and `to` properties. <br/>
-**callback**: An asynchronous function that receives a write function to stream content into the editor.
+**range**：要插入内容的单个位置，或指定替换范围的对象，包含 `from` 和 `to` 属性。<br/>
+**callback**：一个接收写入函数，将内容流式传输到编辑器的异步函数。
 
-### `callback` Arguments
+### `callback` 的参数
 
-**getWritableStream**: A function that returns a writable stream object that can be used to write chunks of data into the editor. <br/>
-**write**: A function that takes an object with the following properties:
+**getWritableStream**：返回一个可写流对象，可用于向编辑器写入数据片段。<br/>
+**write**：接收一个对象，该对象包含以下属性的函数：
 
-- `partial`: The content to insert into the editor.
-- `transform`: An optional function that takes an object with the following properties:
-  - `buffer`: The accumulated content of the stream.
-  - `partial`: The current partial content.
-  - `editor`: The editor instance.
-  - `defaultTransform`: The default transform function. This function takes the accumulated content and inserts it into the editor.
-- `appendToChain`: An optional function which can be used to append commands to the chain.
+- `partial`：要插入到编辑器中的内容。
+- `transform`：可选函数，接收以下属性的对象：
+  - `buffer`：流的累积内容。
+  - `partial`：当前的部分内容。
+  - `editor`：编辑器实例。
+  - `defaultTransform`：默认的转换函数，该函数接收累积内容并将其插入编辑器。
+- `appendToChain`：可选函数，用于将命令添加到命令链中。
 
-## Example Usage
+## 示例用法
 
-### Using the `write` API
+### 使用 `write` API
 
-This example shows the flexibility of the `streamContent` command by fetching a large data stream from a URL and streaming it chunk-by-chunk into the editor.
+此示例展示了 `streamContent` 命令的灵活性，通过从 URL 获取一个大数据流并将其逐块流式传输到编辑器。
 
 ```ts
 editor.commands.streamContent({ from: 0, to: 10 }, async ({ write }) => {
@@ -59,7 +58,7 @@ editor.commands.streamContent({ from: 0, to: 10 }, async ({ write }) => {
   const decoder = new TextDecoder('utf-8')
 
   if (!reader) {
-    throw new Error('Failed to get reader from response body.')
+    throw new Error('无法从响应体获取读取器。')
   }
 
   while (true) {
@@ -72,21 +71,21 @@ editor.commands.streamContent({ from: 0, to: 10 }, async ({ write }) => {
 })
 ```
 
-### Using the `getWritableStream` API
+### 使用 `getWritableStream` API
 
-This example demonstrates an alternative way to stream content using a `WritableStream` object which can be used to write chunks of data into the editor.
+该示例展示了使用 `WritableStream` 对象将内容流式传输到编辑器的另一种方式。
 
 ```ts
 editor.commands.streamContent({ from: 0, to: 10 }, async ({ getWritableStream }) => {
   const response = await fetch('https://example.com/stream')
-  // This will pipe the response body content directly into the editor
+  // 这将直接将响应体内容管道到编辑器中
   await response.body?.pipeTo(getWritableStream())
 })
 ```
 
-### Using transformations
+### 使用内容转换
 
-You can also use the `transform` function to modify the content before streaming it into the editor. This example demonstrates how to transform the content before streaming it into the editor.
+您也可以使用 `transform` 函数在将内容流式传输到编辑器之前对其进行修改。此示例演示了如何在流式传输前转换内容。
 
 ```ts
 editor.commands.streamContent({ from: 0, to: 10 }, async ({ write }) => {
@@ -95,7 +94,7 @@ editor.commands.streamContent({ from: 0, to: 10 }, async ({ write }) => {
   const decoder = new TextDecoder('utf-8')
 
   if (!reader) {
-    throw new Error('Failed to get reader from response body.')
+    throw new Error('无法从响应体获取读取器。')
   }
 
   while (true) {
@@ -107,7 +106,7 @@ editor.commands.streamContent({ from: 0, to: 10 }, async ({ write }) => {
     write({
       partial: transformedChunk,
       transform: ({ buffer, partial, editor, defaultTransform }) => {
-        // This will use the default transform function to take the whole buffer and insert it into the editor as uppercase
+        // 这将使用默认转换函数将整个缓存内容转换为大写并插入编辑器
         return defaultTransform(buffer.toUpperCase())
       },
     })
@@ -115,7 +114,7 @@ editor.commands.streamContent({ from: 0, to: 10 }, async ({ write }) => {
 })
 ```
 
-**Use case:** Parsing markdown content from a URL and streaming it into the editor.
+**用例示例:** 从 URL 解析 Markdown 内容并流式传输到编辑器。
 
 ```ts
 import { marked } from 'marked'
@@ -126,7 +125,7 @@ editor.commands.streamContent({ from: 0, to: 10 }, async ({ write }) => {
   const decoder = new TextDecoder('utf-8')
 
   if (!reader) {
-    throw new Error('Failed to get reader from response body.')
+    throw new Error('无法从响应体获取读取器。')
   }
 
   while (true) {
@@ -138,7 +137,7 @@ editor.commands.streamContent({ from: 0, to: 10 }, async ({ write }) => {
     write({
       partial: chunk,
       transform: ({ buffer, partial, editor, defaultTransform }) => {
-        // This will parse the markdown content into an HTML string and insert it into the editor
+        // 这将解析 Markdown 内容为 HTML 字符串并插入到编辑器中
         return defaultTransform(marked.parse(buffer))
       },
     })
@@ -146,9 +145,9 @@ editor.commands.streamContent({ from: 0, to: 10 }, async ({ write }) => {
 })
 ```
 
-### Using `appendToChain` option
+### 使用 `appendToChain` 选项
 
-The `appendToChain` function allows you to append commands to the chain before it is executed. This example demonstrates how to append a command to the chain before it is executed.
+`appendToChain` 函数允许您在命令链执行前向链中追加命令。此示例展示了如何在执行前追加命令。
 
 ```ts
 import { selectionToInsertionEnd } from '@tiptap/core'
@@ -158,20 +157,20 @@ editor.commands.streamContent({ from: 0, to: 10 }, async ({ write }) => {
     partial: token,
     appendToChain: (chain) =>
       chain
-        // Move the selection to the end of the inserted content
+        // 将选择移动到插入内容的末尾
         .command(({ tr }) => {
           selectionToInsertionEnd(tr, tr.steps.length - 1, -1)
           return true
         })
-        // Scroll the editor to the end of the inserted content
+        // 滚动编辑器视图至插入内容末尾
         .scrollIntoView(),
   })
 })
 ```
 
-### Using `respondInline` option of `streamContent`
+### 使用 `streamContent` 的 `respondInline` 选项
 
-By default `respondInline` is `true`. When inserting block content into the editor, sometimes you may want to insert it as a sibling instead of as a block directly. You can use the `respondInline` option to insert the content at the same depth as the `from` position.
+默认情况下，`respondInline` 为 `true`。当向编辑器插入块级内容时，有时您可能希望将其作为同级节点插入，而不是直接作为块插入。您可以使用 `respondInline` 选项将内容插入到与 `from` 位置相同的深度。
 
 ```ts
 editor.commands.setContent('<p>123</p>')
@@ -189,13 +188,13 @@ editor.commands.streamContent(
   },
   { respondInline: true },
 )
-// Output: <p>123hello world</p><p>ok</p>
-// As opposed to: <p>123</p><p>hello work</p><p>ok</p> when `respondInline` is `false`
+// 输出: <p>123hello world</p><p>ok</p>
+// 与 `respondInline` 为 `false` 时的 <p>123</p><p>hello work</p><p>ok</p> 不同
 ```
 
-## Technical details
+## 技术细节
 
-Here is the full TypeScript definition for the `streamContent` command:
+以下是 `streamContent` 命令的完整 TypeScript 定义：
 
 ```ts
 declare module '@tiptap/core' {
@@ -203,23 +202,23 @@ declare module '@tiptap/core' {
     streamContent: {
       streamContent: (
         /**
-         * The position to insert the content at.
+         * 插入内容的位置。
          */
         position: number | Range,
         /**
-         * The callback to write the content into the editor.
+         * 将内容写入编辑器的回调。
          */
         callback: (options: StreamContentAPI) => Promise<any>,
         /**
-         * The options to pass to the `insertContentAt` command.
+         * 传递给 `insertContentAt` 命令的选项。
          */
         options?: {
           parseOptions?: NonNullable<
             Parameters<RawCommands['insertContentAt']>['2']
           >['parseOptions']
           /**
-           * This will insert the content at the same depth as the `from` position.
-           * Effectively, this will insert the content as a sibling of the node at the `from` position.
+           * 内容将插入到与 `from` 位置相同深度。
+           * 实质上，这会将内容作为 `from` 位置节点的同级节点插入。
            * @default true
            */
           respondInline?: boolean
@@ -231,58 +230,58 @@ declare module '@tiptap/core' {
 
 type StreamContentAPI = {
   /**
-   * The function to write content into the editor.
+   * 向编辑器写入内容的函数。
    */
   write: (ctx: {
     /**
-     * The partial content of the stream to insert.
+     * 要插入的流的部分内容。
      */
     partial: string
     /**
-     * This function allows you to transform the content before inserting it into the editor.
-     * It must return a Prosemirror `Fragment` or `Node`.
+     * 允许您在插入编辑器之前转换内容的函数。
+     * 必须返回 Prosemirror 的 `Fragment` 或 `Node`。
      */
     transform?: (ctx: {
       /**
-       * The accumulated content of the stream.
+       * 流的累计内容。
        */
       buffer: string
       /**
-       * The current partial content of the stream.
+       * 流的当前部分内容。
        */
       partial: string
       editor: Editor
       /**
-       * Allows you to use the default transform function.
+       * 允许使用默认转换函数。
        */
       defaultTransform: (
         /**
-         * The content to insert as an HTML string.
+         * 要作为 HTML 字符串插入的内容。
          * @default ctx.buffer
          */
         htmlString?: string,
       ) => Fragment
     }) => Fragment | Node | Node[]
     /**
-     * Allows you to append commands to the chain before it is executed.
+     * 允许您在命令链执行前追加命令。
      */
     appendToChain?: (chain: ChainedCommands) => ChainedCommands
   }) => {
     /**
-     * The buffer that is being written to.
+     * 正在写入的缓存。
      */
     buffer: string
     /**
-     * The start of the inserted content in the editor.
+     * 编辑器中插入内容的起始位置。
      */
     from: number
     /**
-     * The end of the inserted content in the editor.
+     * 编辑器中插入内容的结束位置。
      */
     to: number
   }
   /**
-   * A writable stream to write content into the editor.
+   * 一个可写流，用于向编辑器写入内容。
    * @example fetch('https://example.com/stream').then(response => response.body.pipeTo(ctx.getWritableStream()))
    */
   getWritableStream: () => WritableStream

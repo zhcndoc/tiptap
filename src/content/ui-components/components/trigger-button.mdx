@@ -1,20 +1,20 @@
 ---
-title: Add a button that triggers editor inputs
+title: 添加一个触发编辑器输入的按钮
 meta:
-  title: Trigger button | Tiptap UI Component
-  description: Add a button UI component that triggers editor inputs like emoji or mentions. More in the docs.
-  category: UI Components
+  title: 触发按钮 | Tiptap UI 组件
+  description: 添加一个可以触发编辑器输入（如表情符号或提及）的按钮 UI 组件。更多信息请查阅文档。
+  category: UI 组件
 ---
 
-A button for triggering specific editor inputs like emoji or mentions.
+一个用于触发特定编辑器输入（如表情符号或提及）的按钮。
 
-## Install
+## 安装
 
 ```bash
 npx @tiptap/cli add trigger-button
 ```
 
-## Usage
+## 使用方法
 
 ```tsx
 import { TriggerButton } from '@/components/tiptap-ui/trigger-button'
@@ -22,7 +22,7 @@ import { useEditor, EditorContent } from '@tiptap/react'
 
 export default function MyEditor() {
   const editor = useEditor({
-    // editor configuration
+    // 编辑器配置
   })
 
   return (
@@ -38,20 +38,20 @@ export default function MyEditor() {
 }
 ```
 
-## Props
+## 属性
 
-| Name   | Type                            | Default  | Description                        |
-| ------ | ------------------------------- | -------- | ---------------------------------- |
-| editor | Editor \| null                  | null     | The Tiptap editor instance         |
-| type   | 'mention' \| 'emoji' \| 'slash' | required | The type of trigger to use         |
-| text   | string                          | -        | Text to display alongside the icon |
+| 名称   | 类型                            | 默认值  | 描述                                |
+| ------ | ------------------------------- | -------- | ------------------------------------ |
+| editor | Editor \| null                  | null     | Tiptap 编辑器实例                   |
+| type   | 'mention' \| 'emoji' \| 'slash' | 必需     | 要使用的触发类型                    |
+| text   | string                          | -        | 伴随图标显示的文本                  |
 
-## Requirements
+## 需求
 
-Used reference components
+使用的引用组件
 
-- `use-tiptap-editor` (hook)
-- `at-sign-icon` (icon)
-- `plus-icon` (icon)
-- `smile-plus-icon` (icon)
-- `button` (primitive)
+- `use-tiptap-editor` (钩子)
+- `at-sign-icon` (图标)
+- `plus-icon` (图标)
+- `smile-plus-icon` (图标)
+- `button` (原始组件)

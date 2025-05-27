@@ -1,14 +1,14 @@
 ---
-title: UniqueID extension
+title: UniqueID 扩展
 tags:
   - type: pro
 meta:
-  title: UniqueID extension | Tiptap Editor Docs
-  description: Add a unique ID to every single node and keep track of them with the UniqueID extension. More in the docs!
-  category: Editor
+  title: UniqueID 扩展 | Tiptap 编辑器文档
+  description: 为每个节点添加唯一 ID，并通过 UniqueID 扩展进行跟踪。在文档中了解更多！
+  category: 编辑器
 extension:
   name: UniqueID
-  description: Add a unique ID to every single node and keep track of them.
+  description: 为每个节点添加唯一 ID，并进行跟踪。
   type: extension
   icon: Hash
   isPro: true
@@ -19,41 +19,37 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Install from private registry">
-        To install this frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 的说明，验证 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-
-
-The `UniqueID` extension adds unique IDs to all nodes. The extension keeps track of your nodes, even if you split them, merge them, undo/redo changes, crop content, paste content … It just works.
-Also, you can configure which node types get an unique ID, and which not, and you can customize how those IDs are generated.
+`UniqueID` 扩展为所有节点添加唯一 ID。该扩展能够跟踪您的节点，即使您对节点进行切分、合并、撤销/重做更改、裁剪内容、粘贴内容…… 它都能正常工作。
+此外，您可以配置哪些节点类型获得唯一 ID，哪些不获得，同时可以自定义这些 ID 的生成方式。
 
 <CodeDemo isPro path="/Extensions/UniqueID" />
 
-## Install
+## 安装
 
-<Callout title="Set up access to Tiptap's private repository" variant="info">
-  Integrate this pro extension by registering for a free [Tiptap
-  account](https://cloud.tiptap.dev/register) and following our [access
-  guide](/guides/pro-extensions) to Tiptap’s private repository.
+<Callout title="设置 Tiptap 私有库的访问权限" variant="info">
+  通过注册免费 [Tiptap 账户](https://cloud.tiptap.dev/register) 并按照我们的 [访问指南](/guides/pro-extensions) 访问 Tiptap 的私有库，集成此专业扩展。
 </Callout>
-Once done, you can install the extension from our private registry:
+完成后，您可以从我们的私有注册表安装该扩展：
 
 ```bash
 npm install @tiptap-pro/extension-unique-id@next
 ```
 
-## Settings
+## 设置
 
 ### attributeName
 
-Name of the attribute that is attached to the HTML tag (will be prefixed with `data-`).
+附加到 HTML 标签上的属性名称（前缀将为 `data-`）。
 
-Default: `'id'`
+默认值：`'id'`
 
 ```js
 UniqueID.configure({
@@ -63,9 +59,9 @@ UniqueID.configure({
 
 ### types
 
-All types that should get a unique ID, for example `['heading', 'paragraph']`
+所有需要获得唯一 ID 的类型，例如 `['heading', 'paragraph']`
 
-Default: `[]`
+默认值：`[]`
 
 ```js
 UniqueID.configure({
@@ -75,20 +71,20 @@ UniqueID.configure({
 
 ### generateID
 
-A function that generates and returns a unique ID.
+生成并返回唯一 ID 的函数。
 
-Default: `() => uuidv4()`
+默认值：`() => uuidv4()`
 
 ### filterTransaction
 
-Ignore some mutations, for example applied from other users through the collaboration plugin.
+忽略某些突变，例如通过协作插件由其他用户应用的突变。
 
-Default: `null`
+默认值：`null`
 
 ```js
 import { isChangeOrigin } from '@tiptap/extension-collaboration'
 
-// Adds support for collaborative editing
+// 添加对协同编辑的支持
 UniqueID.configure({
   filterTransaction: (transaction) => !isChangeOrigin(transaction),
 })

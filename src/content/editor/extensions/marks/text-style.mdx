@@ -1,48 +1,48 @@
 ---
-title: TextStyle extension
+title: TextStyle 扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extension-text-style/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extension-text-style/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extension-text-style
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-text-style.svg
     url: https://npmcharts.com/compare/@tiptap/extension-text-style?minimal=true
-    label: Downloads
+    label: 下载
 extension:
-  name: Text Style
+  name: 文本样式
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-text-style
-  description: 'Otherwise useless, it adds <span> tags required by other extensions.'
+  description: '否则无用，它添加了其他扩展所需的 <span> 标签。'
   type: mark
-  icon: Paintbrush
+  icon: 画笔
 meta:
-  title: TextStyle extension | Tiptap Editor Docs
-  description: Use the Text Style extension in Tiptap to add <span> tags with custom styles. Learn more in our docs!
-  category: Editor
+  title: TextStyle 扩展 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用文本样式扩展添加具有自定义样式的 <span> 标签。更多信息请查看我们的文档！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-This mark renders a `<span>` HTML tag and enables you to add a list of styling related attributes, for example font-family, font-size, or color. The extension doesn’t add any styling attribute by default, but other extensions use it as the foundation, for example [`FontFamily`](/editor/extensions/functionality/fontfamily) or [`Color`](/editor/extensions/functionality/color).
+该标记呈现一个 `<span>` HTML 标签，并允许您添加一系列与样式相关的属性，例如字体系列、字体大小或颜色。该扩展默认不添加任何样式属性，但其他扩展将其作为基础，例如 [`FontFamily`](/editor/extensions/functionality/fontfamily) 或 [`Color`](/editor/extensions/functionality/color)。
 
 <CodeDemo path="/Marks/Textstyle" />
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-text-style@next
 ```
 
-## Commands
+## 命令
 
 ### removeEmptyTextStyle()
 
-Remove `<span>` tags without an inline style.
+移除没有内联样式的 `<span>` 标签。
 
 ```js
 editor.command.removeEmptyTextStyle()
 ```
 
-## Source code
+## 源代码
 
 [packages/extension-text-style/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-text-style/)

@@ -1,54 +1,54 @@
 ---
-title: TableKit extension
+title: TableKit 扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extension-table/beta?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extension-table/beta?label=版本
     url: https://www.npmjs.com/package/@tiptap/extension-table
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-table.svg
     url: https://npmcharts.com/compare/@tiptap/extension-table?minimal=true
-    label: Downloads
+    label: 下载量
 meta:
-  title: TableKit extension | Tiptap Editor Docs
-  description: All necessary table extensions in one extension with TableKit. Perfect for quickly setting up tables with Tiptap. More in the docs!
-  category: Editor
+  title: TableKit 扩展 | Tiptap 编辑器文档
+  description: 一个扩展包含所有必要的表格扩展，使用 TableKit。非常适合快速在 Tiptap 中设置表格。更多详细信息请查看文档！
+  category: 编辑器
 extension:
   name: TableKit
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extensions-table
-  description: All necessary table extensions in one. It doesn’t get much better than this.
-  type: extension
-  icon: Package
+  description: 整合所有必要的表格扩展。没有比这更好的选择了。
+  type: 扩展
+  icon: 包
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-The `TableKit` is a collection of all necessary Tiptap table extensions. If you quickly want to setup tables in Tiptap, this extension is for you.
+`TableKit` 是所有必要的 Tiptap 表格扩展的集合。如果您想快速在 Tiptap 中设置表格，这个扩展非常适合您。
 
 <CodeDemo path="/Nodes/Table" />
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-table@next
 ```
 
-## Included extensions
+## 包含的扩展
 
-### Nodes
+### 节点
 
 - [`Table`](/editor/extensions/nodes/table)
 - [`TableCell`](/editor/extensions/nodes/table-cell)
 - [`TableHeader`](/editor/extensions/nodes/table-header)
 - [`TableRow`](/editor/extensions/nodes/table-row)
 
-## Source code
+## 源代码
 
 [packages/extension-table/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-table/)
 
-## Using the TableKit extension
+## 使用 TableKit 扩展
 
-Pass `TableKit` to the editor to load all included extension at once.
+将 `TableKit` 传递给编辑器，以一次加载所有包含的扩展。
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -59,7 +59,7 @@ const editor = new Editor({
 })
 ```
 
-You can configure the included extensions, or even disable a few of them, like shown below.
+您可以配置包含的扩展，甚至可以禁用其中一些，如下所示。
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -68,10 +68,10 @@ import { TableKit } from '@tiptap/extension-table'
 const editor = new Editor({
   extensions: [
     TableKit.configure({
-      // Disable an extension
+      // 禁用一个扩展
       tableRow: false,
 
-      // Configure an extension
+      // 配置一个扩展
       tableCell: {
         HTMLAttributes: { class: 'list-item' },
       },

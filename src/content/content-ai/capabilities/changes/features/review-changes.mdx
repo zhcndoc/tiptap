@@ -1,96 +1,96 @@
 ---
-title: Review AI changes
+title: 查看 AI 更改
 meta:
-  title: Review changes | Tiptap AI Changes
-  description: Review, accept and reject AI-generated content in your rich text editor.
-  category: Content AI
+  title: 查看更改 | Tiptap AI 更改
+  description: 在您的富文本编辑器中查看、接受和拒绝 AI 生成的内容。
+  category: 内容 AI
 ---
 
-With the AI Changes extension, you can introduce a review workflow for AI-generated content, so that users can correct and approve the changes made by the AI.
+通过 AI 更改扩展，您可以引入一个审查工作流程，以便用户能够纠正和批准 AI 所做的更改。
 
-## Start tracking changes
+## 开始跟踪更改
 
-To start tracking changes, use `startTrackingAiChanges` command.
+要开始跟踪更改，请使用 `startTrackingAiChanges` 命令。
 
 ```ts
 editor.commands.startTrackingAiChanges()
 ```
 
-It creates a snapshot of the editor's content at the moment of running the command. From then on, all new changes to the document will be compared to this snapshot and displayed in the editor.
+它会在运行命令的那一刻创建编辑器内容的快照。从此时起，文档中的所有新更改将与此快照进行比较并显示在编辑器中。
 
-The most common pattern is to call `startTrackingAiChanges` immediately before generating AI content. This allows you to capture all AI-generated changes for review. For example, you can chain it with the [AI Generation extension commands](/content-ai/capabilities/generation/text-generation/built-in-commands):
+最常见的模式是在生成 AI 内容之前立即调用 `startTrackingAiChanges`。这样可以捕捉到所有生成的 AI 更改以供审查。例如，您可以将其与 [AI 生成扩展命令](/content-ai/capabilities/generation/text-generation/built-in-commands) 链式调用：
 
 ```ts
 editor
   .chain()
   .startTrackingAiChanges()
-  .aiTextPrompt({ text: 'Write a blog post about Tiptap' })
+  .aiTextPrompt({ text: '写一篇关于 Tiptap 的博客文章' })
   .run()
 ```
 
-You can access the snapshot of the previous document with the `getPreviousDoc` method of the extension's storage object:
+您可以通过扩展的存储对象的 `getPreviousDoc` 方法访问先前文档的快照：
 
 ```ts
 const storage = editor.extensionStorage.aiChanges
 const previousDoc = storage.getPreviousDoc()
 ```
 
-This will return a [Prosemirror Node object](https://prosemirror.net/docs/ref/#model.Node) that represents the previous document.
+这将返回一个 [Prosemirror Node 对象](https://prosemirror.net/docs/ref/#model.Node)，它表示之前的文档。
 
-When you call the `startTrackingAiChanges` command, you can provide an optional previous document. This is useful when you want to compare the new changes with a different document than the one currently in the editor.
+当您调用 `startTrackingAiChanges` 命令时，可以提供一个可选的前一个文档。这在您希望将新更改与当前编辑器中不同的文档进行比较时特别有用。
 
 ```ts
 editor.commands.startTrackingAiChanges(previousDoc)
 ```
 
-## Access changes data
+## 访问更改数据
 
-The AI Changes extension provides several extension storage methods to retrieve the tracked changes:
+AI 更改扩展提供了几种扩展存储方法来检索跟踪的更改：
 
-- `getChanges`: Returns a list of all the changes made to the document since the last time `startTrackingAiChanges` was called.
-- `getSelectedChange`: Returns the currently selected change. A change is selected when the cursor is on top of it.
-- `getIsTrackingAiChanges`: Returns a boolean that indicates if the editor is currently tracking AI changes.
-- `getIsShowingAiChanges`: Returns a boolean that indicates if the editor is currently showing the AI changes. AI changes [can be temporarily hidden](/content-ai/capabilities/changes/features/display-changes#hide-and-show-changes) with the `setShowAiChanges` command.
-- `getPreviousDoc`: Returns the previous document before the AI made changes. If the extension is currently not tracking changes, this will be `null`.
+- `getChanges`: 返回自上次调用 `startTrackingAiChanges` 以来对文档所做的所有更改列表。
+- `getSelectedChange`: 返回当前选定的更改。当光标位于其上方时，更改被视为已选定。
+- `getIsTrackingAiChanges`: 返回一个布尔值，指示编辑器当前是否正在跟踪 AI 更改。
+- `getIsShowingAiChanges`: 返回一个布尔值，指示编辑器当前是否显示 AI 更改。AI 更改可以通过 `setShowAiChanges` 命令[暂时隐藏](/content-ai/capabilities/changes/features/display-changes#hide-and-show-changes)。
+- `getPreviousDoc`: 返回 AI 修改之前的文档。如果扩展当前没有跟踪更改，则返回 `null`。
 
-To learn how to use these methods to display changes in your editor, see the [Display AI Changes](/content-ai/capabilities/changes/features/display-changes) guide.
+要了解如何使用这些方法在编辑器中显示更改，请参阅 [显示 AI 更改](/content-ai/capabilities/changes/features/display-changes) 指南。
 
-## Accept and reject changes
+## 接受和拒绝更改
 
-The AI Changes extension provides several commands to review changes.
+AI 更改扩展提供了几种命令来审查更改。
 
-To accept a change, call the `acceptAiChange` command. This will modify the snapshot of the previous document to include the change.
+要接受更改，请调用 `acceptAiChange` 命令。这将修改先前文档的快照以包含该更改。
 
 ```ts
 editor.commands.acceptAiChange(changeId)
 ```
 
-To reject a change, call the `rejectAiChange` command. This will modify the current editor content to match the previous document in the range of that change.
+要拒绝更改，请调用 `rejectAiChange` 命令。这将修改当前编辑器内容以匹配该更改范围内的先前文档。
 
 ```ts
 editor.commands.rejectAiChange(changeId)
 ```
 
-To accept all AI changes, use the `acceptAllAiChanges` command.
+要接受所有 AI 更改，请使用 `acceptAllAiChanges` 命令。
 
 ```ts
 editor.commands.acceptAllAiChanges()
 ```
 
-To reject all AI changes, use the `rejectAllAiChanges` command.
+要拒绝所有 AI 更改，请使用 `rejectAllAiChanges` 命令。
 
 ```ts
 editor.commands.rejectAllAiChanges()
 ```
 
-## Stop tracking changes
+## 停止跟踪更改
 
-Finally, to stop tracking AI changes, run the `stopTrackingAiChanges` command. This will remove the snapshot of the previous document and stop tracking changes.
+最后，要停止跟踪 AI 更改，请运行 `stopTrackingAiChanges` 命令。这样会移除先前文档的快照并停止跟踪更改。
 
 ```ts
 editor.commands.stopTrackingAiChanges()
 ```
 
-The previous document snapshot will be set to `null`, and the editor will no longer display the changes made by the AI.
+之前文档的快照将被设置为 `null`，编辑器将不再显示 AI 所做的更改。
 
-You can learn more about the AI Changes extension commands in the [API Reference](/content-ai/capabilities/changes/api-reference).
+您可以在 [API 参考](/content-ai/capabilities/changes/api-reference) 中了解有关 AI 更改扩展命令的更多信息。

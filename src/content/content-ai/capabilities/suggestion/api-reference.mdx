@@ -1,175 +1,161 @@
 ---
-title: AI Suggestion extension API reference
+title: AI 建议扩展 API 参考
 meta:
-  title: API Reference | Tiptap AI Suggestion
-  description: API reference for the Tiptap AI Suggestion extension.
-  category: Content AI
+  title: API 参考 | Tiptap AI 建议
+  description: Tiptap AI 建议扩展的 API 参考。
+  category: 内容 AI
 ---
 
-## Extension Options
+## 扩展选项
 
 ```ts
 /**
- * Configuration options for the AI Suggestion extension.
+ * AI 建议扩展的配置选项。
  */
 export interface AiSuggestionOptions {
-  /** Rules to be applied during proofreading
+  /** 审校过程中应用的规则
    * @default []
    */
   rules: AiSuggestionRule[]
-  /** Initial suggestions to display before any proofreading is done
+  /** 在进行任何审校之前显示的初始建议
    * @default []
    */
   initialSuggestions: Suggestion[]
-  /** Initial rejections to apply before any proofreading is done
+  /** 在进行任何审校之前应用的推荐拒绝
    * @default []
    */
   initialRejections: AiSuggestionRejection[]
-  /** Function to customize the decoration of suggestions in the editor
+  /** 自定义在编辑器中建议装饰的函数
    * @default `getDefaultDecorations()`
-   * @param args - Options for customizing suggestion decorations.
-   * @return An array of `Decoration` objects.
+   * @param args - 定制建议装饰的参数。
+   * @return 一个 `Decoration` 对象数组。
    */
   getCustomSuggestionDecoration: (args: GetCustomSuggestionDecorationOptions) => Decoration[]
-  /** Time in milliseconds to wait before reloading suggestions after content changes.
+  /** 内容变更后等待重新加载建议的时间（毫秒）
    * @default 800
    */
   debounceTimeout: number
-  /** Whether to load suggestions when the editor is initialized
+  /** 初始化时是否加载建议
    * @default true
    */
   loadOnStart: boolean
-  /** Whether to reload suggestions when the editor content changes
+  /** 内容变化时是否重新加载建议
    * @default true
    */
   reloadOnUpdate: boolean
-  /** Callback for handling errors when loading suggestions
-   * @param error - The error that occurred during suggestion loading.
+  /** 加载建议出错时的回调
+   * @param error - 发生错误的建议加载过程中的错误。
    * @default console.error
    */
   onLoadSuggestionsError: (error: unknown) => void
   /**
-   * The AI model used to proofread the content and generate suggestions.
+   * 用于校对内容和生成建议的AI模型。
    * @default "gpt-4o-mini"
    */
   modelName: AiSuggestionModelName
   /**
-   * Function to load suggestions from an external source, based
-   * on the current editor content and rules. Lets you analyze the
-   * content with your own AI model and return suggestions.
+   * 从外部加载建议的函数，基于
+   * 当前编辑器内容和规则。让你可以使用自己的AI模型分析
+   * 内容并返回建议。
    *
-   * @param options - Options for resolving suggestions.
-   * @return A list of suggestions that should be applied.
+   * @param options - 解析建议的参数。
+   * @return 一个应应用的建议列表。
    */
   resolver: (options: AiSuggestionCustomResolverOptions) => Promise<Suggestion[]>
   /**
-   * The Tiptap AI app ID.
+   * Tiptap AI应用ID。
    */
   appId: string
   /**
-   * The Tiptap AI token.
+   * Tiptap AI令牌。
    */
   token: string
   /**
-   * The base URL for the Tiptap AI API.
+   * Tiptap AI API的基础URL。
    */
   baseUrl: string
   /**
-   * Optional context to provide additional information to the AI model
-   * for generating suggestions.
+   * 提供额外信息给AI模型以生成建议的可选上下文。
    */
   context: string | null
   /**
-   * Whether to chunk the editor content and cache the suggestions
-   * for each chunk. This allows the extension to reuse the cached suggestions
-   * for each chunk when the content is reloaded. This is useful for large
-   * documents to improve performance and reduce costs.
+   * 是否对编辑器内容进行块划分并缓存每个块的建议。这允许扩展在内容重新加载时重复使用缓存的建议。这对于大型
+   * 文档有助于提升性能并降低成本。
    *
    * @default true
    */
   enableCache: boolean
   /**
-   * The size of the chunks to split the document into, measured in the amount
-   * of top-level child nodes of the editor's content.
+   * 用于拆分文档的块大小，单位为
+   * 顶层子节点数量。
    *
    * @default 2
    */
   chunkSize: number
   /**
-   * A function that splits the HTML content of the editor into chunks. By
-   * default, it splits the HTML into smaller pieces based on the configured
-   * chunk size and returns an array of HTML chunks. You can override this
-   * behavior by providing your own function.
+   * 拆分编辑器内容的HTML为块的函数。默认情况下，它会依据配置的
+   * 块大小，将HTML拆分成更小的片段，并返回HTML块数组。你也可以通过提供自定义函数来覆盖此行为。
    *
-   * @param options - The options for chunking the HTML.
-   * @returns An array of chunks
+   * @param options - 拆分HTML的参数。
+   * @returns 块数组
    * @default `defaultChunkHtmlFunction`
    */
   chunkHtmlFunction: (options: ChunkHtmlOptions) => HtmlChunk[]
 }
 ```
 
-## Extension Commands
+## 扩展命令
 
 ````ts
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     aiSuggestion: {
       /**
-       * Load AI suggestions immediately.
+       * 立即加载AI建议。
        */
       loadAiSuggestions: () => ReturnType
       /**
-       * Load AI suggestions after a debounce timeout defined in the
-       * extension options.
+       * 在扩展选项定义的去抖时间后加载AI建议。
        */
       loadAiSuggestionsDebounced: () => ReturnType
       /**
-       * Set the AI suggestions to be displayed.
+       * 设置要显示的AI建议。
        *
-       * @param suggestions The suggestions to be displayed.
+       * @param suggestions 要显示的建议。
        */
       setAiSuggestions: (suggestions: Suggestion[]) => ReturnType
       /**
-       * Set a suggestion as selected. The selected suggestion will have a
-       * different style in the editor.
+       * 选择某个建议。被选中的建议在编辑器中会有不同的样式。
        * */
       selectAiSuggestion: (suggestionId: string) => ReturnType
       /**
-       * Apply a suggestion to the editor, modifying its content.
+       * 将建议应用到编辑器，修改其内容。
        *
-       * @param options The id of the suggestion and the selected replacement
-       * option. If the replacement option is not provided, the first option
-       * will be used. The format of the replaced content can also be
-       * customized.
+       * @param options 建议的ID和被选中的替换方案。如果未提供替换方案，则使用第一个方案。还可以自定义被替换内容的格式。
        */
       applyAiSuggestion: (options: ApplyAiSuggestionOptions) => ReturnType
       /**
-       * Marks a suggestion as rejected, removing it from the list of suggestions.
+       * 将建议标记为被拒绝，移除出建议列表。
        *
-       * @param suggestionId The id of the rejected suggestion
+       * @param suggestionId 被拒绝建议的ID。
        */
       rejectAiSuggestion: (suggestionId: string) => ReturnType
 
       /**
-       * Sets the suggestions to be rejected. This command is useful for undoing
-       * rejections or for clearing all rejections.
+       * 设置被拒绝的建议列表。此命令有助于撤销拒绝或清空所有拒绝。
        *
-       * @param rejections The rejections to be set.
+       * @param rejections 被设置的拒绝项。
        */
       setAiSuggestionRejections: (rejections: AiSuggestionRejection[]) => ReturnType
 
       /**
-       * Applies all Ai Suggestions that have not been rejected. Applies
-       * the first replacement option for each suggestion.
+       * 应用所有未被拒绝的AI建议。每个建议将应用第一个替换选项。
        */
       applyAllAiSuggestions: (options?: ApplyAllAiSuggestionOptions) => ReturnType
       /**
-       * Sets the AI suggestion rules. Lets you update the rules used for
-       * proofreading without having to reload the editor.
+       * 设置AI建议规则。让你可以在不重新加载编辑器的情况下更新规则。
        *
-       * This command does not reload the suggestions. To reload the suggestions
-       * with the new rules, call the `loadAiSuggestions` command, like this:
+       * 此命令不会重新加载建议。若要使用新规则重新加载建议，请调用：
        *
        * ```js
        * editor.chain().setAiSuggestionRules(newRules).loadAiSuggestions().run()
@@ -178,17 +164,15 @@ declare module '@tiptap/core' {
       setAiSuggestionRules: (rules?: AiSuggestionRule[]) => ReturnType
 
       /**
-       * Sets the AI Suggestion context. This context is used to provide
-       * additional information to the AI model for generating suggestions.
+       * 设置AI建议的上下文。此上下文用于为AI模型提供额外信息，以生成建议。
        *
-       * This command does not reload the suggestions. To reload the suggestions
-       * with the new context, call the `loadAiSuggestions` command, like this:
+       * 此命令不会重新加载建议。若要用新上下文重新加载建议，请调用：
        *
        * ```js
        * editor.chain().setAiSuggestionContext(newContext).loadAiSuggestions().run()
        * ```
        *
-       * @param context Optional context to provide additional information to the AI model
+       * @param context 提供给AI模型的可选额外信息。
        */
       setAiSuggestionContext: (context: string | null) => ReturnType
     }
@@ -197,19 +181,17 @@ declare module '@tiptap/core' {
 
 export interface ApplyAiSuggestionOptions {
   /**
-   * The suggestion identifier to be applied. If the suggestion is not found, the
-   * method will do nothing.
+   * 要应用的建议ID。如果未找到，则此方法不执行任何操作。
    */
   suggestionId: string
   /**
-   * The replacement option identifier to be applied. If `undefined`,
-   * the method will default to the first replacement option.
+   * 要应用的替换方案ID。如果为`undefined`，则默认采用第一个替换方案。
    */
   replacementOptionId?: string
   /**
-   * Determines how the suggestion will applied
-   * If `rich-text`, the suggestion will be formatted as HTML.
-   * If `plain-text`, the suggestion will be formatted as plain text.
+   * 控制建议的应用方式
+   * 如果为`rich-text`，建议将以HTML格式显示。
+   * 如果为`plain-text`，建议将显示为纯文本。
    * @default "plain-text"
    */
   format?: 'rich-text' | 'plain-text'
@@ -217,109 +199,102 @@ export interface ApplyAiSuggestionOptions {
 
 export interface ApplyAllAiSuggestionOptions {
   /**
-   * Determines how the suggestion will applied
-   * If `rich-text`, the suggestion will be formatted as HTML.
-   * If `plain-text`, the suggestion will be formatted as plain text.
+   * 控制建议的应用方式
+   * 如果为`rich-text`，建议将以HTML格式显示。
+   * 如果为`plain-text`，建议将显示为纯文本。
    * @default "plain-text"
    */
   format?: 'rich-text' | 'plain-text'
 }
 ````
 
-## Extension Storage
+## 扩展存储
 
 ```ts
 /**
- * Internal storage for the AI Suggestion extension.
+ * AI 建议扩展的内部存储。
  */
 export interface AiSuggestionStorage {
-  /** Key for the ProseMirror plugin used by the extension */
+  /** 扩展使用的ProseMirror插件的键 */
   pluginKey: PluginKey<AiSuggestionProsemirrorPluginState>
-  /** Rules to be applied during proofreading */
+  /** 审校过程中应用的规则 */
   rules: AiSuggestionRule[]
-  /** Function to get the current suggestions */
+  /** 获取当前建议的函数 */
   getSuggestions: () => Suggestion[]
-  /** Function to get the rejected suggestions */
+  /** 获取被拒绝建议的函数 */
   getRejections: () => AiSuggestionRejection[]
-  /** Function to get the currently selected suggestion */
+  /** 获取当前选中的建议的函数 */
   getSelectedSuggestion: () => Suggestion | null
-  /** Whether suggestions are currently being loaded */
+  /** 当前是否正在加载建议 */
   isLoading: boolean
-  /** Whether suggestions have been loaded at least once */
+  /** 是否至少加载过一次建议 */
   firstLoad: boolean
-  /** Error that occurred during the last load attempt, if any */
+  /** 上一次加载尝试中发生的错误（如果有） */
   error: unknown | null
-  /** Debounced function for loading suggestions */
+  /** 用于加载建议的去抖函数 */
   debouncedFunction: DebouncedFunction<() => void>
-  /** Controller to abort loading suggestions */
+  /** 用于中止加载建议的控制器 */
   abortController: AbortController
   /**
-   * Optional context to provide additional information to the AI model
-   * for generating suggestions.
+   * 提供给AI模型以生成建议的可选上下文。
    */
   context: string | null
   /**
-   * The cache used to store the suggestions of each chunk of the document.
+   * 用于存储每个块的建议的缓存。
    */
   cache: AiSuggestionCache
 }
 
 /**
- * Arguments for creating decoration for suggestions in the editor.
+ * 创建编辑器中建议装饰的参数。
  */
 export interface GetCustomSuggestionDecorationOptions {
-  /** The suggestion being decorated */
+  /** 被装饰的建议 */
   suggestion: Suggestion
-  /** Whether this suggestion is currently selected */
+  /** 当前该建议是否被选中 */
   isSelected: boolean
-  /** Function to get the default decoration styles provided by the extension */
+  /** 获取扩展提供的默认装饰样式的函数 */
   getDefaultDecorations: () => Decoration[]
 }
 ```
 
-## Extension types
+## 扩展类型
 
-### Rules
+### 规则
 
 ```ts
 /**
- * A rule to be applied during proofreading.
+ * 审校中应用的规则。
  */
 export interface AiSuggestionRule {
   /**
-   * Unique identifier for the rule.
+   * 规则的唯一标识符。
    */
   id: string
   /**
-   * The title of the rule. Will not be used for proofreading, but for display
-   * purposes.
+   * 规则的标题。不用于审校，而用于显示。
    */
   title: string
   /**
-   * The prompt of the rule. Will be sent to the AI model for proofreading.
+   * 规则的提示信息。会传送给AI模型进行校对。
    */
   prompt: string
   /**
-   * The color of the rule. Will be used to underline the content that must
-   * be replaced to apply the rule.
+   * 规则颜色。用于划线需要替换的内容。
    */
   color: string
   /**
-   * The background color of the rule. Will be used to highlight the content
-   * when the suggestion is selected.
+   * 规则的背景色。当建议被选中时用于高亮内容。
    */
   backgroundColor: string
   /**
-   * Extra metadata for the rule, that can be used to store additional
-   * information about it (e.g. its source or its category). It is not used
-   * internally by the extension but it may help developers customize how a
-   * rule is displayed in the UI.
+   * 规则的额外元数据，可用于存储一些补充信息（如来源或类别）。这不会被扩展内部使用，但可以帮助开发者自定义规则在UI中的显示方式。
    */
   metadata?: any
 }
 ```
 
-### Proofreading Suggestions
+### 审校建议
 
 ```ts
 import { Range } from '@tiptap/core'
@@ -328,85 +303,77 @@ import { Slice } from '@tiptap/pm/model'
 import { AiSuggestionRule } from './ai-suggestion-rule'
 
 /**
- * A replacement option for a suggestion. It contains the text to be added and
- * the slice to be replaced.
+ * 建议的替换方案，包含待添加文本和被替换的slice。
  */
 export interface AiSuggestionReplacementOption {
   id: string
   /**
-   * The text to be added when the replacement format is `plain-text`.
+   * 当格式为`plain-text`时，待添加的文本内容。
    */
   addText: string
   /**
-   * The content to be added when the replacement format is `rich-text`.
+   * 当格式为`rich-text`时，待添加的内容Slice。
    */
   addSlice: Slice
 }
 
 /**
- * A suggestion from the AI Suggeston extension. It contains the range to be replaced,
- * the text to be deleted, the replacement options, and the rule that must be
- * applied.
+ * 来自AI建议扩展的建议。它包含待替换范围、删除内容、多个替换方案及需应用的规则。
  *
- * A suggestion can have multiple replacement options. The user can choose one
- * of them to apply the suggestion.
+ * 一个建议可以有多个替换方案。用户可以选择一项应用。
  */
 export interface Suggestion {
   /**
-   * A unique identifier for the suggestion.
+   * 建议的唯一标识符。
    */
   id: string
   /**
-   * The range of content from the editor that should be replaced.
+   * 需要被替换的内容范围。
    */
   deleteRange: Range
   /**
-   * The text to be deleted from the editor, in plain text format
+   * 需要删除的内容（纯文本格式）。
    */
   deleteText: string
   /**
-   * The content to be deleted from the editor, as a Prosemirror slice.
+   * 需要删除的slice内容。
    */
   deleteSlice: Slice
   /**
-   * Multiple replacement options for the suggestion. The user can choose one
-   * of them to apply the suggestion.
+   * 多个替换方案，用户可选择其中一项应用。
    */
   replacementOptions: AiSuggestionReplacementOption[]
   /**
-   * The proofreading rule that is followed by applying this suggestion.
+   * 将通过应用此建议遵循的校对规则。
    */
   rule: AiSuggestionRule
   /**
-   * Whether the suggestion was rejected by the user.
+   * 建议是否被用户拒绝。
    */
   isRejected: boolean
   /**
-   * Extra metadata for the suggestion, that can be used to store additional
-   * information about it (e.g. its source or its category). It is not used
-   * internally by the extension but it may help developers customize how a
-   * suggestion is displayed in the UI.
+   * 建议的额外元数据，可用于存储一些补充信息（如来源或类别）。这不会被扩展内部使用，但可以帮助开发者自定义建议在UI中的显示方式。
    */
   metadata?: any
 }
 ```
 
-### Rejected Suggestions
+### 被拒建议
 
 ```ts
 import { AiSuggestionRule } from './ai-suggestion-rule'
 
 /**
- * Represents a rejected suggestion. These are stored in the AI Suggestion extension's
- * storage so that the suggestion is not generated again.
+ * 表示已被拒绝的建议。它们被存储在AI建议扩展的存储中，
+ * 以确保不会再次生成对应建议。
  */
 export interface AiSuggestionRejection {
   /**
-   * The rule of the suggestion that was rejected.
+   * 被拒绝建议所对应的规则。
    */
   rule: AiSuggestionRule
   /**
-   * The text that was about to be deleted by the rejected suggestion.
+   * 被拒绝建议原本要删除的文本内容。
    */
   deleteText: string
 }

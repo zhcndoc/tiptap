@@ -1,47 +1,46 @@
 ---
-title: BulletList extension
+title: BulletList 扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extension-list/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extension-list/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extension-list
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-list.svg
     url: https://npmcharts.com/compare/@tiptap/extension-list?minimal=true
-    label: Downloads
+    label: 下载量
 extension:
   name: BulletList
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-list
-  description: Everything looks more serious with a few bullet points.
+  description: 使用几个项目符号，所有内容看起来更加严肃。
   type: node
   icon: List
 meta:
-  title: BulletList extension | Tiptap Editor Docs
-  description: Use the Bullet list extension to enable bullet lists in your Tiptap Editor. Learn more about lists in our docs!
-  category: Editor
+  title: BulletList 扩展 | Tiptap 编辑器文档
+  description: 使用 Bullet 列表扩展来启用 Tiptap 编辑器中的项目符号列表。了解更多关于列表的信息，请访问我们的文档！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 
-This extension enables you to use bullet lists in the editor. They are rendered as `<ul>` HTML tags. Type <code>\* </code>, <code>- </code> or <code>+ </code> at the beginning of a new line and it will magically transform to a bullet list.
+此扩展使您能够在编辑器中使用项目符号列表。它们被渲染为 `<ul>` HTML 标签。 在新行的开头键入 <code>\* </code>、<code>- </code> 或 <code>+ </code>，它将神奇地转换为项目符号列表。
 
 <CodeDemo path="/Nodes/BulletList" />
 
-<Callout title="Modify backspace behavior" variant="info">
-  If you want to modify the standard behavior of backspace and delete functions for lists, you
-  should read about the [ListKeymap](/editor/extensions/functionality/listkeymap) extension.
+<Callout title="修改退格行为" variant="info">
+  如果您想修改退格和删除功能在列表中的标准行为，您应该阅读 [ListKeymap](/editor/extensions/functionality/listkeymap) 扩展。
 </Callout>
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-list@next
 ```
 
-This extension requires the [`ListItem`](/editor/extensions/nodes/list-item) node.
+此扩展需要 [`ListItem`](/editor/extensions/nodes/list-item) 节点。
 
-## Usage
+## 使用
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -52,7 +51,7 @@ new Editor({
 })
 ```
 
-This extension is installed by default with the `ListKit` extension, so you don’t need to install it separately.
+此扩展默认与 `ListKit` 扩展一起安装，因此您无需单独安装。
 
 ```ts
 import { Editor } from '@tiptap/core'
@@ -63,11 +62,11 @@ new Editor({
 })
 ```
 
-## Settings
+## 设置
 
 ### HTMLAttributes
 
-Custom HTML attributes that should be added to the rendered HTML tag.
+应添加到渲染的 HTML 标签的自定义 HTML 属性。
 
 ```js
 BulletList.configure({
@@ -79,9 +78,9 @@ BulletList.configure({
 
 ### itemTypeName
 
-Specify the list item name.
+指定列表项名称。
 
-Default: `'listItem'`
+默认值：`'listItem'`
 
 ```js
 BulletList.configure({
@@ -91,9 +90,9 @@ BulletList.configure({
 
 ### keepMarks
 
-Decides whether to keep the marks from a previous line after toggling the list either using `inputRule` or using the button
+决定在使用 `inputRule` 或按钮切换列表后是否保留上一行的标记。
 
-Default: `false`
+默认值：`false`
 
 ```js
 BulletList.configure({
@@ -103,9 +102,9 @@ BulletList.configure({
 
 ### keepAttributes
 
-Decides whether to keep the attributes from a previous line after toggling the list either using `inputRule` or using the button
+决定在使用 `inputRule` 或按钮切换列表后是否保留上一行的属性。
 
-Default: `false`
+默认值：`false`
 
 ```js
 BulletList.configure({
@@ -113,27 +112,27 @@ BulletList.configure({
 })
 ```
 
-## Commands
+## 命令
 
 ### toggleBulletList()
 
-Toggles a bullet list.
+切换项目符号列表。
 
 ```js
 editor.commands.toggleBulletList()
 ```
 
-## Keyboard shortcuts
+## 键盘快捷键
 
-| Command          | Windows/Linux                                        | macOS                                            |
+| 命令            | Windows/Linux                                        | macOS                                            |
 | ---------------- | ---------------------------------------------------- | ------------------------------------------------ |
 | toggleBulletList | <kbd>Control</kbd> + <kbd>Shift</kbd> + <kbd>8</kbd> | <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>8</kbd> |
 
-## Source code
+## 源代码
 
 [packages/extension-list/src/bullet-list/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-list/src/bullet-list/)
 
-## Minimal Install
+## 最小安装
 
 ```js
 import { Editor } from '@tiptap/core'

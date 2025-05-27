@@ -1,54 +1,54 @@
 ---
-title: Image extension
+title: 图片扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extension-image/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extension-image/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extension-image
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-image.svg
     url: https://npmcharts.com/compare/@tiptap/extension-image?minimal=true
-    label: Downloads
+    label: 下载次数
 extension:
-  name: Image
+  name: 图片
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-image
-  description: Add an image (ideally a beautiful one), when words aren’t enough.
+  description: 当文字不够时，添加一张图片（理想情况下是一张美丽的图片）。
   type: node
-  icon: Image
+  icon: 图片
 meta:
-  title: Image extension | Tiptap Editor Docs
-  description: Use the Image extension in Tiptap to render the <img> HTML tag for adding images to your documents. Learn more in our docs!
-  category: Editor
+  title: 图片扩展 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用图片扩展来渲染 `<img>` HTML 标签，以将图片添加到您的文档中。欲了解更多，请查看我们的文档！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 
-Use this extension to render `<img>` HTML tags. By default, those images are blocks. If you want to render images in line with text set the `inline` option to `true`.
+使用此扩展来渲染 `<img>` HTML 标签。默认情况下，这些图片是块级元素。如果您想将图像与文本内联渲染，请将 `inline` 选项设置为 `true`。
 
-<Callout title="No Server Functionality" variant="info">
-  This extension is only responsible for displaying images. It doesn’t upload images to your server,
-  for that you can integrate the [FileHandler
-  extension](/editor/extensions/functionality/filehandler)
+<Callout title="无服务器功能" variant="info">
+  此扩展仅负责显示图像。它不会将图像上传到您的服务器，
+  对此您可以集成 [FileHandler
+  扩展](/editor/extensions/functionality/filehandler)
 </Callout>
 
 <CodeDemo path="/Nodes/Image" />
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-image@next
 ```
 
-## Settings
+## 设置
 
 ### inline
 
-Renders the image node inline, for example in a paragraph tag: `<p><img src="spacer.gif"></p>`. By default images are on the same level as paragraphs.
+将图像节点作为内联元素渲染，例如在段落标签中：`<p><img src="spacer.gif"></p>`。默认情况下，图像与段落处于同一层级。
 
-It totally depends on what kind of editing experience you’d like to have, but can be useful if you (for example) migrate from Quill to Tiptap.
+这完全取决于您希望拥有的编辑体验，但如果您（例如）从 Quill 迁移到 Tiptap，这可能会很有用。
 
-Default: `false`
+默认值：`false`
 
 ```js
 Image.configure({
@@ -58,9 +58,9 @@ Image.configure({
 
 ### allowBase64
 
-Allow images to be parsed as base64 strings `<img src="data:image/jpg;base64...">`.
+允许图像被解析为 base64 字符串 `<img src="data:image/jpg;base64...">`。
 
-Default: `false`
+默认值：`false`
 
 ```js
 Image.configure({
@@ -70,7 +70,7 @@ Image.configure({
 
 ### HTMLAttributes
 
-Custom HTML attributes that should be added to the rendered HTML tag.
+应添加到渲染的 HTML 标签中的自定义 HTML 属性。
 
 ```js
 Image.configure({
@@ -80,21 +80,21 @@ Image.configure({
 })
 ```
 
-## Commands
+## 命令
 
 ### setImage()
 
-Makes the current node an image.
+使当前节点成为一张图片。
 
 ```js
 editor.commands.setImage({ src: 'https://example.com/foobar.png' })
 editor.commands.setImage({
   src: 'https://example.com/foobar.png',
-  alt: 'A boring example image',
-  title: 'An example',
+  alt: '一张无聊的示例图片',
+  title: '示例',
 })
 ```
 
-## Source code
+## 源代码
 
 [packages/extension-image/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-image/)

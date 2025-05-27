@@ -1,42 +1,42 @@
 ---
-title: Add an image node to your Editor
+title: 向您的编辑器添加图像节点
 meta:
-  title: Image node | Tiptap UI Component
-  description: Add an image node UI component to your Tiptap Editor. Learn more in our documentation!
-  category: UI Components
+  title: 图像节点 | Tiptap UI 组件
+  description: 向您的 Tiptap 编辑器添加图像节点 UI 组件。了解更多请查看我们的文档！
+  category: UI 组件
 component:
-  name: Image node
-  description: Integrate an image node UI component.
+  name: 图像节点
+  description: 集成图像节点 UI 组件。
   type: node-component
   isFree: true
   isCloud: false
   isOpen: true
   isNew: false
-  icon: Image
+  icon: 图像
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-Styling for image nodes in the Tiptap editor.
+Tiptap 编辑器中图像节点的样式。
 
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-node/image-node" />
 
-## Install
-You can add the node component via Tiptap CLI (for Vite or Next.js)
+## 安装
+您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加节点组件。
 
 ```bash
 npx @tiptap/cli add image-node
 ```
 
-### Manual Integration
-For frameworks other than Vite or Next.js, add the node component manually from the [open-source repository](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-node/image-node).
+### 手动集成
+对于除 Vite 或 Next.js 以外的框架，请从 [开源代码库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-node/image-node) 手动添加节点组件。
 
-### Import styles
-This component requires you to import our styles which were added to `styles/keyframe-animation.scss` and `styles/_variables.scss`.
+### 导入样式
+该组件要求您导入我们的样式，这些样式已添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss`。
 
-## Usage
+## 使用方法
 
-The ImageNode provides styling for images within the editor. To use it, include it in your project and ensure you're using the Image extension from Tiptap.
+ImageNode 提供了编辑器中图像的样式。要使用它，您需要将其包含在您的项目中，并确保您正在使用 Tiptap 的图像扩展。
 
 ```tsx
 import { useEditor, EditorContent } from '@tiptap/react'
@@ -49,23 +49,23 @@ export default function EditorWithImages() {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [StarterKit, Image],
-    content: '<img src="/images/placeholder-image.png" alt="Example image" />',
+    content: '<img src="/images/placeholder-image.png" alt="示例图像" />',
   })
 
   return <EditorContent editor={editor} />
 }
 ```
 
-## Features
+## 特性
 
-- Proper image sizing (max-width: 100%)
-- Consistent margins and spacing
-- Highlighted selection state for better UX
-- Border radius for aesthetic appearance
-- Compatible with the thread system
+- 适当的图像尺寸（最大宽度：100%）
+- 一致的边距和间距
+- 高亮选择状态以改善用户体验
+- 美观的边角半径
+- 与线程系统兼容
 
-## Requirements
+## 要求
 
-Open source feature(s)
+开源功能
 
-- [`@tiptap/extension-image`](/editor/extensions/nodes/image) (recommended for full functionality)
+- [`@tiptap/extension-image`](/editor/extensions/nodes/image)（建议使用以获得完整功能）

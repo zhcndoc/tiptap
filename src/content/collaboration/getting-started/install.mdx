@@ -1,52 +1,52 @@
 ---
-title: Install Collaboration
+title: 安装协作
 meta:
-  title: Install Collaboration | Tiptap Collaboration Docs
-  description: Set up collaborative editing in your Tiptap Editor by following this installation guide. Learn more in our docs!
-  category: Collaboration
+  title: 安装协作 | Tiptap 协作文档
+  description: 按照此安装指南在您的 Tiptap 编辑器中设置协作编辑。详细了解请查看我们的文档！
+  category: 协作
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
-This guide will get you started with collaborative editing in the Tiptap Editor. If you're already using Tiptap Editor, feel free to skip ahead to [Prepare your editor](#prepare-your-editor) section.
+本指南将帮助您开始在 Tiptap 编辑器中进行协作编辑。如果您已经在使用 Tiptap 编辑器，可以直接跳到 [准备您的编辑器](#prepare-your-editor) 部分。
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的帐户中开始一个免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅一个 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Start Document server">
-        [Add an Environment](https://cloud.tiptap.dev/v2/configuration/document-server) in your dashboard and configure your [Document server](https://cloud.tiptap.dev/v2/configuration/document-server).
+    <RequirementItem label="2. 启动文档服务器">
+        在您的仪表板中 [添加环境](https://cloud.tiptap.dev/v2/configuration/document-server) 并配置您的 [文档服务器](https://cloud.tiptap.dev/v2/configuration/document-server)。
     </RequirementItem>
 </Requirements>
 
-### Install Tiptap Editor
+### 安装 Tiptap 编辑器
 
-If Tiptap Editor isn't installed yet, run the following command in your CLI for React to install the basic editor and necessary extensions for this example:
+如果尚未安装 Tiptap 编辑器，请在 CLI 中运行以下命令以安装此示例所需的基本编辑器和扩展：
 
 ```bash
 npm install @tiptap/extension-document@next @tiptap/extension-paragraph@next @tiptap/extension-text@next @tiptap/react@next
 ```
 
-Once installed, you can get your Tiptap Editor up and running with this basic setup. Just add the following code snippets to your project:
+安装完成后，您可以使用以下基本设置启动 Tiptap 编辑器。只需将以下代码片段添加到您的项目中：
 
 <CodeDemo path="/Examples/Minimal" />
 
-## Prepare your editor
+## 准备您的编辑器
 
-To introduce team collaboration features into your Tiptap Editor, integrate the Yjs library and Editor Collaboration extension into your frontend. This setup uses Y.Doc, a shared document model, rather than just handling plain text.
-Afterwards we will connect Y.Doc to the TiptapCollabProvider to synchronize user interactions.
+要在您的 Tiptap 编辑器中引入团队协作功能，请将 Yjs 库和编辑器协作扩展集成到您的前端中。此设置使用 Y.Doc，一个共享文档模型，而不仅仅是处理纯文本。
+之后，我们将 Y.Doc 连接到 TiptapCollabProvider 以同步用户交互。
 
-### Integrate Yjs and the Collaboration Extension
+### 集成 Yjs 和协作扩展
 
-Add the Editor Collaboration extension and Yjs library to your frontend:
+将编辑器协作扩展和 Yjs 库添加到您的前端：
 
 ```bash
 npm install @tiptap/extension-collaboration@next @tiptap/y-tiptap@next yjs y-protocols
 ```
 
-Then, update your index.jsx to include these new imports:
+接下来，更新您的 index.jsx 以包含这些新导入：
 
 ```tsx
 import './styles.scss'
@@ -60,7 +60,7 @@ import React from 'react'
 import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 
-const doc = new Y.Doc() // Initialize Y.Doc for shared editing
+const doc = new Y.Doc() // 为共享编辑初始化 Y.Doc
 
 export default () => {
   const editor = useEditor({
@@ -69,15 +69,15 @@ export default () => {
       Paragraph,
       Text,
       Collaboration.configure({
-        document: doc, // Configure Y.Doc for collaboration
+        document: doc, // 为协作配置 Y.Doc
       }),
     ],
     content: `
       <p>
-        This is a radically reduced version of Tiptap. It has support for a document, with paragraphs and text. That’s it. It’s probably too much for real minimalists though.
+        这是 Tiptap 的一个极简版本。它支持文档、段落和文本。就这些。这对真正的极简主义者来说可能太多了。
       </p>
       <p>
-        The paragraph extension is not really required, but you need at least one node. Sure, that node can be something different.
+        段落扩展不是必需的，但您至少需要一个节点。当然，那个节点可以是其他东西。
       </p>
     `,
   })
@@ -86,35 +86,33 @@ export default () => {
 }
 ```
 
-Your editor is now almost prepared for collaborative editing!
+您的编辑器现在几乎准备好进行协作编辑了！
 
-## Start your Document server
+## 启动您的文档服务器
 
-1. **Activate a plan:** Begin a [free trial or choose a subscription](https://cloud.tiptap.dev/v2/billing).
-2. **Add an environment.** On your [Dashboard](https://cloud.tiptap.dev/), click the `Add environment` button, enter a name and pick the region that is closest to your users.
-3. **Check the configuration.** As soon as you save the environment, your app boots up. Visit the [configuration page](https://cloud.tiptap.dev/v2/configuration/document-server) to copy your AppID, API keys, and other connection details.
+1. **激活计划：** 开始一个 [免费试用或选择一个订阅](https://cloud.tiptap.dev/v2/billing)。
+2. **添加环境。** 在您的 [仪表板](https://cloud.tiptap.dev/) 上，点击 `添加环境` 按钮，输入名称并选择最接近用户的区域。
+3. **检查配置。** 一旦保存环境，您的应用程序将启动。访问 [配置页面](https://cloud.tiptap.dev/v2/configuration/document-server) 复制您的 AppID、API 密钥和其他连接详细信息。
 
-### Connect to your Document server
+### 连接到您的文档服务器
 
-For collaborative functionality, install the `@hocuspocus/provider` package:
+为了实现协作功能，安装 `@hocuspocus/provider` 包：
 
 ```bash
 npm install @hocuspocus/provider@next
 ```
 
-Next, configure the provider in your index.jsx file with your server details:
+接下来，在您的 index.jsx 文件中配置提供者，并输入您的服务器详细信息：
 
-- **name**: Serves as the document identifier for synchronization.
-- **appID**: Found in your [Cloud account](https://cloud.tiptap.dev/v2/configuration/document-server) after you started your app. For on-premises setups replace `appID` with `baseUrl`.
-- **token**: Use the JWT from your [Cloud interface](https://cloud.tiptap.dev/v2/configuration/document-server) for testing, but generate your own JWT for production.
+- **name**：作为同步的文档标识符。
+- **appID**：在您启动应用后，可以在您的 [云账户](https://cloud.tiptap.dev/v2/configuration/document-server) 中找到。对于本地部署，使用 `baseUrl` 替换 `appID`。
+- **token**：在测试时使用您在 [云界面](https://cloud.tiptap.dev/v2/configuration/document-server) 中获取的 JWT，但在生产环境中生成您自己的 JWT。
 
-<Callout title="Adding initial content" variant="hint">
-  When integrating the Editor in a non-collaborative setting, using the method shown here to set
-  content is perfectly acceptable. However, if you transition to a collaborative environment, you
-  will need to modify how you add initial content as shown after the next headline.
+<Callout title="添加初始内容" variant="hint">
+  在非协作设置中集成编辑器时，使用此处显示的方法来设置内容是完全可以接受的。然而，如果您转到协作环境，则需要修改添加初始内容的方式，如下一标题所示。
 </Callout>
 
-Incorporate the following code to complete the setup:
+添加以下代码以完成设置：
 
 ```tsx
 import './styles.scss'
@@ -128,7 +126,7 @@ import React from 'react'
 import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 
-// Importing the provider and useEffect
+// 导入提供者和 useEffect
 import { useEffect } from 'react'
 import { TiptapCollabProvider } from '@hocuspocus/provider'
 
@@ -146,20 +144,20 @@ export default () => {
     ],
     content: `
       <p>
-        This is a radically reduced version of Tiptap. It has support for a document, with paragraphs and text. That’s it. It’s probably too much for real minimalists though.
+        这是 Tiptap 的一个极简版本。它支持文档、段落和文本。就这些。这对真正的极简主义者来说可能太多了。
       </p>
       <p>
-        The paragraph extension is not really required, but you need at least one node. Sure, that node can be something different.
+        段落扩展不是必需的，但您至少需要一个节点。当然，那个节点可以是其他东西。
       </p>
     `,
   })
 
-  // Connect to your Collaboration server
+  // 连接到您的协作服务器
   useEffect(() => {
     const provider = new TiptapCollabProvider({
-      name: 'document.name', // Unique document identifier for syncing. This is your document name.
-      appId: '7j9y6m10', // Your Cloud Dashboard AppID or `baseURL` for on-premises
-      token: 'notoken', // Your JWT token
+      name: 'document.name', // 用于同步的唯一文档标识符。这是您的文档名称。
+      appId: '7j9y6m10', // 您云仪表板的 AppID 或本地部署的 `baseURL`
+      token: 'notoken', // 您的 JWT 令牌
       document: doc,
     })
   }, [])
@@ -168,13 +166,13 @@ export default () => {
 }
 ```
 
-After following these steps, you should be able to open two different browsers and connect to the same document simultaneously through separate WebSocket connections.
+完成这些步骤后，您应该能够在两个不同的浏览器中打开并通过独立的 WebSocket 连接同时连接到同一文档。
 
-For a clear test of the collaboration features, using two different browsers is recommended to guarantee unique websocket connections.
+为了清晰测试协作功能，推荐使用两个不同的浏览器来保证唯一的 websocket 连接。
 
-### Initialize Content Properly
+### 正确初始化内容
 
-Upon implementing collaboration in your Tiptap Editor, you might notice that the initial content is repeatedly added each time the editor loads. To prevent this, use the `.setContent()` method to set the initial content only once.
+在您的 Tiptap 编辑器中实现协作时，您可能会注意到，每次编辑器加载时，初始内容都会重复添加。为了防止这种情况，使用 `.setContent()` 方法仅单次设置初始内容。
 
 ```tsx
 import './styles.scss'
@@ -203,24 +201,24 @@ export default () => {
         document: doc,
       }),
     ],
-    // Remove the automatic content addition on editor initialization.
+    // 在编辑器初始化时移除自动添加内容。
   })
 
   useEffect(() => {
     const provider = new TiptapCollabProvider({
-      name: 'document.name', // Unique document identifier for syncing. This is your document name.
-      appId: '7j9y6m10', // Your Cloud Dashboard AppID or `baseURL` for on-premises
-      token: 'notoken', // Your JWT token
+      name: 'document.name', // 用于同步的唯一文档标识符。这是您的文档名称。
+      appId: '7j9y6m10', // 您云仪表板的 AppID 或本地部署的 `baseURL`
+      token: 'notoken', // 您的 JWT 令牌
       document: doc,
 
-      // The onSynced callback ensures initial content is set only once using editor.setContent(), preventing repetitive content loading on editor syncs.
+      // onSynced 回调确保初始内容仅设置一次，使用 editor.setContent()，防止在编辑器同步时重复加载内容。
       onSynced() {
         if (!doc.getMap('config').get('initialContentLoaded') && editor) {
           doc.getMap('config').set('initialContentLoaded', true)
 
           editor.commands.setContent(`
-          <p>This is a radically reduced version of Tiptap. It has support for a document, with paragraphs and text. That’s it. It’s probably too much for real minimalists though.</p>
-          <p>The paragraph extension is not really required, but you need at least one node. Sure, that node can be something different.</p>
+          <p>这是 Tiptap 的一个极简版本。它支持文档、段落和文本。就这些。这对真正的极简主义者来说可能太多了。</p>
+          <p>段落扩展不是必需的，但您至少需要一个节点。当然，那个节点可以是其他东西。</p>
           `)
         }
       },
@@ -231,26 +229,26 @@ export default () => {
 }
 ```
 
-This ensures the initial content is set only once. To test with new initial content, create a new document by changing the `name` parameter (e.g., from `document.name` to `document.name2`).
+这确保初始内容仅设置一次。要测试新的初始内容，请通过更改 `name` 参数（例如，从 `document.name` 更改为 `document.name2`）创建新文档。
 
-## Disable Default Undo/Redo
+## 禁用默认撤销/重做
 
-If you're integrating collaboration into an editor **other than the one provided in this demo**, you may need to disable the default history function of your Editor. This is necessary to avoid conflicts with the collaborative history management: You wouldn't want to revert someone else's changes.
+如果您将协作集成到 **与此演示提供的编辑器不同的编辑器** 中，您可能需要禁用编辑器的默认历史功能。这是必要的，以避免与协作历史管理的冲突：您不希望撤销其他人的更改。
 
-This action is only required if your project includes the Tiptap [StarterKit](/editor/extensions/functionality/starterkit) or [Undo/Redo](/editor/extensions/functionality/undo-redo) extension.
+只有当您的项目包含 Tiptap 的 [StarterKit](/editor/extensions/functionality/starterkit) 或 [Undo/Redo](/editor/extensions/functionality/undo-redo) 扩展时，才需要此操作。
 
 ```ts
 const editor = useEditor({
   extensions: [
     StarterKit.configure({
-      history: false, // Disables default history to use Collaboration's history management
+      history: false, // 禁用默认历史，以使用协作的历史管理
     }),
   ],
 })
 ```
 
-Following this guide will set up a basic, yet functional collaborative Tiptap Editor, synchronized through either the Collaboration Cloud or an on-premises backend.
+遵循本指南将设置一个基本而又功能齐全的协作 Tiptap 编辑器，通过协作云或本地后端进行同步。
 
-## Authenticate your users
+## 认证用户
 
-Learn how to secure your collaborative Tiptap editor with JSON Web Tokens (JWTs). The next guide provides step-by-step instructions on creating and managing JWTs for both testing and production, ensuring controlled access with detailed examples. Read more about [authentication](/collaboration/getting-started/authenticate).
+了解如何使用 JSON Web Tokens (JWT) 保护您的协作 Tiptap 编辑器。下一篇指南提供了逐步说明，教您如何创建和管理 JWT，以便在测试和生产中确保受控访问，并提供详细示例。阅读更多关于 [认证](/collaboration/getting-started/authenticate) 的信息。

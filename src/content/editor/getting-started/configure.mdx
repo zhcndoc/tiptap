@@ -1,21 +1,21 @@
 ---
-title: Configure the Editor
+title: 配置编辑器
 meta:
-  title: Configuration | Tiptap Editor Docs
-  description: Configure your Tiptap Editor's elements, extensions, and content settings. Learn more in our documentation!
-  category: Editor
+  title: 配置 | Tiptap 编辑器文档
+  description: 配置您的 Tiptap 编辑器的元素、扩展和内容设置。更多信息请查阅我们的文档！
+  category: 编辑器
 ---
 
-To configure Tiptap, specify three key elements:
-+ where it should be rendered (`element`) 
-+ which functionalities to enable (`extensions`) 
-+ what the initial document should contain (`content`)
+要配置 Tiptap，请指定三个关键元素：
++ 应该渲染到哪里 (`element`) 
++ 需要启用哪些功能 (`extensions`) 
++ 初始文档应该包含什么 (`content`)
 
-While this setup works for most cases, you can configure additional options.
+虽然此设置适用于大多数情况，但您可以配置其他选项。
 
-## Add your configuration
+## 添加您的配置
 
-To configure the editor, pass [an object with settings](/editor/api/editor) to the `Editor` class, as shown below:
+要配置编辑器，请将 [带有设置的对象](/editor/api/editor) 传递给 `Editor` 类，如下所示：
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -24,26 +24,26 @@ import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 
 new Editor({
-  // bind Tiptap to the `.element`
+  // 将 Tiptap 绑定到 `.element`
   element: document.querySelector('.element'),
-  // register extensions
+  // 注册扩展
   extensions: [Document, Paragraph, Text],
-  // set the initial content
-  content: '<p>Example Text</p>',
-  // place the cursor in the editor after initialization
+  // 设置初始内容
+  content: '<p>示例文本</p>',
+  // 初始化后将光标放置在编辑器中
   autofocus: true,
-  // make the text editable (default is true)
+  // 使文本可编辑（默认是 true）
   editable: true,
-  // prevent loading the default CSS (which isn't much anyway)
+  // 防止加载默认 CSS（实际上不多）
   injectCSS: false,
 })
 ```
 
-## Nodes, marks, and extensions
+## 节点、标记和扩展
 
-Most editing features are packaged as [nodes](/editor/extensions/nodes), [marks](/editor/extensions/marks), or [functionality](/editor/extensions/functionality). Import what you need and pass them as an array to the editor.
+大多数编辑功能都打包为 [节点](/editor/extensions/nodes)、[标记](/editor/extensions/marks) 或 [功能](/editor/extensions/functionality)。导入您所需的内容，并将其作为数组传递给编辑器。
 
-Here's the minimal setup with only three extensions:
+以下是仅使用三个扩展的最小设置：
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -57,11 +57,11 @@ new Editor({
 })
 ```
 
-### Configure extensions
+### 配置扩展
 
-Many extensions can be configured with the `.configure()` method. You can pass an object with specific settings.
+许多扩展可以使用 `.configure()` 方法进行配置。您可以传递一个包含特定设置的对象。
 
-For example, to limit the heading levels to 1, 2, and 3, configure the [`Heading`](/editor/extensions/nodes/heading) extension as shown below:
+例如，要将标题级别限制为 1、2 和 3，请按如下方式配置 [`Heading`](/editor/extensions/nodes/heading) 扩展：
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -83,11 +83,11 @@ new Editor({
 })
 ```
 
-Refer to the extension's documentation for available settings.
+有关可用设置的信息，请参考扩展的文档。
 
-### A bundle with the most common extensions
+### 包含最常用扩展的捆绑包
 
-We have bundled a few of the most common extensions into the [`StarterKit`](/editor/extensions/functionality/starterkit). Here's how to use it:
+我们将一些最常用的扩展捆绑成了 [`StarterKit`](/editor/extensions/functionality/starterkit)。以下是如何使用它：
 
 ```js
 import StarterKit from '@tiptap/starter-kit'
@@ -97,7 +97,7 @@ new Editor({
 })
 ```
 
-You can configure all extensions included in the [StarterKit](/editor/extensions/functionality/starterkit) by passing an object. To target specific extensions, prefix their configuration with the name of the extension. For example, to limit heading levels to 1, 2, and 3:
+您可以通过传递一个对象来配置 [StarterKit](/editor/extensions/functionality/starterkit) 中包含的所有扩展。要针对特定扩展，配置时请在其前面加上扩展的名称。例如，要将标题级别限制为 1、2 和 3：
 
 ```js
 import StarterKit from '@tiptap/starter-kit'
@@ -113,9 +113,9 @@ new Editor({
 })
 ```
 
-### Disable specific StarterKit extensions
+### 禁用特定的 StarterKit 扩展
 
-To exclude certain extensions [StarterKit](/editor/extensions/functionality/starterkit), you can set them to `false` in the configuration. For example, to disable the [`Undo/Redo History`](/editor/extensions/functionality/undo-redo) extension:
+要排除某些扩展 [StarterKit](/editor/extensions/functionality/starterkit)，可以在配置中将它们设置为 `false`。例如，要禁用 [`Undo/Redo History`](/editor/extensions/functionality/undo-redo) 扩展：
 
 ```js
 import StarterKit from '@tiptap/starter-kit'
@@ -129,11 +129,11 @@ new Editor({
 })
 ```
 
-When using Tiptap's [`Collaboration`](/editor/extensions/functionality/collaboration), which comes with its own history extension, you must disable the `Undo/Redo History` extension included in the [StarterKit](/editor/extensions/functionality/starterkit) to avoid conflicts.
+在使用 Tiptap 的 [`Collaboration`](/editor/extensions/functionality/collaboration) 时，它带有自己的历史扩展，必须禁用 [StarterKit](/editor/extensions/functionality/starterkit) 中包含的 `Undo/Redo History` 扩展以避免冲突。
 
-### Additional extensions
+### 额外扩展
 
-The [StarterKit](/editor/extensions/functionality/starterkit) doesn't include all available extensions. To add more features to your editor, list them in the `extensions` array. For example, to add the [`Strike`](/editor/extensions/marks/strike) extension:
+[StarterKit](/editor/extensions/functionality/starterkit) 不包括所有可用的扩展。要为您的编辑器添加更多功能，请在 `extensions` 数组中列出它们。例如，要添加 [`Strike`](/editor/extensions/marks/strike) 扩展：
 
 ```js
 import StarterKit from '@tiptap/starter-kit'

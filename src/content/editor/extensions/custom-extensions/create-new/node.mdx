@@ -1,22 +1,22 @@
 ---
 title: Node API
 meta:
-  title: Node API | Tiptap Editor Docs
-  description: Create a new node for your Tiptap editor and create a unique editor experience from scratch. Learn more in the docs!
-  category: Editor
+  title: Node API | Tiptap 编辑器文档
+  description: 为你的 Tiptap 编辑器创建一个新节点，从零开始创造独特的编辑体验。了解更多内容请参考文档！
+  category: 编辑器
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-The power of Tiptap lies in its flexibility. You can create your own extensions from scratch and build a unique editor experience tailored to your needs.
+Tiptap 的强大之处在于它的灵活性。你可以从零开始创建自己的扩展，构建量身定制的独特编辑体验。
 
-## Creating a node
+## 创建一个节点
 
-Nodes are the building blocks of your editor. They can be blocks or inline nodes. Good examples to learn from are [`Paragraph`](/editor/extensions/nodes/paragraph), [`Heading`](/editor/extensions/nodes/heading), or [`CodeBlock`](/editor/extensions/nodes/code-block).
+节点是你编辑器的基本构建块。它们可以是块节点或行内节点。好的学习实例包括 [`Paragraph`](/editor/extensions/nodes/paragraph)、[`Heading`](/editor/extensions/nodes/heading) 或 [`CodeBlock`](/editor/extensions/nodes/code-block)。
 
-They extend all of the options and methods from the [Extension API](/editor/extensions/custom-extensions/extension) and add a few more specific to nodes.
+它们扩展了 [扩展 API](/editor/extensions/custom-extensions/extension) 的所有选项和方法，并添加了一些特定于节点的选项。
 
-Let's add a simple node extension to see how it works.
+让我们添加一个简单的节点扩展，看看它是如何工作的。
 
 ```typescript
 import { Node } from '@tiptap/core'
@@ -44,9 +44,9 @@ const CustomNode = Node.create({
 })
 ```
 
-This code creates a new node extension named `CustomNode`. It adds an `addOptions` method to define the node's options, which are configurable by the user. It also adds `parseHTML` and `renderHTML` methods to define how the node is parsed and rendered as HTML.
+这段代码创建了一个名为 `CustomNode` 的新节点扩展。它添加了一个 `addOptions` 方法来定义节点的选项，这些选项可由用户配置。它还添加了 `parseHTML` 和 `renderHTML` 方法来定义节点如何被解析和渲染为 HTML。
 
-It is installed to the editor just like any other extension by adding it to the `extensions` array.
+它像其他扩展一样通过将其添加到 `extensions` 数组中安装到编辑器中。
 
 ```typescript
 import { Editor } from '@tiptap/core'
@@ -55,24 +55,24 @@ new Editor({
   extensions: [CustomNode],
 })
 
-// Or if using React or Vue
+// 或者如果使用 React 或 Vue
 
 const editor = useEditor({
   extensions: [CustomNode],
 })
 ```
 
-Now let's take a closer look at the options and methods available for nodes.
+现在让我们仔细看看可用于节点的选项和方法。
 
-## Node options
+## 节点选项
 
-When creating a node, you can define options that are configurable by the user. These options can be used to customize the behavior or appearance of the node.
+创建一个节点时，可以定义可由用户配置的选项。这些选项可用于自定义节点的行为或外观。
 
 ### `parseHTML`
 
-The `parseHTML` method is used to define how the mark is parsed from HTML. It should return an array of objects representing the mark's attributes.
+`parseHTML` 方法用于定义如何从 HTML 中解析标记。它应该返回一个数组，表示标记的属性。
 
-Maps to the `parseDOM` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.MarkSpec.parseDOM).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.MarkSpec.parseDOM) 中的 `parseDOM` 属性。
 
 ```typescript
 const CustomMark = Mark.create({
@@ -93,13 +93,13 @@ const CustomMark = Mark.create({
 })
 ```
 
-This will be used during paste events to parse the HTML content into a mark.
+这将在粘贴事件期间用于将 HTML 内容解析为标记。
 
 ### `renderHTML`
 
-The `renderHTML` method is used to define how the mark is rendered as HTML. It should return an array representing the mark's HTML representation.
+`renderHTML` 方法用于定义如何将标记渲染为 HTML。它应该返回一个表示标记 HTML 表示的数组。
 
-Maps to the `toDOM` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.MarkSpec.toDOM).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.MarkSpec.toDOM) 中的 `toDOM` 属性。
 
 ```typescript
 const CustomMark = Mark.create({
@@ -111,13 +111,13 @@ const CustomMark = Mark.create({
 })
 ```
 
-This will be used during copy events to render the mark as HTML. For more details, see the [extend existing extensions](/editor/extensions/custom-extensions/extend-existing#render-html) guide.
+这将在复制事件期间用于将标记渲染为 HTML。更多细节请参见 [扩展现有扩展](/editor/extensions/custom-extensions/extend-existing#render-html) 指南。
 
 ### `addAttributes`
 
-The `addAttributes` method is used to define custom attributes for the mark. It should return an object with the attribute names and their default values.
+`addAttributes` 方法用于定义标记的自定义属性。它应该返回一个包含属性名称及其默认值的对象。
 
-Maps to the `attrs` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.MarkSpec.attrs).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.MarkSpec.attrs) 中的 `attrs` 属性。
 
 ```typescript
 const CustomMark = Mark.create({
@@ -134,13 +134,13 @@ const CustomMark = Mark.create({
 })
 ```
 
-For more details, see the [extend existing extensions](/editor/extensions/custom-extensions/extend-existing#attributes) guide.
+有关更多细节，请参见 [扩展现有扩展](/editor/extensions/custom-extensions/extend-existing#attributes) 指南。
 
 ### `topNode`
 
-Defines if this node should be a top-level node (doc).
+定义此节点是否应为顶级节点（文档）。
 
-Maps to the `topNode` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.NodeSpec.topNode).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.NodeSpec.topNode) 中的 `topNode` 属性。
 
 ```typescript
 const CustomNode = Node.create({
@@ -152,9 +152,9 @@ const CustomNode = Node.create({
 
 ### `content`
 
-The content expression for this node, as described in the [schema guide](/docs/guide/#schema.content_expressions). When not given, the node does not allow any content.
+该节点的内容表达式，如 [架构指南](/docs/guide/#schema.content_expressions) 所述。如果未给定，则该节点不允许任何内容。
 
-You can read more about it on the Prosemirror documentation [here](https://prosemirror.net/docs/guide/#schema.content_expressions).
+你可以在 Prosemirror 文档中阅读更多内容 [这里](https://prosemirror.net/docs/guide/#schema.content_expressions)。
 
 ```typescript
 const CustomNode = Node.create({
@@ -166,9 +166,9 @@ const CustomNode = Node.create({
 
 ### `marks`
 
-The marks that are allowed inside of this node. May be a space-separated string referring to mark names or groups, `"_"` to explicitly allow all marks, or `""` to disallow marks. When not given, nodes with inline content default to allowing all marks, other nodes default to not allowing marks.
+该节点内允许的标记。可以是指向标记名称或组的空格分隔字符串，`"_"` 明确允许所有标记，或 `""` 禁止标记。如果未给定，具有行内内容的节点默认允许所有标记，其他节点默认不允许标记。
 
-Maps to the `marks` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.NodeSpec.marks).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.NodeSpec.marks) 中的 `marks` 属性。
 
 ```typescript
 const CustomNode = Node.create({
@@ -180,11 +180,11 @@ const CustomNode = Node.create({
 
 ### `group`
 
-The group or space-separated groups to which this node belongs, which can be referred to in the content expressions for the schema.
+该节点所属的组或用空格分隔的组，可以在架构的内容表达式中引用。
 
-By default, Tiptap uses the groups 'block' and 'inline' for nodes. You can also use custom groups if you want to group specific nodes together and handle them in your schema.
+默认情况下，Tiptap 将 `block` 和 `inline` 作为节点的组。如果你想将特定节点分组并在架构中处理它们，也可以使用自定义组。
 
-Maps to the `group` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.NodeSpec.group).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.NodeSpec.group) 中的 `group` 属性。
 
 ```typescript
 const CustomNode = Node.create({
@@ -196,9 +196,9 @@ const CustomNode = Node.create({
 
 ### `inline`
 
-Should be set to true for inline nodes. (Implied for text nodes).
+此属性应该设置为 true ，以表示行内节点。（对文本节点是隐含的）。
 
-Maps to the `inline` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.NodeSpec.inline).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.NodeSpec.inline) 中的 `inline` 属性。
 
 ```typescript
 const CustomNode = Node.create({
@@ -210,9 +210,9 @@ const CustomNode = Node.create({
 
 ### `atom`
 
-Can be set to true to indicate that, though this isn't a [leaf node](https://prosemirror.net/docs/ref/#model.NodeType.isLeaf), it doesn't have directly editable content and should be treated as a single unit in the view.
+可以设置为 true，以指示虽然这不是一个 [叶节点](https://prosemirror.net/docs/ref/#model.NodeType.isLeaf)，但它没有直接可编辑的内容，应视为视图中的一个单元。
 
-Maps to the `atom` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.NodeSpec.atom).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.NodeSpec.atom) 中的 `atom` 属性。
 
 ```typescript
 const CustomNode = Node.create({
@@ -224,9 +224,9 @@ const CustomNode = Node.create({
 
 ### `selectable`
 
-Controls whether nodes of this type can be selected as a [node selection](https://prosemirror.net/docs/ref/#state.NodeSelection). Defaults to true for non-text nodes.
+控制该类型的节点是否可以被选中作为 [节点选择](https://prosemirror.net/docs/ref/#state.NodeSelection)。默认情况下，对于非文本节点为 true。
 
-Maps to the `selectable` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.NodeSpec.selectable).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.NodeSpec.selectable) 中的 `selectable` 属性。
 
 ```typescript
 const CustomNode = Node.create({
@@ -238,9 +238,9 @@ const CustomNode = Node.create({
 
 ### `draggable`
 
-Determines whether nodes of this type can be dragged without being selected. Defaults to false.
+确定该类型的节点是否可以在不被选中的情况下拖动。默认值为 false。
 
-Maps to the `draggable` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.NodeSpec.draggable).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.NodeSpec.draggable) 中的 `draggable` 属性。
 
 ```typescript
 const CustomNode = Node.create({
@@ -252,9 +252,9 @@ const CustomNode = Node.create({
 
 ### `code`
 
-Can be used to indicate that this node contains code, which causes some commands to behave differently.
+可以用于指示此节点包含代码，这会导致某些命令表现得不同。
 
-Maps to the `code` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.NodeSpec.code).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.NodeSpec.code) 中的 `code` 属性。
 
 ```typescript
 const CustomNode = Node.create({
@@ -266,9 +266,9 @@ const CustomNode = Node.create({
 
 ### `whitespace`
 
-Controls the way whitespace in this a node is parsed. The default is `"normal"`, which causes the [DOM parser](https://prosemirror.net/docs/ref/#model.DOMParser) to collapse whitespace in normal mode, and normalize it (replacing newlines and such with spaces) otherwise. `"pre"` causes the parser to preserve spaces inside the node. When this option isn't given, but [`code`](https://prosemirror.net/docs/ref/#model.NodeSpec.code) is true, `whitespace` will default to `"pre"`.
+控制该节点中空格的解析方式。默认值为 `"normal"`，这会导致 [DOM 解析器](https://prosemirror.net/docs/ref/#model.DOMParser) 在正常模式下折叠空格，其他情况则标准化（用空格替换换行等）。`"pre"` 则使解析器保留节点内的空格。如果未给定此选项，但 [`code`](https://prosemirror.net/docs/ref/#model.NodeSpec.code) 为 true，则 `whitespace` 默认值为 `"pre"`。
 
-Maps to the `whitespace` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.NodeSpec.whitespace).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.NodeSpec.whitespace) 中的 `whitespace` 属性。
 
 ```typescript
 const CustomNode = Node.create({
@@ -280,9 +280,9 @@ const CustomNode = Node.create({
 
 ### `linebreakReplacement`
 
-Allows a **single** node to be set as a linebreak equivalent (e.g. hardBreak). When converting between block types that have whitespace set to "pre" and don't support the linebreak node (e.g. codeBlock) and other block types that do support the linebreak node (e.g. paragraphs) - this node will be used as the linebreak instead of stripping the newline.
+允许将 **单个** 节点设置为换行等价物（例如 hardBreak）。在转换具有空格设置为 "pre" 并且不支持换行节点（例如 codeBlock）与支持换行节点的其他块类型（例如段落）之间进行转换时，将使用此节点作为换行，而不是删除换行符。
 
-Maps to the `linebreakReplacement` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.NodeSpec.linebreakReplacement).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.NodeSpec.linebreakReplacement) 中的 `linebreakReplacement` 属性。
 
 ```typescript
 const CustomNode = Node.create({
@@ -294,9 +294,9 @@ const CustomNode = Node.create({
 
 ### `defining`
 
-When enabled, enables both [`definingAsContext`](https://prosemirror.net/docs/ref/#model.NodeSpec.definingAsContext) and [`definingForContent`](https://prosemirror.net/docs/ref/#model.NodeSpec.definingForContent).
+启用时，同时启用 [`definingAsContext`](https://prosemirror.net/docs/ref/#model.NodeSpec.definingAsContext) 和 [`definingForContent`](https://prosemirror.net/docs/ref/#model.NodeSpec.definingForContent)。
 
-Maps to the `defining` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.NodeSpec.defining).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.NodeSpec.defining) 中的 `defining` 属性。
 
 ```typescript
 const CustomNode = Node.create({
@@ -308,9 +308,9 @@ const CustomNode = Node.create({
 
 ### `isolating`
 
-When enabled (default is false), the sides of nodes of this type count as boundaries that regular editing operations, like backspacing or lifting, won't cross. An example of a node that should probably have this enabled is a table cell.
+启用时（默认值为 false），该类型节点的两侧视为边界，常规编辑操作（如退格或提升）不会穿越。一个应该启用此功能的节点示例是表格单元。
 
-Maps to the `isolating` attribute in [the ProseMirror schema](https://prosemirror.net/docs/ref/#model.NodeSpec.isolating).
+将映射到 [ProseMirror 架构](https://prosemirror.net/docs/ref/#model.NodeSpec.isolating) 中的 `isolating` 属性。
 
 ```typescript
 const CustomNode = Node.create({
@@ -320,11 +320,11 @@ const CustomNode = Node.create({
 })
 ```
 
-### `addNodeView` (Advanced)
+### `addNodeView`（高级）
 
-For advanced use cases, where you need to execute JavaScript inside your nodes, for example to render a sophisticated interface around an image, you need to learn about node views.
+对于高级用例，比如需要在节点内部执行 JavaScript，例如渲染一个围绕图像的复杂界面，你需要了解节点视图。
 
-They are really powerful, but also complex. In a nutshell, you need to return a parent DOM element, and a DOM element where the content should be rendered in. Look at the following, simplified example:
+它们非常强大，但也很复杂。简单来说，你需要返回一个父 DOM 元素和一个内容应该渲染到的 DOM 元素。查看以下简化示例：
 
 ```js
 import Image from '@tiptap/extension-image'
@@ -335,7 +335,7 @@ const CustomImage = Image.extend({
       const container = document.createElement('div')
 
       container.addEventListener('click', (event) => {
-        alert('clicked on the container')
+        alert('点击了容器')
       })
 
       const content = document.createElement('div')
@@ -350,4 +350,4 @@ const CustomImage = Image.extend({
 })
 ```
 
-There is a whole lot to learn about node views, so head over to the [dedicated section in our guide about node views](/editor/extensions/custom-extensions/node-views) for more information. If you are looking for a real-world example, look at the source code of the [`TaskItem`](/editor/extensions/nodes/task-item) node. This is using a node view to render the checkboxes.
+关于节点视图有很多内容需要学习，因此请前往我们指南中关于节点视图的 [专门部分](/editor/extensions/custom-extensions/node-views) 获取更多信息。如果你正在寻找一个实际的例子，查看 [`TaskItem`](/editor/extensions/nodes/task-item) 节点的源代码。这个节点使用节点视图来渲染复选框。

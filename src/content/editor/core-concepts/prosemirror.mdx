@@ -1,33 +1,33 @@
 ---
 title: ProseMirror
 meta:
-  title: ProseMirror | Tiptap Editor Docs
-  description: Access the ProseMirror API and functionality with the Tiptap PM package while developing your editor. Learn more in the docs!
-  category: Editor
+  title: ProseMirror | Tiptap 编辑器文档
+  description: 在开发编辑器时，通过 Tiptap PM 包访问 ProseMirror API 和功能。详细信息请查看文档！
+  category: 编辑器
 ---
 
-Tiptap is built on top of ProseMirror, which has a pretty powerful API. To access it, we provide the package `@tiptap/pm`. This package provides all important ProseMirror packages like `prosemirror-state`, `prosemirror-view` or `prosemirror-model`.
+Tiptap 构建在 ProseMirror 之上，ProseMirror 拥有强大的 API。为了访问它，我们提供了包 `@tiptap/pm`。这个包提供了所有重要的 ProseMirror 包，比如 `prosemirror-state`、`prosemirror-view` 或 `prosemirror-model`。
 
-Using the package for custom development makes sure that you always have the same version of ProseMirror which is used by Tiptap as well. This way, we can make sure that Tiptap and all extensions are compatible with each other and prevent version clashes.
+使用这个包进行自定义开发可以确保你始终使用与 Tiptap 一样的 ProseMirror 版本。通过这种方式，我们可以确保 Tiptap 和所有扩展之间的兼容性，并防止版本冲突。
 
-Another plus is that you don't need to install all ProseMirror packages manually, especially if you are not using npm or any other package manager that supports automatic peer dependency resolution.
+另一个好处是，特别是在你不使用 npm 或其他支持自动 Peer 依赖解析的包管理器时，你不需要手动安装所有的 ProseMirror 包。
 
-## Install
+## 安装
 
 ```bash
 npm i @tiptap/pm
 ```
 
-After that you can access all internal ProseMirror packages like this:
+之后你可以像这样访问所有内部的 ProseMirror 包：
 
 ```js
-// this example loads the EditorState class from the ProseMirror state package
+// 这个示例从 ProseMirror 状态包加载 EditorState 类
 import { EditorState } from '@tiptap/pm/state'
 ```
 
-## Integrate packages
+## 集成包
 
-The following packages are available:
+可以使用以下包：
 
 - `@tiptap/pm/changeset`
 - `@tiptap/pm/collab`
@@ -48,4 +48,4 @@ The following packages are available:
 - `@tiptap/pm/transform`
 - `@tiptap/pm/view`
 
-You can find out more about those libraries in the [ProseMirror documentation](https://prosemirror.net/docs/ref).
+你可以在 [ProseMirror 文档](https://prosemirror.net/docs/ref) 中找到有关这些库的更多信息。

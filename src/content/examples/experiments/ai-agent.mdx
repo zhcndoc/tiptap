@@ -1,9 +1,9 @@
 ---
-title: AI agent experiment
+title: AI 代理实验
 meta:
-  title: AI Agent | Tiptap Editor Docs
-  description: Integrate an AI Agent into your Tiptap Editor to edit documents. Learn more about it in our documentation.
-  category: Examples
+  title: AI 代理 | Tiptap 编辑器文档
+  description: 在您的 Tiptap 编辑器中集成 AI 代理来编辑文档。更多内容请参阅我们的文档。
+  category: 示例
 sidebars:
   hideSecondary: true
 ---
@@ -11,28 +11,25 @@ sidebars:
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-With Tiptap, you can build an AI agent that can reason, define a plan, and edit your document. It makes decisions based on the user's feedback and the editor's state. This experiment showcases Tiptap's capabilities for building an text editor where you let an AI agent automate the editing process.
+使用 Tiptap，您可以构建一个能够推理、制定计划并编辑文档的 AI 代理。它基于用户反馈和编辑器状态做出决策。此实验展示了 Tiptap 在构建允许 AI 代理自动化编辑流程的文本编辑器方面的能力。
 
-<Callout title="Private Beta" variant="hint">
-  This feature is currently in private beta and available by invite only. Share your [use case with
-  us](https://tiptap-suite.notion.site/1b601ffa3ebc80a281a8ea0b03b19bdd?pvs=105) to be considered for early access to Tiptap AI
-  Agent.
+<Callout title="私密测试" variant="hint">
+  此功能目前处于私密测试阶段，仅限受邀用户使用。请通过[这个链接](https://tiptap-suite.notion.site/1b601ffa3ebc80a281a8ea0b03b19bdd?pvs=105)分享您的使用场景，以便考虑您获得 Tiptap AI 代理的早期访问权限。
 </Callout>
 
 <CodeDemo isLarge={true} isScrollable={true} src="https://ai-agent.tiptap.dev/embedded" />
 
-[View fullscreen demo](https://ai-agent.tiptap.dev).
+[查看全屏演示](https://ai-agent.tiptap.dev).
 
-## Tiptap AI Agent Development Toolkit
+## Tiptap AI 代理开发工具包
 
-Tiptap is the rich text editor toolkit for AI Agents. Its [editor commands](/editor/api/commands) provide an interface for the AI to make precise edits to the document. And its [Content AI extensions](/content-ai/getting-started/overview) allow you to integrate AI content generation and assistance directly into your editor.
+Tiptap 是 AI 代理的富文本编辑器工具包。其[编辑器命令](/editor/api/commands)为 AI 提供了精确编辑文档的接口。其[内容 AI 扩展](/content-ai/getting-started/overview)允许您将 AI 内容生成和辅助直接集成到编辑器中。
 
-AI Agents stand apart from other AI-assisted apps for their ability to interact with their environment with **tool calling**. Currently, the Tiptap AI Agent has access to these tools:
+AI 代理区别于其他 AI 辅助应用，是因为它们能够通过**调用工具**与环境交互。目前，Tiptap AI 代理可以访问以下工具：
 
-- **Plan**: creates and updates a plan. It lets the AI break down a complex task into a series of steps.
-- **Ask**: asks the user questions and requests information.
-- **Write**: replaces the entire editor content.
-- **Summary**: generates a summary of the changes made to the document.
+- **计划**：创建和更新计划。它使 AI 能将复杂任务拆分为一系列步骤。
+- **提问**：向用户提问并请求信息。
+- **写入**：替换整个编辑器内容。
+- **摘要**：生成对文档所做更改的摘要。
 
-
-We're creating more tools and templates to help developers build AI agent applications. If you have any feedback on an AI agent use case you’d like to integrate, please [let us know](https://tiptap-suite.notion.site/1b601ffa3ebc80a281a8ea0b03b19bdd?pvs=105).
+我们正在创建更多工具和模板，帮助开发者构建 AI 代理应用。如果您对希望集成的 AI 代理使用场景有任何反馈，欢迎[告诉我们](https://tiptap-suite.notion.site/1b601ffa3ebc80a281a8ea0b03b19bdd?pvs=105)。

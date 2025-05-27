@@ -1,26 +1,26 @@
 ---
-title: Node views with Vue
+title: 使用 Vue 创建节点视图
 meta:
-  title: Vue node views | Tiptap Editor Docs
-  description: Use Vue to build custom node views in Tiptap. Direct manipulation of node properties and interactive content.
-  category: Editor
+  title: Vue 节点视图 | Tiptap 编辑器文档
+  description: 使用 Vue 构建自定义节点视图。直接操作节点属性和交互式内容。
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-Using Vanilla JavaScript can feel complex if you are used to work in Vue. Good news: You can use regular Vue components in your node views, too. There is just a little bit you need to know, but let’s go through this one by one.
+如果你习惯使用 Vue，单纯用 Vanilla JavaScript 可能感觉比较复杂。好消息是：你也可以在节点视图中使用常规的 Vue 组件。只需要知道一点点相关知识，下面我们逐步讲解。
 
-## Render a Vue component
+## 渲染 Vue 组件
 
-Here is what you need to do to render Vue components inside your editor:
+在编辑器内部渲染 Vue 组件的步骤如下：
 
-1. [Create a node extension](/editor/extensions/custom-extensions)
-2. Create a Vue component
-3. Pass that component to the provided `VueNodeViewRenderer`
-4. Register it with `addNodeView()`
-5. [Configure Tiptap to use your new node extension](/editor/getting-started/configure)
+1. [创建节点扩展](/editor/extensions/custom-extensions)
+2. 创建一个 Vue 组件
+3. 将该组件传递给提供的 `VueNodeViewRenderer`
+4. 使用 `addNodeView()` 注册
+5. [配置 Tiptap 以使用你的新节点扩展](/editor/getting-started/configure)
 
-This is how your node extension could look like:
+你的节点扩展大致可以这样写：
 
 ```js
 import { Node } from '@tiptap/core'
@@ -28,7 +28,7 @@ import { VueNodeViewRenderer } from '@tiptap/vue-2'
 import Component from './Component.vue'
 
 export default Node.create({
-  // configuration …
+  // 配置项 …
 
   addNodeView() {
     return VueNodeViewRenderer(Component)
@@ -36,23 +36,23 @@ export default Node.create({
 })
 ```
 
-There is a little bit of magic required to make this work. But don’t worry, we provide a wrapper component you can use to get started easily. Don’t forget to add it to your custom Vue component, like shown below:
+为了让它正常工作，少许“魔法”操作是需要的。但不用担心，我们提供了一个封装组件，帮助你轻松入门。记得将其添加到你的自定义 Vue 组件中，示范如下：
 
 ```html
 <template>
-  <node-view-wrapper> Vue Component </node-view-wrapper>
+  <node-view-wrapper> Vue 组件 </node-view-wrapper>
 </template>
 ```
 
-Got it? Let’s see it in action. Feel free to copy the below example to get started.
+懂了吗？让我们一起来看看实际效果。以下示例可以直接复制使用。
 
 <CodeDemo path="/GuideNodeViews/VueComponent" />
 
-That component doesn’t interact with the editor, though. Time to wire it up.
+不过，这个组件本身不与编辑器交互。现在就来连接它。
 
-## Access node attributes
+## 访问节点属性
 
-The `VueNodeViewRenderer` which you use in your node extension, passes a few very helpful props to your custom Vue component. One of them is the `node` prop. Add this snippet to your Vue component to directly access the node:
+你在节点扩展中使用的 `VueNodeViewRenderer` 会向你的自定义 Vue 组件传递一些非常有用的 props。其中之一是 `node` 属性。你可以将以下代码添加到你的 Vue 组件中，以便直接访问节点：
 
 ```js
 props: {
@@ -63,15 +63,15 @@ props: {
 },
 ```
 
-That enables you to access node attributes in your Vue component. Let’s say you have [added an attribute](/editor/extensions/custom-extensions/extend-existing#attributes) named `count` to your node extension (like we did in the above example) you could access it like this:
+这样你就可以在 Vue 组件中访问节点的属性了。假设你在节点扩展中[添加了一个 attribute](/editor/extensions/custom-extensions/extend-existing#attributes)，比如 `count`（像刚才的例子中那样），你可以这样访问它：
 
 ```js
 this.node.attrs.count
 ```
 
-## Update node attributes
+## 更新节点属性
 
-You can even update node attributes from your node, with the help of the `updateAttributes` prop passed to your component. Just add this snippet to your component:
+你甚至可以通过传递给组件的 `updateAttributes` 方法，更新节点的属性。只需在你的组件中添加如下代码：
 
 ```js
 props: {
@@ -82,7 +82,7 @@ props: {
 },
 ```
 
-Pass an object with updated attributes to the function:
+然后调用这个函数，并传入一个包含新的属性值的对象：
 
 ```js
 this.updateAttributes({
@@ -90,11 +90,11 @@ this.updateAttributes({
 })
 ```
 
-And yes, all of that is reactive, too. A pretty seamless communication, isn’t it?
+是的，这一切都是响应式的，通信非常顺畅，不是挺好的吗？
 
-## Adding a content editable
+## 添加内容可编辑区域
 
-There is another component called `NodeViewContent` which helps you adding editable content to your node view. Here is an example:
+还有一个叫 `NodeViewContent` 的组件，可以帮助你为节点视图添加可编辑内容。示例如下：
 
 ```html
 <template>
@@ -115,51 +115,51 @@ There is another component called `NodeViewContent` which helps you adding edita
 </script>
 ```
 
-You don’t need to add those `class` attributes, feel free to remove them or pass other class names. Try it out in the following example:
+不一定非要使用这些 `class` 属性，感觉可以删除或替换为其他类名。试试看下面的示例：
 
 <CodeDemo path="/GuideNodeViews/VueComponentContent" />
 
-Keep in mind that this content is rendered by Tiptap. That means you need to tell what kind of content is allowed, for example with `content: 'inline*'` in your node extension (that’s what we use in the above example).
+请记住，这些内容由 Tiptap 渲染。这意味着你需要在节点扩展中声明允许的内容类型，比如通过 `content: 'inline*'`（这是我们上面示例中的设置）。
 
-The `NodeViewWrapper` and `NodeViewContent` components render a `<div>` HTML tag (`<span>` for inline nodes), but you can change that. For example `<node-view-content as="p">` should render a paragraph. One limitation though: That tag must not change during runtime.
+`NodeViewWrapper` 和 `NodeViewContent` 组件会渲染 `<div>`（内联节点为 `<span>`），但你也可以修改这个行为。例如 `<node-view-content as="p">` 只要是块级标签就可以，默认会渲染为 `<p>`。但有个限制：标签在运行时不能更改。
 
-## All available props
+## 所有可用的 props
 
-For advanced use cases, we pass a few more props to the component.
+对于高级用例，我们会传递更多 props 给你的组件。
 
 ### editor
 
-The editor instance.
+编辑器实例。
 
 ### node
 
-Access the current node.
+当前节点。
 
 ### decorations
 
-An array of decorations.
+装饰的数组。
 
 ### selected
 
-`true` when there is a `NodeSelection` at the current node view.
+当当前节点视图被选中（`NodeSelection`）时为 `true`。
 
 ### extension
 
-Access to the node extension, for example to get options.
+访问节点扩展，例如用来获取配置项。
 
 ### getPos()
 
-Get the document position of the current node.
+获取当前节点在文档中的位置。
 
 ### updateAttributes()
 
-Update attributes of the current node.
+更新当前节点的属性。
 
 ### deleteNode()
 
-Delete the current node.
+删除当前节点。
 
-Here is the full list of what props you can expect:
+以下是全部可用 props 的完整列表：
 
 ```html
 <template>
@@ -175,42 +175,42 @@ Here is the full list of what props you can expect:
     },
 
     props: {
-      // the editor instance
+      // 编辑器实例
       editor: {
         type: Object,
       },
 
-      // the current node
+      // 当前节点
       node: {
         type: Object,
       },
 
-      // an array of decorations
+      // 装饰数组
       decorations: {
         type: Array,
       },
 
-      // `true` when there is a `NodeSelection` at the current node view
+      // 如果此节点视图被选中，则为 `true`
       selected: {
         type: Boolean,
       },
 
-      // access to the node extension, for example to get options
+      // 访问节点扩展（例如获取配置）
       extension: {
         type: Object,
       },
 
-      // get the document position of the current node
+      // 获取当前节点在文档中的位置
       getPos: {
         type: Function,
       },
 
-      // update attributes of the current node
+      // 更新当前节点的属性
       updateAttributes: {
         type: Function,
       },
 
-      // delete the current node
+      // 删除当前节点
       deleteNode: {
         type: Function,
       },
@@ -219,7 +219,7 @@ Here is the full list of what props you can expect:
 </script>
 ```
 
-If you just want to have all (and TypeScript support) you can import all props:
+如果你希望获取所有 props（支持 TypeScript），可以直接引入全部，例如：
 
 ```js
 // Vue 3
@@ -237,8 +237,8 @@ export default Vue.extend({
 })
 ```
 
-## Dragging
+## 拖拽支持
 
-To make your node views draggable, set `draggable: true` in the extension and add `data-drag-handle` to the DOM element that should function as the drag handle.
+若要让你的节点视图支持拖拽，只需在扩展中设置 `draggable: true`，并将 `data-drag-handle` 添加到作为拖拽手柄的 DOM 元素即可。
 
 <CodeDemo path="/GuideNodeViews/DragHandle" />

@@ -1,16 +1,16 @@
 ---
-title: Details extension
+title: 详情扩展
 icon: menu-unfold-line
 extension:
-  name: Details
-  description: Add collapsible details nodes to your editor content.
+  name: 详情
+  description: 向您的编辑器内容添加可折叠的详情节点。
   type: node
   icon: ListCollapse
   isPro: true
 meta:
-  title: Details extension | Tiptap Editor Docs
-  description: Use the Details extension in Tiptap to enable the <details> HTML tag for showing and hiding content. Learn more in our docs!
-  category: Editor
+  title: 详情扩展 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用详情扩展以启用 <details> HTML 标记来显示和隐藏内容。了解更多信息请查看我们的文档！
+  category: 编辑器
 tags:
   - type: pro
 ---
@@ -20,37 +20,35 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Install from private registry">
-        To install this frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-The Details extension enables you to use the `<details>` HTML tag in the editor. This is great to show and hide content.
+详情扩展使您能够在编辑器中使用 `<details>` HTML 标签。这非常适合显示和隐藏内容。
 
 <CodeDemo isPro path="/Nodes/Details" />
 
-## Install
+## 安装
 
-<Callout title="Set up access to Tiptap’s private repository" variant="info">
-  Gain access to this pro extension by registering for a free [Tiptap
-  account](https://cloud.tiptap.dev/register) and following our [access
-  guide](/guides/pro-extensions) to Tiptap’s private repository.
+<Callout title="设置对 Tiptap 私有库的访问" variant="info">
+  通过注册一个免费的 [Tiptap 账户](https://cloud.tiptap.dev/register) 并按照我们的 [访问指南](/guides/pro-extensions) 获取对 Tiptap 私有库的访问权限，获得此专业扩展。
 </Callout>
 
 ```bash
 npm install @tiptap-pro/extension-details@next
 ```
 
-This extension requires the [`DetailsSummary`](/editor/extensions/nodes/details-summary) and [`DetailsContent`](/editor/extensions/nodes/details-content) node.
+此扩展要求 [`DetailsSummary`](/editor/extensions/nodes/details-summary) 和 [`DetailsContent`](/editor/extensions/nodes/details-content) 节点。
 
-## Settings
+## 设置
 
 ### persist
 
-Specify if the open status should be saved in the document. Defaults to `false`.
+指定打开状态是否应保存在文档中。默认为 `false`。
 
 ```js
 Details.configure({
@@ -60,7 +58,7 @@ Details.configure({
 
 ### openClassName
 
-Specifies a CSS class that is set when toggling the content. Defaults to `is-open`.
+指定切换内容时设置的 CSS 类。默认为 `is-open`。
 
 ```js
 Details.configure({
@@ -70,7 +68,7 @@ Details.configure({
 
 ### HTMLAttributes
 
-Custom HTML attributes that should be added to the rendered HTML tag.
+应添加到渲染的 HTML 标签中的自定义 HTML 属性。
 
 ```js
 Details.configure({
@@ -80,11 +78,11 @@ Details.configure({
 })
 ```
 
-## Commands
+## 命令
 
 ### setDetails()
 
-Wrap content in a details node.
+将内容包装在一个详情节点中。
 
 ```js
 editor.commands.setDetails()
@@ -92,7 +90,7 @@ editor.commands.setDetails()
 
 ### unsetDetails()
 
-Unwrap a details node.
+解包详情节点。
 
 ```js
 editor.commands.unsetDetails()

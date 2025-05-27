@@ -1,12 +1,12 @@
 ---
-title: Integrate the image upload node UI component
+title: 集成图像上传节点 UI 组件
 meta:
-  title: Image upload node | Tiptap UI Component
-  description: Integrate a node UI component that adds an image upload in your Tiptap Editor. More in the docs!
-  category: UI Components
+  title: 图像上传节点 | Tiptap UI 组件
+  description: 集成一个节点 UI 组件，可以在您的 Tiptap 编辑器中添加图像上传功能。更多内容请参见文档！
+  category: UI 组件
 component:
-  name: Image upload node
-  description: Upload an image via a node UI component
+  name: 图像上传节点
+  description: 通过节点 UI 组件上传图像
   type: node-component
   isFree: true
   isCloud: false
@@ -17,25 +17,25 @@ component:
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-A node for uploading images directly within the Tiptap editor, providing a drag-and-drop interface and progress tracking.
+一个可以在 Tiptap 编辑器中直接上传图像的节点，提供拖放界面和进度跟踪。
 
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-node/image-upload-node" />
 
-## Install
-You can add the node component via Tiptap CLI (for Vite or Next.js)
+## 安装
+您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加该节点组件。
 
 ```bash
 npx @tiptap/cli add image-upload-node
 ```
 
-### Manual Integration
-For frameworks other than Vite or Next.js, add the node component manually from the [open-source repository](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-node/image-upload-node).
+### 手动集成
+对于除 Vite 或 Next.js 之外的框架，请从 [开源仓库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-node/image-upload-node) 手动添加节点组件。
 
-### Import styles
+### 导入样式
 
-This component requires you to import our styles which were added to `styles/keyframe-animation.scss` and `styles/_variables.scss`.
+此组件需要您导入我们的样式，样式已添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 中。
 
-## Usage
+## 使用
 
 ```tsx
 import * as React from 'react'
@@ -57,10 +57,10 @@ export default function EditorWithImageUpload() {
         maxSize: MAX_FILE_SIZE,
         limit: 3,
         upload: handleImageUpload,
-        onError: (error) => console.error('Upload failed:', error),
+        onError: (error) => console.error('上传失败:', error),
       }),
     ],
-    content: '<p>Try uploading an image!</p>',
+    content: '<p>尝试上传图像！</p>',
   })
 
   React.useEffect(() => {
@@ -75,34 +75,34 @@ export default function EditorWithImageUpload() {
 }
 ```
 
-## Props
+## 属性
 
-| Name      | Type                                                                                | Default    | Description                                  |
-| --------- | ----------------------------------------------------------------------------------- | ---------- | -------------------------------------------- |
-| accept    | string                                                                              | 'image/\*' | Acceptable file types for upload             |
-| limit     | number                                                                              | 1          | Maximum number of files that can be uploaded |
-| maxSize   | number                                                                              | 0          | Maximum file size in bytes (0 for unlimited) |
-| upload    | `(file: File, onProgress?: Function, abortSignal?: AbortSignal) => Promise<string>` | undefined  | Function to handle the upload process        |
-| onError   | (error: Error) => void                                                              | undefined  | Callback for upload errors                   |
-| onSuccess | (url: string) => void                                                               | undefined  | Callback for successful uploads              |
+| 名称      | 类型                                                                                | 默认值     | 描述                                        |
+| --------- | ----------------------------------------------------------------------------------- | ---------- | ------------------------------------------- |
+| accept    | string                                                                              | 'image/\*' | 可接受的上传文件类型                       |
+| limit     | number                                                                              | 1          | 可上传文件的最大数量                       |
+| maxSize   | number                                                                              | 0          | 文件的最大大小（以字节为单位，0 表示无限制）|
+| upload    | `(file: File, onProgress?: Function, abortSignal?: AbortSignal) => Promise<string>` | undefined  | 处理上传过程的函数                         |
+| onError   | (error: Error) => void                                                              | undefined  | 上传错误的回调                             |
+| onSuccess | (url: string) => void                                                               | undefined  | 上传成功后的回调                           |
 
-## Features
+## 特性
 
-- Drag-and-drop file upload
-- File size validation
-- Upload progress tracking
-- File type filtering
-- Abortable uploads
-- Visual feedback during upload process
-- Seamless replacement with Image node after upload
+- 拖放文件上传
+- 文件大小验证
+- 上传进度跟踪
+- 文件类型过滤
+- 可中止的上传
+- 上传过程中的视觉反馈
+- 上传后与图像节点的无缝替换
 
-## Requirements
+## 需求
 
-Used reference components
+使用的参考组件
 
-- `close-icon` (icon)
+- `close-icon`（图标）
 
-Open source feature(s)
+开源功能
 
 - `@tiptap/react`
-- [`@tiptap/extension-image`](/editor/extensions/nodes/image) (recommended for full functionality)
+- [`@tiptap/extension-image`](/editor/extensions/nodes/image)（推荐以实现完整功能）

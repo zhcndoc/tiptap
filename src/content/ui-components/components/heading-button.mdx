@@ -1,13 +1,13 @@
 ---
-title: Toggle through heading levels with a button
+title: 使用按钮切换标题级别
 meta:
-  title: Heading Button | Tiptap UI Component
-  description: Add a button that toggles through different heading levels in your Tiptap editor. More in the docs!
-  category: UI Components
+  title: 标题按钮 | Tiptap UI 组件
+  description: 添加一个按钮，在你的 Tiptap 编辑器中切换不同的标题级别。详细内容请参阅文档！
+  category: UI 组件
 component:
-  name: Heading button
-  description: Toggle through headings with a button.
-  type: component
+  name: 标题按钮
+  description: 使用按钮切换标题内容。
+  type: 组件
   isFree: true
   isCloud: false
   isOpen: true
@@ -17,26 +17,26 @@ component:
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-A button for toggling different heading levels.
+用于切换不同标题级别的按钮。
 
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/heading-button" />
 
-## Install
+## 安装
 
-You can add the component via Tiptap CLI (for Vite or Next.js)
+你可以通过 Tiptap CLI 添加此组件（适用于 Vite 或 Next.js）
 
 ```bash
 npx @tiptap/cli add heading-button
 ```
 
-### Manual Integration
-For frameworks other than Vite or Next.js, add the component manually from the [open-source repository](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/heading-button).
+### 手动集成
+对于除了 Vite 或 Next.js 之外的框架，请从[开源仓库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/heading-button)手动添加该组件。
 
-### Import styles
+### 引入样式
 
-This component requires you to import our styles which were added to `styles/keyframe-animation.scss` and `styles/_variables.scss`.
+此组件需要引入我们的样式文件，已添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 中。
 
-## Usage
+## 使用方法
 
 ```tsx
 import { HeadingButton } from '@/components/tiptap-ui/heading-button'
@@ -50,10 +50,10 @@ export default function MyEditor() {
     immediatelyRender: false,
     extensions: [StarterKit],
     content: `
-          <h1>Heading 1</h1>
-          <h2>Heading 2</h2>
-          <h3>Heading 3</h3>
-          <h4>Heading 4</h4>
+          <h1>标题 1</h1>
+          <h2>标题 2</h2>
+          <h3>标题 3</h3>
+          <h4>标题 4</h4>
         `,
   })
 
@@ -72,25 +72,23 @@ export default function MyEditor() {
 }
 ```
 
-## Props
+## 属性说明
 
-| Name                | Type                       | Default  | Description                                        |
-| ------------------- | -------------------------- | -------- | -------------------------------------------------- |
-| editor              | Editor \| null             | null     | The Tiptap editor instance                         |
-| level               | 1 \| 2 \| 3 \| 4 \| 5 \| 6 | required | The heading level                                  |
-| hideWhenUnavailable | boolean                    | false    | Whether the button should be hide if not available |
-| text                | string                     | -        | Text to display alongside the icon                 |
+| 名称                 | 类型                         | 默认值   | 说明                                              |
+| -------------------  | ---------------------------- | -------- | ------------------------------------------------- |
+| editor               | Editor \| null               | null     | Tiptap 编辑器实例                                |
+| level                | 1 \| 2 \| 3 \| 4 \| 5 \| 6   | 必填     | 标题级别                                          |
+| hideWhenUnavailable  | boolean                      | false    | 当按钮不可用时是否隐藏                              |
+| text                 | string                       | -        | 图标旁显示的文本                                   |
 
-## Requirements
+## 依赖组件
 
-Used reference components
-
-- `use-tiptap-editor` (hook)
-- `button` (primitive)
-- `tiptap-utils` (lib)
-- `heading-one-icon` (icon)
-- `heading-two-icon` (icon)
-- `heading-three-icon` (icon)
-- `heading-four-icon` (icon)
-- `heading-five-icon` (icon)
-- `heading-six-icon` (icon)
+- `use-tiptap-editor`（钩子）
+- `button`（基础组件）
+- `tiptap-utils`（库）
+- `heading-one-icon`（图标）
+- `heading-two-icon`（图标）
+- `heading-three-icon`（图标）
+- `heading-four-icon`（图标）
+- `heading-five-icon`（图标）
+- `heading-six-icon`（图标）

@@ -1,47 +1,47 @@
 ---
-title: Autocompletion in Content AI
+title: 内容 AI 中的自动完成功能
 meta:
-  title: Autocompletion | Tiptap Content AI
-  description: Set up your AI Generation extension to autocomplete and stream text when a user hits tab in your editor. More in the docs!
-  category: Content AI
+  title: 自动完成 | Tiptap 内容 AI
+  description: 设置您的 AI 生成扩展，以便在用户在编辑器中按下 Tab 键时自动完成并流式传输文本。更多内容请参阅文档！
+  category: 内容 AI
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 启动试用或订阅">
+        在您的帐户中启动免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Integrate an AI provider">
-        Configure OpenAI in your [AI settings](https://cloud.tiptap.dev/v2/cloud/ai) or review the [Custom LLM guides](/content-ai/capabilities/generation/custom-llms).
+    <RequirementItem label="2. 集成 AI 提供商">
+        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI 或查看 [自定义 LLM 指南](/content-ai/capabilities/generation/custom-llms)。
     </RequirementItem>
-    <RequirementItem label="3. Install from private registry">
-        To install the frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="3. 从私有注册表安装">
+        要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证以访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-When you enable autocompletion, the system uses a segment of the text you've already written to generate suggestions.
+启用自动完成时，系统会使用您已经编写的文本的一部分来生成建议。
 
-To trigger autocompletion, simply press the `Tab` key while writing. Press `Tab` again to accept the suggested completion.
+要触发自动完成，您只需在编写时按 `Tab` 键。再次按 `Tab` 以接受建议的完成。
 
-If you want to see it in action, hit the `Tab` key after any line of text in this demo.
+如果您想看到实际效果，在此演示中的任何文本行后按 `Tab` 键。
 
 <CodeDemo isPro path="/Extensions/AiAutocompletion" />
 
-## Configure autocompletion
+## 配置自动完成
 
-When you're integrating the Content AI extension you can specify that you want to enable autocompletion,
-how the autocompletion feature should behave and what context it should consider.
+在集成内容 AI 扩展时，您可以指定想要启用自动完成、
+自动完成功能的行为以及该考虑什么上下文。
 
-| Setting                 | Type      | Default                                                                                         | Definition                                                                                                                                                                                                                                                   |
-| ----------------------- | --------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `autocompletion`        | `boolean` | `false`                                                                                         | Enables the autocompletion feature. When writing text, just hit **Tab** to trigger the autocompletion and another **Tab** to accept the completion. We’re using a portion of your already written text to build a prompt for OpenAI.                         |
-| `autocompletionOptions` | `object`  | `{ trigger: 'Tab', accept: 'Tab', debounce: 0, inputLength: 4000, modelName: 'gpt-3.5-turbo' }` | Defines the trigger and length of text used to generate autocompletion suggestion. Accept defaults to trigger, if not set explicitly. Debounce in ms the request after trigger pressed. You can also choose the OpenAI model to run the autocompletion task. |
+| 设置                     | 类型      | 默认值                                                                                     | 定义                                                                                                                                                                                                                                                     |
+| ------------------------ | --------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `autocompletion`         | `boolean` | `false`                                                                                     | 启用自动完成功能。在编写文本时，只需按 **Tab** 以触发自动完成，再按一次 **Tab** 接受完成。我们将使用您已写文本的一部分来构建 OpenAI 的提示。                                                                                                        |
+| `autocompletionOptions`  | `object`  | `{ trigger: 'Tab', accept: 'Tab', debounce: 0, inputLength: 4000, modelName: 'gpt-3.5-turbo' }` | 定义生成自动完成建议所使用的触发器和文本长度。如果未明确设置，接受默认为触发器。触发后请求的去抖动时间（毫秒）。您还可以选择运行自动完成任务的 OpenAI 模型。                                                                                     |
 
-To see all other Content AI extension configuration option, head over to the [install](/content-ai/capabilities/generation/install#configure-the-extension) page.
+要查看所有其他内容 AI 扩展配置选项，请前往 [安装](/content-ai/capabilities/generation/install#configure-the-extension) 页面。
 
-## Enable autocompletion
+## 启用自动完成
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -55,9 +55,9 @@ const editor = new Editor{
       appId: 'APP_ID_HERE',
       token: 'TOKEN_HERE',
       autocompletion: true,
-      // … other options (see above)
+      // … 其他选项（见上文）
     }),
-    // … more extensions
+    // … 更多扩展
   ],
 })
 ```

@@ -1,50 +1,50 @@
 ---
-title: Comments webhook
+title: 评论 Webhook
 meta:
-  title: Webhook | Tiptap Comments Docs
-  description: Enable and manage webhooks for Comments in Tiptap to receive notifications on thread and comment activities. More in the docs!
-  category: Comments
+  title: Webhook | Tiptap 评论文档
+  description: 启用和管理 Tiptap 中评论的 Webhook，以接收线程和评论活动的通知。更多内容请参阅文档！
+  category: 评论
 ---
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
-Set up and manage webhooks to improve your Comments integration. Common use cases for Comments webhooks include:
+设置和管理 Webhook，以改善您的评论集成。评论 Webhook 的常见用例包括：
 
-- Sending notifications when a thread is created, resolved, updated, or deleted.
-- Notifying users when comments are added, updated, or deleted.
-- In conjunction with the [mention extension](/editor/extensions/nodes/mention), sending emails or notifications to users when they are mentioned in comments.
+- 在创建、解决、更新或删除线程时发送通知。
+- 在添加、更新或删除评论时通知用户。
+- 结合使用 [提及扩展](/editor/extensions/nodes/mention)，在用户被提及时向用户发送电子邮件或通知。
 
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to the [Team plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [团队计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Start Document server">
-        Configure your [Comments webhook](https://cloud.tiptap.dev/v2/configuration/document-server) after starting your [Environment](https://cloud.tiptap.dev/v2/configuration/document-server).
+    <RequirementItem label="2. 启动文档服务器">
+        在启动您的 [环境](https://cloud.tiptap.dev/v2/configuration/document-server) 后配置您的 [评论 Webhook](https://cloud.tiptap.dev/v2/configuration/document-server)。
     </RequirementItem>
 </Requirements>
 
-## Enable comment events
+## 启用评论事件
 
-For accounts created after March 1, 2024, Comments webhooks are enabled by default. Otherwise, you could still be using an older version of the webhook system and need to manually upgrade:
+对于 2024 年 3 月 1 日后创建的账户，评论 Webhook 默认启用。否则，您可能仍在使用旧版本的 Webhook 系统，需要手动升级：
 
-1. In case you’ve previously implemented Collaboration webhooks, check the `type` and `trigger` fields when processing incoming webhooks. ([Documentation](/collaboration/core-concepts/webhooks))
-2. Navigate to your [Collaboration settings](https://cloud.tiptap.dev/v2/configuration/document-server).
-3. In the Webhooks section, click **Upgrade**.
+1. 如果您之前实现了协作 Webhook，请在处理传入 Webhook 时检查 `type` 和 `trigger` 字段。（[文档](/collaboration/core-concepts/webhooks)）
+2. 访问您的 [协作设置](https://cloud.tiptap.dev/v2/configuration/document-server)。
+3. 在 Webhooks 部分，点击 **升级**。
 
-This upgrade is necessary to accommodate the introduction of multiple new events being routed to the same webhook endpoint, distinguished by a new `type` and `trigger` field.
+该升级有必要以便适应多种新事件被路由到同一 Webhook 端点的引入，新的 `type` 和 `trigger` 字段作为区别。
 
-## Configure webhooks
+## 配置 Webhook
 
-To configure webhooks for Comments notifications:
+要配置评论通知的 Webhook：
 
-1. Navigate to the [Collaboration settings](https://cloud.tiptap.dev/v2/configuration/document-server) in your account.
-2. In the Webhooks section, add your desired endpoint URL.
+1. 访问您账户中的 [协作设置](https://cloud.tiptap.dev/v2/configuration/document-server)。
+2. 在 Webhooks 部分，添加您希望的端点 URL。
 
-After adding your URL, the webhook is immediately live. You'll start receiving notifications for the specified events without any delay.
+添加 URL 后，Webhook 会立即生效。您将开始接收指定事件的通知，毫无延迟。
 
-## Webhook events
+## Webhook 事件
 
-Comments webhooks trigger notifications for a variety of events related to threads and comments within the Comments extension. These events are triggered immediately as soon as their associated action occur within the comments.
+评论 Webhook 触发与评论扩展内线程和评论相关的多种事件的通知。这些事件在其关联操作发生时立即触发。
 
 - `comment.added`
 - `comment.updated`
@@ -54,11 +54,11 @@ Comments webhooks trigger notifications for a variety of events related to threa
 - `thread.updated`
 - `thread.deleted`
 
-## Example payloads
+## 示例有效载荷
 
-Below are example payloads for different types of webhook events:
+以下是不同类型 Webhook 事件的示例有效载荷：
 
-### Thread/comment created
+### 线程/评论创建
 
 ```json
 {
@@ -75,7 +75,7 @@ Below are example payloads for different types of webhook events:
           "userName": "Cyndi Lauper",
           "userAvatar": "https://api.dicebear.com/7.x/lorelei/svg?seed=Cyndi Lauper"
         },
-        "content": "Threaderstellungskommentar"
+        "content": "线程创建评论"
       }
     ],
     "updatedAt": "2024-03-02T22:17:51.305Z"
@@ -88,7 +88,7 @@ Below are example payloads for different types of webhook events:
       "userName": "Cyndi Lauper",
       "userAvatar": "https://api.dicebear.com/7.x/lorelei/svg?seed=Cyndi Lauper"
     },
-    "content": "Threaderstellungskommentar"
+    "content": "线程创建评论"
   },
   "appName": "",
   "user": "",
@@ -97,7 +97,7 @@ Below are example payloads for different types of webhook events:
 }
 ```
 
-### Comment updated
+### 评论更新
 
 ```json
 {
@@ -111,7 +111,7 @@ Below are example payloads for different types of webhook events:
         "userName": "Cyndi Lauper",
         "userAvatar": "https://api.dicebear.com/7.x/lorelei/svg?seed=Cyndi Lauper"
       },
-      "content": "Threaderstellungskommentar (bearbeitet)"
+      "content": "线程创建评论（已编辑）"
     }
   ],
   "comment": {
@@ -122,7 +122,7 @@ Below are example payloads for different types of webhook events:
       "userName": "Cyndi Lauper",
       "userAvatar": "https://api.dicebear.com/7.x/lorelei/svg?seed=Cyndi Lauper"
     },
-    "content": "Threaderstellungskommentar (bearbeitet)"
+    "content": "线程创建评论（已编辑）"
   },
   "appName": "",
   "user": "",
@@ -131,7 +131,7 @@ Below are example payloads for different types of webhook events:
 }
 ```
 
-### Comment deleted
+### 评论删除
 
 ```json
 {
@@ -148,7 +148,7 @@ Below are example payloads for different types of webhook events:
           "userName": "Cyndi Lauper",
           "userAvatar": "https://api.dicebear.com/7.x/lorelei/svg?seed=Cyndi Lauper"
         },
-        "content": "Threaderstellungskommentar (bearbeitet)"
+        "content": "线程创建评论（已编辑）"
       }
     ],
     "updatedAt": "2024-03-02T22:17:51.305Z"
@@ -161,7 +161,7 @@ Below are example payloads for different types of webhook events:
       "userName": "Cyndi Lauper",
       "userAvatar": "https://api.dicebear.com/7.x/lorelei/svg?seed=Cyndi Lauper"
     },
-    "content": "Zweites Kommentar, selber Thread"
+    "content": "第二条评论，相同线程"
   },
   "appName": "",
   "user": "",
@@ -170,7 +170,7 @@ Below are example payloads for different types of webhook events:
 }
 ```
 
-### Thread deleted
+### 线程删除
 
 ```json
 {
@@ -187,7 +187,7 @@ Below are example payloads for different types of webhook events:
           "userName": "Cyndi Lauper",
           "userAvatar": "https://api.dicebear.com/7.x/lorelei/svg?seed=Cyndi Lauper"
         },
-        "content": "Threaderstellungskommentar (bearbeitet)"
+        "content": "线程创建评论（已编辑）"
       }
     ],
     "updatedAt": "2024-03-02T22:18:52.050Z",
@@ -200,7 +200,7 @@ Below are example payloads for different types of webhook events:
 }
 ```
 
-### Thread resolved
+### 线程解决
 
 ```json
 {
@@ -217,7 +217,7 @@ Below are example payloads for different types of webhook events:
           "userName": "Cyndi Lauper",
           "userAvatar": "https://api.dicebear.com/7.x/lorelei/svg?seed=Cyndi Lauper"
         },
-        "content": "Threaderstellungskommentar (bearbeitet)"
+        "content": "线程创建评论（已编辑）"
       }
     ],
     "updatedAt": "2024-03-02T22:18:48.531Z",
@@ -230,7 +230,7 @@ Below are example payloads for different types of webhook events:
 }
 ```
 
-### Thread updated (i.e., Unresolved)
+### 线程更新（即未解决）
 
 ```json
 {
@@ -247,7 +247,7 @@ Below are example payloads for different types of webhook events:
           "userName": "Cyndi Lauper",
           "userAvatar": "https://api.dicebear.com/7.x/lorelei/svg?seed=Cyndi Lauper"
         },
-        "content": "Threaderstellungskommentar (bearbeitet)"
+        "content": "线程创建评论（已编辑）"
       }
     ],
     "updatedAt": "2024-03-02T22:18:52.050Z",

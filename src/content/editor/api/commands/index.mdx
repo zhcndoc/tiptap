@@ -1,55 +1,53 @@
 ---
-title: Editor commands
+title: 编辑器命令
 meta:
-  title: Commands | Tiptap Editor Docs
-  description: Learn about command execution and chaining in Tiptap. Discover how to extend functionalities in the Editor command docs.
-  category: Editor
+  title: 命令 | Tiptap 编辑器文档
+  description: 了解 Tiptap 中的命令执行和链式调用。发现如何在编辑器命令文档中扩展功能。
+  category: 编辑器
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-The editor provides a ton of commands to programmatically add or change content or alter the selection. If you want to build your own editor you definitely want to learn more about them.
+编辑器提供了大量命令，用于以编程方式添加或更改内容或改变选择。如果你想构建自己的编辑器，您绝对想要了解更多关于它们的信息。
 
-## Execute a command
+## 执行命令
 
-All available commands are accessible through an editor instance. Let’s say you want to make text bold when a user clicks on a button. That’s how that would look like:
+所有可用的命令通过编辑器实例访问。假设你想让用户点击按钮时文本变为粗体。实现方法如下：
 
 ```js
 editor.commands.setBold()
 ```
 
-While that’s perfectly fine and does make the selected bold, you’d likely want to chain multiple commands in one run. Let’s have a look at how that works.
+虽然这样完全可以将选定文本设置为粗体，但你可能希望在一次运行中链接多个命令。让我们看看这是如何工作的。
 
-### Chain commands
+### 链接命令
 
-Most commands can be combined to one call. That’s shorter than separate function calls in most cases. Here is an example to make the selected text bold:
+大多数命令可以组合为一个调用。在大多数情况下，这比分别调用函数要短。以下是一个将选定文本变为粗体的示例：
 
 ```js
 editor.chain().focus().toggleBold().run()
 ```
 
-The `.chain()` is required to start a new chain and the `.run()` is needed to actually execute all the commands in between.
+`.chain()` 是启动新链所必需的，而 `.run()` 是实际执行所有中间命令所必需的。
 
-In the example above two different commands are executed at once. When a user clicks on a button outside of the content, the editor isn’t in focus anymore. That’s why you probably want to add a `.focus()` call to most of your commands. It brings back the focus to the editor, so the user can continue to type.
+在上面的示例中，同时执行了两个不同的命令。当用户点击内容外部的按钮时，编辑器不再处于焦点状态。这就是为什么你可能希望在大多数命令中添加 `.focus()` 调用。它将焦点返回给编辑器，以便用户能够继续输入。
 
-All chained commands are kind of queued up. They are combined to one single transaction. That means, the content is only updated once, also the `update` event is only triggered once.
+所有链式命令都是排队的。它们组合成一个单一的事务。这意味着内容仅更新一次，`update` 事件也仅触发一次。
 
-<Callout title="Transaction mapping" variant="hint">
-  By default Prosemirror **does not support chaining** which means that you need to update the
-  positions between chained commands via [**Transaction
-  mapping**](https://prosemirror.net/docs/ref/#transform.Mapping).
+<Callout title="事务映射" variant="hint">
+  默认情况下，Prosemirror **不支持链式调用**，这意味着你需要通过 [**事务映射**](https://prosemirror.net/docs/ref/#transform.Mapping) 来更新链式命令之间的位置。
 </Callout>
 
-For example you want to chain a **delete** and **insert** command in one chain, you need to keep track of the position inside your chain commands. Here is an example:
+例如，你想在一个链中链接一个 **删除** 和 **插入** 命令，你需要在链命令中跟踪位置。以下是一个示例：
 
 ```js
-// here we add two custom commands to the editor to demonstrate transaction mapping between two transaction steps
+// 在此我们为编辑器添加两个自定义命令以演示两个事务步骤之间的事务映射
 addCommands() {
   return {
     delete: () => ({ tr }) => {
       const { $from, $to } = tr.selection
 
-      // here we use tr.mapping.map to map the position between transaction steps
+      // 这里我们使用 tr.mapping.map 来映射事务步骤之间的位置
       const from = tr.mapping.map($from.pos)
       const to = tr.mapping.map($to.pos)
 
@@ -60,7 +58,7 @@ addCommands() {
     insert: (content: string) => ({ tr }) => {
       const { $from } = tr.selection
 
-      // here we use tr.mapping.map to map the position between transaction steps
+      // 这里我们使用 tr.mapping.map 来映射事务步骤之间的位置
       const pos = tr.mapping.map($from.pos)
 
       tr.insertText(content, pos)
@@ -71,24 +69,24 @@ addCommands() {
 }
 ```
 
-Now you can do the following without `insert` inserting the content into the wrong position:
+现在你可以执行以下操作，而不会导致 `insert` 将内容插入错误的位置：
 
 ```js
 editor.chain().delete().insert('foo').run()
 ```
 
-#### Chain inside custom commands
+#### 在自定义命令中链式调用
 
-When chaining a command, the transaction is held back. If you want to chain commands inside your custom commands, you’ll need to use said transaction and add to it. Here is how you would do that:
+在链式调用命令时，事务将被暂时保留。如果你想在自定义命令中链接命令，你需要使用上述事务并进行添加。以下是如何做到这一点：
 
 ```js
 addCommands() {
   return {
     customCommand: attributes => ({ chain }) => {
-      // Doesn’t work:
+      // 不起作用：
       // return editor.chain() …
 
-      // Does work:
+      // 起作用：
       return chain()
         .insertContent('foo!')
         .insertContent('bar!')
@@ -98,42 +96,42 @@ addCommands() {
 }
 ```
 
-### Inline commands
+### 行内命令
 
-In some cases, it’s helpful to put some more logic in a command. That’s why you can execute commands in commands. I know, that sounds crazy, but let’s look at an example:
+在某些情况下，在命令中加入更多逻辑是有帮助的。这就是为什么你可以在命令中执行命令。我知道，这听起来很疯狂，但我们来看看一个示例：
 
 ```js
 editor
   .chain()
   .focus()
   .command(({ tr }) => {
-    // manipulate the transaction
-    tr.insertText('hey, that’s cool!')
+    // 操作事务
+    tr.insertText('嘿，这太酷了!')
 
     return true
   })
   .run()
 ```
 
-### Dry run commands
+### 干跑命令
 
-Sometimes, you don’t want to actually run the commands, but only know if it would be possible to run commands, for example to show or hide buttons in a menu. That’s what we added `.can()` for. Everything coming after this method will be executed, without applying the changes to the document:
+有时候，你并不想实际运行命令，而只是想知道是否可以运行命令，例如在菜单中显示或隐藏按钮。这就是我们添加 `.can()` 的原因。所有在此方法之后的内容将被执行，而不对文档应用更改：
 
 ```js
 editor.can().toggleBold()
 ```
 
-And you can use it together with `.chain()`, too. Here is an example which checks if it’s possible to apply all the commands:
+你也可以将其与 `.chain()` 一起使用。以下是一个例子，检查是否可以应用所有命令：
 
 ```js
 editor.can().chain().toggleBold().toggleItalic().run()
 ```
 
-Both calls would return `true` if it’s possible to apply the commands, and `false` in case it’s not.
+如果可以应用命令，则两个调用都会返回 `true`，否则返回 `false`。
 
-In order to make that work with your custom commands, don’t forget to return `true` or `false`.
+为了使其在你的自定义命令中工作，别忘了返回 `true` 或 `false`。
 
-For some of your own commands, you probably want to work with the raw [transaction](/editor/core-concepts/introduction). To make them work with `.can()` you should check if the transaction should be dispatched. Here is how you can create a simple `.insertText()` command:
+对于一些你自己的命令，你可能想使用原始的 [事务](/editor/core-concepts/introduction)。为了使它们与 `.can()` 一起工作，你应该检查事务是否应该被派遣。以下是如何创建一个简单的 `.insertText()` 命令：
 
 ```js
 export default (value) =>
@@ -146,7 +144,7 @@ export default (value) =>
   }
 ```
 
-If you’re just wrapping another Tiptap command, you don’t need to check that, we’ll do it for you.
+如果你只是封装另一个 Tiptap 命令，你不需要检查，我们会为你做到。
 
 ```js
 addCommands() {
@@ -158,7 +156,7 @@ addCommands() {
 }
 ```
 
-If you’re just wrapping a plain ProseMirror command, you’ll need to pass `dispatch` anyway. Then there’s also no need to check it:
+如果你只是封装一个普通的 ProseMirror 命令，你仍然需要传递 `dispatch`。这时也不需要进行检查：
 
 ```js
 import { exitCode } from '@tiptap/pm/commands'
@@ -169,11 +167,11 @@ export default () =>
   }
 ```
 
-### Try commands
+### 尝试命令
 
-If you want to run a list of commands, but want only the first successful command to be applied, you can do this with the `.first()` method. This method runs one command after the other and stops at the first which returns `true`.
+如果你想运行一系列命令，但只想应用第一个成功的命令，你可以使用 `.first()` 方法。该方法依次运行一个命令，直到遇到第一个返回 `true` 的命令为止。
 
-For example, the backspace key tries to undo an input rule first. If that was successful, it stops there. If no input rule has been applied and thus can’t be reverted, it runs the next command and deletes the selection, if there is one. Here is the simplified example:
+例如，退格键首先尝试撤消输入规则。如果成功，它就会停止。如果没有应用输入规则，因此无法撤消，它将运行下一个命令并删除所选内容（如果有的话）。以下是简化的示例：
 
 ```js
 editor.commands.first(({ commands }) => [
@@ -183,7 +181,7 @@ editor.commands.first(({ commands }) => [
 ])
 ```
 
-Inside of commands you can do the same thing:
+在命令内部，你可以执行相同的操作：
 
 ```js
 export default () =>
@@ -196,74 +194,74 @@ export default () =>
   }
 ```
 
-## List of commands
+## 命令列表
 
-Have a look at all of the core commands listed below. They should give you a good first impression of what’s possible.
+请查看下面列出的所有核心命令。它们应该给你一个关于可能性的良好第一印象。
 
-### Content
+### 内容
 
-| Command             | Description                                              |
-| ------------------- | -------------------------------------------------------- |
-| `clearContent()`    | Clear the whole document.                                |
-| `insertContent()`   | Insert a node or an HTML string at the current position. |
-| `insertContentAt()` | Insert a node or an HTML string at a specific position.  |
-| `setContent()`      | Replace the whole document with new content.             |
+| 命令                | 描述                                               |
+| ------------------- | -------------------------------------------------- |
+| `clearContent()`    | 清空整个文档。                                     |
+| `insertContent()`   | 在当前位插入一个节点或 HTML 字符串。              |
+| `insertContentAt()` | 在特定位置插入一个节点或 HTML 字符串。            |
+| `setContent()`      | 用新内容替换整个文档。                             |
 
-### Nodes & Marks
+### 节点和标记
 
-| Command                 | Description                                               |
-| ----------------------- | --------------------------------------------------------- |
-| `clearNodes()`          | Normalize nodes to a simple paragraph.                    |
-| `createParagraphNear()` | Create a paragraph nearby.                                |
-| `deleteNode()`          | Delete a node.                                            |
-| `extendMarkRange()`     | Extends the text selection to the current mark.           |
-| `exitCode()`            | Exit from a code block.                                   |
-| `joinBackward()`        | Join two nodes backward.                                  |
-| `joinForward()`         | Join two nodes forward.                                   |
-| `lift()`                | Removes an existing wrap.                                 |
-| `liftEmptyBlock()`      | Lift block if empty.                                      |
-| `newlineInCode()`       | Add a newline character in code.                          |
-| `resetAttributes()`     | Resets some node or mark attributes to the default value. |
-| `setMark()`             | Add a mark with new attributes.                           |
-| `setNode()`             | Replace a given range with a node.                        |
-| `splitBlock()`          | Forks a new node from an existing node.                   |
-| `toggleMark()`          | Toggle a mark on and off.                                 |
-| `toggleNode()`          | Toggle a node with another node.                          |
-| `toggleWrap()`          | Wraps nodes in another node, or removes an existing wrap. |
-| `undoInputRule()`       | Undo an input rule.                                       |
-| `unsetAllMarks()`       | Remove all marks in the current selection.                |
-| `unsetMark()`           | Remove a mark in the current selection.                   |
-| `updateAttributes()`    | Update attributes of a node or mark.                      |
+| 命令                   | 描述                                              |
+| ----------------------- | -------------------------------------------------- |
+| `clearNodes()`          | 将节点标准化为简简单单的段落。                    |
+| `createParagraphNear()` | 创建一个邻近的段落。                               |
+| `deleteNode()`          | 删除一个节点。                                     |
+| `extendMarkRange()`     | 扩展文本选择至当前标记。                           |
+| `exitCode()`            | 退出代码块。                                      |
+| `joinBackward()`        | 将两个节点向后连接。                               |
+| `joinForward()`         | 将两个节点向前连接。                               |
+| `lift()`                | 移除现有包裹。                                    |
+| `liftEmptyBlock()`      | 如果为空，则提升块。                              |
+| `newlineInCode()`       | 在代码中添加换行符。                              |
+| `resetAttributes()`     | 将某些节点或标记的属性重置为默认值。              |
+| `setMark()`             | 添加具有新属性的标记。                             |
+| `setNode()`             | 用节点替换给定范围。                              |
+| `splitBlock()`          | 从现有节点分叉出一个新节点。                        |
+| `toggleMark()`          | 切换标记的开关。                                  |
+| `toggleNode()`          | 用另一个节点切换节点。                            |
+| `toggleWrap()`          | 在另一个节点中包裹节点，或移除现有的包裹。       |
+| `undoInputRule()`       | 撤消输入规则。                                    |
+| `unsetAllMarks()`       | 删除当前选择中的所有标记。                         |
+| `unsetMark()`           | 删除当前选择中的标记。                             |
+| `updateAttributes()`    | 更新节点或标记的属性。                             |
 
-### Lists
+### 列表
 
-| Command           | Description                                 |
-| ----------------- | ------------------------------------------- |
-| `liftListItem()`  | Lift the list item into a wrapping list.    |
-| `sinkListItem()`  | Sink the list item down into an inner list. |
-| `splitListItem()` | Splits one list item into two list items.   |
-| `toggleList()`    | Toggle between different list types.        |
-| `wrapInList()`    | Wrap a node in a list.                      |
+| 命令                 | 描述                                            |
+| --------------------- | ----------------------------------------------- |
+| `liftListItem()`      | 提升列表项到一个包装列表中。                    |
+| `sinkListItem()`      | 将列表项下沉到一个内部列表中。                  |
+| `splitListItem()`     | 将一个列表项拆分为两个列表项。                   |
+| `toggleList()`        | 在不同类型的列表之间切换。                      |
+| `wrapInList()`        | 将节点包裹在一个列表中。                        |
 
-### Selection
+### 选择
 
-| Command                | Description                             |
-| ---------------------- | --------------------------------------- |
-| `blur()`               | Removes focus from the editor.          |
-| `deleteRange()`        | Delete a given range.                   |
-| `deleteSelection()`    | Delete the selection, if there is one.  |
-| `enter()`              | Trigger enter.                          |
-| `focus()`              | Focus the editor at the given position. |
-| `keyboardShortcut()`   | Trigger a keyboard shortcut.            |
-| `scrollIntoView()`     | Scroll the selection into view.         |
-| `selectAll()`          | Select the whole document.              |
-| `selectNodeBackward()` | Select a node backward.                 |
-| `selectNodeForward()`  | Select a node forward.                  |
-| `selectParentNode()`   | Select the parent node.                 |
-| `setNodeSelection()`   | Creates a NodeSelection.                |
-| `setTextSelection()`   | Creates a TextSelection.                |
+| 命令                   | 描述                             |
+| ----------------------- | --------------------------------- |
+| `blur()`               | 从编辑器中移除焦点。             |
+| `deleteRange()`        | 删除给定范围。                   |
+| `deleteSelection()`     | 删除选定内容（如果有的话）。     |
+| `enter()`              | 触发回车。                      |
+| `focus()`              | 在给定位置将焦点放在编辑器上。 |
+| `keyboardShortcut()`   | 触发键盘快捷键。                |
+| `scrollIntoView()`      | 将选定内容滚动到可视区域。      |
+| `selectAll()`          | 选择整个文档。                  |
+| `selectNodeBackward()`  | 向后选择一个节点。              |
+| `selectNodeForward()`   | 向前选择一个节点。              |
+| `selectParentNode()`    | 选择父节点。                    |
+| `setNodeSelection()`     | 创建一个 NodeSelection。         |
+| `setTextSelection()`     | 创建一个 TextSelection。         |
 
-## Write your own commands
+## 编写自己的命令
 
-All extensions can add additional commands (and most do), check out the specific [documentation for the provided nodes](/editor/extensions/nodes), [marks](/editor/extensions/marks), and [functionality](/editor/extensions/functionality) to learn more about those. And of course, you can [add your custom extensions](/editor/extensions/custom-extensions) with custom commands as well.
-But how do you write those commands? There’s a little bit to learn about that.
+所有扩展都可以添加额外的命令（大多数都有），请查看提供的节点的具体 [文档](/editor/extensions/nodes)、[标记](/editor/extensions/marks)、和 [功能](/editor/extensions/functionality) 来了解更多信息。 当然，您还可以 [添加自定义扩展](/editor/extensions/custom-extensions) 和自定义命令。
+那么如何编写这些命令呢？关于这方面还有一些内容需要学习。

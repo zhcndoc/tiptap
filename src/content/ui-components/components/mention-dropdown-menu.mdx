@@ -1,18 +1,18 @@
 ---
-title: A dropdown menu for mentioning users
+title: 提及用户的下拉菜单
 meta:
-  title: Mention dropdown | Tiptap UI Component
-  description: Mention other users with a dropdown menu UI component in your Tiptap editor. More in our documentation!
-  category: UI Components
+  title: 提及下拉菜单 | Tiptap UI 组件
+  description: 在您的 Tiptap 编辑器中使用下拉菜单 UI 组件提及其他用户。更多信息请参考我们的文档！
+  category: UI 组件
 ---
 
-## Install
+## 安装
 
 ```bash
 npx @tiptap/cli add mention-dropdown-menu
 ```
 
-## Usage
+## 使用方法
 
 ```tsx
 import { MentionDropdownMenu } from '@/components/tiptap-ui/mention-dropdown-menu'
@@ -22,9 +22,9 @@ import { Mention } from '@tiptap/extension-mention'
 export default function MyEditor() {
   const editor = useEditor({
     extensions: [
-      // other extensions
+      // 其他扩展
       Mention.configure({
-        // mention configuration
+        // 提及配置
       }),
     ],
   })
@@ -38,20 +38,18 @@ export default function MyEditor() {
 }
 ```
 
-## Props
+## 组件属性
 
-| Name            | Type           | Default                        | Description                |
-| --------------- | -------------- | ------------------------------ | -------------------------- |
-| editor          | Editor \| null | null                           | The Tiptap editor instance |
-| floatingOptions | object         | -                              | Options for floating UI    |
-| selector        | string         | 'tiptap-mention-dropdown-menu' | Selector for the target    |
-| char            | string         | '@'                            | Mention character          |
+| 名称             | 类型             | 默认值                      | 描述                     |
+| ---------------- | ---------------- | --------------------------- | ------------------------ |
+| editor           | Editor \| null   | null                        | Tiptap 编辑器实例      |
+| floatingOptions  | object           | -                           | 浮动UI的选项            |
+| selector         | string           | 'tiptap-mention-dropdown-menu' | 目标选择器             |
+| char             | string           | '@'                         | 提及字符                |
 
-## Requirements
+## 依赖组件
 
-Used reference components
-
-- `tiptap-utils` (lib)
-- `suggestion-menu` (ui)
-- `avatar` (primitive)
-- `button` (primitive)
+- `tiptap-utils`（库）
+- `suggestion-menu`（UI）
+- `avatar`（原语）
+- `button`（原语）

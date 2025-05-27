@@ -1,25 +1,25 @@
 ---
-title: deleteNode command
+title: deleteNode 命令
 meta:
-  title: deleteNode command | Tiptap Editor Docs
-  description: Use the deleteNode command in Tiptap to selectively remove nodes from your document. Learn more in the docs.
-  category: Editor
+  title: deleteNode 命令 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用 deleteNode 命令有选择性地删除文档中的节点。详细信息请查看文档。
+  category: 编辑器
 ---
 
-The `deleteNode` command deletes a node inside the current selection. It requires a `typeOrName` argument, which can be a string or a `NodeType` to find the node that needs to be deleted. After deleting the node, the view will automatically scroll to the cursors position.
+`deleteNode` 命令删除当前选区内的一个节点。它需要一个 `typeOrName` 参数，这可以是一个字符串或一个 `NodeType`，用于查找需要删除的节点。删除节点后，视图将自动滚动到光标的位置。
 
-## Parameters
+## 参数
 
 `typeOrName: string | NodeType`
 
-## Use the deleteNode command
+## 使用 deleteNode 命令
 
 ```js
-// deletes a paragraph node
+// 删除一个段落节点
 editor.commands.deleteNode('paragraph')
 
-// or
+// 或者
 
-// deletes a custom node
+// 删除一个自定义节点
 editor.commands.deleteNode(MyCustomNode)
 ```

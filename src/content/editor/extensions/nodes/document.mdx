@@ -1,22 +1,22 @@
 ---
-title: Document extension
+title: 文档扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extension-document/next?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extension-document/next?label=版本
     url: https://www.npmjs.com/package/@tiptap/extension-document
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-document.svg
     url: https://npmcharts.com/compare/@tiptap/extension-document?minimal=true
-    label: Downloads
+    label: 下载量
 meta:
-  title: Document extension | Tiptap Editor Docs
-  description: Use the required Document extension as a home for all your editor’s nodes and content. Learn more in our docs!
-  category: Editor
+  title: 文档扩展 | Tiptap 编辑器文档
+  description: 使用必需的文档扩展作为您所有编辑器节点和内容的家。在我们的文档中了解更多信息！
+  category: 编辑器
 extension:
-  name: Document
+  name: 文档
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-document
-  description: 'Everyone needs it, nobody talks about it: the Document extension.'
+  description: '每个人都需要它，但没人谈论它：文档扩展。'
   type: node
   icon: FileText
 ---
@@ -24,23 +24,22 @@ extension:
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 
-The `Document` extension is required, no matter what you build with Tiptap. It’s a so called “topNode”, a node that’s the home to all other nodes. Think of it like the `<body>` tag for your document.
+无论您使用 Tiptap 构建什么，`Document` 扩展都是必需的。它是一个所谓的“顶级节点”，是所有其他节点的家。可以将其视为您文档的 `<body>` 标签。
 
-The node is very tiny though. It defines a name of the node (`doc`), is configured to be a top node (`topNode: true`) and that it can contain multiple other nodes (`block+`). That’s all. But have a look yourself:
+但是这个节点非常小。它定义了节点的名称（`doc`），配置为顶级节点（`topNode: true`），并且可以包含多个其他节点（`block+`）。就这些。您可以自己看看：
 
 <CodeDemo path="/Nodes/Document" />
 
-<Callout title="Breaking Change" variant="warning">
-  Tiptap v1 tried to hide that node from you, but it has always been there. You have to explicitly
-  import it from now on (or use [StarterKit](/editor/extensions/functionality/starterkit)).
+<Callout title="重大变更" variant="warning">
+  Tiptap v1 尝试向您隐藏该节点，但它始终存在。从现在开始，您必须显式导入它（或者使用 [StarterKit](/editor/extensions/functionality/starterkit)）。
 </Callout>
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-document@next
 ```
 
-## Source code
+## 源代码
 
 [packages/extension-document/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-document/)

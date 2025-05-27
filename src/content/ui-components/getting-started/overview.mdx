@@ -1,9 +1,9 @@
 ---
-title: Integrate Tiptap UI Components
+title: 集成 Tiptap UI 组件
 meta:
-    title: UI Components | Tiptap
-    description: Set up Tiptap UI Components using one of our prebuilt templates or by integrating individual components. More in the docs!
-    category: UI Components
+    title: UI 组件 | Tiptap
+    description: 使用我们的一些预构建模板或集成单独组件设置 Tiptap UI 组件。更多信息请查看文档！
+    category: UI 组件
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -13,17 +13,16 @@ import * as CardGrid from '@/components/CardGrid'
 import cardCoverSimpleEditorTemplate from '@/assets/card-covers/examples/simple-editor-template-preview.jpg'
 import cardCoverUIComponents from '@/assets/card-covers/examples/components-preview.jpg'
 
-Tiptap is headless and modular, giving you full control over the UI. The Tiptap UI Components library provides prebuilt interfaces, so you don’t have to build everything from scratch. Use them as-is or customize them to fit your setup.
+Tiptap 是无头和模块化的，给予你对 UI 的完全控制。Tiptap UI 组件库提供预构建的接口，因此你无需从头构建所有内容。你可以按原样使用它们或根据需要进行定制。
 
-
-<Section title="Get started">
+<Section title="开始使用">
     <CardGrid.Wrapper>
         <CardGrid.Item asChild>
             <Link href="/ui-components/templates/simple-editor">
-                <CardGrid.ItemImage asNextImage src={cardCoverSimpleEditorTemplate.src} width={cardCoverSimpleEditorTemplate.width} height={cardCoverSimpleEditorTemplate.height} alt="Image" />
+                <CardGrid.ItemImage asNextImage src={cardCoverSimpleEditorTemplate.src} width={cardCoverSimpleEditorTemplate.width} height={cardCoverSimpleEditorTemplate.height} alt="图像" />
                 <div>
-                    <CardGrid.ItemTitle>Templates</CardGrid.ItemTitle>
-                    <CardGrid.ItemParagraph>Get started fast with a prebuilt editor that includes commonly used features.</CardGrid.ItemParagraph>
+                    <CardGrid.ItemTitle>模板</CardGrid.ItemTitle>
+                    <CardGrid.ItemParagraph>使用一个包含常用功能的预构建编辑器快速入门。</CardGrid.ItemParagraph>
                 </div>
                 <CardGrid.ItemFooter>
                 </CardGrid.ItemFooter>
@@ -31,10 +30,10 @@ Tiptap is headless and modular, giving you full control over the UI. The Tiptap 
         </CardGrid.Item>
         <CardGrid.Item asChild>
             <Link href="/ui-components/components/overview">
-                <CardGrid.ItemImage asNextImage src={cardCoverUIComponents.src} width={cardCoverUIComponents.width} height={cardCoverUIComponents.height} alt="Image" />
+                <CardGrid.ItemImage asNextImage src={cardCoverUIComponents.src} width={cardCoverUIComponents.width} height={cardCoverUIComponents.height} alt="图像" />
                 <div>
-                    <CardGrid.ItemTitle>Components</CardGrid.ItemTitle>
-                    <CardGrid.ItemParagraph>Already using Tiptap? Drop in just the pieces you need.</CardGrid.ItemParagraph>
+                    <CardGrid.ItemTitle>组件</CardGrid.ItemTitle>
+                    <CardGrid.ItemParagraph>已经在使用 Tiptap？直接添加你需要的部分。</CardGrid.ItemParagraph>
                 </div>
                 <CardGrid.ItemFooter>
                 </CardGrid.ItemFooter>
@@ -43,44 +42,43 @@ Tiptap is headless and modular, giving you full control over the UI. The Tiptap 
     </CardGrid.Wrapper>
 </Section>
 
+## 许可证和源代码
 
-## License and source code
+Tiptap [UI 组件](/ui-components/components/overview) 遵循与其构建的 [编辑器扩展](/editor/extensions/overview) 相同的许可证。
+- 如果扩展是开源的（例如 Bold、Heading 或 Image），那么 UI 组件也是 MIT 许可证的。
+- 你可以自由地查看源代码、复制它，并根据自己的需要进行定制。
 
-Tiptap [UI Components](/ui-components/components/overview) follow the same license as the [editor extension](/editor/extensions/overview) they’re built on.
-- If the extension is open source (like Bold, Heading, or Image), the UI component is MIT licensed too.
-- You’re free to read the source code, copy it, and customize it however you like.
+某些组件是为付费 **Tiptap 功能** 构建的，例如评论或版本历史。
 
-Some components are built for paid **Tiptap features**, like Comments or Version History.
+- 这些组件 **不是** 开源的。
+- 大多数包含依赖于 Tiptap 后端服务的前端逻辑。
+- 使用它们需要 Tiptap Cloud 订阅或试用。
 
-- These components are **not** open source.
-- Most include frontend logic that depends on Tiptap’s backend services.
-- A Tiptap Cloud subscription or trial is required to use them.
+无论类型（免费或云连接），你都可以检查源代码并根据你的用例进行调整。
 
-No matter the type (free or cloud-connected), you can inspect the source code and adapt it to your use case.
-
-<Callout title="Tiptap Cloud Features" variant="hint">
-    We’re starting with open source components. Components for Tiptap Cloud features will roll out gradually.
+<Callout title="Tiptap Cloud 功能" variant="hint">
+    我们将从开源组件开始。Tiptap Cloud 功能的组件将逐步推出。
 </Callout>
 
-## Design defaults
-Components are designed to feel vanilla and blend into your design. They come with neutral styling: minimal colors, basic spacing, and no strong visual opinions. You can use them as-is or customize them to match your brand.
+## 设计默认
+组件的设计旨在让人感觉简单并融入你的设计。它们采用中性色彩：最少的颜色、基本的间距，并且没有强烈的视觉观点。你可以按原样使用它们或进行定制以匹配你的品牌。
 
-The design is consistent and cohesive across all components, so if you use multiple of them together, they’ll match nicely without extra work.
+所有组件的设计一致且协调，因此如果你同时使用多个组件，它们将很好地匹配，而无需额外的工作。
 
-- No complex overrides or `!important` hacks needed
-- Just edit the code directly because it’s meant to be forked or extended
+- 不需要复杂的覆盖或 `!important` 黑客
+- 只需直接编辑代码，因为它旨在被分支或扩展
 
-## Components and primitives
-To build a great editing experience in your Tiptap editor, you can integrate UI elements. The library provides different types of building blocks for this: **Components**, **Node Components** and **Primitives**.
+## 组件和原语
+为了在你的 Tiptap 编辑器中构建出色的编辑体验，你可以集成 UI 元素。库提供了不同类型的构建模块：**组件**、**节点组件**和 **原语**。
 
-### Components
+### 组件
 
-Ready-made, feature-specific React components like a heading dropdown for example. Each UI Component typically pairs with a Tiptap extension (e.g., the **ListButton** relies on list-related extensions), and uses React hooks to interact with the editor’s state.
+现成的、特定功能的 React 组件，例如标题下拉菜单。每个 UI 组件通常与 Tiptap 扩展配对（例如，**ListButton** 依赖于与列表相关的扩展），并使用 React hooks 与编辑器的状态进行交互。
 
-- **Works with extensions**: To use a component (e.g., `HeadingDropdownMenu`), ensure the matching Tiptap extension (like `@tiptap/extension-heading`) is enabled in your editor.
-- **Leverages hooks**: Many components internally consume hooks (like `useTiptapEditor` or `useFloatingElement`) to synchronize with editor state, handle positioning, or manage keyboard navigation. You can also use these hooks in your own custom components.
-- **Easy customization**: By default, these components have minimal styling so they can blend into your design. You can fully override or extend them. Each component’s source code is openly available for direct edits with no `!important` hacks.
+- **与扩展配合使用**：要使用组件（例如 `HeadingDropdownMenu`），请确保在编辑器中启用对应的 Tiptap 扩展（如 `@tiptap/extension-heading`）。
+- **利用 hooks**：许多组件内部使用 hooks（如 `useTiptapEditor` 或 `useFloatingElement`）以与编辑器状态同步、处理定位或管理键盘导航。你也可以在自己的自定义组件中使用这些 hooks。
+- **易于定制**：默认情况下，这些组件具有最少的样式，因此可以融入你的设计。你可以完全覆盖或扩展它们。每个组件的源代码都是公开的，可以直接编辑，没有 `!important` 黑客。
 
-### Primitives
+### 原语
 
-Low-level UI elements like `Button`,`DropdownMenu`,`Popover` and `Spacer`. They’re the foundation of many UI Components, handling accessibility and basic behavior. You can mix and match these primitives to create your own editor controls or to further customize existing components.
+低级 UI 元素，如 `Button`、`DropdownMenu`、`Popover` 和 `Spacer`。它们是许多 UI 组件的基础，处理可访问性和基本行为。你可以将这些原语混合搭配，以创建自己的编辑器控件或进一步自定义现有组件。

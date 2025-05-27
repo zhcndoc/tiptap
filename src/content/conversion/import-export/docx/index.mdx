@@ -1,26 +1,26 @@
 ---
-title: Import & export DOCX with Tiptap
+title: 导入与导出 DOCX  文件与 Tiptap
 meta:
-    title: DOCX | Tiptap Conversion
-    description: Review DOCX import and export options, REST API usage, and customizations for Tiptap in our docs.
-    category: Conversion
+    title: DOCX | Tiptap 转换
+    description: 在我们的文档中查看 DOCX 导入和导出选项、REST API 使用情况以及自定义设置，用于 Tiptap。
+    category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-Integrating `DOCX` (Microsoft Word) conversion with Tiptap can be done in several ways, from adding in-editor “Import/Export DOCX” buttons to using the REST API for server-side workflows.
+将 `DOCX`（Microsoft Word）转换集成到 Tiptap 中，可以通过多种方式实现，从在编辑器中添加“导入/导出 DOCX”按钮，到使用 REST API 进行服务器端工作流程。
 
-<Callout title="Integrate or test Conversion" variant="warning">
-    To test or integrate this feature you need an [active trial or Tiptap subscription](https://cloud.tiptap.dev/v2/billing).
+<Callout title="集成或测试转换" variant="warning">
+    要测试或集成此功能，您需要一个 [有效的试用或 Tiptap 订阅](https://cloud.tiptap.dev/v2/billing)。
 </Callout>
 
-| Method                    | Description                                                                                                                                                                                        | Documentation                                                                                                                                          |
-|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Editor Import**         | Let users upload `.docx` files directly in the editor (e.g., “Import DOCX” button), converting them to Tiptap JSON for editing. This extension makes a request to our REST API for the conversion. | [DOCX Editor import](/conversion/import-export/docx/editor-import)                                                                                     |
-| **Editor Export**         | Provides the functionality to generate `.docx` from Tiptap content. You can use this extension both on client and on server  and it also supports **custom nodes**.                                | [DOCX Editor export](/conversion/import-export/docx/editor-export)                                                                                     |
-| **REST API**              | Ideal for server-side or external `.docx` conversions (batch processing, no in-editor interaction). Sends `.docx` to get Tiptap JSON or vice versa. **Cannot handle custom nodes.**                | [DOCX conversion REST API](/conversion/import-export/docx/rest-api)                                                                                    |
-| **Custom nodes & styles** | If you have custom Tiptap extensions or need deeper style control, you can override defaults or provide custom renderers for `.docx` output.                                                       | [Export styles for DOCX](/conversion/import-export/docx/export-styles), [Custom nodes for DOCX](/conversion/import-export/docx/custom-node-conversion) |
+| 方法                      | 描述                                                                                                                                                                                     | 文档说明                                                                                                                                                 |
+|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **编辑器导入**             | 允许用户直接在编辑器中上传 `.docx` 文件（例如，“导入 DOCX”按钮），将其转换为 Tiptap JSON 进行编辑。此扩展会向我们的 REST API 发送请求进行转换。                                        | [DOCX 编辑器导入](/conversion/import-export/docx/editor-import)                                                                                      |
+| **编辑器导出**             | 提供从 Tiptap 内容生成 `.docx` 的功能。此扩展可在客户端和服务器端使用，并支持 **自定义节点**。                                                                                       | [DOCX 编辑器导出](/conversion/import-export/docx/editor-export)                                                                                      |
+| **REST API**               | 适用于服务器端或外部的 `.docx` 转换（批处理，无需在编辑器中交互）。发送 `.docx` 以获取 Tiptap JSON 或反之。 **无法处理自定义节点。**                                                | [DOCX 转换REST API](/conversion/import-export/docx/rest-api)                                                                                        |
+| **自定义节点和样式**         | 如果你有自定义的 Tiptap 扩展或需要更深层次的样式控制，可以覆盖默认设置或为 `.docx` 输出提供自定义渲染器。                                                                                   | [导出 DOCX 样式](/conversion/import-export/docx/export-styles)，[自定义节点用于 DOCX](/conversion/import-export/docx/custom-node-conversion)             |
 
-<Callout title="Information related to custom nodes" variant="hint">
-    The REST API can’t handle custom node conversions. For that, implement the Editor Export extension on your own server or on the client so you can define how those nodes convert.
+<Callout title="关于自定义节点的信息" variant="hint">
+    REST API 无法处理自定义节点转换。为此，你可以在自己的服务器或客户端实现 Editor Export 扩展，以定义这些节点的转换方式。
 </Callout>

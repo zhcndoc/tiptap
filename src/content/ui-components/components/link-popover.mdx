@@ -1,12 +1,12 @@
 ---
-title: Add a link popover UI component
+title: 添加链接弹出框 UI 组件
 meta:
-  title: Link popover | Tiptap UI Component
-  description: Select link options in a popover element with this Tiptap UI component. More in our documentation
-  category: UI Components
+  title: 链接弹出框 | Tiptap UI 组件
+  description: 使用此 Tiptap UI 组件在弹出框元素中选择链接选项。更多内容请参考我们的文档
+  category: UI 组件
 component:
-  name: Link popover
-  description: Add a popover element featuring link options.
+  name: 链接弹出框
+  description: 添加一个具有链接选项的弹出框元素。
   type: component
   isFree: true
   isCloud: false
@@ -17,25 +17,25 @@ component:
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-A popover for creating and editing links.
+用于创建和编辑链接的弹出框。
 
 <CodeDemo isScrollable isSmall src="https://template.tiptap.dev/preview/tiptap-ui/link-popover" />
 
-## Install
-You can add the component via Tiptap CLI (for Vite or Next.js)
+## 安装
+您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加组件
 
 ```bash
 npx @tiptap/cli add link-popover
 ```
 
-### Manual Integration
-For frameworks other than Vite or Next.js, add the component manually from the [open-source repository](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/link-popover).
+### 手动集成
+对于 Vite 或 Next.js 以外的框架，请从 [开源仓库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/link-popover) 手动添加组件。
 
-### Import styles
+### 导入样式
 
-This component requires you to import our styles which were added to `styles/keyframe-animation.scss` and `styles/_variables.scss`.
+此组件需要您导入我们的样式，这些样式已添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 中。
 
-## Usage
+## 使用
 
 ```tsx
 import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
@@ -50,7 +50,7 @@ export default function MyEditor() {
     immediatelyRender: false,
     extensions: [StarterKit, Link.configure({ openOnClick: false })],
     content: `
-        <p>Click the button to open the link popover.</p>
+        <p>点击按钮打开链接弹出框。</p>
         <p><a href="https://www.tiptap.dev">Tiptap</a></p>
         `,
   })
@@ -69,27 +69,27 @@ export default function MyEditor() {
 
 ## Props
 
-| Name                 | Type                      | Default | Description                                     |
-| -------------------- | ------------------------- | ------- | ----------------------------------------------- |
-| editor               | Editor \| null            | null    | The Tiptap editor instance                      |
-| hideWhenUnavailable  | boolean                   | false   | Whether the popover is in a floating context    |
-| onOpenChange         | (isOpen: boolean) => void | -       | Callback when popover open state changes        |
-| autoOpenOnLinkActive | boolean                   | true    | Whether to open popover when a link is selected |
+| 名称                 | 类型                      | 默认值 | 描述                                           |
+| -------------------- | ------------------------- | ------- | ---------------------------------------------- |
+| editor               | Editor \| null            | null    | Tiptap 编辑器实例                             |
+| hideWhenUnavailable  | boolean                   | false   | 弹出框是否在浮动上下文中                     |
+| onOpenChange         | (isOpen: boolean) => void | -       | 弹出框打开状态改变时的回调                   |
+| autoOpenOnLinkActive | boolean                   | true    | 链接被选中时是否打开弹出框                   |
 
-## Requirements
+## 需求
 
-Used reference components
+使用的参考组件
 
-- `use-tiptap-editor` (hook)
-- `tiptap-utils` (lib)
-- `button` (primitive)
-- `popover` (primitive)
-- `separator` (primitive)
-- `link-icon` (icon)
-- `trash-icon` (icon)
-- `corner-down-left-icon` (icon)
-- `external-link-icon` (icon)
+- `use-tiptap-editor`（钩子）
+- `tiptap-utils`（库）
+- `button`（原语）
+- `popover`（原语）
+- `separator`（原语）
+- `link-icon`（图标）
+- `trash-icon`（图标）
+- `corner-down-left-icon`（图标）
+- `external-link-icon`（图标）
 
-Open source feature(s)
+开源功能
 
 - `@tiptap/extension-link`

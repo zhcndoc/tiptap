@@ -1,14 +1,14 @@
 ---
-title: Drag Handle extension
+title: 拖拽手柄扩展
 tags:
   - type: pro
 meta:
-  category: Editor
-  title: Drag Handle extension | Tiptap Editor Docs
-  description: Enable dragging nodes around your Tiptap Editor with the Drag Handle Extension. Learn how to set it up here in the Docs!
+  category: 编辑器
+  title: 拖拽手柄扩展 | Tiptap 编辑器文档
+  description: 通过拖拽手柄扩展，让你可以在 Tiptap 编辑器中自由拖动节点。在此文档中了解如何进行设置！
 extension:
-  name: Drag Handle
-  description: Have you ever wanted to drag nodes around your editor? Well, we did too.
+  name: 拖拽手柄
+  description: 你是否曾经想在编辑器中拖动节点？其实我们也有这个需求。
   type: extension
   icon: GripVertical
   isPro: true
@@ -19,45 +19,42 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        Start a free [trial in your Account](https://cloud.tiptap.dev/v2/billing) or subscribe to a [Tiptap plan](https://cloud.tiptap.dev/v2/billing).
+    <RequirementItem label="1. 激活试用或订阅">
+        在你的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 方案](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Install from private registry">
-        To install this frontend extensions, authenticate to Tiptap’s private npm registry by following the [setup guide](/guides/pro-extensions).
+    <RequirementItem label="2. 通过私有仓库安装">
+        要安装此前端扩展，你需要通过 [设置指南](/guides/pro-extensions) 进行认证，访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
+你是否曾经希望在编辑器中自由拖动节点？其实我们也有这个需求 — 这就是为此设计的扩展。
 
-Have you ever wanted to drag nodes around your editor? Well, we did too—so here’s an extension for that.
-
-The `DragHandle` extension allows you to easily handle dragging nodes around in the editor. You can define custom render functions, placement, and more.
+`DragHandle` 扩展允许你轻松管理在编辑器中拖动节点。你可以定义自定义渲染函数、位置等。
 
 <CodeDemo isPro path="/Extensions/DragHandle" />
 
-## Install
+## 安装
 
-<Callout title="Set up access to Tiptap's private repository" variant="info">
-  Integrate this pro extension by registering for a free [Tiptap
-  account](https://cloud.tiptap.dev/register) and following our [access
-  guide](/guides/pro-extensions) to Tiptap’s private repository.
+<Callout title="设置访问 Tiptap 私有仓库" variant="info">
+  通过注册一个免费的 [Tiptap 账号](https://cloud.tiptap.dev/register)，并按照我们的 [访问指南](/guides/pro-extensions) 操作，即可集成此专业扩展到你的项目中。
 </Callout>
 
 ```bash
 npm install @tiptap-pro/extension-drag-handle@next
 ```
 
-## Settings
+## 设置
 
 ### render
 
-Renders an element that is positioned with tippy.js. This is the element that will be displayed as the handle when dragging a node around.
+定义一个通过 tippy.js 定位的元素。这个元素会作为拖动节点时显示的手柄。
 
 ```js
 DragHandle.configure({
   render: () => {
     const element = document.createElement('div')
 
-    // Use as a hook for CSS to insert an icon
+    // 用于 CSS 插入图标的钩子
     element.classList.add('custom-drag-handle')
 
     return element
@@ -67,9 +64,9 @@ DragHandle.configure({
 
 ### tippyOptions
 
-Options for tippy.js. You can pass any options that are available in the [tippy.js documentation](https://atomiks.github.io/tippyjs/v6/all-props/).
+tippy.js 的配置项。你可以传入 [tippy.js 文档](https://atomiks.github.io/tippyjs/v6/all-props/) 中的任何选项。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```js
 DragHandle.configure({
@@ -81,9 +78,9 @@ DragHandle.configure({
 
 ### onNodeChange
 
-Returns a node or null when a node is hovered over. This can be used to highlight the node that is currently hovered over.
+当鼠标悬停在某个节点上时，返回该节点或 null。可以用来高亮悬停的节点。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```js
 DragHandle.configure({
@@ -92,19 +89,19 @@ DragHandle.configure({
       selectedNode = null
       return
     }
-    // Do something with the node
+    // 处理悬停节点
     selectedNode = node
   },
 })
 ```
 
-## Commands
+## 命令
 
 ### lockDragHandle()
 
-Locks the draghandle in place and visibility. If the drag handle was visible, it will remain visible until unlocked. If it was hidden, it will remain hidden until unlocked.
+锁定拖拽手柄，使其保持可见且被锁定状态。如果此前手柄是可见的，保持可见直到解锁；如果之前是隐藏的，保持隐藏直到解锁。
 
-This can be useful if you want to have a menu inside of the drag handle and want it to remain visible whether the drag handle is moused over or not.
+适合在手柄内设置菜单，并希望菜单在鼠标悬停或不悬停时都保持可见。
 
 ```js
 editor.commands.lockDragHandle()
@@ -112,7 +109,7 @@ editor.commands.lockDragHandle()
 
 ### unlockDragHandle()
 
-Unlocks the draghandle. Resets to default visibility and behavior.
+解锁拖拽手柄，恢复默认的可见性和行为。
 
 ```js
 editor.commands.unlockDragHandle()
@@ -120,7 +117,7 @@ editor.commands.unlockDragHandle()
 
 ### toggleDragHandle()
 
-Toggle draghandle lock state. If the drag handle is locked, it will be unlocked and vice versa.
+切换拖拽手柄的锁定状态。若锁定，则解锁；若未锁定则锁定。
 
 ```js
 editor.commands.toggleDragHandle()
