@@ -3,15 +3,15 @@ import { SidebarConfig } from '@/types'
 export const sidebarConfig: SidebarConfig = {
   id: 'content-ai',
   rootHref: '/content-ai/getting-started/overview',
-  title: 'Content AI',
+  title: '内容 AI',
   items: [
     {
       href: '/content-ai/getting-started/overview',
-      title: 'Get started',
+      title: '开始使用',
       type: 'group',
       children: [
         {
-          title: 'Overview',
+          title: '概述',
           href: '/content-ai/getting-started/overview',
         },
       ],
@@ -19,163 +19,163 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/content-ai/capabilities',
-      title: 'Capabilities',
+      title: '能力',
       children: [
         {
-          title: 'AI Generation',
+          title: 'AI 生成',
           tags: ['Pro'],
           href: '/content-ai/capabilities/generation/',
           children: [
             {
-              title: 'Overview',
+              title: '概述',
               href: '/content-ai/capabilities/generation/overview',
             },
             {
-              title: 'Install',
+              title: '安装',
               href: '/content-ai/capabilities/generation/install',
             },
             {
-              title: 'Text generation',
+              title: '文本生成',
               href: '/content-ai/capabilities/generation/text-generation',
               children: [
                 {
-                  title: 'Built-in commands',
+                  title: '内置命令',
                   href: '/content-ai/capabilities/generation/text-generation/built-in-commands',
                 },
                 {
-                  title: 'Autocompletion',
+                  title: '自动完成',
                   href: '/content-ai/capabilities/generation/text-generation/autocompletion',
                 },
                 {
-                  title: 'Provide context',
+                  title: '提供上下文',
                   href: '/content-ai/capabilities/generation/text-generation/provide-context',
                 },
                 {
-                  title: 'Formatted responses',
+                  title: '格式化响应',
                   href: '/content-ai/capabilities/generation/text-generation/format',
                 },
                 {
-                  title: 'Manage responses',
+                  title: '管理响应',
                   href: '/content-ai/capabilities/generation/text-generation/manage-responses',
                 },
                 {
-                  title: 'Custom commands',
+                  title: '自定义命令',
                   href: '/content-ai/capabilities/generation/text-generation/custom-commands',
                 },
                 {
-                  title: 'Stream content (Advanced)',
+                  title: '流媒体内容（高级）',
                   href: '/content-ai/capabilities/generation/text-generation/stream',
                 },
               ],
             },
             {
-              title: 'Image generation',
+              title: '图像生成',
               href: '/content-ai/capabilities/generation/image-generation',
             },
             {
-              title: 'Integrate your LLM',
+              title: '集成你的 LLM',
               href: '/content-ai/capabilities/generation/custom-llms',
             },
             {
-              title: 'Configure',
+              title: '配置',
               href: '/content-ai/capabilities/generation/configure',
             },
           ],
         },
         {
-          title: 'AI Suggestion',
+          title: 'AI 建议',
           href: '/content-ai/capabilities/suggestion',
           tags: ['Pro', 'Beta'],
           children: [
             {
-              title: 'Overview',
+              title: '概述',
               href: '/content-ai/capabilities/suggestion/overview',
             },
             {
-              title: 'Install',
+              title: '安装',
               href: '/content-ai/capabilities/suggestion/install',
             },
             {
-              title: 'Features',
+              title: '特征',
               href: '/content-ai/capabilities/suggestion/features',
               children: [
                 {
-                  title: 'Define rules',
+                  title: '定义规则',
                   href: '/content-ai/capabilities/suggestion/features/define-rules',
                 },
                 {
-                  title: 'Configure when to load suggestions',
+                  title: '配置何时加载建议',
                   href: '/content-ai/capabilities/suggestion/features/configure-when-to-load-suggestions',
                 },
                 {
-                  title: 'Display suggestions',
+                  title: '显示建议',
                   href: '/content-ai/capabilities/suggestion/features/display-suggestions',
                 },
                 {
-                  title: 'Apply and reject suggestions',
+                  title: '应用和拒绝建议',
                   href: '/content-ai/capabilities/suggestion/features/apply-suggestions',
                 },
                 {
-                  title: 'Lock content',
+                  title: '锁定内容',
                   href: '/content-ai/capabilities/suggestion/features/lock-content',
                 },
                 {
-                  title: 'Provide LLM Context',
+                  title: '提供 LLM 上下文',
                   href: '/content-ai/capabilities/suggestion/features/provide-llm-context',
                 },
               ],
             },
             {
-              title: 'Use with Content AI Cloud',
+              title: '与内容 AI 云一起使用',
               href: '/content-ai/capabilities/suggestion/use-with-content-ai-cloud',
             },
             {
-              title: 'Integrate your LLM',
+              title: '集成您的 LLM',
               href: '/content-ai/capabilities/suggestion/custom-llms',
             },
             {
-              title: 'Configure',
+              title: '配置',
               href: '/content-ai/capabilities/suggestion/configure',
             },
             {
-              title: 'API Reference',
+              title: 'API 参考',
               href: '/content-ai/capabilities/suggestion/api-reference',
             },
           ],
         },
         {
-          title: 'AI Changes',
+          title: 'AI 变更',
           href: '/content-ai/capabilities/changes',
           tags: ['Pro', 'Beta'],
           children: [
             {
-              title: 'Overview',
+              title: '概述',
               href: '/content-ai/capabilities/changes/overview',
             },
             {
-              title: 'Install',
+              title: '安装',
               href: '/content-ai/capabilities/changes/install',
             },
             {
-              title: 'Features',
+              title: '特征',
               href: '/content-ai/capabilities/changes/features',
               children: [
                 {
-                  title: 'Review changes',
+                  title: '审查更改',
                   href: '/content-ai/capabilities/changes/features/review-changes',
                 },
                 {
-                  title: 'Display changes',
+                  title: '显示更改',
                   href: '/content-ai/capabilities/changes/features/display-changes',
                 },
               ],
             },
             {
-              title: 'Configure',
+              title: '配置',
               href: '/content-ai/capabilities/changes/configure',
             },
             {
-              title: 'API Reference',
+              title: 'API 参考',
               href: '/content-ai/capabilities/changes/api-reference',
             },
           ],
@@ -185,25 +185,25 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '',
-      title: 'Examples',
+      title: '示例',
       children: [
         {
-          title: 'Text Generation',
+          title: '文本生成',
           isActive: false,
           href: '/content-ai/capabilities/generation/overview',
         },
         {
-          title: 'Autocomplete',
+          title: '自动完成',
           isActive: false,
           href: '/content-ai/capabilities/generation/text-generation/autocompletion',
         },
         {
-          title: 'AI Suggestions',
+          title: 'AI 建议',
           isActive: false,
           href: '/content-ai/capabilities/suggestion/overview',
         },
         {
-          title: 'Track AI changes',
+          title: '跟踪 AI 变化',
           isActive: false,
           href: '/content-ai/capabilities/changes/overview',
         },
@@ -213,7 +213,7 @@ export const sidebarConfig: SidebarConfig = {
           tags: ['Experiment'],
         },
         {
-          title: 'Starter templates',
+          title: '入门模板',
           href: 'https://tiptap.dev/product/templates',
         },
       ],
@@ -221,10 +221,10 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/content-ai/custom-llms',
-      title: 'Custom LLMs',
+      title: '定制 LLM',
       children: [
         {
-          title: 'Integrate your LLM',
+          title: '集成您的 LLM',
           href: '/content-ai/custom-llms',
         },
       ],
@@ -232,14 +232,14 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/content-ai/resources',
-      title: 'Resources',
+      title: '资源',
       children: [
         {
-          title: 'Privacy',
+          title: '隐私',
           href: '/content-ai/resources/privacy',
         },
         {
-          title: 'Collaboration',
+          title: '协作',
           href: '/content-ai/resources/collaboration',
         },
       ],

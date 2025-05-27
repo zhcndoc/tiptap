@@ -3,19 +3,19 @@ import { SidebarConfig } from '@/types'
 export const sidebarConfig: SidebarConfig = {
   id: 'conversion',
   rootHref: '/conversion/getting-started/overview',
-  title: 'Conversion',
+  title: '转换',
   items: [
     {
       type: 'group',
       href: '/conversion/getting-started',
-      title: 'get started',
+      title: '开始使用',
       children: [
         {
-          title: 'Overview',
+          title: '概述',
           href: '/conversion/getting-started/overview',
         },
         {
-          title: 'Authenticate',
+          title: '认证',
           href: '/conversion/getting-started/install',
         },
       ],
@@ -23,7 +23,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/conversion/import-export',
-      title: 'Import & Export',
+      title: '导入和导出',
       children: [
         {
           title: 'DOCX',
@@ -31,11 +31,11 @@ export const sidebarConfig: SidebarConfig = {
           tags: ['Beta'],
           children: [
             {
-              title: 'Editor import',
+              title: '编辑器导入',
               href: '/conversion/import-export/docx/editor-import',
             },
             {
-              title: 'Editor export',
+              title: '编辑器导出',
               href: '/conversion/import-export/docx/editor-export',
             },
             {
@@ -43,19 +43,19 @@ export const sidebarConfig: SidebarConfig = {
               href: '/conversion/import-export/docx/rest-api',
             },
             {
-              title: 'Convert custom nodes',
+              title: '转换自定义节点',
               href: '/conversion/import-export/docx/custom-node-conversion',
             },
             {
-              title: 'Convert custom marks',
+              title: '转换自定义标记',
               href: '/conversion/import-export/docx/custom-mark-conversion',
             },
             {
-              title: 'Export styles',
+              title: '导出样式',
               href: '/conversion/import-export/docx/export-styles',
             },
             {
-              title: 'Preserve images',
+              title: '保存图像',
               href: '/conversion/import-export/docx/preserve-images',
             },
           ],
@@ -65,7 +65,7 @@ export const sidebarConfig: SidebarConfig = {
           title: 'ODT',
           children: [
             {
-              title: 'Editor extensions',
+              title: '编辑器扩展',
               href: '/conversion/import-export/odt/editor-extensions',
             },
             {
@@ -79,7 +79,7 @@ export const sidebarConfig: SidebarConfig = {
           title: 'Markdown',
           children: [
             {
-              title: 'Editor extensions',
+              title: '编辑器扩展',
               href: '/conversion/import-export/markdown/editor-extensions',
             },
             {
@@ -93,10 +93,10 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/conversion/resources',
-      title: 'Resources',
+      title: '资源',
       children: [
         {
-          title: 'Legacy extensions',
+          title: '遗留扩展',
           href: '/guides/legacy-conversion',
         },
       ],

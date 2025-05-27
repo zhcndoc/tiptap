@@ -3,78 +3,78 @@ import { SidebarConfig } from '@/types'
 export const sidebarConfig: SidebarConfig = {
   id: 'guides',
   rootHref: '/guides',
-  title: 'Guides',
+  title: '指南',
   items: [
     {
-      title: 'First Steps',
+      title: '入门指南',
       href: '',
       type: 'group',
       children: [
         {
           href: '/guides/pro-extensions',
-          title: 'Integrate Pro Extensions',
+          title: '集成专业扩展',
         },
       ],
     },
     {
-      title: 'Essential',
+      title: '核心概念',
       type: 'group',
       href: '',
       children: [
         {
           href: '/guides/faq',
-          title: 'FAQ',
+          title: '常见问题',
         },
         {
           href: '/guides/accessibility',
-          title: 'Accessibility',
+          title: '可访问性',
         },
         {
           href: '/guides/performance',
-          title: 'Performance',
+          title: '性能优化',
         },
         {
           href: '/guides/invalid-schema',
-          title: 'Invalid schema handling',
+          title: '无效模式处理',
         },
         {
           href: '/guides/output-json-html',
-          title: 'Export JSON or HTML',
+          title: '导出 JSON 或 HTML',
         },
         {
           href: '/guides/authentication',
-          title: 'Collaboration Auth',
+          title: '协作认证',
         },
         {
           href: '/guides/naming-documents',
-          title: 'Naming documents',
+          title: '文档命名规范',
         },
         {
           href: '/guides/offline-support',
-          title: 'Offline Collaboration',
+          title: '离线协作',
         },
         {
           href: '/guides/legacy-conversion',
-          title: 'Legacy conversion',
+          title: '旧版转换',
         },
         {
           href: '/guides/upgrade-tiptap-v1',
-          title: 'Upgrade Tiptap V1',
+          title: '升级到 Tiptap V1',
         },
         {
           href: '/guides/upgrade-tiptap-v2',
-          title: 'Upgrade Tiptap V2',
+          title: '升级到 Tiptap V2',
         },
       ],
     },
     {
-      title: 'Customization',
+      title: '自定义开发',
       type: 'group',
       href: '',
       children: [
         {
           href: '/guides/typescript',
-          title: 'Extend with TypeScript',
+          title: '使用 TypeScript 扩展',
         },
       ],
     },

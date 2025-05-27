@@ -3,24 +3,24 @@ import { SidebarConfig } from '@/types'
 export const sidebarConfig: SidebarConfig = {
   id: 'editor',
   rootHref: '/editor/getting-started/overview',
-  title: 'Editor',
+  title: '编辑器',
   items: [
     {
       type: 'group',
       href: '/editor/getting-started',
-      title: 'Get started',
+      title: '开始使用',
       children: [
         {
-          title: 'Overview',
+          title: '概述',
           href: '/editor/getting-started/overview',
         },
         {
-          title: 'Install',
+          title: '安装',
           href: '/editor/getting-started/install',
           children: [
             {
               href: '/editor/getting-started/install/vanilla-javascript',
-              title: 'Vanilla JavaScript',
+              title: '原生 JavaScript',
             },
             {
               href: '/editor/getting-started/install/react',
@@ -61,16 +61,16 @@ export const sidebarConfig: SidebarConfig = {
           ],
         },
         {
-          title: 'Configure',
+          title: '配置',
           href: '/editor/getting-started/configure',
         },
         {
-          title: 'Styling',
+          title: '样式',
           href: '/editor/getting-started/style-editor',
           children: [
             {
               href: '/editor/getting-started/style-editor/custom-menus',
-              title: 'Custom menus',
+              title: '自定义菜单',
             },
           ],
         },
@@ -78,384 +78,384 @@ export const sidebarConfig: SidebarConfig = {
     },
     {
       type: 'group',
-      title: 'Extensions',
+      title: '扩展',
       href: '/editor/extensions',
       children: [
         {
           href: '/editor/extensions/overview',
-          title: 'Overview',
+          title: '概述',
         },
         {
           href: '/editor/extensions/nodes',
-          title: 'Nodes',
+          title: '节点',
           children: [
             {
               href: '/editor/extensions/nodes/blockquote',
-              title: 'Blockquote',
+              title: '引用',
             },
             {
               href: '/editor/extensions/nodes/bullet-list',
-              title: 'Bullet list',
+              title: '无序列表',
             },
             {
               href: '/editor/extensions/nodes/code-block',
-              title: 'Code block',
+              title: '代码块',
             },
             {
               href: '/editor/extensions/nodes/code-block-lowlight',
-              title: 'Code block lowlight',
+              title: '代码块浅色主题',
             },
             {
               href: '/editor/extensions/nodes/details',
-              title: 'Details',
+              title: '详情',
               tags: ['Pro'],
             },
             {
               href: '/editor/extensions/nodes/details-content',
-              title: 'Details content',
+              title: '详情内容',
               tags: ['Pro'],
             },
             {
               href: '/editor/extensions/nodes/details-summary',
-              title: 'Details summary',
+              title: '详情摘要',
               tags: ['Pro'],
             },
             {
               href: '/editor/extensions/nodes/document',
-              title: 'Document',
+              title: '文档',
             },
             {
               href: '/editor/extensions/nodes/emoji',
-              title: 'Emoji',
+              title: '表情符号',
               tags: ['Pro'],
             },
             {
               href: '/editor/extensions/nodes/hard-break',
-              title: 'Hard break',
+              title: '硬换行',
             },
             {
               href: '/editor/extensions/nodes/heading',
-              title: 'Heading',
+              title: '标题',
             },
             {
               href: '/editor/extensions/nodes/horizontal-rule',
-              title: 'Horizontal rule',
+              title: '水平线',
             },
             {
               href: '/editor/extensions/nodes/image',
-              title: 'Image',
+              title: '图片',
             },
             {
               href: '/editor/extensions/nodes/list-item',
-              title: 'List item',
+              title: '列表项',
             },
             {
               href: '/editor/extensions/nodes/mention',
-              title: 'Mention',
+              title: '提及',
             },
             {
               href: '/editor/extensions/nodes/ordered-list',
-              title: 'Ordered list',
+              title: '有序列表',
             },
             {
               href: '/editor/extensions/nodes/paragraph',
-              title: 'Paragraph',
+              title: '段落',
             },
             {
               href: '/editor/extensions/nodes/table',
-              title: 'Table',
+              title: '表格',
             },
             {
               href: '/editor/extensions/nodes/table-cell',
-              title: 'Table cell',
+              title: '表格单元格',
             },
             {
               href: '/editor/extensions/nodes/table-header',
-              title: 'Table header',
+              title: '表格头部',
             },
             {
               href: '/editor/extensions/nodes/table-row',
-              title: 'Table row',
+              title: '表格行',
             },
             {
               href: '/editor/extensions/nodes/task-list',
-              title: 'Task list',
+              title: '任务列表',
             },
             {
               href: '/editor/extensions/nodes/task-item',
-              title: 'Task item',
+              title: '任务项',
             },
             {
               href: '/editor/extensions/nodes/text',
-              title: 'Text',
+              title: '文本',
             },
             {
               href: '/editor/extensions/nodes/youtube',
-              title: 'Youtube',
+              title: 'YouTube 视频',
             },
           ],
         },
         {
           href: '/editor/extensions/marks',
-          title: 'Marks',
+          title: '标记',
           children: [
             {
               href: '/editor/extensions/marks/bold',
-              title: 'Bold',
+              title: '加粗',
             },
             {
               href: '/editor/extensions/marks/code',
-              title: 'Code',
+              title: '代码',
             },
             {
               href: '/editor/extensions/marks/highlight',
-              title: 'Highlight',
+              title: '高亮',
             },
             {
               href: '/editor/extensions/marks/italic',
-              title: 'Italic',
+              title: '斜体',
             },
             {
               href: '/editor/extensions/marks/link',
-              title: 'Link',
+              title: '链接',
             },
             {
               href: '/editor/extensions/marks/strike',
-              title: 'Strike',
+              title: '删除线',
             },
             {
               href: '/editor/extensions/marks/subscript',
-              title: 'Subscript',
+              title: '下标',
             },
             {
               href: '/editor/extensions/marks/superscript',
-              title: 'Superscript',
+              title: '上标',
             },
             {
               href: '/editor/extensions/marks/text-style',
-              title: 'Text Style',
+              title: '文本样式',
             },
             {
               href: '/editor/extensions/marks/underline',
-              title: 'Underline',
+              title: '下划线',
             },
           ],
         },
         {
           href: '/editor/extensions/functionality',
-          title: 'Functionality',
+          title: '功能扩展',
           children: [
             {
               href: '/editor/extensions/functionality/ai-changes',
-              title: 'AI Changes',
+              title: 'AI 修改',
               tags: ['Beta', 'Pro'],
             },
             {
               href: '/editor/extensions/functionality/ai-generation',
-              title: 'AI Generation',
+              title: 'AI 生成',
               tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/ai-suggestion',
-              title: 'AI Suggestion',
+              title: 'AI 建议',
               tags: ['Beta', 'Pro'],
             },
             {
               href: '/editor/extensions/functionality/bubble-menu',
-              title: 'Bubble menu',
+              title: '气泡菜单',
             },
             {
               href: '/editor/extensions/functionality/character-count',
-              title: 'Character count',
+              title: '字符计数',
             },
             {
               href: '/editor/extensions/functionality/collaboration',
-              title: 'Collaboration',
+              title: '协作编辑',
             },
             {
               href: '/editor/extensions/functionality/collaboration-caret',
-              title: 'Collaboration Caret',
+              title: '协作插入符',
             },
             {
               href: '/editor/extensions/functionality/background-color',
-              title: 'Background Color',
+              title: '背景颜色',
             },
             {
               href: '/editor/extensions/functionality/color',
-              title: 'Color',
+              title: '字体颜色',
             },
             {
               href: '/editor/extensions/functionality/comments',
-              title: 'Comments',
+              title: '评论',
               tags: ['Beta', 'Pro'],
             },
             {
               href: '/editor/extensions/functionality/drag-handle',
-              title: 'Drag Handle',
+              title: '拖动手柄',
               tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/drag-handle-react',
-              title: 'Drag Handle React',
+              title: 'React 拖动手柄',
               tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/drag-handle-vue',
-              title: 'Drag Handle Vue',
+              title: 'Vue 拖动手柄',
               tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/dropcursor',
-              title: 'Dropcursor',
+              title: '拖放光标',
             },
             {
               href: '/editor/extensions/functionality/export',
-              title: 'Export',
+              title: '导出',
               tags: ['Beta', 'Pro'],
             },
             {
               href: '/editor/extensions/functionality/filehandler',
-              title: 'File handler',
+              title: '文件处理',
               tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/floatingmenu',
-              title: 'Floating menu',
+              title: '浮动菜单',
             },
             {
               href: '/editor/extensions/functionality/focus',
-              title: 'Focus',
+              title: '焦点控制',
             },
             {
               href: '/editor/extensions/functionality/fontfamily',
-              title: 'Font family',
+              title: '字体家族',
             },
             {
               href: '/editor/extensions/functionality/fontsize',
-              title: 'Font size',
+              title: '字体大小',
             },
             {
               href: '/editor/extensions/functionality/gapcursor',
-              title: 'Gap cursor',
+              title: '间隙光标',
             },
             {
               href: '/editor/extensions/functionality/invisiblecharacters',
-              title: 'Invisible characters',
+              title: '不可见字符',
               tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/line-height',
-              title: 'Line Height',
+              title: '行高',
             },
             {
               href: '/editor/extensions/functionality/list-kit',
-              title: 'List kit',
+              title: '列表工具包',
             },
             {
               href: '/editor/extensions/functionality/listkeymap',
-              title: 'List Keymap',
+              title: '列表快捷键映射',
             },
             {
               href: '/editor/extensions/functionality/import',
-              title: 'Import',
+              title: '导入',
               tags: ['Beta', 'Pro'],
             },
             {
               href: '/editor/extensions/functionality/mathematics',
-              title: 'Mathematics',
+              title: '数学公式',
               tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/placeholder',
-              title: 'Placeholder',
+              title: '占位文本',
             },
             {
               href: '/editor/extensions/functionality/snapshot',
-              title: 'Snapshot',
+              title: '快照',
               tags: ['Pro', 'Cloud'],
             },
             {
               href: '/editor/extensions/functionality/snapshot-compare',
-              title: 'Snapshot Compare',
+              title: '快照对比',
               tags: ['Pro', 'Cloud'],
             },
             {
               href: '/editor/extensions/functionality/selection',
-              title: 'Selection',
+              title: '选区操作',
             },
             {
               href: '/editor/extensions/functionality/starterkit',
-              title: 'Starter kit',
+              title: '入门工具包',
             },
             {
               href: '/editor/extensions/functionality/table-kit',
-              title: 'Table kit',
+              title: '表格工具包',
             },
             {
               href: '/editor/extensions/functionality/table-of-contents',
-              title: 'Table of contents',
+              title: '目录',
               tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/text-style-kit',
-              title: 'TextStyle kit',
+              title: '文本样式工具包',
             },
             {
               href: '/editor/extensions/functionality/textalign',
-              title: 'Text align',
+              title: '文本对齐',
             },
             {
               href: '/editor/extensions/functionality/trailing-node',
-              title: 'Trailing node',
+              title: '尾部节点',
             },
             {
               href: '/editor/extensions/functionality/typography',
-              title: 'Typography',
+              title: '排版',
             },
             {
               href: '/editor/extensions/functionality/undo-redo',
-              title: 'Undo & Redo History',
+              title: '撤销与重做历史',
             },
             {
               href: '/editor/extensions/functionality/uniqueid',
-              title: 'Unique ID',
+              title: '唯一标识符',
               tags: ['Pro'],
             },
           ],
         },
         {
           href: '/editor/extensions/custom-extensions',
-          title: 'Custom extensions',
+          title: '自定义扩展',
           children: [
             {
               href: '/editor/extensions/custom-extensions/create-new',
-              title: 'Create new',
+              title: '新建扩展',
               children: [
                 {
                   href: '/editor/extensions/custom-extensions/create-new/extension',
-                  title: 'Extension API',
+                  title: '扩展 API',
                 },
                 {
                   href: '/editor/extensions/custom-extensions/create-new/node',
-                  title: 'Node API',
+                  title: '节点 API',
                 },
                 {
                   href: '/editor/extensions/custom-extensions/create-new/mark',
-                  title: 'Mark API',
+                  title: '标记 API',
                 },
               ],
             },
             {
               href: '/editor/extensions/custom-extensions/extend-existing',
-              title: 'Extend existing',
+              title: '扩展现有功能',
             },
             {
               href: '/editor/extensions/custom-extensions/node-views',
-              title: 'Node views',
+              title: '节点视图',
               children: [
                 {
                   href: '/editor/extensions/custom-extensions/node-views/javascript',
-                  title: 'Javascript',
+                  title: 'JavaScript',
                 },
                 {
                   href: '/editor/extensions/custom-extensions/node-views/react',
@@ -467,17 +467,17 @@ export const sidebarConfig: SidebarConfig = {
                 },
                 {
                   href: '/editor/extensions/custom-extensions/node-views/examples',
-                  title: 'Examples',
+                  title: '示例',
                 },
               ],
             },
             {
               href: '/editor/extensions/custom-extensions/mark-views',
-              title: 'Mark views',
+              title: '标记视图',
               children: [
                 {
                   href: '/editor/extensions/custom-extensions/mark-views/javascript',
-                  title: 'Javascript',
+                  title: 'JavaScript',
                 },
                 {
                   href: '/editor/extensions/custom-extensions/mark-views/react',
@@ -495,31 +495,31 @@ export const sidebarConfig: SidebarConfig = {
     },
     {
       type: 'group',
-      title: 'Core Concepts',
+      title: '核心概念',
       href: '/editor/core-concepts',
       children: [
         {
           href: '/editor/core-concepts/introduction',
-          title: 'Introduction',
+          title: '简介',
         },
         {
           href: '/editor/core-concepts/extensions',
-          title: 'Extensions',
+          title: '扩展机制',
         },
         {
           href: '/editor/core-concepts/nodes-and-marks',
-          title: 'Nodes and Marks',
+          title: '节点与标记',
         },
         {
           href: '/editor/core-concepts/schema',
-          title: 'Schema',
+          title: '模式定义',
         },
         {
           href: '/editor/core-concepts/keyboard-shortcuts',
-          title: 'Keyboard shortcuts',
+          title: '键盘快捷键',
         },
         {
-          title: 'ProseMirror',
+          title: 'ProseMirror 集成',
           href: '/editor/core-concepts/prosemirror',
         },
       ],
@@ -527,298 +527,298 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/editor/api',
-      title: 'API',
+      title: 'API 文档',
       children: [
         {
           href: '/editor/api/editor',
-          title: 'Editor instance',
+          title: '编辑器实例',
         },
         {
           href: '/editor/api/commands',
-          title: 'Commands',
+          title: '命令',
           children: [
             {
               href: '/editor/api/commands/content',
-              title: 'Content',
+              title: '内容操作',
               children: [
                 {
                   href: '/editor/api/commands/content/clear-content',
-                  title: 'clearContent',
+                  title: '清空内容',
                 },
                 {
                   href: '/editor/api/commands/content/cut',
-                  title: 'cut',
+                  title: '剪切',
                 },
                 {
                   href: '/editor/api/commands/content/insert-content',
-                  title: 'insertContent',
+                  title: '插入内容',
                 },
                 {
                   href: '/editor/api/commands/content/insert-content-at',
-                  title: 'insertContentAt',
+                  title: '指定位置插入内容',
                 },
                 {
                   href: '/editor/api/commands/content/set-content',
-                  title: 'setContent',
+                  title: '设置内容',
                 },
               ],
             },
             {
               href: '/editor/api/commands/nodes-and-marks',
-              title: 'Nodes & Marks',
+              title: '节点与标记操作',
               children: [
                 {
                   href: '/editor/api/commands/nodes-and-marks/clear-nodes',
-                  title: 'clearNodes',
+                  title: '清除节点',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/create-paragraph-near',
-                  title: 'createParagraphNear',
+                  title: '就近创建段落',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/delete-node',
-                  title: 'deleteNode',
+                  title: '删除节点',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/extend-mark-range',
-                  title: 'extendMarkRange',
+                  title: '扩展标记范围',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/exit-code',
-                  title: 'exitCode',
+                  title: '退出代码模式',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/join-backward',
-                  title: 'joinBackward',
+                  title: '向后合并',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/join-down',
-                  title: 'joinDown',
+                  title: '向下合并',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/join-forward',
-                  title: 'joinForward',
+                  title: '向前合并',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/join-textblock-backward',
-                  title: 'joinTextblockBackward',
+                  title: '向后合并文本块',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/join-textblock-forward',
-                  title: 'joinTextblockForward',
+                  title: '向前合并文本块',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/join-up',
-                  title: 'joinUp',
+                  title: '向上合并',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/lift',
-                  title: 'lift',
+                  title: '提升节点层级',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/lift-empty-block',
-                  title: 'liftEmptyBlock',
+                  title: '提升空块',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/newline-in-code',
-                  title: 'newlineInCode',
+                  title: '代码块内换行',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/reset-attributes',
-                  title: 'resetAttributes',
+                  title: '重置属性',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/set-mark',
-                  title: 'setMark',
+                  title: '设置标记',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/set-node',
-                  title: 'setNode',
+                  title: '设置节点',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/split-block',
-                  title: 'splitBlock',
+                  title: '拆分块',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/toggle-mark',
-                  title: 'toggleMark',
+                  title: '切换标记',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/toggle-node',
-                  title: 'toggleNode',
+                  title: '切换节点',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/toggle-wrap',
-                  title: 'toggleWrap',
+                  title: '切换包裹节点',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/undo-input-rule',
-                  title: 'undoInputRule',
+                  title: '撤销输入规则',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/unset-all-marks',
-                  title: 'unsetAllMarks',
+                  title: '清除所有标记',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/unset-mark',
-                  title: 'unsetMark',
+                  title: '清除标记',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/update-attributes',
-                  title: 'updateAttributes',
+                  title: '更新属性',
                 },
               ],
             },
             {
               href: '/editor/api/commands/lists',
-              title: 'Lists',
+              title: '列表操作',
               children: [
                 {
                   href: '/editor/api/commands/lists/lift-list-item',
-                  title: 'liftListItem',
+                  title: '提升列表项层级',
                 },
                 {
                   href: '/editor/api/commands/lists/sink-list-item',
-                  title: 'sinkListItem',
+                  title: '降低列表项层级',
                 },
                 {
                   href: '/editor/api/commands/lists/split-list-item',
-                  title: 'splitListItem',
+                  title: '拆分列表项',
                 },
                 {
                   href: '/editor/api/commands/lists/toggle-list',
-                  title: 'toggleList',
+                  title: '切换列表类型',
                 },
                 {
                   href: '/editor/api/commands/lists/wrap-in-list',
-                  title: 'wrapInList',
+                  title: '包裹为列表',
                 },
               ],
             },
             {
               href: '/editor/api/commands/selection',
-              title: 'Selection',
+              title: '选区操作',
               children: [
                 {
                   href: '/editor/api/commands/selection/blur',
-                  title: 'blur',
+                  title: '失去焦点',
                 },
                 {
                   href: '/editor/api/commands/selection/delete-range',
-                  title: 'deleteRange',
+                  title: '删除选区范围',
                 },
                 {
                   href: '/editor/api/commands/selection/delete-selection',
-                  title: 'deleteSelection',
+                  title: '删除选区内容',
                 },
                 {
                   href: '/editor/api/commands/selection/enter',
-                  title: 'enter',
+                  title: '换行',
                 },
                 {
                   href: '/editor/api/commands/selection/focus',
-                  title: 'focus',
+                  title: '获取焦点',
                 },
                 {
                   href: '/editor/api/commands/selection/keyboard-shortcut',
-                  title: 'keyboardShortcut',
+                  title: '触发键盘快捷键',
                 },
                 {
                   href: '/editor/api/commands/selection/scroll-into-view',
-                  title: 'scrollIntoView',
+                  title: '滚动到可见区域',
                 },
                 {
                   href: '/editor/api/commands/selection/select-all',
-                  title: 'selectAll',
+                  title: '全选',
                 },
                 {
                   href: '/editor/api/commands/selection/select-node-backward',
-                  title: 'selectNodeBackward',
+                  title: '向后选择节点',
                 },
                 {
                   href: '/editor/api/commands/selection/select-node-forward',
-                  title: 'selectNodeForward',
+                  title: '向前选择节点',
                 },
                 {
                   href: '/editor/api/commands/selection/select-parent-node',
-                  title: 'selectParentNode',
+                  title: '选择父节点',
                 },
                 {
                   href: '/editor/api/commands/selection/set-node-selection',
-                  title: 'setNodeSelection',
+                  title: '设置节点选区',
                 },
                 {
                   href: '/editor/api/commands/selection/set-text-selection',
-                  title: 'setTextSelection',
+                  title: '设置文本选区',
                 },
               ],
             },
             {
               href: '/editor/api/commands/for-each',
-              title: 'forEach',
+              title: '遍历操作',
             },
             {
               href: '/editor/api/commands/select-textblock-end',
-              title: 'selectTextblockEnd',
+              title: '选择文本块末尾',
             },
             {
               href: '/editor/api/commands/select-textblock-start',
-              title: 'selectTextblockStart',
+              title: '选择文本块开头',
             },
             {
               href: '/editor/api/commands/set-meta',
-              title: 'setMeta',
+              title: '设置元数据',
             },
           ],
         },
         {
           href: '/editor/api/utilities',
-          title: 'Utilities',
+          title: '工具函数',
           children: [
             {
               href: '/editor/api/utilities/html',
-              title: 'HTML',
+              title: 'HTML 处理',
             },
             {
               href: '/editor/api/utilities/static-renderer',
-              title: 'Static Renderer',
+              title: '静态渲染器',
             },
             {
               href: '/editor/api/utilities/jsx',
-              title: 'JSX',
+              title: 'JSX 支持',
             },
             {
               href: '/editor/api/utilities/suggestion',
-              title: 'Suggestion',
+              title: '建议提示',
             },
             {
               href: '/editor/api/utilities/tiptap-for-php',
-              title: 'Tiptap for PHP',
+              title: 'PHP 集成工具',
             },
           ],
         },
         {
           href: '/editor/api/node-positions',
-          title: 'Node Positions',
+          title: '节点位置',
         },
         {
           href: '/editor/api/events',
-          title: 'Events',
+          title: '事件系统',
         },
       ],
     },
     {
       type: 'group',
-      title: 'Resources',
+      title: '资源',
       href: '/editor/resources',
       children: [
         {
           href: '/guides',
-          title: 'Guides',
+          title: '指南',
         },
         {
           href: '/resources/pro-license',
-          title: 'Pro license',
+          title: '专业版授权',
         },
       ],
     },

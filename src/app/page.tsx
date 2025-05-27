@@ -15,7 +15,7 @@ export async function generateMetadata() {
   const canonicalUrl = createCanonicalUrl([])
 
   return await createMetadata({
-    title: pageMdx.frontmatter?.meta?.title ?? pageMdx.frontmatter?.title ?? '',
+    title: `${pageMdx.frontmatter?.meta?.title ?? pageMdx.frontmatter?.title ?? ''} - Tiptap 中文文档`,
     description: pageMdx.frontmatter?.meta?.description ?? pageMdx.frontmatter?.description ?? '',
     ogTitle: pageMdx.frontmatter?.title ?? '',
     canonicalUrl,

@@ -3,19 +3,19 @@ import { SidebarConfig } from '@/types'
 export const sidebarConfig: SidebarConfig = {
   id: 'ui components',
   rootHref: '/ui-components/getting-started/',
-  title: 'Components',
+  title: '组件',
   items: [
     {
       type: 'group',
       href: '/ui-components/getting-started/overview',
-      title: 'Get started',
+      title: '快速上手',
       children: [
         {
-          title: 'Overview',
+          title: '概述',
           href: '/ui-components/getting-started/overview',
         },
         {
-          title: 'CLI',
+          title: '命令行工具',
           href: '/ui-components/getting-started/cli',
         },
       ],
@@ -23,26 +23,26 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/ui-components/templates',
-      title: 'Templates',
+      title: '模板',
       children: [
         {
-          title: 'Simple Editor',
+          title: '简易编辑器',
           href: '/ui-components/templates/simple-editor',
-          tags: ['Open Source'],
+          tags: ['开源'],
         },
       ],
     },
     {
       type: 'group',
       href: '/ui-components/components',
-      title: 'UI Components',
+      title: 'UI 组件',
       children: [
         {
-          title: 'Overview',
+          title: '概述',
           href: '/ui-components/components/overview',
         },
         {
-          title: 'Components',
+          title: '组件列表',
           href: '/ui-components/components/',
           children: [
             // {
@@ -62,35 +62,35 @@ export const sidebarConfig: SidebarConfig = {
             //   href: '/ui-components/components/floating-toolbar',
             // },
             {
-              title: 'Heading button',
+              title: '标题按钮',
               href: '/ui-components/components/heading-button',
             },
             {
-              title: 'Heading dropdown',
+              title: '标题下拉菜单',
               href: '/ui-components/components/heading-dropdown-menu',
             },
             {
-              title: 'Highlight popover',
+              title: '高亮弹窗',
               href: '/ui-components/components/highlight-popover',
             },
             {
-              title: 'Image upload button',
+              title: '图片上传按钮',
               href: '/ui-components/components/image-upload-button',
             },
             {
-              title: 'Link popover',
+              title: '链接弹窗',
               href: '/ui-components/components/link-popover',
             },
             {
-              title: 'List button',
+              title: '列表按钮',
               href: '/ui-components/components/list-button',
             },
             {
-              title: 'List dropdown',
+              title: '列表下拉菜单',
               href: '/ui-components/components/list-dropdown-menu',
             },
             {
-              title: 'Mark button',
+              title: '标记按钮',
               href: '/ui-components/components/mark-button',
             },
             // {
@@ -102,7 +102,7 @@ export const sidebarConfig: SidebarConfig = {
             //   href: '/ui-components/components/mention-dropdown-menu',
             // },
             {
-              title: 'Node button',
+              title: '节点按钮',
               href: '/ui-components/components/node-button',
             },
             // {
@@ -110,7 +110,7 @@ export const sidebarConfig: SidebarConfig = {
             //   href: '/ui-components/components/slash-dropdown-menu',
             // },
             {
-              title: 'Text align button',
+              title: '文本对齐按钮',
               href: '/ui-components/components/text-align-button',
             },
             // {
@@ -122,39 +122,39 @@ export const sidebarConfig: SidebarConfig = {
             //   href: '/ui-components/components/trigger-button',
             // },
             {
-              title: 'Undo redo button',
+              title: '撤销/重做按钮',
               href: '/ui-components/components/undo-redo-button',
             },
           ],
         },
         {
-          title: 'Node components',
+          title: '节点组件',
           href: '/ui-components/node-components',
           children: [
             {
-              title: 'Code block node',
+              title: '代码块节点',
               href: '/ui-components/node-components/code-block-node',
             },
             {
-              title: 'Image node',
+              title: '图片节点',
               href: '/ui-components/node-components/image-node',
             },
             {
-              title: 'Image upload node',
+              title: '图片上传节点',
               href: '/ui-components/node-components/image-upload-node',
             },
             {
-              title: 'List node',
+              title: '列表节点',
               href: '/ui-components/node-components/list-node',
             },
             {
-              title: 'Paragraph node',
+              title: '段落节点',
               href: '/ui-components/node-components/paragraph-node',
             },
           ],
         },
         {
-          title: 'Primitives',
+          title: '基础组件',
           href: '/ui-components/primitives',
           children: [
             // {
@@ -166,31 +166,31 @@ export const sidebarConfig: SidebarConfig = {
             //   href: '/ui-components/primitives/badge',
             // },
             {
-              title: 'Button',
+              title: '按钮',
               href: '/ui-components/primitives/button',
             },
             {
-              title: 'Dropdown menu',
+              title: '下拉菜单',
               href: '/ui-components/primitives/dropdown-menu',
             },
             {
-              title: 'Popover',
+              title: '弹出框',
               href: '/ui-components/primitives/popover',
             },
             {
-              title: 'Separator',
+              title: '分隔线',
               href: '/ui-components/primitives/separator',
             },
             {
-              title: 'Spacer',
+              title: '间隔器',
               href: '/ui-components/primitives/spacer',
             },
             {
-              title: 'Toolbar',
+              title: '工具栏',
               href: '/ui-components/primitives/toolbar',
             },
             {
-              title: 'Tooltip',
+              title: '工具提示',
               href: '/ui-components/primitives/tooltip',
             },
           ],

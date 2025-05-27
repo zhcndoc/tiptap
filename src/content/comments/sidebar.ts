@@ -3,19 +3,19 @@ import { SidebarConfig } from '@/types'
 export const sidebarConfig: SidebarConfig = {
   id: 'comments',
   rootHref: '/comments/getting-started/overview',
-  title: 'Comments',
+  title: '评论',
   items: [
     {
       type: 'group',
       href: '/comments/getting-started',
-      title: 'Get started',
+      title: '开始使用',
       children: [
         {
-          title: 'Overview',
+          title: '概述',
           href: '/comments/getting-started/overview',
         },
         {
-          title: 'Install',
+          title: '安装',
           href: '/comments/getting-started/install',
         },
       ],
@@ -23,18 +23,18 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/comments/core-concepts',
-      title: 'Core concepts',
+      title: '核心概念',
       children: [
         {
-          title: 'Manage threads',
+          title: '管理线程',
           href: '/comments/core-concepts/manage-threads',
         },
         {
-          title: 'Style threads',
+          title: '风格线程',
           href: '/comments/core-concepts/style-threads',
         },
         {
-          title: 'Configure',
+          title: '配置',
           href: '/comments/core-concepts/configure',
         },
       ],
@@ -42,10 +42,10 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/comments/integrate',
-      title: 'Integrate',
+      title: '整合',
       children: [
         {
-          title: 'Editor commands',
+          title: '编辑器命令',
           href: '/comments/integrate/editor-commands',
         },
         {

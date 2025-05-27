@@ -91,7 +91,7 @@ function RequirementsBox({ children }: { children: ReactNode }) {
     <div>
       <Sidebar.Track>
         <Sidebar.Group>
-          <Sidebar.GroupTitle>Requirements</Sidebar.GroupTitle>
+          <Sidebar.GroupTitle>要求</Sidebar.GroupTitle>
           {React.Children.map(children, (child, idx) => (
             <React.Fragment key={idx}>{child}</React.Fragment>
           ))}

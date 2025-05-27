@@ -10,27 +10,27 @@ import { cn } from '@/utils'
 
 const options = [
   {
-    label: 'Features',
+    label: '特征',
     items: [
-      { label: 'Editor', href: '/editor/getting-started/overview' },
+      { label: '编辑器', href: '/editor/getting-started/overview' },
       {
-        label: 'Collaboration',
+        label: '协作',
         href: '/collaboration/getting-started/overview',
       },
-      { label: 'Comments', href: '/comments/getting-started/overview' },
-      { label: 'Content AI', href: '/content-ai/getting-started/overview' },
-      { label: 'History', href: '/collaboration/documents/history' },
-      { label: 'Conversion', href: '/conversion/getting-started/overview' },
-      { label: 'Semantic search', href: '/collaboration/documents/semantic-search' },
+      { label: '评论', href: '/comments/getting-started/overview' },
+      { label: '内容 AI', href: '/content-ai/getting-started/overview' },
+      { label: '历史', href: '/collaboration/documents/history' },
+      { label: '转换', href: '/conversion/getting-started/overview' },
+      { label: '语义搜索', href: '/collaboration/documents/semantic-search' },
     ],
   },
   {
-    label: 'Others',
+    label: '其他',
     items: [
-      { label: 'Guides', href: '/guides' },
-      { label: 'Examples', href: '/examples' },
-      { label: 'UI Components', href: '/ui-components/getting-started/overview' },
-      { label: 'Website', href: 'https://tiptap.dev', target: '_blank' },
+      { label: '指南', href: '/guides' },
+      { label: '示例', href: '/examples' },
+      { label: 'UI 组件', href: '/ui-components/getting-started/overview' },
+      { label: '简中文档', href: 'https://www.zhcndoc.com', target: '_blank' },
     ],
   },
 ]
@@ -61,7 +61,7 @@ export const MobileNavigationDropdown = () => {
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <NavLinkButton className={buttonClass}>
-          {activeItem?.label || 'All docs'}
+          {activeItem?.label || '所有文档'}
           <ChevronDownIcon className="w-3 h-3" />
         </NavLinkButton>
       </DropdownMenu.Trigger>
@@ -81,7 +81,7 @@ export const MobileNavigationDropdown = () => {
               ))}
             </div>
           ))}
-          <div>
+          {/* <div>
             <NavLink
               variant="invert"
               href="https://cloud.tiptap.dev/register"
@@ -91,7 +91,7 @@ export const MobileNavigationDropdown = () => {
             >
               Sign up
             </NavLink>
-          </div>
+          </div> */}
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>

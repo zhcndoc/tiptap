@@ -6,7 +6,7 @@ export const PRO_DEMO_URL =
   process.env.NEXT_PUBLIC_DEMO_URL_PRO ?? 'https://embed-pro.tiptap.dev/preview'
 
 export const BASE_PATH = process.env.BASE_PATH || process.env.NEXT_PUBLIC_BASE_PATH || ''
-export const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || 'http://localhost:3000'
+export const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || 'https://tiptap.zhcndoc.com'
 export const FULL_DOMAIN = `${DOMAIN}${BASE_PATH}`
 export const IS_NEXT = process.env.NEXT_PUBLIC_NEXT === 'true' ? true : false
 
@@ -33,6 +33,6 @@ export const VERSIONS: Array<VersionData> = [
 ]
 
 export const CTA_BAR: CTABarOptions | null = {
-  text: "Find out what's new in Tiptap V3",
+  text: '探索 Tiptap V3 的最新功能',
   url: '/resources/whats-new',
 }

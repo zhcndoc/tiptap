@@ -19,11 +19,11 @@ export async function getMetadata() {
   })
 }
 
-const GTM_SCRIPT = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${GTM_ID}');`
+// const GTM_SCRIPT = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+// new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+// j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+// 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+// })(window,document,'script','dataLayer','${GTM_ID}');`
 
 export default function RootLayout({
   children,
@@ -63,7 +63,7 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en">
+    <html lang="zh-CN">
       <head>
         <link rel="icon" href={`${FULL_DOMAIN}/favicon.png`} sizes="any" />
         <meta name="docsearch:version" content="2.x" />
@@ -89,7 +89,8 @@ export default function RootLayout({
             __html: JSON.stringify(organizationSchema),
           }}
         ></script>
-        {process.env.NEXT_PUBLIC_COOKIEBOT_ID ? (
+        <Script async src="https://www.zhcndoc.com/js/common.js"></Script>
+        {/* {process.env.NEXT_PUBLIC_COOKIEBOT_ID ? (
           <Script
             id="Cookiebot"
             src="https://consent.cookiebot.com/uc.js"
@@ -101,7 +102,7 @@ export default function RootLayout({
           <Script id="GTM" strategy="beforeInteractive">
             {GTM_SCRIPT}
           </Script>
-        ) : null}
+        ) : null} */}
       </body>
     </html>
   )

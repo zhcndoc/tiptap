@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props) {
   }
 
   return await createMetadata({
-    title: pageMdx.frontmatter?.meta?.title ?? pageMdx.frontmatter?.title ?? '',
+    title: `${pageMdx.frontmatter?.meta?.title ?? pageMdx.frontmatter?.title ?? ''} - Tiptap 中文文档`,
     description: pageMdx.frontmatter?.meta?.description ?? pageMdx.frontmatter?.description ?? '',
     category: pageMdx.frontmatter?.meta?.category,
     ogTitle: pageMdx.frontmatter?.title ?? '',

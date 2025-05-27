@@ -3,23 +3,23 @@ import { SidebarConfig } from '@/types'
 export const sidebarConfig: SidebarConfig = {
   id: 'collaboration',
   rootHref: '/collaboration/getting-started/overview',
-  title: 'Collaboration',
+  title: '协作',
   items: [
     {
       type: 'group',
       href: '/collaboration/getting-started',
-      title: 'Get started',
+      title: '开始使用',
       children: [
         {
-          title: 'Overview',
+          title: '概述',
           href: '/collaboration/getting-started/overview',
         },
         {
-          title: 'Install',
+          title: '安装',
           href: '/collaboration/getting-started/install',
         },
         {
-          title: 'Authenticate',
+          title: '认证',
           href: '/collaboration/getting-started/authenticate',
         },
       ],
@@ -27,14 +27,14 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/collaboration/provider',
-      title: 'Provider',
+      title: '提供商',
       children: [
         {
-          title: 'Integration',
+          title: '集成',
           href: '/collaboration/provider/integration',
         },
         {
-          title: 'Events',
+          title: '事件',
           href: '/collaboration/provider/events',
         },
       ],
@@ -42,14 +42,14 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/collaboration/core-concepts',
-      title: 'Features',
+      title: '特性',
       children: [
         {
-          title: 'Awareness',
+          title: '感知',
           href: '/collaboration/core-concepts/awareness',
         },
         {
-          title: 'Webhooks',
+          title: 'Webhook',
           href: '/collaboration/core-concepts/webhooks',
         },
       ],
@@ -57,10 +57,10 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/collaboration/documents',
-      title: 'Documents',
+      title: '文档',
       children: [
         {
-          title: 'Overview',
+          title: '概述',
           href: '/collaboration/documents',
         },
         {
@@ -68,19 +68,19 @@ export const sidebarConfig: SidebarConfig = {
           href: '/collaboration/documents/rest-api',
         },
         {
-          title: 'Snapshots',
+          title: '快照',
           href: '/collaboration/documents/snapshot',
         },
         {
-          title: 'Compare Snapshots',
+          title: '比较快照',
           href: '/collaboration/documents/snapshot-compare',
         },
         {
-          title: 'Inject content',
+          title: '注入内容',
           href: '/collaboration/documents/content-injection',
         },
         {
-          title: 'Semantic Search',
+          title: '语义搜索',
           href: '/collaboration/documents/semantic-search',
           tags: ['Beta'],
         },
@@ -89,14 +89,14 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/collaboration/operations',
-      title: 'Ops',
+      title: '操作',
       children: [
         {
-          title: 'Configure runtime',
+          title: '配置运行时',
           href: '/collaboration/operations/configure',
         },
         {
-          title: 'Metrics',
+          title: '指标',
           href: '/collaboration/operations/metrics',
         },
       ],
