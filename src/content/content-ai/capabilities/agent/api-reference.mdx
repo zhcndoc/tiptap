@@ -1,0 +1,148 @@
+---
+title: AI Suggestion 扩展 API 参考
+meta:
+  title: API 参考 | Tiptap AI Agent
+  description: Tiptap AI Agent 扩展的 API 参考文档。
+  category: 内容 AI
+---
+
+## 配置选项
+
+````tsx
+export interface AiAgentEventContext {
+  editor: Editor
+  provider: AiAgentProvider
+}
+
+export type EventHandlers = {
+  loadingError: (error: unknown, context: AiAgentEventContext) => void
+  stateChange: (
+    state: AiAgentProviderState,
+    previousState: AiAgentProviderState,
+    context: AiAgentEventContext,
+  ) => void
+  beforeToolCall: (toolCall: AiAgentToolCall, context: AiAgentEventContext) => void
+  afterToolCall: (toolCall: AiAgentToolCall, context: AiAgentEventContext) => void
+  runFinished: (context: AiAgentEventContext) => void
+}
+
+/**
+ * AI Agent 提供者的配置选项。
+ */
+export interface AiAgentProviderOptions extends Omit<BaseAiAgentProviderOptions, 'onStateChange'> {
+  /**
+   * 用于与 AI 服务进行身份验证的应用程序 ID。
+   */
+  appId: string
+
+  /**
+   * AI 服务的身份验证令牌。
+   */
+  token: string
+
+  /**
+   * AI 服务 API 的基本 URL。
+   */
+  baseUrl: string
+  /**
+   * 与 AI Agent 之间对话的初始聊天消息。
+   * @default []
+   * @example
+   * ```ts
+   * [
+   *   {
+   *     type: 'ai',
+   *     text: "你好，我是一个可以编辑您文档的 AI 助手。您需要什么帮助？",
+   *   },
+   * ]
+   * ```
+   */
+  initialChatMessages: ChatMessage[]
+  /**
+   * 控制 AI Agent 是否应自动接受修改编辑器内容的工具调用。
+   * @default "onlyRead"
+   */
+  autoAccept: 'always' | 'never' | 'onlyRead'
+  /**
+   * 控制用户发送消息或接受工具调用时是否自动保存检查点。
+   * 如果为 false，则不调用 setCheckpoint 函数。
+   * @default false
+   */
+  autoSaveCheckpoints?: boolean
+  /**
+   * 用于 AI Agent 的 OpenAI 模型。
+   * 推荐的模型是 gpt-4.1 和 gpt-4o，因为它们与 AI Agent 的兼容性最佳。
+   * 该模型需要支持工具调用。
+   * @default "gpt-4.1"
+   */
+  modelName?: AiAgentModelName
+
+  onLoadingError: EventHandlers['loadingError']
+  onStateChange: EventHandlers['stateChange']
+  onBeforeToolCall: EventHandlers['beforeToolCall']
+  onAfterToolCall: EventHandlers['afterToolCall']
+  onRunFinished: EventHandlers['runFinished']
+
+  /**
+   * 将 LLM 消息转换为可以被 Tiptap AI Agent 扩展解析的格式。
+   * @default openaiChatCompletionsAdapter
+   */
+  adapter: AiAgentAdapter<unknown, unknown, unknown, unknown>
+
+  /**
+   * AI Agent 是否应使用 AI Changes 扩展。
+   * @default true
+   */
+  useAiChangesExtension: boolean
+
+  /**
+   * 解析 AI Agent 请求的函数。允许您将 AI Agent 与自己的后端服务集成。
+   * @param options AI Agent 请求的选项，包括聊天消息、工具处理程序和模型名称。
+   * @returns AI 服务的聊天消息和工具调用消息
+   * @default defaultAiAgentResolver
+   */
+  resolver: (options: AiAgentResolverOptions) => Promise<AiAgentResolverReturn>
+
+  /**
+   * 将 AI Agent 对话的聊天消息转换为可以发送给 LLM 的格式。
+   *
+   * @param messages AI Agent 对话的聊天消息
+   * @param adapter 用于转换消息的适配器
+   * @returns LLM 提供程序所期望的 LLM 消息格式
+   */
+  createLlmMessages: (
+    messages: ChatMessage[],
+    adapter: AiAgentAdapter<unknown, unknown, unknown, unknown>,
+  ) => unknown[]
+}
+
+/**
+ * AI Agent 提供者的内部状态。
+ */
+export interface AiAgentProviderState {
+  /**
+   * AI Agent 当前的状态。它决定下一步采取的行动。
+   *
+   * AI Agent 像一个有限状态机，可以在不同的状态之间转换。
+   *
+   * @see AiAgentStatus
+   */
+  status: AiAgentStatus
+  loadingError: unknown
+  /**
+   * 对话中的聊天消息。
+   */
+  chatMessages: ChatMessage[]
+  chatMessagesPendingReview: {
+    accept: ChatMessage[]
+    reject: ChatMessage[]
+  }
+  /**
+   * 控制 AI Agent 的自动接受行为。
+   * - "always": 自动接受所有工具调用。
+   * - "never": 永不自动接受工具调用，需手动审核。
+   * - "onlyRead": 自动接受不修改编辑器内容的工具调用。
+   */
+  autoAccept: 'always' | 'never' | 'onlyRead'
+}
+````

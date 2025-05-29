@@ -1,0 +1,64 @@
+---
+title: 使用 AI 代理与内容 AI 云
+meta:
+  title: 使用 AI 代理与内容 AI 云 | Tiptap 内容 AI
+  description: 学习如何将 AI 代理扩展与 Tiptap 内容 AI 云一起使用。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+
+<Requirements>
+  <RequirementItem label="1. 激活试用或订阅">
+    在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [团队计划](https://cloud.tiptap.dev/v2/billing)。
+  </RequirementItem>
+  <RequirementItem label="2. 集成 AI 提供商">
+    在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看 [自定义 LLM 指南](/content-ai/capabilities/agent/custom-llms)。
+  </RequirementItem>
+  <RequirementItem label="3. 从私有注册表安装">
+    要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 通过 Tiptap 的私有 npm 注册表进行身份验证。
+  </RequirementItem>
+</Requirements>
+
+使用 Tiptap Cloud 开始使用 AI 代理扩展的最快方式。它开箱即用，您只需为扩展提供身份验证凭据。
+
+<Callout title="注意" variant="info">
+  此指南依赖于使用 [Tiptap Cloud 服务](https://cloud.tiptap.dev/v2/cloud/ai)。如果要使用自己的自定义 LLM 进行配置，请按照 [自定义 LLM 指南](/content-ai/capabilities/agent/custom-llms) 操作。
+</Callout>
+
+## 开始您的内容 AI 应用
+
+1. **激活计划：** 开始 [免费试用或选择订阅](https://cloud.tiptap.dev/v2/billing)。
+2. **配置您的 AI 应用：** 将您的 OpenAI API 密钥添加到您的 [内容 AI 应用](https://cloud.tiptap.dev/v2/cloud/ai)。
+3. **设置身份验证：** 使用我们提供的密钥生成 JWT (HS256 算法)，以便对扩展进行身份验证。 [获取您的 JWT 密钥。](https://cloud.tiptap.dev/v2/cloud/ai)
+
+## 将您的身份验证凭据添加到扩展中
+
+使用 `AiAgentProvider` 类与 Tiptap Cloud 连接。它处理与 Tiptap Cloud 的通信并管理 AI 代理的状态。
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import AiAgent, { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider({
+  // 您的 Tiptap 内容 AI 应用 ID
+  appId: 'APP_ID_HERE',
+  // 您生成的 JWT 令牌。它不得是 OpenAI API 密钥！
+  token: 'TOKEN_HERE',
+  // ... 其他选项
+})
+```
+
+当您使用 `AiAgentProvider` 向 AI 代理发送消息时，将调用 Tiptap Cloud API 以获取 AI 代理的响应。AI 代理将生成聊天消息并对文档进行编辑以完成用户的任务。
+
+## 自定义 OpenAI 模型
+
+您可以通过设置 `modelName` 选项来自定义在 Tiptap Cloud 中使用的 OpenAI 模型。AI 代理在处理复杂文档编辑任务时，使用 `gpt-4.1` 模型效果最佳，因为它提供了最佳的性能。请注意，该模型需要支持 [功能调用](https://platform.openai.com/docs/guides/function-calling)。
+
+```tsx
+const provider = new AiAgentProvider({
+  modelName: 'gpt-4.1',
+})
+```

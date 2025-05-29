@@ -1,0 +1,52 @@
+---
+title: 监听 AI 代理事件
+meta:
+  title: 监听 AI 代理事件 | Tiptap 内容 AI
+  description: 学习如何监听 Tiptap 中 AI 代理的事件。
+  category: 内容 AI
+---
+
+AI 代理提供者会触发你可以订阅的事件，以响应代理状态或行为的变化。这些事件使你能够构建响应式 UI 并实现自定义逻辑。
+
+## 可用事件
+
+| 事件            | 描述                                   | 参数                           |
+| ---------------- | ------------------------------------- | ------------------------------ |
+| `stateChange`    | 当提供者状态变化时触发                 | `(newState, previousState, context)` |
+| `loadingError`   | 加载过程中发生错误时触发               | `(error, context)`             |
+| `beforeToolCall` | 在执行工具调用之前触发                 | `(toolCall, context)`          |
+| `afterToolCall`  | 在执行工具调用之后触发                 | `(toolCall, context)`          |
+| `runFinished`    | 当 AI 代理运行完成时触发               | `(context)`                   |
+
+## 订阅事件
+
+有两种方式订阅事件。在初始化提供者时，你可以将事件处理函数作为选项传入。
+
+```tsx
+const provider = new AiAgentProvider({
+  onStateChange: (newState, previousState, context) => {
+    console.log('状态变化:', newState)
+    // 根据新状态更新 UI
+  },
+  onLoadingError: (error, context) => {
+    console.error('加载错误:', error)
+    // 向用户显示错误信息
+  },
+})
+```
+
+或者，你可以使用 `on` 方法订阅事件，使用 `off` 方法取消订阅。
+
+```tsx
+// 定义事件处理函数
+const handleStateChange = (newState, previousState, context) => {
+  console.log('状态变化:', newState)
+  // 根据新状态更新 UI
+}
+
+// 订阅事件
+provider.on('stateChange', handleStateChange)
+
+// 之后，在不需要时取消订阅
+provider.off('stateChange', handleStateChange)
+```

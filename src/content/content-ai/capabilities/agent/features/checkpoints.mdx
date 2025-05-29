@@ -1,0 +1,42 @@
+---
+title: 管理检查点
+meta:
+  title: 管理检查点 | Tiptap 内容 AI
+  description: 了解如何在 AI Agent 中管理检查点。
+  category: 内容 AI
+---
+
+检查点是编辑器内容和对话状态在特定时间点的快照。它们允许您保存文档和对话的当前状态，并在需要时恢复它。
+
+## 设置检查点
+
+要创建检查点，请使用 `setCheckpoint` 方法：
+
+```tsx
+const checkpointMessage = provider.setCheckpoint()
+```
+
+此方法返回一个检查点消息，其中包括当前的聊天消息和编辑器内容。
+
+## 恢复检查点
+
+要恢复先前保存的检查点，请使用 `restoreCheckpoint` 方法：
+
+```tsx
+provider.restoreCheckpoint(checkpointMessage.checkpoint)
+```
+
+这将把编辑器内容和对话消息恢复到创建检查点时的状态。
+
+## 自动检查点
+
+您可以配置提供者，以便在用户发送消息时自动保存检查点：
+
+```tsx
+const provider = new AiAgentProvider({
+  // ...其他选项
+  autoSaveCheckpoints: true,
+})
+```
+
+当 `autoSaveCheckpoints` 被启用时，检查点会在用户消息发送之前和工具调用之前保存。要在其他时间保存检查点，您可以手动调用 `setCheckpoint`。

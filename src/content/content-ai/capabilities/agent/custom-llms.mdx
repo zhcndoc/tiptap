@@ -1,0 +1,241 @@
+---
+title: 集成您的大语言模型（LLM）
+meta:
+  title: 集成您的大语言模型（LLM） | Tiptap 内容 AI
+  description: 学习如何将 AI 代理与您自己的大语言模型（LLM）和后端集成。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+您可以将 AI 代理扩展与您自己的后端及 LLM 提供商集成，而非使用 Tiptap Cloud。这样您就能完全掌控 AI 模型、工具和对话流程。
+
+<Callout title="定制 LLM 演示" variant="info">
+  我们为商务及企业客户提供详尽的定制 LLM 演示，包含客户端和服务器代码，以及运行和部署说明。请参阅 [方案和定价](https://tiptap.dev/pricing)。
+</Callout>
+
+## 基础设置
+
+开始之前，请按照以下步骤操作：
+
+1. 创建一个与您的 LLM 提供商通信的后端服务
+2. 配置 AI 代理扩展以调用您的后端服务
+
+## 创建调用您 LLM 的后端服务
+
+构建 AI 代理时，您需要定义一组它可以调用的工具。`AIAgentToolkit` 类提供一系列文本编辑工具，您可以将它们发送给 LLM 提供商的 API。您可以将这些工具与自己的自定义工具（如网页搜索、代理式检索增强生成（agentic RAG）或编排）结合，构建能编辑富文本并执行其他操作的定制 AI 代理。
+
+在您的服务器代码中，安装 `@tiptap-pro/extension-ai-agent` 和 `@tiptap-pro/extension-ai-agent-server` 库。
+
+```bash
+npm install @tiptap-pro/extension-ai-agent @tiptap-pro/extension-ai-agent-server
+```
+
+`AiAgentToolkit` 类提供生成系统提示和工具定义的方法，这些内容格式适合发送给您的 LLM 提供商 API 或您选择的 AI 代理框架。
+
+```tsx
+import { openaiChatCompletionsAdapter } from '@tiptap-pro/extension-ai-agent'
+import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
+
+const toolkit = new AiAgentToolkit()
+
+const response = await openai.chat.completions.create({
+  model: 'gpt-4.1',
+  messages: [
+    {
+      role: 'system',
+      content: `You are Tiptap AI Agent, an AI agent that edits rich text documents.
+// ... 其他系统提示指令
+${toolkit.getSystemPrompt()}`,
+    },
+    ...args.llmMessages,
+  ],
+  tools: [
+    ...toolkit.getTools(openaiChatCompletionsAdapter),
+    // ... 与您的自定义工具组合
+    customWebSearchTool,
+    customWeatherReportTool,
+  ],
+})
+```
+
+## 配置 AI 代理扩展以调用您的后端
+
+AI 代理扩展提供了一个 `resolver` 选项，允许您与自定义后端服务集成。该函数负责将消息发送至 LLM 并返回响应。
+
+```tsx
+import { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider({
+  resolver: async (options) => {
+    // 您的自定义逻辑，向 LLM 发送聊天消息并返回响应
+    const response = await yourCustomBackend.sendChatMessages(options.llmMessages)
+    return response
+  },
+  // ... 其他选项
+})
+```
+
+resolver 的响应应包含以下属性：
+
+- `chatMessages`：AI 生成的普通聊天消息数组，通常包含文本回复，不包括工具调用消息。
+
+- `toolCallChatMessages`：AI 生成的工具调用消息数组，代表 AI 希望执行的操作。这些消息包含指示工具执行特定操作（如编辑文档或向用户提问）的指令。
+
+这些属性帮助您将 AI 的文本响应与其请求的操作分离，使您更好地控制如何处理和展示 AI 在应用中的输出。
+
+您可以使用适配器的 `parseResponse` 函数，将 LLM 响应转换为 AI 代理扩展期望的格式。
+
+```ts
+import { openaiChatCompletionsAdapter } from '@tiptap-pro/extension-ai-agent-server'
+
+// 在服务器调用您的 LLM 提供商 API
+const response = await openai.chat.completions.create({
+  // ...
+})
+
+// 解析响应，获取符合 resolver 期望格式的聊天消息和工具调用
+const result = openaiChatCompletionsAdapter.parseResponse(response)
+```
+
+## 适配器
+
+适配器负责在 AI 代理内部格式与不同 LLM 提供商及 AI 代理框架使用的格式之间转换。扩展内置了以下适配器：
+
+| 适配器                          | 提供商                          |
+| ------------------------------ | ------------------------------- |
+| `openaiResponsesAdapter`       | OpenAI API 响应 API             |
+| `openaiChatCompletionsAdapter` | OpenAI API 聊天补全 API          |
+| `anthropicMessagesAdapter`     | Anthropic Claude 消息 API       |
+
+<Callout title="需要更多适配器？" variant="info">
+  我们正在为更多 LLM 提供商和框架添加适配器。如果您需要某个尚未支持的特定提供商的适配器，请
+  <a href="mailto:humans@tiptap.dev">联系我们并说明具体使用案例</a>。
+</Callout>
+
+如果您想使用尚未被我们后端库支持的 LLM 提供商，可以通过实现 `AiAgentAdapter` 接口创建自定义适配器。
+
+## 配置 AI 代理的工具
+
+您可以通过向构造函数传入自定义文本编辑工具，定制 `AiAgentToolkit` 实例。
+
+```ts
+import { AiAgentToolkit, toolsStarterKit } from '@tiptap-pro/extension-ai-agent-server'
+
+const toolkit = new AiAgentToolkit({
+  // 工具入门包包含所有内建工具
+  ...toolsStarterKit(),
+  // 添加例如搜索编辑器内容的工具
+  customSearchTool()
+})
+```
+
+### 内建工具
+
+AI 代理扩展包含以下预置工具：
+
+| 工具类别    | 工具                                                                     |
+| ----------- | ------------------------------------------------------------------------ |
+| **阅读**    | `read_first_chunk`，`read_next_chunk`，`read_previous_chunk`             |
+| **写作**    | `replace_chunk`，`replace_document`                                      |
+| **格式化**  | `run_command`（含诸如 `setBold`、`setItalic` 等多种命令）                |
+| **工作流**  | `plan`，`ask_user`，`finish_with_summary`                               |
+
+每个工具有两个组成部分：
+
+1. **工具定义**：定义工具 ID、描述和 JSON 模式。该数据用于发送给 LLM 生成工具调用。
+2. **工具处理器**：实现该工具在编辑器中的执行逻辑。如果您在后端定义工具，则必须在 AI 代理提供者的 `toolHandlers` 选项中定义对应的工具处理器。
+
+### 自定义工具
+
+您可以创建自定义工具以扩展 AI 代理的功能。首先，在服务端定义工具：
+
+```ts
+import { AiAgentTool } from '@tiptap-pro/extension-ai-agent-server'
+
+export const customSearchTool = (): AiAgentTool => ({
+  id: 'search_document',
+  toolDescription: '搜索文档中的文本内容',
+  jsonSchema: {
+    type: 'object',
+    properties: {
+      query: {
+        type: 'string',
+        description: '要搜索的文本',
+      },
+    },
+    required: ['query'],
+  },
+  // 系统提示的可选附加规则
+  systemPromptRules: [
+    '当需要查找文档中特定内容时使用此工具',
+    '搜索不区分大小写',
+  ],
+})
+```
+
+然后，在客户端实现工具处理器：
+
+```tsx
+import { AiAgentToolCallHandler } from '@tiptap-pro/extension-ai-agent'
+import { z } from 'zod'
+
+// 验证工具参数的模式
+const SearchToolSchema = z.object({
+  query: z.string(),
+})
+
+export const searchToolHandler = (): AiAgentToolCallHandler => ({
+  id: 'search_document',
+  modifiesEditor: false, // 该工具不修改文档
+  handleToolCall: ({ editor, toolCall }) => {
+    // 验证参数
+    const args = SearchToolSchema.parse(toolCall.arguments)
+
+    // 实现搜索逻辑
+    const html = editor.getHTML()
+    const results = findTextInHtml(html, args.query)
+
+    // 返回搜索结果给 LLM
+    return '找到以下结果: ' + results.join(', ')
+  },
+})
+```
+
+最后，将工具添加到工具包和提供者中：
+
+```tsx
+// 服务器端
+const toolkit = new AiAgentToolkit({
+  tools: [
+    // 内建工具
+    ...toolsStarterKit(),
+    // 自定义工具
+    customSearchTool(),
+  ],
+})
+
+// 客户端
+const provider = new CustomAiAgentProvider({
+  toolHandlers: [
+    // 内建工具处理器
+    ...toolHandlersStarterKit(),
+    // 自定义处理器
+    searchToolHandler(),
+  ],
+})
+```
+
+## 使用除 TypeScript 以外其他编程语言开发您的后端
+
+尽管 `@tiptap-pro/extension-ai-agent-server` 包是用 TypeScript 编写的，您仍可以用任何其他编程语言开发后端。
+
+首先，通过将 `AiAgentToolkit` 实例导出的内容转换为 JSON，提取系统提示和工具定义。然后，您可以在其他编程语言编写的代码中使用这些 JSON 数据调用 LLM 提供商。
+
+```ts
+const toolkit = new AiAgentToolkit()
+
+// 获取系统提示和工具定义的 JSON 格式
+const systemPrompt: string = toolkit.getSystemPrompt()
+const toolDefinitions: string = JSON.stringify(toolkit.getTools(openaiChatCompletionsAdapter))
+```

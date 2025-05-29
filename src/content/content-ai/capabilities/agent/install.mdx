@@ -1,0 +1,106 @@
+---
+title: 安装 AI Agent 扩展
+meta:
+  title: 安装 AI Agent 扩展 | Tiptap 内容 AI
+  description: 了解如何安装和设置 Tiptap 的 AI Agent 扩展。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+
+<Requirements>
+  <RequirementItem label="1. 激活试用或订阅">
+    在您的账户中开始一个免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅
+    [团队计划](https://cloud.tiptap.dev/v2/billing)。
+  </RequirementItem>
+  <RequirementItem label="2. 集成一个 AI 提供者">
+    在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI 或查看
+    [自定义 LLM 指南](/content-ai/capabilities/agent/custom-llms)。
+  </RequirementItem>
+  <RequirementItem label="3. 从私有注册表安装">
+    要安装前端扩展，请通过遵循 [设置指南](/guides/pro-extensions) 进行身份验证以访问 Tiptap 的私有 npm 注册表。
+  </RequirementItem>
+</Requirements>
+
+<Callout title="集成或测试 AI Agent" variant="warning">
+  要测试或集成此功能，您需要一个有效的试用或 Tiptap 团队订阅。
+</Callout>
+
+## 安装包
+
+```bash
+npm install @tiptap-pro/extension-ai-agent
+```
+
+## 设置提供者
+
+提供者对象管理 AI Agent 的状态。开始使用 AI Agent 扩展的最简单方法是使用 Tiptap Cloud 提供者：
+
+```tsx
+import { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider({
+  // 配置 Tiptap Cloud（查看下一部分）
+  appId: 'APP_ID_HERE',
+  token: 'TOKEN_HERE',
+})
+```
+
+AI Agent 可开箱即用 [与 Tiptap Cloud](/content-ai/capabilities/agent/tiptap-cloud) 作为后端。如果您想将其与自己的后端一起使用，请阅读我们的 [自定义 LLM 和后端集成指南](/content-ai/capabilities/agent/custom-llms)。
+
+## 在编辑器中导入扩展
+
+将 `AiAgent` 添加到扩展列表中，并用提供者进行配置。
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import AiAgent from '@tiptap-pro/extension-ai-agent'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    AiAgent.configure({
+      provider,
+      // … 其他选项
+    }),
+    // … 更多扩展
+  ],
+})
+```
+
+## 调用 AI Agent
+
+调用提供者的方法与 AI Agent 进行交互。
+
+```tsx
+provider.addUserMessage(
+  '纠正拼写和语法错误。然后，在文本中查找关键短语，并以粗体格式显示它们。',
+)
+provider.run()
+```
+
+## 显示 AI Agent 聊天对话
+
+您可以访问 AI Agent 状态（包括聊天对话）并在 UI 中显示它：
+
+```tsx
+provider.state.messages
+```
+
+您还可以订阅事件，并在触发时更新 UI：
+
+```tsx
+// 订阅状态变化
+provider.on('stateChange', (newState, previousState, context) => {
+  console.log('状态已更改：', newState)
+  // 根据新状态更新您的 UI
+})
+
+// 订阅加载错误
+provider.on('loadingError', (error, context) => {
+  console.error('发生错误：', error)
+  // 向用户显示错误信息
+})
+```

@@ -1,19 +1,19 @@
 ---
 title: 集成自定义大语言模型（LLM）
 meta:
-  title: 自定义LLM | Tiptap 内容AI
-  description: 通过生成式AI扩展实现自定义LLM，并在编辑器中覆盖解析器函数。请查阅文档了解更多信息！
-  category: 内容AI
+  title: 自定义 LLM | Tiptap 内容 AI
+  description: 通过生成式 AI 扩展实现自定义 LLM，并在编辑器中覆盖解析器函数。请查阅文档了解更多信息！
+  category: 内容 AI
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-如果你想使用自己的后端来提供访问自定义LLM的能力，可以在扩展配置中覆盖以下定义的解析器函数。
+如果你想使用自己的后端来提供访问自定义 LLM 的能力，可以在扩展配置中覆盖以下定义的解析器函数。
 
 请确保你返回的是正确类型的响应，并且正确处理错误。
 
 <Callout title="温馨提示！" variant="hint">
-  强烈建议你不要在前端直接调用OpenAI接口，这可能导致API令牌泄露！你应当通过后端代理来保护你的API令牌安全。
+  强烈建议你不要在前端直接调用 OpenAI 接口，这可能导致 API 令牌泄露！你应当通过后端代理来保护你的 API 令牌安全。
 </Callout>
 
 ## 安装 AI 扩展
@@ -32,7 +32,7 @@ import { Callout } from '@/components/ui/Callout'
 npm install @tiptap-pro/extension-ai@next
 ```
 
-### 同时使用自定义LLM和Tiptap AI云服务
+### 同时使用自定义 LLM 和 Tiptap AI 云服务
 
 如果你想部分情况下依赖我们的云服务，请确保你[按照这里的说明完成团队设置](/content-ai/capabilities/generation/install#start-your-content-ai-app)。
 
@@ -84,7 +84,7 @@ Ai.configure({
     // 决定是否调用自定义接口
     if (action === 'rephrase') {
       const response = await fetch('https://dummyjson.com/quotes/random')
-      const json = await response?.json()
+      const json = await response.json()
 
       if (!response.ok) {
         throw new Error(`${response.status} ${json?.message}`)
@@ -160,7 +160,7 @@ const editor = new Editor{
       }) => {
         if (action === 'customCommand') {
           const response = await fetch('https://dummyjson.com/quotes/random')
-          const json = await response?.json()
+          const json = await response.json()
 
           if (!response.ok) {
             throw new Error(`${response.status} ${json?.message}`)
@@ -222,13 +222,13 @@ Ai.configure({
     }
 
     const response = await fetch(`<YOUR_STREAMED_BACKEND_ENDPOINT>`, fetchOptions)
-    const json = await response?.json()
 
     if (!response.ok) {
+      const json = await response.json()
       throw new Error(`${json?.error} ${json?.message}`)
     }
 
-    return response?.body
+    return response.body
   },
 })
 ```

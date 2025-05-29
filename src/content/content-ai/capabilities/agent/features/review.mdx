@@ -1,0 +1,99 @@
+---
+title: 审查 AI 生成的修改
+meta:
+  title: 审查 AI 生成的修改 | Tiptap 内容 AI
+  description: 了解如何将 AI 代理与 AI 修改扩展集成，以审查 AI 生成的修改。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+AI 代理扩展可以与 AI 修改扩展集成，为 AI 生成的修改提供审查工作流程。这使得用户能够在将修改应用到文档之前查看、接受或拒绝 AI 代理所做的修改。
+
+## 设置 AI 修改集成
+
+### 步骤 1：安装两个扩展
+
+```bash
+npm install @tiptap-pro/extension-ai-agent @tiptap-pro/extension-ai-changes
+```
+
+### 步骤 2：在编辑器中配置两个扩展
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import AiAgent from '@tiptap-pro/extension-ai-agent'
+import AiChanges from '@tiptap-pro/extension-ai-changes'
+
+const provider = new AiAgentProvider({
+  appId: 'YOUR_APP_ID',
+  token: 'YOUR_JWT_TOKEN',
+  // 将 autoAccept 设置为 "never" 以始终要求审查
+  autoAccept: 'never',
+  // 启用 AI 修改集成（默认启用）
+  useAiChangesExtension: true,
+})
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    AiAgent.configure({
+      provider,
+    }),
+    AiChanges.configure({
+      // 可选：自定义 AI 修改的外观，以在选中修改时显示弹出框
+      getCustomDecorations({ change, isSelected, getDefaultDecorations }) {
+        const decorations = getDefaultDecorations()
+        // 根据需要添加自定义装饰
+        return decorations
+      },
+    }),
+  ],
+})
+```
+
+## 审查工作流程如何工作
+
+1. 当 AI 代理对文档进行修改时，这些修改会被 AI 修改扩展跟踪
+2. 如果 `autoAccept` 设置为 `never` 或 `onlyRead`（对于内容修改的更改），则修改将显示为待处理状态
+3. 提供者的状态更改为 `reviewingToolCall`
+4. 用户可以审查修改并决定接受或拒绝
+5. 在接受或拒绝后，谈话将继续进行
+
+## 接受和拒绝修改
+
+您可以调用这些方法来接受或拒绝修改：
+
+```tsx
+// 接受所有待处理的修改
+provider.acceptToolCall()
+
+// 拒绝所有待处理的修改
+provider.rejectToolCall()
+```
+
+<Callout title="注意" variant="info">
+  如果工具调用被拒绝，AI 代理提供者将尝试使用 AI 修改扩展将文档重置为工具调用执行之前的状态。然而，如果未导入 AI 修改扩展或如果 `useAiChangesExtension` 设置为 `false`，则 AI 代理将无法自动重置文档状态，因此您需要自行实现逻辑来处理被拒绝的工具调用并将文档恢复到先前状态。
+</Callout>
+
+在没有 AI 修改扩展的情况下处理被拒绝的工具调用的一种方法是，在应用工具调用之前（当触发 `beforeToolCall` 事件时）存储文档状态，并在工具调用被拒绝时恢复该状态。
+
+## 自动接受配置
+
+要控制工具是否自动应用或者需要用户审查，可以配置 `autoAccept` 选项。
+
+- `"always"`：所有工具自动应用，无需审查
+- `"never"`：所有工具需要用户审查和明确接受
+- `"onlyRead"`：仅修改编辑器内容的工具需要审查；读取操作将自动接受。
+
+```tsx
+// 配置自动接受行为
+const provider = new AiAgentProvider({
+  // ...其他选项
+  autoAccept: 'onlyRead', // 默认设置
+})
+
+// 在运行时更改自动接受行为
+provider.setAutoAccept('never')
+```
