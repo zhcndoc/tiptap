@@ -1,0 +1,321 @@
+---
+tags:
+  - type: editor
+title: 从 Draft.js 迁移
+meta:
+  title: 从 Draft.js 迁移 | Tiptap 编辑器文档
+  description: 学习如何将现有的 Draft.js 编辑器迁移到 Tiptap。完整指南涵盖内容迁移、设置及功能映射。
+  category: Editor
+---
+
+从 [Draft.js](https://draftjs.org/) 迁移到 Tiptap 非常简单。本指南将帮助你从 Draft.js 的不可变状态模型过渡到 Tiptap 的扩展系统。
+
+## 内容迁移
+
+### HTML 内容兼容性
+
+Draft.js 使用 ContentState，需要转换为 HTML 以供 Tiptap 使用：
+
+```ts
+// 将 Draft.js ContentState 转换为 HTML
+import { convertFromRaw } from 'draft-js'
+import { stateToHTML } from 'draft-js-export-html'
+
+// 如果你已有 ContentState
+const htmlContent = stateToHTML(contentState)
+
+// 如果你有原始状态（JSON）
+const contentState = convertFromRaw(rawContentState)
+const htmlContent = stateToHTML(contentState)
+
+// 在 Tiptap 中使用 HTML 内容
+const editor = new Editor({
+  content: htmlContent,
+  extensions: [StarterKit],
+})
+```
+
+如果你已有 Draft.js 输出的 HTML，也可以直接使用：
+
+```ts
+// 你现有的 Draft.js HTML 内容
+const existingContent = '<p>Hello <strong>world</strong>!</p>'
+
+// 在 Tiptap 中直接使用
+const editor = new Editor({
+  content: existingContent,
+  extensions: [StarterKit],
+})
+```
+
+尽管 HTML 完全可用，但我们建议将其转换为 Tiptap 的 JSON 格式，以获得更好的性能和可读性。对于现有内容的批量转换，可以使用[HTML 工具](/editor/api/utilities/html)以编程方式将 HTML 转换为 JSON。
+
+## 编辑器设置
+
+### 安装
+
+首先，安装 Tiptap 及其依赖：
+
+```bash
+npm install @tiptap/core @tiptap/starter-kit
+```
+
+Tiptap 支持所有现代前端 UI 框架，如 React 和 Vue。请参考我们的[安装指南](/editor/getting-started/install)中的框架特定安装说明。
+
+### 基本编辑器设置
+
+将你的 Draft.js 编辑器替换为 Tiptap：
+
+```tsx
+// Draft.js（迁移前）
+import React, { useState } from 'react'
+import { Editor, EditorState, RichUtils } from 'draft-js'
+
+function MyDraftEditor() {
+  const [editorState, setEditorState] = useState(EditorState.createEmpty())
+
+  const handleKeyCommand = (command) => {
+    const newState = RichUtils.handleKeyCommand(editorState, command)
+    if (newState) {
+      setEditorState(newState)
+      return 'handled'
+    }
+    return 'not-handled'
+  }
+
+  return (
+    <Editor
+      editorState={editorState}
+      onChange={setEditorState}
+      handleKeyCommand={handleKeyCommand}
+    />
+  )
+}
+
+// Tiptap（迁移后）
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+
+function MyTiptapEditor() {
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: '<p>Hello World!</p>',
+  })
+
+  return <EditorContent editor={editor} />
+}
+```
+
+## 扩展
+
+### 理解 Tiptap 的扩展系统
+
+Tiptap 使用模块化扩展系统，类似于 Draft.js 的实体和装饰器系统。每个功能都是独立的扩展，具备清晰的 API。
+
+[StarterKit](/editor/extensions/functionality/starterkit) 是包含所有基础扩展的集合，你也可以根据需要添加或移除其他扩展。
+
+请浏览我们的[扩展示例](/editor/extensions/overview)查看所有可用扩展，或[创建自定义扩展](/editor/extensions/custom-extensions)支持自定义功能和 HTML 元素。
+
+### 常见 Draft.js 功能对应关系
+
+| Draft.js 功能  | Tiptap 扩展               | 说明                 |
+| -------------- | ------------------------- | -------------------- |
+| 粗体内联样式   | `Bold`                    | 包含在 StarterKit 中 |
+| 斜体内联样式   | `Italic`                  | 包含在 StarterKit 中 |
+| 下划线内联样式 | `Underline`               | 包含在 StarterKit 中 |
+| 代码内联样式   | `Code`                    | 包含在 StarterKit 中 |
+| 链接实体       | `Link`                    | 包含在 StarterKit 中 |
+| 图片实体       | `Image`                   | 单独提供             |
+| 标题块         | `Heading`                 | 包含在 StarterKit 中 |
+| 引用块         | `Blockquote`              | 包含在 StarterKit 中 |
+| 代码块         | `CodeBlock`               | 包含在 StarterKit 中 |
+| 无序列表       | `BulletList`, `ListItem`  | 包含在 StarterKit 中 |
+| 有序列表       | `OrderedList`, `ListItem` | 包含在 StarterKit 中 |
+
+### 扩展配置
+
+```ts
+import { useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import Image from '@tiptap/extension-image'
+import { Color } from '@tiptap/extension-color'
+import TextStyle from '@tiptap/extension-text-style'
+import Highlight from '@tiptap/extension-highlight'
+
+const editor = useEditor({
+  extensions: [
+    StarterKit,
+    Image.configure({
+      inline: true,
+      allowBase64: true,
+    }),
+    TextStyle,
+    Color.configure({
+      types: [TextStyle.name],
+    }),
+    Highlight.configure({
+      multicolor: true,
+    }),
+  ],
+})
+```
+
+### 自定义扩展
+
+对于 Draft.js 的自定义实体或装饰器，可创建 Tiptap 自定义扩展。详情请参阅我们的[自定义扩展指南](/editor/extensions/custom-extensions)。
+
+## UI 实现
+
+### 工具栏实现
+
+Draft.js 基于 RichUtils 的工具栏对应为 Tiptap 的 UI 组件：
+
+```tsx
+// Draft.js 工具栏（迁移前）
+import { RichUtils } from 'draft-js'
+
+function DraftToolbar({ editorState, onChange }) {
+  const toggleInlineStyle = (style) => {
+    onChange(RichUtils.toggleInlineStyle(editorState, style))
+  }
+
+  const toggleBlockType = (blockType) => {
+    onChange(RichUtils.toggleBlockType(editorState, blockType))
+  }
+
+  return (
+    <div>
+      <button onClick={() => toggleInlineStyle('BOLD')}>Bold</button>
+      <button onClick={() => toggleInlineStyle('ITALIC')}>Italic</button>
+      <button onClick={() => toggleBlockType('header-one')}>H1</button>
+    </div>
+  )
+}
+
+// Tiptap 等效实现（React 示例）
+function Toolbar({ editor }) {
+  if (!editor) return null
+
+  return (
+    <div className="toolbar">
+      <button
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        className={editor.isActive('bold') ? 'active' : ''}
+      >
+        Bold
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        className={editor.isActive('italic') ? 'active' : ''}
+      >
+        Italic
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+        className={editor.isActive('heading', { level: 1 }) ? 'active' : ''}
+      >
+        H1
+      </button>
+    </div>
+  )
+}
+```
+
+### 预构建 UI 组件
+
+为了加速开发，可以使用 Tiptap 预构建的 UI 组件：
+
+- 浏览我们的[UI 组件](/ui-components/getting-started/overview)，获取现成组件
+- 查看我们的[默认文本编辑器示例](/examples/basics/default-text-editor)获取实用范例
+
+### 行内工具栏
+
+创建类似于 Draft.js 行内样式的行内工具栏：
+
+```tsx
+import { BubbleMenu } from '@tiptap/react'
+
+function MyEditor() {
+  const editor = useEditor({
+    extensions: [StarterKit],
+  })
+
+  return (
+    <>
+      <EditorContent editor={editor} />
+      <BubbleMenu editor={editor}>
+        <button
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={editor.isActive('bold') ? 'active' : ''}
+        >
+          Bold
+        </button>
+        <button
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={editor.isActive('italic') ? 'active' : ''}
+        >
+          Italic
+        </button>
+        <button
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className={editor.isActive('underline') ? 'active' : ''}
+        >
+          Underline
+        </button>
+      </BubbleMenu>
+    </>
+  )
+}
+```
+
+### 实体替换（节点视图）
+
+Draft.js 实体可以被 Tiptap 的[节点视图](/editor/extensions/custom-extensions/node-views)替换：
+
+```tsx
+// Draft.js 实体（迁移前）
+const LinkEntity = (props) => {
+  const { url } = props.contentState.getEntity(props.entityKey).getData()
+  return <a href={url}>{props.children}</a>
+}
+
+// Tiptap 节点视图（迁移后）
+import { Node } from '@tiptap/core'
+import { ReactNodeViewRenderer } from '@tiptap/react'
+
+const LinkComponent = ({ node }) => {
+  return <a href={node.attrs.href}>{node.textContent}</a>
+}
+
+const CustomLink = Node.create({
+  name: 'customLink',
+
+  addNodeView() {
+    return ReactNodeViewRenderer(LinkComponent)
+  },
+})
+```
+
+## 迁移清单
+
+1. 安装 Tiptap 包
+2. 将 Draft.js ContentState 转换为 HTML
+3. 使用 Tiptap 设置替换 Draft.js 编辑器
+4. 映射 Draft.js 内联样式到 Tiptap 标记
+5. 映射 Draft.js 块类型到 Tiptap 节点
+6. 将实体迁移到[节点视图](/editor/extensions/custom-extensions/node-views)或扩展
+7. 将工具栏组件迁移到 Tiptap UI
+8. 测试内容兼容性
+9. 转换现有内容为 JSON 格式（推荐）
+10. 为任何缺失功能实现自定义扩展
+11. 更新事件处理程序和按键命令
+12. 测试行内工具栏功能
+13. 验证链接和图片处理
+14. 测试列表功能
+
+## 后续步骤
+
+- 探索[扩展概览](/editor/extensions/overview)，发现所有可用扩展
+- 了解[自定义扩展](/editor/extensions/custom-extensions)以实现高级定制
+- 浏览我们的[示例](/examples)，获取实现灵感
+- 查看[性能指南](/guides/performance)获取优化建议

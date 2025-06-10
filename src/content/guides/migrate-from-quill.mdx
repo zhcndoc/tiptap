@@ -1,0 +1,332 @@
+---
+tags:
+  - type: editor
+title: 从 Quill 迁移
+meta:
+  title: 从 Quill 迁移 | Tiptap 编辑器文档
+  description: 学习如何将现有的 Quill 编辑器迁移到 Tiptap。完整指南涵盖内容迁移、设置以及功能映射。
+  category: Editor
+---
+
+从 [Quill](https://quilljs.com/) 迁移到 Tiptap 非常简单。本指南将帮助你顺利完成从 Quill 的 Delta 格式到 Tiptap 扩展系统的过渡。
+
+## 内容迁移
+
+### HTML 内容兼容性
+
+Quill 使用 Delta 格式存储内容，需要先转换为 HTML 以供 Tiptap 使用：
+
+```ts
+// 先将 Quill Delta 转换为 HTML
+const quill = new Quill('#temp-editor')
+quill.setContents(existingDeltaContent)
+const htmlContent = quill.root.innerHTML
+
+// 在 Tiptap 中使用 HTML 内容
+const editor = new Editor({
+  content: htmlContent,
+  extensions: [StarterKit],
+})
+```
+
+如果你已经有 Quill 输出的 HTML，可以直接使用：
+
+```ts
+// 你的现有 Quill HTML 内容
+const existingContent = '<p>Hello <strong>world</strong>!</p>'
+
+// 直接在 Tiptap 中使用
+const editor = new Editor({
+  content: existingContent,
+  extensions: [StarterKit],
+})
+```
+
+虽然 HTML 已经完全兼容，我们建议转换为 Tiptap 的 JSON 格式以获得更好的性能和可读性。对于批量转换现有内容，可使用[HTML 工具](/editor/api/utilities/html)程序化地将 HTML 转为 JSON。
+
+## 编辑器设置
+
+### 安装
+
+首先，安装 Tiptap 及其依赖：
+
+```bash
+npm install @tiptap/core @tiptap/starter-kit
+```
+
+Tiptap 支持所有现代前端 UI 框架，例如 React 和 Vue。请参阅我们的[安装指南](/editor/getting-started/install)中针对具体框架的安装说明。
+
+### 基础编辑器设置
+
+将 Quill 的初始化替换为 Tiptap：
+
+```ts
+// Quill（之前）
+const quill = new Quill('#editor', {
+  theme: 'snow',
+  modules: {
+    toolbar: [
+      ['bold', 'italic', 'underline'],
+      ['link', 'image'],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ header: [1, 2, 3, false] }],
+    ],
+  },
+})
+
+// Tiptap（之后）
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+
+const editor = new Editor({
+  element: document.querySelector('#editor'),
+  extensions: [StarterKit],
+  content: '<p>Hello World!</p>',
+})
+```
+
+## 扩展
+
+### 了解 Tiptap 的扩展系统
+
+Tiptap 使用模块化扩展系统，类似于 Quill 的模块系统。每个功能都是独立的扩展，可以进行配置和自定义。
+
+[StarterKit](/editor/extensions/functionality/starterkit) 包含了所有基本扩展，你也可以根据需要增删其他扩展。
+
+在我们的[扩展指南](/editor/extensions/overview)中探索所有可用的扩展，或者[创建自定义扩展](/editor/extensions/custom-extensions)以支持自定义功能和 HTML 元素。
+
+### 常见 Quill 模块对应关系
+
+| Quill 功能            | Tiptap 扩展                             | 备注            |
+| --------------------- | --------------------------------------- | --------------- |
+| 加粗                  | `Bold`                                  | 含于 StarterKit |
+| 斜体                  | `Italic`                                | 含于 StarterKit |
+| 下划线                | `Underline`                             | 含于 StarterKit |
+| 链接                  | `Link`                                  | 含于 StarterKit |
+| 图片                  | `Image`                                 | 单独提供        |
+| 列表（项目符号/有序） | `BulletList`, `OrderedList`, `ListItem` | 含于 StarterKit |
+| 标题                  | `Heading`                               | 含于 StarterKit |
+| 引用块                | `Blockquote`                            | 含于 StarterKit |
+| 代码块                | `CodeBlock`                             | 含于 StarterKit |
+| 删除线                | `Strike`                                | 含于 StarterKit |
+| 字体颜色              | `TextStyle`, `Color`                    | 单独提供        |
+| 背景色                | `TextStyle`, `Highlight`                | 单独提供        |
+| 对齐                  | `TextAlign`                             | 单独提供        |
+
+### 扩展配置
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Image from '@tiptap/extension-image'
+import TextAlign from '@tiptap/extension-text-align'
+import { Color } from '@tiptap/extension-color'
+import TextStyle from '@tiptap/extension-text-style'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    Image.configure({
+      inline: true,
+      allowBase64: true,
+    }),
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+    }),
+    TextStyle,
+    Color.configure({
+      types: [TextStyle.name, ListItem.name],
+    }),
+  ],
+})
+```
+
+### 自定义扩展
+
+对于 Quill 自定义模块或 blot，请创建对应的 Tiptap 自定义扩展。详见我们的[自定义扩展指南](/editor/extensions/custom-extensions)。
+
+## UI 实现
+
+### 工具栏实现
+
+Quill 的工具栏配置需要转换为 Tiptap 中的自定义 UI 组件：
+
+```tsx
+// Quill 工具栏配置
+toolbar: [
+  ['bold', 'italic', 'underline'],
+  ['link', 'image'],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  [{ header: [1, 2, 3, false] }],
+]
+
+// Tiptap 等效实现（React 示例）
+function Toolbar({ editor }) {
+  if (!editor) return null
+
+  return (
+    <div className="toolbar">
+      <div className="toolbar-group">
+        <button
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={editor.isActive('bold') ? 'active' : ''}
+        >
+          加粗
+        </button>
+        <button
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={editor.isActive('italic') ? 'active' : ''}
+        >
+          斜体
+        </button>
+        <button
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className={editor.isActive('underline') ? 'active' : ''}
+        >
+          下划线
+        </button>
+      </div>
+
+      <div className="toolbar-group">
+        <button
+          onClick={() => {
+            const url = window.prompt('输入链接 URL')
+            if (url) {
+              editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+            }
+          }}
+          className={editor.isActive('link') ? 'active' : ''}
+        >
+          链接
+        </button>
+        <button
+          onClick={() => {
+            const url = window.prompt('输入图片 URL')
+            if (url) {
+              editor.chain().focus().setImage({ src: url }).run()
+            }
+          }}
+        >
+          图片
+        </button>
+      </div>
+
+      <div className="toolbar-group">
+        <button
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={editor.isActive('orderedList') ? 'active' : ''}
+        >
+          有序列表
+        </button>
+        <button
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={editor.isActive('bulletList') ? 'active' : ''}
+        >
+          项目符号列表
+        </button>
+      </div>
+
+      <div className="toolbar-group">
+        <select
+          onChange={(e) => {
+            const level = parseInt(e.target.value)
+            if (level === 0) {
+              editor.chain().focus().setParagraph().run()
+            } else {
+              editor.chain().focus().toggleHeading({ level }).run()
+            }
+          }}
+          value={
+            editor.isActive('heading', { level: 1 })
+              ? 1
+              : editor.isActive('heading', { level: 2 })
+                ? 2
+                : editor.isActive('heading', { level: 3 })
+                  ? 3
+                  : 0
+          }
+        >
+          <option value={0}>普通文本</option>
+          <option value={1}>标题 1</option>
+          <option value={2}>标题 2</option>
+          <option value={3}>标题 3</option>
+        </select>
+      </div>
+    </div>
+  )
+}
+```
+
+### 预构建 UI 组件
+
+为了加快开发速度，可以使用 Tiptap 提供的预构建 UI 组件：
+
+- 浏览我们的[UI 组件](/ui-components/getting-started/overview)以获得现成组件
+- 参考我们的[默认文本编辑器示例](/examples/basics/default-text-editor)获取实用示例
+
+### 气泡工具栏（Quill 气泡主题）
+
+使用 Tiptap 的 BubbleMenu 模拟 Quill 的气泡主题：
+
+```tsx
+import { BubbleMenu, useEditor } from '@tiptap/react'
+
+function MyEditor() {
+  const editor = useEditor({
+    extensions: [StarterKit],
+  })
+
+  return (
+    <>
+      <EditorContent editor={editor} />
+      <BubbleMenu editor={editor}>
+        <button
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={editor.isActive('bold') ? 'active' : ''}
+        >
+          加粗
+        </button>
+        <button
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={editor.isActive('italic') ? 'active' : ''}
+        >
+          斜体
+        </button>
+        <button
+          onClick={() => {
+            const url = window.prompt('输入链接 URL')
+            if (url) {
+              editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+            }
+          }}
+          className={editor.isActive('link') ? 'active' : ''}
+        >
+          链接
+        </button>
+      </BubbleMenu>
+    </>
+  )
+}
+```
+
+## 迁移清单
+
+1. 安装 Tiptap 包
+2. 将 Quill Delta 内容转换为 HTML
+3. 用 Tiptap 设置替换 Quill 初始化
+4. 映射 Quill 模块到 Tiptap 扩展
+5. 迁移工具栏配置为自定义 UI 组件
+6. 测试内容兼容性
+7. （推荐）将现有内容转换为 JSON 格式
+8. 针对缺失功能实现自定义扩展
+9. 更新事件处理与 API 调用
+10. 如果使用气泡主题，测试气泡菜单功能
+11. 验证图片上传与处理
+12. 测试格式和样式功能
+
+## 后续步骤
+
+- 探索[扩展总览](/editor/extensions/overview)，了解所有可用扩展
+- 了解[自定义扩展](/editor/extensions/custom-extensions)以实现高级定制
+- 查看我们的[示例](/examples)以获得实现灵感
+- 浏览[性能指南](/guides/performance)获取优化建议

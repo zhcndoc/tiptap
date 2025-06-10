@@ -96,10 +96,21 @@ export default () => {
 
 ### 连接到您的文档服务器
 
-为了实现协作功能，安装 `@hocuspocus/provider` 包：
+为了实现协作功能，安装 `@tiptap-cloud/provider` 包：
+
+<Callout title="设置私有注册表" variant="hint">
+请注意，您需要按照[这里](https://cloud.tiptap.dev/pro-extensions)的说明设置对私有注册表的访问。
+
+此外，您可能需要将以下行添加到您的 .npmrc 中：
+
+```
+@tiptap-cloud:registry=https://registry.tiptap.dev/
+```
+
+</Callout>
 
 ```bash
-npm install @hocuspocus/provider@next
+npm install @tiptap-cloud/provider@next
 ```
 
 接下来，在您的 index.jsx 文件中配置提供者，并输入您的服务器详细信息：
@@ -128,7 +139,7 @@ import * as Y from 'yjs'
 
 // 导入提供者和 useEffect
 import { useEffect } from 'react'
-import { TiptapCollabProvider } from '@hocuspocus/provider'
+import { TiptapCollabProvider } from '@tiptap-cloud/provider'
 
 const doc = new Y.Doc()
 
@@ -187,7 +198,7 @@ import * as Y from 'yjs'
 import Collaboration from '@tiptap/extension-collaboration'
 import { useEffect } from 'react'
 
-import { TiptapCollabProvider } from '@hocuspocus/provider'
+import { TiptapCollabProvider } from '@tiptap-cloud/provider'
 
 const doc = new Y.Doc()
 
@@ -233,7 +244,7 @@ export default () => {
 
 ## 禁用默认撤销/重做
 
-如果您将协作集成到 **与此演示提供的编辑器不同的编辑器** 中，您可能需要禁用编辑器的默认历史功能。这是必要的，以避免与协作历史管理的冲突：您不希望撤销其他人的更改。
+如果您正在将协作集成到**本演示中提供的编辑器以外的编辑器**中，您可能需要禁用编辑器的默认撤销/重做功能。这是为了避免与协作历史管理发生冲突：您不希望撤销其他人的更改。
 
 只有当您的项目包含 Tiptap 的 [StarterKit](/editor/extensions/functionality/starterkit) 或 [Undo/Redo](/editor/extensions/functionality/undo-redo) 扩展时，才需要此操作。
 
@@ -241,7 +252,7 @@ export default () => {
 const editor = useEditor({
   extensions: [
     StarterKit.configure({
-      history: false, // 禁用默认历史，以使用协作的历史管理
+      undoRedo: false, // 禁用默认的撤销/重做扩展，以使用协作的历史记录管理功能
     }),
   ],
 })

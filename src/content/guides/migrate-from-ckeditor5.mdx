@@ -1,0 +1,291 @@
+---
+tags:
+  - type: editor
+title: 从 CKEditor 5 迁移
+meta:
+  title: 从 CKEditor 5 迁移 | Tiptap 编辑器文档
+  description: 了解如何将现有的 CKEditor 5 编辑器迁移到 Tiptap。涵盖内容迁移、配置及功能映射的完整指南。
+  category: Editor
+---
+
+从 [CKEditor 5](https://ckeditor.com/) 迁移到 Tiptap 非常简单。本指南涵盖平稳过渡所需了解的所有内容。
+
+## 内容迁移
+
+### HTML 内容兼容性
+
+CKEditor 5 通常输出 HTML 内容，Tiptap 可直接使用，无需任何转换：
+
+```ts
+// 你现有的 CKEditor 5 内容
+const existingContent =
+  '<p>Hello <strong>world</strong>!</p><ul><li>Item 1</li><li>Item 2</li></ul>'
+
+// 直接在 Tiptap 中使用
+const editor = new Editor({
+  content: existingContent,
+  extensions: [StarterKit],
+})
+```
+
+虽然 HTML 完美兼容，我们仍推荐将其转换为 Tiptap 的 JSON 格式，以获得更好的性能和可读性。对于批量转换现有内容，可以使用 [HTML 工具](/editor/api/utilities/html) 以编程方式将 HTML 转换为 JSON。
+
+## 编辑器配置
+
+### 安装
+
+首先，安装 Tiptap 及其依赖：
+
+```bash
+npm install @tiptap/core @tiptap/starter-kit
+```
+
+Tiptap 支持所有现代前端 UI 框架，如 React 和 Vue。请参阅我们针对具体框架的[安装指南](/editor/getting-started/install)。
+
+### 基础编辑器配置
+
+用 Tiptap 替换你的 CKEditor 5 初始化：
+
+```ts
+// CKEditor 5 （之前）
+import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor'
+import Essentials from '@ckeditor/ckeditor5-essentials/src/essentials'
+import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold'
+import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic'
+
+ClassicEditor.create(document.querySelector('#editor'), {
+  plugins: [Essentials, Bold, Italic],
+  toolbar: ['bold', 'italic'],
+})
+
+// Tiptap （之后）
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+
+const editor = new Editor({
+  element: document.querySelector('#editor'),
+  extensions: [StarterKit],
+  content: '<p>Hello World!</p>',
+})
+```
+
+## 扩展功能
+
+### 理解 Tiptap 的扩展系统
+
+Tiptap 使用类似于 CKEditor 5 插件架构的模块化扩展系统。每个功能都是独立的扩展，可进行配置和自定义。
+
+[StarterKit](/editor/extensions/functionality/starterkit) 是所有基础扩展的集合，你可以根据需要添加或删除其他扩展。
+
+在我们的[扩展指南](/editor/extensions/overview)中探索所有可用扩展，或者[创建你自己的](/editor/extensions/custom-extensions)以支持自定义功能和 HTML 元素。
+
+### 常见 CKEditor 5 插件对应关系
+
+| CKEditor 5 插件 | Tiptap 扩展                             | 备注                 |
+| --------------- | --------------------------------------- | -------------------- |
+| `Bold`          | `Bold`                                  | 包含在 StarterKit 中 |
+| `Italic`        | `Italic`                                | 包含在 StarterKit 中 |
+| `List`          | `BulletList`, `OrderedList`, `ListItem` | 包含在 StarterKit 中 |
+| `Link`          | `Link`                                  | 包含在 StarterKit 中 |
+| `Image`         | `Image`                                 | 单独提供             |
+| `Table`         | `Table`                                 | 单独提供             |
+| `CodeBlock`     | `CodeBlock`                             | 包含在 StarterKit 中 |
+| `Heading`       | `Heading`                               | 包含在 StarterKit 中 |
+| `Blockquote`    | `Blockquote`                            | 包含在 StarterKit 中 |
+| `Alignment`     | `TextAlign`                             | 单独提供             |
+| `FontColor`     | `TextStyle`, `Color`                    | 单独提供             |
+| `FontSize`      | `TextStyle`, `FontSize`                 | 单独提供             |
+
+### 扩展配置
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Image from '@tiptap/extension-image'
+import Table from '@tiptap/extension-table'
+import TableRow from '@tiptap/extension-table-row'
+import TableHeader from '@tiptap/extension-table-header'
+import TableCell from '@tiptap/extension-table-cell'
+import TextAlign from '@tiptap/extension-text-align'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    Image.configure({
+      inline: true,
+      allowBase64: true,
+    }),
+    Table.configure({
+      resizable: true,
+    }),
+    TableRow,
+    TableHeader,
+    TableCell,
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+    }),
+  ],
+})
+```
+
+### 自定义扩展
+
+针对 CKEditor 5 的自定义插件，可创建自定义 Tiptap 扩展。详见我们的[自定义扩展指南](/editor/extensions/custom-extensions)。
+
+## UI 实现
+
+### 工具栏实现
+
+CKEditor 5 的工具栏配置可转为 Tiptap 的自定义 UI 组件：
+
+```tsx
+// CKEditor 5 工具栏配置
+toolbar: ['heading', 'bold', 'italic', 'link', 'bulletedList', 'numberedList']
+
+// Tiptap 等价（React 示例）
+function Toolbar({ editor }) {
+  if (!editor) return null
+
+  return (
+    <div className="toolbar">
+      <select
+        onChange={(e) => {
+          const level = parseInt(e.target.value)
+          if (level === 0) {
+            editor.chain().focus().setParagraph().run()
+          } else {
+            editor.chain().focus().toggleHeading({ level }).run()
+          }
+        }}
+        value={
+          editor.isActive('heading', { level: 1 })
+            ? 1
+            : editor.isActive('heading', { level: 2 })
+              ? 2
+              : editor.isActive('heading', { level: 3 })
+                ? 3
+                : 0
+        }
+      >
+        <option value={0}>段落</option>
+        <option value={1}>标题 1</option>
+        <option value={2}>标题 2</option>
+        <option value={3}>标题 3</option>
+      </select>
+
+      <button
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        className={editor.isActive('bold') ? 'active' : ''}
+      >
+        加粗
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        className={editor.isActive('italic') ? 'active' : ''}
+      >
+        斜体
+      </button>
+
+      <button
+        onClick={() => {
+          const url = window.prompt('URL')
+          if (url) {
+            editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+          }
+        }}
+        className={editor.isActive('link') ? 'active' : ''}
+      >
+        链接
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        className={editor.isActive('bulletList') ? 'active' : ''}
+      >
+        项目符号列表
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        className={editor.isActive('orderedList') ? 'active' : ''}
+      >
+        编号列表
+      </button>
+    </div>
+  )
+}
+```
+
+### 预构建 UI 组件
+
+为了加快开发，可使用 Tiptap 的预构建 UI 组件：
+
+- 参阅我们的[UI 组件](/ui-components/getting-started/overview)，获取现成可用组件
+- 查看我们的[默认文本编辑器示例](/examples/basics/default-text-editor)中的实用案例
+
+### 气泡编辑器等价
+
+CKEditor 5 的气泡编辑器可用 Tiptap 的 BubbleMenu 实现：
+
+```tsx
+import { BubbleMenu } from '@tiptap/react'
+
+function MyEditor() {
+  const editor = useEditor({
+    extensions: [StarterKit],
+  })
+
+  return (
+    <>
+      <EditorContent editor={editor} />
+      <BubbleMenu editor={editor}>
+        <button
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={editor.isActive('bold') ? 'active' : ''}
+        >
+          加粗
+        </button>
+        <button
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={editor.isActive('italic') ? 'active' : ''}
+        >
+          斜体
+        </button>
+        <button
+          onClick={() => {
+            const url = window.prompt('URL')
+            if (url) {
+              editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+            }
+          }}
+          className={editor.isActive('link') ? 'active' : ''}
+        >
+          链接
+        </button>
+      </BubbleMenu>
+    </>
+  )
+}
+```
+
+## 迁移清单
+
+1. 安装 Tiptap 包
+2. 用 Tiptap 配置替换 CKEditor 5 初始化
+3. 映射 CKEditor 5 插件到 Tiptap 扩展
+4. 迁移工具栏配置到自定义 UI 组件
+5. 测试内容兼容性
+6. 将现有内容转换为 JSON 格式（推荐）
+7. 为缺失功能实现自定义扩展
+8. 更新事件处理及 API 调用
+9. 如使用，测试气泡/弹出菜单功能
+10. 验证图片上传及处理
+11. 如使用，测试表格功能
+
+## 下一步
+
+- 探索[扩展概览](/editor/extensions/overview)以发现所有可用扩展
+- 学习[自定义扩展](/editor/extensions/custom-extensions)实现高级定制
+- 参考我们的[示例](/examples)获取实现灵感
+- 查看[性能指南](/guides/performance)获取优化建议

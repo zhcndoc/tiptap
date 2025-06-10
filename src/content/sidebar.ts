@@ -81,7 +81,7 @@ export const sidebarConfig: SidebarConfig = {
           title: '更新日志',
         },
         {
-          href: '/resources/pro-license',
+          href: 'https://tiptap.dev/pro-license',
           title: '许可证',
         },
       ],

@@ -2,7 +2,7 @@
 title: Tiptap 指南
 meta:
   title: 指南 | Tiptap 文档
-  description: 探索关于内容 AI、评论、协作等的 Tiptap 指南，以构建动态和可访问的富文本编辑器。
+  description: 探索有关内容 AI、评论、协作等的 Tiptap 指南，构建动态且易于访问的富文本编辑器。
   category: 编辑器
 sidebars:
   hideSecondary: true
@@ -14,14 +14,14 @@ import { Section } from '@/components/ui/Section'
 import * as FilterGrid from '@/components/FilterGrid'
 import * as CardGrid from '@/components/CardGrid'
 
-Tiptap 指南提供有关配置编辑器、利用我们的功能提升用户体验、自定义扩展、交互元素，确保可访问性的实用建议，旨在帮助您为应用程序构建包容性和动态的富文本编辑器。
+Tiptap 指南提供了关于配置编辑器、使用我们的功能增强用户体验、自定义扩展、交互元素以及确保无障碍性的实用建议，旨在帮助您为应用构建包容且动态的富文本编辑器。
 
-<FilterGrid.Wrapper filters={['编辑器', '协作']}>
+<FilterGrid.Wrapper filters={['编辑器', '协作', '迁移']}>
   <CardGrid.Wrapper className="sm:grid-cols-3">
     <FilterGrid.Item filter="编辑器">
       <CardGrid.Item asChild>
         <Link href="/guides/pro-extensions">
-          <CardGrid.Subtitle size="sm">第一步</CardGrid.Subtitle>
+          <CardGrid.Subtitle size="sm">初步步骤</CardGrid.Subtitle>
           <div>
             <CardGrid.ItemTitle>如何集成专业扩展</CardGrid.ItemTitle>
           </div>
@@ -34,11 +34,9 @@ Tiptap 指南提供有关配置编辑器、利用我们的功能提升用户体�
     <FilterGrid.Item filter="编辑器">
       <CardGrid.Item asChild>
         <Link href="/guides/accessibility">
-          <CardGrid.Subtitle size="sm">基本</CardGrid.Subtitle>
+          <CardGrid.Subtitle size="sm">基础</CardGrid.Subtitle>
           <div>
-            <CardGrid.ItemTitle>
-              如何确保使用 Tiptap 创建的内容可访问？
-            </CardGrid.ItemTitle>
+            <CardGrid.ItemTitle>如何确保使用 Tiptap 创建的内容具有无障碍性？</CardGrid.ItemTitle>
           </div>
           <CardGrid.ItemFooter>
             <Tag>编辑器</Tag>
@@ -49,11 +47,9 @@ Tiptap 指南提供有关配置编辑器、利用我们的功能提升用户体�
     <FilterGrid.Item filter="编辑器">
       <CardGrid.Item asChild>
         <Link href="/guides/performance">
-          <CardGrid.Subtitle size="sm">基本</CardGrid.Subtitle>
+          <CardGrid.Subtitle size="sm">基础</CardGrid.Subtitle>
           <div>
-            <CardGrid.ItemTitle>
-              如何确保您的编辑器性能良好地集成？
-            </CardGrid.ItemTitle>
+            <CardGrid.ItemTitle>如何确保您的编辑器集成表现卓越？</CardGrid.ItemTitle>
           </div>
           <CardGrid.ItemFooter>
             <Tag>编辑器</Tag>
@@ -64,9 +60,9 @@ Tiptap 指南提供有关配置编辑器、利用我们的功能提升用户体�
     <FilterGrid.Item filter="编辑器">
       <CardGrid.Item asChild>
         <Link href="/guides/invalid-schema">
-          <CardGrid.Subtitle size="sm">基本</CardGrid.Subtitle>
+          <CardGrid.Subtitle size="sm">基础</CardGrid.Subtitle>
           <div>
-            <CardGrid.ItemTitle>如何处理 Tiptap 中的无效模式</CardGrid.ItemTitle>
+            <CardGrid.ItemTitle>如何处理 Tiptap 中的无效 Schema</CardGrid.ItemTitle>
           </div>
           <CardGrid.ItemFooter>
             <Tag>编辑器</Tag>
@@ -77,11 +73,9 @@ Tiptap 指南提供有关配置编辑器、利用我们的功能提升用户体�
     <FilterGrid.Item filter="编辑器">
       <CardGrid.Item asChild>
         <Link href="/guides/output-json-html">
-          <CardGrid.Subtitle size="sm">基本</CardGrid.Subtitle>
+          <CardGrid.Subtitle size="sm">基础</CardGrid.Subtitle>
           <div>
-            <CardGrid.ItemTitle>
-              查看如何将您的内容导出并存储为 JSON 或 HTML
-            </CardGrid.ItemTitle>
+            <CardGrid.ItemTitle>查看如何将内容导出并保存为 JSON 或 HTML</CardGrid.ItemTitle>
           </div>
           <CardGrid.ItemFooter>
             <Tag>编辑器</Tag>
@@ -92,11 +86,9 @@ Tiptap 指南提供有关配置编辑器、利用我们的功能提升用户体�
     <FilterGrid.Item filter="协作">
       <CardGrid.Item asChild>
         <Link href="/guides/authentication">
-          <CardGrid.Subtitle size="sm">基本</CardGrid.Subtitle>
+          <CardGrid.Subtitle size="sm">基础</CardGrid.Subtitle>
           <div>
-            <CardGrid.ItemTitle>
-              如何实施文档访问控制的身份验证？
-            </CardGrid.ItemTitle>
+            <CardGrid.ItemTitle>如何为文档访问控制实现身份认证？</CardGrid.ItemTitle>
           </div>
           <CardGrid.ItemFooter>
             <Tag>协作</Tag>
@@ -109,9 +101,7 @@ Tiptap 指南提供有关配置编辑器、利用我们的功能提升用户体�
         <Link href="/guides/naming-documents">
           <CardGrid.Subtitle size="sm">文档</CardGrid.Subtitle>
           <div>
-            <CardGrid.ItemTitle>
-              如何在您的协作平台中有效地命名和组织文档？
-            </CardGrid.ItemTitle>
+            <CardGrid.ItemTitle>如何在协作平台中有效地命名和组织文档？</CardGrid.ItemTitle>
           </div>
           <CardGrid.ItemFooter>
             <Tag>协作</Tag>
@@ -124,9 +114,7 @@ Tiptap 指南提供有关配置编辑器、利用我们的功能提升用户体�
         <Link href="/guides/offline-support">
           <CardGrid.Subtitle size="sm">离线</CardGrid.Subtitle>
           <div>
-            <CardGrid.ItemTitle>
-              如何整合离线功能和自动同步？
-            </CardGrid.ItemTitle>
+            <CardGrid.ItemTitle>如何整合离线功能及自动同步？</CardGrid.ItemTitle>
           </div>
           <CardGrid.ItemFooter>
             <Tag>协作</Tag>
@@ -137,7 +125,7 @@ Tiptap 指南提供有关配置编辑器、利用我们的功能提升用户体�
     <FilterGrid.Item filter="编辑器">
       <CardGrid.Item asChild>
         <Link href="/guides/upgrade-tiptap-v1">
-          <CardGrid.Subtitle size="sm">基本</CardGrid.Subtitle>
+          <CardGrid.Subtitle size="sm">基础</CardGrid.Subtitle>
           <div>
             <CardGrid.ItemTitle>如何从 Tiptap v1 升级到 v2？</CardGrid.ItemTitle>
           </div>
@@ -150,14 +138,103 @@ Tiptap 指南提供有关配置编辑器、利用我们的功能提升用户体�
     <FilterGrid.Item filter="编辑器">
       <CardGrid.Item asChild>
         <Link href="/guides/typescript">
-          <CardGrid.Subtitle size="sm">自定义</CardGrid.Subtitle>
+          <CardGrid.Subtitle size="sm">定制化</CardGrid.Subtitle>
           <div>
-            <CardGrid.ItemTitle>
-              如何使用 TypeScript 编写和扩展您的编辑器？
-            </CardGrid.ItemTitle>
+            <CardGrid.ItemTitle>如何使用 TypeScript 编码并扩展您的编辑器？</CardGrid.ItemTitle>
           </div>
           <CardGrid.ItemFooter>
             <Tag>编辑器</Tag>
+          </CardGrid.ItemFooter>
+        </Link>
+      </CardGrid.Item>
+    </FilterGrid.Item>
+    <FilterGrid.Item filter="迁移">
+      <CardGrid.Item asChild>
+        <Link href="/guides/migrate-from-tinymce">
+          <CardGrid.Subtitle size="sm">迁移</CardGrid.Subtitle>
+          <div>
+            <CardGrid.ItemTitle>从 TinyMCE 迁移</CardGrid.ItemTitle>
+          </div>
+          <CardGrid.ItemFooter>
+            <Tag>迁移</Tag>
+          </CardGrid.ItemFooter>
+        </Link>
+      </CardGrid.Item>
+    </FilterGrid.Item>
+    <FilterGrid.Item filter="迁移">
+      <CardGrid.Item asChild>
+        <Link href="/guides/migrate-from-ckeditor5">
+          <CardGrid.Subtitle size="sm">迁移</CardGrid.Subtitle>
+          <div>
+            <CardGrid.ItemTitle>从 CKEditor 5 迁移</CardGrid.ItemTitle>
+          </div>
+          <CardGrid.ItemFooter>
+            <Tag>迁移</Tag>
+          </CardGrid.ItemFooter>
+        </Link>
+      </CardGrid.Item>
+    </FilterGrid.Item>
+    <FilterGrid.Item filter="迁移">
+      <CardGrid.Item asChild>
+        <Link href="/guides/migrate-from-quill">
+          <CardGrid.Subtitle size="sm">迁移</CardGrid.Subtitle>
+          <div>
+            <CardGrid.ItemTitle>从 Quill 迁移</CardGrid.ItemTitle>
+          </div>
+          <CardGrid.ItemFooter>
+            <Tag>迁移</Tag>
+          </CardGrid.ItemFooter>
+        </Link>
+      </CardGrid.Item>
+    </FilterGrid.Item>
+    <FilterGrid.Item filter="迁移">
+      <CardGrid.Item asChild>
+        <Link href="/guides/migrate-from-slate">
+          <CardGrid.Subtitle size="sm">迁移</CardGrid.Subtitle>
+          <div>
+            <CardGrid.ItemTitle>从 Slate 迁移</CardGrid.ItemTitle>
+          </div>
+          <CardGrid.ItemFooter>
+            <Tag>迁移</Tag>
+          </CardGrid.ItemFooter>
+        </Link>
+      </CardGrid.Item>
+    </FilterGrid.Item>
+    <FilterGrid.Item filter="迁移">
+      <CardGrid.Item asChild>
+        <Link href="/guides/migrate-from-lexical">
+          <CardGrid.Subtitle size="sm">迁移</CardGrid.Subtitle>
+          <div>
+            <CardGrid.ItemTitle>从 Lexical 迁移</CardGrid.ItemTitle>
+          </div>
+          <CardGrid.ItemFooter>
+            <Tag>迁移</Tag>
+          </CardGrid.ItemFooter>
+        </Link>
+      </CardGrid.Item>
+    </FilterGrid.Item>
+    <FilterGrid.Item filter="迁移">
+      <CardGrid.Item asChild>
+        <Link href="/guides/migrate-from-editorjs">
+          <CardGrid.Subtitle size="sm">迁移</CardGrid.Subtitle>
+          <div>
+            <CardGrid.ItemTitle>从 Editor.js 迁移</CardGrid.ItemTitle>
+          </div>
+          <CardGrid.ItemFooter>
+            <Tag>迁移</Tag>
+          </CardGrid.ItemFooter>
+        </Link>
+      </CardGrid.Item>
+    </FilterGrid.Item>
+    <FilterGrid.Item filter="迁移">
+      <CardGrid.Item asChild>
+        <Link href="/guides/migrate-from-draftjs">
+          <CardGrid.Subtitle size="sm">迁移</CardGrid.Subtitle>
+          <div>
+            <CardGrid.ItemTitle>从 Draft.js 迁移</CardGrid.ItemTitle>
+          </div>
+          <CardGrid.ItemFooter>
+            <Tag>迁移</Tag>
           </CardGrid.ItemFooter>
         </Link>
       </CardGrid.Item>

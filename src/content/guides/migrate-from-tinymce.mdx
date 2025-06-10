@@ -1,0 +1,220 @@
+---
+tags:
+  - type: editor
+title: 从 TinyMCE 迁移
+meta:
+  title: 从 TinyMCE 迁移 | Tiptap 编辑器文档
+  description: 学习如何将现有的 TinyMCE 编辑器迁移到 Tiptap。完整指南涵盖内容迁移、设置和功能映射。
+  category: 编辑器
+---
+
+从 [TinyMCE](https://tiny.cloud/) 迁移到 Tiptap 非常简单。本文将逐步引导你完成迁移流程。
+
+## 内容迁移
+
+### HTML 内容兼容性
+
+TinyMCE 通常以 HTML 格式存储内容，这使得迁移到 Tiptap 变得无缝。Tiptap 可以直接使用 HTML 内容，无需转换：
+
+```ts
+// 你现有的 TinyMCE 内容
+const existingContent = '<p>Hello <strong>world</strong>!</p>'
+
+// 在 Tiptap 中直接使用
+const editor = new Editor({
+  content: existingContent,
+  extensions: [StarterKit],
+})
+```
+
+虽然 HTML 完全可用，我们仍推荐将其转换为 Tiptap 的 JSON 格式，以获得更好的性能和易读性。对于批量转换已有内容，可使用 [HTML 工具](/editor/api/utilities/html) 以编程方式将 HTML 转换为 JSON。
+
+## 编辑器设置
+
+### 安装
+
+首先，安装 Tiptap 及相关依赖：
+
+```bash
+npm install @tiptap/core @tiptap/starter-kit
+```
+
+Tiptap 支持所有现代前端 UI 框架，如 React 和 Vue。请参考我们的[安装指南](/editor/getting-started/install)获取框架特定的安装说明。
+
+### 基本编辑器设置
+
+用 Tiptap 替换原有 TinyMCE 的初始化：
+
+```ts
+// TinyMCE（之前）
+tinymce.init({
+  selector: '#editor',
+  plugins: 'lists link image table code',
+  toolbar: 'undo redo | bold italic | bullist numlist | link image',
+})
+
+// Tiptap（之后）
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+
+const editor = new Editor({
+  element: document.querySelector('#editor'),
+  extensions: [StarterKit],
+  content: '<p>Hello World!</p>',
+})
+```
+
+## 扩展
+
+### 了解 Tiptap 的扩展系统
+
+Tiptap 使用模块化的扩展系统，类似于 TinyMCE 的插件结构。每个功能作为独立扩展，可以单独配置。
+
+[StarterKit](/editor/extensions/functionality/starterkit) 是所有基础扩展的合集，你可以根据需求添加或移除其他扩展。
+
+请在我们的[扩展指南](/editor/extensions/overview)中探索所有可用扩展，或[创建自定义扩展](/editor/extensions/custom-extensions)支持特殊功能和 HTML 元素。
+
+### 常见 TinyMCE 插件对应关系
+
+| TinyMCE 插件 | Tiptap 扩展                             | 备注              |
+| ------------ | --------------------------------------- | ----------------- |
+| `lists`      | `BulletList`、`OrderedList`、`ListItem` | 包含于 StarterKit |
+| `link`       | `Link`                                  | 包含于 StarterKit |
+| `image`      | `Image`                                 | 单独提供          |
+| `table`      | `Table`                                 | 单独提供          |
+| `code`       | `Code`、`CodeBlock`                     | 包含于 StarterKit |
+| `textcolor`  | `TextStyle`、`Color`                    | 单独提供          |
+| `fontsize`   | `TextStyle`、`FontSize`                 | 单独提供          |
+| `align`      | `TextAlign`                             | 单独提供          |
+
+### 扩展配置
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Image from '@tiptap/extension-image'
+import Table from '@tiptap/extension-table'
+import TableRow from '@tiptap/extension-table-row'
+import TableHeader from '@tiptap/extension-table-header'
+import TableCell from '@tiptap/extension-table-cell'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    // 添加并配置扩展
+    Image.configure({
+      inline: true,
+      allowBase64: true,
+    }),
+    Table.configure({
+      resizable: true,
+    }),
+    TableRow,
+    TableHeader,
+    TableCell,
+  ],
+})
+```
+
+### 自定义扩展
+
+对于 TinyMCE 自定义插件，你可以创建自定义的 Tiptap 扩展。详细说明请参阅我们的[自定义扩展指南](/editor/extensions/custom-extensions)。
+
+## UI 实现
+
+### 工具栏实现
+
+TinyMCE 的工具栏配置需要转换为 Tiptap 的自定义 UI 组件：
+
+```tsx
+// TinyMCE 工具栏配置
+toolbar: 'undo redo | bold italic | bullist numlist'
+
+// Tiptap 对应实现（React 示例）
+function Toolbar({ editor }) {
+  if (!editor) return null
+
+  return (
+    <div className="toolbar">
+      <button onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()}>
+        Undo
+      </button>
+      <button onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()}>
+        Redo
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        className={editor.isActive('bold') ? 'active' : ''}
+      >
+        Bold
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        className={editor.isActive('italic') ? 'active' : ''}
+      >
+        Italic
+      </button>
+    </div>
+  )
+}
+```
+
+### 预构建 UI 组件
+
+为加快开发速度，可以使用 Tiptap 预构建的 UI 组件：
+
+- 探索我们的[UI 组件](/ui-components/getting-started/overview)，内含现成的工具栏和菜单组件
+- 参考我们的[默认文本编辑器示例](/examples/basics/default-text-editor)了解实用案例
+
+### 菜单系统
+
+TinyMCE 的上下文菜单可以用 Tiptap 的 BubbleMenu 和 FloatingMenu 替代：
+
+```tsx
+import { BubbleMenu } from '@tiptap/react'
+
+function MyEditor() {
+  const editor = useEditor({
+    extensions: [StarterKit],
+  })
+
+  return (
+    <>
+      <EditorContent editor={editor} />
+      <BubbleMenu editor={editor}>
+        <button
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={editor.isActive('bold') ? 'active' : ''}
+        >
+          Bold
+        </button>
+        <button
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={editor.isActive('italic') ? 'active' : ''}
+        >
+          Italic
+        </button>
+      </BubbleMenu>
+    </>
+  )
+}
+```
+
+## 迁移检查清单
+
+1. 安装 Tiptap 包
+2. 用 Tiptap 设置替换 TinyMCE 初始化
+3. 将 TinyMCE 插件映射为 Tiptap 扩展
+4. 将工具栏配置迁移为自定义 UI 组件
+5. 测试内容兼容性
+6. 转换现有内容为 JSON 格式（推荐）
+7. 为缺失的功能实现自定义扩展
+8. 更新事件处理程序和 API 调用
+9. 在所有用例中进行全面测试
+
+## 后续步骤
+
+- 探索[扩展总览](/editor/extensions/overview)，发现所有可用扩展
+- 了解[自定义扩展](/editor/extensions/custom-extensions)，实现高级定制
+- 查看我们的[示例](/examples)，获取实现灵感
+- 查阅[性能指南](/guides/performance)，学习优化技巧

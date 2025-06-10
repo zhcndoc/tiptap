@@ -1,9 +1,9 @@
 ---
-title: 将 AI 集成到您的编辑器中
+title: 将 AI 集成到你的编辑器中
 meta:
-  title: AI 生成 | Tiptap 内容 AI
-  description: 将 AI 功能整合到您的编辑器中，如智能自动完成、图像生成等。请在我们的文档中阅读更多信息。
-  category: 内容 AI
+  title: AI 生成 | Tiptap Content AI
+  description: 将智能自动补全、图像生成等 AI 功能集成到你的编辑器中。请在我们的文档中了解详情。
+  category: Content AI
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
@@ -11,43 +11,45 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 集成 AI 提供者">
-        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看 [自定义 LLM 指南](/content-ai/capabilities/generation/custom-llms)。
-    </RequirementItem>
-    <RequirementItem label="3. 从私有注册表安装">
-        要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证以访问 Tiptap 的私有 npm 注册表。
-    </RequirementItem>
+  <RequirementItem label="1. 激活试用或订阅">
+    在你的[账户中开启免费试用](https://cloud.tiptap.dev/v2/billing)或订阅 [Tiptap
+    计划](https://cloud.tiptap.dev/v2/billing)。
+  </RequirementItem>
+  <RequirementItem label="2. 集成 AI 提供商">
+    在你的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查看 [自定义 LLM
+    指南](/content-ai/capabilities/generation/custom-llms)。
+  </RequirementItem>
+  <RequirementItem label="3. 从私有注册表安装">
+    要安装前端扩展，请按照[安装指南](/guides/pro-extensions)验证登录 Tiptap 的私有 npm 注册表。
+  </RequirementItem>
 </Requirements>
 
-仅需几行代码即可将 AI 生成扩展集成到您的 Tiptap 编辑器中。此扩展为您提供了一套 AI 增强功能，包括预构建的命令、提示自定义、图像生成和智能自动完成。
+只需几行代码即可将 AI 生成扩展集成到你的 Tiptap 编辑器中。该扩展为你提供一套 AI 增强功能，包括预置命令、提示词自定义、图像生成以及智能自动补全。
 
-在此基础上添加您自己的自定义命令，甚至集成您自己的专有 LLM，以创建独特的用户体验。
+在此基础上添加你自己的自定义命令，甚至集成你自己的专有 LLM，打造独特的用户体验。
 
 <CodeDemo isPro path="/Extensions/AiCommands" />
 
 <Callout title="集成或测试 AI 生成" variant="warning">
-    要测试或集成此功能，您需要一个 [有效的试用或 Tiptap 订阅](https://cloud.tiptap.dev/v2/billing)。
+  要测试或集成此功能，你需要一个[有效的试用或 Tiptap 订阅](https://cloud.tiptap.dev/v2/billing)。
 </Callout>
 
-## AI 生成特性
+## AI 生成功能
 
 - [预配置的默认命令](/content-ai/capabilities/generation/text-generation)
-- [效率编辑的自动完成](/content-ai/capabilities/generation/text-generation/autocompletion)
-- 实时流式处理命令
-- 与各种 OpenAI 模型的兼容性（例如 gpt-4o、gpt-4o-mini、gpt-4.1、dall-e-3）
-- [创建您自己的提示和命令](/content-ai/capabilities/generation/text-generation/custom-commands)
-- [面向商业账户的自定义 LLM 集成](/content-ai/capabilities/generation/custom-llms)
+- [高效编辑的自动补全](/content-ai/capabilities/generation/text-generation/autocompletion)
+- 命令的实时流式传输
+- 兼容多种 OpenAI 模型（例如 gpt-4o、gpt-4o-mini、gpt-4.1、dall-e-3）
+- [创建你自己的提示词和命令](/content-ai/capabilities/generation/text-generation/custom-commands)
+- [自定义 LLM 集成](/content-ai/capabilities/generation/custom-llms)
 
 ## 工作原理
 
-将 [OpenAI](/content-ai/capabilities/generation/install) 或您自己的 [自定义 LLM](/content-ai/capabilities/generation/custom-llms) 集成到您的 Tiptap 编辑器中。该扩展涵盖了客户端和服务器端的实现。用户体验如下：
+将 [OpenAI](/content-ai/capabilities/generation/install) 或你自己的 [自定义 LLM](/content-ai/capabilities/generation/custom-llms) 集成到你的 Tiptap 编辑器中。该扩展包含客户端和服务器端的实现。以下是用户体验流程：
 
-1. 在编辑器中突出显示文本并应用 AI 命令。
-2. 您的选择、所选操作和任何选项将发送到我们的云服务。
-3. 我们生成一个提示并代表您与 OpenAI 互动。
-4. AI 的响应会直接插入或流式传输到您的编辑器中。
+1. 在编辑器中高亮文本并应用 AI 命令。
+2. 你的选区、所选动作及任何选项将发送到我们的云服务。
+3. 我们生成提示词，并代表你调用 OpenAI。
+4. AI 的响应被直接插入或流式传输到你的编辑器中。
 
-默认情况下，这利用我们的后端服务，但对于包括自定义后端和 LLM 的高级场景，还有其他选项。
+默认情况下，该功能使用我们的后端服务，但也支持高度自定义场景，包括自定义后端和 LLM。
