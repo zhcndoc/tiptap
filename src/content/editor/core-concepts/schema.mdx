@@ -436,6 +436,20 @@ editor.on('contentError', ({ editor, error, disableCollaboration }) => {
 
 有关更多实现示例，请参考 [events](/editor/api/events) 部分。
 
+### 在不启用内容检查的情况下监听 contentError 事件
+
+如果您想在不启用内容检查的情况下监听 `contentError` 事件，请在初始化 Tiptap 编辑器时将 `emitContentError` 设置为 `true`：
+
+```jsx
+new Editor({
+  enableContentCheck: false,
+  emitContentError: true,
+  ...options,
+})
+```
+
+此设置允许您在编辑器中拥有无效内容，但仍会在内容无效时收到通知。
+
 ### 推荐处理
 
 您处理模式错误的方式将取决于您的应用程序和要求，但以下是我们的建议：

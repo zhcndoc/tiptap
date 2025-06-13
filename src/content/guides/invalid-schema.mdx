@@ -66,7 +66,21 @@ editor.on('contentError', ({ editor, error, disableCollaboration }) => {
 })
 ```
 
-## 关于内容类型的注意事项
+## 在不启用内容校验时监听 contentError 事件
+
+如果你想在不启用内容校验的情况下监听 `contentError` 事件，可以在初始化 Tiptap 编辑器时将 `emitContentError` 设置为 `true`：
+
+```jsx
+new Editor({
+  enableContentCheck: false,
+  emitContentError: true,
+  // ... 其他选项
+})
+```
+
+此设置允许运行带有无效内容的编辑器，但依然会在内容无效时通知你。
+
+## 关于内容类型的说明
 
 需要注意的是，Tiptap 在处理 JSON 内容类型时，内容校验的准确率达 100%。但在处理 HTML 内容时，可能存在一些局限。虽然 Tiptap 会尽最大努力提示缺失的节点，但某些与标记相关的问题可能在某些情况下未被检测到。
 
@@ -100,7 +114,7 @@ onContentError({ editor, error, disableCollaboration }) {
 
 此方法执行了以下操作：
 
-1. 禁用协作以避免同步无效内容
-2. 阻止任何内容更新的传输
-3. 禁止编辑器的进一步输入
+1. 禁用协作以避免同步无效内容  
+2. 阻止任何内容更新的传输  
+3. 禁止编辑器的进一步输入  
 4. 向用户发出提示，告知问题所在
