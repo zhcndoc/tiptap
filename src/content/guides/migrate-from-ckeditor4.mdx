@@ -1,0 +1,241 @@
+---
+tags:
+  - type: editor
+title: 从 CKEditor 4 迁移到 Tiptap
+meta:
+  title: 从 CKEditor 4 迁移 | Tiptap 编辑器文档
+  description: 学习如何将现有的 CKEditor 4 编辑器迁移到 Tiptap。完整指南涵盖内容迁移、设置和功能映射。
+  category: 编辑器
+---
+
+从 CKEditor 4 迁移到 Tiptap 非常直接，并且在现代架构和灵活性方面带来显著优势。本指南将逐步引导您完成迁移过程。
+
+## 内容迁移
+
+### HTML 内容兼容性
+
+CKEditor 4 将内容存储为 HTML，这使得迁移到 Tiptap 十分无缝。Tiptap 可以直接使用 HTML 内容，无需任何转换：
+
+```ts
+// 您现有的 CKEditor 4 内容
+const existingContent =
+  '<p>Hello <strong>world</strong>!</p><ul><li>Item 1</li><li>Item 2</li></ul>'
+
+// 在 Tiptap 中直接使用
+const editor = new Editor({
+  content: existingContent,
+  extensions: [StarterKit],
+})
+```
+
+虽然 HTML 可以完美使用，我们推荐将其转换为 Tiptap 的 JSON 格式，以获得更好的性能和可读性。对于现有内容的批量转换，请使用 [HTML 实用工具](/editor/api/utilities/html) 以程序化方式将 HTML 转换为 JSON。
+
+## 编辑器设置
+
+### 安装
+
+首先，安装 Tiptap 及其依赖：
+
+```bash
+npm install @tiptap/core @tiptap/starter-kit
+```
+
+Tiptap 支持所有现代前端 UI 框架，如 React 和 Vue。请参阅我们框架特定的[安装指南](/editor/getting-started/install)。
+
+### 基本编辑器设置
+
+用 Tiptap 替换 CKEditor 4 的初始化：
+
+```ts
+// CKEditor 4（之前）
+CKEDITOR.replace('editor', {
+  toolbar: [
+    { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
+    { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+    { name: 'links', items: ['Link', 'Unlink'] },
+  ],
+  height: 300,
+})
+
+// Tiptap（之后）
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+
+const editor = new Editor({
+  element: document.querySelector('#editor'),
+  extensions: [StarterKit],
+  content: '<p>Hello World!</p>',
+})
+```
+
+## 扩展
+
+### 了解 Tiptap 的扩展系统
+
+Tiptap 使用模块化的扩展系统，取代了 CKEditor 4 的插件架构。每个功能都是独立的扩展，可以配置和自定义。
+
+[StarterKit](/editor/extensions/functionality/starterkit) 包含了所有基础扩展，您可以根据需要添加或删除其他扩展。
+
+在我们的[扩展指南](/editor/extensions/overview)中探索所有可用扩展，或[创建自定义扩展](/editor/extensions/custom-extensions)以支持自定义功能和 HTML 元素。
+
+### 常见 CKEditor 4 插件对应项
+
+| CKEditor 4 插件    | Tiptap 扩展                         | 备注                     |
+| ----------------- | ---------------------------------- | ------------------------ |
+| `basicstyles`     | `Bold`、`Italic`、`Underline`      | 包含于 StarterKit        |
+| `list`            | `BulletList`、`OrderedList`、`ListItem` | 包含于 StarterKit        |
+| `link`            | `Link`                            | 包含于 StarterKit        |
+| `image`           | `Image`                           | 单独提供                  |
+| `table`           | `Table`                           | 单独提供                  |
+| `sourcearea`      | `CodeBlock`                      | 包含于 StarterKit        |
+| `format`          | `Heading`                        | 包含于 StarterKit        |
+| `blockquote`      | `Blockquote`                     | 包含于 StarterKit        |
+| `justify`         | `TextAlign`                     | 单独提供                  |
+| `colorbutton`     | `TextStyle`、`Color`             | 单独提供                  |
+| `font`            | `TextStyle`、`FontSize`          | 单独提供                  |
+| `indentlist`      | 集成于列表扩展                   | 包含于 StarterKit        |
+| `horizontalrule`  | `HorizontalRule`                 | 包含于 StarterKit        |
+
+### 扩展配置
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Image from '@tiptap/extension-image'
+import Table from '@tiptap/extension-table'
+import TableRow from '@tiptap/extension-table-row'
+import TableHeader from '@tiptap/extension-table-header'
+import TableCell from '@tiptap/extension-table-cell'
+import TextAlign from '@tiptap/extension-text-align'
+import Underline from '@tiptap/extension-underline'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    Underline,
+    Image.configure({
+      inline: true,
+      allowBase64: true,
+    }),
+    Table.configure({
+      resizable: true,
+    }),
+    TableRow,
+    TableHeader,
+    TableCell,
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+    }),
+  ],
+})
+```
+
+### 自定义扩展
+
+针对 CKEditor 4 的自定义插件，您可以创建自定义 Tiptap 扩展。详细说明请参阅我们的[自定义扩展指南](/editor/extensions/custom-extensions)。
+
+## UI 实现
+
+### 工具栏实现
+
+CKEditor 4 的工具栏配置转化为 Tiptap 中的自定义 UI 组件：
+
+```tsx
+// CKEditor 4 工具栏配置
+toolbar: [
+  { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
+  { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+  { name: 'links', items: ['Link', 'Unlink'] },
+]
+
+// Tiptap 等效实现（React 示例）
+function Toolbar({ editor }) {
+  if (!editor) return null
+
+  return (
+    <div className="toolbar">
+      <button
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        className={editor.isActive('bold') ? 'active' : ''}
+      >
+        Bold
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        className={editor.isActive('italic') ? 'active' : ''}
+      >
+        Italic
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().toggleUnderline().run()}
+        className={editor.isActive('underline') ? 'active' : ''}
+      >
+        Underline
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        className={editor.isActive('bulletList') ? 'active' : ''}
+      >
+        Bullet List
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        className={editor.isActive('orderedList') ? 'active' : ''}
+      >
+        Numbered List
+      </button>
+
+      <button
+        onClick={() => {
+          const url = window.prompt('URL')
+          if (url) {
+            editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+          }
+        }}
+        className={editor.isActive('link') ? 'active' : ''}
+      >
+        Link
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().unsetLink().run()}
+        disabled={!editor.isActive('link')}
+      >
+        Unlink
+      </button>
+    </div>
+  )
+}
+```
+
+### 预构建 UI 组件
+
+为了更快速的开发，可以考虑使用 Tiptap 的预构建 UI 组件：
+
+- 浏览我们的[UI 组件](/ui-components/getting-started/overview)，获取可直接使用的工具栏和菜单组件
+- 查看我们的[默认文本编辑器示例](/examples/basics/default-text-editor)中的实用示例
+
+## 迁移清单
+
+1. 安装 Tiptap 相关包
+2. 用 Tiptap 设置替换 CKEditor 4 初始化
+3. 映射 CKEditor 4 插件到 Tiptap 扩展
+4. 将工具栏配置迁移到自定义 UI 组件
+5. 测试内容兼容性
+6. 将现有内容转换为 JSON 格式（推荐）
+7. 为缺失的功能实现自定义扩展
+8. 更新事件处理和 API 调用
+9. 测试图片上传与处理（如有使用）
+10. 验证表格功能（如有使用）
+11. 测试用户交互
+
+## 下一步
+
+- 探索[扩展总览](/editor/extensions/overview)，发现所有可用扩展
+- 了解[自定义扩展](/editor/extensions/custom-extensions)实现高级定制
+- 查看我们的[示例](/examples)获取实现灵感
+- 阅读[性能指南](/guides/performance)优化性能技巧

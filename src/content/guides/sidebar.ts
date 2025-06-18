@@ -79,37 +79,41 @@ export const sidebarConfig: SidebarConfig = {
       ],
     },
     {
-      title: 'Migration',
+      title: '迁移',
       type: 'group',
       href: '',
       children: [
         {
           href: '/guides/migrate-from-tinymce',
-          title: 'Migrate from TinyMCE',
+          title: '从 TinyMCE 迁移',
+        },
+        {
+          href: '/guides/migrate-from-ckeditor4',
+          title: '从 CKEditor 4 迁移',
         },
         {
           href: '/guides/migrate-from-ckeditor5',
-          title: 'Migrate from CKEditor 5',
+          title: '从 CKEditor 5 迁移',
         },
         {
           href: '/guides/migrate-from-quill',
-          title: 'Migrate from Quill',
+          title: '从 Quill 迁移',
         },
         {
           href: '/guides/migrate-from-slate',
-          title: 'Migrate from Slate',
+          title: '从 Slate 迁移',
         },
         {
           href: '/guides/migrate-from-lexical',
-          title: 'Migrate from Lexical',
+          title: '从 Lexical 迁移',
         },
         {
           href: '/guides/migrate-from-editorjs',
-          title: 'Migrate from Editor.js',
+          title: '从 Editor.js 迁移',
         },
         {
           href: '/guides/migrate-from-draftjs',
-          title: 'Migrate from Draft.js',
+          title: '从 Draft.js 迁移',
         },
       ],
     },

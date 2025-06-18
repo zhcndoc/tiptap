@@ -11,7 +11,9 @@ import { Callout } from '@/components/ui/Callout'
 您可以将 AI 代理扩展与您自己的后端及 LLM 提供商集成，而非使用 Tiptap Cloud。这样您就能完全掌控 AI 模型、工具和对话流程。
 
 <Callout title="定制 LLM 演示" variant="info">
-  我们为我们的增长和企业客户提供详细的定制 LLM 演示。它包括客户端和服务器代码，以及运行和部署的说明。请查看 [计划和定价](https://tiptap.dev/pricing)。
+  我们为我们的增长和企业客户提供详细的定制 LLM
+  演示。它包括客户端和服务器代码，以及运行和部署的说明。请查看
+  [计划和定价](https://tiptap.dev/pricing)。
 </Callout>
 
 ## 基础设置
@@ -87,7 +89,7 @@ resolver 的响应应包含以下属性：
 您可以使用适配器的 `parseResponse` 函数，将 LLM 响应转换为 AI 代理扩展期望的格式。
 
 ```ts
-import { openaiChatCompletionsAdapter } from '@tiptap-pro/extension-ai-agent-server'
+import { openaiChatCompletionsAdapter } from '@tiptap-pro/extension-ai-agent'
 
 // 在服务器调用您的 LLM 提供商 API
 const response = await openai.chat.completions.create({
@@ -100,13 +102,24 @@ const result = openaiChatCompletionsAdapter.parseResponse(response)
 
 ## 适配器
 
-适配器负责在 AI 代理内部格式与不同 LLM 提供商及 AI 代理框架使用的格式之间转换。扩展内置了以下适配器：
+适配器用于在 AI Agent 的内部格式与不同 LLM 供应商及 AI Agent 框架所使用的格式之间进行转换。在客户端配置 AI Agent 供应商时需提供相应适配器。
 
-| 适配器                          | 提供商                          |
-| ------------------------------ | ------------------------------- |
-| `openaiResponsesAdapter`       | OpenAI API 响应 API             |
-| `openaiChatCompletionsAdapter` | OpenAI API 聊天补全 API          |
-| `anthropicMessagesAdapter`     | Anthropic Claude 消息 API       |
+```ts
+import { AiAgentProvider, openAiChatCompletionsAdapter } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider({
+  adapter: openAiChatCompletionsAdapter,
+})
+```
+
+`@tiptap-pro/extension-ai-agent` 包含以下内置适配器：
+
+| Adapter                        | Provider                                                                                            |
+| ------------------------------ | --------------------------------------------------------------------------------------------------- |
+| `openaiChatCompletionsAdapter` | OpenAI API [聊天完成 API](https://platform.openai.com/docs/api-reference/chat?lang=node.js)（默认） |
+| `openaiResponsesAdapter`       | OpenAI API [响应 API](https://platform.openai.com/docs/api-reference/responses?lang=javascript)     |
+| `anthropicMessagesAdapter`     | Anthropic Claude [消息 API](https://docs.anthropic.com/en/api/messages)                             |
+| `vercelAiSdkAdapter`           | [Vercel AI SDK](https://ai-sdk.dev)                                                                 |
 
 <Callout title="需要更多适配器？" variant="info">
   我们正在为更多 LLM 提供商和框架添加适配器。如果您需要某个尚未支持的特定提供商的适配器，请
@@ -134,12 +147,12 @@ const toolkit = new AiAgentToolkit({
 
 AI 代理扩展包含以下预置工具：
 
-| 工具类别    | 工具                                                                     |
-| ----------- | ------------------------------------------------------------------------ |
-| **阅读**    | `read_first_chunk`，`read_next_chunk`，`read_previous_chunk`             |
-| **写作**    | `replace_chunk`，`replace_document`                                      |
-| **格式化**  | `run_command`（含诸如 `setBold`、`setItalic` 等多种命令）                |
-| **工作流**  | `plan`，`ask_user`，`finish_with_summary`                               |
+| 工具类别   | 工具                                                         |
+| ---------- | ------------------------------------------------------------ |
+| **阅读**   | `read_first_chunk`，`read_next_chunk`，`read_previous_chunk` |
+| **写作**   | `replace_chunk`，`replace_document`                          |
+| **格式化** | `run_command`（含诸如 `setBold`、`setItalic` 等多种命令）    |
+| **工作流** | `plan`，`ask_user`，`finish_with_summary`                    |
 
 每个工具有两个组成部分：
 
@@ -167,10 +180,7 @@ export const customSearchTool = (): AiAgentTool => ({
     required: ['query'],
   },
   // 系统提示的可选附加规则
-  systemPromptRules: [
-    '当需要查找文档中特定内容时使用此工具',
-    '搜索不区分大小写',
-  ],
+  systemPromptRules: ['当需要查找文档中特定内容时使用此工具', '搜索不区分大小写'],
 })
 ```
 
