@@ -1,54 +1,45 @@
 ---
 title: 目录扩展
-tags:
-  - type: pro
-meta:
-  title: 目录扩展 | Tiptap 编辑器文档
-  description: 将锚点列表集成到文档中，并收集所有标题到一个漂亮的目录 (Table of Contents)。在文档中了解更多信息！
-  category: 编辑器
 extension:
   name: 目录
+  link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-table-of-contents
   description: 添加一个列出所有锚点或标题的目录。
   type: extension
-  icon: 列表
-  isPro: true
+  icon: List
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@tiptap/extension-table-of-contents.svg?label=version
+    url: https://www.npmjs.com/package/@tiptap/extension-table-of-contents
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@tiptap/extension-table-of-contents.svg
+    url: https://npmcharts.com/compare/@tiptap/extension-table-of-contents?minimal=true
+    label: 下载量
+meta:
+  title: 目录扩展 | Tiptap 编辑器文档
+  description: 将锚点列表集成到您的文档中，汇总所有标题形成漂亮的目录 (Table of Contents)。在文档中了解更多！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
-import { Callout } from '@/components/ui/Callout'
-import { Requirements, RequirementItem } from '@/components/Requirements'
 
-<Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 从私有注册表安装">
-        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证，以访问 Tiptap 的私有 npm 注册表。
-    </RequirementItem>
-</Requirements>
+`TableOfContents` 扩展允许您从文档中获取锚点列表，并传递每个锚点的重要信息（例如深度、内容及每个标题的唯一 ID，还包括每个锚点的激活状态和滚动状态）。这可用于您自行渲染目录。
 
-`TableOfContents` 扩展允许您从文档中获取锚点列表，并传递关于每个锚点的重要信息（例如深度、内容和每个标题的唯一 ID，以及每个锚点的活动状态和滚动状态）。这可以用来在自己的内容目录中进行渲染。
-
-<CodeDemo isPro path="/Extensions/TableOfContents" />
+<CodeDemo path="/Extensions/TableOfContents" />
 
 ## 安装
-
-<Callout title="设置对 Tiptap 私有库的访问" variant="info">
-  通过注册免费 [Tiptap
-  账户](https://cloud.tiptap.dev/register) 并按照我们的 [访问指南](/guides/pro-extensions) 前往 Tiptap 的私有仓库集成此专业扩展。
-</Callout>
 
 完成后，您可以从我们的私有注册表安装该扩展：
 
 ```bash
-npm install @tiptap-pro/extension-table-of-contents@next
+npm install @tiptap/extension-table-of-contents@beta
 ```
 
 ## 设置
 
 ### anchorTypes
 
-您希望用于目录的节点类型。默认值为 `["heading"]`，但如果您创建自己的自定义标题扩展或扩展现有的扩展并使用不同的名称，可以在此传递该名称。
+您希望用于目录的节点类型。默认值为 `["heading"]`，但如果您创建自己的自定义标题扩展或扩展现有扩展并使用不同的名称，可以在此传递该名称。
 
 默认值： `["heading"]`
 
@@ -71,10 +62,10 @@ TableOfContents.configure({
 })
 ```
 
-我们提供了两个现成的函数 - 一个用于生成从 1 到 n 的线性索引，另一个用于生成从 1 到 n 的每个级别的层次索引。
+我们提供了两个现成的函数——一个用于生成从 1 到 n 的线性索引，另一个用于生成从 1 到 n 的每个级别的层次索引。
 
 ```js
-import { getLinearIndexes, getHierarchicalIndexes } from '@tiptap-pro/extension-table-of-contents'
+import { getLinearIndexes, getHierarchicalIndexes } from '@tiptap/extension-table-of-contents'
 
 // 生成线性索引
 TableOfContents.configure({

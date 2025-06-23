@@ -2,44 +2,37 @@
 title: 详情扩展
 icon: menu-unfold-line
 extension:
-  name: 详情
-  description: 向您的编辑器内容添加可折叠的详情节点。
+  name: Details
+  description: 在编辑器内容中添加可折叠的详情节点。
+  link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-details
   type: node
   icon: ListCollapse
-  isPro: true
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@tiptap/extension-details.svg?label=version
+    url: https://www.npmjs.com/package/@tiptap/extension-details
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@tiptap/extension-details.svg
+    url: https://npmcharts.com/compare/@tiptap/extension-details?minimal=true
+    label: 下载量
 meta:
   title: 详情扩展 | Tiptap 编辑器文档
-  description: 在 Tiptap 中使用详情扩展以启用 <details> HTML 标记来显示和隐藏内容。了解更多信息请查看我们的文档！
+  description: 在 Tiptap 中使用详情扩展以启用 `<details>` HTML 标签用于显示和隐藏内容。更多内容请参阅我们的文档！
   category: 编辑器
-tags:
-  - type: pro
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
-import { Requirements, RequirementItem } from '@/components/Requirements'
-
-<Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 从私有注册表安装">
-        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 访问 Tiptap 的私有 npm 注册表。
-    </RequirementItem>
-</Requirements>
 
 详情扩展使您能够在编辑器中使用 `<details>` HTML 标签。这非常适合显示和隐藏内容。
 
-<CodeDemo isPro path="/Nodes/Details" />
+<CodeDemo path="/Nodes/Details" />
 
 ## 安装
 
-<Callout title="设置对 Tiptap 私有库的访问" variant="info">
-  通过注册一个免费的 [Tiptap 账户](https://cloud.tiptap.dev/register) 并按照我们的 [访问指南](/guides/pro-extensions) 获取对 Tiptap 私有库的访问权限，获得此专业扩展。
-</Callout>
-
 ```bash
-npm install @tiptap-pro/extension-details@next
+npm install @tiptap/extension-details@beta
 ```
 
 此扩展要求 [`DetailsSummary`](/editor/extensions/nodes/details-summary) 和 [`DetailsContent`](/editor/extensions/nodes/details-content) 节点。

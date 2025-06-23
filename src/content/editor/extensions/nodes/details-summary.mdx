@@ -3,52 +3,41 @@ title: DetailsSummary 扩展
 icon: menu-unfold-line
 extension:
   name: DetailsSummary
-  description: 为您的详情节点添加摘要。
+  link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-details-summary
+  description: 为你的 details 节点添加一个摘要。
   type: node
-  icon: 文本
-  isPro: true
+  icon: Text
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@tiptap/extension-details-summary.svg?label=version
+    url: https://www.npmjs.com/package/@tiptap/extension-details-summary
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@tiptap/extension-details-summary.svg
+    url: https://npmcharts.com/compare/@tiptap/extension-details-summary?minimal=true
+    label: 下载量
 meta:
   title: DetailsSummary 扩展 | Tiptap 编辑器文档
-  description: 使用 DetailsSummary 扩展为您的 `<details>` 内容启用 `<summary>` HTML 标签。更多信息请参见我们的文档！
+  description: 使用 DetailsSummary 扩展为你的 `<details>` 内容启用 `<summary>` HTML 标签。详情请查看我们的文档！
   category: 编辑器
-tags:
-  - type: pro
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
-import { Callout } from '@/components/ui/Callout'
 
-import { Requirements, RequirementItem } from '@/components/Requirements'
+Details 扩展使你能够在编辑器中使用 `<details>` HTML 标签。这非常适合用于显示和隐藏内容。
 
-<Requirements>
-    <RequirementItem label="1. 启动试用或订阅">
-        在您的帐户中启动免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 从私有注册表安装">
-        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 的说明通过 Tiptap 的私有 npm 注册表进行身份验证。
-    </RequirementItem>
-</Requirements>
-
-Details 扩展使您能够在编辑器中使用 `<details>` HTML 标签。这非常适合显示和隐藏内容。
-
-<CodeDemo isPro path="/Nodes/Details" />
+<CodeDemo path="/Nodes/Details" />
 
 ## 安装
 
-<Callout title="设置对 Tiptap 私有库的访问" variant="info">
-  通过注册一个免费的 [Tiptap
-  帐户](https://cloud.tiptap.dev/register) 并遵循我们的 [访问
-  指南](/guides/pro-extensions) 来访问 Tiptap 的私有库，从而集成此专业扩展。
-</Callout>
-
 ```bash
-npm install @tiptap-pro/extension-details@next
+npm install @tiptap/extension-details@beta
 ```
 
 ## 使用
 
 ```js
-import { Details, DetailsSummary, DetailsContent } from '@tiptap-pro/extension-details'
+import { Details, DetailsSummary, DetailsContent } from '@tiptap/extension-details'
 
 const editor = new Editor({
   extensions: [Details, DetailsSummary, DetailsContent],
@@ -59,7 +48,7 @@ const editor = new Editor({
 
 ### HTMLAttributes
 
-应添加到呈现的 HTML 标签的自定义 HTML 属性。
+应添加到渲染的 HTML 标签的自定义 HTML 属性。
 
 ```js
 DetailsSummary.configure({

@@ -1,46 +1,36 @@
 ---
 title: 数学扩展
-tags:
-  - type: pro
-meta:
-  title: 数学扩展 | Tiptap 编辑器文档
-  description: 此扩展允许用户通过 LaTeX 编写和可视化数学公式。了解如何在文档中设置它！
-  category: 编辑器
 extension:
   name: 数学
-  description: 此扩展允许用户通过 LaTeX 编写和可视化数学公式。
+  link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-mathematics
+  description: 这个扩展允许您的用户通过 LaTeX 编写和可视化数学公式。
   type: extension
   icon: SquareDivide
-  isPro: true
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@tiptap/extension-mathematics.svg?label=version
+    url: https://www.npmjs.com/package/@tiptap/extension-mathematics
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@tiptap/extension-mathematics.svg
+    url: https://npmcharts.com/compare/@tiptap/extension-mathematics?minimal=true
+    label: 下载量
+meta:
+  title: 数学扩展 | Tiptap 编辑器文档
+  description: 这个扩展允许您的用户通过 LaTeX 编写和可视化数学公式。了解如何在文档中进行设置！
+  category: 编辑器
 ---
 
-import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
-import { Requirements, RequirementItem } from '@/components/Requirements'
 
-<Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 从私有注册表安装">
-        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 认证 Tiptap 的私有 npm 注册表。
-    </RequirementItem>
-</Requirements>
+这个扩展允许您在编辑器中编写和可视化甚至复杂的数学公式或方程。请注意，当前版本仍处于非常基础的阶段。
 
-此扩展允许您在编辑器中编写和可视化甚至复杂的数学公式或方程。请注意，当前版本仍处于非常基础的阶段。
-
-<CodeDemo isPro path="/Extensions/Mathematics" />
+<CodeDemo path="/Extensions/Mathematics" />
 
 ## 安装
 
-<Callout title="设置访问 Tiptap 的私有存储库" variant="info">
-  通过注册一个免费的 [Tiptap
-  账户](https://cloud.tiptap.dev/register) 并按照我们的 [访问
-  指南](/guides/pro-extensions) 访问 Tiptap 的私有存储库，从而集成此专业扩展。
-</Callout>
-
 ```bash
-npm install @tiptap-pro/extension-mathematics@next katex
+npm install @tiptap/extension-mathematics@beta katex
 ```
 
 ### 额外设置
@@ -72,7 +62,7 @@ import 'katex/dist/katex.min.css'
 默认情况下，当数学表达式不在代码块内时，会渲染 LaTeX 装饰。如果您想自定义此行为，可以通过将一个函数传递给 `shouldRender` 选项来实现。此函数应该返回一个布尔值，指示是否应渲染 LaTeX 装饰。
 
 ```js
-import Mathematics from '@tiptap-pro/extension-mathematics'
+import Mathematics from '@tiptap/extension-mathematics'
 
 // [...]
 
@@ -80,15 +70,14 @@ Mathematics.configure({
   shouldRender: (state, pos, node) => {
     const $pos = state.doc.resolve(pos)
     return node.type.name === 'text' && $pos.parent.type.name !== 'codeBlock'
-  }
+  },
 })
 ```
 
 您还可以导入默认的 `shouldRender` 函数以扩展默认行为：
 
 ```js
-
-import Mathematics, { shouldRender } from '@tiptap-pro/extension-mathematics'
+import Mathematics, { shouldRender } from '@tiptap/extension-mathematics'
 
 // [...]
 
@@ -96,7 +85,7 @@ Mathematics.configure({
   shouldRender: (state, pos, node) => {
     // 这将禁用标题和代码块的渲染
     return shouldRender(state, pos, node) && node.type.name !== 'heading'
-  }
+  },
 })
 ```
 
@@ -115,7 +104,7 @@ Tiptap 需要知道文本何时为数学。为此，正则表达式模式允许�
 默认值: `undefined`
 
 ```js
-import Mathematics from '@tiptap-pro/extension-mathematics'
+import Mathematics from '@tiptap/extension-mathematics'
 
 // [...]
 
@@ -125,6 +114,7 @@ Mathematics.configure({
   },
 })
 ```
+
 ### shouldRender
 
 默认情况下，当数学表达式不在代码块内时，会渲染 LaTeX 装饰。如果您想自定义此行为，可以通过将一个函数传递给 `shouldRender` 选项来实现。此函数应该返回一个布尔值，指示是否应渲染 LaTeX 装饰。
@@ -132,7 +122,7 @@ Mathematics.configure({
 默认值: `() => true`
 
 ```js
-import Mathematics from '@tiptap-pro/extension-mathematics'
+import Mathematics from '@tiptap/extension-mathematics'
 
 // [...]
 
@@ -140,6 +130,6 @@ Mathematics.configure({
   shouldRender: (state, pos, node) => {
     const $pos = state.doc.resolve(pos)
     return node.type.name === 'text' && $pos.parent.type.name !== 'codeBlock'
-  }
+  },
 })
 ```

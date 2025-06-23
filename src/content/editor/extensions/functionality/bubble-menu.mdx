@@ -32,7 +32,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 ## 安装
 
 ```bash
-npm install @tiptap/extension-bubble-menu@next
+npm install @tiptap/extension-bubble-menu@beta
 ```
 
 ## 设置
@@ -82,6 +82,10 @@ BubbleMenuPlugin 默认将有 250 毫秒的延迟。通过将延迟设置为 `0`
 | `autoPlacement`| `AutoPlacementOptions` 或 `boolean` | [自动定位中间件选项](https://floating-ui.com/docs/autoPlacement#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                  |
 | `hide`         | `HideOptions` 或 `boolean`          | [隐藏中间件选项](https://floating-ui.com/docs/hide#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                               |
 | `inline`       | `InlineOptions` 或 `boolean`        | [内联中间件选项](https://floating-ui.com/docs/inline#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                            |
+| `onShow`        | `Function` or `undefined`           | A callback that is called when the menu is shown. This can be used to add custom logic or styles when the menu is displayed.                                   |
+| `onHide`        | `Function` or `undefined`           | A callback that is called when the menu is hidden. This can be used to add custom logic or styles when the menu is hidden.                                     |
+| `onUpdate`      | `Function` or `undefined`           | A callback that is called when the menu is updated. This can be used to add custom logic or styles when the menu is updated.                                   |
+| `onDestroy`     | `Function` or `undefined`           | A callback that is called when the menu is destroyed. This can be used to add custom logic or styles when the menu is removed.                                 |
 
 ### pluginKey
 

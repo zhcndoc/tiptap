@@ -108,17 +108,14 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/nodes/details',
               title: '详情',
-              tags: ['Pro'],
             },
             {
               href: '/editor/extensions/nodes/details-content',
               title: '详情内容',
-              tags: ['Pro'],
             },
             {
               href: '/editor/extensions/nodes/details-summary',
               title: '详情摘要',
-              tags: ['Pro'],
             },
             {
               href: '/editor/extensions/nodes/document',
@@ -127,7 +124,6 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/nodes/emoji',
               title: '表情符号',
-              tags: ['Pro'],
             },
             {
               href: '/editor/extensions/nodes/hard-break',
@@ -292,17 +288,14 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/drag-handle',
               title: '拖动手柄',
-              tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/drag-handle-react',
               title: 'React 拖动手柄',
-              tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/drag-handle-vue',
               title: 'Vue 拖动手柄',
-              tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/dropcursor',
@@ -316,7 +309,6 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/filehandler',
               title: '文件处理',
-              tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/floatingmenu',
@@ -341,7 +333,6 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/invisiblecharacters',
               title: '不可见字符',
-              tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/line-height',
@@ -363,7 +354,6 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/mathematics',
               title: '数学公式',
-              tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/placeholder',
@@ -394,7 +384,6 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/table-of-contents',
               title: '目录',
-              tags: ['Pro'],
             },
             {
               href: '/editor/extensions/functionality/text-style-kit',
@@ -419,7 +408,6 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/uniqueid',
               title: '唯一标识符',
-              tags: ['Pro'],
             },
           ],
         },

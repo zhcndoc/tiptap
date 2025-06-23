@@ -35,7 +35,7 @@ cd my-tiptap-project
 接下来，安装 `@tiptap/react` 包，`@tiptap/pm`（ProseMirror 库）和 `@tiptap/starter-kit`，它包括启动时常用的扩展。
 
 ```bash
-npm install @tiptap/react@next @tiptap/pm@next @tiptap/starter-kit@next
+npm install @tiptap/react@beta @tiptap/pm@beta @tiptap/starter-kit@beta
 ```
 
 如果您按照步骤 1 和 2 操作，现在可以通过 `npm run dev` 启动项目，并在浏览器中打开 [http://localhost:3000](http://localhost:3000)。
@@ -159,6 +159,36 @@ const EditorJSONPreview = () => {
 />
 ```
 
-## 优化性能
+## 响应编辑器状态变化
 
-我们建议访问 [React 性能指南](/guides/performance) 来有效地集成 Tiptap 编辑器。这将帮助您在应用程序扩展时避免潜在的问题。
+要响应编辑器状态变化，您可以使用 `@tiptap/react` 提供的 `useEditorState` 钩子。该钩子可用于从编辑器状态中获取信息，而不会导致编辑器组件或其子组件重新渲染。
+
+```jsx
+import { useEditorState } from '@tiptap/react'
+
+function MyEditorComponent() {
+  // ... 您的编辑器设置代码
+
+  const editorState = useEditorState({
+    editor,
+
+    // selector 函数用于选择您想要响应的状态
+    selector: ({ editor }) => {
+      if (!editor) return null;
+
+      return {
+        isEditable: editor.isEditable,
+        currentSelection: editor.state.selection,
+        currentContent: editor.getJSON(),
+        // 您可以在这里添加更多的状态属性，如：
+        // isBold: editor.isActive('bold'),
+        // isItalic: editor.isActive('italic'),
+      };
+    },
+  });
+}
+```
+
+## 优化您的性能
+
+我们建议您访问[React 性能指南](/guides/performance)，以高效集成 Tiptap 编辑器。这将帮助您避免应用规模扩大时可能出现的问题。

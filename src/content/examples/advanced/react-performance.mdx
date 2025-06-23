@@ -13,3 +13,9 @@ import { CodeDemo } from '@/components/CodeDemo'
 在 React 中使用 Tiptap 时，最常见的性能问题是编辑器被过于频繁地重新渲染。本演示展示了默认编辑器与使用 `shouldRerenderOnTransaction` 进行优化渲染之间的区别。
 
 <CodeDemo path="/Examples/Performance" />
+
+## 获取编辑器状态信息而不影响性能
+
+如果您需要访问编辑器状态而不导致重新渲染，可以使用 `useEditorState` 钩子。这样可以在不触发组件重新渲染的情况下读取编辑器状态。
+
+在 [这里]( /editor/getting-started/install/react#reacting-to-editor-state-changes) 了解更多信息。

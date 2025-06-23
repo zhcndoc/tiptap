@@ -31,7 +31,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ```bash
 # 安装扩展及浮动 UI
-npm install @tiptap/extension-floating-menu@next @floating-ui/dom@^1.6.0
+npm install @tiptap/extension-floating-menu@beta @floating-ui/dom@^1.6.0
 ```
 
 ## 设置
@@ -64,6 +64,10 @@ npm install @tiptap/extension-floating-menu@next @floating-ui/dom@^1.6.0
 | `autoPlacement` | `AutoPlacementOptions` 或 `boolean` | [自动放置中间件选项](https://floating-ui.com/docs/autoPlacement#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件                   |
 | `hide`          | `HideOptions` 或 `boolean`          | [隐藏中间件选项](https://floating-ui.com/docs/hide#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件                                |
 | `inline`        | `InlineOptions` 或 `boolean`        | [内联中间件选项](https://floating-ui.com/docs/inline#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件                               |
+| `onShow`        | `Function` or `undefined`           | A callback that is called when the menu is shown. This can be used to add custom logic or styles when the menu is displayed.                                   |
+| `onHide`        | `Function` or `undefined`           | A callback that is called when the menu is hidden. This can be used to add custom logic or styles when the menu is hidden.                                     |
+| `onUpdate`      | `Function` or `undefined`           | A callback that is called when the menu is updated. This can be used to add custom logic or styles when the menu is updated.                                   |
+| `onDestroy`     | `Function` or `undefined`           | A callback that is called when the menu is destroyed. This can be used to add custom logic or styles when the menu is removed.                                 |
 
 ### pluginKey
 

@@ -1,33 +1,28 @@
 ---
 title: FileHandler 扩展
+extension:
+  name: 文件处理器
+  link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-file-handler
+  description: 您是否想过将文件拖放或粘贴到编辑器中？我们也有这个需求。
+  type: extension
+  icon: File
 tags:
-  - type: pro
+  - type: image
+    src: https://img.shields.io/npm/v/@tiptap/extension-file-handler.svg?label=version
+    url: https://www.npmjs.com/package/@tiptap/extension-file-handler
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@tiptap/extension-file-handler.svg
+    url: https://npmcharts.com/compare/@tiptap/extension-file-handler?minimal=true
+    label: 下载量
 meta:
   category: 编辑器
   title: FileHandler 扩展 | Tiptap 编辑器文档
-  description: 使用 FileHandler 扩展处理文件拖放和粘贴到 Tiptap 编辑器中。了解如何在文档中设置它！
-extension:
-  name: 文件处理器
-  description: 您是否想过将文件拖放或粘贴到编辑器中？我们也有这个需求。
-  type: extension
-  icon: 文件
-  isPro: true
+  description: 使用 FileHandler 扩展处理您的 Tiptap 编辑器中的文件拖放和粘贴。点击这里查看如何设置！
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
-import { Requirements, RequirementItem } from '@/components/Requirements'
-
-<Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 从私有注册表安装">
-        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证，以访问 Tiptap 的私有 npm 注册表。
-    </RequirementItem>
-</Requirements>
-
-
 
 您是否想过将文件拖放或粘贴到编辑器中？我们也有这个需求——所以这里有一个扩展可以实现。
 
@@ -35,21 +30,16 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 默认情况下，当文件被粘贴或拖放时，该扩展不会显示上传的文件。相反，它会触发一个事件，您可以通过在编辑器中插入一个新的节点来响应该事件。例如，要显示上传的图像文件，请使用 [图像扩展](/editor/extensions/nodes/image)。
 
-<Callout title="没有服务器上传功能" variant="info">
-  此扩展仅负责处理将文件拖放或粘贴到编辑器中的事件。它不实现服务器文件上传。
+<Callout title="无服务器上传功能" variant="info">
+  此扩展仅负责处理将文件拖放或粘贴到编辑器中的事件。它不实现服务器端文件上传功能。
 </Callout>
 
-<CodeDemo isPro path="/Extensions/FileHandler" />
+<CodeDemo path="/Extensions/FileHandler" />
 
 ## 安装
 
-<Callout title="设置访问 Tiptap 的私有库" variant="info">
-  通过注册一个免费的 [Tiptap
-  账户](https://cloud.tiptap.dev/register) 并按照我们的 [访问指南](/guides/pro-extensions) 访问 Tiptap 的私有库。
-</Callout>
-
 ```bash
-npm install @tiptap-pro/extension-file-handler@next
+npm install @tiptap/extension-file-handler@beta
 ```
 
 ## 设置
@@ -75,7 +65,7 @@ FileHandler.configure({
 
 ### onDrop
 
-当文件拖放到编辑器中时，将调用的回调函数。您将可以访问编辑器实例、被拖放的文件以及文件被拖放的位置。
+当文件被拖放到编辑器中时，将调用的回调函数。您将可以访问编辑器实例、被拖放的文件以及文件被拖放的位置。
 
 默认值：`undefined`
 
@@ -90,7 +80,7 @@ FileHandler.configure({
 
 ### allowedMimeTypes
 
-此选项控制允许被拖放或粘贴到编辑器中的文件类型。您可以定义 MIME 类型列表或文件扩展名列表。如果未定义 MIME 类型或文件扩展名，则所有文件均被允许。
+此选项控制允许被拖放或粘贴到编辑器中的文件类型。您可以定义 MIME 类型列表或文件扩展名列表。如果未定义 MIME 类型或文件扩展名，则允许所有文件。
 
 默认值：`undefined`
 

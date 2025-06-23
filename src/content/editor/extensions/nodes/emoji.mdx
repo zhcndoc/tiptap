@@ -3,46 +3,36 @@ title: Emoji 扩展
 icon: emoji-smile-line
 extension:
   name: Emoji
-  description: 将表情符号作为行内节点呈现，并为不支持的表情符号提供备用图像。
+  link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-emoji
+  description: 将表情符号呈现为行内节点，对于不支持的表情符号则使用备用图片。
   type: node
   icon: Laugh
-  isPro: true
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@tiptap/extension-emoji.svg?label=version
+    url: https://www.npmjs.com/package/@tiptap/extension-emoji
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@tiptap/extension-emoji.svg
+    url: https://npmcharts.com/compare/@tiptap/extension-emoji?minimal=true
+    label: 下载次数
 meta:
   title: Emoji 扩展 | Tiptap 编辑器文档
-  description: 在 Tiptap 中使用 Emoji 扩展，将表情符号作为行内节点呈现，并为不支持的表情符号提供备用图像。
+  description: 在 Tiptap 中使用 Emoji 扩展，将表情符号呈现为行内节点，对于不支持的表情符号则使用备用图片。
   category: 编辑器
-tags:
-  - type: pro
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
-import { Requirements, RequirementItem } from '@/components/Requirements'
-
-<Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的帐户中开始一个免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅一个 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 从私有注册中心安装">
-        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 认证 Tiptap 的私有 npm 注册中心。
-    </RequirementItem>
-</Requirements>
-
 
 `Emoji` 扩展将表情符号作为行内节点呈现。所有插入的（输入、粘贴等）表情符号将转换为此节点。这样做的好处是，不支持的表情符号可以用备用图像呈现。当您从编辑器中复制文本时，它们将被转换回纯文本。
 
-<CodeDemo isPro path="/Nodes/Emoji" />
+<CodeDemo path="/Nodes/Emoji" />
 
 ## 安装
 
-<Callout title="设置对 Tiptap 私有存储库的访问" variant="info">
-  通过注册一个免费的 [Tiptap
-  帐户](https://cloud.tiptap.dev/register) 并按照我们的 [访问
-  指南](/guides/pro-extensions) 获取 Tiptap 的私有存储库，以集成此专业扩展。
-</Callout>
-
 ```bash
-npm install @tiptap-pro/extension-emoji@next
+npm install @tiptap/extension-emoji@beta
 ```
 
 ## 依赖
@@ -53,11 +43,11 @@ npm install @tiptap-pro/extension-emoji@next
 npm install tippy.js
 ```
 
-## 设置
+## 配置
 
 ### HTMLAttributes
 
-要添加到呈现的 HTML 标签中的自定义 HTML 属性。
+要添加到渲染的 HTML 标签中的自定义 HTML 属性。
 
 ```js
 Emoji.configure({
@@ -75,7 +65,7 @@ Emoji.configure({
 2. 扩展的 `gitHubEmojis` 列表，包含自定义表情符号，例如 :octocat:
 
 ```js
-import Emoji, { gitHubEmojis } from '@tiptap-pro/extension-emoji'
+import Emoji, { gitHubEmojis } from '@tiptap/extension-emoji'
 
 Emoji.configure({
   emojis: gitHubEmojis,
@@ -113,7 +103,7 @@ Emoji.configure({
 添加您自己的自定义表情符号非常简单。
 
 ```js
-import Emoji, { emojis } from '@tiptap-pro/extension-emoji'
+import Emoji, { emojis } from '@tiptap/extension-emoji'
 
 const customEmojis = [
   {

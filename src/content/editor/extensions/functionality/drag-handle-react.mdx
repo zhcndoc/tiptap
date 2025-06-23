@@ -1,47 +1,39 @@
 ---
 title: 拖动手柄 React 扩展
-tags:
-  - type: pro
-meta:
-  category: 编辑器
-  title: 拖动手柄 React | Tiptap 编辑器文档
-  description: 使用拖动手柄 React 扩展在基于 React 的 Tiptap 编辑器中启用节点拖动功能。了解如何在文档中进行设置！
 extension:
-  name: 拖动手柄 React
-  description: 你是否曾想在基于 React 的编辑器中拖动节点？我们也想过。
+  name: Drag Handle React
+  link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-drag-handle-react
+  description: 你是否曾想过在基于 React 的编辑器中拖动节点？我们也有同样的需求。
   type: extension
   icon: GripVertical
-  isPro: true
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@tiptap/extension-drag-handle-react.svg?label=version
+    url: https://www.npmjs.com/package/@tiptap/extension-drag-handle-react
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@tiptap/extension-drag-handle-react.svg
+    url: https://npmcharts.com/compare/@tiptap/extension-drag-handle-react?minimal=true
+    label: 下载量
+meta:
+  category: 编辑器
+  title: Drag Handle React | Tiptap 编辑器文档
+  description: 使用 Drag Handle React 扩展启用在基于 React 的 Tiptap 编辑器中拖动节点。请在文档中了解如何设置！
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
-import { Callout } from '@/components/ui/Callout'
-import { Requirements, RequirementItem } from '@/components/Requirements'
 
-<Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在你的账户中开始免费[试用](https://cloud.tiptap.dev/v2/billing)或订阅一个[Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 从私有注册表安装">
-        要安装此前端扩展，请通过遵循[设置指南](/guides/pro-extensions)来认证 Tiptap 的私有 npm 注册表。
-    </RequirementItem>
-</Requirements>
+你是否曾想过在基于 React 的编辑器中拖动节点？我们也有同样的需求——所以这里有一个扩展实现它。
 
-你是否曾想在基于 React 的编辑器中拖动节点？我们也想过——因此这里有一个扩展可以实现这个功能。
+`DragHandleReact` 组件允许你轻松处理编辑器中节点的拖动。你可以定义自定义渲染函数、位置等。
+它本质上将 [DragHandle](/editor/extensions/functionality/drag-handle) 扩展封装到一个 React 组件中，该组件会自动向编辑器注册和注销扩展。
 
-`DragHandleReact` 组件允许你轻松处理在编辑器中拖动节点。你可以定义自定义渲染函数、放置位置等。
-它本质上是在一个 React 组件中包装了 [DragHandle](/editor/extensions/functionality/drag-handle) 扩展，该组件会自动向编辑器注册/注销扩展。
-
-<CodeDemo isPro path="/Extensions/DragHandle/" />
+<CodeDemo path="/Extensions/DragHandle/" />
 
 ## 安装
 
-<Callout title="设置访问 Tiptap 的私有仓库" variant="info">
-  通过注册一个免费的[Tiptap 账户](https://cloud.tiptap.dev/register)并遵循我们的[访问指南](/guides/pro-extensions)以访问 Tiptap 的私有仓库，集成此专业扩展。
-</Callout>
-
 ```bash
-npm install @tiptap-pro/extension-drag-handle-react@next @tiptap-pro/extension-drag-handle@next @tiptap-pro/extension-node-range@next @tiptap/extension-collaboration@next @tiptap/y-tiptap@next yjs y-protocols
+npm install @tiptap/extension-drag-handle-react@beta @tiptap/extension-drag-handle@beta @tiptap/extension-node-range@beta @tiptap/extension-collaboration@beta @tiptap/y-tiptap@beta yjs y-protocols
 ```
 
 ## 属性
@@ -50,7 +42,7 @@ npm install @tiptap-pro/extension-drag-handle-react@next @tiptap-pro/extension-d
 
 ### children
 
-应该显示在拖动手柄内部的内容。
+应显示在拖动手柄内部的内容。
 
 ```jsx
 <DragHandle>
@@ -60,7 +52,7 @@ npm install @tiptap-pro/extension-drag-handle-react@next @tiptap-pro/extension-d
 
 ### tippyOptions
 
-tippy.js 的选项。你可以传递在 [tippy.js 文档](https://atomiks.github.io/tippyjs/v6/all-props/)中可用的任何选项。
+tippy.js 的选项。你可以传递在 [tippy.js 文档](https://atomiks.github.io/tippyjs/v6/all-props/) 中可用的任何选项。
 
 默认值：`undefined`
 
@@ -76,7 +68,7 @@ tippy.js 的选项。你可以传递在 [tippy.js 文档](https://atomiks.github
 
 ### onNodeChange
 
-当节点被悬停时返回一个节点或 null。这可以用于高亮显示当前悬停的节点。
+当节点被悬停时返回一个节点或 null。这可以用于高亮当前悬停的节点。
 
 默认值：`undefined`
 

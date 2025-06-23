@@ -1,53 +1,44 @@
 ---
 title: UniqueID 扩展
-tags:
-  - type: pro
-meta:
-  title: UniqueID 扩展 | Tiptap 编辑器文档
-  description: 为每个节点添加唯一 ID，并通过 UniqueID 扩展进行跟踪。在文档中了解更多！
-  category: 编辑器
 extension:
   name: UniqueID
-  description: 为每个节点添加唯一 ID，并进行跟踪。
+  link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-unique-id
+  description: 为每个节点添加唯一 ID 并跟踪它们。
   type: extension
   icon: Hash
-  isPro: true
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@tiptap/extension-unique-id.svg?label=version
+    url: https://www.npmjs.com/package/@tiptap/extension-unique-id
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@tiptap/extension-unique-id.svg
+    url: https://npmcharts.com/compare/@tiptap/extension-unique-id?minimal=true
+    label: 下载量
+meta:
+  title: UniqueID 扩展 | Tiptap 编辑器文档
+  description: 通过 UniqueID 扩展为每个节点添加唯一 ID 并跟踪它们。更多内容请见文档！
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
-import { Callout } from '@/components/ui/Callout'
-import { Requirements, RequirementItem } from '@/components/Requirements'
 
-<Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 从私有注册表安装">
-        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 的说明，验证 Tiptap 的私有 npm 注册表。
-    </RequirementItem>
-</Requirements>
+`UniqueID` 扩展会为所有节点添加唯一 ID。该扩展会跟踪你的节点，即使你拆分它们、合并它们、撤销/重做更改、裁剪内容、粘贴内容……它都能正常工作。
+此外，你可以配置哪些节点类型会获得唯一 ID，哪些不会，并且可以自定义 ID 的生成方式。
 
-`UniqueID` 扩展为所有节点添加唯一 ID。该扩展能够跟踪您的节点，即使您对节点进行切分、合并、撤销/重做更改、裁剪内容、粘贴内容…… 它都能正常工作。
-此外，您可以配置哪些节点类型获得唯一 ID，哪些不获得，同时可以自定义这些 ID 的生成方式。
-
-<CodeDemo isPro path="/Extensions/UniqueID" />
+<CodeDemo path="/Extensions/UniqueID" />
 
 ## 安装
 
-<Callout title="设置 Tiptap 私有库的访问权限" variant="info">
-  通过注册免费 [Tiptap 账户](https://cloud.tiptap.dev/register) 并按照我们的 [访问指南](/guides/pro-extensions) 访问 Tiptap 的私有库，集成此专业扩展。
-</Callout>
-完成后，您可以从我们的私有注册表安装该扩展：
-
 ```bash
-npm install @tiptap-pro/extension-unique-id@next
+npm install @tiptap/extension-unique-id@beta
 ```
 
 ## 设置
 
 ### attributeName
 
-附加到 HTML 标签上的属性名称（前缀将为 `data-`）。
+附加到 HTML 标签上的属性名称（前缀会是 `data-`）。
 
 默认值：`'id'`
 
@@ -59,7 +50,7 @@ UniqueID.configure({
 
 ### types
 
-所有需要获得唯一 ID 的类型，例如 `['heading', 'paragraph']`
+所有需要获得唯一 ID 的节点类型，例如 `['heading', 'paragraph']`
 
 默认值：`[]`
 
@@ -71,13 +62,13 @@ UniqueID.configure({
 
 ### generateID
 
-生成并返回唯一 ID 的函数。
+用于生成并返回唯一 ID 的函数。
 
 默认值：`() => uuidv4()`
 
 ### filterTransaction
 
-忽略某些突变，例如通过协作插件由其他用户应用的突变。
+忽略某些事务，例如通过协作插件由其他用户应用的事务。
 
 默认值：`null`
 

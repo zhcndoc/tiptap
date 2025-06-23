@@ -1,53 +1,45 @@
 ---
 title: 拖拽手柄扩展
+extension:
+  name: 拖拽手柄
+  link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-drag-handle
+  description: 你是否曾经想在编辑器中拖拽节点？好吧，我们也想——所以这里有一个扩展。
+  type: extension
+  icon: GripVertical
 tags:
-  - type: pro
+  - type: image
+    src: https://img.shields.io/npm/v/@tiptap/extension-drag-handle.svg?label=version
+    url: https://www.npmjs.com/package/@tiptap/extension-drag-handle
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@tiptap/extension-drag-handle.svg
+    url: https://npmcharts.com/compare/@tiptap/extension-drag-handle?minimal=true
+    label: 下载量
 meta:
   category: 编辑器
   title: 拖拽手柄扩展 | Tiptap 编辑器文档
-  description: 通过拖拽手柄扩展，让你可以在 Tiptap 编辑器中自由拖动节点。在此文档中了解如何进行设置！
-extension:
-  name: 拖拽手柄
-  description: 你是否曾经想在编辑器中拖动节点？其实我们也有这个需求。
-  type: extension
-  icon: GripVertical
-  isPro: true
+  description: 使用拖拽手柄扩展在你的 Tiptap 编辑器中启用节点拖拽功能。可在文档中学习如何配置！
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
-import { Callout } from '@/components/ui/Callout'
-import { Requirements, RequirementItem } from '@/components/Requirements'
 
-<Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在你的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 方案](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 通过私有仓库安装">
-        要安装此前端扩展，你需要通过 [设置指南](/guides/pro-extensions) 进行认证，访问 Tiptap 的私有 npm 注册表。
-    </RequirementItem>
-</Requirements>
+你是否曾经想在你的编辑器中拖拽节点？我们也是——因此这里有一个扩展来实现它。
 
-你是否曾经希望在编辑器中自由拖动节点？其实我们也有这个需求 — 这就是为此设计的扩展。
+`DragHandle` 扩展允许你轻松地处理编辑器中的节点拖拽。你可以定义自定义渲染函数、位置等。
 
-`DragHandle` 扩展允许你轻松管理在编辑器中拖动节点。你可以定义自定义渲染函数、位置等。
-
-<CodeDemo isPro path="/Extensions/DragHandle" />
+<CodeDemo path="/Extensions/DragHandle" />
 
 ## 安装
 
-<Callout title="设置访问 Tiptap 私有仓库" variant="info">
-  通过注册一个免费的 [Tiptap 账号](https://cloud.tiptap.dev/register)，并按照我们的 [访问指南](/guides/pro-extensions) 操作，即可集成此专业扩展到你的项目中。
-</Callout>
-
 ```bash
-npm install @tiptap-pro/extension-drag-handle@next
+npm install @tiptap/extension-drag-handle@beta
 ```
 
 ## 设置
 
 ### render
 
-定义一个通过 tippy.js 定位的元素。这个元素会作为拖动节点时显示的手柄。
+定义一个通过 tippy.js 定位的元素。该元素作为拖动节点时显示的手柄。
 
 ```js
 DragHandle.configure({
@@ -64,7 +56,7 @@ DragHandle.configure({
 
 ### tippyOptions
 
-tippy.js 的配置项。你可以传入 [tippy.js 文档](https://atomiks.github.io/tippyjs/v6/all-props/) 中的任何选项。
+tippy.js 的配置项。你可以传入 [tippy.js 文档](https://atomiks.github.io/tippyjs/v6/all-props/) 中的任意选项。
 
 默认值：`undefined`
 
@@ -78,7 +70,7 @@ DragHandle.configure({
 
 ### onNodeChange
 
-当鼠标悬停在某个节点上时，返回该节点或 null。可以用来高亮悬停的节点。
+当鼠标悬停在某个节点时，返回该节点或 null。可以用来高亮悬停的节点。
 
 默认值：`undefined`
 
@@ -99,7 +91,7 @@ DragHandle.configure({
 
 ### lockDragHandle()
 
-锁定拖拽手柄，使其保持可见且被锁定状态。如果此前手柄是可见的，保持可见直到解锁；如果之前是隐藏的，保持隐藏直到解锁。
+锁定拖拽手柄，使其保持可见且被锁定状态。如果此前手柄是可见的，则保持可见直到解锁；如果之前隐藏，则保持隐藏直到解锁。
 
 适合在手柄内设置菜单，并希望菜单在鼠标悬停或不悬停时都保持可见。
 

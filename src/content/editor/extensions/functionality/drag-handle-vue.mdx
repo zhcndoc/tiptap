@@ -1,54 +1,45 @@
 ---
 title: 拖拽句柄 Vue 扩展
-tags:
-  - type: pro
-meta:
-  category: 编辑器
-  title: 拖拽句柄 Vue | Tiptap 编辑器文档
-  description: 使用拖拽句柄 Vue 扩展在您的基于 Vue 的 Tiptap 编辑器中启用节点拖拽功能。在文档中学习如何设置它！
 extension:
   name: 拖拽句柄 Vue
+  link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-drag-handle-vue
   description: 您是否曾希望在基于 Vue 的编辑器中拖动节点？好吧，我们也有这个想法。
   type: extension
   icon: GripVertical
-  isPro: true
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@tiptap/extension-drag-handle-vue.svg?label=version
+    url: https://www.npmjs.com/package/@tiptap/extension-drag-handle-vue
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@tiptap/extension-drag-handle-vue.svg
+    url: https://npmcharts.com/compare/@tiptap/extension-drag-handle-vue?minimal=true
+    label: 下载量
+meta:
+  category: 编辑器
+  title: 拖拽句柄 Vue | Tiptap 编辑器文档
+  description: 使用拖拽句柄 Vue 扩展，启用在基于 Vue 的 Tiptap 编辑器中拖动节点。在文档中学习如何设置！
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
-import { Requirements, RequirementItem } from '@/components/Requirements'
-
-<Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费[试用](https://cloud.tiptap.dev/v2/billing)或订阅[Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 从私有注册表安装">
-        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)中的说明，向 Tiptap 的私有 npm 注册表进行身份验证。
-    </RequirementItem>
-</Requirements>
-
-
 
 您是否曾希望在基于 Vue 的编辑器中拖动节点？好吧，我们也有这个想法——所以这就是为此而创建的扩展。
 
-`DragHandleVue` 组件使您能够轻松地在编辑器中拖动节点。您可以定义自定义渲染函数、位置等。
+`DragHandleVue` 组件使您能够轻松地在编辑器中拖动节点。您可以定义自定义渲染函数、位置等。  
 它实质上将 [DragHandle](/editor/extensions/functionality/drag-handle) 扩展包装在 Vue 组件中，并会自动与编辑器注册/注销扩展。
 
-<CodeDemo isPro path="/Extensions/DragHandle?selectedTab=Vue" />
+<CodeDemo path="/Extensions/DragHandle?selectedTab=Vue" />
 
 ## 安装
 
-<Callout title="设置对 Tiptap 私有库的访问" variant="info">
-  通过注册免费的 [Tiptap
-  账户](https://cloud.tiptap.dev/register) 并遵循我们的[访问指南](/guides/pro-extensions)获取对 Tiptap 私有库的访问，以集成此专业扩展。
-</Callout>
-
 ```bash
-npm install @tiptap-pro/extension-drag-handle-vue-3@next @tiptap-pro/extension-drag-handle@next @tiptap-pro/extension-node-range@next @tiptap/extension-collaboration@next @tiptap/y-tiptap@next yjs y-protocols
+npm install @tiptap/extension-drag-handle-vue-3@beta @tiptap/extension-drag-handle@beta @tiptap/extension-node-range@beta @tiptap/extension-collaboration@beta @tiptap/y-tiptap@beta yjs y-protocols
 ```
 
-<Callout title="Vue 2 vs. Vue 3" variant="info">
-  有两个版本的 DragHandle 扩展可用。确保为您的 Vue 版本安装正确的版本。 `@tiptap-pro/extension-drag-handle-vue-2` 和 `@tiptap-pro/extension-drag-handle-vue-3`
+<Callout title="Vue 2 与 Vue 3 的区别" variant="info">
+  拖拽句柄扩展提供两个版本。请确保根据您的 Vue 版本安装正确的版本。分别是 `@tiptap/extension-drag-handle-vue-2` 和
+  `@tiptap/extension-drag-handle-vue-3`
 </Callout>
 
 ## 属性
@@ -57,7 +48,7 @@ npm install @tiptap-pro/extension-drag-handle-vue-3@next @tiptap-pro/extension-d
 
 ### children
 
-应该在拖拽句柄内显示的内容。
+应显示在拖拽句柄内的内容。
 
 ```vue
 <drag-handle>
@@ -67,7 +58,7 @@ npm install @tiptap-pro/extension-drag-handle-vue-3@next @tiptap-pro/extension-d
 
 ### tippyOptions
 
-tippy.js 的选项。您可以传递在[tippy.js 文档](https://atomiks.github.io/tippyjs/v6/all-props/)中提供的任何选项。
+tippy.js 的配置选项。您可以传入在 [tippy.js 文档](https://atomiks.github.io/tippyjs/v6/all-props/) 中列出的任意选项。
 
 默认值： `undefined`
 
@@ -79,7 +70,7 @@ tippy.js 的选项。您可以传递在[tippy.js 文档](https://atomiks.github.
 
 ### onNodeChange
 
-当节点被悬停时返回节点或 null。这可以用来高亮显示当前被悬停的节点。
+当节点被悬停时返回节点或者 null。您可以用它来高亮当前悬停的节点。
 
 默认值： `undefined`
 
@@ -92,7 +83,7 @@ tippy.js 的选项。您可以传递在[tippy.js 文档](https://atomiks.github.
 
 <script>
 import { ref } from 'vue'
-import { DragHandle } from '@tiptap-pro/extension-drag-handle-vue-3'
+import { DragHandle } from '@tiptap/extension-drag-handle-vue-3'
 
 export default {
   components: {
@@ -117,7 +108,7 @@ export default {
 
 ### pluginKey
 
-应在编辑器中用于存储插件的键。如果您在同一编辑器中有多个拖拽句柄，这非常有用。
+编辑器中用于存储插件的键。若您在同一编辑器中使用多个拖拽句柄，此属性非常有用。
 
 默认值： `undefined`
 
