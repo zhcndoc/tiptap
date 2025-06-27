@@ -6,29 +6,29 @@ meta:
   category: 内容 AI
 ---
 
-AI 代理提供者暴露了几种方法，您可以调用这些方法来控制 AI 代理的行为和管理对话。
+AI 代理提供者公开了多个方法，您可以调用这些方法来控制 AI 代理的行为并管理对话。
 
 ## 核心方法
 
-| 方法                                   | 描述                                      | 参数                              |
-| -------------------------------------- | ----------------------------------------- | --------------------------------- |
-| `addUserMessage(message, metadata?)`  | 将用户消息添加到对话中                   | `message`: 字符串, `metadata?`: 任意 |
-| `run()`                                | 启动或继续 AI 代理的运行                  | 无                                |
-| `stop()`                               | 停止当前的 AI 代理运行                    | 无                                |
-| `reset(chatMessages?)`                 | 重置对话为初始状态                       | `chatMessages?`: ChatMessage[]    |
+| 方法                                | 描述                                        | 参数                                                      |
+| ----------------------------------- | ------------------------------------------- | --------------------------------------------------------- |
+| `addUserMessage(message, options?)` | 向对话中添加用户消息                          | `message`：`string`，`options?`：`AddUserMessageOptions`  |
+| `run()`                             | 启动或继续 AI 代理运行                       | 无                                                        |
+| `stop()`                            | 停止当前 AI 代理运行                         | 无                                                        |
+| `reset(chatMessages?)`              | 重置对话到初始状态                           | `chatMessages?`：`ChatMessage[]`                         |
 
 ## 对话管理
 
-| 方法                               | 描述                                    | 参数                                          |
-| ---------------------------------- | --------------------------------------- | --------------------------------------------- |
-| `setCheckpoint()`                  | 将当前状态保存为检查点                 | 无                                            |
-| `restoreCheckpoint(checkpoint)`    | 恢复先前保存的检查点                   | `checkpoint`: Checkpoint                      |
-| `setChatMessages(messages)`        | 替换所有聊天消息                        | `messages`: ChatMessage[]                     |
-| `setAutoAccept(autoAccept)`        | 更改自动接受设置                       | `autoAccept`: "always" \| "never" \| "onlyRead" |
+| 方法                            | 描述                                      | 参数                                                |
+| ------------------------------- | ----------------------------------------- | --------------------------------------------------- |
+| `setCheckpoint()`               | 将当前状态保存为检查点                   | 无                                                  |
+| `restoreCheckpoint(checkpoint)` | 恢复先前保存的检查点                      | `checkpoint`：`Checkpoint`                         |
+| `setChatMessages(messages)`     | 替换所有聊天消息                         | `messages`：`ChatMessage[]`                        |
+| `setAutoAccept(autoAccept)`     | 更改自动接受设置                         | `autoAccept`：`"always" \| "never" \| "onlyRead"` |
 
 ## 工具调用审查
 
-| 方法                | 描述                             | 参数   |
-| ------------------- | -------------------------------- | ------ |
-| `acceptToolCall()`  | 接受挂起的工具调用               | 无     |
-| `rejectToolCall()`  | 拒绝挂起的工具调用               | 无     |
+| 方法                  | 描述                             | 参数   |
+| --------------------- | -------------------------------- | ------ |
+| `acceptToolCall()`    | 接受挂起的工具调用               | 无     |
+| `rejectToolCall()`    | 拒绝挂起的工具调用               | 无     |

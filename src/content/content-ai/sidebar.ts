@@ -181,66 +181,80 @@ export const sidebarConfig: SidebarConfig = {
           ],
         },
         {
-          title: 'AI Agent',
+          title: 'AI 智能体',
           href: '/content-ai/capabilities/agent',
           tags: ['Pro', 'Beta'],
           children: [
             {
-              title: 'Overview',
+              title: '概述',
               href: '/content-ai/capabilities/agent/overview',
             },
             {
-              title: 'Install',
+              title: '安装',
               href: '/content-ai/capabilities/agent/install',
             },
             {
-              title: 'Use with Content AI Cloud',
+              title: '与内容 AI 云一起使用',
               href: '/content-ai/capabilities/agent/use-with-content-ai-cloud',
             },
             {
-              title: 'Features',
+              title: '特征',
               href: '/content-ai/capabilities/agent/features',
               children: [
                 {
-                  title: 'State Management',
+                  title: '状态管理',
                   href: '/content-ai/capabilities/agent/features/state-management',
                 },
                 {
-                  title: 'Listen to events',
+                  title: '监听事件',
                   href: '/content-ai/capabilities/agent/features/events',
                 },
                 {
-                  title: 'Available Methods',
+                  title: '可用的方法',
                   href: '/content-ai/capabilities/agent/features/methods',
                 },
                 {
-                  title: 'Manage Checkpoints',
+                  title: '管理检查点',
                   href: '/content-ai/capabilities/agent/features/checkpoints',
                 },
                 {
-                  title: 'AI Agent Lifecycle',
+                  title: 'AI 智能体生命周期',
                   href: '/content-ai/capabilities/agent/features/runs',
                 },
                 {
-                  title: 'Reading the document',
+                  title: '阅读文档',
                   href: '/content-ai/capabilities/agent/features/reading-the-document',
                 },
                 {
-                  title: 'Review AI-generated changes',
+                  title: '审查 AI 生成的更改',
                   href: '/content-ai/capabilities/agent/features/review',
+                },
+                {
+                  title: '为消息添加上下文',
+                  href: '/content-ai/capabilities/agent/features/add-context',
                 },
               ],
             },
             {
-              title: 'Integrate your LLM',
+              title: '配置',
+              href: '/content-ai/capabilities/agent/configure',
+              children: [
+                {
+                  title: '配置选项',
+                  href: '/content-ai/capabilities/agent/configure/options',
+                },
+                {
+                  title: '系统提示',
+                  href: '/content-ai/capabilities/agent/configure/system-prompt',
+                },
+              ],
+            },
+            {
+              title: '集成您的 LLM',
               href: '/content-ai/capabilities/agent/custom-llms',
             },
             {
-              title: 'Configure',
-              href: '/content-ai/capabilities/agent/configure',
-            },
-            {
-              title: 'API Reference',
+              title: 'API 参考',
               href: '/content-ai/capabilities/agent/api-reference',
             },
           ],
