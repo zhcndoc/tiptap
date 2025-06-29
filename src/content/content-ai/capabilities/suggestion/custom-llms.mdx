@@ -1,30 +1,30 @@
 ---
-title: 集成自定义后端和 LLM
+title: 集成你的自定义后端和大语言模型（LLMs）
 meta:
-  title: 自定义 LLM | Tiptap AI 建议
-  description: 使用 AI 建议扩展集成您自己的后端和 LLM 以获得自定义建议。
-  category: 内容 AI
+  title: 自定义大语言模型 | Tiptap AI 建议
+  description: 使用 AI 建议扩展集成你自己的后端和大语言模型，实现自定义建议。
+  category: 内容人工智能
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-默认情况下，AI 建议扩展使用 Tiptap 内容 AI 云生成您的内容的建议。这使您能够以最少的设置使用其功能。然而，您可以集成自己后端和 LLM 以生成建议。
+默认情况下，AI 建议扩展使用 Tiptap 内容 AI 云来生成内容建议。这让你以最少的配置享受其功能。不过，你也可以集成自己的后端和大语言模型来生成建议。
 
-<Callout title="Custom LLM demo" variant="info">
-  我们为我们的增长和企业客户提供详细的自定义 LLM 演示。它包括客户端和服务器代码，以及如何运行和部署的说明。请参阅[计划和定价](https://tiptap.dev/pricing)。
+<Callout title="自定义大语言模型演示" variant="info">
+  我们为成长版和企业版客户提供详细的自定义大语言模型演示。它包含客户端和服务器端代码，以及如何运行和部署的说明。见 [套餐与定价](https://tiptap.dev/pricing)。
 </Callout>
 
-AI 建议扩展支持不同程度的自定义。您可以：
+AI 建议扩展支持不同程度的自定义。你可以：
 
 1. 使用 Tiptap 内容 AI 云，但自定义 OpenAI 模型。
-2. 用您自己的 LLM 和后端替换获取建议数据的 API 端点，但让扩展处理建议的显示和应用。这是大多数用例推荐的方法，因为我们为您处理了大部分复杂性：比较旧的和新的编辑器内容，以愉快的方式显示差异，并处理冲突。
-3. 完全实现您自己的解析器函数。这使您能够完全控制如何在编辑器中显示建议。只有在高级场景中推荐这种方法。
+2. 替换用于获取建议数据的 API 端点，使用你自己的大语言模型和后端，但让扩展处理建议的展示和应用。这是大多数用例的推荐方式，因为我们会帮你处理大部分复杂性：比较编辑器旧内容和新内容，以友好的方式展示差异，以及处理冲突。
+3. 完全实现你自己的解析器函数。这可以让你完全自由决定建议如何在编辑器中展示，仅推荐进阶场景使用。
 
-## 在 Tiptap Cloud 中自定义 OpenAI 模型
+## 在 Tiptap 云中自定义 OpenAI 模型
 
-您可以使用 `model` 选项配置用于生成建议的 OpenAI 模型。默认模型是 `gpt-4o-mini`。它在速度、成本和准确性之间提供了良好的平衡。
+你可以通过 `model` 选项配置用于生成建议的 OpenAI 模型。默认模型是 `gpt-4o-mini`，它在速度、成本和准确性间取得良好平衡。
 
-如果您希望提高建议的质量，可以使用更大的模型如 `gpt-4o`。请注意，更大的模型通常会更昂贵、更慢，并且延迟更高。
+如果你想提升建议质量，可以使用更大的模型，如 `gpt-4o`。但请注意，更大的模型通常更昂贵，速度更慢且延迟更高。
 
 ```ts
 AiSuggestion.configure({
@@ -35,7 +35,7 @@ AiSuggestion.configure({
 
 ## 替换 API 端点（推荐）
 
-如果您想使用自己的后端和 LLM 生成建议，可以提供一个自定义的 `apiResolver` 函数。该函数应调用您的后端，并根据编辑器的内容和规则返回建议数组。
+如需使用你自己的后端和大语言模型生成建议，可以提供自定义的 `apiResolver` 函数。该函数应调用你的后端并根据编辑器内容和规则返回建议数组。
 
 ```tsx
 AiSuggestion.configure({
@@ -43,10 +43,10 @@ AiSuggestion.configure({
     const suggestions = defaultResolver({
       ...options,
       apiResolver: async ({ html, htmlChunks, rules }) => {
-        // 通过调用您自定义的后端和 LLM 生成响应
+        // 调用自定义后端和大语言模型生成响应
         const response = await claudeSonnetApi({ html, htmlChunks, rules })
 
-        // 以正确的格式返回响应（见下文细节）
+        // 以正确格式返回响应（详情见下文）
         return { format: 'replacements', content: response }
       },
     })
@@ -56,28 +56,29 @@ AiSuggestion.configure({
 })
 ```
 
-为提供最大的灵活性，`apiResolver` 接受两种格式的响应：
+为提供最大灵活性，`apiResolver` 可接受两种响应格式：
 
 ### `replacements` 格式（推荐）
 
-响应是一个替换数组，将应用于编辑器的内容。当建议修改文档的特定部分时，此格式非常有用。它是我们 Tiptap 内容 AI 云内部使用的格式，迄今为止为我们提供了最佳结果。
+响应为一组替换项，将应用于编辑器内容。适用于建议修改文档中特定部分。这是我们在 Tiptap 内容 AI 云内部使用的格式，效果最佳。
+
 它包含以下属性：
 
-- `items`: 建议列表。每个建议具有以下属性：
-  - `ruleId`: 生成建议的规则 ID。
-  - `deleteHtml`: 要从编辑器中删除的 HTML 内容。
-  - `insertHtml`: 要插入到编辑器中的 HTML 内容。
-  - `chunkId`: 建议应应用的块 ID。
-- `htmlChunks`: 编辑器内容中所有 HTML 代码块的列表。每个块具有以下属性：
-  - `id`: 块的唯一标识符。
-  - `html`: 块的 HTML 内容。
-  - `generateSuggestions`: AI 模型是否为此块生成了建议。否则，如果设置为 `false`，则建议将从扩展的内部缓存中获取。
+- `items`：建议列表。每条建议具有以下属性：
+  - `ruleId`：生成该建议的规则 ID。
+  - `deleteHtml`：需从编辑器删除的 HTML 内容。
+  - `insertHtml`：需插入到编辑器的 HTML 内容。
+  - `chunkId`：应应用该建议的内容块 ID。
+- `htmlChunks`：编辑器内容中所有 HTML 代码块的列表。每个块包含：
+  - `id`：块的唯一标识符。
+  - `html`：该块的 HTML 内容。
+  - `generateSuggestions`：AI 模型是否针对该块生成了建议。若为 `false`，则建议将从扩展的内部缓存获取。
 
-确保 `htmlChunks` 属性包含编辑器内容中的所有 HTML 代码块，否则缓存机制将无法正常工作。
+请确保 `htmlChunks` 属性包含编辑器内容中的所有 HTML 代码块，否则缓存机制无法正常工作。
 
-您可以通过读取 `apiResolver` 函数的 `htmlChunks` 参数轻松获取 `htmlChunks` 属性的值。
+你可通过读取 `apiResolver` 函数的 `htmlChunks` 参数轻松获得该属性值。
 
-以下是用 `replacements` 格式的示例响应。
+以下是一个使用 `replacements` 格式的响应示例。
 
 ```json
 {
@@ -86,12 +87,12 @@ AiSuggestion.configure({
     "htmlChunks": [
       {
         "id": "1",
-        "html": "<p>你好，欢迎使用我们的超棒应用！我们希望你们会喜欢它。我们的应用程序提供独特的功能，增强您的烹饪体验。您可以探索各种美食并分享您的美食时刻。</p><p>Hola, estamos emocionados de tenerte aquí. 我们的应用程序不仅仅是关于食谱，而是关于建立社区。我们相信这将改变您的烹饪方式。</p>",
+        "html": "<p>Hello, welcome to our awesome app! We hope you guys will love it. Our aplication offers unique features that enhance your cooking experience. You can explore various cuisines and share your food momentts.</p><p>Hola, estamos emocionados de tenerte aquí. Our app is not just about recipes but also about building a community. We believe this will transform how you cook.</p>",
         "generateSuggestions": true
       },
       {
         "id": "2",
-        "html": "<p>请查看我们的酷功能，享受与我们一起烹饪。如果您有疑问，请随时提问。</p>",
+        "html": "<p>Please check out our cool fetures and enjoy cooking with us. Si tienes dudas, no dudes en preguntar.</p>",
         "generateSuggestions": true
       }
     ],
@@ -99,7 +100,7 @@ AiSuggestion.configure({
       {
         "ruleId": "1",
         "deleteHtml": "Hola, estamos <bold>emocionados</bold> de tenerte aquí.",
-        "insertHtml": "你好，我们很<bold>兴奋</bold>你在这里。",
+        "insertHtml": "Hello, we are <bold>excited</bold> to have you here.",
         "chunkId": "1"
       },
       {
@@ -117,7 +118,7 @@ AiSuggestion.configure({
       {
         "ruleId": "1",
         "deleteHtml": "Si tienes dudas, no dudes en preguntar.",
-        "insertHtml": "如果您有任何问题，请随时问。",
+        "insertHtml": "If you have any questions, feel free to ask.",
         "chunkId": "2"
       },
       {
@@ -133,7 +134,7 @@ AiSuggestion.configure({
 
 ### `fullHtml` 格式
 
-响应是一个完整的 HTML 字符串，将替换编辑器的内容。当您希望用建议替换整个内容时，此格式非常有用。我们发现这个格式在只要应用一个规则时性能非常好，但在需要多个规则时效果较差。此格式不支持分块和缓存。
+响应为一整段完整的 HTML 字符串，用于替换编辑器内容。适用于你想用建议替换整个内容的情况。我们发现当只有一条规则时此格式表现很好，多条规则时效果稍差。此格式不支持内容分块和缓存。
 
 ```json
 {
@@ -142,81 +143,80 @@ AiSuggestion.configure({
     "items": [
       {
         "ruleId": "1",
-        "fullHtml": "<p>你好，欢迎使用我们的超棒应用！我们希望你们会喜欢它。我们的应用程序提供独特的功能，增强您的烹饪体验。您可以探索各种美食并分享您的美食时刻。</p><p>你好，我们很兴奋你在这里。我们的应用程序不仅仅是关于食谱，而是关于建立社区。我们相信这将改变您的烹饪方式。</p><p>请查看我们的酷功能，享受与我们一起烹饪。如果您有疑问，请随时提问。</p>"
+        "fullHtml": "<p>Hello, welcome to our awesome app! We hope you guys will love it. Our aplication offers unique features that enhance your cooking experience. You can explore various cuisines and share your food momentts.</p><p>Hello, we are excited to have you here. Our app is not just about recipes but also about building a community. We believe this will transform how you cook.</p><p>Please check out our cool fetures and enjoy cooking with us. If you have doubts, do not hesitate to ask.</p>"
       },
       {
         "ruleId": "2",
-        "fullHtml": "<p>你好，欢迎使用我们的超棒应用！我们希望你们会喜欢它。我们的应用程序提供独特的功能，增强您的烹饪体验。您可以探索各种美食并分享您的美食时刻。</p><p>Hola, estamos emocionados de tenerte aquí. 我们的应用程序不仅仅是关于食谱，而是关于建立社区。我们相信这将改变您的烹饪方式。</p><p>请查看我们的酷功能，享受与我们一起烹饪。如果您有疑问，请随时提问。</p>"
+        "fullHtml": "<p>Hello, welcome to our awesome app! We hope you guys will love it. Our application offers unique features that enhance your cooking experience. You can explore various cuisines and share your food moments.</p><p>Hola, estamos emocionados de tenerte aquí. Our app is not just about recipes but also about building a community. We believe this will transform how you cook.</p><p>Please check out our cool features and enjoy cooking with us. Si tienes dudas, no dudes en preguntar.</p>"
       }
     ]
   }
 }
 ```
 
-### 提高准确性
+### 提高准确率
 
-LLM 可能会犯错误，这使得确保其响应遵循所需格式变得困难。为了提高自定义模型的准确性，我们建议遵循以下最佳实践和提示工程技术。
+大语言模型可能出错，导致响应难以符合预期格式。为提升自定义模型准确率，建议遵循以下最佳实践和提示工程技巧：
 
-- 在实施改进之前，评估您自定义端点的响应并测量其性能和准确性。使用像 [Evalite](https://www.evalite.dev/) 这样的评估框架。这有助于您细化和比较提示以获得更好的性能。
-- 如果您使用 `replacements` 格式，请利用 [OpenAI 结构化输出](https://platform.openai.com/docs/guides/structured-outputs)（或其他 LLM 提供商的等效功能）以确保响应是符合特定架构的 JSON 对象。
-- 如果您使用 `fullHtml` 格式，可以利用 [OpenAI 预测输出](https://platform.openai.com/docs/guides/predicted-outputs)（或其他 LLM 提供商的等效功能）以确保响应不会与原始编辑器内容偏离过大。
-- 调整 `temperature` 或 `top_p` [参数](https://platform.openai.com/docs/api-reference/completions/create) 来控制模型输出的随机性。
-- 各个 LLM 提供商都有官方的 [最佳实践](https://platform.openai.com/docs/guides/prompt-engineering)、优化 [延迟](https://platform.openai.com/docs/guides/latency-optimization) 和提高 [准确性](https://platform.openai.com/docs/guides/optimizing-llm-accuracy) 的指南。
-- 不同的校对规则在不同的提示方法和响应格式中效果最佳。您不必在 `replacements` 或 `fullHtml` 格式之间进行选择——您可以两者都使用！定义一个返回 `replacements` 格式建议的 API 端点，另一个生成 `fullHtml` 格式的建议。以下是一个示例：
+- 先评估自定义端点响应并测量性能及准确率。推荐使用像 [Evalite](https://www.evalite.dev/) 这类评估框架，有助于优化和对比提示效果。
+- 如使用 `replacements` 格式，利用 [OpenAI 结构化输出](https://platform.openai.com/docs/guides/structured-outputs)（或其他 LLM 提供商的同类功能）确保响应为符合特定模式的 JSON 对象。
+- 如使用 `fullHtml` 格式，利用 [OpenAI 预测输出](https://platform.openai.com/docs/guides/predicted-outputs)（或其他 LLM 提供商的同类功能）确保响应不偏离原编辑器内容过多。
+- 调整模型的 `temperature` 或 `top_p` [参数](https://platform.openai.com/docs/api-reference/completions/create)，以控制输出随机性。
+- LLM 提供商均有官方的 [最佳实践](https://platform.openai.com/docs/guides/prompt-engineering)、[延迟优化](https://platform.openai.com/docs/guides/latency-optimization)及[准确率提升](https://platform.openai.com/docs/guides/optimizing-llm-accuracy)指南。
+- 不同校对规则适合不同的提示方法和响应格式。你无需只能选择使用 `replacements` 或 `fullHtml` 格式——两者皆可！定义一个 API 返回 `replacements` 格式的建议，另一个生成 `fullHtml` 格式。示例：
 
   ```tsx
   AiSuggestion.configure({
     async resolver({ defaultResolver, rules, ...options }) {
-      // 将规则分成两组
-      const {
-        rulesForFirstApi,
-        rulesForSecondApi,
-      } = splitRules(rules)
+     // 将规则拆分为两组
+     const {
+     rulesForFirstApi,
+     rulesForSecondApi,
+    } = splitRules(rules)
 
-      // 将第一组规则发送到第一个 api 端点
+    // 将第一组规则发送给第一个 API 端点
       const suggestions1 = await defaultResolver({
         ...options,
-        rules: rulesForFirstApiEndpoint,
+        rules: rulesForFirstApiEndpoint
         apiResolver: async ({ html, htmlChunks, rules }) => {
           const response = await firstApi({ html, htmlChunks, rules });
           return { format: "replacements", content: response };
         },
       });
 
-      // 将第二组规则发送到第二个 api 端点
+      // 将第二组规则发送给第二个 API 端点
       const suggestions2 = await defaultResolver({
         ...options,
-        rules: rulesForSecondApiEndpoint,
+        rules: rulesForSecondApiEndpoint
         apiResolver: async ({ html, htmlChunks, rules }) => {
           const response = await secondApi({ html, htmlChunks, rules });
           return { format: "fullHtml", content: response };
         },
       });
 
-      // 合并两个建议列表
+    // 合并两组建议列表
       return [...suggestions1, ...suggestions2]
     },
-  })
   ```
 
-### 提高性能
+### 提升性能
 
-为了提高您的 API 和自定义 LLM 模型在生成建议时的性能，请考虑以下策略：
+为提升生成建议时 API 和自定义大语言模型的性能，可参考：
 
-- 选择一种在准确性、速度和低延迟之间取得平衡的模型。使用像 [Artificial Analysis](https://artificialanalysis.ai/#intelligence-vs-output-speed) 这样的排行榜来比较不同指标下的模型。
-- 在实施性能改进之前，测量您的 API 响应时间。如果您的管道包含多个步骤或模型调用，请分析每个步骤以识别瓶颈。使用像 [Evalite](https://www.evalite.dev/) 这样的评估框架迭代提示并比较其有效性。
-- 利用 [OpenAI 预测输出](https://platform.openai.com/docs/guides/predicted-outputs)（或其他 LLM 提供商的等效功能）来提高延迟和处理速度。
-- 将编辑器内容分块处理，并并行处理以减少总体处理时间，特别是对于大型文档。利用扩展的内置分块和缓存机制，仅重新加载已更改的块的建议。
-- 结构化您的提示以充分利用完整或 [部分缓存](https://platform.openai.com/docs/guides/prompt-caching)。注意，不同 LLM 提供商提供不同的缓存实现，有些可能不支持。如果必要，可以实现您自己的缓存机制，以便对相同或相似的提示重用 LLM 响应。
-- 流式响应可以提高您 API 的感知性能，特别是对于大型文档，通过允许在生成完整响应之前显示建议。虽然我们的 AI 建议扩展目前不支持流式处理，但我们正在考虑在未来版本中添加此功能。如果您认为您的应用程序会从中受益，请通过 humans@tiptap.dev 与我们联系。
+- 选择在准确率、速度和低延迟间平衡的模型。使用如 [Artificial Analysis](https://artificialanalysis.ai/#intelligence-vs-output-speed) 这类排行榜从多维度对比模型。
+- 在改进性能前，测量 API 响应时间。若流程有多个步骤或模型调用，分析每步瓶颈。利用 [Evalite](https://www.evalite.dev/) 持续迭代提示和效果对比。
+- 利用 [OpenAI 预测输出](https://platform.openai.com/docs/guides/predicted-outputs)（或其他 LLM 提供商的同类功能）提升延迟和处理速度。
+- 将编辑器内容分块，分块并行处理，缩短整体处理时间，尤其针对大型文档。利用扩展内建分块缓存机制，仅重新加载变更部分的建议。
+- 设计提示时利用完整或[部分缓存](https://platform.openai.com/docs/guides/prompt-caching)。不同 LLM 提供商缓存机制差异较大，有的甚至不支持。必要时自行实现缓存机制，复用相同或相似提示的响应。
+- 流式响应可以改善 API 体验，特别是大文档，允许在完整响应生成前先展示建议。虽然 AI 建议扩展当前不支持流式，但未来版本可能添加。如你认为此功能有用，欢迎通过 humans@tiptap.dev 联系我们。
 
-## 完全替换解析器函数（高级）
+## 完全替换解析器函数（进阶）
 
-如果您想完全控制如何生成编辑器建议，包括它们在文档中的准确位置，可以通过提供自定义的 `resolver` 函数来实现。该函数应根据编辑器的内容和规则返回建议数组。
+若想完全掌控编辑器建议的生成方式，包括明确建议在文档中的具体位置，可提供自定义 `resolver` 函数。该函数应基于编辑器内容和规则，返回建议数组。
 
-要生成有效的建议对象，您的代码需要计算它们在编辑器中的 [位置](https://prosemirror.net/docs/guide/#doc.indexing)。这很可能涉及比较编辑器的当前内容与 LLM 生成的内容。要查看如何做到这一点的示例，您可以检查扩展源代码中的默认解析器函数。
+生成有效建议对象需计算[编辑器中的具体位置](https://prosemirror.net/docs/guide/#doc.indexing)，通常涉及对比编辑器当前内容和大语言模型生成的内容。你可查看扩展源码中的默认解析器函数示例。
 
-有关每个建议对象应包含的数据的更多信息，请查看 [API 参考](/content-ai/capabilities/suggestion/api-reference#proofreading-suggestions)。
+更多每条建议对象所需数据详见[API 参考](/content-ai/capabilities/suggestion/api-reference#proofreading-suggestions)。
 
 ```tsx
 AiSuggestion.configure({
@@ -227,16 +227,16 @@ AiSuggestion.configure({
 })
 ```
 
-总体而言，实施自定义解析器的方法需要更多的工作，但它将为您提供更多的灵活性。我们只在高级用例中推荐它。
+总的来说，自定义解析器实现工作量更大，但灵活性最高。仅推荐用于高级用例。
 
-## 将 Tiptap 内容 AI 云与您的自定义后端结合起来
+## 结合 Tiptap 内容 AI 云和你自己的后端
 
-您不必在使用 Tiptap 内容 AI 云或您自己的后端之间进行选择。您可以将两者结合，以获得最佳效果。
+你无需在使用 Tiptap 内容 AI 云和自定义后端间做选择。可结合两者优点。
 
 ```tsx
 AiSuggestion.configure({
   async resolver({ defaultResolver, rules, ...options }) {
-    // 将规则分成两组
+    // 将规则拆分为两组
     const { rulesForDefaultSuggestions, rulesForCustomSuggestions } = splitRules(rules)
 
     // 从 Tiptap 内容 AI 云获取建议
@@ -244,7 +244,7 @@ AiSuggestion.configure({
       ...options,
       rules: rulesForDefaultSuggestions,
     })
-    // 从您自己的后端获取建议
+    // 从你自己后端获取建议
     const customSuggestions = await customResolver({
       ...options,
       rules: rulesForCustomSuggestions,
@@ -256,9 +256,9 @@ AiSuggestion.configure({
 })
 ```
 
-## 在没有 AI 的情况下生成校对建议
+## 非 AI 方式生成校对建议
 
-您并不需要使用 AI 来生成校对建议。您可以将 AI 模型与经典的校对技术结合起来。例如，您可以检查某些单词并进行替换。以下是一个生成将单词“hello”替换为“goodbye”的建议的解析器示例。
+生成校对建议不一定要用 AI。你可以将 AI 模型与经典校对技术结合使用。例如，你可检查指定词汇并替换。下面示例展示一个解析器，将单词 “hello” 替换为 “goodbye” 的建议。
 
 ```tsx
 AiSuggestion.configure({
@@ -266,8 +266,8 @@ AiSuggestion.configure({
     {
       id: '1',
       title: '将 hello 替换为 goodbye',
-      // 该提示将不被使用，因为我们不使用 LLM 为此规则生成建议
-      prompt: '将 hello 替换为 goodbye',
+      // 由于不使用 LLM 生成建议，本提示不会被使用
+      prompt: 'Replace hello with goodbye',
       color: '#DC143C',
       backgroundColor: 'FFE6E6',
     },
@@ -276,14 +276,14 @@ AiSuggestion.configure({
     const suggestions = await defaultResolver({
       ...options,
       apiResolver: async ({ html, rules }) => {
-        // 在不需要调用 LLM 的情况下生成响应
+        // 生成响应，无需调用 LLM
         return {
           format: 'fullHtml',
           content: {
             items: [
               {
                 ruleId: '1',
-                // 返回替换 "hello" 为 "goodbye" 后的新文档 HTML
+                // 返回替换所有 "hello" 为 "goodbye" 后的新文档 HTML
                 fullHtml: html.replaceAll('hello', 'goodbye'),
               },
             ],

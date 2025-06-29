@@ -1,8 +1,10 @@
 ---
-title: 内容 AI 中的自动完成功能
+title: 内容 AI 中的自动补全
+tags:
+  - type: start
 meta:
-  title: 自动完成 | Tiptap 内容 AI
-  description: 设置您的 AI 生成扩展，以便在用户在编辑器中按下 Tab 键时自动完成并流式传输文本。更多内容请参阅文档！
+  title: 自动补全 | Tiptap 内容 AI
+  description: 设置您的 AI 生成扩展，在用户按下编辑器中的 Tab 键时自动补全并流式传输文本。更多内容请查看文档！
   category: 内容 AI
 ---
 
@@ -10,38 +12,38 @@ import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. 启动试用或订阅">
-        在您的帐户中启动免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 集成 AI 提供商">
-        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI 或查看 [自定义 LLM 指南](/content-ai/capabilities/generation/custom-llms)。
+        在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或参考[自定义大语言模型指南](/content-ai/capabilities/generation/custom-llms)。
     </RequirementItem>
-    <RequirementItem label="3. 从私有注册表安装">
-        要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证以访问 Tiptap 的私有 npm 注册表。
+    <RequirementItem label="3. 从私有仓库安装">
+        若要安装前端扩展，请按照[设置指南](/guides/pro-extensions)认证登录 Tiptap 的私有 npm 仓库。
     </RequirementItem>
 </Requirements>
 
-启用自动完成时，系统会使用您已经编写的文本的一部分来生成建议。
+启用自动补全时，系统会利用您已书写的文本片段来生成建议。
 
-要触发自动完成，您只需在编写时按 `Tab` 键。再次按 `Tab` 以接受建议的完成。
+只需在书写时按下 `Tab` 键即可触发自动补全。再次按下 `Tab` 键接受建议的补全内容。
 
-如果您想看到实际效果，在此演示中的任何文本行后按 `Tab` 键。
+如果您想现场体验，请在本演示中任意文本行后按 `Tab` 键。
 
 <CodeDemo isPro path="/Extensions/AiAutocompletion" />
 
-## 配置自动完成
+## 配置自动补全
 
-在集成内容 AI 扩展时，您可以指定想要启用自动完成、
-自动完成功能的行为以及该考虑什么上下文。
+集成内容 AI 扩展时，您可以指定是否启用自动补全，
+自动补全功能的行为方式以及应考虑的上下文。
 
-| 设置                     | 类型      | 默认值                                                                                     | 定义                                                                                                                                                                                                                                                     |
-| ------------------------ | --------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `autocompletion`         | `boolean` | `false`                                                                                     | 启用自动完成功能。在编写文本时，只需按 **Tab** 以触发自动完成，再按一次 **Tab** 接受完成。我们将使用您已写文本的一部分来构建 OpenAI 的提示。                                                                                                        |
-| `autocompletionOptions`  | `object`  | `{ trigger: 'Tab', accept: 'Tab', debounce: 0, inputLength: 4000, modelName: 'gpt-3.5-turbo' }` | 定义生成自动完成建议所使用的触发器和文本长度。如果未明确设置，接受默认为触发器。触发后请求的去抖动时间（毫秒）。您还可以选择运行自动完成任务的 OpenAI 模型。                                                                                     |
+| 设置项                  | 类型       | 默认值                                                                                          | 定义                                                                                                                                                                                                                                                         |
+| ----------------------- | ---------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `autocompletion`        | `boolean`  | `false`                                                                                         | 启用自动补全功能。书写文本时，按下 **Tab** 键触发自动补全，再按一次 **Tab** 接受补全内容。系统会使用您已书写的部分文本作为向 OpenAI 构建提示的基础。                                                                                                       |
+| `autocompletionOptions` | `object`   | `{ trigger: 'Tab', accept: 'Tab', debounce: 0, inputLength: 4000, modelName: 'gpt-3.5-turbo' }` | 定义触发自动补全所用的触发键和用于生成补全建议的文本长度。若未显式设置，accept 默认为触发键。debounce 表示触发后请求的去抖动时间（毫秒）。您还可以选择用于运行自动补全任务的 OpenAI 模型。                                                                    |
 
-要查看所有其他内容 AI 扩展配置选项，请前往 [安装](/content-ai/capabilities/generation/install#configure-the-extension) 页面。
+欲了解内容 AI 扩展的其他全部配置选项，请访问[安装页面](/content-ai/capabilities/generation/install#configure-the-extension)。
 
-## 启用自动完成
+## 启用自动补全
 
 ```js
 import { Editor } from '@tiptap/core'

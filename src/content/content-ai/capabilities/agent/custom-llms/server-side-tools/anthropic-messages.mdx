@@ -1,0 +1,107 @@
+---
+title: 服务器端工具（Anthropic Claude Messages API）
+meta:
+  title: 服务器端工具（Anthropic Claude Messages API）| Tiptap 内容 AI
+  description: 学习如何使用 Anthropic Claude Messages API 在服务器端调用工具。
+  category: 内容 AI
+---
+
+本指南讲解如何使用 Anthropic Claude Messages API 在服务器端调用工具。示例展示了一个返回指定位置天气的工具。
+
+首先，按照 [Anthropic Claude Messages API 工具格式](https://docs.anthropic.com/en/docs/tool-use) 定义工具：
+
+```ts
+const weatherTool = {
+  name: 'get_weather',
+  description: '返回指定位置的天气',
+  input_schema: {
+    type: 'object',
+    properties: {
+      location: {
+        type: 'string',
+        description: '要获取天气的位置',
+      },
+    },
+    required: ['location'],
+  },
+}
+```
+
+然后，调用 Anthropic API 时，将该工具包含在 `tools` 数组中：
+
+```ts
+import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
+import { anthropicMessagesAdapter } from '@tiptap-pro/extension-ai-agent'
+import Anthropic from '@anthropic-ai/sdk'
+
+const toolkit = new AiAgentToolkit()
+
+// 初始化 Anthropic 客户端
+const anthropic = new Anthropic()
+
+// 调用 Anthropic Claude Messages API
+const response = await anthropic.messages.create({
+  model: 'claude-sonnet-4-0',
+  system: `
+<你的系统提示>
+${toolkit.getSystemPrompt()}
+`,
+  messages: llmMessages,
+  // 在 tools 数组中包括天气工具，
+  // 以及 AiAgentToolkit 提供的其他工具
+  tools: [...toolkit.getTools(anthropicMessagesAdapter), weatherTool],
+})
+```
+
+接着，检查响应中是否包含天气工具调用；如果有，则调用该工具，并将结果添加到 `llmMessages` 数组中。
+
+```ts
+for (const content of response.content) {
+  if (content.type !== 'tool_use') {
+    continue
+  }
+
+  const name = content.name
+
+  if (name !== 'get_weather') {
+    continue
+  }
+
+  const args = content.input
+
+  const result = getWeather(args)
+  llmMessages.push({
+    role: 'user',
+    content: [
+      {
+        type: 'tool_result',
+        tool_use_id: content.id,
+        content: result.toString(),
+      },
+    ],
+  })
+}
+```
+
+最后，当没有更多服务器端工具调用时，使用 `anthropicMessagesAdapter` 将响应转换为 AI Agent 扩展所期望的格式。
+
+```ts
+const result = anthropicMessagesAdapter.parseResponse(response)
+```
+
+`result` 应为 API 端点的响应，也是 `resolver` 函数的返回值。
+
+你还可以向 `result` 添加描述所调用工具的聊天消息，这将在聊天对话中显示工具调用结果。
+
+```ts
+// 在新的聊天消息列表开头添加工具调用消息
+result.chatMessages.unshift({
+  type: 'ai',
+  text: '柏林的天气是晴朗的。',
+  metadata: {
+    // 包含此元数据以标记该消息为服务器端工具调用
+    // 并在 UI 中以不同样式显示
+    isServerSideToolCall: true,
+  },
+})
+```

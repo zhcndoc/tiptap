@@ -1,0 +1,107 @@
+---
+title: 客户端工具
+meta:
+  title: 客户端工具 | Tiptap 内容 AI
+  description: 了解如何从 AI 代理调用客户端工具。
+  category: 内容 AI
+---
+
+客户端工具是在浏览器中运行的工具。使用它们与编辑器的内容进行交互。例如：
+
+- 统计文档中的字数
+- 替换文档中所有某个词的实例
+- 格式化文档。
+
+所有[内置工具](/content-ai/capabilities/agent/custom-llms/tools#built-in-tools)都是客户端工具。
+
+本指南展示如何实现一个工具，将文档中所有出现的某个词替换为另一个词。
+
+## 客户端设置
+
+为你的工具声明一个工具调用处理器。工具处理器是应用工具调用到编辑器的函数。它们必须实现 `AiAgentToolHandler` 接口。
+
+```ts
+import { z } from 'zod'
+
+import type { AiAgentToolHandler } from '@tiptap-pro/extension-ai-agent'
+import { ToolCallError, invalidArgumentsResponseFormatter } from '@tiptap-pro/extension-ai-agent'
+
+// 验证工具参数的 schema
+const replaceToolSchema = z.object({
+  find: z.string(),
+  replace: z.string(),
+})
+
+export const replaceToolHandler = (): AiAgentToolHandler => ({
+  // 工具的唯一标识符
+  name: 'replace',
+  modifiesEditor: true,
+  handleToolCall: ({ editor, state, toolCall }) => {
+    // 验证参数
+    const result = replaceToolSchema.safeParse(toolCall.arguments)
+    if (!result.success) {
+      // 返回错误信息给 AI
+      throw new ToolCallError(invalidArgumentsResponseFormatter(result.error))
+    }
+    const args = result.data
+
+    // 替换文档中的词语
+    const html = editor.getHTML()
+    const replacedHtml = html.replaceAll(args.find, args.replace)
+    const newHtml = editor.commands.setContent(replacedHtml)
+
+    // 返回成功信息
+    return '工具调用成功。'
+  },
+})
+```
+
+然后，将工具添加到你的 AI 代理提供者：
+
+```ts
+import { AiAgentProvider, toolHandlersStarterKit } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider({
+  toolHandlers: [...toolHandlersStarterKit(), replaceToolHandler()],
+})
+```
+
+`toolHandlersStarterKit` 包含所有[内置工具](/content-ai/capabilities/agent/custom-llms/tools#built-in-tools)的工具处理器。你可以将自定义工具处理器添加到该数组中。
+
+## 服务器端设置
+
+在服务器端定义工具。工具定义包含工具的 ID、描述和 JSON schema。此数据会发送给 LLM 用于生成工具调用。它必须实现 `AiAgentTool` 接口。
+
+```ts
+import type { AiAgentTool } from '@tiptap-pro/extension-ai-agent'
+
+export const replaceTool = (): AiAgentTool => ({
+  // 工具的唯一标识符，必须与工具处理器中的一致
+  name: 'replace',
+  description: '将文档中所有出现的某个词替换为另一个词',
+  parameters: {
+    type: 'object',
+    properties: {
+      find: {
+        type: 'string',
+      },
+      replace: {
+        type: 'string',
+      },
+    },
+    required: ['find', 'replace'],
+  },
+})
+```
+
+然后，将工具添加到你的 AI 代理工具包：
+
+```ts
+import { AiAgentToolkit, toolsStarterKit } from '@tiptap-pro/extension-ai-agent'
+
+const toolkit = new AiAgentToolkit({
+  tools: [...toolsStarterKit(), replaceTool()],
+})
+```
+
+`toolsStarterKit` 包含所有[内置工具](/content-ai/capabilities/agent/custom-llms/tools#built-in-tools)的工具定义。你可以将自定义工具定义添加到该数组中。

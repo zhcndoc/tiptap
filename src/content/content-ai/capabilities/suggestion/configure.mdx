@@ -1,22 +1,22 @@
 ---
-title: AI 建议扩展配置选项
+title: AI建议扩展配置选项
 meta:
-  title: 配置 AI 建议 | Tiptap AI 建议
-  description: 用规则、初始建议和自定义样式配置 AI 建议扩展。
-  category: 内容 AI
+  title: 配置AI建议 | Tiptap AI建议
+  description: 使用规则、初始建议和自定义样式配置AI建议扩展。
+  category: 内容AI
 ---
 
-Tiptap 的 AI 建议扩展接受不同的设置，以配置扩展和命令的全局行为。
+Tiptap的AI建议扩展接受不同的设置来配置扩展和命令的全局行为。
 
 ## 规则
 
-在校对过程中应用的一组规则。每个规则包含
+一组在校对过程中应用的规则数组。每条规则包含：
 
 - 唯一的 `id`
-- `prompt` 属性，该文本将由 AI 模型读取以生成建议
-- 决定规则在 UI 中如何显示的参数，如 `title`、`color` 和 `backgroundColor`
+- `prompt` 属性，一个文本，将被 AI 模型读取以生成建议
+- 决定规则在 UI 中如何显示的一些参数，如 `title`、`color` 和 `backgroundColor`
 
-您可以随时更改规则，无需重新加载编辑器，使用 `setAiSuggestionRules` 命令。
+你可以随时通过使用 `setAiSuggestionRules` 命令修改规则，无需重新加载编辑器。
 
 ```ts
 AiSuggestion.configure({
@@ -32,11 +32,11 @@ AiSuggestion.configure({
 })
 ```
 
-您可以在此指南中了解更多关于规则的信息： [定义规则](/content-ai/capabilities/suggestion/features/define-rules)
+你可以在此指南中了解更多关于规则的内容：[定义规则](/content-ai/capabilities/suggestion/features/define-rules)
 
 ## 初始建议
 
-在进行任何校对之前展示的一组初始建议。这可以作为性能优化，避免等待首次生成建议。
+一个在任何校对开始前显示的初始建议数组。可用作性能优化，避免等待首批建议生成。
 
 ```ts
 export const suggestions: Suggestion[] = [
@@ -66,23 +66,23 @@ AiSuggestion.configure({
 })
 ```
 
-要了解建议对象应包含的数据，请查看 [API 参考](/content-ai/capabilities/suggestion/api-reference#proofreading-suggestions)。
+更多关于建议对象应包含的数据，请查看[API参考](/content-ai/capabilities/suggestion/api-reference#proofreading-suggestions)。
 
 ## 自定义建议样式
 
-`getCustomSuggestionDecoration` 函数允许您控制建议的外观并为用户提供视觉提示。您可以为建议添加自定义 CSS 类，并在建议前后添加自定义元素。对于添加弹出窗口、工具提示或图标到建议非常有用。
+`getCustomSuggestionDecoration` 函数允许你控制建议的外观并为用户提供视觉提示。你可以给建议添加自定义的CSS类，并在建议前后添加自定义元素。适用于为建议添加弹出框、工具提示或图标。
 
-自定义样式和元素是使用 [Prosemirror Decorations API](https://prosemirror.net/docs/ref/#view.Decorations) 实现的。
+自定义样式和元素基于 [Prosemirror Decorations API](https://prosemirror.net/docs/ref/#view.Decorations) 实现。
 
-要了解如何在选择建议时显示弹出窗口，请遵循 [此指南](/content-ai/capabilities/suggestion/features/display-suggestions#show-a-popover-when-you-select-a-suggestion)。
+想了解如何在选择建议时显示弹出框，请参阅[本指南](/content-ai/capabilities/suggestion/features/display-suggestions#show-a-popover-when-you-select-a-suggestion)。
 
 ```ts
 AiSuggestion.configure({
   getCustomSuggestionDecoration({ suggestion, isSelected, getDefaultDecorations }) {
-    // 您可以将 AI 建议扩展的默认装饰与自定义装饰结合使用
+    // 你可以将AI建议扩展的默认装饰与自定义装饰结合使用
     const decorations = getDefaultDecorations()
 
-    // 在建议文本前添加一个自定义元素
+    // 在建议文本前添加自定义元素
     Decoration.widget(suggestion.deleteRange.from, () => {
       const element = document.createElement('span')
       element.textContent = '⚠️'
@@ -93,9 +93,9 @@ AiSuggestion.configure({
 })
 ```
 
-## 自定义加载建议的时机
+## 自定义何时加载建议
 
-默认情况下，AI 建议扩展将在编辑器准备好时自动加载建议。您可以使用 `loadOnStart` 选项禁用此行为。
+默认情况下，AI建议扩展在编辑器准备就绪时会自动加载建议。你可以通过 `loadOnStart` 选项禁用此行为。
 
 ```ts
 AiSuggestion.configure({
@@ -103,7 +103,7 @@ AiSuggestion.configure({
 })
 ```
 
-默认情况下，当编辑器的内容发生变化时，AI 建议扩展将重新加载建议。您可以使用 `reloadOnUpdate` 选项禁用此行为。
+默认情况下，AI建议扩展会在编辑器内容变化时重新加载建议。你可以通过 `reloadOnUpdate` 选项禁用此行为。
 
 ```ts
 AiSuggestion.configure({
@@ -111,11 +111,11 @@ AiSuggestion.configure({
 })
 ```
 
-您可以在 [此指南](/content-ai/capabilities/suggestion/features/configure-when-to-load-suggestions) 中学习如何配置加载建议的时机。
+你可以在[此指南](/content-ai/capabilities/suggestion/features/configure-when-to-load-suggestions)中了解如何配置何时加载建议。
 
-## 自定义去抖超时
+## 自定义防抖超时时间
 
-默认情况下，AI 建议扩展将在用户停止输入后等待 800 毫秒再重新加载建议。这防止了 API 被频繁调用。您可以使用 `debounceTimeout` 选项配置此超时。
+默认情况下，AI建议扩展会在用户停止输入后等待800毫秒再重新加载建议，以避免API调用过于频繁。你可以通过 `debounceTimeout` 选项配置此超时时间。
 
 ```ts
 AiSuggestion.configure({
@@ -125,9 +125,9 @@ AiSuggestion.configure({
 
 ## 处理加载建议时的错误
 
-您可以提供一个回调函数来处理加载建议时的错误。这允许您记录错误、向用户显示错误信息或在发生错误时采取其他措施。
+你可以提供一个回调函数来处理加载建议时的错误。这允许你记录错误、向用户显示错误信息或在发生错误时执行其他操作。
 
-关于如何在 UI 中处理加载和错误状态的完整指南可以在这里找到：
+关于如何在UI中处理加载和错误状态的完整指南见下：
 
 ```ts
 AiSuggestion.configure({
@@ -137,24 +137,24 @@ AiSuggestion.configure({
 })
 ```
 
-## Tiptap 内容 AI 云选项
+## Tiptap内容AI云选项
 
-如果您没有 [提供自己的后端](/content-ai/capabilities/suggestion/custom-llms)，AI 建议扩展将使用 Tiptap 内容 AI 云生成建议。
+如果你不[提供自己的后端](/content-ai/capabilities/suggestion/custom-llms)，AI建议扩展将使用Tiptap内容AI云来生成建议。
 
-您可以使用 `model` 选项配置用于生成建议的 OpenAI 模型。默认模型为 `gpt-4o-mini`。我们推荐它用于大部分用例，因为它在速度、成本和准确性之间提供了良好的平衡。
+你可以通过 `model` 选项配置用于生成建议的OpenAI模型。默认模型为 `gpt-4o-mini`。我们推荐它用于大多数用例，因其在速度、成本与准确性之间取得了良好平衡。
 
 ```ts
 AiSuggestion.configure({
-  // 您的 Tiptap 内容 AI 应用 ID
+  // 你的Tiptap内容AI应用ID
   appId: 'APP_ID_HERE',
-  // 这需要是您生成的 JWT，且绝对不能是 OpenAI API 密钥！
+  // 这里需填写你生成的JWT，且绝对不能是OpenAI API密钥！
   token: 'YOUR_TOKEN',
-  // 用于生成建议的模型。默认为 "gpt-4o-mini"
+  // 用于生成建议的模型，默认为"gpt-4o-mini"
   model: 'gpt-4o',
 })
 ```
 
-我们目前支持以下 OpenAI 模型：
+目前支持的OpenAI模型包括：
 
 - `gpt-4.1`
 - `gpt-4.1-2025-04-14`
@@ -184,26 +184,26 @@ AiSuggestion.configure({
 - `gpt-3.5-turbo-1106`
 - `gpt-3.5-turbo-16k`
 
-## 集成您自己的后端和 LLMs
+## 集成你自己的后端和大型语言模型（LLMs）
 
-如果您想使用自己的后端和 LLMs 来生成建议，可以提供自定义 `resolver` 函数。此函数应根据编辑器的内容和规则返回一组建议。
+如果你想使用自己的后端和LLM来生成建议，可以提供一个自定义的 `resolver` 函数。该函数应根据编辑器内容和规则返回建议数组。
 
-您可以在 [此指南](/content-ai/capabilities/suggestion/custom-llms) 中找到关于如何集成您自己的后端和 LLMs 的更全面指南。
+关于如何集成自己的后端和LLMs，你可以参考[此指南](/content-ai/capabilities/suggestion/custom-llms)。
 
 ```ts
 AiSuggestion.configure({
   resolver: async ({ content, rules }) => {
-    // 您自定义生成建议的逻辑
+    // 你的自定义逻辑以生成建议
     return suggestions
   },
 })
 ```
 
-## 向 LLM 提供额外上下文
+## 向LLM提供额外上下文
 
-如果您想向 LLM 提供额外信息，可以使用 `context` 选项。此选项允许您传递可以用来提高建议质量的附加数据。
+如果你想向LLM提供额外信息，可以使用 `context` 选项。此选项允许你传递附加数据，以改善建议的质量。
 
-`context` 选项是一个将作为提示的一部分添加到 LLM 的字符串。它将应用于所有规则。
+`context` 选项是一个字符串，会作为提示的一部分添加给LLM。它将应用于所有规则。
 
 ```ts
 AiSuggestion.configure({
@@ -211,13 +211,13 @@ AiSuggestion.configure({
 })
 ```
 
-您可以在 [此指南](/content-ai/capabilities/suggestion/features/provide-llm-context) 中了解更多关于提供上下文的信息。
+你可以在[此指南](/content-ai/capabilities/suggestion/features/provide-llm-context)了解更多关于提供上下文的信息。
 
 ## 配置缓存
 
-AI 建议扩展缓存建议以最小化 API 调用。它将编辑器内容分块并存储每个块生成的建议。在重新加载建议时，仅重新获取已修改的块。此行为默认启用，但您可以自定义它。
+AI建议扩展会缓存建议以减少API调用。它将编辑器内容拆分成多个块，并存储每个块生成的建议。重新加载建议时，仅重新获取已修改的块。该行为默认启用，但你可以自定义。
 
-通过将 `enableCache` 设置为 `false`，您可以禁用缓存。这将使 AI 建议扩展在编辑器内容更改时对所有块调用 API。
+你可以通过将 `enableCache` 设为 `false` 来禁用缓存。此时编辑器内容变更时，AI建议扩展会对所有块调用API。
 
 ```ts
 AiSuggestion.configure({
@@ -226,16 +226,16 @@ AiSuggestion.configure({
 })
 ```
 
-您可以使用 `chunkSize` 选项配置块大小。此选项控制每个块中包含多少个顶级节点。默认值为 `2`，这意味着对于一个包含 10 个段落的文档，AI 建议将创建 5 个包含 2 个段落的块。
+你可以通过 `chunkSize` 选项配置每个块包含的顶级节点数。默认值是 `2`，意味着对于包含10段的文档，AI建议会创建5个每块包含2段的块。
 
 ```ts
 AiSuggestion.configure({
-  // 每个块将包含 3 个顶级 HTML 节点
+  // 每个块包含3个顶级HTML节点
   chunkSize: 3,
 })
 ```
 
-通过重写 `chunkHtml` 函数，您可以自定义块的生成。此函数接收编辑器内容并应返回一个 HTML 字符串数组，每个字符串表示一个块。这使您可以精细控制内容如何拆分成块。
+你可以通过重写 `chunkHtml` 函数来自定义块的生成。该函数接收编辑器内容，并应返回一个HTML字符串数组，每个字符串代表一个块。这让你能够精细控制内容如何切分成块。
 
 ```ts
 AiSuggestion.configure({

@@ -1,0 +1,116 @@
+---
+title: AI 代理状态
+meta:
+  title: AI 代理状态 | Tiptap 内容 AI
+  description: 了解如何管理 Tiptap 中 AI 代理的状态。
+  category: 内容 AI
+---
+
+AI 代理提供者维护一个内部状态，用于跟踪对话和其他重要信息。您可以访问此状态以更新应用程序的 UI。
+
+## 访问状态
+
+您可以直接访问状态及其属性：
+
+```tsx
+// 访问当前状态
+const currentState = provider.state
+
+// 访问状态的某个属性
+currentState.status
+```
+
+或者订阅状态的变化：
+
+```tsx
+provider.on('stateChange', (newState) => setState(newState))
+```
+
+## 状态属性
+
+提供者状态包含以下属性：
+
+| 属性           | 类型                                | 描述                                                                                             |
+| -------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `status`       | `AiAgentStatus`                    | 当前状态（加载中、错误等）                                                                       |
+| `loadingError` | `unknown`                         | 加载过程中发生的错误（如果有）                                                                    |
+| `chatMessages` | `ChatMessage[]`                   | 对话中的所有消息列表                                                                             |
+| `autoAccept`   | `'always' \| 'never' \| 'onlyRead'` | 当前的[自动接受](/content-ai/capabilities/agent/features/review#auto-accept-configuration) 配置 |
+| `systemPrompt` | `string \| null`                  | 自定义的[系统提示](/content-ai/capabilities/agent/configure/system-prompt)                       |
+
+## 状态说明
+
+AI 代理可能处于以下状态之一：
+
+1. `idle`：代理当前没有处理任何内容
+2. `loading`：代理正在处理发送到服务器的请求
+3. `loadingError`：处理过程中发生错误
+4. `reviewingToolCall`：代理正在等待用户接受或拒绝工具调用
+
+您可以根据这些状态值更新 UI，例如显示加载指示器或错误消息。
+
+## 聊天消息类型
+
+聊天消息存储在 `provider.state.chatMessages` 属性中，包含不同类型的消息：
+
+```jsonl
+// 用户消息
+{ type: "user", text: "总结这份文件" }
+
+// AI 回复消息
+{ type: "ai", text: "这是文件的摘要..." }
+
+// 工具调用消息（AI 决定调用工具）
+{
+  type: "toolCall",
+  name: "read_first_chunk",
+  arguments: {},
+  llmMessage: {...}
+}
+
+// 工具调用结果消息
+{
+  type: "toolCallResult",
+  name: "read_first_chunk",
+  llmMessage: {...}
+}
+
+// 检查点消息（保存编辑器状态）
+{
+  type: "checkpoint",
+  checkpoint: {
+    chatMessages: [...],
+    editorContent: "<p>文档内容...</p>"
+  }
+}
+```
+
+所有消息都拥有一个 `metadata` 属性，用于存储附加信息。
+
+## 管理消息
+
+对话的初始消息定义在 `initialMessages` 选项中。要修改消息列表，提供者包含以下方法：
+
+```tsx
+// 插入用户消息
+provider.addUserMessage('写一个短篇故事')
+
+// 在对话中插入不同类型的消息
+provider.addChatMessages([
+  {
+    type: 'ai',
+    text: '我能帮您什么？',
+  },
+])
+
+// 完全替换对话
+provider.setChatMessages([])
+```
+
+## 重置 AI 代理状态
+
+您可以通过调用 `reset` 方法重置 AI 代理的状态。这将清除对话并将状态重置为初始值。
+
+```tsx
+provider.reset()
+```

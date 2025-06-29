@@ -1,33 +1,35 @@
 ---
 title: AI 图像生成编辑器命令
+tags:
+  - type: start
 meta:
     title: 生成图像 | Tiptap 内容 AI 文档
-    description: 将 aiImagePrompt 集成到您的编辑器中，以使用自定义提示和风格生成图像。更多信息请参阅文档！
+    description: 将 aiImagePrompt 集成到您的编辑器中，通过自定义提示和样式使用 AI 生成图像。更多内容请参阅文档！
     category: 内容 AI
 ---
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+        在您的账户中开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. 集成 AI 提供者">
-        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看 [自定义 LLM 指南](/content-ai/capabilities/generation/custom-llms)。
+    <RequirementItem label="2. 集成 AI 提供商">
+        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看 [自定义大型语言模型指南](/content-ai/capabilities/generation/custom-llms)。
     </RequirementItem>
     <RequirementItem label="3. 从私有注册表安装">
-        要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证以连接 Tiptap 的私有 npm 注册表。
+        若要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 认证访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-Tiptap 内容 AI 中的 `aiImagePrompt` 命令使您可以直接在编辑器中生成图像。您可以使用不同的 OpenAI 模型并自定义生成图像的风格。
+Tiptap 内容 AI 中的 `aiImagePrompt` 命令使您可以直接在编辑器内生成图像。您可以使用不同的 OpenAI 模型，并自定义生成图像的样式。
 
-要查看如何使用此命令，请查看 [类似 Notion 的模板](https://templates.tiptap.dev/)。
+想了解此命令的使用方法，请查看 [类似 Notion 的模板](https://templates.tiptap.dev/)。
 
 ## 集成 aiImagePrompt
 
-根据您的提示和所需的风格生成图像。
+根据您的提示和所需样式生成图像。
 
-确保在您的编辑器实例中加载图像扩展（`'@tiptap/extension-image'`）。
+请确保在您的编辑器实例中加载了图像扩展（`'@tiptap/extension-image'`）。
 
 ```js
 editor.chain().focus().aiImagePrompt(options: ImageOptions).run()
@@ -35,10 +37,10 @@ editor.chain().focus().aiImagePrompt(options: ImageOptions).run()
 
 ## 图像命令选项
 
-通过这些设置，您可以控制图像的生成方式：
+通过以下设置，您可以控制图像的生成方式：
 
-| 设置       | 类型                                                                                              | 默认值           | 定义                     |
-| ---------- | ------------------------------------------------------------------------------------------------- | ---------------- | ------------------------ |
-| modelName  | `dall-e-2`, `dall-e-3`, `null`                                                                    | `dall-e-3`       | 在 OpenAI 中使用的模型   |
-| style      | `photorealistic`, `digital_art`, `comic_book`, `neon_punk`, `isometric`, `line_art`, `3d_model` | `photorealistic` | 定义图像风格             |
-| size       | `256x256`, `512x512`, `1024x1024`                                                                 | `null`           |
+| 设置       | 类型                                                                                             | 默认值            | 说明                     |
+| ---------- | ------------------------------------------------------------------------------------------------ | ----------------- | ------------------------ |
+| modelName  | `dall-e-2`、`dall-e-3`、`null`                                                                    | `dall-e-3`        | OpenAI 使用的模型        |
+| style      | `photorealistic`、`digital_art`、`comic_book`、`neon_punk`、`isometric`、`line_art`、`3d_model`     | `photorealistic`  | 定义图像的样式           |
+| size       | `256x256`、`512x512`、`1024x1024`                                                               | `null`            |                           |

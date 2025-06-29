@@ -1,16 +1,16 @@
 ---
-title: 配置何时加载建议
+title: 配置建议加载时机
 meta:
   title: 加载建议 | Tiptap AI 建议
-  description: 通过 loadOnStart 和 reloadOnUpdate 等选项自定义 AI 建议扩展加载建议的时机。
+  description: 通过 loadOnStart 和 reloadOnUpdate 等选项自定义 AI 建议扩展何时加载建议。
   category: 内容 AI
 ---
 
-您可以自定义 AI 建议扩展调用大语言模型（LLM）生成建议的时机。这允许您控制何时加载新建议，以及重新加载的频率。
+您可以自定义 AI 建议扩展何时调用大语言模型（LLM）来生成建议。这让您能够控制何时加载新的建议，以及建议被重新加载的频率。
 
 ## 启动时加载建议
 
-默认情况下，AI 建议扩展会在编辑器就绪时自动加载建议。您可以通过 `loadOnStart` 选项禁用此行为。
+默认情况下，AI 建议扩展将在编辑器准备好时自动加载建议。您可以通过 `loadOnStart` 选项禁用此行为。
 
 ```ts
 AiSuggestion.configure({
@@ -21,7 +21,7 @@ AiSuggestion.configure({
 
 ## 内容更新时重新加载建议
 
-默认情况下，AI 建议扩展会在编辑器内容变化时重新加载建议。您可以通过 `reloadOnUpdate` 选项禁用此行为。
+默认情况下，AI 建议扩展会在编辑器内容发生变化时重新加载建议。您可以通过 `reloadOnUpdate` 选项禁用此行为。
 
 ```ts
 AiSuggestion.configure({
@@ -32,7 +32,7 @@ AiSuggestion.configure({
 
 ## 防抖超时
 
-默认情况下，AI 建议扩展会在用户停止输入后等待 800 毫秒才重新加载建议。这样可以防止频繁调用 API。您可以使用 `debounceTimeout` 选项配置该超时。
+默认情况下，AI 建议扩展会在用户停止输入后等待 800 毫秒再重新加载建议。这可以防止 API 被过于频繁调用。您可以通过 `debounceTimeout` 选项配置此超时时间。
 
 ```ts
 AiSuggestion.configure({
@@ -40,7 +40,7 @@ AiSuggestion.configure({
 })
 ```
 
-但是，有时您可能想强制重新加载建议。例如，用户点击“刷新”按钮时可能想重新加载建议。
+但在某些情况下，您可能希望强制重新加载建议。例如，用户点击“刷新”按钮时，您可能希望重新加载建议。
 
 要手动重新加载建议，请使用 `loadAiSuggestions` 命令。
 
@@ -50,7 +50,7 @@ editor.commands.loadAiSuggestions()
 
 要延迟加载建议，请使用 `loadAiSuggestionsDebounced` 命令。延迟时间由 `debounceTimeout` 选项决定。
 
-此命令在内部用于在编辑器内容更改后重新加载建议（例如用户输入时）。该函数经过防抖处理，因此如果在防抖时间内被多次调用，只有最后一次调用会被执行。
+此命令内部用于在编辑器内容发生变化时重新加载建议（例如用户在编辑器中输入时）。函数带有防抖处理，因此如果在防抖超时内多次调用，仅执行最后一次调用。
 
 ```ts
 editor.commands.loadAiSuggestionsDebounced()
@@ -58,9 +58,9 @@ editor.commands.loadAiSuggestionsDebounced()
 
 ## 编程方式设置建议
 
-如果您想将建议设置为特定值，而不通过配置的 API 加载它们，可以使用 `setAiSuggestions` 命令。以下情况特别有用：
+如果您想将建议设置为某个具体值，而不是通过配置的 API 加载它们，可以使用 `setAiSuggestions` 命令。此方法适用于以下场景：
 
-- 您已经有一组建议，并希望立即显示。
+- 您已有一组想要立即显示的建议列表。
 - 您想清空建议。
 - 您想显示来自不同于扩展选项中配置的 API 的建议。
 
@@ -68,4 +68,4 @@ editor.commands.loadAiSuggestionsDebounced()
 editor.commands.setAiSuggestions(suggestions)
 ```
 
-想了解建议对象应包含的数据详情，请参考 [API 参考](/content-ai/capabilities/suggestion/api-reference#proofreading-suggestions)。
+想了解建议对象应包含的数据详情，请查看 [API 参考](/content-ai/capabilities/suggestion/api-reference#proofreading-suggestions)。

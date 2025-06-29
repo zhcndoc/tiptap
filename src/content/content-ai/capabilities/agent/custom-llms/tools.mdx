@@ -1,0 +1,88 @@
+---
+title: 配置 AI 代理的工具
+meta:
+  title: AI 代理工具 | Tiptap 内容 AI
+  description: 学习如何配置 AI 代理的工具。
+  category: 内容 AI
+---
+
+工具是 AI 代理的构建模块。它们定义了 AI 模型与其环境交互时可以执行的操作。这包括：阅读/编辑文档、搜索外部数据源以及规划工作。
+
+虽然 AI 代理扩展提供了一组内置工具，但您也可以[定义自定义工具](#custom-tools)来扩展 AI 代理的功能。
+
+## 内置工具
+
+### `read_first_chunk`
+
+从文档开头开始读取当前文档。
+
+### `read_next_chunk`
+
+读取文档的下一部分。
+
+### `read_previous_chunk`
+
+读取文档的上一部分。
+
+### `apply_diff`
+
+这是 AI 代理用于更改文档的主要工具。它将一系列差异应用到文档中。每个差异包含：
+
+- 变更前的内容，用于定位编辑位置。
+- 需要删除的内容
+- 需要插入的内容
+
+### `replace_document`
+
+用新内容替换整个文档。
+
+### `plan`
+
+规划要完成的工作。它会生成 Markdown 格式的步骤列表。
+
+### `ask_user`
+
+向用户提问。
+
+### `finish_with_summary`
+
+标记任务已完成，并以 Markdown 格式提供总结。
+
+## 自定义内置工具
+
+您可以通过配置 `AiAgentToolkit` 实例来移除或替换内置工具。
+
+```ts
+import {
+  AiAgentToolkit,
+  planTool,
+  askUserTool,
+  readFirstChunkTool,
+  readNextChunkTool,
+  readPreviousChunkTool,
+  replaceDocumentTool,
+  finishWithSummaryTool,
+  applyDiffTool,
+} from '@tiptap-pro/extension-ai-agent-server'
+
+const toolkit = new AiAgentToolkit({
+  tools: [
+    // 这些都是所有内置工具。根据需要移除或替换它们。
+    planTool(),
+    askUserTool(),
+    readFirstChunkTool(),
+    readNextChunkTool(),
+    readPreviousChunkTool(),
+    replaceDocumentTool(),
+    finishWithSummaryTool(),
+    applyDiffTool(),
+  ],
+})
+```
+
+## 自定义工具
+
+除了内置工具，您还可以定义额外的工具。自定义工具有两种类型：
+
+- [**客户端工具**](/content-ai/capabilities/agent/custom-llms/client-side-tools) 在客户端运行。它们与编辑器内容交互。例如：用于计数文档中的单词数的工具，或者用于格式化文档的工具。所有内置工具都是客户端工具。
+- [**服务器端工具**](/content-ai/capabilities/agent/custom-llms/server-side-tools) 在服务器端运行。它们与外部数据源交互。例如：用于网络搜索的工具，或用于查询数据库的工具。

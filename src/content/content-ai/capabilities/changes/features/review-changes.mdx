@@ -1,24 +1,24 @@
 ---
-title: 查看 AI 更改
+title: 审核 AI 变更
 meta:
-  title: 查看更改 | Tiptap AI 更改
-  description: 在您的富文本编辑器中查看、接受和拒绝 AI 生成的内容。
+  title: 审核变更 | Tiptap AI 变更
+  description: 在富文本编辑器中审核、接受或拒绝 AI 生成的内容。
   category: 内容 AI
 ---
 
-通过 AI 更改扩展，您可以引入一个审查工作流程，以便用户能够纠正和批准 AI 所做的更改。
+通过 AI 变更扩展，您可以引入 AI 生成内容的审核工作流程，使用户能够纠正和批准 AI 所做的更改。
 
-## 开始跟踪更改
+## 开始跟踪变更
 
-要开始跟踪更改，请使用 `startTrackingAiChanges` 命令。
+要开始跟踪变更，请使用 `startTrackingAiChanges` 命令。
 
 ```ts
 editor.commands.startTrackingAiChanges()
 ```
 
-它会在运行命令的那一刻创建编辑器内容的快照。从此时起，文档中的所有新更改将与此快照进行比较并显示在编辑器中。
+此命令会创建编辑器内容在执行命令时的快照。从此刻起，所有对文档的新更改都会与该快照进行比较，并在编辑器中显示。
 
-最常见的模式是在生成 AI 内容之前立即调用 `startTrackingAiChanges`。这样可以捕捉到所有生成的 AI 更改以供审查。例如，您可以将其与 [AI 生成扩展命令](/content-ai/capabilities/generation/text-generation/built-in-commands) 链式调用：
+最常见的用法是在生成 AI 内容之前立即调用 `startTrackingAiChanges`。这样可以捕获所有 AI 生成的变更以供审核。例如，您可以将其与 [AI 生成扩展命令](/content-ai/capabilities/generation/text-generation/built-in-commands) 链接使用：
 
 ```ts
 editor
@@ -28,69 +28,69 @@ editor
   .run()
 ```
 
-您可以通过扩展的存储对象的 `getPreviousDoc` 方法访问先前文档的快照：
+您可以通过扩展的存储对象的 `getPreviousDoc` 方法访问之前文档的快照：
 
 ```ts
 const storage = editor.extensionStorage.aiChanges
 const previousDoc = storage.getPreviousDoc()
 ```
 
-这将返回一个 [Prosemirror Node 对象](https://prosemirror.net/docs/ref/#model.Node)，它表示之前的文档。
+这将返回一个表示之前文档的 [Prosemirror Node 对象](https://prosemirror.net/docs/ref/#model.Node)。
 
-当您调用 `startTrackingAiChanges` 命令时，可以提供一个可选的前一个文档。这在您希望将新更改与当前编辑器中不同的文档进行比较时特别有用。
+调用 `startTrackingAiChanges` 命令时，您还可以提供一个可选的之前文档。这在您想将新变更与编辑器中当前文档以外的其他文档进行比较时非常有用。
 
 ```ts
 editor.commands.startTrackingAiChanges(previousDoc)
 ```
 
-## 访问更改数据
+## 访问变更数据
 
-AI 更改扩展提供了几种扩展存储方法来检索跟踪的更改：
+AI 变更扩展提供了几个扩展存储方法来检索跟踪的变更：
 
-- `getChanges`: 返回自上次调用 `startTrackingAiChanges` 以来对文档所做的所有更改列表。
-- `getSelectedChange`: 返回当前选定的更改。当光标位于其上方时，更改被视为已选定。
-- `getIsTrackingAiChanges`: 返回一个布尔值，指示编辑器当前是否正在跟踪 AI 更改。
-- `getIsShowingAiChanges`: 返回一个布尔值，指示编辑器当前是否显示 AI 更改。AI 更改可以通过 `setShowAiChanges` 命令[暂时隐藏](/content-ai/capabilities/changes/features/display-changes#hide-and-show-changes)。
-- `getPreviousDoc`: 返回 AI 修改之前的文档。如果扩展当前没有跟踪更改，则返回 `null`。
+- `getChanges`：返回自上次调用 `startTrackingAiChanges` 以来对文档所做的所有变更列表。
+- `getSelectedChange`：返回当前选中的变更。当光标位于变更上时，该变更即被选中。
+- `getIsTrackingAiChanges`：返回一个布尔值，表示编辑器当前是否正在跟踪 AI 变更。
+- `getIsShowingAiChanges`：返回一个布尔值，表示编辑器当前是否显示 AI 变更。AI 变更可以通过 `setShowAiChanges` 命令[临时隐藏](/content-ai/capabilities/changes/features/display-changes#hide-and-show-changes)。
+- `getPreviousDoc`：返回 AI 变更之前的文档。如果扩展当前未跟踪变更，则返回 `null`。
 
-要了解如何使用这些方法在编辑器中显示更改，请参阅 [显示 AI 更改](/content-ai/capabilities/changes/features/display-changes) 指南。
+要了解如何使用这些方法在编辑器中显示变更，请参阅[显示 AI 变更](/content-ai/capabilities/changes/features/display-changes)指南。
 
-## 接受和拒绝更改
+## 接受和拒绝变更
 
-AI 更改扩展提供了几种命令来审查更改。
+AI 变更扩展提供了多个命令来审核变更。
 
-要接受更改，请调用 `acceptAiChange` 命令。这将修改先前文档的快照以包含该更改。
+要接受某个变更，请调用 `acceptAiChange` 命令。此操作会修改之前文档的快照以包含该变更。
 
 ```ts
 editor.commands.acceptAiChange(changeId)
 ```
 
-要拒绝更改，请调用 `rejectAiChange` 命令。这将修改当前编辑器内容以匹配该更改范围内的先前文档。
+要拒绝某个变更，请调用 `rejectAiChange` 命令。此操作会将编辑器中该变更范围内的内容修改为之前文档的内容。
 
 ```ts
 editor.commands.rejectAiChange(changeId)
 ```
 
-要接受所有 AI 更改，请使用 `acceptAllAiChanges` 命令。
+要接受所有 AI 变更，使用 `acceptAllAiChanges` 命令。
 
 ```ts
 editor.commands.acceptAllAiChanges()
 ```
 
-要拒绝所有 AI 更改，请使用 `rejectAllAiChanges` 命令。
+要拒绝所有 AI 变更，使用 `rejectAllAiChanges` 命令。
 
 ```ts
 editor.commands.rejectAllAiChanges()
 ```
 
-## 停止跟踪更改
+## 停止跟踪变更
 
-最后，要停止跟踪 AI 更改，请运行 `stopTrackingAiChanges` 命令。这样会移除先前文档的快照并停止跟踪更改。
+最后，要停止跟踪 AI 变更，请执行 `stopTrackingAiChanges` 命令。此操作会删除之前文档的快照，并停止跟踪变更。
 
 ```ts
 editor.commands.stopTrackingAiChanges()
 ```
 
-之前文档的快照将被设置为 `null`，编辑器将不再显示 AI 所做的更改。
+之前文档的快照将被设置为 `null`，编辑器将不再显示 AI 所做的变更。
 
-您可以在 [API 参考](/content-ai/capabilities/changes/api-reference) 中了解有关 AI 更改扩展命令的更多信息。
+您可以在 [API 参考](/content-ai/capabilities/changes/api-reference) 了解更多关于 AI 变更扩展命令的信息。

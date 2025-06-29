@@ -1,8 +1,11 @@
 ---
 title: 在编辑器中显示 AI 建议
+tags:
+  - type: team
+  - type: beta
 meta:
   title: AI 建议 | Tiptap 内容 AI
-  description: 获取 AI 建议扩展的概述、功能及其工作原理。
+  description: 了解 AI 建议扩展的概述、功能及其工作原理。
   category: 内容 AI
 ---
 
@@ -12,17 +15,17 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [团队计划](https://cloud.tiptap.dev/v2/billing)。
+        在您的账户中开启[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅团队计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. 集成 AI 提供者">
-        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看 [自定义 LLM 指南](/content-ai/capabilities/suggestion/custom-llms)。
+    <RequirementItem label="2. 集成 AI 提供商">
+        在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查阅[自定义大语言模型指南](/content-ai/capabilities/suggestion/custom-llms)。
     </RequirementItem>
-    <RequirementItem label="3. 从私有注册中心安装">
-        要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 认证到 Tiptap 的私有 npm 注册中心。
+    <RequirementItem label="3. 从私有仓库安装">
+        要安装前端扩展，请参考[设置指南](/guides/pro-extensions)进行身份验证，登录到 Tiptap 的私有 npm 仓库。
     </RequirementItem>
 </Requirements>
 
-AI 建议扩展分析文档并显示用户可以接受或拒绝的建议。它可以开箱即用地与内容 AI 云协同工作，并且可以很容易地扩展以与您自己的后端和 LLM 配合使用。
+AI 建议扩展会分析文档并提供用户可接受或拒绝的建议。它开箱即用地支持 Content AI Cloud，并且可以轻松扩展以支持您自己的后端和大语言模型（LLM）。
 
 <CodeDemo
   isPro
@@ -30,23 +33,19 @@ AI 建议扩展分析文档并显示用户可以接受或拒绝的建议。它�
   src="https://develop--tiptap-pro.netlify.app/preview/Extensions/AiSuggestion"
 />
 
-<Callout title="集成或测试 AI 建议" variant="warning">
-    要测试或集成此功能，您需要一个 [有效的试用或 Tiptap 团队订阅](https://cloud.tiptap.dev/v2/billing)。
-</Callout>
-
 ## 功能
 
-- [定义您自己的规则](/content-ai/capabilities/suggestion/features/define-rules)，执行您的风格指南，提高可读性，并确保用户的内容遵循最佳实践。
+- [定义您自己的规则](/content-ai/capabilities/suggestion/features/define-rules)，以执行您的风格指南、提升可读性，并确保用户内容遵循最佳实践。
 - [应用建议](/content-ai/capabilities/suggestion/features/apply-suggestions)：用 AI 建议扩展生成的建议替换单词、短语或句子。
-- 建议中的富文本支持，因此您可以执行样式规则，例如将关键词加粗或斜体。
-- [集成您自己的后端和 LLMs](/content-ai/capabilities/suggestion/custom-llms)
+- 支持建议中的富文本，因此您可以强制执行样式规则，如将关键词设为加粗或斜体。
+- [集成您自己的后端和大语言模型](/content-ai/capabilities/suggestion/custom-llms)
 - [自定义用户界面](/content-ai/capabilities/suggestion/features/display-suggestions)：完全控制建议在编辑器中的显示方式。
 
 ## 工作原理
 
-AI 建议扩展使用 Tiptap Cloud 的 OpenAI 模型（或您的自定义后端）根据您的规则和编辑器内容生成校对建议。该扩展涵盖客户端和服务器端的实现。以下是用户体验：
+AI 建议扩展使用 Tiptap Cloud 的 OpenAI 模型（或您的自定义后端）根据您的规则和编辑器内容生成校对建议。该扩展涵盖客户端和服务器端的实现。用户体验如下：
 
-1. 当编辑器加载时，AI 建议扩展基于其初始内容和规则生成建议。
-2. 如果用户编辑规则或内容，扩展的建议会实时更新。
-3. 用户可以审核和接受建议，或拒绝它们。
-4. 当建议被接受时，编辑器的内容会用新文本更新。
+1. 编辑器加载时，AI 建议扩展根据初始内容和规则生成建议。
+2. 如果用户编辑了规则或内容，扩展的建议会实时更新。
+3. 用户可以查看并接受建议，或拒绝建议。
+4. 当接受建议时，编辑器内容会更新为新的文本。

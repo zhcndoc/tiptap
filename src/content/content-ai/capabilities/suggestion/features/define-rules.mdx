@@ -1,12 +1,12 @@
 ---
-title: 为 AI Suggestion 扩展定义规则
+title: 为 AI 建议扩展定义规则
 meta:
-  title: 定义规则 | Tiptap AI Suggestion
-  description: 配置 AI Suggestion 扩展的规则列表以生成建议。
+  title: 定义规则 | Tiptap AI 建议
+  description: 使用规则列表配置 AI 建议扩展以生成建议。
   category: 内容 AI
 ---
 
-AI Suggestion 扩展必须配置一系列规则，以帮助 LLM 分析编辑器的内容并生成建议。
+AI 建议扩展必须配置一个规则列表，帮助大型语言模型（LLM）分析编辑器内容并生成建议。
 
 ```ts
 AiSuggestion.configure({
@@ -22,25 +22,25 @@ AiSuggestion.configure({
 })
 ```
 
-每个建议都与一个规则相关联。如果未提供规则，AI Suggestion 扩展将不会生成任何建议。
+每条建议都关联一个规则。如果未提供规则，AI 建议扩展将不会生成任何建议。
 
-每个规则必须具有唯一的字符串 ID，以便每个建议可以与其对应的规则匹配。
+每条规则必须有一个唯一的字符串 id，以便每条建议都能匹配到对应的规则。
 
-prompt 属性是描述规则的字符串。它提供给 AI 模型以帮助生成建议。
+prompt 属性是一个描述规则的字符串，会提供给 AI 模型帮助它生成建议。
 
-仅 ID 和 prompt 被发送给 AI 模型。title、color 和 backgroundColor 属性用于在编辑器中样式化和显示建议。
+只有 id 和 prompt 会被发送给 AI 模型。title、color 和 backgroundColor 属性用于在编辑器中为建议进行样式设置和展示。
 
-## 规则存储在 Tiptap 云中吗？
+## 规则会存储在 Tiptap Cloud 吗？
 
-如果您使用 Tiptap 内容 AI 云为您的内容生成建议，规则不会存储在云中。它们会在每次请求中发送。
+如果您使用 Tiptap 内容 AI 云服务为内容生成建议，规则不会被存储在云端。它们会在每次请求时发送。
 
-由于我们不存储您的规则，您可以随时更改它们，并根据您自己的应用程序特定逻辑启用它们。例如，您可以有适用于所有文档的规则、特定文档的规则、适用于某些用户的规则，甚至让用户定义自己的规则。
+因为我们不存储您的规则，您可以随时更改规则，并根据您自己的应用程序逻辑启用它们。例如，您可以拥有适用于所有文档的规则、文档特定规则、适用于某些用户的规则，甚至让用户自行定义规则。
 
-如果您希望规则在会话之间保持一致，您应该将它们存储在自己的数据库中。
+如果您希望规则跨会话持久化，应该将它们存储在您自己的数据库中。
 
-## 如何在编辑器加载后更改规则
+## 编辑器加载后如何更改规则
 
-您可以随时更改规则，而无需重新加载编辑器。使用 `setAiSuggestionRules` 命令来更新规则。
+您可以随时更改规则，无需重新加载编辑器。使用 `setAiSuggestionRules` 命令来更新规则。
 
 ```ts
 const newRules = [
@@ -53,10 +53,10 @@ const newRules = [
   },
 ]
 
-editor.commands.setAiSuggestionRules(newRules)
+editor.commmands.setAiSuggestionRules(newRules)
 ```
 
-警告：`setAiSuggestionRules` 命令不会自动重新加载建议。您需要调用 `loadAiSuggestions` 命令以根据新规则更新建议。一种常见的模式是将这两个命令连接在一起。
+警告：`setAiSuggestionRules` 命令不会自动重新加载建议。您需要调用 `loadAiSuggestions` 命令来基于新规则更新建议。一个常见的做法是将两个命令链式调用。
 
 ```ts
 editor.chain().setAiSuggestionRules(newRules).loadAiSuggestions().run()

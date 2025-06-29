@@ -1,0 +1,117 @@
+---
+title: 快速开始使用 OpenAI Responses API
+meta:
+  title: 快速开始使用 OpenAI Responses API | Tiptap 内容 AI
+  description: 学习如何使用 AI Agent 扩展与 OpenAI Responses API。
+  category: 内容 AI
+---
+
+[OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses?lang=javascript) 允许你使用 OpenAI 的模型构建 AI Agent。
+
+## 客户端设置
+
+首先，安装 AI Agent 扩展。
+
+```bash
+npm install @tiptap-pro/extension-ai-agent
+```
+
+然后，导入该扩展并使用 `AiAgentProvider` 类进行配置。
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import AiAgent, { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider()
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    AiAgent.configure({
+      provider,
+    }),
+  ],
+})
+```
+
+在 AI Agent 提供者中，定义一个 `resolver` 函数来调用你的后端。
+
+同样定义一个 `adapter` 函数，将聊天消息转换为 OpenAI Responses API 期望的格式。
+
+```tsx
+import AiAgent, { AiAgentProvider, openaiResponsesAdapter } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider({
+  adapter: openaiResponsesAdapter,
+  // llmMessages 属性包含以 OpenAI API 期望格式传递的聊天消息
+  resolver: async ({ llmMessages }) => {
+    // 调用你的后端 API 端点
+    const response = await fetch('/api-endpoint', {
+      method: 'POST',
+      body: JSON.stringify({ llmMessages }),
+    })
+    return await response.json()
+  },
+})
+```
+
+下一节，我们将介绍如何实现返回正确格式响应的 API 端点。
+
+## 服务器端设置
+
+首先，安装 AI Agent 和 OpenAI 服务端库。
+
+```bash
+npm install @tiptap-pro/extension-ai-agent @tiptap-pro/extension-ai-agent-server openai
+```
+
+然后，在你的 API 端点内，创建一个 `AiAgentToolkit` 实例。它允许你配置 AI 模型可用的工具。
+
+```ts
+import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
+
+const toolkit = new AiAgentToolkit()
+```
+
+创建工具包后，向 OpenAI Responses API 发送请求。
+
+```ts
+import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
+import { openaiResponsesAdapter } from '@tiptap-pro/extension-ai-agent'
+import OpenAI from 'openai'
+
+const toolkit = new AiAgentToolkit()
+
+// 初始化 OpenAI 客户端
+const openai = new OpenAI()
+
+// 调用 OpenAI Responses API
+const response = await openai.responses.create({
+  model: 'gpt-4.1',
+  input: [
+    {
+      role: 'developer',
+      content: `
+<你的系统提示>
+${toolkit.getSystemPrompt()}
+`,
+    },
+    ...llmMessages,
+  ],
+  // 提供给 AI 模型可调用的工具
+  tools: toolkit.getTools(openaiResponsesAdapter),
+})
+```
+
+在系统提示末尾，包含由 `AiAgentToolkit` 实例生成的系统提示，如：`toolkit.getSystemPrompt()`。其中包含关于如何使用工具的指令。
+
+有关编写系统提示，请参见 [系统提示指南](/content-ai/capabilities/agent/configure/system-prompt)。其中包含可作为起点的示例系统提示。
+
+最后，使用 `openaiResponsesAdapter` 将响应转换为 AI Agent 扩展期望的格式。
+
+```ts
+const result = openaiResponsesAdapter.parseResponse(response)
+```
+
+`result` 应该作为 API 端点的响应，也是 `resolver` 函数的返回值。

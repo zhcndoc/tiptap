@@ -1,8 +1,10 @@
 ---
 title: 为你的提示提供更多上下文
+tags:
+  - type: start
 meta:
     title: 上下文 | Tiptap 内容 AI
-    description: 为你的提示和编辑器命令添加更多上下文，以微调你的 AI 响应。详见我们的文档。
+    description: 为你的提示词和编辑器命令添加更多上下文，以微调 AI 的响应。请查看我们的文档了解更多信息。
     category: 内容 AI
 ---
 
@@ -12,13 +14,13 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在你的[账户中开始免费试用](https://cloud.tiptap.dev/v2/billing)或订阅[Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+        在你的账户中开始一个 <a href="https://cloud.tiptap.dev/v2?trial=true">免费试用</a> 或 <a href="https://cloud.tiptap.dev/v2/billing">订阅入门计划</a>。
     </RequirementItem>
     <RequirementItem label="2. 集成 AI 提供商">
-        在你的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查看[自定义大型语言模型指南](/content-ai/capabilities/generation/custom-llms)。
+        在你的<a href="https://cloud.tiptap.dev/v2/cloud/ai">AI 设置</a>中配置 OpenAI，或查看 <a href="/content-ai/capabilities/generation/custom-llms">自定义 LLM 指南</a>。
     </RequirementItem>
-    <RequirementItem label="3. 从私有注册表安装">
-        要安装前端扩展，请按照[设置指南](/guides/pro-extensions)认证登录 Tiptap 的私有 npm 注册表。
+    <RequirementItem label="3. 从私有仓库安装">
+        若要安装前端扩展，请根据<a href="/guides/pro-extensions">设置指南</a>，认证 Tiptap 的私有 npm 仓库。
     </RequirementItem>
 </Requirements>
 
@@ -26,20 +28,20 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <CodeDemo isPro path="/Extensions/AiContext" />
 
-## context 选项
+## Context 选项
 
-上下文可采用两种格式，`text` 和 `url`。`text` 格式用于向 AI 模型提供额外的文本上下文，而 `url` 格式用于提供 URL 上下文。
+上下文可以通过两种格式提供，`text` 和 `url`。`text` 格式用于向 AI 模型提供额外的文本上下文，而 `url` 格式用于提供网址上下文。
 
 <Callout title="URL 要求" variant="warning">
-    所提供的 URL 必须是有效且可被 Tiptap 内容 AI 访问的。这在你希望提供引用第三方来源的额外上下文时非常有用。
+    提供的 URL 必须是 Tiptap 内容 AI 可以访问的有效网址。当你想为 AI 模型提供引用第三方来源的额外上下文时，这非常有用。
 </Callout>
 
 ```ts
-// 以富文本流式传输响应到编辑器
+// 将响应作为富文本流式传输到编辑器
 editor
   .chain()
   .aiTextPrompt({
-    text: 'Alice 是做什么工作的？',
+    text: 'Alice 的职业是什么？',
     stream: true,
     format: 'rich-text',
     context: [

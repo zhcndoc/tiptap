@@ -1,8 +1,10 @@
 ---
-title: 丰富文本 AI 响应
+title: 富文本 AI 响应
+tags:
+  - type: start
 meta:
-  title: 格式 | Tiptap 内容 AI 文档
-  description: 让 AI 自动在您的 Tiptap 编辑器中以丰富文本、列表等格式化生成的内容。在我们的文档中了解如何操作！
+  title: 格式化 | Tiptap 内容 AI 文档
+  description: 通过富文本、列表等格式，启用 AI 在你的 Tiptap 编辑器中自动格式化生成的内容。详见我们的文档！
   category: 内容 AI
 ---
 
@@ -11,26 +13,26 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+        在你的账户中开始一个 <a href="https://cloud.tiptap.dev/v2?trial=true" target="_blank">免费试用</a> 或 <a href="https://cloud.tiptap.dev/v2/billing" target="_blank">订阅入门方案</a>。
     </RequirementItem>
-    <RequirementItem label="2. 集成一个 AI 提供商">
-        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看 [自定义 LLM 指南](/content-ai/capabilities/generation/custom-llms)。
+    <RequirementItem label="2. 集成 AI 提供商">
+        在你的 <a href="https://cloud.tiptap.dev/v2/cloud/ai" target="_blank">AI 设置</a> 中配置 OpenAI，或查阅 <a href="/content-ai/capabilities/generation/custom-llms" target="_blank">自定义 LLM 指南</a>。
     </RequirementItem>
     <RequirementItem label="3. 从私有注册表安装">
-        要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 验证到 Tiptap 的私有 npm 注册表。
+        若要安装前端扩展，通过遵循 <a href="/guides/pro-extensions" target="_blank">设置指南</a>，对 Tiptap 私有 npm 注册表进行认证。
     </RequirementItem>
 </Requirements>
 
 <CodeDemo isPro path="/Extensions/AiFormattedResponse" />
 
-通过 `format: 'rich-text'` 选项，您可以生成应用格式化内容的 AI 响应。这在您想生成包含粗体、斜体、链接等丰富文本格式的内容时特别有用。
+通过 `format: 'rich-text'` 选项，你可以生成带有内容格式的 AI 响应。这在你需要生成包含加粗、斜体、链接等富文本格式的内容时特别有用。
 
 ```ts
-// 将响应作为丰富文本流入编辑器
+// 将响应以富文本格式流式传输到编辑器
 editor
   .chain()
   .aiTextPrompt({
-    text: '写出一份流行编程语言的列表',
+    text: '写一份流行编程语言列表',
     stream: true,
     format: 'rich-text',
   })

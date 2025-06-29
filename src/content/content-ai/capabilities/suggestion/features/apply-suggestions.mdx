@@ -1,22 +1,22 @@
 ---
-title: 应用建议到编辑器内容
+title: 将建议应用到编辑器内容
 meta:
   title: 应用建议 | Tiptap AI 建议
-  description: 了解如何在您的 Tiptap 编辑器中应用、拒绝和突出显示 AI 建议。更多信息请参见文档！
+  description: 了解如何在 Tiptap 编辑器中应用、拒绝和高亮 AI 建议。更多内容请查阅文档！
   category: 内容 AI
 ---
 
-AI 建议扩展提供了将建议应用于编辑器内容的命令。这些命令允许您接受或拒绝建议，并将其应用于编辑器的内容。
+AI Suggestion 扩展提供命令，将建议应用到编辑器内容。这些命令允许你接受或拒绝建议，并将其应用到编辑器内容中。
 
 ## 应用单个建议
 
-要将建议应用于编辑器的内容，请使用 `applyAiSuggestion` 命令。
+要将建议应用到编辑器内容中，使用 `applyAiSuggestion` 命令。
 
-一个建议可以有多个替换选项。要应用特定的替换选项，请提供 `replacementOptionId` 属性。如果您不提供此属性，将应用第一个替换选项。
+一个建议可以有多个替换选项。要应用特定的替换选项，请提供 `replacementOptionId` 属性。如果你不提供该属性，默认应用第一个替换选项。
 
-注意：如果您使用 Tiptap 内容 AI 云 API 生成建议，则每个建议将仅有一个替换选项。但是，如果您使用自己的后端和 LLM，您可以提供多个替换选项。
+注意：如果你使用 Tiptap Content AI Cloud API 生成建议， 每个建议只有一个替换选项。但如果你使用自己的后端和大型语言模型（LLM），可以提供多个替换选项。
 
-您可以通过提供 `format` 属性来自定义替换文本的格式。默认格式为 "plain-text"。如果您希望替换文本格式化为富文本，请使用 "rich-text" 格式。这在建议修改样式时，例如加粗或斜体格式时，非常有用。
+你可以通过提供 `format` 属性来自定义替换文本的格式。默认格式是“plain-text”（纯文本）。如果你想让替换文本格式为富文本，请使用“rich-text”格式。当建议修改了样式，比如加粗或斜体格式时，这会很有用。
 
 ```ts
 editor.commands.applyAiSuggestion({
@@ -26,33 +26,33 @@ editor.commands.applyAiSuggestion({
 })
 ```
 
-## 一次应用所有建议
+## 应用所有建议
 
-要一次性应用所有建议，请使用 `applyAllAiSuggestions` 命令。
+要一次性应用所有建议，使用 `applyAllAiSuggestions` 命令。
 
 ```ts
 editor.commands.applyAllAiSuggestions()
 ```
 
-这将把每个建议的第一个替换选项应用于编辑器的内容。
+这将为每个建议应用其第一个替换选项到编辑器内容。
 
-如果某些建议相互重叠，AI 建议扩展将自动解决冲突，忽略后应用的重叠建议。通常这不是问题，因为在每次更改后，建议会被重新加载，AI 建议扩展将根据更新的内容生成新的建议。
+如果有些建议相互重叠，AI Suggestion 扩展会自动解决冲突，忽略后续应用的重叠建议。这通常不是问题，因为在每次更改后建议都会重新加载，AI Suggestion 扩展会根据更新后的内容生成新的建议。
 
 ## 拒绝建议
 
-您可以通过使用 `rejectAiSuggestion` 命令来拒绝建议。
+你可以使用 `rejectAiSuggestion` 命令拒绝建议。
 
 ```ts
 editor.commands.rejectAiSuggestion('suggestionId')
 ```
 
-当您拒绝一个建议时，它将不再显示在编辑器中。然而，它仍然会存储在扩展的存储对象中，您可以通过调用 `storage.getSuggestions()` 来检索。您可以通过读取 `isRejected` 属性来检查建议是否被拒绝。
+当你拒绝一个建议后，它将不再显示在编辑器中。不过，它仍然保存在扩展的存储对象中，你可以通过调用 `storage.getSuggestions()` 来获取它。你可以通过读取 `isRejected` 属性来检查某个建议是否被拒绝。
 
-您可以通过调用 `storage.getRejections()` 来访问被拒绝的建议列表。
+你也可以通过调用 `storage.getRejections()` 访问被拒绝建议的列表。
 
-## 在应用建议后突出显示替换文本
+## 应用建议后高亮替换文本
 
-要突出显示或为被建议替换的文本添加任何标记，您可以将 `applyAiSuggestion` 命令与设置建议范围标记的命令链式调用。
+要高亮或添加任意标记到被建议替换的文本，你可以将 `applyAiSuggestion` 命令与设置标记到建议范围的命令链式调用。
 
 ```ts
 editor
@@ -62,17 +62,17 @@ editor
     suggestionId: suggestion.id,
     replacementOptionId: option.id,
   })
-  // 选择更改的文本
+  // 选择被修改的文本
   .command(({ tr, commands }) => {
-    // 我们需要映射更改文本的位置，因为在应用建议时它们可能已更改
+    // 需要映射被修改文本的位置，因为应用建议后它们可能已发生变化
     return commands.setTextSelection({
       from: tr.mapping.map(suggestion.deleteRange.from),
       to: tr.mapping.map(suggestion.deleteRange.to),
     })
   })
-  // 对更改的文本应用样式。例如，加粗样式
+  // 对被修改文本应用样式。例如，加粗样式
   .setBold()
-  // 将光标设置在更改文本的末尾。
+  // 将光标设置到被修改文本的末尾
   .command(({ tr, commands }) => {
     return commands.setTextSelection(tr.mapping.map(suggestion.deleteRange.to))
   })

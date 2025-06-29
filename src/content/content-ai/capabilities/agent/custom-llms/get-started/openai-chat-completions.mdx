@@ -1,0 +1,120 @@
+---
+title: 入门 OpenAI 聊天补全 API
+meta:
+  title: 入门 OpenAI 聊天补全 API | Tiptap 内容 AI
+  description: 学习如何将 AI Agent 扩展与 OpenAI 聊天补全 API 结合使用。
+  category: 内容 AI
+---
+
+[OpenAI 聊天补全 API](https://platform.openai.com/docs/api-reference/chat?lang=javascript) 允许你使用 OpenAI 的模型构建 AI 代理。
+
+## 客户端设置
+
+首先，安装 AI Agent 扩展。
+
+```bash
+npm install @tiptap-pro/extension-ai-agent
+```
+
+然后，导入该扩展，并使用 `AiAgentProvider` 类进行配置。
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import AiAgent, { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider()
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    AiAgent.configure({
+      provider,
+    }),
+  ],
+})
+```
+
+在 AI Agent 提供者中，定义一个调用后端的 `resolver` 函数。
+
+还需要定义一个 `adapter` 函数，将聊天消息转换为 OpenAI 聊天补全 API 所期望的格式。
+
+```tsx
+import AiAgent, {
+  AiAgentProvider,
+  openaiChatCompletionsAdapter,
+} from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider({
+  adapter: openaiChatCompletionsAdapter,
+  // llmMessages 属性包含了符合 OpenAI API 期望格式的聊天消息
+  resolver: async ({ llmMessages }) => {
+    // 调用你的后端 API 端点
+    const response = await fetch('/api-endpoint', {
+      method: 'POST',
+      body: JSON.stringify({ llmMessages }),
+    })
+    return await response.json()
+  },
+})
+```
+
+下一节中，我们将看到如何实现返回正确格式回复的 API 端点。
+
+## 服务器端设置
+
+首先，安装 AI Agent 和 OpenAI 服务器端库。
+
+```bash
+npm install @tiptap-pro/extension-ai-agent @tiptap-pro/extension-ai-agent-server openai
+```
+
+然后，在你的 API 端点中，创建一个 `AiAgentToolkit` 实例。它允许你配置 AI 模型可使用的工具。
+
+```ts
+import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
+
+const toolkit = new AiAgentToolkit()
+```
+
+创建工具包后，将请求发送到 OpenAI 聊天补全 API。
+
+```ts
+import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
+import { openaiChatCompletionsAdapter } from '@tiptap-pro/extension-ai-agent'
+import OpenAI from 'openai'
+
+const toolkit = new AiAgentToolkit()
+
+// 初始化 OpenAI 客户端
+const openai = new OpenAI()
+
+// 调用 OpenAI 聊天补全 API
+const response = await openai.chat.completions.create({
+  model: 'gpt-4.1',
+  messages: [
+    {
+      role: 'system',
+      content: `
+<你的系统提示>
+${toolkit.getSystemPrompt()}
+`,
+    },
+    ...llmMessages,
+  ],
+  // 提供 AI 模型可调用的工具
+  tools: toolkit.getTools(openaiChatCompletionsAdapter),
+})
+```
+
+在系统提示的末尾，包含 `AiAgentToolkit` 实例生成的系统提示，如：`toolkit.getSystemPrompt()`。其中包含了有关如何使用工具的指令。
+
+关于如何编写系统提示，请参阅[系统提示指南](/content-ai/capabilities/agent/configure/system-prompt)。其中包含了可用作起点的示例系统提示。
+
+最后，使用 `openaiChatCompletionsAdapter` 将响应转换为 AI Agent 扩展期望的格式。
+
+```ts
+const result = openaiChatCompletionsAdapter.parseResponse(response)
+```
+
+`result` 应为 API 端点的响应，也是 `resolver` 函数的返回值。

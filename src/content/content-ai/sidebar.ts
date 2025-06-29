@@ -7,7 +7,7 @@ export const sidebarConfig: SidebarConfig = {
   items: [
     {
       href: '/content-ai/getting-started/overview',
-      title: '开始使用',
+      title: '快速开始',
       type: 'group',
       children: [
         {
@@ -19,11 +19,11 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/content-ai/capabilities',
-      title: '能力',
+      title: '功能',
       children: [
         {
           title: 'AI 生成',
-          tags: ['Pro'],
+          tags: ['Start'],
           href: '/content-ai/capabilities/generation/',
           children: [
             {
@@ -39,11 +39,11 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/generation/text-generation',
               children: [
                 {
-                  title: '内置命令',
+                  title: '内置指令',
                   href: '/content-ai/capabilities/generation/text-generation/built-in-commands',
                 },
                 {
-                  title: '自动完成',
+                  title: '自动补全',
                   href: '/content-ai/capabilities/generation/text-generation/autocompletion',
                 },
                 {
@@ -59,11 +59,11 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/generation/text-generation/manage-responses',
                 },
                 {
-                  title: '自定义命令',
+                  title: '自定义指令',
                   href: '/content-ai/capabilities/generation/text-generation/custom-commands',
                 },
                 {
-                  title: '流媒体内容（高级）',
+                  title: '流式内容（高级）',
                   href: '/content-ai/capabilities/generation/text-generation/stream',
                 },
               ],
@@ -73,7 +73,7 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/generation/image-generation',
             },
             {
-              title: '集成你的 LLM',
+              title: '集成你的大语言模型',
               href: '/content-ai/capabilities/generation/custom-llms',
             },
             {
@@ -85,7 +85,8 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: 'AI 建议',
           href: '/content-ai/capabilities/suggestion',
-          tags: ['Pro', 'Beta'],
+          tags: ['Team'],
+          beta: true,
           children: [
             {
               title: '概述',
@@ -96,7 +97,7 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/suggestion/install',
             },
             {
-              title: '特征',
+              title: '功能',
               href: '/content-ai/capabilities/suggestion/features',
               children: [
                 {
@@ -112,7 +113,7 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/suggestion/features/display-suggestions',
                 },
                 {
-                  title: '应用和拒绝建议',
+                  title: '应用与拒绝建议',
                   href: '/content-ai/capabilities/suggestion/features/apply-suggestions',
                 },
                 {
@@ -120,17 +121,17 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/suggestion/features/lock-content',
                 },
                 {
-                  title: '提供 LLM 上下文',
+                  title: '提供大模型上下文',
                   href: '/content-ai/capabilities/suggestion/features/provide-llm-context',
                 },
               ],
             },
             {
-              title: '与内容 AI 云一起使用',
+              title: '搭配 Content AI 云使用',
               href: '/content-ai/capabilities/suggestion/use-with-content-ai-cloud',
             },
             {
-              title: '集成您的 LLM',
+              title: '集成你的大语言模型',
               href: '/content-ai/capabilities/suggestion/custom-llms',
             },
             {
@@ -146,7 +147,8 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: 'AI 变更',
           href: '/content-ai/capabilities/changes',
-          tags: ['Pro', 'Beta'],
+          tags: ['Team'],
+          beta: true,
           children: [
             {
               title: '概述',
@@ -157,15 +159,15 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/changes/install',
             },
             {
-              title: '特征',
+              title: '功能',
               href: '/content-ai/capabilities/changes/features',
               children: [
                 {
-                  title: '审查更改',
+                  title: '审查变更',
                   href: '/content-ai/capabilities/changes/features/review-changes',
                 },
                 {
-                  title: '显示更改',
+                  title: '显示变更',
                   href: '/content-ai/capabilities/changes/features/display-changes',
                 },
               ],
@@ -181,9 +183,10 @@ export const sidebarConfig: SidebarConfig = {
           ],
         },
         {
-          title: 'AI 智能体',
+          title: 'AI 代理',
           href: '/content-ai/capabilities/agent',
-          tags: ['Pro', 'Beta'],
+          tags: ['Team'],
+          beta: true,
           children: [
             {
               title: '概述',
@@ -194,44 +197,48 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/agent/install',
             },
             {
-              title: '与内容 AI 云一起使用',
+              title: '搭配 Content AI 云使用',
               href: '/content-ai/capabilities/agent/use-with-content-ai-cloud',
             },
             {
-              title: '特征',
+              title: '功能',
               href: '/content-ai/capabilities/agent/features',
               children: [
                 {
-                  title: '状态管理',
-                  href: '/content-ai/capabilities/agent/features/state-management',
+                  title: '状态',
+                  href: '/content-ai/capabilities/agent/features/state',
                 },
                 {
-                  title: '监听事件',
+                  title: '事件',
                   href: '/content-ai/capabilities/agent/features/events',
                 },
                 {
-                  title: '可用的方法',
+                  title: '方法',
                   href: '/content-ai/capabilities/agent/features/methods',
                 },
                 {
-                  title: '管理检查点',
-                  href: '/content-ai/capabilities/agent/features/checkpoints',
+                  title: '生命周期',
+                  href: '/content-ai/capabilities/agent/features/lifecycle',
                 },
                 {
-                  title: 'AI 智能体生命周期',
-                  href: '/content-ai/capabilities/agent/features/runs',
-                },
-                {
-                  title: '阅读文档',
-                  href: '/content-ai/capabilities/agent/features/reading-the-document',
-                },
-                {
-                  title: '审查 AI 生成的更改',
+                  title: '审查变更',
                   href: '/content-ai/capabilities/agent/features/review',
                 },
                 {
-                  title: '为消息添加上下文',
-                  href: '/content-ai/capabilities/agent/features/add-context',
+                  title: '检查点',
+                  href: '/content-ai/capabilities/agent/features/checkpoints',
+                },
+                {
+                  title: '提供上下文',
+                  href: '/content-ai/capabilities/agent/features/context',
+                },
+                {
+                  title: '选择识别',
+                  href: '/content-ai/capabilities/agent/features/selection-awareness',
+                },
+                {
+                  title: '阅读大型文档',
+                  href: '/content-ai/capabilities/agent/features/large-documents',
                 },
               ],
             },
@@ -244,14 +251,72 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/agent/configure/options',
                 },
                 {
-                  title: '系统提示',
+                  title: '系统提示词',
                   href: '/content-ai/capabilities/agent/configure/system-prompt',
                 },
               ],
             },
             {
-              title: '集成您的 LLM',
+              title: '集成你的大语言模型',
               href: '/content-ai/capabilities/agent/custom-llms',
+              children: [
+                {
+                  title: '概述',
+                  href: '/content-ai/capabilities/agent/custom-llms/overview',
+                },
+                {
+                  title: '快速开始',
+                  href: '/content-ai/capabilities/agent/custom-llms/get-started',
+                  children: [
+                    {
+                      title: 'Vercel AI SDK',
+                      href: '/content-ai/capabilities/agent/custom-llms/get-started/vercel-ai-sdk',
+                    },
+                    {
+                      title: 'OpenAI 补全',
+                      href: '/content-ai/capabilities/agent/custom-llms/get-started/openai-chat-completions',
+                    },
+                    {
+                      title: 'OpenAI 响应',
+                      href: '/content-ai/capabilities/agent/custom-llms/get-started/openai-responses',
+                    },
+                    {
+                      title: 'Anthropic Claude',
+                      href: '/content-ai/capabilities/agent/custom-llms/get-started/anthropic-messages',
+                    },
+                  ],
+                },
+                {
+                  title: '工具概览',
+                  href: '/content-ai/capabilities/agent/custom-llms/tools',
+                },
+                {
+                  title: '客户端工具',
+                  href: '/content-ai/capabilities/agent/custom-llms/client-side-tools',
+                },
+                {
+                  title: '服务端工具',
+                  href: '/content-ai/capabilities/agent/custom-llms/server-side-tools',
+                  children: [
+                    {
+                      title: 'Vercel AI SDK',
+                      href: '/content-ai/capabilities/agent/custom-llms/server-side-tools/vercel-ai-sdk',
+                    },
+                    {
+                      title: 'OpenAI 补全',
+                      href: '/content-ai/capabilities/agent/custom-llms/server-side-tools/openai-chat-completions',
+                    },
+                    {
+                      title: 'OpenAI 响应',
+                      href: '/content-ai/capabilities/agent/custom-llms/server-side-tools/openai-responses',
+                    },
+                    {
+                      title: 'Anthropic Claude',
+                      href: '/content-ai/capabilities/agent/custom-llms/server-side-tools/anthropic-messages',
+                    },
+                  ],
+                },
+              ],
             },
             {
               title: 'API 参考',
@@ -272,7 +337,7 @@ export const sidebarConfig: SidebarConfig = {
           href: '/content-ai/capabilities/generation/overview',
         },
         {
-          title: '自动完成',
+          title: '自动补全',
           isActive: false,
           href: '/content-ai/capabilities/generation/text-generation/autocompletion',
         },
@@ -282,28 +347,24 @@ export const sidebarConfig: SidebarConfig = {
           href: '/content-ai/capabilities/suggestion/overview',
         },
         {
-          title: '跟踪 AI 变化',
+          title: '跟踪 AI 变更',
           isActive: false,
           href: '/content-ai/capabilities/changes/overview',
         },
         {
-          title: 'AI 智能体',
-          href: '/examples/experiments/ai-agent',
-          tags: ['Experiment'],
-        },
-        {
-          title: '入门模板',
+          title: '起始模板',
           href: 'https://tiptap.dev/product/templates',
+          external: true,
         },
       ],
     },
     {
       type: 'group',
       href: '/content-ai/custom-llms',
-      title: '定制 LLM',
+      title: '自定义大语言模型',
       children: [
         {
-          title: '集成您的 LLM',
+          title: '集成你的大语言模型',
           href: '/content-ai/custom-llms',
         },
       ],
@@ -314,7 +375,7 @@ export const sidebarConfig: SidebarConfig = {
       title: '资源',
       children: [
         {
-          title: '隐私',
+          title: '隐私政策',
           href: '/content-ai/resources/privacy',
         },
         {

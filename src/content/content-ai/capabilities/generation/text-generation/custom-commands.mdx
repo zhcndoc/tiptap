@@ -1,8 +1,10 @@
 ---
 title: 注册自定义命令和提示
+tags:
+  - type: start
 meta:
   title: 自定义命令 | Tiptap 内容 AI
-  description: 扩展 AI 生成扩展，以创建适用于您的 Tiptap 编辑器的自定义编辑器命令和提示。详见文档了解更多信息！
+  description: 扩展 AI 生成扩展，为你的 Tiptap 编辑器创建自定义编辑命令和提示。详见文档！
   category: 内容 AI
 ---
 
@@ -11,33 +13,33 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+        在你的账户中开始一个<a href="https://cloud.tiptap.dev/v2?trial=true">免费试用</a>或<a href="https://cloud.tiptap.dev/v2/billing">订阅入门计划</a>。
     </RequirementItem>
     <RequirementItem label="2. 集成 AI 提供商">
-        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI 或查看 [自定义 LLM 指南](/content-ai/capabilities/generation/custom-llms)。
+        在你的<a href="https://cloud.tiptap.dev/v2/cloud/ai">AI 设置</a>中配置 OpenAI，或查看<a href="/content-ai/capabilities/generation/custom-llms">自定义大语言模型指南</a>。
     </RequirementItem>
-    <RequirementItem label="3. 从私有注册表安装">
-        要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 的指示验证 Tiptap 的私有 npm 注册表。
+    <RequirementItem label="3. 从私有仓库安装">
+        若要安装前端扩展，请按照<a href="/guides/pro-extensions">设置指南</a>验证身份并登录 Tiptap 私有 npm 仓库。
     </RequirementItem>
 </Requirements>
 
-AI 生成扩展提供了一系列 [内置命令](/content-ai/capabilities/generation/text-generation/built-in-commands)，但您可以扩展它以定义自己的命令。这些自定义命令可用于使用您的自定义提示调用 LLM。
+AI 生成扩展提供了一个[内置命令列表](/content-ai/capabilities/generation/text-generation/built-in-commands)，但你可以扩展它来定义你自己的命令。这些自定义命令可以用来用你自己的提示调用大语言模型。
 
 <CodeDemo isPro path="/Extensions/AiCustomCommandUsingAiTextPrompt" />
 
 ## 注册自定义命令
 
-要注册您自己的 AI 命令，只需扩展 AI 生成扩展，在 `addCommands()` 中添加您的命令（不要忘记继承 `this.parent?.()` 中的预定义命令），然后执行 `aiTextPrompt()` 以运行您个人的提示。
+要注册你自己的 AI 命令，只需扩展 AI 生成扩展，在 `addCommands()` 中添加你的命令（别忘了继承预定义命令，调用 `this.parent?.()`），然后执行 `aiTextPrompt()` 来运行你的自定义提示。
 
-请注意，此示例在客户端使用您的提示，这意味着用户可以查看它。如果您希望在后端使用自定义语言模型（LLM）或提示，请参考 [在这里提供的示例](/content-ai/custom-llms)。
+请注意，此示例在客户端使用你的提示，这意味着用户可以查看它。如果你想在后端使用自定义语言模型 (LLM) 或提示，请参阅[这里提供的示例](/content-ai/custom-llms)。
 
 ```js
 import { Ai, getHTMLContentBetween } from '@tiptap-pro/extension-ai'
 
 // … 其他导入
 
-// 如果使用 TypeScript，请声明扩展类型。
-// 更多信息： https://tiptap.dev/docs/guides/typescript
+// 如果使用 TypeScript，声明扩展类型。
+// 更多信息：https://tiptap.dev/docs/guides/typescript
 //
 // declare module '@tiptap/core' {
 //   interface Commands<ReturnType> {
@@ -59,7 +61,7 @@ const AiExtended = Ai.extend({
           const selectedText = getHTMLContentBetween(editor, from, to)
 
           return editor.commands.aiTextPrompt({
-            text: `将以下文本翻译成法语并添加一些表情符号：${selectedText}`,
+            text: `将以下文本翻译成法语并添加一些表情符号: ${selectedText}`,
             ...options,
           })
         },
@@ -67,7 +69,7 @@ const AiExtended = Ai.extend({
   },
 })
 
-// 初始化您的 Tiptap 编辑器实例并注册扩展
+// 初始化你的 Tiptap 编辑器实例并注册扩展后的扩展
 
 const editor = new Editor({
   extensions: [
@@ -79,6 +81,6 @@ const editor = new Editor({
   content: '',
 })
 
-// 运行您自定义的命令
+// 运行你的自定义命令
 // editor.chain().focus().aiCustomTextCommand().run()
 ```

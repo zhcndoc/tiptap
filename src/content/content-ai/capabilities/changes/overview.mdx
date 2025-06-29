@@ -1,9 +1,12 @@
 ---
-title: 追踪和审查 AI 生成的更改
+title: 跟踪和审查 AI 生成的更改
 meta:
   title: AI 更改 | Tiptap 内容 AI
-  description: 在 Tiptap 文本编辑器中审查 AI 所做的更改。
+  description: 审查 AI 在您的 Tiptap 文本编辑器中所做的更改。
   category: 内容 AI
+tags:
+  - type: team
+  - type: beta
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
@@ -12,19 +15,19 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在您的[账户](https://cloud.tiptap.dev/v2/billing)启动免费试用或订阅[团队计划](https://cloud.tiptap.dev/v2/billing)。
+        在您的账户中启动[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅团队计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 集成 AI 提供商">
-        在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)配置 OpenAI，或查看[自定义大语言模型指南](/content-ai/capabilities/suggestion/custom-llms)。
+        在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查看[自定义大型语言模型指南](/content-ai/capabilities/suggestion/custom-llms)。
     </RequirementItem>
     <RequirementItem label="3. 从私有注册表安装">
-        要安装前端扩展，请按照[安装指南](/guides/pro-extensions)认证访问 Tiptap 的私有 npm 注册表。
+        要安装前端扩展，请按照[设置指南](/guides/pro-extensions)进行身份验证，登录 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-AI Changes 扩展使您能够追踪、审查并管理编辑器中 AI 所做的内容修改。它清晰地突出显示更改，让您轻松查看添加或删除了哪些内容。
+AI 更改扩展使您能够跟踪、审查和管理编辑器中 AI 所做的内容修改。它清晰地突出显示更改，方便查看新增或删除的内容。
 
-将其与[AI 生成扩展](/content-ai/capabilities/generation/overview)结合使用，创建内容并为用户提供无缝的审查工作流程。
+将其与[AI 生成扩展](/content-ai/capabilities/generation/overview)结合使用，以创建内容并为您的用户提供无缝的审查工作流程。
 
 <CodeDemo
   isPro
@@ -32,22 +35,18 @@ AI Changes 扩展使您能够追踪、审查并管理编辑器中 AI 所做的�
   src="https://develop--tiptap-pro.netlify.app/preview/Extensions/AiChanges"
 />
 
-<Callout title="集成或测试 AI Changes" variant="warning">
-    要测试或集成此功能，您需要拥有[有效的试用资格或 Tiptap 团队订阅](https://cloud.tiptap.dev/v2/billing)。
-</Callout>
+## AI 更改功能
 
-## AI Changes 功能
-
-- 与我们的[AI 生成扩展](/content-ai/capabilities/generation/text-generation)和[AI 代理工具包](/examples/experiments/ai-agent)无缝集成
-- 支持丰富的文本格式，包括图片、链接和提及
-- 允许用户[接受或拒绝单个更改](/content-ai/capabilities/changes/features/review-changes)，或对生成内容进行调整
-- 提供[完全可定制的 UI](/content-ai/capabilities/changes/features/display-changes)来展示更改
+- 与我们的[AI 生成扩展](/content-ai/capabilities/generation/text-generation)和[AI 助手工具包](/examples/experiments/ai-agent)无缝集成
+- 支持富文本格式，包括图片、链接和提及
+- 允许用户[接受和拒绝单个更改](/content-ai/capabilities/changes/features/review-changes)，或者调整生成的内容
+- 提供一个[完全可定制的 UI](/content-ai/capabilities/changes/features/display-changes)来显示更改
 
 ## 工作原理
 
-AI Changes 扩展可适配您的具体文本编辑工作流程。通过四个简单步骤集成它：
+AI 更改扩展可适配您的特定文本编辑工作流程。四个简单步骤即可集成：
 
-1. [安装](/content-ai/capabilities/changes/install)并[配置](/content-ai/capabilities/changes/configure)该扩展
+1. [安装](/content-ai/capabilities/changes/install)并[配置](/content-ai/capabilities/changes/configure)扩展
 2. 编辑编辑器内容（例如，插入 AI 生成的文本）
 3. 在编辑器中[显示更改](/content-ai/capabilities/changes/features/display-changes)
 4. [审查 AI 所做的更改](/content-ai/capabilities/changes/features/review-changes)

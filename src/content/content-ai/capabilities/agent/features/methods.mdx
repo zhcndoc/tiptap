@@ -1,34 +1,36 @@
 ---
-title: 可用的方法
+title: 可用方法
 meta:
-  title: 可用的方法 | Tiptap 内容 AI
-  description: 了解 AI 代理提供者中可用的方法。
+  title: 可用方法 | Tiptap 内容 AI
+  description: 了解 AI Agent 提供程序中的可用方法。
   category: 内容 AI
 ---
 
-AI 代理提供者公开了多个方法，您可以调用这些方法来控制 AI 代理的行为并管理对话。
+AI Agent 提供程序暴露了若干方法。
 
 ## 核心方法
 
-| 方法                                | 描述                                        | 参数                                                      |
-| ----------------------------------- | ------------------------------------------- | --------------------------------------------------------- |
-| `addUserMessage(message, options?)` | 向对话中添加用户消息                          | `message`：`string`，`options?`：`AddUserMessageOptions`  |
-| `run()`                             | 启动或继续 AI 代理运行                       | 无                                                        |
-| `stop()`                            | 停止当前 AI 代理运行                         | 无                                                        |
-| `reset(chatMessages?)`              | 重置对话到初始状态                           | `chatMessages?`：`ChatMessage[]`                         |
+| 方法                              | 描述                                                                                  | 参数                                 |
+| -------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------ |
+| `run()`                          | 启动一个新的 AI Agent [生命周期](/content-ai/capabilities/agent/features/lifecycle)      | 无                                  |
+| `stop()`                         | 停止当前 AI Agent 生命周期                                                             | 无                                  |
+| `reset(chatMessages?)`           | 重置 AI Agent 提供程序至初始状态                                                        | `chatMessages?`：`ChatMessage[]`    |
+| `setSystemPrompt(systemPrompt)` | 设置 [系统提示](/content-ai/capabilities/agent/configure/system-prompt)                 | `systemPrompt`：`string \| null`    |
 
-## 对话管理
+## 会话管理
 
-| 方法                            | 描述                                      | 参数                                                |
-| ------------------------------- | ----------------------------------------- | --------------------------------------------------- |
-| `setCheckpoint()`               | 将当前状态保存为检查点                   | 无                                                  |
-| `restoreCheckpoint(checkpoint)` | 恢复先前保存的检查点                      | `checkpoint`：`Checkpoint`                         |
-| `setChatMessages(messages)`     | 替换所有聊天消息                         | `messages`：`ChatMessage[]`                        |
-| `setAutoAccept(autoAccept)`     | 更改自动接受设置                         | `autoAccept`：`"always" \| "never" \| "onlyRead"` |
+| 方法                                    | 描述                                                                                               | 参数                                                      |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `addUserMessage(message, options?)`    | 向会话中添加一条用户消息                                                                            | `message`：`string`，`options?`：`AddUserMessageOptions`  |
+| `addChatMessages(messages)`             | 向会话中添加多条聊天消息                                                                            | `messages`：`ChatMessage[]`                                |
+| `setChatMessages(messages)`             | 替换会话中的所有消息                                                                               | `messages`：`ChatMessage[]`                                |
+| `setAutoAccept(autoAccept)`             | 更改 [自动接受](/content-ai/capabilities/agent/features/review#auto-accept-configuration) 设置     | `autoAccept`：`"always" \| "never" \| "onlyRead"`         |
+| `setCheckpoint()`                       | 将当前状态保存为一个[检查点](/content-ai/capabilities/agent/features/checkpoints)                  | 无                                                        |
+| `restoreCheckpoint(checkpoint)`         | 恢复之前保存的检查点                                                                              | `checkpoint`：`Checkpoint`                                 |
 
-## 工具调用审查
+## 工具调用审核
 
-| 方法                  | 描述                             | 参数   |
-| --------------------- | -------------------------------- | ------ |
-| `acceptToolCall()`    | 接受挂起的工具调用               | 无     |
-| `rejectToolCall()`    | 拒绝挂起的工具调用               | 无     |
+| 方法                 | 描述                           | 参数 |
+| -------------------- | ------------------------------ | ---- |
+| `acceptToolCall()`   | 接受待处理的工具调用             | 无   |
+| `rejectToolCall()`   | 拒绝待处理的工具调用             | 无   |

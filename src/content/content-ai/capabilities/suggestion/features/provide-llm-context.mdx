@@ -1,18 +1,18 @@
 ---
 title: 为 LLM 提供上下文
 meta:
-  title: 提供 LLM 上下文 | Tiptap AI 建议
+  title: 为 LLM 提供上下文 | Tiptap AI 建议
   description: 如何为 LLM 提供额外的上下文，以改善 AI 建议扩展的结果。
   category: 内容 AI
 ---
 
-当你 [使用 Tiptap 内容 AI 云生成建议](/content-ai/capabilities/suggestion/use-with-content-ai-cloud) 时，以下信息将被发送到 LLM：
+当你使用[Tiptap 内容 AI 云服务生成建议](/content-ai/capabilities/suggestion/use-with-content-ai-cloud)时，以下信息会发送给 LLM：
 
 - 编辑器的内容。
-- 扩展的 [规则](/content-ai/capabilities/suggestion/features/define-rules)。
+- 扩展的[规则](/content-ai/capabilities/suggestion/features/define-rules)。
 - `context` 选项（如果提供）。
 
-`context` 选项是一个可选的字符串属性，用于向 LLM 提供额外信息。此信息将被添加到提示中。它是全局的，因此将与所有规则一起使用。
+`context` 选项是一个可选的字符串属性，可用于向 LLM 提供额外的信息。该信息会被添加到提示中。它是全局的，因此会与所有规则一起使用。
 
 ## 配置上下文的初始值
 
@@ -26,20 +26,20 @@ AiSuggestion.configure({
 
 ## 更新上下文
 
-你可以随时使用 `setAiSuggestionContext` 命令更新上下文的值。如果你想根据用户输入或其他应用程序特定的逻辑更改上下文，这会很有用。
+你可以随时通过 `setAiSuggestionContext` 命令更新上下文的值。如果你想根据用户输入或其他应用特定逻辑更改上下文，这非常有用。
 
 ```ts
 const newContext = '语气应非正式且友好。'
 editor.commands.setAiSuggestionContext(newContext)
 ```
 
-此命令不会自动重新加载建议。你需要调用 `loadAiSuggestions` 命令，以基于新的上下文更新建议。一种常见的模式是将两个命令连锁在一起。
+此命令不会自动重新加载建议。你需要调用 `loadAiSuggestions` 命令，基于新的上下文更新建议。一个常见的做法是将两个命令链式调用。
 
 ```ts
 editor.chain().setAiSuggestionContext(newContext).loadAiSuggestions().run()
 ```
 
-要清除上下文，将其设置为 `null`。
+若要清除上下文，请将其设置为 `null`。
 
 ```ts
 editor.commands.setAiSuggestionContext(null)
@@ -47,7 +47,7 @@ editor.commands.setAiSuggestionContext(null)
 
 ## 读取当前上下文
 
-你可以通过 `context` 存储属性访问当前上下文的值。
+你可以通过 `context` 存储属性访问当前的上下文值。
 
 ```ts
 const currentContext = editor.extensionStorage.aiSuggestion.context

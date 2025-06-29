@@ -2,8 +2,11 @@
 title: 安装 AI Changes 扩展
 meta:
   title: 安装 AI Changes | Tiptap 内容 AI
-  description: 在您的编辑器中设置 Tiptap AI Changes 扩展。
+  description: 在你的编辑器中设置 Tiptap AI Changes 扩展。
   category: 内容 AI
+tags:
+  - type: team
+  - type: beta
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -11,35 +14,31 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始一个免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [团队计划](https://cloud.tiptap.dev/v2/billing)。
+        在你的账号中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅团队计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 集成 AI 提供商">
-        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看 [自定义 LLM 指南](/content-ai/capabilities/suggestion/custom-llms)。
+        在你的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI 或查看[自定义 LLM 指南](/content-ai/capabilities/suggestion/custom-llms)。
     </RequirementItem>
     <RequirementItem label="3. 从私有注册表安装">
-        要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证以访问 Tiptap 的私有 npm 注册表。
+        若要安装前端扩展，请按照[设置指南](/guides/pro-extensions)认证并使用 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-AI Changes 扩展作为 npm 包通过我们的私有注册表提供。请按照以下步骤在您的项目中安装并设置它。
-
-<Callout title="集成或测试 AI Changes" variant="warning">
-  要测试或集成此功能，您需要一个 [活动试用或 Tiptap 团队订阅](https://cloud.tiptap.dev/v2/billing)。
-</Callout>
+AI Changes 扩展以 npm 包的形式通过我们的私有注册表提供。按照以下步骤在你的项目中安装和设置它。
 
 ## 安装扩展
 
-AI Changes 扩展已发布在 Tiptap 的私有 npm 注册表中。按照 [私有注册表指南](/guides/pro-extensions) 集成扩展。
+AI Changes 扩展发布在 Tiptap 私有 npm 注册表中。通过遵循[私有注册表指南](/guides/pro-extensions)集成该扩展。
 
-准备好之后，您可以像安装任何其他 Tiptap Pro 扩展一样进行安装。
+准备好后，你可以像安装其他 Tiptap Pro 扩展一样安装它。
 
 ```bash
-npm install @tiptap-pro/extension-ai-changes@beta
+npm install @tiptap-pro/extension-ai-changes
 ```
 
 ## 初始化扩展
 
-将 AI Changes 集成到您的编辑器实例中，方式与其他 Tiptap 扩展相同。以下是示范实现：
+将 AI Changes 集成到你的编辑器实例中，就像集成其他 Tiptap 扩展一样。以下是一个示例实现：
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -55,7 +54,7 @@ const editor = new Editor({
 })
 ```
 
-您还需要设置 CSS 样式，以便在编辑器中可见更改。
+你还需要设置 CSS 样式，以便在编辑器中显示更改。
 
 ```css
 :root {
@@ -80,23 +79,23 @@ const editor = new Editor({
 
 ## 开始跟踪更改
 
-要开始跟踪更改，请调用 `startTrackingAiChanges` 命令。这将创建当前编辑器内容的快照，将与 AI 生成的任何新内容进行比较。
+要开始跟踪更改，调用 `startTrackingAiChanges` 命令。该命令会创建当前编辑器内容的快照，用于与 AI 生成的新内容进行比较。
 
 ```ts
 editor.commands.startTrackingAiChanges()
 ```
 
-调用此命令后，对编辑器内容的任何修改——无论是手动进行的还是通过 [AI 生成](/content-ai/capabilities/generation/overview) 扩展生成的——都将被跟踪并显示为更改。
+调用此命令后，对编辑器内容的任何修改 —— 无论是手动进行还是通过[AI 生成](/content-ai/capabilities/generation/overview)扩展产生 —— 都会被跟踪并显示为更改。
 
 ## 接受或拒绝更改
 
-该扩展提供了几个命令来审查更改：
+此扩展提供多个命令以便你审阅更改：
 
 ```ts
-// 接受特定更改
+// 接受指定更改
 editor.commands.acceptAiChange(changeId)
 
-// 拒绝特定更改
+// 拒绝指定更改
 editor.commands.rejectAiChange(changeId)
 
 // 接受所有更改
@@ -108,12 +107,12 @@ editor.commands.rejectAllAiChanges()
 
 ## 停止跟踪更改
 
-完成审查后，调用 `stopTrackingAiChanges` 命令以结束跟踪会话：
+完成更改审阅后，调用 `stopTrackingAiChanges` 命令结束跟踪会话：
 
 ```ts
 editor.commands.stopTrackingAiChanges()
 ```
 
-这将移除之前文档的快照，并停止显示更改高亮。
+此操作将移除之前文档的快照，并停止显示更改高亮。
 
-有关更详细的信息，关于如何审查、接受和拒绝更改，请参阅 [审查内容指南](/content-ai/capabilities/changes/features/review-changes)。
+有关审阅、接受和拒绝更改的详细信息，请参阅[审阅内容指南](/content-ai/capabilities/changes/features/review-changes)。

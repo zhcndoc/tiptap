@@ -2,30 +2,30 @@
 title: 自定义建议显示方式
 meta:
   title: 显示建议 | Tiptap AI 建议
-  description: 使用自定义样式和弹出框自定义编辑器中 AI 建议的显示方式。
+  description: 使用自定义样式和弹出层自定义编辑器中 AI 建议的显示方式。
   category: 内容 AI
 ---
 
-AI 建议扩展是无头且完全可自定义的。这意味着你可以完全控制建议在编辑器中的显示方式。
+AI 建议扩展是无头且完全可定制的。这意味着你可以完全控制建议在编辑器中的显示方式。
 
-## 加载建议时显示加载/错误状态
+## 显示加载建议时的加载/错误状态
 
 你可以通过读取扩展的存储对象来访问当前的加载状态
 
 ```ts
 const storage = editor.extensionStorage.aiSuggestion
 if (storage.isLoading) {
-  // 显示加载中动画
+  // 显示加载动画
 } else if (storage.error) {
-  // 显示错误信息
+  // 显示错误信息。
 }
 ```
 
-`storage.error` 属性将包含加载建议时抛出的错误对象。你可以利用这个对象根据错误类型显示不同的错误提示。
+`storage.error` 属性将包含加载建议时抛出的错误对象。你可以根据错误类型使用该对象显示不同的错误信息。
 
 ## 默认建议样式
 
-默认情况下，AI 建议扩展会为每个建议应用 CSS 类 `tiptap-ai-suggestion`。它还会添加一个包含以下颜色变量的 `style` 属性：`--tiptap-ai-suggestion-color` 和 `--tiptap-ai-suggestion-background-color`。`tiptap-ai-suggestion` 类可以用来为编辑器中的建议应用简单样式。
+默认情况下，AI 建议扩展会向每个建议添加 CSS 类 `tiptap-ai-suggestion`。它还会添加带有以下颜色变量的 `style` 属性：`--tiptap-ai-suggestion-color` 和 `--tiptap-ai-suggestion-background-color`。类 `tiptap-ai-suggestion` 可用于在编辑器中为建议应用简单样式。
 
 ```css
 .tiptap-ai-suggestion {
@@ -34,28 +34,28 @@ if (storage.isLoading) {
 }
 ```
 
-要实现更高级的样式，可以使用 `getCustomSuggestionDecoration` [配置项](/content-ai/capabilities/suggestion/configure#custom-suggestion-styles)。
+如果需要更高级的样式，请使用 `getCustomSuggestionDecoration` [配置选项](/content-ai/capabilities/suggestion/configure#custom-suggestion-styles)。
 
-## 被选中的建议
+## 选中建议
 
-当光标悬停在建议上时，该建议即视为“已选择”。
+当光标悬停在建议上时，该建议被视为“选中”。
 
-你可以从扩展的存储对象中读取已选择的建议
+你可以从扩展的存储对象中读取选中的建议
 
 ```ts
 const storage = editor.extensionStorage.aiSuggestion
 const selectedSuggestion = storage.getSelectedSuggestion()
 ```
 
-要以程序化方式选中建议，使用 `selectAiSuggestion` 命令。
+要通过编程方式选中某个建议，请使用 `selectAiSuggestion` 命令。
 
 ```ts
 editor.commands.selectAiSuggestion(suggestionId)
 ```
 
-这会将光标移动到建议的起始位置，使其被视为“已选择”。
+这会将光标移至建议的起始位置，从而使其被视为“选中”。
 
-默认情况下，AI 建议扩展会将 CSS 类 `tiptap-ai-suggestion--selected` 应用于已选择的建议。你可以通过该类为编辑器中的建议设置样式。
+默认情况下，AI 建议扩展会向选中的建议应用 CSS 类 `tiptap-ai-suggestion--selected`。此类可用于在编辑器中为选中的建议添加样式。
 
 ```css
 .tiptap-ai-suggestion--selected {
@@ -66,16 +66,16 @@ editor.commands.selectAiSuggestion(suggestionId)
 
 ## 自定义建议的外观
 
-`getCustomSuggestionDecoration` 选项允许你控制建议的外观，并为用户提供视觉提示。你可以为建议添加自定义 CSS 类，或者在建议前后添加自定义元素。这对于添加弹出提示框、工具提示、图标或其他元素非常有用。
+`getCustomSuggestionDecoration` 选项允许你控制建议的外观，并为用户提供视觉提示。你可以向建议添加自定义 CSS 类，也可以在建议前后添加自定义元素。这对于向建议添加弹出层、工具提示、图标或其他元素非常有用。
 
-自定义建议样式是通过 [Prosemirror Decorations API](https://prosemirror.net/docs/guide/#view.decorations) 实现的。
+自定义建议样式是通过 [Prosemirror Decorations API](https://prosemirror.net/docs/guide/#view.decorations) 应用的。
 
-了解如何在选择建议时显示弹出框的详细指南，请[参考此指南](/content-ai/capabilities/suggestion/features/display-suggestions#show-a-popover-when-you-select-a-suggestion)。
+要了解如何在选中建议时显示弹出层，[请参考本指南](/content-ai/capabilities/suggestion/features/display-suggestions#show-a-popover-when-you-select-a-suggestion)。
 
 ```ts
 AiSuggestion.configure({
   getCustomSuggestionDecoration({ suggestion, isSelected, getDefaultDecorations }) {
-    // 可以将AI建议扩展的默认装饰与自定义装饰结合使用
+    // 你可以将 AI 建议扩展的默认装饰与自定义装饰结合起来
     const decorations = getDefaultDecorations()
 
     // 在建议文本后添加自定义元素
@@ -91,23 +91,23 @@ AiSuggestion.configure({
 })
 ```
 
-## 选择建议时显示弹出框
+## 选中建议时显示弹出层
 
-现代 AI 建议的一个重要功能是能够在选择建议时显示弹出框或工具提示。这种弹出框通常提供关于建议的额外信息，并允许用户接受或拒绝。
+现代 AI 建议的一个核心功能是在选中建议时显示弹出层或工具提示。该弹出层通常提供该建议的额外信息，并允许用户接受或拒绝该建议。
 
-要在选择建议时显示弹出框，你需要使用 `getCustomSuggestionDecoration` 选项。此函数允许你向建议中添加自定义元素，包括弹出框。
+要在选中建议时显示弹出层，需使用 `getCustomSuggestionDecoration` 选项。该函数允许你向建议添加自定义元素，包括弹出层。
 
-下面是使用 React UI 库实现的简化示例。
+下面是用 React UI 库简化实现的示例。
 
 ```tsx
-// 首先，定义一个钩子存储将渲染弹出框的 HTML 元素
+// 首先，定义一个 hook 来存储弹出层渲染的 HTML 元素
 const [popoverElement, setPopoverElement] = useState<HTMLElement | null>(null)
 
 AiSuggestion.configure({
   getCustomSuggestionDecoration({ suggestion, isSelected, getDefaultDecorations }) {
     const decorations = getDefaultDecorations()
 
-    // 创建包含HTML元素的Prosemirror装饰
+    // 然后，创建包含该 HTML 元素的 Prosemirror 装饰
     if (isSelected) {
       decorations.push(
         Decoration.widget(suggestion.deleteRange.to, () => {
@@ -124,41 +124,41 @@ AiSuggestion.configure({
 
 const selectedSuggestion = editor.extensionStorage.aiSuggestion.getSelectedSuggestion()
 if (popoverElement && selectedSuggestion) {
-  // 使用React Portals将弹出框内容渲染到自定义元素中
+  // 然后，将内容添加到该自定义元素中。在此示例中，我们使用 React 门户将弹出层渲染到编辑器内。
   ReactDOM.createPortal(<Popover suggestion={selectedSuggestion} />, popoverElement)
 }
 ```
 
-我们建议使用 [Floating UI](https://floating-ui.com/) 库来显示弹出框。你可以在[演示页面](/content-ai/capabilities/suggestion/overview)中看到示例。
+我们推荐使用 [Floating UI](https://floating-ui.com/) 库来显示弹出层。你可以在 [演示示例](/content-ai/capabilities/suggestion/overview) 中查看具体实现。
 
-在弹出框中渲染建议时，建议显示句子的前后词，以提供更多上下文。我们已经创建了 `getNextWord` 和 `getPreviousWord` 工具函数，你无需自己实现。可以从 `@tiptap-pro/extension-ai-suggestion` 库中导入。
+在弹出层中渲染建议时，你可能希望显示该句子的前后单词，为用户提供更多上下文。我们已经创建了 `getNextWord` 和 `getPreviousWord` 实用函数，免去你自己实现的麻烦。你可以从 `@tiptap-pro/extension-ai-suggestion` 库中导入它们。
 
 ```ts
 import { getNextWord, getPreviousWord } from '@tiptap-pro/extension-ai-suggestion'
 
-// 获取句子中的前一个词
+// 获取句子中的前一个单词。
 const { previousWord } = getPreviousWord(editor, suggestion.deleteRange.from)
-// 获取句子中的后一个词以及紧随其后的标点符号（如果是句末）
+// 获取句子中的下一个单词及其后的标点符号（如果已到句尾）。
 const { nextWord, punctuationMark } = getNextWord(editor, suggestion.deleteRange.to)
 ```
 
-## 在编辑器外侧的侧边栏显示建议
+## 在编辑器外的侧边栏显示建议
 
-你可以通过扩展的 [存储对象](/content-ai/capabilities/suggestion/api-reference#extension-storage) 获取当前的建议。
+你可以从扩展的[存储对象](/content-ai/capabilities/suggestion/api-reference#extension-storage)访问当前建议。
 
 ```ts
 const storage = editor.extensionStorage.aiSuggestion
 const suggestions = storage.getSuggestions()
 ```
 
-然后，可以利用这些数据在编辑器外部的界面中渲染建议。以下是使用 React UI 库实现的示例：
+然后，你可以使用这些数据在 UI 中（编辑器外）渲染建议。以下是使用 React UI 库实现的示例：
 
 ```tsx
-// 获取编辑器状态中的建议
+// 从编辑器状态中获取建议。
 const storage = editor.extensionStorage.aiSuggestion
 const suggestions = storage.getSuggestions()
 
-// 在界面中渲染建议
+// 在 UI 中渲染建议
 return (
   <div>
     {suggestions.map((suggestion) => (

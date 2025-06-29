@@ -2,28 +2,28 @@
 title: 锁定内容以防止校对
 meta:
   title: 锁定内容 | Tiptap AI 建议
-  description: 通过过滤建议来防止某些内容被校对。
+  description: 通过过滤建议，防止对某些内容进行校对。
   category: 内容 AI
 ---
 
-因为您的文档可能包含重要信息，您可能不想对其所有内容生成建议。您可能想将某些内容标记为“已锁定”，并防止生成修改它的建议。
+因为您的文档可能包含重要信息，您可能不希望对其所有内容生成建议。您可能希望将某些内容标记为“锁定”，并阻止建议生成修改这些内容的建议。
 
-我们正在开发一个扩展来实现这一功能，尽量减少麻烦。如果您对即将推出的这一功能感兴趣，并认为您会在应用程序中使用它，请通过 humans@tiptap.dev 与我们联系。
+我们正在开发一个扩展，以最小的麻烦实现此功能。如果您对即将推出的此功能感兴趣，并且认为会在您的应用中使用它，请通过 humans@tiptap.dev 与我们联系。
 
-您还可以通过过滤解析器生成的建议来防止某些内容被校对。实现您自定义的过滤函数，以删除应用于文档某些位置的建议，或者删除包含特定类型内容的建议。
+您也可以通过过滤解析器生成的建议来防止对某些内容进行校对。实现您的自定义过滤函数，删除应用于文档中特定位置或包含特定类型内容的建议。
 
 ```ts
 AiSuggestion.configure({
   async resolver({ defaultResolver, ...options }) {
     // 加载建议
     const suggestions = await defaultResolver(options)
-    // 移除修改已锁定内容的建议
+    // 移除修改锁定内容的建议
     const filteredSuggestions = filterSuggestions(suggestions)
     return filteredSuggestions
   },
 })
 
-// 过滤函数，移除修改 10 到 20 位置内容的建议。
+// 过滤函数，移除修改位置在10到20之间内容的建议。
 function filterSuggestions(suggestions) {
   return suggestions.filter(
     (suggestion) => suggestion.deleteRange.from > 20 || suggestion.deleteRange.to < 10,

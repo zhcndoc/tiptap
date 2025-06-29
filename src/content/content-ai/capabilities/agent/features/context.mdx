@@ -1,0 +1,37 @@
+---
+title: 提供上下文
+meta:
+  title: 提供上下文 | Tiptap 内容 AI
+  description: 了解如何为用户消息添加上下文
+  category: 内容 AI
+---
+
+在 AI 代理中，上下文是补充用户请求的数据。有时，它对于完成任务至关重要。
+
+例如，在多文档 AI 代理中，如果用户提到某个文档，则应同时将该文档的 ID 作为上下文发送。
+
+通过使用 `context` 选项，在创建用户消息时提供上下文。
+
+```ts
+provider.addUserMessage('总结所选文档', {
+  context: '所选文档的 ID 是：12345',
+})
+```
+
+## 通过提及插入上下文
+
+在许多 AI 聊天机器人中，用户可以通过提及文件和其他用户来引用它们：`@John`，`#file-123` 等。你可以通过将提示输入定义为 Tiptap 文本编辑器，并安装 [Mention 扩展](/editor/extensions/nodes/mention) 来实现此行为。
+
+## 将文件和 URL 添加到上下文
+
+`context` 选项仅接受字符串，不接受文件对象。要将文件作为上下文添加，请按以下步骤操作：
+
+1. 将文件上传到你的服务器。获取其标识符。
+2. 将文件标识符添加到 `context` 选项中。
+3. 在[你的后端](/content-ai/capabilities/agent/custom-llms)中，定义一个[自定义服务器端工具](/content-ai/capabilities/agent/custom-llms/server-side-tools)，让 AI 代理读取该文件的内容。
+
+URL 同样适用。如果用户提供 URL，你可以将其作为字符串包含在 `context` 选项中，并定义一个[自定义工具](/content-ai/capabilities/agent/custom-llms/server-side-tools)来搜索网页并检索该 URL 的内容。
+
+## 将编辑器的选区添加到上下文
+
+为了让 AI 代理了解编辑器中选中的内容，启用[选区感知](/content-ai/capabilities/agent/features/selection-awareness)。

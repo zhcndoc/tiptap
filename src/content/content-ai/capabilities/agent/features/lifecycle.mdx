@@ -1,0 +1,68 @@
+---
+title: AI 代理生命周期
+meta:
+  title: AI 代理生命周期 | Tiptap 内容 AI
+  description: 了解在 Tiptap 中运行的 AI 代理的生命周期。
+  category: 内容 AI
+---
+
+AI 代理的生命周期从调用 `provider.run()` 开始，到 AI 代理完成任务、需要用户审核或遇到错误时结束。
+
+## 生命周期步骤
+
+1. **初始化**：当您在添加用户消息后调用 `provider.run()` 时，生命周期开始。
+2. **处理**：AI 代理调用 AI 模型。AI 返回一条消息和一个工具调用。
+3. **工具执行**：AI 代理调用工具以读取或修改文档。
+4. **循环**：AI 代理再次调用 AI 并执行下一个工具，直到满足终止条件。
+5. **完成**：当 AI 代理完成任务、需要用户审核或遇到错误时，生命周期结束。
+
+## 控制生命周期
+
+您可以使用以下方法控制 AI 代理的生命周期：
+
+```tsx
+// 启动生命周期
+provider.run()
+
+// 停止当前生命周期
+provider.stop()
+```
+
+默认情况下，AI 代理在添加用户消息后不会自动运行。您需要显式调用 `run()`：
+
+```tsx
+// 添加消息并运行 AI 代理
+provider.addUserMessage('用适当的标题格式化此文档')
+provider.run()
+```
+
+## 处理完成
+
+监听 `runFinished` 事件，以便在生命周期完成时收到通知。
+
+```tsx
+// 订阅 runFinished 事件
+provider.on('runFinished', (context) => {
+  console.log('AI 代理生命周期已完成')
+  showCompletionNotification('AI 代理已完成任务')
+})
+```
+
+## 状态
+
+在其生命周期中，AI 代理会经历不同的[状态](/content-ai/capabilities/agent/features/state#status)转换：
+
+1. `idle` → `loading`：调用 `run()` 时
+2. `loading` → `reviewingToolCall`：工具调用需要用户审核时
+3. `loading` → `loadingError`：发生错误时
+4. `loading` → `idle`：满足以下任一条件时：
+   - 执行了最终工具调用。最终工具调用是指工具调用处理对象中 `isFinal` 属性设置为 `true` 的调用。
+   - LLM 没有响应工具调用。
+   - 调用了 `provider.stop()`
+   - 在当前生命周期结束前，调用 `provider.run()` 启动了另一个生命周期。
+
+## 并发运行 AI 代理
+
+在当前版本中，AI 代理扩展不支持在同一编辑器中运行多个 AI 代理。如果在调用 `provider.run()` 时已有生命周期正在进行，当前生命周期将在新生命周期开始前被中断。
+
+若需同时运行多个 AI 代理，请实例化多个编辑器和 AI 代理提供者。

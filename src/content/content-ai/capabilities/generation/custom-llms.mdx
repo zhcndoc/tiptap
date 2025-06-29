@@ -1,65 +1,64 @@
 ---
-title: 集成自定义大语言模型（LLM）
+title: 集成自定义 LLM
 meta:
-  title: 自定义 LLM | Tiptap 内容 AI
-  description: 通过生成式 AI 扩展实现自定义 LLM，并在编辑器中覆盖解析器函数。请查阅文档了解更多信息！
+  title: 自定义 LLM | Tiptap Content AI
+  description: 使用生成式 AI 扩展实现自定义 LLM，并在编辑器中重写解析函数。详细内容请查阅文档！
   category: 内容 AI
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-如果你想使用自己的后端来提供访问自定义 LLM 的能力，可以在扩展配置中覆盖以下定义的解析器函数。
+如果你想使用自己的后端提供对自定义 LLM 的访问，可以在扩展配置中重写下面定义的解析函数。
 
-请确保你返回的是正确类型的响应，并且正确处理错误。
+确保你返回了正确类型的响应，并且正确处理了错误。
 
-<Callout title="温馨提示！" variant="hint">
-  强烈建议你不要在前端直接调用 OpenAI 接口，这可能导致 API 令牌泄露！你应当通过后端代理来保护你的 API 令牌安全。
+<Callout title="注意！" variant="hint">
+  我们强烈建议不要在前端直接调用 OpenAI，因为这可能导致 API
+  令牌泄露！你应该通过后端代理来保护你的 API 令牌安全。
 </Callout>
 
-## 安装 AI 扩展
+## 访问私有注册表
 
-为了使用自定义解析器函数，你需要安装我们的 Tiptap AI 扩展。
+高级 AI 扩展发布在 Tiptap 的私有 npm 注册表中。请按照[私有注册表指南](/guides/pro-extensions)集成扩展。如果你已经认证了你的 Tiptap 账户，可以直接跳转到[#安装](#install)。
 
-<Callout title="专业版扩展" variant="warning">
+## 安装
 
-    此扩展需要有效订阅且处于合适计划中，并且需要[访问我们的私有注册表](/guides/pro-extensions)，请先完成相关设置。
-
-</Callout>
+为了使用自定义解析函数，你需要安装我们 Tiptap AI 扩展的高级版本。
 
 ```bash
-npm install @tiptap-pro/extension-ai@beta
+npm install @tiptap-pro/extension-ai-advanced
 ```
 
 ### 同时使用自定义 LLM 和 Tiptap AI 云服务
 
-如果你想部分情况下依赖我们的云服务，请确保你[按照这里的说明完成团队设置](/content-ai/capabilities/generation/install#start-your-content-ai-app)。
+如果你想在某些情况下依赖我们的云服务，确保你已按照[此处说明](/content-ai/capabilities/generation/install#start-your-content-ai-app)设置了你的团队。
 
-## 解析器函数
+## 解析函数
 
-你可以在扩展选项中定义自定义解析器函数。请注意，它们期望返回以下类型。
+你可以在扩展选项中定义自定义解析函数。请注意它们预期的返回类型如下：
 
-| 类型       | 方法名                 | 返回类型                                       |
+| 类型         | 方法名                   | 返回类型                                      |
 | ---------- | ---------------------- | --------------------------------------------- |
-| 文字补全   | `aiCompletionResolver` | `Promise<string \| null>`                      |
-| 流式输出   | `aiStreamResolver`     | `Promise<ReadableStream<Uint8Array> \| null>` |
-| 图片生成   | `aiImageResolver`      | `Promise<string \| null>`                      |
+| completion | `aiCompletionResolver` | `Promise<string \| null>`                     |
+| streaming  | `aiStreamResolver`     | `Promise<ReadableStream<Uint8Array> \| null>` |
+| image      | `aiImageResolver`      | `Promise<string \| null>`                     |
 
 使用 `aiCompletionResolver` 以非流式方式向编辑器添加文本。
 
-使用 `aiStreamResolver` 可将内容直接流入编辑器，从而实现编辑器的打字机效果。
+使用 `aiStreamResolver` 直接将内容流式传输到编辑器，实现打字机效果。
 
-确保流返回的是 HTML，以便 Tiptap 可以直接将内容渲染为富文本。这种方式免去了 Markdown 解析的需要，并保持前端轻量。
+确保流返回 HTML，以便 Tiptap 直接将内容渲染为富文本。此方式免去了 Markdown 解析器的需求，使前端保持轻量。
 
 ## 示例
 
-### 在补全模式下覆盖特定命令解析
+### 在完成模式中重写特定命令的解析
 
-本示例中，当调用 `rephrase` 操作/命令时，我们希望调用自定义后端。
-其他所有操作都应由 Tiptap 云的默认后端处理。
+本例中我们希望在调用 `rephrase` 动作/命令时，调用自定义后端。
+其他所有情况均由 Tiptap Cloud 默认后端处理。
 
 ```js
 // ...
-import Ai from '@tiptap-pro/extension-ai'
+import Ai from '@tiptap-pro/extension-ai-advanced'
 // ...
 
 Ai.configure({
@@ -67,9 +66,9 @@ Ai.configure({
   token: 'TOKEN_HERE',
   // ...
   onError(error, context) {
-    // 错误处理
+    // 处理错误
   },
-  // 定义补全解析器函数（注意：流式和图片解析器需分别定义！）
+  // 定义完成解析函数（注意：流式和图像需单独定义！）
   aiCompletionResolver: async ({
     editor,
     action,
@@ -78,8 +77,8 @@ Ai.configure({
     extensionOptions,
     defaultResolver,
   }) => {
-    // 根据 action、text 等条件判断
-    // 决定是否调用自定义接口
+    // 根据 action、text 或其他条件判断
+    // 决定是否使用自定义接口
     if (action === 'rephrase') {
       const response = await fetch('https://dummyjson.com/quotes/random')
       const json = await response.json()
@@ -91,7 +90,7 @@ Ai.configure({
       return json?.quote
     }
 
-    // 其他请求交由 Tiptap AI 服务处理
+    // 其他情况则转发至 Tiptap AI 服务
     return defaultResolver({
       editor,
       action,
@@ -104,13 +103,13 @@ Ai.configure({
 })
 ```
 
-### 注册一个新的AI命令并调用自定义后端操作
+### 注册新的 AI 命令并调用自定义后端动作
 
-本示例中，我们注册了一个新的编辑器命令 `aiCustomTextCommand`，使用 Tiptap 的 `runAiTextCommand` 函数让 Tiptap 处理其余操作，并添加自定义命令解析以调用自定义后端（补全模式）。
+本例中，我们注册了一个名为 `aiCustomTextCommand` 的编辑器命令，使用 Tiptap 的 `runAiTextCommand` 函数完成其余工作，并添加自定义命令的解析以调用自定义后端（完成模式）。
 
 ```js
 // …
-import { Ai, runAiTextCommand } from '@tiptap-pro/extension-ai'
+import { Ai, runAiTextCommand } from '@tiptap-pro/extension-ai-advanced'
 // …
 
 // 如果使用 TypeScript，请声明类型：
@@ -131,22 +130,22 @@ const AiExtended = Ai.extend({
       aiCustomTextCommand:
         (options = {}) =>
         (props) => {
-          // 你可以自行处理，例如获取选中文本并传入特定命令解析
+          // 你可以自行实现逻辑，比如获取所选文字并传递给特定命令解析
           return runAiTextCommand(props, 'customCommand', options)
         },
     }
   },
 })
 
-// … 你需要在此处初始化你的 Tiptap 编辑器实例并注册扩展
+// … 这里初始化你的 Tiptap 编辑器实例并注册扩展
 
 const editor = new Editor({
   extensions: [
     /* … 添加其他扩展 */
     AiExtended.configure({
-      /* … 添加配置（appId, token 等） */
+      /* … 添加配置（appId、token 等） */
       onError(error, context) {
-        // 错误处理
+        // 处理错误
       },
       aiCompletionResolver: async ({
         action,
@@ -181,21 +180,21 @@ const editor = new Editor({
   content: '',
 })
 
-// … 使用此命令运行你的新指令：
+// … 使用以下方式运行新命令：
 // editor.chain().focus().aiCustomTextCommand().run()
 ```
 
-### 在流式模式下使用自定义后端
+### 在流模式下使用你的自定义后端
 
-本示例中，我们完全依赖自定义后端。
+本例完全依赖自定义后端。
 
-确保函数 `aiStreamResolver` 返回的是一个 `ReadableStream<Uint8Array>`。
+确保 `aiStreamResolver` 函数返回 `ReadableStream<Uint8Array>`。
 
-另外请注意：如果你既想使用流式模式，又想使用传统的补全模式（非流式），你还需要定义一个 `aiCompletionResolver`！
+请注意：如果你同时想使用流模式和传统的完成模式（非流模式），也需定义 `aiCompletionResolver`！
 
 ```js
 // ...
-import Ai from '@tiptap-pro/extension-ai'
+import Ai from '@tiptap-pro/extension-ai-advanced'
 // ...
 
 Ai.configure({
@@ -203,9 +202,9 @@ Ai.configure({
   token: 'TOKEN_HERE',
   // ...
   onError(error, context) {
-    // 错误处理
+    // 处理错误
   },
-  // 定义流式解析器函数
+  // 定义流解析函数
   aiStreamResolver: async ({ action, text, textOptions }) => {
     const fetchOptions = {
       method: 'POST',

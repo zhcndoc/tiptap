@@ -2,8 +2,11 @@
 title: Tiptap 的 AI 代理
 meta:
   title: AI 代理 | Tiptap 内容 AI
-  description: 构建 AI 代理以编辑富文本文档 - 从简单的聊天机器人助手到复杂的文档编辑工作流程。
+  description: 构建编辑富文本文件的 AI 代理——从简单的聊天助手到复杂的文档编辑工作流。
   category: 内容 AI
+tags:
+  - type: team
+  - type: beta
 sidebars:
   hideSecondary: true
 ---
@@ -13,20 +16,19 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-  <RequirementItem label="1. 激活试用或订阅">
-    在您的账户中开始一个免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 
-    [团队计划](https://cloud.tiptap.dev/v2/billing)。
-  </RequirementItem>
-  <RequirementItem label="2. 集成 AI 提供者">
-    在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI 或查看 
-    [自定义 LLM 指南](/content-ai/capabilities/agent/custom-llms)。
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账号中开启[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅团队计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+  <RequirementItem label="2. 集成 AI 提供商">
+    在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或者查看
+    [自定义大型语言模型指南](/content-ai/capabilities/agent/custom-llms)。
   </RequirementItem>
   <RequirementItem label="3. 从私有注册表安装">
-    要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证以访问 Tiptap 的私有 npm 注册表。
+    要安装前端扩展，请按照[设置指南](/guides/pro-extensions)认证访问 Tiptap 的私有 npm 注册表。
   </RequirementItem>
 </Requirements>
 
-构建能够编辑富文本文档的 AI 代理——从简单的聊天机器人助手到复杂的文档编辑工作流程。
+构建可以编辑富文本的 AI 代理——从简单的聊天助手到复杂的文档编辑工作流。
 
 <CodeDemo
   isPro
@@ -35,35 +37,32 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
   src="https://develop--tiptap-pro.netlify.app/preview/Extensions/AiAgent"
 />
 
-AI Agent 扩展让您能够集成一个 AI 助手，该助手可以读取文档、回答问题，并基于用户定义的任务编辑您的文档。
+AI 代理扩展允许你集成一个 AI 助手，它可以根据用户定义的任务读取、回答问题并编辑你的文档。
 
-<Callout title="集成或测试 AI 代理" variant="warning">
-  要测试或集成此功能，您需要一个有效的试用或 Tiptap 团队订阅。
-</Callout>
-
-## 主要功能
+## 主要特点
 
 - 快速且高效地编辑大型文档。
-- 理解您的文档结构和格式，包括自定义元素。
+- 理解你的文档结构，包括自定义元素。
 - 与 Tiptap Cloud 开箱即用，零配置。
-- 可与您自定义的后端和大语言模型（LLM）集成。
-- 添加自定义数据源和 RAG 流水线。
-- 让您的用户审核并接受/拒绝 AI 生成的更改。
+- 可集成自定义后端和大型语言模型（LLM）。
+- 可添加到已有的 AI 代理中。
+- 支持添加自定义数据源和基于检索的生成（RAG）管道。
+- 允许用户审核并接受/拒绝 AI 生成的更改。
 
 ## 什么是 AI 代理？
 
-AI 代理是能够通过独立决策完成复杂任务的系统。与简单的聊天机器人助手不同，AI 代理不仅可以以文本回复，还可以调用让其与环境交互的“工具”。
+AI 代理是可以通过自主决策完成复杂任务的系统。与简单的聊天助手不同，AI 代理不仅可以回复文本，还可以调用“工具”，让它们与环境进行交互。
 
-Tiptap AI 代理具备执行以下操作的工具：
+Tiptap 的 AI 代理拥有执行以下操作的工具：
 
 - 读取文档
 - 重写文档内容
-- 制订计划，与用户互动，并创建所做更改的总结
+- 制定计划，与用户交互，并创建所做更改的摘要。
 
-这些内置工具针对富文本编辑进行了优化，遵循大语言模型（LLM）的最佳实践，让您专注于应用的核心逻辑。您还可以将它们与用于数据检索的自定义工具结合使用。
+这些内置工具针对富文本编辑进行了优化，并遵循大型语言模型的最佳实践，让你专注于应用程序的核心逻辑。你也可以将它们与自定义的数据检索工具结合使用。
 
-当调用带有这些工具的 LLM 时，它会选择一个执行工具。然后，Tiptap AI 代理扩展将其应用于编辑器，有效地修改文档或读取其内容。在典型的实现中，LLM 会在服务器端调用，而文档编辑则发生在浏览器中。
+当调用大型语言模型（LLM）并配合这些工具时，模型会选择其中一个执行。随后，Tiptap AI 代理扩展会将其应用到编辑器中，以高效方式修改文档或读取内容。在典型实现中，LLM 在服务器端调用，而文档编辑在浏览器中进行。
 
-可将 LLM 视为 AI 代理的“大脑”，负责决定调用哪些工具。Tiptap AI 代理扩展则充当“手”和“眼”，使代理能够读取和操作文档。
+可以把大型语言模型视为 AI 代理的“大脑”，负责决定调用哪些工具；Tiptap AI 代理扩展则是“手”和“眼睛”，使代理能够读取并与文档互动。
 
-通过将 AI 代理扩展与 Tiptap Cloud 一起使用，您无需担心服务器——我们已经为您搭建好。如果您想定制 LLM 及 AI 代理可用的工具（以执行如搜索外部数据源等其他操作），可以将 AI 代理扩展与您自己的后端集成。
+通过在 Tiptap Cloud 上使用 AI 代理扩展，你无需担心服务器，我们已经为你搭建好。如果你想自定义 LLM 以及 AI 代理可用的工具（例如，让它能够执行搜索外部数据源等操作），你也可以将 AI 代理扩展集成到你自己的后端中。

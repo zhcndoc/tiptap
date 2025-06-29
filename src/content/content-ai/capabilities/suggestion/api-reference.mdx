@@ -13,91 +13,89 @@ meta:
  * AI 建议扩展的配置选项。
  */
 export interface AiSuggestionOptions {
-  /** 审校过程中应用的规则
+  /** 校对时要应用的规则
    * @default []
    */
   rules: AiSuggestionRule[]
-  /** 在进行任何审校之前显示的初始建议
+  /** 在完成任何校对之前显示的初始建议
    * @default []
    */
   initialSuggestions: Suggestion[]
-  /** 在进行任何审校之前应用的推荐拒绝
+  /** 在完成任何校对之前应用的初始拒绝项
    * @default []
    */
   initialRejections: AiSuggestionRejection[]
-  /** 自定义在编辑器中建议装饰的函数
+  /** 自定义编辑器中建议装饰的方法
    * @default `getDefaultDecorations()`
-   * @param args - 定制建议装饰的参数。
-   * @return 一个 `Decoration` 对象数组。
+   * @param args - 自定义建议装饰的选项。
+   * @return 返回一个 `Decoration` 对象数组。
    */
   getCustomSuggestionDecoration: (args: GetCustomSuggestionDecorationOptions) => Decoration[]
-  /** 内容变更后等待重新加载建议的时间（毫秒）
+  /** 内容变化后等待重新加载建议的时间，单位毫秒。
    * @default 800
    */
   debounceTimeout: number
-  /** 初始化时是否加载建议
+  /** 编辑器初始化时是否加载建议
    * @default true
    */
   loadOnStart: boolean
-  /** 内容变化时是否重新加载建议
+  /** 编辑器内容变化时是否重新加载建议
    * @default true
    */
   reloadOnUpdate: boolean
-  /** 加载建议出错时的回调
-   * @param error - 发生错误的建议加载过程中的错误。
+  /** 加载建议时发生错误的回调函数
+   * @param error - 加载建议时发生的错误。
    * @default console.error
    */
   onLoadSuggestionsError: (error: unknown) => void
   /**
-   * 用于校对内容和生成建议的AI模型。
+   * 用于校对内容并生成建议的 AI 模型。
    * @default "gpt-4o-mini"
    */
   modelName: AiSuggestionModelName
   /**
-   * 从外部加载建议的函数，基于
-   * 当前编辑器内容和规则。让你可以使用自己的AI模型分析
+   * 从外部来源加载建议的函数，基于当前编辑器内容和规则。允许你用自己的 AI 模型分析
    * 内容并返回建议。
    *
-   * @param options - 解析建议的参数。
-   * @return 一个应应用的建议列表。
+   * @param options - 解析建议的选项。
+   * @return 应用的建议列表。
    */
   resolver: (options: AiSuggestionCustomResolverOptions) => Promise<Suggestion[]>
   /**
-   * Tiptap AI应用ID。
+   * Tiptap AI 应用的 ID。
    */
   appId: string
   /**
-   * Tiptap AI令牌。
+   * Tiptap AI 令牌。
    */
   token: string
   /**
-   * Tiptap AI API的基础URL。
+   * Tiptap AI API 的基础 URL。
    */
   baseUrl: string
   /**
-   * 提供额外信息给AI模型以生成建议的可选上下文。
+   * 可选的上下文，用于向 AI 模型提供额外信息以生成建议。
    */
   context: string | null
   /**
-   * 是否对编辑器内容进行块划分并缓存每个块的建议。这允许扩展在内容重新加载时重复使用缓存的建议。这对于大型
-   * 文档有助于提升性能并降低成本。
+   * 是否将编辑器内容分块并缓存每块的建议。这样扩展在重新加载内容时可以重复使用缓存的建议，
+   * 对于处理大型文档，有助于提升性能并降低成本。
    *
    * @default true
    */
   enableCache: boolean
   /**
-   * 用于拆分文档的块大小，单位为
-   * 顶层子节点数量。
+   * 将文档拆分成块的大小，以编辑器内容的顶层子节点数量计。
    *
    * @default 2
    */
   chunkSize: number
   /**
-   * 拆分编辑器内容的HTML为块的函数。默认情况下，它会依据配置的
-   * 块大小，将HTML拆分成更小的片段，并返回HTML块数组。你也可以通过提供自定义函数来覆盖此行为。
+   * 一个将编辑器 HTML 内容分块的函数。
+   * 默认根据配置的块大小将 HTML 拆分成更小部分，返回 HTML 块数组。你可以通过提供自己的函数覆盖此行为。
    *
-   * @param options - 拆分HTML的参数。
-   * @returns 块数组
+   * @param options - 拆分 HTML 的选项。
+   * @returns 返回一个块数组
    * @default `defaultChunkHtmlFunction`
    */
   chunkHtmlFunction: (options: ChunkHtmlOptions) => HtmlChunk[]
@@ -111,51 +109,54 @@ declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     aiSuggestion: {
       /**
-       * 立即加载AI建议。
+       * 立即加载 AI 建议。
        */
       loadAiSuggestions: () => ReturnType
       /**
-       * 在扩展选项定义的去抖时间后加载AI建议。
+       * 在扩展选项中定义的防抖超时后加载 AI 建议。
        */
       loadAiSuggestionsDebounced: () => ReturnType
       /**
-       * 设置要显示的AI建议。
+       * 设置显示的 AI 建议。
        *
        * @param suggestions 要显示的建议。
        */
       setAiSuggestions: (suggestions: Suggestion[]) => ReturnType
       /**
-       * 选择某个建议。被选中的建议在编辑器中会有不同的样式。
+       * 设置一个建议为选中状态。选中的建议在编辑器中会有不同样式。
        * */
       selectAiSuggestion: (suggestionId: string) => ReturnType
       /**
-       * 将建议应用到编辑器，修改其内容。
+       * 应用一个建议到编辑器，修改内容。
        *
-       * @param options 建议的ID和被选中的替换方案。如果未提供替换方案，则使用第一个方案。还可以自定义被替换内容的格式。
+       * @param options 建议的 id 及选中替换选项。
+       * 如果未提供替换选项，默认使用第一个选项。
+       * 也可自定义替换内容的格式。
        */
       applyAiSuggestion: (options: ApplyAiSuggestionOptions) => ReturnType
       /**
-       * 将建议标记为被拒绝，移除出建议列表。
+       * 标记一个建议为已拒绝，从建议列表中移除。
        *
-       * @param suggestionId 被拒绝建议的ID。
+       * @param suggestionId 被拒绝建议的 id
        */
       rejectAiSuggestion: (suggestionId: string) => ReturnType
 
       /**
-       * 设置被拒绝的建议列表。此命令有助于撤销拒绝或清空所有拒绝。
+       * 设置多个被拒绝的建议。该命令对于撤销拒绝或清空所有拒绝项很有用。
        *
-       * @param rejections 被设置的拒绝项。
+       * @param rejections 要设置的拒绝项。
        */
       setAiSuggestionRejections: (rejections: AiSuggestionRejection[]) => ReturnType
 
       /**
-       * 应用所有未被拒绝的AI建议。每个建议将应用第一个替换选项。
+       * 应用所有未被拒绝的 AI 建议。
+       * 对每个建议应用第一个替换选项。
        */
       applyAllAiSuggestions: (options?: ApplyAllAiSuggestionOptions) => ReturnType
       /**
-       * 设置AI建议规则。让你可以在不重新加载编辑器的情况下更新规则。
+       * 设置 AI 建议规则。允许你更新用于校对的规则，而无需重新加载编辑器。
        *
-       * 此命令不会重新加载建议。若要使用新规则重新加载建议，请调用：
+       * 该命令不会重新加载建议。要使用新规则重新加载建议，请调用 `loadAiSuggestions` 命令，例如：
        *
        * ```js
        * editor.chain().setAiSuggestionRules(newRules).loadAiSuggestions().run()
@@ -164,15 +165,15 @@ declare module '@tiptap/core' {
       setAiSuggestionRules: (rules?: AiSuggestionRule[]) => ReturnType
 
       /**
-       * 设置AI建议的上下文。此上下文用于为AI模型提供额外信息，以生成建议。
+       * 设置 AI 建议上下文。该上下文用于向 AI 模型提供额外信息以生成建议。
        *
-       * 此命令不会重新加载建议。若要用新上下文重新加载建议，请调用：
+       * 该命令不会重新加载建议。要使用新上下文重新加载建议，请调用 `loadAiSuggestions` 命令，例如：
        *
        * ```js
        * editor.chain().setAiSuggestionContext(newContext).loadAiSuggestions().run()
        * ```
        *
-       * @param context 提供给AI模型的可选额外信息。
+       * @param context 可选上下文，用于向 AI 模型提供额外信息
        */
       setAiSuggestionContext: (context: string | null) => ReturnType
     }
@@ -181,17 +182,18 @@ declare module '@tiptap/core' {
 
 export interface ApplyAiSuggestionOptions {
   /**
-   * 要应用的建议ID。如果未找到，则此方法不执行任何操作。
+   * 要应用的建议标识符。如果找不到建议，则方法不会执行任何操作。
    */
   suggestionId: string
   /**
-   * 要应用的替换方案ID。如果为`undefined`，则默认采用第一个替换方案。
+   * 要应用的替换选项标识符。如果为 `undefined`，
+   * 方法默认使用第一个替换选项。
    */
   replacementOptionId?: string
   /**
-   * 控制建议的应用方式
-   * 如果为`rich-text`，建议将以HTML格式显示。
-   * 如果为`plain-text`，建议将显示为纯文本。
+   * 决定建议如何被应用
+   * 如果是 `rich-text`，建议将格式化为 HTML。
+   * 如果是 `plain-text`，建议将格式化为纯文本。
    * @default "plain-text"
    */
   format?: 'rich-text' | 'plain-text'
@@ -199,9 +201,9 @@ export interface ApplyAiSuggestionOptions {
 
 export interface ApplyAllAiSuggestionOptions {
   /**
-   * 控制建议的应用方式
-   * 如果为`rich-text`，建议将以HTML格式显示。
-   * 如果为`plain-text`，建议将显示为纯文本。
+   * 决定建议如何被应用
+   * 如果是 `rich-text`，建议将格式化为 HTML。
+   * 如果是 `plain-text`，建议将格式化为纯文本。
    * @default "plain-text"
    */
   format?: 'rich-text' | 'plain-text'
@@ -215,43 +217,43 @@ export interface ApplyAllAiSuggestionOptions {
  * AI 建议扩展的内部存储。
  */
 export interface AiSuggestionStorage {
-  /** 扩展使用的ProseMirror插件的键 */
+  /** 扩展使用的 ProseMirror 插件的键 */
   pluginKey: PluginKey<AiSuggestionProsemirrorPluginState>
-  /** 审校过程中应用的规则 */
+  /** 校对时要应用的规则 */
   rules: AiSuggestionRule[]
   /** 获取当前建议的函数 */
   getSuggestions: () => Suggestion[]
   /** 获取被拒绝建议的函数 */
   getRejections: () => AiSuggestionRejection[]
-  /** 获取当前选中的建议的函数 */
+  /** 获取当前所选建议的函数 */
   getSelectedSuggestion: () => Suggestion | null
-  /** 当前是否正在加载建议 */
+  /** 是否正在加载建议 */
   isLoading: boolean
   /** 是否至少加载过一次建议 */
   firstLoad: boolean
-  /** 上一次加载尝试中发生的错误（如果有） */
+  /** 上次加载尝试时出现的错误（如果有） */
   error: unknown | null
-  /** 用于加载建议的去抖函数 */
+  /** 用于加载建议的防抖函数 */
   debouncedFunction: DebouncedFunction<() => void>
   /** 用于中止加载建议的控制器 */
   abortController: AbortController
   /**
-   * 提供给AI模型以生成建议的可选上下文。
+   * 可选上下文，用于向 AI 模型提供额外信息以生成建议。
    */
   context: string | null
   /**
-   * 用于存储每个块的建议的缓存。
+   * 用于存储文档每块建议的缓存。
    */
   cache: AiSuggestionCache
 }
 
 /**
- * 创建编辑器中建议装饰的参数。
+ * 在编辑器中为建议创建装饰的参数。
  */
 export interface GetCustomSuggestionDecorationOptions {
-  /** 被装饰的建议 */
+  /** 正在装饰的建议 */
   suggestion: Suggestion
-  /** 当前该建议是否被选中 */
+  /** 此建议是否被选中 */
   isSelected: boolean
   /** 获取扩展提供的默认装饰样式的函数 */
   getDefaultDecorations: () => Decoration[]
@@ -264,7 +266,7 @@ export interface GetCustomSuggestionDecorationOptions {
 
 ```ts
 /**
- * 审校中应用的规则。
+ * 校对中要应用的一条规则。
  */
 export interface AiSuggestionRule {
   /**
@@ -272,29 +274,30 @@ export interface AiSuggestionRule {
    */
   id: string
   /**
-   * 规则的标题。不用于审校，而用于显示。
+   * 规则标题。不会用于校对，仅用于展示。
    */
   title: string
   /**
-   * 规则的提示信息。会传送给AI模型进行校对。
+   * 规则提示。会发送给 AI 模型用于校对。
    */
   prompt: string
   /**
-   * 规则颜色。用于划线需要替换的内容。
+   * 规则颜色。用于标记必须替换内容的下划线颜色。
    */
   color: string
   /**
-   * 规则的背景色。当建议被选中时用于高亮内容。
+   * 规则背景色。在选中建议时用于突出显示内容。
    */
   backgroundColor: string
   /**
-   * 规则的额外元数据，可用于存储一些补充信息（如来源或类别）。这不会被扩展内部使用，但可以帮助开发者自定义规则在UI中的显示方式。
+   * 规则的额外元数据，可用于存储附加信息（例如其来源或类别）。
+   * 扩展内部不使用，但可帮助开发者自定义规则在 UI 中的展示。
    */
   metadata?: any
 }
 ```
 
-### 审校建议
+### 校对建议
 
 ```ts
 import { Range } from '@tiptap/core'
@@ -303,24 +306,25 @@ import { Slice } from '@tiptap/pm/model'
 import { AiSuggestionRule } from './ai-suggestion-rule'
 
 /**
- * 建议的替换方案，包含待添加文本和被替换的slice。
+ * 建议的一个替换选项，包含待添加的文本和被替换的片段。
  */
 export interface AiSuggestionReplacementOption {
   id: string
   /**
-   * 当格式为`plain-text`时，待添加的文本内容。
+   * 替换格式为 `plain-text` 时添加的文本。
    */
   addText: string
   /**
-   * 当格式为`rich-text`时，待添加的内容Slice。
+   * 替换格式为 `rich-text` 时，添加的内容片段。
    */
   addSlice: Slice
 }
 
 /**
- * 来自AI建议扩展的建议。它包含待替换范围、删除内容、多个替换方案及需应用的规则。
+ * AI 建议扩展给出的建议。包含应被替换的范围、
+ * 要删除的文本、替换选项以及需应用的规则。
  *
- * 一个建议可以有多个替换方案。用户可以选择一项应用。
+ * 一个建议可以有多个替换选项，用户可以从中选择一个应用。
  */
 export interface Suggestion {
   /**
@@ -328,23 +332,23 @@ export interface Suggestion {
    */
   id: string
   /**
-   * 需要被替换的内容范围。
+   * 编辑器中应被替换内容的范围。
    */
   deleteRange: Range
   /**
-   * 需要删除的内容（纯文本格式）。
+   * 要从编辑器删除的纯文本内容。
    */
   deleteText: string
   /**
-   * 需要删除的slice内容。
+   * 要从编辑器删除的内容，Prosemirror 片段格式。
    */
   deleteSlice: Slice
   /**
-   * 多个替换方案，用户可选择其中一项应用。
+   * 建议的多个替换选项，用户可以从中选一个应用。
    */
   replacementOptions: AiSuggestionReplacementOption[]
   /**
-   * 将通过应用此建议遵循的校对规则。
+   * 该建议所遵循的校对规则。
    */
   rule: AiSuggestionRule
   /**
@@ -352,28 +356,29 @@ export interface Suggestion {
    */
   isRejected: boolean
   /**
-   * 建议的额外元数据，可用于存储一些补充信息（如来源或类别）。这不会被扩展内部使用，但可以帮助开发者自定义建议在UI中的显示方式。
+   * 建议的额外元数据，可用于存储附加信息（如来源或类别）。
+   * 扩展内部不使用，但可帮助开发者自定义建议在 UI 中的展示。
    */
   metadata?: any
 }
 ```
 
-### 被拒建议
+### 被拒绝的建议
 
 ```ts
 import { AiSuggestionRule } from './ai-suggestion-rule'
 
 /**
- * 表示已被拒绝的建议。它们被存储在AI建议扩展的存储中，
- * 以确保不会再次生成对应建议。
+ * 表示一条被拒绝的建议。这些会存储在 AI 建议扩展的存储中，
+ * 以避免该建议再次被生成。
  */
 export interface AiSuggestionRejection {
   /**
-   * 被拒绝建议所对应的规则。
+   * 被拒绝建议的规则。
    */
   rule: AiSuggestionRule
   /**
-   * 被拒绝建议原本要删除的文本内容。
+   * 被拒绝建议中即将被删除的文本。
    */
   deleteText: string
 }

@@ -2,15 +2,15 @@
 title: AI Agent 扩展配置选项
 meta:
   title: 配置 AI Agent | Tiptap 内容 AI
-  description: 学习如何为 Tiptap 配置 AI Agent 扩展。
+  description: 了解如何配置 Tiptap 的 AI Agent 扩展。
   category: 内容 AI
 ---
 
-Tiptap 的 AI Agent 扩展接受不同的配置选项。这些设置在创建新实例时提供给 `AiAgentProvider`。
+Tiptap 的 AI Agent 扩展接受多种配置选项。这些设置在创建新实例时传递给 `AiAgentProvider`。
 
 ## 认证
 
-要使用 AI Agent 扩展，您需要为 Tiptap Cloud 提供认证凭证。
+要使用 AI Agent 扩展，您需要提供 Tiptap Cloud 的认证凭证。
 
 ```ts
 const provider = new AiAgentProvider({
@@ -23,7 +23,7 @@ const provider = new AiAgentProvider({
 
 ## 模型选择
 
-通过设置 `modelName` 选项来配置在 Tiptap Cloud 中使用的 OpenAI 模型。AI Agent 在 `gpt-4.1` 模型上表现最佳，因为它为复杂文档编辑任务提供最佳性能。请注意，模型需要支持 [函数调用](https://platform.openai.com/docs/guides/function-calling)。
+通过设置 `modelName` 选项，配置在 Tiptap Cloud 中使用的 OpenAI 模型。AI Agent 在使用 `gpt-4.1` 模型时表现最佳，因为它在复杂文档编辑任务中提供最佳性能。请注意，模型需要支持[函数调用](https://platform.openai.com/docs/guides/function-calling)。
 
 ```ts
 const provider = new AiAgentProvider({
@@ -34,11 +34,11 @@ const provider = new AiAgentProvider({
 
 ## 自动接受设置
 
-`autoAccept` 选项控制 AI Agent 是否应该自动接受工具调用并继续运行，或者它应该停止并等待用户审查。
+`autoAccept` 选项控制 AI Agent 是否自动接受工具调用并继续运行，或停止并等待用户审核。
 
-- `"always"`: 自动接受所有工具调用
-- `"never"`: 从不自动接受工具调用
-- `"onlyRead"`: 仅自动接受不修改内容的工具调用（默认）
+- `"always"`：自动接受所有工具调用
+- `"never"`：从不自动接受工具调用
+- `"onlyRead"`：自动接受不修改内容的工具调用（默认）
 
 ```ts
 const provider = new AiAgentProvider({
@@ -49,14 +49,14 @@ const provider = new AiAgentProvider({
 
 ## 初始聊天消息
 
-您可以提供初始聊天消息，以便在第一次加载 AI Agent 时填充对话。
+您可以提供初始聊天消息，以在 AI Agent 首次加载时填充对话。
 
 ```ts
 const provider = new AiAgentProvider({
   initialChatMessages: [
     {
       type: 'ai',
-      text: '你好！我是你的 AI 助手。我今天可以为你做些什么？',
+      text: '您好！我是您的 AI 助手。今天我能帮您做些什么？',
     },
   ],
   // ... 其他选项
@@ -65,7 +65,7 @@ const provider = new AiAgentProvider({
 
 ## 自动检查点保存
 
-`autoSaveCheckpoints` 选项允许您在用户发送消息时自动保存检查点。
+`autoSaveCheckpoints` 选项允许在用户发送消息时自动保存检查点。
 
 ```ts
 const provider = new AiAgentProvider({
@@ -74,18 +74,18 @@ const provider = new AiAgentProvider({
 })
 ```
 
-当 `autoSaveCheckpoints` 选项启用时，检查点在发送用户消息之前和调用工具之前保存。如果您想自定义如何以及何时保存检查点，可以禁用此选项并手动使用 `setCheckpoint()` 方法。要了解更多关于检查点的信息，请查看 [检查点指南](/content-ai/capabilities/agent/features/checkpoints)。
+当启用 `autoSaveCheckpoints` 选项时，检查点会在用户发送消息和调用工具前保存。如果您想自定义检查点的保存方式和时间，可以禁用此选项并手动使用 `setCheckpoint()` 方法。更多关于检查点的内容，请参阅[检查点指南](/content-ai/capabilities/agent/features/checkpoints)。
 
 ## 文档分块
 
-`chunkSize` 选项控制读取时文档块的最大大小（以字符为单位）。`chunkHtml` 选项允许您自定义文档如何拆分成块。
+`chunkSize` 选项控制读取时文档块的最大大小（以字符计）。`chunkHtml` 选项允许您自定义文档如何被分块。
 
 ```ts
 const provider = new AiAgentProvider({
   chunkSize: 2000,
   chunkHtml: ({ html, chunkSize }) => {
-    // 自定义逻辑以将 HTML 拆分为块
-    // 必须返回一个 HTML 字符串数组
+    // 自定义逻辑将 HTML 分割成块
+    // 必须返回 HTML 字符串数组
     return customSplitFunction(html, chunkSize)
   },
   // ... 其他选项
@@ -94,7 +94,7 @@ const provider = new AiAgentProvider({
 
 ## AI 变更扩展集成
 
-`useAiChangesExtension` 选项决定是否使用 AI 变更扩展来跟踪变更。
+`useAiChangesExtension` 选项决定是否使用 AI Changes 扩展来跟踪变更。
 
 ```ts
 const provider = new AiAgentProvider({
@@ -103,29 +103,29 @@ const provider = new AiAgentProvider({
 })
 ```
 
-请记得在实例化编辑器实例时导入并配置 AI 变更扩展，否则集成将无法正常工作。
+请确保在实例化 Editor 实例时导入并配置 AI Changes 扩展，否则集成将无法正常工作。
 
 ## 事件处理程序
 
-AI Agent 提供程序支持多个事件处理程序，帮助您响应不同的状态和操作：
+AI Agent 提供者支持多个事件处理程序，帮助您响应不同状态和操作：
 
-### 状态变化处理程序
+### 状态变化处理器
 
-`onStateChange` 处理程序在 AI Agent 的状态改变时被调用。
+`onStateChange` 处理器在 AI Agent 状态发生变化时调用。
 
 ```ts
 const provider = new AiAgentProvider({
   onStateChange: (newState, previousState, context) => {
-    console.log('状态改变了:', newState)
+    console.log('状态变化:', newState)
     updateUI(newState)
   },
   // ... 其他选项
 })
 ```
 
-### 加载错误处理程序
+### 加载错误处理器
 
-`onLoadingError` 处理程序在加载 AI Agent 时出现错误时被调用。
+`onLoadingError` 处理器在加载 AI Agent 出错时调用。
 
 ```ts
 const provider = new AiAgentProvider({
@@ -137,32 +137,32 @@ const provider = new AiAgentProvider({
 })
 ```
 
-### 工具调用处理程序
+### 工具调用处理器
 
-`onBeforeToolCall` 和 `onAfterToolCall` 处理程序在执行工具调用之前和之后被调用。
+`onBeforeToolCall` 和 `onAfterToolCall` 处理器分别在执行工具调用之前和之后调用。
 
 ```ts
 const provider = new AiAgentProvider({
   onBeforeToolCall: (toolCall, context) => {
-    console.log('工具调用之前:', toolCall)
+    console.log('工具调用前:', toolCall)
     showLoadingIndicator()
   },
   onAfterToolCall: (toolCall, context) => {
-    console.log('工具调用之后:', toolCall)
+    console.log('工具调用后:', toolCall)
     hideLoadingIndicator()
   },
   // ... 其他选项
 })
 ```
 
-### 运行完成处理程序
+### 运行完成处理器
 
-`onRunFinished` 处理程序在 [AI Agent 运行](/content-ai/capabilities/agent/features/runs) 完成时被调用。
+`onRunFinished` 处理器在[AI Agent 生命周期](/content-ai/capabilities/agent/features/lifecycle)结束时调用。
 
 ```ts
 const provider = new AiAgentProvider({
   onRunFinished: (context) => {
-    console.log('运行完成')
+    console.log('AI Agent 运行完成')
     playCompletionSound()
   },
   // ... 其他选项
@@ -171,7 +171,7 @@ const provider = new AiAgentProvider({
 
 ## 自定义 API 端点
 
-您可以通过设置 `baseUrl` 选项来指定一个自定义的 API 端点。这在您运行自己的 Tiptap 内容 AI 服务实例时非常有用。
+您可以通过设置 `baseUrl` 选项指定 AI Agent 的自定义 API 端点。如果您正在运行自己的 Tiptap 内容 AI 服务实例，这将非常有用。
 
 ```ts
 const provider = new AiAgentProvider({
@@ -182,16 +182,16 @@ const provider = new AiAgentProvider({
 
 ## 自定义 LLM 集成选项
 
-这些配置选项使您能够将 AI Agent 与自定义 LLM 和后端服务集成。要了解更多信息，请阅读 [自定义 LLM 集成指南](/content-ai/capabilities/agent/custom-llms)。
+这些配置选项允许您将 AI Agent 与自定义的 LLM 及后端服务集成。了解更多信息，请阅读[自定义 LLM 集成指南](/content-ai/capabilities/agent/custom-llms)。
 
 ### 自定义解析器
 
-`resolver` 选项允许您将 AI Agent 与您自己的后端服务集成。此函数负责将聊天消息发送到 LLM 并返回响应。
+`resolver` 选项允许您将 AI Agent 与自己的后端服务集成。该函数负责将聊天消息发送至 LLM 并返回响应。
 
 ```ts
 const provider = new AiAgentProvider({
   resolver: async (options) => {
-    // 您自定义的逻辑，将聊天消息发送到 LLM
+    // 您的自定义逻辑，将聊天消息发送给 LLM
     // 并返回响应
     const response = await yourCustomBackend.sendChatMessages(options)
     return response
@@ -200,11 +200,11 @@ const provider = new AiAgentProvider({
 })
 ```
 
-默认情况下，AI Agent 使用 `defaultAiAgentResolver`，它将聊天消息发送到 Tiptap Cloud。
+默认情况下，AI Agent 使用 `defaultAiAgentResolver`，它将聊天消息发送至 Tiptap Cloud。
 
 ### 自定义消息适配器
 
-`adapter` 选项允许您自定义 LLM 消息转换为 AI Agent 扩展可解析的格式的方式。
+`adapter` 选项允许您自定义如何将 LLM 消息转换为 Tiptap AI Agent 扩展可解析的格式。
 
 ```ts
 const provider = new AiAgentProvider({
@@ -213,17 +213,16 @@ const provider = new AiAgentProvider({
 })
 ```
 
-默认情况下，AI Agent 使用 `openaiChatCompletionsAdapter`，与 OpenAI 聊天完成 API 兼容。该库还包括其他 LLM 提供商和 AI Agent 框架的适配器。
+默认情况下，AI Agent 使用 `openaiChatCompletionsAdapter`，它兼容 OpenAI Chat Completions API。该库还包括其他 LLM 提供商及 AI Agent 框架的适配器。
 
 ### 自定义 LLM 消息格式
 
-`createLlmMessages` 选项允许您自定义聊天消息转换为可以发送到 LLM 的格式。在 99% 的情况下，使用自定义适配器就足够了，因此您不需要自定义此选项。
+`createLlmMessages` 选项允许您自定义如何将聊天消息转换为可发送给 LLM 的格式。在99%的情况下，使用自定义适配器就足够了，因此通常不需要自定义此选项。
 
 ```ts
 const provider = new AiAgentProvider({
   createLlmMessages: (messages, adapter) => {
-    // 您自定义的逻辑，将聊天消息转换为
-    // 您的 LLM 提供商所期望的格式
+    // 您的自定义逻辑，将聊天消息转换为您的 LLM 提供商期望的格式
     return messages.map((message) => ({
       role: message.type === 'ai' ? 'assistant' : 'user',
       content: message.text,
@@ -235,7 +234,7 @@ const provider = new AiAgentProvider({
 
 ### 自定义工具
 
-`toolHandlers` 选项允许您定义 AI Agent 可以调用的自定义工具。此选项仅在您将 AI Agent 与自定义后端一起使用时生效。要了解如何设置自定义工具，请阅读 [自定义 LLM 集成指南](/content-ai/capabilities/agent/custom-llms)。
+`toolHandlers` 选项允许您定义 AI Agent 可调用的自定义工具。该选项仅在您使用自定义后端时生效。了解如何设置自定义工具，请参阅[自定义 LLM 集成指南](/content-ai/capabilities/agent/custom-llms)。
 
 ```ts
 import { toolHandlersStarterKit } from '@tiptap-pro/extension-ai-agent'
@@ -243,44 +242,44 @@ import { toolHandlersStarterKit } from '@tiptap-pro/extension-ai-agent'
 const provider = new AiAgentProvider({
   toolHandlers: [
     toolHandlersStarterKit(),
-    // ... 自定义工具处理程序
+    // ... 自定义工具处理器
   ],
   // ... 其他选项
 })
 ```
 
-### 系统提示（System prompt）
+### 系统提示
 
-您可以在与 Tiptap Cloud 一起使用时，为 AI Agent [定义自定义系统提示](/content-ai/capabilities/agent/configure/system-prompt)。
+您可以在使用 Tiptap Cloud 时，为 AI Agent [定义自定义系统提示](/content-ai/capabilities/agent/configure/system-prompt)。
 
 ```ts
 const provider = new AiAgentProvider({
-  systemPrompt: 'You are an AI agent that edits rich text documents...',
+  systemPrompt: '您是一个编辑富文本文档的 AI 代理...',
   // ... 其他选项
 })
 ```
 
 ## 关键配置选项
 
-| 选项                      | 类型                                | 默认值                         | 描述                                                                  |
-| ------------------------- | ----------------------------------- | ------------------------------ | --------------------------------------------------------------------- |
-| `appId`                   | `string`                            | `""`                           | 您的 Tiptap 内容 AI 应用 ID                                           |
-| `token`                   | `string`                            | `""`                           | 用于认证的 JWT 令牌                                                   |
-| `baseUrl`                 | `string`                            | `""`                           | AI 服务 API 的基础 URL                                                |
-| `modelName`               | `AiAgentModelName`                  | `"gpt-4.1"`                    | 要使用的 OpenAI 模型（推荐使用 gpt-4.1 和 gpt-4o）                   |
-| `autoAccept`              | `"always" \| "never" \| "onlyRead"` | `"onlyRead"`                   | 控制是否自动接受 AI 的更改                                           |
-| `autoSaveCheckpoints`     | `boolean`                           | `false`                        | 用户发送消息时是否自动保存检查点                                      |
-| `chunkSize`               | `number`                            | `1000`                         | 读取时文档块的大小（字符数）                                         |
-| `chunkHtml`               | `Function`                          | `defaultChunkHtmlFunction`     | 自定义文档拆分为块的方式                                             |
-| `useAiChangesExtension`   | `boolean`                           | `true`                         | 是否使用 AI 变更扩展                                                  |
-| `initialChatMessages`     | `ChatMessage[]`                     | `[]`                           | 用于填充对话的初始聊天消息                                           |
-| `adapter`                 | `AiAgentAdapter`                    | `openaiChatCompletionsAdapter` | 将 LLM 消息转换为 AI Agent 可解析格式                               |
-| `resolver`                | `Function`                          | `defaultAiAgentResolver`       | 用于通过自定义后端解析 AI Agent 请求的函数                           |
-| `createLlmMessages`       | `Function`                          | `defaultCreateLlmMessages`     | 将聊天消息转换为 LLM 所需格式的函数                                  |
-| `toolHandlers`            | `AiAgentToolCallHandler[]`          | `toolHandlersStarterKit()`     | 自定义工具处理程序                                                   |
-| `onStateChange`           | `Function`                          | `undefined`                    | AI Agent 状态改变时调用                                              |
-| `onLoadingError`          | `Function`                          | `undefined`                    | 加载 AI Agent 出错时调用                                             |
-| `onBeforeToolCall`        | `Function`                          | `undefined`                    | 工具调用执行之前调用                                                 |
-| `onAfterToolCall`         | `Function`                          | `undefined`                    | 工具调用执行之后调用                                                 |
-| `onRunFinished`           | `Function`                          | `undefined`                    | AI Agent 运行结束时调用                                              |
-| `systemPrompt`            | `string`                            | `undefined`                    | 与 Tiptap Cloud 一起使用时的自定义系统提示                            |
+| 选项                     | 类型                                | 默认值                        | 描述                                                                 |
+| ------------------------ | ----------------------------------- | ------------------------------ | --------------------------------------------------------------------- |
+| `appId`                  | `string`                            | `""`                           | 您的 Tiptap 内容 AI 应用 ID                                           |
+| `token`                  | `string`                            | `""`                           | 用于认证的 JWT 令牌                                                   |
+| `baseUrl`                | `string`                            | `""`                           | AI 服务 API 的基本 URL                                                |
+| `modelName`              | `AiAgentModelName`                  | `"gpt-4.1"`                    | 使用的 OpenAI 模型（推荐使用 gpt-4.1 和 gpt-4o）                      |
+| `autoAccept`             | `"always" \| "never" \| "onlyRead"` | `"onlyRead"`                   | 控制自动接受 AI 变更的行为                                            |
+| `autoSaveCheckpoints`    | `boolean`                           | `false`                        | 用户发送消息时自动保存检查点                                         |
+| `chunkSize`              | `number`                            | `1000`                         | 读取时文档块的大小（字符数）                                         |
+| `chunkHtml`              | `Function`                         | `defaultChunkHtmlFunction`     | 自定义文档如何分割成块                                                |
+| `useAiChangesExtension`  | `boolean`                           | `true`                         | 是否使用 AI Changes 扩展                                              |
+| `initialChatMessages`    | `ChatMessage[]`                     | `[]`                           | 用于填充对话的初始聊天消息                                            |
+| `adapter`                | `AiAgentAdapter`                    | `openaiChatCompletionsAdapter` | 将 LLM 消息转换为 AI Agent 可用格式                                  |
+| `resolver`               | `Function`                         | `defaultAiAgentResolver`       | 使用自定义后端解决 AI Agent 请求的函数                               |
+| `createLlmMessages`      | `Function`                         | `defaultCreateLlmMessages`     | 将聊天消息转换为 LLM 格式                                             |
+| `toolHandlers`           | `AiAgentToolCallHandler[]`          | `toolHandlersStarterKit()`     | 自定义工具的处理程序                                                 |
+| `onStateChange`          | `Function`                         | `undefined`                    | AI Agent 状态变化时调用                                               |
+| `onLoadingError`         | `Function`                         | `undefined`                    | 加载 AI Agent 出错时调用                                             |
+| `onBeforeToolCall`       | `Function`                         | `undefined`                    | 工具调用执行前调用                                                   |
+| `onAfterToolCall`        | `Function`                         | `undefined`                    | 工具调用执行后调用                                                   |
+| `onRunFinished`          | `Function`                         | `undefined`                    | AI Agent 运行完成时调用                                              |
+| `systemPrompt`           | `string`                            | `undefined`                    | 使用 Tiptap Cloud 时 AI Agent 的自定义系统提示                        |

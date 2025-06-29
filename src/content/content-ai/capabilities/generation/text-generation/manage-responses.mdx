@@ -1,8 +1,10 @@
 ---
 title: 存储和重新生成响应
+tags:
+  - type: start
 meta:
   title: 管理响应 | Tiptap 内容 AI
-  description: 使用内容 AI 存储保存、重新生成并插入 AI 响应到你的 Tiptap 编辑器。更多内容请查看我们的文档！
+  description: 使用内容 AI 存储将 AI 响应保存、重新生成并插入到你的 Tiptap 编辑器中。更多内容请参阅我们的文档！
   category: 内容 AI
 ---
 
@@ -10,36 +12,36 @@ import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. 启用试用或订阅">
-        在你的账户中开始 [免费试用](https://cloud.tiptap.dev/v2/billing) 或订阅一个 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+    <RequirementItem label="1. 激活试用或订阅">
+        在你的账户中开始一个<a href="https://cloud.tiptap.dev/v2?trial=true">免费试用</a>或<a href="https://cloud.tiptap.dev/v2/billing">订阅开始计划</a>。
     </RequirementItem>
-    <RequirementItem label="2. 集成 AI 提供者">
-        在你的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看 [自定义 LLM 指南](/content-ai/capabilities/generation/custom-llms)。
+    <RequirementItem label="2. 集成 AI 提供商">
+        在你的<a href="https://cloud.tiptap.dev/v2/cloud/ai">AI 设置</a>中配置 OpenAI，或查阅<a href="/content-ai/capabilities/generation/custom-llms">自定义 LLM 指南</a>。
     </RequirementItem>
-    <RequirementItem label="3. 从私有注册中心安装">
-        要安装前端扩展，请根据 [设置指南](/guides/pro-extensions) 认证 Tiptap 的私有 npm 注册中心。
+    <RequirementItem label="3. 从私有注册表安装">
+        要安装前端扩展，通过遵循<a href="/guides/pro-extensions">设置指南</a>进行认证，访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-AI 扩展会将当前状态存储在它的扩展存储中，位置为 `editor.storage.ai`。这个存储用于跟踪 AI 响应的当前状态，以及任何过往的响应。
+AI Generation 扩展会将当前状态存储在其扩展存储中，位置为 `editor.storage.ai || editor.storage.aiAdvanced`（取决于你是否使用 extension-ai 或 extension-ai-advanced 扩展）。该存储用于跟踪 AI 响应的当前状态以及所有过去的响应。
 
 <CodeDemo isPro path="/Extensions/AiStorage" />
 
-| key           | type                                                                                    | definition                                                                                                                                                                                                                                                                                                   |
-| ------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| state         | `'loading' \| 'error' \| 'idle'`                                                       | 当 AI 正在生成响应时，状态设置为 `loading`。在响应生成后，状态设置为 `idle`。当发生错误时，状态设置为 `error`                                                                                                                       |
-| response      | `string \| undefined`                                                                   | AI 生成的最新消息。当状态为 `idle` 时，如果这是一个字符串，它是之前生成的消息；如果为 `undefined`，则表示没有生成任何消息。当状态为 `loading` 时，这将是 AI 到目前为止生成的字符串（如果正在流式生成响应）。当状态为 `error` 时，这将是 `undefined` |
-| error         | `Error \| undefined`                                                                    | 生成的错误，仅在错误状态时设置                                                                                                                                                                                                                                      |
-| generatedWith | `{ action: TextAction; options: TextOptions; range: undefined \| Range; } \| undefined` | 描述最后一个生成的响应的选项；范围只有在插入内容到编辑器时才会设置                                                                                                                                                                                    |
-| pastResponses | `string[]`                                                                              | 存储先前生成的响应（成功时），最新的在前。当响应被接受/拒绝时清除。                                                                                                                                                                                              |
+| key           | 类型                                                                                      | 定义                                                                                                                                                                                                                                                                                                     |
+| ------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| state         | `'loading' \| 'error' \| 'idle'`                                                          | 当 AI 正在生成响应时，状态设为 `loading`。响应生成后，状态设为 `idle`。当发生错误时，状态设为 `error`。                                                                                                                                                                                                |
+| response      | `string \| undefined`                                                                     | AI 最近生成的消息。当状态为 `idle` 时，如果为字符串，则是之前生成的消息；如果为 `undefined`，则尚未生成任何消息。状态为 `loading` 时，该字符串是 AI 目前已生成的内容（流式响应时）。状态为 `error` 时为 `undefined`。                                                                         |
+| error         | `Error \| undefined`                                                                      | 发生的错误，仅在错误状态时设置。                                                                                                                                                                                                                                                                       |
+| generatedWith | `{ action: TextAction; options: TextOptions; range: undefined \| Range; } \| undefined`   | 描述上一次生成响应时所用选项的对象，只有在将内容插入编辑器时会设置 range                                                                                                                                                                                                                              |
+| pastResponses | `string[]`                                                                              | 存储之前生成的响应（成功时），最新的优先。接受或拒绝响应时清空。                                                                                                                                                                                                                                        |
 
-你可以使用这个存储来读取当前 AI 响应的状态，如下所示：
+你可以使用此存储读取 AI 响应的当前状态，如下所示：
 
 ```ts
-const aiStorage = editor.storage.ai
+const aiStorage = editor.storage.ai || editor.storage.aiAdvanced
 
 if (aiStorage.response.state === 'error') {
-  // 发生的错误
+  // 出现的错误
   aiStorage.response.error
 }
 
@@ -60,10 +62,10 @@ if (aiStorage.response.state === 'idle') {
 
 ## 使用 AI 存储
 
-想要利用 Tiptap 内容 AI 生成结果，但又不希望结果在编辑器外部可用吗？你可以在任何 AI [TextOption](/content-ai/capabilities/generation/text-generation/built-in-commands#text-command-options) 上使用 `insert: false` ，这样它就会将结果存储到扩展中。
+想利用 Tiptap 内容 AI 生成结果，但不想让结果直接显示在编辑器中吗？你可以在任何 AI [TextOption](/content-ai/capabilities/generation/text-generation/built-in-commands#text-command-options) 中使用 `insert: false`，这样结果会存储到扩展中，而不是插入编辑器。
 
 ```ts
-const chatMessage = '你好，你好吗？'
+const chatMessage = 'Hello, how are you?'
 
 editor
   .chain()
@@ -76,97 +78,100 @@ editor
   .run()
 ```
 
-从那里，你可以使用 `aiAccept`、`aiReject` 和 `aiRegenerate` 命令。
+之后，你可以使用 `aiAccept`、`aiReject` 和 `aiRegenerate` 命令。
 
 ### aiAccept
 
-此命令在用户接受 AI 响应时执行，默认情况下它会将响应插入到编辑器中，并根据提供的选项改变行为。
+该命令用于用户接受 AI 响应时执行，默认行为是将响应插入编辑器。行为会根据提供的选项而变化。
 
-| key      | type                                     | definition                                                                                                                                                                                                               |
-| -------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| insertAt | `number \| { from: number, to: number }` | 当为 `number` 时，接受响应并将其插入到编辑器的起始位置。当为 `{ from: number, to: number }` 时，接受响应并用 AI 响应替换从位置 `from` 到位置 `to` 的内容 |
-| append   | `boolean`                                | 如果为 `true`，则不会替换当前选择，而是追加到当前选择后                                                                                                                                                        |
+| key      | 类型                                     | 定义                                                                                                                                                                                                                 |
+| -------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| insertAt | `number \| { from: number, to: number }` | 如果是数字，接收响应并插入到编辑器开头；如果是 `{ from: number, to: number }`，则接收响应并替换编辑器中该区间的内容。                                                                                             |
+| append   | `boolean`                                | 如果为 `true`，则不替换当前选区，而是追加到当前选区后面。                                                                                                                                                          |
 
-默认行为是在未提供选项的情况下，接受响应并将其插入到编辑器中，替换当前选择。
+默认行为（无选项传入）是接收响应并替换当前选区插入到编辑器中。
 
 ```ts
-// 接受响应并将其插入到编辑器
+// 接受响应并插入编辑器
 editor.chain().aiAccept().run()
 
-// 接受响应并将其插入到编辑器的起始位置
+// 接受响应并插入到编辑器开头
 editor.chain().aiAccept({ insertAt: 0 }).run()
 
-// 接受响应并将其插入到编辑器的末尾
+// 接受响应并插入到编辑器末尾
 editor.chain().aiAccept({ insertAt: editor.state.doc.content.size }).run()
 
-// 接受响应并将其追加到当前选择
+// 接受响应并追加到当前选区后面
 editor.chain().aiAccept({ append: true }).run()
 ```
 
 ### aiRegenerate
 
-此命令在用户希望重试 AI 响应时执行，它将使用与之前 AI 文本操作相同的选项，并添加到 `editor.storage.ai.pastResponses` 数组中。
+该命令用于用户希望重新生成 AI 响应时执行，会使用上一次 AI 文本操作的所有相同选项，并将新的响应添加到 `(editor.storage.ai || editor.storage.aiAdvanced).pastResponses` 数组中。
 
-| key      | type                                     | definition                                                                                                                                                                                                                                                                                                                   |
-| -------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| insert   | `boolean`                                | 是否将重新生成的响应插入到编辑器中                                                                                                                                                                                                                                                                                   |
-| insertAt | `number \| { from: number, to: number }` | 如果未指定，重新生成的响应将插入在之前响应的位置。当为 `number` 时，重新生成响应并将其插入到编辑器的开始。当为 `{ from: number, to: number }` 时，重新生成响应并用 AI 响应替换从位置 `from` 到位置 `to` 的内容                                                        |
+| key      | 类型                                     | 定义                                                                                                                                                                                                                                                                                                               |
+| -------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| insert   | `boolean`                                | 是否将重新生成的响应插入编辑器。                                                                                                                                                                                                                                                                                   |
+| insertAt | `number \| { from: number, to: number }` | 如果未指定，重新生成的响应将插入到上一次响应的位置。当为数字时，重新生成的响应将插入到编辑器开头；当为 `{ from: number, to: number }` 时，重新生成响应将替换编辑器中该区间的内容。                                                                                                                             |
 
-默认行为是在未提供选项的情况下，重新生成响应并将其插入到编辑器中，替换当前选择。
+默认行为（无选项传入）是重新生成响应并替换当前选区插入到编辑器中。
 
 ```ts
-// 重新生成响应并将其插入到编辑器
+// 重新生成响应并插入编辑器
 editor.chain().aiRegenerate().run()
 
-// 重新生成响应并将其插入到编辑器的起始位置
+// 重新生成响应并插入到编辑器开头
 editor.chain().aiRegenerate({ insertAt: 0 }).run()
 
-// 重新生成响应并将其插入到编辑器的末尾
+// 重新生成响应并插入到编辑器末尾
 editor.chain().aiRegenerate({ insertAt: editor.state.doc.content.size }).run()
 
-// 重新生成响应并将其追加到当前选择
+// 重新生成响应并追加到当前选区后面
 editor.chain().aiRegenerate({ append: true }).run()
 ```
 
 ### aiReject
 
-此命令在用户拒绝 AI 响应时执行，它将扩展的状态重置为初始闲置状态并清除所有 `editor.storage.ai.pastResponses`。
+该命令用于用户拒绝 AI 响应时执行，会将扩展的状态重置为初始的 idle 状态，并清空所有 `(editor.storage.ai || editor.storage.aiAdvanced).pastResponses`。
 
-| key  | type               | definition                                                                                          |
-| ---- | ------------------ | --------------------------------------------------------------------------------------------------- |
-| type | 'reset' \| 'pause' | 是否将 AI 重置为闲置状态，或者只是暂停当前响应。默认值为 `'reset'` |
+| key  | 类型                 | 定义                                                                                  |
+| ---- | -------------------- | ------------------------------------------------------------------------------------- |
+| type | 'reset' \| 'pause'   | 是重置 AI 到 idle 状态，还是仅暂停当前响应。默认为 `'reset'`。                         |
 
 ```ts
 editor.chain().aiReject().run()
 
-// 将不会清除 editor.storage.ai，这对于保持当前响应在编辑器存储中有用
+// 不会清空 editor.storage.ai || editor.storage.aiAdvanced，适合保留当前响应在编辑器存储中
 editor.chain().aiReject({ type: 'pause' }).run()
 ```
 
 ## 高级示例
 
-扩展存储的一个用例可能是渲染 AI 生成内容的预览。
+扩展存储的一个使用场景是渲染 AI 生成内容的预览。
 
-为了在你的编辑器中渲染聊天的预览，我们可以使用你的编辑器的 schema 来生成将要生成的 HTML。使用这个 HTML 你可以在一个元素中显示内容的预览。
+为了在编辑器中渲染聊天内容的预览，我们可以使用编辑器的 schema 生成对应的 HTML。这段 HTML 可以在某个元素中展示该内容的预览。
 
 ```tsx
-// 将响应显示为 HTML
+// 以 HTML 形式显示响应
 import { tryParseToTiptapHTML } from '@tiptap-pro/extension-ai'
 
-// 尝试将当前消息解析为 HTML，如果无法解析则返回 null
-tryToParseToHTML(editor.storage.ai.response.message, editor)
+// 尝试将当前消息解析为 HTML，无法解析时返回 null
+tryToParseToHTML((editor.storage.ai || editor.storage.aiAdvanced).response.message, editor)
 
-// 尝试将之前的响应解析为 HTML，如果无法解析则返回 null
-tryToParseToHTML(editor.storage.ai.pastResponses[0], editor)
+// 尝试将之前的响应解析为 HTML，无法解析时返回 null
+tryToParseToHTML((editor.storage.ai || editor.storage.aiAdvanced).pastResponses[0], editor)
 
 // 例如在 React 中
 function PreviewComponent({ editor }) {
-  const htmlResponse = tryToParseToHTML(editor.storage.ai.response.message, editor)
-  /* 这是安全的，因为我们已经先用 prose-mirror 解析了内容 */
+  const htmlResponse = tryToParseToHTML(
+    (editor.storage.ai || editor.storage.aiAdvanced).response.message,
+    editor,
+  )
+  /* 由于先用 prose-mirror 解析，风险较小 */
   return <div dangerouslySetInnerHTML={{ __html: htmlResponse }}></div>
 }
 ```
 
-请参见下面的演示，了解聊天预览是如何工作的一整套示例。
+请参阅下面的演示，了解聊天预览的完整示例。
 
 <CodeDemo isPro path="/Extensions/AiPrompt" />

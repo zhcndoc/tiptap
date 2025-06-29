@@ -1,0 +1,107 @@
+---
+title: 服务器端工具 (Vercel AI SDK)
+meta:
+  title: 服务器端工具 (Vercel AI SDK) | Tiptap Content AI
+  description: 学习如何使用 Vercel AI SDK 在服务器端调用工具。
+  category: Content AI
+---
+
+本指南介绍如何使用 Vercel AI SDK 在服务器端调用工具。示例展示了一个返回指定位置天气的工具。
+
+首先，按照 [Vercel AI SDK 工具格式](https://ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling) 定义工具：
+
+```ts
+const weatherTool = {
+  description: '返回指定位置的天气',
+  parameters: {
+    type: 'object',
+    properties: {
+      location: {
+        type: 'string',
+        description: '获取天气的地点',
+      },
+    },
+    required: ['location'],
+  },
+}
+```
+
+然后，在调用 Vercel AI SDK 时，将该工具包含在 `tools` 对象中：
+
+```ts
+import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
+import { vercelAiSdkAdapter } from '@tiptap-pro/extension-ai-agent'
+import { generateObject } from 'ai'
+import { openai } from '@ai-sdk/openai'
+
+const toolkit = new AiAgentToolkit()
+
+// 调用 Vercel AI SDK
+const response = await generateObject({
+  model: openai('gpt-4.1'),
+  messages: [
+    {
+      role: 'system',
+      content: `
+<您的系统提示>
+${toolkit.getSystemPrompt()}
+`,
+    },
+    ...llmMessages,
+  ],
+  // 在 tools 对象中包含天气工具，和 AiAgentToolkit 提供的其他工具一同传入
+  tools: {
+    ...toolkit.getTools(vercelAiSdkAdapter),
+    get_weather: weatherTool,
+  },
+})
+```
+
+随后，检查响应是否包含天气工具的调用。如果是，调用该工具并将结果添加到 `llmMessages` 数组中。
+
+```ts
+for (const toolCall of response.toolCalls) {
+  const name = toolCall.toolName
+
+  if (name !== 'get_weather') {
+    continue
+  }
+
+  const args = toolCall.args
+
+  const result = getWeather(args)
+  llmMessages.push({
+    role: 'tool',
+    content: [
+      {
+        type: 'tool-result',
+        toolCallId: toolCall.toolCallId,
+        result: result.toString(),
+      },
+    ],
+  })
+}
+```
+
+最后，在没有更多服务器端工具调用时，使用 `vercelAiSdkAdapter` 将响应转换为 AI Agent 扩展期望的格式。
+
+```ts
+const result = vercelAiSdkAdapter.parseResponse(response)
+```
+
+`result` 应为 API 端点的响应，以及 `resolver` 函数的返回值。
+
+你还可以向 `result` 添加描述所调用工具的聊天消息，这将在聊天对话中显示工具调用的结果。
+
+```ts
+// 将工具调用消息添加到新聊天消息列表的开头
+result.chatMessages.unshift({
+  type: 'ai',
+  text: '柏林的天气是晴朗的。',
+  metadata: {
+    // 包含此元数据以标记该消息为服务器端工具调用
+    // 并在 UI 中以不同方式显示
+    isServerSideToolCall: true,
+  },
+})
+```

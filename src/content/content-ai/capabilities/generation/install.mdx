@@ -1,41 +1,43 @@
 ---
 title: 安装 AI 生成扩展
+tags:
+  - type: start
 meta:
   title: 安装 AI 生成 | Tiptap 内容 AI
-  description: 在您的编辑器中设置 Tiptap AI 生成，包括配置 OpenAI 密钥和 JWT 认证。更多内容请查看文档！
+  description: 在编辑器中设置 Tiptap AI 生成，包括配置 OpenAI 密钥和 JWT 认证。详情请查阅文档！
   category: 内容 AI
 ---
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始一个免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅一个 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+        在您的账户中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 集成 AI 提供商">
-        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看 [自定义 LLM 指南](/content-ai/custom-llms)。
+        在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查看[自定义 LLM 指南](/content-ai/custom-llms)。
     </RequirementItem>
     <RequirementItem label="3. 从私有注册表安装">
-        要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证，以便访问 Tiptap 的私有 npm 注册表。
+        要安装前端扩展，请按照[安装指南](/guides/pro-extensions)登录 Tiptap 私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-本安装指南依赖于使用 [Tiptap 内容 AI 后端服务](https://cloud.tiptap.dev/v2/cloud/ai)，如果您想用自己的自定义 LLM 进行配置，请改为遵循 [本指南](/content-ai/capabilities/generation/custom-llms)。
+本安装指南基于使用 [Tiptap 内容 AI 后端服务](https://cloud.tiptap.dev/v2/cloud/ai)，如果您想配置自己的自定义 LLM，请改为参考[此指南](/content-ai/capabilities/generation/custom-llms)。
 
-## 开始您的内容 AI 应用
-1. **激活计划：** 开始一个 [免费试用或选择订阅](https://cloud.tiptap.dev/v2/billing)。
-2. **配置您的 AI 应用。** 将您的 OpenAI API 密钥添加到您的 [内容 AI 应用](https://cloud.tiptap.dev/v2/cloud/ai)。
-3. **设置认证**：使用我们提供的密钥生成 JWT（HS256 算法），以便将扩展与我们的服务进行身份验证。 [获取您的 JWT 密钥。](https://cloud.tiptap.dev/v2/cloud/ai)
+## 启动您的内容 AI 应用
+1. **激活计划：** 开始[免费试用或选择订阅方案](https://cloud.tiptap.dev/v2/billing)。
+2. **配置您的 AI 应用：** 在您的[内容 AI 应用](https://cloud.tiptap.dev/v2/cloud/ai)中添加您的 OpenAI API 密钥。
+3. **设置认证：** 使用我们提供的密钥生成包含 HS256 算法的 JWT，用于验证扩展与服务之间的身份。[获取您的 JWT 密钥。](https://cloud.tiptap.dev/v2/cloud/ai)
 
-## 访问专业注册表
-AI 生成扩展发布在 Tiptap 的私有 npm 注册表中。通过遵循 [私有注册表指南](/guides/pro-extensions) 来集成扩展。如果您已经对 Tiptap 账户进行了身份验证，可以直接跳转到 [#安装](#install)。
+## 访问私有注册表
+AI 生成扩展发布在 Tiptap 的私有 npm 注册表中。请按照[私有注册表指南](/guides/pro-extensions)集成扩展。如果您已完成 Tiptap 账户认证，可直接跳转至[#安装](#install)。
 
 ## 安装
 
 ```bash
-npm install @tiptap-pro/extension-ai@beta
+npm install @tiptap-pro/extension-ai
 ```
 
-将其集成到您的编辑器实例中的方式与其他 Tiptap 扩展类似。以下是一个示例：
+集成到您的编辑器实例中的方法与其他 Tiptap 扩展相同。下面是示例代码：
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -48,14 +50,14 @@ const editor = new Editor({
     Ai.configure({
       // 您的 Tiptap 内容 AI 应用 ID
       appId: 'APP_ID_HERE',
-      // 这必须是您生成的 JWT，绝对不要是 OpenAI API 密钥！
+      // 这里应为您生成的 JWT，绝对不要使用 OpenAI API 密钥！
       token: 'TOKEN_HERE',
       autocompletion: true,
-      // … 其他选项（见下文）
+      // … 其他选项（详见下文）
     }),
-    // … 更多扩展
+    // … 其他扩展
   ],
 })
 ```
 
-到此，您可以在 Tiptap 编辑器中使用 OpenAI。可以查看 [配置选项](/content-ai/capabilities/generation/configure) 来定制您的体验。
+此时，您即可在 Tiptap 编辑器中使用 OpenAI。可查看[配置选项](/content-ai/capabilities/generation/configure)以定制您的使用体验。

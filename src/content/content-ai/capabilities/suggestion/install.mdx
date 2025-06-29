@@ -1,8 +1,11 @@
 ---
 title: 安装 AI 建议扩展
+tags:
+  - type: team
+  - type: beta
 meta:
-  title: 安装 AI 建议 | Tiptap AI 建议
-  description: 使用本设置指南将 AI 建议扩展集成到您的应用程序中。更多信息见文档。
+  title: 安装 AI 建议 | Tiptap AI Suggestion
+  description: 使用本安装指南将 AI 建议扩展集成到您的应用中。更多内容请查看文档。
   category: 内容 AI
 ---
 
@@ -11,29 +14,25 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [团队计划](https://cloud.tiptap.dev/v2/billing)。
+        在您的账户中开始一个 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅团队计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. 集成 AI 提供者">
-        在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看 [自定义 LLM 指南](/content-ai/capabilities/suggestion/custom-llms)。
+    <RequirementItem label="2. 集成 AI 提供商">
+        在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查看[自定义大语言模型指南](/content-ai/capabilities/suggestion/custom-llms)。
     </RequirementItem>
     <RequirementItem label="3. 从私有注册表安装">
-        要安装前端扩展，请通过遵循 [设置指南](/guides/pro-extensions) 进行身份验证以访问 Tiptap 的私有 npm 注册表。
+        要安装前端扩展，请按照[安装指南](/guides/pro-extensions)进行身份验证，连接到 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-本设置指南将帮助您从头开始将 AI 建议扩展集成到您的应用程序中。
-
-<Callout title="集成或测试 AI 建议" variant="warning">
-    要测试或集成此功能，您需要一个 [有效的试用或 Tiptap 团队订阅](https://cloud.tiptap.dev/v2/billing)。
-</Callout>
+本安装指南将帮助您从零开始将 AI 建议扩展集成到您的应用中。
 
 ## 安装
-AI 建议扩展已发布在 Tiptap 的私有 npm 注册表中。按照 [私有注册表指南](/guides/pro-extensions) 集成扩展。
+AI 建议扩展发布于 Tiptap 的私有 npm 注册表。请按照[私有注册表指南](/guides/pro-extensions)来集成此扩展。
 
-一旦准备就绪，您可以像安装任何其他 Tiptap Pro 扩展一样进行安装。
+准备好后，您可以像安装其他 Tiptap Pro 扩展一样安装它。
 
 ```bash
-npm install @tiptap-pro/extension-ai-suggestion@beta
+npm install @tiptap-pro/extension-ai-suggestion
 ```
 
 ## 在编辑器中导入扩展
@@ -60,7 +59,7 @@ const editor = new Editor({
           backgroundColor: 'FFE6E6',
         },
       ],
-      // 配置内容 AI 云（见下一部分）
+      // 配置内容 AI 云（见下一节）
       appId: 'APP_ID_HERE',
       token: 'TOKEN_HERE',
       // … 其他选项
@@ -76,19 +75,19 @@ const editor = new Editor({
 })
 ```
 
-## 决定建议生成方式
+## 决定建议的生成方式
 
-下一步是配置生成将在编辑器中显示的建议的方式。
+下一步是配置生成将在编辑器中显示的建议的方法。
 
-开始使用 AI 建议扩展的最简单方法是使用 Tiptap 内容 AI 云。我们的 API 将根据您的规则和内容生成建议。请按照此设置指南：[使用 Tiptap 内容 AI 云](/content-ai/capabilities/suggestion/use-with-content-ai-cloud)。
+开始使用 AI 建议扩展最简单的方式是使用 Tiptap 内容 AI 云。我们的 API 会根据您的规则和内容生成建议。请参考此安装指南：[使用 Tiptap 内容 AI 云](/content-ai/capabilities/suggestion/use-with-content-ai-cloud)。
 
-您也可以使用自己的后端和 LLM 生成校对建议。您可以在这里找到指南：[集成您的专用后端和 LLM](/content-ai/capabilities/suggestion/custom-llms)。
+您也可以使用自己的后端和大语言模型生成校对建议。相关指南请见：[集成您自己的后端和大语言模型](/content-ai/capabilities/suggestion/custom-llms)。
 
 ## 自定义用户界面
 
 最后，您需要配置编辑器样式，以便在 UI 中显示建议。
 
-默认情况下，AI 建议具有 CSS 类和颜色属性，以帮助您为其样式化。使用这些 CSS 样式在建议下方显示彩色下划线。
+默认情况下，AI 建议拥有 CSS 类和颜色属性，帮助您对其进行样式设置。使用以下 CSS 样式在建议下方显示彩色下划线。
 
 ```css
 .tiptap-ai-suggestion {
@@ -102,4 +101,4 @@ const editor = new Editor({
 }
 ```
 
-您可以通过提供自定义装饰进一步自定义建议的外观。要在选择建议时显示工具提示或弹出窗口，请 [遵循此指南](/content-ai/capabilities/suggestion/features/display-suggestions#show-a-popover-when-you-select-a-suggestion)。
+您还可以通过提供自定义装饰进一步定制建议的外观。若要在选择建议时显示工具提示或弹出框，请[参阅此指南](/content-ai/capabilities/suggestion/features/display-suggestions#show-a-popover-when-you-select-a-suggestion)。

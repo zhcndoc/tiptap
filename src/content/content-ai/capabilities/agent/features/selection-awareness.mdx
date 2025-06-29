@@ -1,0 +1,17 @@
+---
+title: 选区感知
+meta:
+  title: 选区感知 | Tiptap 内容 AI
+  description: 让 AI 代理感知编辑器中的选中内容。
+  category: 内容 AI
+---
+
+选区感知允许 AI 代理知道编辑器中选中的内容。它帮助 AI 代理理解用户的请求，并且只对选中的内容进行精准编辑。
+
+要激活选区感知，请将 `addSelection` 选项设置为 `true`。这将把选中的内容作为[上下文](/content-ai/capabilities/agent/features/context)发送给 AI 代理。
+
+```ts
+provider.addUserMessage('总结选中的文档', {
+  addSelection: true, // 默认为 false
+})
+```

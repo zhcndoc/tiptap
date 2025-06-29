@@ -1,0 +1,115 @@
+---
+title: 入门 Vercel AI SDK
+meta:
+  title: 入门 Vercel AI SDK | Tiptap Content AI
+  description: 学习如何使用 Vercel AI SDK 的 AI Agent 扩展。
+  category: 内容 AI
+---
+
+[Vercel AI SDK](https://ai-sdk.dev) 允许你使用多个 AI 模型提供商构建 AI Agent。它支持在不同的[AI 模型提供商](https://ai-sdk.dev/providers/ai-sdk-providers)之间切换，方便你尝试并选择最适合你的模型。
+
+## 客户端设置
+
+首先，安装 AI Agent 扩展。
+
+```bash
+npm install @tiptap-pro/extension-ai-agent
+```
+
+然后，导入扩展并使用 `AiAgentProvider` 类进行配置。
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import AiAgent, { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider()
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    AiAgent.configure({
+      provider,
+    }),
+  ],
+})
+```
+
+在 AI Agent 提供者中，定义一个调用后端的 `resolver` 函数。
+
+同时，定义一个将聊天消息转换为 Vercel AI SDK 期望格式的 `adapter` 函数。
+
+```tsx
+import AiAgent, { AiAgentProvider, vercelAiSdkAdapter } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider({
+  adapter: vercelAiSdkAdapter,
+  // llmMessages 属性包含了以 Vercel AI SDK 期望格式的聊天消息
+  resolver: async ({ llmMessages }) => {
+    // 调用你后端的 API 端点
+    const response = await fetch('/api-endpoint', {
+      method: 'POST',
+      body: JSON.stringify({ llmMessages }),
+    })
+    return await response.json()
+  },
+})
+```
+
+下一节我们将演示如何实现返回正确格式响应的 API 端点。
+
+## 服务端设置
+
+首先，安装 AI Agent、Vercel AI SDK 以及你偏好的 AI 提供商（此例使用 OpenAI）。
+
+```bash
+npm install @tiptap-pro/extension-ai-agent @tiptap-pro/extension-ai-agent-server ai @ai-sdk/openai
+```
+
+然后，在你的 API 端点中，创建一个 `AiAgentToolkit` 实例。它允许你配置 AI 模型可用的工具。
+
+```ts
+import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
+
+const toolkit = new AiAgentToolkit()
+```
+
+创建工具包后，使用 Vercel AI SDK 将请求发送给你的 AI 提供商。
+
+```ts
+import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
+import { vercelAiSdkAdapter } from '@tiptap-pro/extension-ai-agent'
+import { generateObject } from 'ai'
+import { openai } from '@ai-sdk/openai'
+
+const toolkit = new AiAgentToolkit()
+
+// 调用 Vercel AI SDK
+const response = await generateText({
+  model: openai('gpt-4.1'),
+  messages: [
+    {
+      role: 'system',
+      content: `
+<Your system prompt>
+${toolkit.getSystemPrompt()}
+`,
+    },
+    ...llmMessages,
+  ],
+  // 提供 AI 模型可调用的工具
+  tools: toolkit.getTools(vercelAiSdkAdapter),
+})
+```
+
+在系统提示的末尾，包含由 `AiAgentToolkit` 实例生成的系统提示，如：`toolkit.getSystemPrompt()`。它包含了如何使用工具的指令。
+
+有关编写系统提示，请参阅[系统提示指南](/content-ai/capabilities/agent/configure/system-prompt)。其中包含示例系统提示，可作为起点。
+
+最后，使用 `vercelAiSdkAdapter` 将响应转换为 AI Agent 扩展期望的格式。
+
+```ts
+const result = vercelAiSdkAdapter.parseResponse(response)
+```
+
+`result` 应为 API 端点的响应，同时也是 `resolver` 函数的返回值。

@@ -1,0 +1,111 @@
+---
+title: 服务器端工具（OpenAI 聊天补全 API）
+meta:
+  title: 服务器端工具（OpenAI 聊天补全 API）| Tiptap 内容 AI
+  description: 学习如何使用 OpenAI 聊天补全 API 调用服务器端的工具。
+  category: 内容 AI
+---
+
+本指南介绍了如何使用 OpenAI 聊天补全 API 在服务器端调用工具。示例展示了一个返回指定地点天气的工具。
+
+首先，在[OpenAI 聊天补全 API 工具格式](https://platform.openai.com/docs/guides/function-calling)中定义该工具：
+
+```ts
+const weatherTool = {
+  type: 'function',
+  function: {
+    name: 'get_weather',
+    description: '返回指定地点的天气',
+    parameters: {
+      type: 'object',
+      properties: {
+        location: {
+          type: 'string',
+          description: '需要查询天气的地点',
+        },
+      },
+      required: ['location'],
+    },
+  },
+}
+```
+
+接着，调用 OpenAI API 时，将工具包含在 `tools` 数组中：
+
+```ts
+import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
+import { openaiChatCompletionsAdapter } from '@tiptap-pro/extension-ai-agent'
+import OpenAI from 'openai'
+
+const toolkit = new AiAgentToolkit()
+
+// 初始化 OpenAI 客户端
+const openai = new OpenAI()
+
+// 调用 OpenAI 聊天补全 API
+const response = await openai.chat.completions.create({
+  model: 'gpt-4.1',
+  messages: [
+    {
+      role: 'system',
+      content: `
+<你的系统提示>
+${toolkit.getSystemPrompt()}
+`,
+    },
+    ...llmMessages,
+  ],
+  // 在 tools 数组中包含天气工具，以及由 AiAgentToolkit 提供的其他工具
+  tools: [...toolkit.getTools(openaiChatCompletionsAdapter), weatherTool],
+})
+```
+
+然后，检查响应是否包含天气工具调用。如果有，调用工具并将结果添加到 `llmMessages` 数组中。
+
+```ts
+for (const choice of response.choices) {
+  if (!choice.message.tool_calls) {
+    continue
+  }
+
+  for (const toolCall of choice.message.tool_calls) {
+    const name = toolCall.function.name
+
+    if (name !== 'get_weather') {
+      continue
+    }
+
+    const args = JSON.parse(toolCall.function.arguments)
+
+    const result = getWeather(args)
+    llmMessages.push({
+      role: 'tool',
+      content: result.toString(),
+      tool_call_id: toolCall.id,
+    })
+  }
+}
+```
+
+最后，当没有更多服务器端工具调用时，使用 `openaiChatCompletionsAdapter` 将响应转换为 AI Agent 扩展预期的格式。
+
+```ts
+const result = openaiChatCompletionsAdapter.parseResponse(response)
+```
+
+`result` 应为 API 端点的响应，也是 `resolver` 函数的返回值。
+
+你也可以向 `result` 添加描述所调用工具的聊天消息，这将使工具调用的结果显示在聊天对话中。
+
+```ts
+// 将工具调用消息添加到新聊天消息列表的开头
+result.chatMessages.unshift({
+  type: 'ai',
+  text: '柏林的天气是晴朗的。',
+  metadata: {
+    // 添加此元数据以标记消息为服务器端工具调用
+    // 并在 UI 中以不同方式显示
+    isServerSideToolCall: true,
+  },
+})
+```
