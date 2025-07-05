@@ -1,26 +1,30 @@
 ---
 title: 评论 REST API
+tags:
+  - type: team
 meta:
   title: REST API | Tiptap 评论文档
   description: 使用 Tiptap 评论 REST API 从编辑器外部管理线程和评论。更多内容请查看文档！
   category: 评论
 ---
 import { Requirements, RequirementItem } from '@/components/Requirements'
+import { Callout } from '@/components/ui/Callout'
 
 评论 REST API 允许用户从 Tiptap 编辑器外部管理评论线程和单个评论。它支持创建、更新、删除和检索线程与评论。
 
 使用 [评论 Postman 集合](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/folder/33042171-01d1c110-e913-4d99-b47a-fc95aad877c9?ctx=documentation) 进行动手实验。
 
 <Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [团队计划](https://cloud.tiptap.dev/v2/billing)。
+    <RequirementItem label="1. Activate trial or subscribe">
+        在您的账户中[开始免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅团队计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 启动文档服务器">
         要使用评论 REST API，请在您的仪表板中 [添加环境](https://cloud.tiptap.dev/v2/configuration/document-server) 并配置您的 [文档服务器](https://cloud.tiptap.dev/v2/configuration/document-server)。
     </RequirementItem>
 </Requirements>
 
-## 访问 API
+
+## Access the API
 
 REST API 直接从您的文档服务器提供，位于您的自定义 URL：
 

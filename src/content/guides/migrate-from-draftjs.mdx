@@ -1,14 +1,14 @@
 ---
 tags:
   - type: editor
-title: 从 Draft.js 迁移
+title: 从 Draft.js 迁移到 Tiptap
 meta:
   title: 从 Draft.js 迁移 | Tiptap 编辑器文档
   description: 学习如何将现有的 Draft.js 编辑器迁移到 Tiptap。完整指南涵盖内容迁移、设置及功能映射。
   category: Editor
 ---
 
-从 [Draft.js](https://draftjs.org/) 迁移到 Tiptap 非常简单。本指南将帮助你从 Draft.js 的不可变状态模型过渡到 Tiptap 的扩展系统。
+Tiptap 是 Draft.js 的流行替代方案，且从 Draft.js 迁移到 Tiptap 非常直接。本指南将帮助你从 Draft.js 的不可变状态模型过渡到 Tiptap 的扩展系统。
 
 ## 内容迁移
 
@@ -298,20 +298,22 @@ const CustomLink = Node.create({
 
 ## 迁移清单
 
-1. 安装 Tiptap 包
-2. 将 Draft.js ContentState 转换为 HTML
-3. 使用 Tiptap 设置替换 Draft.js 编辑器
-4. 映射 Draft.js 内联样式到 Tiptap 标记
-5. 映射 Draft.js 块类型到 Tiptap 节点
-6. 将实体迁移到[节点视图](/editor/extensions/custom-extensions/node-views)或扩展
-7. 将工具栏组件迁移到 Tiptap UI
-8. 测试内容兼容性
-9. 转换现有内容为 JSON 格式（推荐）
-10. 为任何缺失功能实现自定义扩展
-11. 更新事件处理程序和按键命令
-12. 测试行内工具栏功能
-13. 验证链接和图片处理
-14. 测试列表功能
+<Checklist>
+  <CheckboxItem>安装 Tiptap 包</CheckboxItem>
+  <CheckboxItem>将 Draft.js ContentState 转换为 HTML</CheckboxItem>
+  <CheckboxItem>用 Tiptap 设置替换 Draft.js 编辑器</CheckboxItem>
+  <CheckboxItem>映射 Draft.js 内联样式到 Tiptap 标记</CheckboxItem>
+  <CheckboxItem>映射 Draft.js 块类型到 Tiptap 节点</CheckboxItem>
+  <CheckboxItem>将实体迁移到[节点视图](/editor/extensions/custom-extensions/node-views)或扩展</CheckboxItem>
+  <CheckboxItem>将工具栏组件迁移到 Tiptap UI</CheckboxItem>
+  <CheckboxItem>测试内容兼容性</CheckboxItem>
+  <CheckboxItem>将现有内容转换为 JSON 格式（推荐）</CheckboxItem>
+  <CheckboxItem>为缺失功能实现自定义扩展</CheckboxItem>
+  <CheckboxItem>更新事件处理程序和快捷键命令</CheckboxItem>
+  <CheckboxItem>测试行内工具栏功能</CheckboxItem>
+  <CheckboxItem>验证链接和图片处理</CheckboxItem>
+  <CheckboxItem>测试列表功能</CheckboxItem>
+</Checklist>
 
 ## 后续步骤
 

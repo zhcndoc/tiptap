@@ -89,6 +89,23 @@ const jwt = jsonwebtoken.sign(data, 'your_secret')
 
 将 `readonlyDocumentNames` 属性纳入您的 JWT 策略通过确保只有经过授权的编辑被进行，提高了文档安全性，从而保护了关键文档的完整性。
 
+## 在只读访问时允许评论
+
+如果您想禁止编辑文档但仍然允许评论，可以将 `commentDocumentNames` 添加到 JWT 中。
+
+```typescript
+import jsonwebtoken from 'jsonwebtoken'
+
+const data = {
+  sub: 'your_local_user_identifier',
+  allowedDocumentNames: [], // no write access to any doc
+  readonlyDocumentNames: ['annual-report-2024', 'policy-document-v3'], // read access
+  commentDocumentNames: ['annual-report-2024', 'policy-document-v3'], // plus comments access
+}
+
+const jwt = jsonwebtoken.sign(data, 'your_secret')
+```
+
 ## 使用通配符授权
 
 JWT 中的通配符提供了一种动态管理文档访问权限的方法，允许在特定条件下更广泛的权限，而无需逐个列出每个文档。这种方法在文档按某些属性（例如项目或团队）分组的情况下特别有用。

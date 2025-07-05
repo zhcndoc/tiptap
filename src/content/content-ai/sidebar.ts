@@ -23,7 +23,7 @@ export const sidebarConfig: SidebarConfig = {
       children: [
         {
           title: 'AI 生成',
-          tags: ['Pro'],
+          tags: ['Start'],
           href: '/content-ai/capabilities/generation/',
           children: [
             {
@@ -85,7 +85,8 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: 'AI 建议',
           href: '/content-ai/capabilities/suggestion',
-          tags: ['Pro', 'Beta'],
+          tags: ['Team'],
+          beta: true,
           children: [
             {
               title: '总览',
@@ -146,7 +147,8 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: 'AI 变更',
           href: '/content-ai/capabilities/changes',
-          tags: ['Pro', 'Beta'],
+          tags: ['Team'],
+          beta: true,
           children: [
             {
               title: '总览',
@@ -183,7 +185,8 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: 'AI 智能体',
           href: '/content-ai/capabilities/agent',
-          tags: ['Pro', 'Beta'],
+          tags: ['Team'],
+          beta: true,
           children: [
             {
               title: '总览',
@@ -351,6 +354,7 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: '起始模板',
           href: 'https://tiptap.dev/product/templates',
+          external: true,
         },
       ],
     },

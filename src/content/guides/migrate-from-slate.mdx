@@ -1,14 +1,14 @@
 ---
 tags:
   - type: editor
-title: 从 Slate 迁移
+title: 从 Slate 迁移到 Tiptap
 meta:
   title: 从 Slate 迁移 | Tiptap 编辑器文档
   description: 学习如何将已有的 Slate 编辑器迁移到 Tiptap。完整指南涵盖内容迁移、设置及功能映射。
   category: 编辑器
 ---
 
-从 [Slate](https://docs.slatejs.org/) 迁移到 Tiptap 十分简单。本指南将帮助你从 Slate 的 JSON 结构过渡到 Tiptap 的扩展系统。
+Tiptap 是一个流行的 Slate 替代方案，从 Slate 迁移到 Tiptap 十分简单。本指南将帮助你从 Slate 的 JSON 结构过渡到 Tiptap 的扩展系统。
 
 ## 内容迁移
 
@@ -327,18 +327,20 @@ const CustomImage = Node.create({
 
 ## 迁移清单
 
-1. 安装 Tiptap 包
-2. 将 Slate JSON 内容转为 HTML 或 Tiptap JSON
-3. 替换 Slate 编辑器初始化为 Tiptap 设置
-4. 将 Slate 插件映射为 Tiptap 扩展
-5. 迁移自定义元素至 [节点视图](/editor/extensions/custom-extensions/node-views)
-6. 将工具栏组件迁移至 Tiptap UI
-7. 测试内容兼容性
-8. 将现有内容转换为 JSON 格式（推荐）
-9. 为缺失功能实现自定义扩展
-10. 更新事件处理和 API 调用
-11. 测试悬浮工具栏功能
-12. 验证自定义元素渲染
+<Checklist>
+  <CheckboxItem>安装 Tiptap 包</CheckboxItem>
+  <CheckboxItem>将 Slate JSON 内容转换为 HTML 或 Tiptap JSON</CheckboxItem>
+  <CheckboxItem>用 Tiptap 设置替换 Slate 编辑器初始化</CheckboxItem>
+  <CheckboxItem>将 Slate 插件映射到 Tiptap 扩展</CheckboxItem>
+  <CheckboxItem>迁移自定义元素到 [节点视图](/editor/extensions/custom-extensions/node-views)</CheckboxItem>
+  <CheckboxItem>迁移工具栏组件到 Tiptap UI</CheckboxItem>
+  <CheckboxItem>测试内容兼容性</CheckboxItem>
+  <CheckboxItem>将现有内容转换为 JSON 格式（推荐）</CheckboxItem>
+  <CheckboxItem>实现缺失功能的自定义扩展</CheckboxItem>
+  <CheckboxItem>更新事件处理和 API 调用</CheckboxItem>
+  <CheckboxItem>测试悬浮工具栏功能</CheckboxItem>
+  <CheckboxItem>验证自定义元素渲染</CheckboxItem>
+</Checklist>
 
 ## 后续步骤
 

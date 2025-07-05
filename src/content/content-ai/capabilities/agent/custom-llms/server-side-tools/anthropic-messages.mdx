@@ -1,14 +1,21 @@
 ---
 title: 服务器端工具（Anthropic Claude Messages API）
 meta:
-  title: 服务器端工具（Anthropic Claude Messages API）| Tiptap 内容 AI
-  description: 学习如何使用 Anthropic Claude Messages API 在服务器端调用工具。
+  title: 服务器端工具（Anthropic Claude Messages API） | Tiptap 内容 AI
+  description: 了解如何使用 Anthropic Claude Messages API 调用服务器端工具。
   category: 内容 AI
 ---
 
-本指南讲解如何使用 Anthropic Claude Messages API 在服务器端调用工具。示例展示了一个返回指定位置天气的工具。
+import { Callout } from '@/components/ui/Callout'
 
-首先，按照 [Anthropic Claude Messages API 工具格式](https://docs.anthropic.com/en/docs/tool-use) 定义工具：
+本指南介绍如何使用 Anthropic Claude Messages API 调用服务器端工具。示例展示了一个返回指定位置天气的工具。
+
+<Callout title="代码演示可用" variant="info">
+  本指南包含一个代码演示，帮助你快速入门。请参阅[GitHub
+  仓库](https://github.com/ueberdosis/ai-agent-custom-llm-demos)。
+</Callout>
+
+首先，在 [Anthropic Claude Messages API 工具格式](https://docs.anthropic.com/en/docs/tool-use)中定义该工具：
 
 ```ts
 const weatherTool = {
@@ -27,14 +34,24 @@ const weatherTool = {
 }
 ```
 
-然后，调用 Anthropic API 时，将该工具包含在 `tools` 数组中：
+然后，在调用 Anthropic API 时，将该工具包含在 `tools` 数组中。
 
 ```ts
-import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
-import { anthropicMessagesAdapter } from '@tiptap-pro/extension-ai-agent'
+import {
+  AiAgentToolkit,
+  anthropicMessagesAdapter,
+  ChatMessagesFormatter,
+} from '@tiptap-pro/extension-ai-agent-server'
 import Anthropic from '@anthropic-ai/sdk'
 
-const toolkit = new AiAgentToolkit()
+const toolkit = new AiAgentToolkit({
+  adapter: anthropicMessagesAdapter,
+})
+
+const formatter = new ChatMessagesFormatter({
+  initialMessages: chatMessages,
+  adapter: anthropicMessagesAdapter,
+})
 
 // 初始化 Anthropic 客户端
 const anthropic = new Anthropic()
@@ -42,66 +59,71 @@ const anthropic = new Anthropic()
 // 调用 Anthropic Claude Messages API
 const response = await anthropic.messages.create({
   model: 'claude-sonnet-4-0',
+  max_tokens: 2048,
   system: `
 <你的系统提示>
 ${toolkit.getSystemPrompt()}
 `,
-  messages: llmMessages,
-  // 在 tools 数组中包括天气工具，
-  // 以及 AiAgentToolkit 提供的其他工具
-  tools: [...toolkit.getTools(anthropicMessagesAdapter), weatherTool],
+  messages: formatter.format(),
+  // 在 tools 数组中包含天气工具，以及 AiAgentToolkit 提供的其他工具
+  tools: [...toolkit.format(), weatherTool],
 })
 ```
 
-接着，检查响应中是否包含天气工具调用；如果有，则调用该工具，并将结果添加到 `llmMessages` 数组中。
+首先，将响应添加到 formatter 中，以便包含在对话中。
 
 ```ts
-for (const content of response.content) {
-  if (content.type !== 'tool_use') {
-    continue
-  }
+formatter.addAiResponse(response)
+```
 
-  const name = content.name
+然后，检查响应是否包含服务器端工具调用（如天气工具）。如果包含，则调用该工具并将结果添加到 formatter 中。随后，再次调用 Anthropic API。
 
-  if (name !== 'get_weather') {
-    continue
-  }
+重复此流程，直到响应中不再包含服务器端工具调用。
 
-  const args = content.input
+```ts
+const isGetWeatherToolUse = (
+  content: Anthropic.Messages.ContentBlock,
+): content is Anthropic.Messages.ToolUseBlock =>
+  content.type === 'tool_use' && content.name === 'get_weather'
 
-  const result = getWeather(args)
-  llmMessages.push({
-    role: 'user',
-    content: [
-      {
-        type: 'tool_result',
-        tool_use_id: content.id,
-        content: result.toString(),
-      },
-    ],
+let response: Anthropic.Messages.Message | null = null
+
+while (!response || response.content.some(isGetWeatherToolUse)) {
+  // 调用 Anthropic Claude Messages API
+  response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-0',
+    max_tokens: 2048,
+    system: `${systemPrompt}\n${toolkit.getSystemPrompt()}`,
+    messages: formatter.format(),
+    // 在 tools 数组中包含天气工具，以及 AiAgentToolkit 的其他工具
+    tools: [...toolkit.format(), weatherTool],
   })
+
+  // 将响应转换为 AI Agent 扩展期望的格式
+  formatter.addAiResponse(response)
+
+  // 处理天气工具调用
+  for (const content of response.content) {
+    if (isGetWeatherToolUse(content)) {
+      const weatherResult = await getWeather(content.input)
+
+      // 将工具调用结果添加到 formatter
+      formatter.addChatMessage({
+        type: 'toolCallResult',
+        toolName: 'get_weather',
+        toolCallId: content.id,
+        result: weatherResult,
+        isError: false,
+      })
+    }
+  }
 }
 ```
 
-最后，当没有更多服务器端工具调用时，使用 `anthropicMessagesAdapter` 将响应转换为 AI Agent 扩展所期望的格式。
+最后，当不再有服务器端工具调用时，使用 `formatter` 将响应转换为 AI Agent 扩展期望的格式。
 
 ```ts
-const result = anthropicMessagesAdapter.parseResponse(response)
+const response = formatter.getResolverResponse()
 ```
 
-`result` 应为 API 端点的响应，也是 `resolver` 函数的返回值。
-
-你还可以向 `result` 添加描述所调用工具的聊天消息，这将在聊天对话中显示工具调用结果。
-
-```ts
-// 在新的聊天消息列表开头添加工具调用消息
-result.chatMessages.unshift({
-  type: 'ai',
-  text: '柏林的天气是晴朗的。',
-  metadata: {
-    // 包含此元数据以标记该消息为服务器端工具调用
-    // 并在 UI 中以不同样式显示
-    isServerSideToolCall: true,
-  },
-})
-```
+从 `formatter.getResolverResponse()` 返回的值即为你的 API 端点响应和解析器函数的返回值。

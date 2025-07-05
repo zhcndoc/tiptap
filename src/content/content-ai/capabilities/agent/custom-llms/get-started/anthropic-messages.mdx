@@ -6,7 +6,14 @@ meta:
   category: 内容 AI
 ---
 
-[Anthropic Claude Messages API](https://docs.anthropic.com/) 允许你使用 Anthropic 的模型构建 AI Agent。
+import { Callout } from '@/components/ui/Callout'
+
+[Anthropic Claude Messages API](https://docs.anthropic.com/) 允许你使用 Anthropic 的模型构建 AI 代理。
+
+<Callout title="代码演示可用" variant="info">
+  本指南包含一个代码演示，帮助你快速入门。见 [GitHub
+  仓库](https://github.com/ueberdosis/ai-agent-custom-llm-demos)。
+</Callout>
 
 ## 客户端设置
 
@@ -35,21 +42,18 @@ const editor = new Editor({
 })
 ```
 
-在 AI Agent 提供者中，定义一个调用你后端的 `resolver` 函数。
-
-同时定义一个 `adapter` 函数，将聊天消息转换为 Anthropic Claude Messages API 期望的格式。
+在 AI Agent 提供者内部，定义一个调用你后端的 `resolver` 函数。
 
 ```tsx
-import AiAgent, { AiAgentProvider, anthropicMessagesAdapter } from '@tiptap-pro/extension-ai-agent'
+import AiAgent, { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
 
 const provider = new AiAgentProvider({
-  adapter: anthropicMessagesAdapter,
-  // llmMessages 属性包含符合 Anthropic API 格式的聊天消息
-  resolver: async ({ llmMessages }) => {
+  // `chatMessages` 属性包含对话的聊天消息
+  resolver: async ({ chatMessages }) => {
     // 调用你的后端 API 端点
     const response = await fetch('/api-endpoint', {
       method: 'POST',
-      body: JSON.stringify({ llmMessages }),
+      body: JSON.stringify({ chatMessages }),
     })
     return await response.json()
   },
@@ -63,25 +67,53 @@ const provider = new AiAgentProvider({
 首先，安装 AI Agent 和 Anthropic 服务器库。
 
 ```bash
-npm install @tiptap-pro/extension-ai-agent @tiptap-pro/extension-ai-agent-server @anthropic-ai/sdk
+npm install @tiptap-pro/extension-ai-agent-server @anthropic-ai/sdk
 ```
 
 然后，在你的 API 端点中，创建一个 `AiAgentToolkit` 实例。它允许你配置 AI 模型可用的工具。
 
 ```ts
-import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
+import { AiAgentToolkit, anthropicMessagesAdapter } from '@tiptap-pro/extension-ai-agent-server'
 
-const toolkit = new AiAgentToolkit()
+const toolkit = new AiAgentToolkit({
+  adapter: anthropicMessagesAdapter,
+})
 ```
 
-创建工具包后，向 Anthropic Claude Messages API 发送请求。
+还要定义一个 `ChatMessagesFormatter` 实例。它让你将聊天消息转换成 Anthropic Claude Messages API 期望的格式。
 
 ```ts
-import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
-import { anthropicMessagesAdapter } from '@tiptap-pro/extension-ai-agent'
+import {
+  AiAgentToolkit,
+  anthropicMessagesAdapter,
+  ChatMessagesFormatter,
+} from '@tiptap-pro/extension-ai-agent-server'
+
+const formatter = new ChatMessagesFormatter({
+  initialMessages: chatMessages,
+  adapter: anthropicMessagesAdapter,
+})
+```
+
+创建工具包和格式化器后，向 Anthropic Claude Messages API 发送请求。
+
+```ts
+import {
+  AiAgentToolkit,
+  anthropicMessagesAdapter,
+  ChatMessagesFormatter,
+} from '@tiptap-pro/extension-ai-agent-server'
 import Anthropic from '@anthropic-ai/sdk'
 
-const toolkit = new AiAgentToolkit()
+const toolkit = new AiAgentToolkit({
+  adapter: anthropicMessagesAdapter,
+})
+
+const formatter = new ChatMessagesFormatter({
+  // 从请求体获取聊天消息
+  initialMessages: chatMessages,
+  adapter: anthropicMessagesAdapter,
+})
 
 // 初始化 Anthropic 客户端
 const anthropic = new Anthropic()
@@ -89,13 +121,14 @@ const anthropic = new Anthropic()
 // 调用 Anthropic Claude Messages API
 const response = await anthropic.messages.create({
   model: 'claude-sonnet-4-0',
+  max_tokens: 2048,
   system: `
 <你的系统提示>
 ${toolkit.getSystemPrompt()}
 `,
-  messages: llmMessages,
-  // 提供 AI 模型可调用的工具
-  tools: toolkit.getTools(anthropicMessagesAdapter),
+  messages: formatter.format(),
+  // 提供 AI 模型可以调用的工具
+  tools: toolkit.format(),
 })
 ```
 
@@ -103,10 +136,12 @@ ${toolkit.getSystemPrompt()}
 
 有关生成系统提示的写法，参见[系统提示指南](/content-ai/capabilities/agent/configure/system-prompt)。其中包含一个示例系统提示，可用作起点。
 
-最后，使用 `anthropicMessagesAdapter` 将响应转换为 AI Agent 扩展期望的格式。
+最后，使用 `formatter` 将响应转换为 AI Agent 扩展期望的格式。
 
 ```ts
-const result = anthropicMessagesAdapter.parseResponse(response)
+formatter.addAiResponse(response)
+
+const response = formatter.getResolverResponse()
 ```
 
-`result` 应为 API 端点的响应，也是 `resolver` 函数的返回值。
+从 `formatter.getResolverResponse()` 返回的值应作为你的 API 端点响应和 resolver 函数的返回值。

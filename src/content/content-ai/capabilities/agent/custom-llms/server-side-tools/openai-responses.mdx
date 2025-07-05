@@ -1,43 +1,60 @@
 ---
 title: 服务器端工具（OpenAI Responses API）
 meta:
-  title: 服务器端工具（OpenAI Responses API）| Tiptap 内容 AI
-  description: 学习如何使用 OpenAI Responses API 在服务器端调用工具。
+  title: 服务器端工具（OpenAI Responses API）| Tiptap Content AI
+  description: 学习如何使用 OpenAI Responses API 调用服务器端工具。
   category: 内容 AI
 ---
 
-本指南讲解如何使用 OpenAI Responses API 在服务器端调用工具。这里展示了一个返回指定地点天气的工具示例。
+import { Callout } from '@/components/ui/Callout'
+
+本指南讲解如何使用 OpenAI Responses API 调用服务器端工具。示例展示了一个返回指定地点天气的工具。
+
+<Callout title="提供代码演示" variant="info">
+  本指南包含代码演示，帮助你快速上手。参见 [GitHub
+  仓库](https://github.com/ueberdosis/ai-agent-custom-llm-demos)。
+</Callout>
 
 首先，按照 [OpenAI Responses API 工具格式](https://platform.openai.com/docs/guides/function-calling?api-mode=responses#defining-functions) 定义工具：
 
 ```ts
-const weatherTool = {
+import OpenAI from 'openai'
+
+const weatherTool: OpenAI.Responses.Tool = {
   type: 'function',
-  function: {
-    name: 'get_weather',
-    description: '返回指定位置的天气',
-    parameters: {
-      type: 'object',
-      properties: {
-        location: {
-          type: 'string',
-          description: '获取天气的地点',
-        },
+  name: 'get_weather',
+  parameters: {
+    type: 'object',
+    properties: {
+      location: {
+        type: 'string',
+        description: '获取天气的地点',
       },
-      required: ['location'],
     },
+    required: ['location'],
   },
+  strict: false,
 }
 ```
 
-然后，在调用 OpenAI API 时，将该工具包含在 `tools` 数组中：
+接着，调用 OpenAI API 时，将该工具加入 `tools` 数组。
 
 ```ts
-import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
-import { openaiResponsesAdapter } from '@tiptap-pro/extension-ai-agent'
+import {
+  AiAgentToolkit,
+  openaiResponsesAdapter,
+  ChatMessagesFormatter,
+} from '@tiptap-pro/extension-ai-agent-server'
 import OpenAI from 'openai'
 
-const toolkit = new AiAgentToolkit()
+const toolkit = new AiAgentToolkit({
+  adapter: openaiResponsesAdapter,
+})
+
+const formatter = new ChatMessagesFormatter({
+  initialMessages: chatMessages,
+  adapter: openaiResponsesAdapter,
+})
 
 // 初始化 OpenAI 客户端
 const openai = new OpenAI()
@@ -49,61 +66,75 @@ const response = await openai.responses.create({
     {
       role: 'developer',
       content: `
-<Your system prompt>
+<你的系统提示>
 ${toolkit.getSystemPrompt()}
 `,
     },
-    ...llmMessages,
+    ...formatter.format(),
   ],
-  // 在 tools 数组中包含天气工具，连同 AiAgentToolkit 提供的其他工具
-  tools: [...toolkit.getTools(openaiResponsesAdapter), weatherTool],
+  // 在 tools 数组中包含天气工具，及 AiAgentToolkit 的其他工具
+  tools: [...toolkit.format(), weatherTool],
 })
 ```
 
-接着，检查响应是否包含天气工具调用。如有，则调用该工具，并将结果添加到 `llmMessages` 数组中。
+首先，将响应添加到 formatter，以便包含在对话中。
 
 ```ts
-for (const toolCall of response.output) {
-  if (toolCall.type !== 'function_call') {
-    continue
-  }
+formatter.addAiResponse(response)
+```
 
-  const name = toolCall.name
+然后，检查响应中是否包含类似天气工具的服务器端调用；如果有，调用该工具并将结果添加到 formatter，然后再次调用 OpenAI API。
 
-  if (name !== 'get_weather') {
-    continue
-  }
+重复此过程，直到响应中不再包含服务器端工具调用。
 
-  const args = JSON.parse(toolCall.arguments)
+```ts
+const isGetWeatherMessage = (
+  message: OpenAI.Responses.ResponseOutputItem,
+): message is OpenAI.Responses.ResponseFunctionToolCall =>
+  message.type === 'function_call' && message.name === 'get_weather'
 
-  const result = getWeather(args)
-  llmMessages.push({
-    type: 'function_call_output',
-    call_id: toolCall.call_id,
-    output: result.toString(),
+let response: OpenAI.Responses.Response | null = null
+
+while (!response || response.output?.some(isGetWeatherMessage)) {
+  // 调用 OpenAI Responses API
+  response = await openai.responses.create({
+    model: 'gpt-4.1',
+    input: [
+      {
+        role: 'developer',
+        content: `${systemPrompt}\n${toolkit.getSystemPrompt()}`,
+      },
+      ...formatter.format(),
+    ],
+    // 在 tools 数组中包含天气工具，及 AiAgentToolkit 的其他工具
+    tools: [...toolkit.format(), weatherTool],
   })
+  // 将响应转换为 AI Agent 扩展所需的格式
+  formatter.addAiResponse(response)
+
+  // 处理天气工具调用
+  for (const toolCall of response.output) {
+    if (isGetWeatherMessage(toolCall)) {
+      const args = locationSchema.parse(JSON.parse(toolCall.arguments))
+      const weatherResult = await getWeather(args.location)
+
+      // 将工具调用结果添加到 formatter
+      formatter.addChatMessage({
+        type: 'toolCallResult',
+        toolName: 'get_weather',
+        toolCallId: toolCall.call_id,
+        result: weatherResult,
+        isError: false,
+      })
+    }
+  }
 }
 ```
 
-最后，当没有更多服务器端工具调用时，使用 `openaiResponsesAdapter` 将响应转换为 AI Agent 扩展所期望的格式。
+最后，当不再有服务器端工具调用时，使用 `formatter` 将响应转换为 AI Agent 扩展需要的格式。
 
 ```ts
-const result = openaiResponsesAdapter.parseResponse(response)
+const response = formatter.getResolverResponse()
 ```
 
-`result` 应为 API 端点的响应，也是 `resolver` 函数的返回值。
-
-你还可以向 `result` 添加描述被调用工具的聊天消息，这样可在聊天对话中显示工具调用的结果。
-
-```ts
-// 将工具调用消息添加到新聊天消息列表的开头
-result.chatMessages.unshift({
-  type: 'ai',
-  text: '柏林的天气是晴朗的。',
-  metadata: {
-    // 添加此元数据以标记消息为服务器端工具调用
-    // 并在 UI 中以不同方式显示
-    isServerSideToolCall: true,
-  },
-})
-```
+`formatter.getResolverResponse()` 返回的值应作为你的 API 端点响应以及解析器函数的返回值。

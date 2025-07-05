@@ -23,12 +23,13 @@ import { Callout } from '@/components/ui/Callout'
 | `allowed_origins`               | 根据提供的值（以逗号分隔）验证 `Origin` 头，例如 `https://test.tiptap.dev,https://prod.tiptap.dev`；如果未设置，则禁用验证                                                   |
 | `authentication_disabled`       | 设置为 `1` 以禁用身份验证，设置为 `0` 以启用（默认值：`0`）                                                                                                             |
 | `webhook_url`                   | 用于接收 webhook 回调的 URL                                                                                                                                  |
-| `webhook_loader_url`            | 可选的 webhook URL，用于初始加载文档。有关更多信息，请参见 [webhooks](/collaboration/core-concepts/webhooks#loader-webhook)。 | 
+| `webhook_loader_url`            | 可选的 webhook URL，用于初始加载文档。有关更多信息，请参见 [webhooks](/collaboration/core-concepts/webhooks#loader-webhook)。 |
 | `webhook_version`               | Webhook 的版本                                                                                                                                                  |
 | `webhook_awareness`             | 启用用户活动的意识 webhook，跟踪 `user.connected` 和 `user.disconnected` 事件（`1` 为启用，`0` 为禁用）                                                             |
 | `webhook_log_errors_only`       | 仅记录 webhook 错误；成功的 webhook 日志被禁用                                                                                                           |
 | `default_auto_versioning`       | 设置为 `1` 以启用自动版本控制，设置为 `0` 以禁用（默认值：`0`）                                                                                                   |
 | `default_auto_versioning_interval` | 自动版本控制的时间间隔（以秒为单位，默认值：`30` 秒）                                                                                                    |
+| `auto_versioning_all_fragments` | 设置为 `1` 以使自动版本控制监听文档的任何片段/字段的更改（默认值仅为 `default`）                                                                                               |
 | `name`                          | 用于标识的实例名称                                                                                                                                             |
 
 ## 通过 API 管理设置

@@ -6,7 +6,14 @@ meta:
   category: 内容 AI
 ---
 
-[Vercel AI SDK](https://ai-sdk.dev) 允许你使用多个 AI 模型提供商构建 AI Agent。它支持在不同的[AI 模型提供商](https://ai-sdk.dev/providers/ai-sdk-providers)之间切换，方便你尝试并选择最适合你的模型。
+import { Callout } from '@/components/ui/Callout'
+
+[Vercel AI SDK](https://ai-sdk.dev) 允许你构建一个包含多个[AI 模型提供商](https://ai-sdk.dev/providers/ai-sdk-providers)的 AI Agent。它让你轻松切换提供商，以便尝试它们，并找到最适合你的那个。
+
+<Callout title="提供代码演示" variant="info">
+  本指南包含一个代码演示，助你快速入门。请查看 [GitHub
+  仓库](https://github.com/ueberdosis/ai-agent-custom-llm-demos)。
+</Callout>
 
 ## 客户端设置
 
@@ -35,21 +42,18 @@ const editor = new Editor({
 })
 ```
 
-在 AI Agent 提供者中，定义一个调用后端的 `resolver` 函数。
-
-同时，定义一个将聊天消息转换为 Vercel AI SDK 期望格式的 `adapter` 函数。
+在 AI Agent 提供商内定义一个 `resolver` 函数，该函数调用你的后端。
 
 ```tsx
-import AiAgent, { AiAgentProvider, vercelAiSdkAdapter } from '@tiptap-pro/extension-ai-agent'
+import AiAgent, { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
 
 const provider = new AiAgentProvider({
-  adapter: vercelAiSdkAdapter,
-  // llmMessages 属性包含了以 Vercel AI SDK 期望格式的聊天消息
-  resolver: async ({ llmMessages }) => {
-    // 调用你后端的 API 端点
+  // `chatMessages` 属性包含会话的聊天消息
+  resolver: async ({ chatMessages }) => {
+    // 调用你的后端 API 端点
     const response = await fetch('/api-endpoint', {
       method: 'POST',
-      body: JSON.stringify({ llmMessages }),
+      body: JSON.stringify({ chatMessages }),
     })
     return await response.json()
   },
@@ -63,26 +67,54 @@ const provider = new AiAgentProvider({
 首先，安装 AI Agent、Vercel AI SDK 以及你偏好的 AI 提供商（此例使用 OpenAI）。
 
 ```bash
-npm install @tiptap-pro/extension-ai-agent @tiptap-pro/extension-ai-agent-server ai @ai-sdk/openai
+npm install @tiptap-pro/extension-ai-agent-server ai @ai-sdk/openai
 ```
 
 然后，在你的 API 端点中，创建一个 `AiAgentToolkit` 实例。它允许你配置 AI 模型可用的工具。
 
 ```ts
-import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
+import { AiAgentToolkit, vercelAiSdkAdapter } from '@tiptap-pro/extension-ai-agent-server'
 
-const toolkit = new AiAgentToolkit()
+const toolkit = new AiAgentToolkit({
+  adapter: vercelAiSdkAdapter,
+})
 ```
 
-创建工具包后，使用 Vercel AI SDK 将请求发送给你的 AI 提供商。
+同时，定义一个 `ChatMessagesFormatter` 实例。它让你将聊天消息转换为 Vercel AI SDK 所期望的格式。
 
 ```ts
-import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
-import { vercelAiSdkAdapter } from '@tiptap-pro/extension-ai-agent'
-import { generateObject } from 'ai'
+import {
+  AiAgentToolkit,
+  vercelAiSdkAdapter,
+  ChatMessagesFormatter,
+} from '@tiptap-pro/extension-ai-agent-server'
+
+const formatter = new ChatMessagesFormatter({
+  initialMessages: chatMessages,
+  adapter: vercelAiSdkAdapter,
+})
+```
+
+创建 toolkit 和 formatter 后，使用 Vercel AI SDK 向 AI 提供商发送请求。
+
+```ts
+import {
+  AiAgentToolkit,
+  vercelAiSdkAdapter,
+  ChatMessagesFormatter,
+} from '@tiptap-pro/extension-ai-agent-server'
+import { generateText } from 'ai'
 import { openai } from '@ai-sdk/openai'
 
-const toolkit = new AiAgentToolkit()
+const toolkit = new AiAgentToolkit({
+  adapter: vercelAiSdkAdapter,
+})
+
+const formatter = new ChatMessagesFormatter({
+  // 从请求体中获取聊天消息
+  initialMessages: chatMessages,
+  adapter: vercelAiSdkAdapter,
+})
 
 // 调用 Vercel AI SDK
 const response = await generateText({
@@ -91,25 +123,27 @@ const response = await generateText({
     {
       role: 'system',
       content: `
-<Your system prompt>
+<你的系统提示>
 ${toolkit.getSystemPrompt()}
 `,
     },
-    ...llmMessages,
+    ...formatter.format(),
   ],
   // 提供 AI 模型可调用的工具
-  tools: toolkit.getTools(vercelAiSdkAdapter),
+  tools: toolkit.format(),
 })
 ```
 
-在系统提示的末尾，包含由 `AiAgentToolkit` 实例生成的系统提示，如：`toolkit.getSystemPrompt()`。它包含了如何使用工具的指令。
+在系统提示的末尾，包含由 `AiAgentToolkit` 实例生成的系统提示，例如：`toolkit.getSystemPrompt()`。它包含了有关如何使用工具的指令。
 
 有关编写系统提示，请参阅[系统提示指南](/content-ai/capabilities/agent/configure/system-prompt)。其中包含示例系统提示，可作为起点。
 
-最后，使用 `vercelAiSdkAdapter` 将响应转换为 AI Agent 扩展期望的格式。
+最后，使用 `formatter` 将响应转换为 AI Agent 扩展所需的格式。
 
 ```ts
-const result = vercelAiSdkAdapter.parseResponse(response)
+formatter.addAiResponse(response)
+
+const response = formatter.getResolverResponse()
 ```
 
-`result` 应为 API 端点的响应，同时也是 `resolver` 函数的返回值。
+从 `formatter.getResolverResponse()` 返回的值应作为你的 API 端点响应以及 resolver 函数的返回值。

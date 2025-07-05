@@ -6,63 +6,77 @@ meta:
   category: 内容 AI
 ---
 
-客户端工具是在浏览器中运行的工具。使用它们与编辑器的内容进行交互。例如：
+import { Callout } from '@/components/ui/Callout'
 
-- 统计文档中的字数
-- 替换文档中所有某个词的实例
-- 格式化文档。
+客户端工具是运行在浏览器中的工具。使用它们来与编辑器的内容进行交互。例如：
+
+<Callout title="提供代码示例" variant="info">
+  本指南包含一个代码示例，帮助你快速上手。请参见 [GitHub 仓库](https://github.com/ueberdosis/ai-agent-custom-llm-demos)。
+</Callout>
+
+- 统计文档中的单词数量
+- 替换文档中所有的某个单词
+- 格式化文档内容。
 
 所有[内置工具](/content-ai/capabilities/agent/custom-llms/tools#built-in-tools)都是客户端工具。
 
-本指南展示如何实现一个工具，将文档中所有出现的某个词替换为另一个词。
+本指南展示如何实现一个工具，用于将文档中所有某个单词替换为另一个单词。假设你已经[设置好了带有自定义后端的 AI Agent 扩展](/content-ai/capabilities/agent/custom-llms/get-started)。
 
 ## 客户端设置
 
-为你的工具声明一个工具调用处理器。工具处理器是应用工具调用到编辑器的函数。它们必须实现 `AiAgentToolHandler` 接口。
+为你的工具声明一个工具调用处理器。工具处理器是执行编辑器工具调用的函数。它们必须实现 `AiAgentToolHandler` 接口。
 
 ```ts
 import { z } from 'zod'
-
 import type { AiAgentToolHandler } from '@tiptap-pro/extension-ai-agent'
 import { ToolCallError, invalidArgumentsResponseFormatter } from '@tiptap-pro/extension-ai-agent'
 
 // 验证工具参数的 schema
-const replaceToolSchema = z.object({
-  find: z.string(),
+const replaceAllToolSchema = z.object({
+  find: z.string().min(1, '查找文本不能为空'),
   replace: z.string(),
 })
 
-export const replaceToolHandler = (): AiAgentToolHandler => ({
+export const replaceAllToolHandler = (): AiAgentToolHandler => ({
   // 工具的唯一标识符
-  name: 'replace',
+  name: 'replace_all',
   modifiesEditor: true,
   handleToolCall: ({ editor, state, toolCall }) => {
     // 验证参数
-    const result = replaceToolSchema.safeParse(toolCall.arguments)
+    const result = replaceAllToolSchema.safeParse(toolCall.arguments)
     if (!result.success) {
       // 返回错误信息给 AI
       throw new ToolCallError(invalidArgumentsResponseFormatter(result.error))
     }
     const args = result.data
 
-    // 替换文档中的词语
-    const html = editor.getHTML()
-    const replacedHtml = html.replaceAll(args.find, args.replace)
-    const newHtml = editor.commands.setContent(replacedHtml)
+    try {
+      // 获取当前 HTML 内容
+      const html = editor.getHTML()
 
-    // 返回成功信息
-    return '工具调用成功。'
+      // 将所有查找文本替换为替换文本
+      const replacedHtml = html.replaceAll(args.find, args.replace)
+
+      // 设置编辑器新内容
+      editor.commands.setContent(replacedHtml)
+
+      // 返回成功消息
+      return `成功将所有 "${args.find}" 替换为 "${args.replace}"。`
+    } catch (error) {
+      console.error(error)
+      throw new ToolCallError(`替换文本失败：${error.message}`)
+    }
   },
 })
 ```
 
-然后，将工具添加到你的 AI 代理提供者：
+然后，将该工具添加到你的 AI 代理提供者：
 
 ```ts
 import { AiAgentProvider, toolHandlersStarterKit } from '@tiptap-pro/extension-ai-agent'
 
 const provider = new AiAgentProvider({
-  toolHandlers: [...toolHandlersStarterKit(), replaceToolHandler()],
+  toolHandlers: [...toolHandlersStarterKit(), replaceAllToolHandler()],
 })
 ```
 
@@ -70,15 +84,15 @@ const provider = new AiAgentProvider({
 
 ## 服务器端设置
 
-在服务器端定义工具。工具定义包含工具的 ID、描述和 JSON schema。此数据会发送给 LLM 用于生成工具调用。它必须实现 `AiAgentTool` 接口。
+在服务器端定义工具。工具定义包含工具的名称、描述和[JSON schema](https://json-schema.org/)。这些数据会发送给大语言模型（LLM），用于生成工具调用。它必须实现 `AiAgentTool` 接口。
 
 ```ts
-import type { AiAgentTool } from '@tiptap-pro/extension-ai-agent'
+import type { AiAgentTool } from '@tiptap-pro/extension-ai-agent-server'
 
-export const replaceTool = (): AiAgentTool => ({
-  // 工具的唯一标识符，必须与工具处理器中的一致
-  name: 'replace',
-  description: '将文档中所有出现的某个词替换为另一个词',
+export const replaceAllTool = (): AiAgentTool => ({
+  // 工具的唯一标识符，必须与工具处理器中一致
+  name: 'replace_all',
+  description: '将文档中所有出现的某个单词替换为另一个单词',
   parameters: {
     type: 'object',
     properties: {
@@ -94,13 +108,13 @@ export const replaceTool = (): AiAgentTool => ({
 })
 ```
 
-然后，将工具添加到你的 AI 代理工具包：
+然后，将该工具添加到你的 AI 代理工具包：
 
 ```ts
-import { AiAgentToolkit, toolsStarterKit } from '@tiptap-pro/extension-ai-agent'
+import { AiAgentToolkit, toolsStarterKit } from '@tiptap-pro/extension-ai-agent-server'
 
 const toolkit = new AiAgentToolkit({
-  tools: [...toolsStarterKit(), replaceTool()],
+  tools: [...toolsStarterKit(), replaceAllTool()],
 })
 ```
 

@@ -23,7 +23,7 @@ export type EventHandlers = {
   ) => void
   beforeToolCall: (toolCall: AiAgentToolCall, context: AiAgentEventContext) => void
   afterToolCall: (toolCall: AiAgentToolCall, context: AiAgentEventContext) => void
-  runFinished: (context: AiAgentEventContext) => void
+  stopRunning: (context: AiAgentEventContext) => void
 }
 
 /**
@@ -58,6 +58,7 @@ export interface AiAgentProviderOptions extends Omit<BaseAiAgentProviderOptions,
    * ```
    */
   initialChatMessages: ChatMessage[]
+
   /**
    * 控制 AI Agent 是否应该自动接受修改编辑器内容的工具调用。
    * @default "onlyRead"
@@ -81,13 +82,7 @@ export interface AiAgentProviderOptions extends Omit<BaseAiAgentProviderOptions,
   onStateChange: EventHandlers['stateChange']
   onBeforeToolCall: EventHandlers['beforeToolCall']
   onAfterToolCall: EventHandlers['afterToolCall']
-  onRunFinished: EventHandlers['runFinished']
-
-  /**
-   * 将 LLM 消息转换为 Tiptap AI Agent 扩展可解析的格式。
-   * @default openaiChatCompletionsAdapter
-   */
-  adapter: AiAgentAdapter<unknown, unknown, unknown, unknown>
+  onStopRunning: EventHandlers['stopRunning']
 
   /**
    * 是否让 AI Agent 使用 AI Changes 扩展。
@@ -102,18 +97,6 @@ export interface AiAgentProviderOptions extends Omit<BaseAiAgentProviderOptions,
    * @default defaultAiAgentResolver
    */
   resolver: (options: AiAgentResolverOptions) => Promise<AiAgentResolverReturn>
-
-  /**
-   * 将 AI Agent 对话的聊天消息转换为可发送给 LLM 的格式。
-   *
-   * @param messages AI Agent 对话的聊天消息
-   * @param adapter 用于转换消息的适配器
-   * @returns LLM 提供者期望的格式的 LLM 消息
-   */
-  createLlmMessages: (
-    messages: ChatMessage[],
-    adapter: AiAgentAdapter<unknown, unknown, unknown, unknown>,
-  ) => unknown[]
 
   /**
    * AI Agent 使用的系统提示。在使用 Tiptap Cloud 的 AI Agent 时覆盖默认系统提示。

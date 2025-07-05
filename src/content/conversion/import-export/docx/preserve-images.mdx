@@ -1,5 +1,8 @@
 ---
-title: 在转换过程中保留图像
+title: 转换过程中保留图像
+tags:
+  - type: start
+  - type: beta
 meta:
     title: 保留图像 | Tiptap 转换
     description: 通过提供图像上传回调 URL，保留您转换文档中的图像。请在文档中了解更多信息。
@@ -12,10 +15,10 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+        在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 从私有注册表中安装">
-        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证以访问 Tiptap 的私有 npm 注册表。
+        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)进行身份验证以访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
@@ -103,11 +106,22 @@ Tiptap 转换服务随后将该 URL 插入到 Tiptap JSON 中，作为图像节�
  const app = new Hono() as Hono<any>
 
  app.post('/upload', async (c) => {
+   // 如果您使用的是 v2 导入，需要这段代码
+   const file = await c.req.blob()
+
+   const filename = c.req.header('File-Name')
+   const fileType = c.req.header('Content-Type')
+   // 结束
+   // 如果您使用的是 v1 导入，需要这段代码
    const body = await c.req.parseBody()
    const file = body['file']
 
-   if (!file || typeof file === 'string') {
-     return c.json({ error: '没有上传文件' }, 400)
+   const filename = file.name
+   const fileType = file.type
+   // 结束
+
+   if (!file) {
+     return c.json({ error: '未上传文件' }, 400)
    }
 
    try {
@@ -115,10 +129,9 @@ Tiptap 转换服务随后将该 URL 插入到 Tiptap JSON 中，作为图像节�
        client: s3,
        params: {
          Bucket: AWS_S3_BUCKET,
-         // file.name 只是当前时间戳和文件扩展名
-         Key: file.name,
+         Key: filename,
          Body: file,
-         ContentType: file.type,
+         ContentType: fileType,
        },
      }).done()
 
@@ -153,11 +166,25 @@ Tiptap 转换服务随后将该 URL 插入到 Tiptap JSON 中，作为图像节�
 
      // 处理 /upload 端点上的文件上传
      if (url.pathname === '/upload') {
-       const formdata = await req.formData()
-       const file = formdata.get('file')
 
-       if (!file || typeof file === 'string') {
-         return new Response(JSON.stringify({ error: '没有上传文件' }), {
+       // 如果您使用的是 v2 导入，需要这段代码
+       const file = await req.blob()
+
+       const filename = req.headers.get('File-Name')!
+       const fileType = req.headers.get('Content-Type')!
+       // 结束
+       // 如果您使用的是 v1 导入，需要这段代码
+       const body = await req.formData()
+       const file = body.get('file')
+
+       const filename = file.name
+       const fileType = file.type
+       // 结束
+
+       const file = await req.blob()
+
+       if (!file) {
+         return new Response(JSON.stringify({ error: '未上传文件' }), {
            status: 400,
            headers: {
              'content-type': 'application/json',
@@ -166,8 +193,8 @@ Tiptap 转换服务随后将该 URL 插入到 Tiptap JSON 中，作为图像节�
        }
 
        try {
-         // 文件已经有名称和类型，因此我们可以直接使用它
-         const s3File = s3Client.file(file.name, { type: file.type })
+         // 文件已包含名称和类型，因此我们可以直接使用它
+         const s3File = s3Client.file(filename, { type: fileType })
          // 将文件写入 S3
          await s3File.write(file)
 

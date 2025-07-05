@@ -1,5 +1,8 @@
 ---
 title: 通过 REST API 转换 ODT 文件
+tags:
+  - type: start
+  - type: beta
 meta:
     title: ODT REST API | Tiptap 转换
     description: 学习如何在 Tiptap 编辑器中处理 ODT 文件（OpenDocument 文本），包括编辑器内的导入/导出和 REST API 的使用。
@@ -11,21 +14,21 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在您的帐户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+        在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 配置 Convert 应用">
-        如果您想集成 REST API，请从 [您的仪表盘](https://cloud.tiptap.dev/v2/cloud/convert) 获取您的应用 ID 和 Convert 密钥。
+        如果您想集成 REST API，请从[您的仪表盘](https://cloud.tiptap.dev/v2/cloud/convert)获取您的应用 ID 和 Convert 密钥。
     </RequirementItem>
     <RequirementItem label="3. 从私有注册表安装">
-        要安装前端扩展，请按照 [设置指南](/guides/pro-extensions) 在 Tiptap 的私有 npm 注册表中进行身份验证。
+        要安装前端扩展，请按照[设置指南](/guides/pro-extensions)在 Tiptap 的私有 npm 注册表中进行身份验证。
     </RequirementItem>
 </Requirements>
 
 ODT 文档转换 API 支持从和转换到 Tiptap 的 JSON 格式。
 
 <Callout title="查看 Postman 集合" variant="hint">
-    您还可以通过访问我们的 [Postman
-    集合](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/collection/33042171-cc186a66-df41-4df8-9c6e-e91b20deffe5?action=share&creator=32651125) 来实验文档转换 API。
+    您还可以通过访问我们的[Postman
+    集合](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/collection/33042171-cc186a66-df41-4df8-9c6e-e91b20deffe5?action=share&creator=32651125)来体验文档转换 API。
 </Callout>
 
 ## 导入 API 端点
@@ -35,7 +38,7 @@ ODT 文档转换 API 支持从和转换到 Tiptap 的 JSON 格式。
 
 ### 示例 (cURL)
  ```bash
- curl -X POST "https://api.tiptap.dev/v1/import" \
+ curl -X POST "https://api.tiptap.dev/v1/convert/import" \
    -H "Authorization: Bearer <your-jwt-token>" \
    -H "X-App-Id: <your-app-id>" \
    -F "file=@/path/to/document.odt"

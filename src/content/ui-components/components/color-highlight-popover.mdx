@@ -1,13 +1,13 @@
 ---
 title: 为高亮添加弹出层
 meta:
-  title: 高亮弹出层 | Tiptap UI 组件
-  description: 添加一个弹出层，您可以在其中选择高亮。将此 UI 组件添加到您的 Tiptap 编辑器中。
+  title: 颜色高亮弹出层 | Tiptap UI 组件
+  description: 添加一个弹出层，您可以在其中选择高亮颜色。将此 UI 组件添加到您的 Tiptap 编辑器中。
   category: UI 组件
 component:
-  name: 高亮弹出层
-  description: 从弹出层中选择高亮。
-  type: component
+  name: 颜色高亮弹出层
+  description: 从弹出层中选择高亮颜色。
+  type: 组件
   isFree: true
   isCloud: false
   isOpen: true
@@ -22,18 +22,20 @@ import { CodeDemo } from '@/components/CodeDemo'
 <CodeDemo
   isScrollable
   isSmall
-  src="https://template.tiptap.dev/preview/tiptap-ui/highlight-popover"
+  src="https://template.tiptap.dev/preview/tiptap-ui/color-highlight-popover"
 />
 
 ## 安装
-您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加此组件
+
+您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加该组件：
 
 ```bash
-npx @tiptap/cli add highlight-popover
+npx @tiptap/cli add color-highlight-popover
 ```
 
 ### 手动集成
-对于除了 Vite 或 Next.js 以外的框架，可从[开源仓库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/highlight-popover)手动添加此组件。
+
+对于除 Vite 或 Next.js 以外的其他框架，请从[开源仓库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/color-highlight-popover)手动添加该组件。
 
 ### 导入样式
 
@@ -45,7 +47,7 @@ npx @tiptap/cli add highlight-popover
 import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
 import { StarterKit } from '@tiptap/starter-kit'
 import { Highlight } from '@tiptap/extension-highlight'
-import { HighlightPopover } from '@/components/tiptap-ui/highlight-popover'
+import { ColorHighlightPopover } from '@/components/tiptap-ui/color-highlight-popover'
 
 import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
 
@@ -55,19 +57,19 @@ export default function MyEditor() {
     extensions: [StarterKit, Highlight.configure({ multicolor: true })],
     content: `
         <p style="text-align: left">
-            <mark data-color="var(--tt-highlight-purple)" style="background-color: var(--tt-highlight-purple); color: inherit">
-                <span class="selection">高亮文本</span>
+            <mark data-color="var(--tt-color-highlight-purple)" style="background-color: var(--tt-color-highlight-purple); color: inherit">
+                <span class="selection">突出显示的文本</span>
             </mark>
             <span class="selection"> </span>
-            <mark data-color="var(--tt-highlight-red)" style="background-color: var(--tt-highlight-red); color: inherit">
-                <span class="selection">在</span>
+            <mark data-color="var(--tt-color-highlight-red)" style="background-color: var(--tt-color-highlight-red); color: inherit">
+                <span class="selection">用</span>
             </mark>
             <span class="selection"> </span>
-            <mark data-color="var(--tt-highlight-green)" style="background-color: var(--tt-highlight-green); color: inherit">
-                <span class="selection">不同</span>
+            <mark data-color="var(--tt-color-highlight-green)" style="background-color: var(--tt-color-highlight-green); color: inherit">
+                <span class="selection">不同的</span>
             </mark>
             <span class="selection"> </span>
-            <mark data-color="var(--tt-highlight-blue)" style="background-color: var(--tt-highlight-blue); color: inherit">
+            <mark data-color="var(--tt-color-highlight-blue)" style="background-color: var(--tt-color-highlight-blue); color: inherit">
                 <span class="selection">颜色</span>
             </mark>
             <span class="selection"> 中以突出重点。</span>
@@ -78,7 +80,7 @@ export default function MyEditor() {
   return (
     <EditorContext.Provider value={{ editor }}>
       <div className="tiptap-button-group" data-orientation="horizontal">
-        <HighlightPopover />
+        <ColorHighlightPopover />
       </div>
 
       <EditorContent editor={editor} role="presentation" />
@@ -93,7 +95,7 @@ export default function MyEditor() {
 | -------------------- | ------------------ | -------------------------- | ------------------------------------------- |
 | editor               | Editor \| null     | null                       | Tiptap 编辑器实例                            |
 | colors               | HighlightColor[]   | DEFAULT_HIGHLIGHT_COLORS   | 高亮颜色选项数组                            |
-| hideWhenUnavailable  | boolean            | false                      | 弹出层是否处于浮动环境中                    |
+| hideWhenUnavailable  | boolean            | false                      | 弹出层在不可用时是否隐藏                    |
 
 ## 需求
 

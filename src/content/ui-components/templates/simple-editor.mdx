@@ -12,6 +12,7 @@ import { ArrowRightIcon } from 'lucide-react'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Button } from '@/components/ui/Button'
 import { Link } from '@/components/Link'
+import { Callout } from '@/components/ui/Callout'
 
 简单编辑器模板是一个完整工作的 Tiptap 编辑器设置。它包括常用的开源扩展和 UI 组件，所有组件都采用 MIT 许可证，并且可以随意自定义。
 
@@ -45,42 +46,23 @@ import { Link } from '@/components/Link'
 npx @tiptap/cli add simple-editor
 ```
 
-### 包含全局样式
+## 样式
 
-为编辑器应用正确的样式，请手动在 `styles/` 中将 css 文件导入到您的主要 CSS/SCSS 条目中：
-
-```jsx
-@import 'path-to/_variables.scss';
-@import 'path-to/_keyframes-animations.scss';
-```
+<Callout title="缺少样式？" variant="info">
+  如果您尚未添加样式，请务必[按照样式设置指南](/ui-components/getting-started/style)进行操作，以确保编辑器和组件能够正确渲染。
+</Callout>
 
 ## 使用
 
 安装后，在您的 React 或 Next.js 项目中使用 SimpleEditor 组件：
 
 ```jsx
-import { SimpleEditor } from '@/components/templates/simple/simple-editor'
+import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor'
 
-export default function Page() {
+export default function App() {
   return <SimpleEditor />
 }
 ```
-
-## 要求
-
-确保具备以下开源包和扩展，以充分利用简单编辑器模板：
-
-```bash
-npm i @tiptap/react @tiptap/starter-kit @tiptap/extension-image @tiptap/extension-task-item @tiptap/extension-task-list @tiptap/extension-text-align @tiptap/extension-typography
-```
-
-- `@tiptap/react`
-- `@tiptap/starter-kit`
-- `@tiptap/extension-image`
-- `@tiptap/extension-task-item`
-- `@tiptap/extension-task-list`
-- `@tiptap/extension-text-align`
-- `@tiptap/extension-typography`
 
 ## 特性
 
@@ -123,13 +105,17 @@ npm i @tiptap/react @tiptap/starter-kit @tiptap/extension-image @tiptap/extensio
 
 #### UI 组件
 
-- `mark-button`
-- `node-button`
-- `image-upload-button`
-- `list-dropdown-menu`
+- `blockquote-button`
+- `code-block-button`
+- `color-highlight-button`
+- `color-highlight-popover`
+- `heading-button`
 - `heading-dropdown-menu`
-- `highlight-popover`
+- `image-upload-button`
 - `link-popover`
+- `list-button`
+- `list-dropdown-menu`
+- `mark-button`
 - `text-align-button`
 - `undo-redo-button`
 

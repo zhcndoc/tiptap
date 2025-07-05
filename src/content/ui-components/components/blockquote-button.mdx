@@ -1,0 +1,87 @@
+---
+title: 添加切换块级节点的按钮
+meta:
+  title: 引用按钮 | Tiptap UI 组件
+  description: 使用引用按钮切换块级节点（如引用块）。更多内容见文档。
+  category: UI 组件
+component:
+  name: 引用按钮
+  description: 添加一个按钮，用于切换块级节点（如引用块）。
+  type: 组件
+  isFree: true
+  isCloud: false
+  isOpen: true
+  isNew: false
+  icon: TextQuote
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个用于在您的 Tiptap 编辑器中切换引用块的按钮。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/blockquote-button" />
+
+## 安装
+
+您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加此组件：
+
+```bash
+npx @tiptap/cli add blockquote-button
+```
+
+### 手动集成
+
+对于除 Vite 或 Next.js 之外的框架，请从[开源仓库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/blockquote-button)手动添加该组件。
+
+### 导入样式
+
+此组件需要您导入我们添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 的样式。
+
+## 使用方法
+
+```tsx
+import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
+import { StarterKit } from '@tiptap/starter-kit'
+import { BlockQuoteButton } from '@/components/tiptap-ui/blockquote-button'
+
+import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
+
+export default function MyEditor() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit],
+    content: `
+        <blockquote>
+            <p>"预测未来的最好方法就是发明未来."</p><p>— Alan Kay</p>
+        </blockquote>
+        `,
+  })
+
+  return (
+    <EditorContext.Provider value={{ editor }}>
+      <div className="tiptap-button-group" data-orientation="horizontal">
+        <BlockQuoteButton />
+      </div>
+
+      <EditorContent editor={editor} role="presentation" />
+    </EditorContext.Provider>
+  )
+}
+```
+
+## 属性
+
+| 名称                 | 类型             | 默认值  | 说明                                       |
+| -------------------- | ---------------- | ------- | ------------------------------------------ |
+| editor               | Editor \| `null` | `null`  | Tiptap 编辑器实例                          |
+| hideWhenUnavailable  | boolean          | `false` | 按钮不可用时是否隐藏                       |
+| text                 | string           | -       | 与图标一起显示的文本                       |
+
+## 要求
+
+使用的参考组件
+
+- `use-tiptap-editor`（hook）
+- `tiptap-utils`（库）
+- `button`（基础组件）
+- `block-quote-icon`（图标）

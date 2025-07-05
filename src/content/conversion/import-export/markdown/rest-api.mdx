@@ -1,5 +1,8 @@
 ---
 title: 通过 REST API 转换 Markdown
+tags:
+  - type: start
+  - type: beta
 meta:
     title: Markdown REST API | Tiptap 转换
     description: 了解如何在 Tiptap 编辑器中处理 Markdown 文件，包括编辑器内的导入/导出和 REST API 的使用。
@@ -10,8 +13,8 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费的[试用](https://cloud.tiptap.dev/v2/billing)或订阅[Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+    <RequirementItem label="1. Activate trial or subscribe">
+        开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或在您的账户中[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 配置 Convert 应用">
         如果您想集成 REST API，请从[您的仪表板](https://cloud.tiptap.dev/v2/cloud/convert)中获取您的应用 ID 和 Convert 密钥。
@@ -29,7 +32,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 将 .md 文件（或 gfm）转换为 Tiptap JSON。
 
 ```bash
-curl -X POST "https://api.tiptap.dev/v1/import?format=md" \
+curl -X POST "https://api.tiptap.dev/v1/convert/import?format=md" \
   -H "Authorization: Bearer <your-jwt-token>" \
   -H "X-App-Id: <your-app-id>" \
   -F "file=@/path/to/file.md"
@@ -53,7 +56,7 @@ curl -X POST "https://api.tiptap.dev/v1/import?format=md" \
 将 Tiptap JSON 转换为 .md 或 .gfm。
 
 ```bash
-curl -X POST "https://api.tiptap.dev/v1/export" \
+curl -X POST "https://api.tiptap.dev/v1/convert/export" \
   -H "Authorization: Bearer <your-jwt-token>" \
   -H "X-App-Id: <your-app-id>" \
   -H "Content-Type: application/json" \

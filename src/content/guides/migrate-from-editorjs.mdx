@@ -1,14 +1,14 @@
 ---
 tags:
   - type: editor
-title: 从 Editor.js 迁移
+title: 从 Editor.js 迁移到 Tiptap
 meta:
   title: 从 Editor.js 迁移 | Tiptap 编辑器文档
   description: 学习如何将现有的 Editor.js 编辑器迁移到 Tiptap。完整指南涵盖内容迁移、设置和功能映射。
   category: Editor
 ---
 
-从 [Editor.js](https://editorjs.io/) 迁移到 Tiptap 非常简单。本文档将帮助你从 Editor.js 的块级结构过渡到 Tiptap 的文档模型。
+如果你想替换 Editor.js 编辑器，Tiptap 是一个流行的替代方案。从 Editor.js 迁移到 Tiptap 非常简单。本指南将帮助你从 Editor.js 的基于块的结构平滑过渡到 Tiptap 的文档模型。
 
 ## 内容迁移
 
@@ -264,19 +264,21 @@ function MyEditor() {
 
 ## 迁移清单
 
-1. 安装 Tiptap 包
-2. 将 Editor.js JSON 内容转换为 HTML
-3. 用 Tiptap 设置替换 Editor.js 初始化
-4. 将 Editor.js 工具映射到 Tiptap 扩展
-5. 将自定义工具迁移为自定义扩展或 [节点视图](/editor/extensions/custom-extensions/node-views)
-6. 实现工具栏 UI 组件
-7. 测试内容兼容性
-8. 将现有内容转换为 JSON 格式（推荐）
-9. 为缺失功能实现自定义扩展
-10. 更新事件处理和 API 调用
-11. 测试内联工具栏功能
-12. 验证图片上传和处理
-13. 测试块级特性（引用、代码块等）
+<Checklist>
+  <CheckboxItem>安装 Tiptap 包</CheckboxItem>
+  <CheckboxItem>将 Editor.js JSON 内容转换为 HTML</CheckboxItem>
+  <CheckboxItem>用 Tiptap 设置替换 Editor.js 初始化</CheckboxItem>
+  <CheckboxItem>将 Editor.js 工具映射到 Tiptap 扩展</CheckboxItem>
+  <CheckboxItem>将自定义工具迁移为自定义扩展或 [Node Views](/editor/extensions/custom-extensions/node-views)</CheckboxItem>
+  <CheckboxItem>实现工具栏 UI 组件</CheckboxItem>
+  <CheckboxItem>测试内容兼容性</CheckboxItem>
+  <CheckboxItem>将现有内容转换为 JSON 格式（推荐）</CheckboxItem>
+  <CheckboxItem>为缺失功能实现自定义扩展</CheckboxItem>
+  <CheckboxItem>更新事件处理和 API 调用</CheckboxItem>
+  <CheckboxItem>测试内联工具栏功能</CheckboxItem>
+  <CheckboxItem>验证图片上传和处理</CheckboxItem>
+  <CheckboxItem>测试块级功能（引用、代码块等）</CheckboxItem>
+</Checklist>
 
 ## 后续步骤
 

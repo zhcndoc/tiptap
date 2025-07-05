@@ -15,7 +15,11 @@ export const sidebarConfig: SidebarConfig = {
           href: '/ui-components/getting-started/overview',
         },
         {
-          title: '命令行工具',
+          title: 'Style',
+          href: '/ui-components/getting-started/style',
+        },
+        {
+          title: 'CLI',
           href: '/ui-components/getting-started/cli',
         },
       ],
@@ -28,7 +32,22 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: '简易编辑器',
           href: '/ui-components/templates/simple-editor',
-          tags: ['开源'],
+          tags: ['Open Source'],
+        },
+      ],
+    },
+    {
+      type: 'group',
+      href: '/ui-components/install',
+      title: 'Install',
+      children: [
+        {
+          title: 'Next.js',
+          href: '/ui-components/install/next',
+        },
+        {
+          title: 'Vite',
+          href: '/ui-components/install/vite',
         },
       ],
     },
@@ -45,6 +64,54 @@ export const sidebarConfig: SidebarConfig = {
           title: '组件列表',
           href: '/ui-components/components/',
           children: [
+            {
+              title: '引用按钮',
+              href: '/ui-components/components/blockquote-button',
+            },
+            {
+              title: '代码块按钮',
+              href: '/ui-components/components/code-block-button',
+            },
+            {
+              title: '颜色高亮弹出框',
+              href: '/ui-components/components/color-highlight-popover',
+            },
+            {
+              title: '标题按钮',
+              href: '/ui-components/components/heading-button',
+            },
+            {
+              title: '标题下拉菜单',
+              href: '/ui-components/components/heading-dropdown-menu',
+            },
+            {
+              title: '图片上传按钮',
+              href: '/ui-components/components/image-upload-button',
+            },
+            {
+              title: '链接弹出框',
+              href: '/ui-components/components/link-popover',
+            },
+            {
+              title: '列表按钮',
+              href: '/ui-components/components/list-button',
+            },
+            {
+              title: '列表下拉菜单',
+              href: '/ui-components/components/list-dropdown-menu',
+            },
+            {
+              title: '标记按钮',
+              href: '/ui-components/components/mark-button',
+            },
+            {
+              title: '文本对齐按钮',
+              href: '/ui-components/components/text-align-button',
+            },
+            {
+              title: '撤销重做按钮',
+              href: '/ui-components/components/undo-redo-button',
+            },
             // {
             //   title: 'Comment button',
             //   href: '/ui-components/components/comment-button',
@@ -61,38 +128,6 @@ export const sidebarConfig: SidebarConfig = {
             //   title: 'Floating toolbar',
             //   href: '/ui-components/components/floating-toolbar',
             // },
-            {
-              title: '标题按钮',
-              href: '/ui-components/components/heading-button',
-            },
-            {
-              title: '标题下拉菜单',
-              href: '/ui-components/components/heading-dropdown-menu',
-            },
-            {
-              title: '高亮弹窗',
-              href: '/ui-components/components/highlight-popover',
-            },
-            {
-              title: '图片上传按钮',
-              href: '/ui-components/components/image-upload-button',
-            },
-            {
-              title: '链接弹窗',
-              href: '/ui-components/components/link-popover',
-            },
-            {
-              title: '列表按钮',
-              href: '/ui-components/components/list-button',
-            },
-            {
-              title: '列表下拉菜单',
-              href: '/ui-components/components/list-dropdown-menu',
-            },
-            {
-              title: '标记按钮',
-              href: '/ui-components/components/mark-button',
-            },
             // {
             //   title: 'Math button',
             //   href: '/ui-components/components/math-button',
@@ -101,18 +136,10 @@ export const sidebarConfig: SidebarConfig = {
             //   title: 'Mention dropdown',
             //   href: '/ui-components/components/mention-dropdown-menu',
             // },
-            {
-              title: '节点按钮',
-              href: '/ui-components/components/node-button',
-            },
             // {
             //   title: 'Slash menu',
             //   href: '/ui-components/components/slash-dropdown-menu',
             // },
-            {
-              title: '文本对齐按钮',
-              href: '/ui-components/components/text-align-button',
-            },
             // {
             //   title: 'Thread',
             //   href: '/ui-components/components/thread',
@@ -121,10 +148,6 @@ export const sidebarConfig: SidebarConfig = {
             //   title: 'Trigger button',
             //   href: '/ui-components/components/trigger-button',
             // },
-            {
-              title: '撤销/重做按钮',
-              href: '/ui-components/components/undo-redo-button',
-            },
           ],
         },
         {

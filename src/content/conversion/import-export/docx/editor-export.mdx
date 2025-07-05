@@ -1,5 +1,8 @@
 ---
 title: 从编辑器导出 .docx
+tags:
+  - type: start
+  - type: beta
 meta:
     title: 导出 DOCX | Tiptap 转换
     description: 学习如何使用我们的文档中的导出扩展将 Tiptap 编辑器内容导出为 DOCX（Word）文件。
@@ -11,39 +14,35 @@ import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅一个 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+    <RequirementItem label="1. Activate trial or subscribe">
+        在您的账户中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门套餐](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 从私有注册表安装">
-        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 的说明认证到 Tiptap 的私有 npm 注册表。
+        要安装此前端扩展，请按照[安装指南](/guides/pro-extensions)中的说明认证访问 Tiptap 私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
 <CodeDemo src="https://develop--tiptap-pro.netlify.app/preview/Extensions/ExportDocx" />
 
-使用 Tiptap 的 `@tiptap-pro/extension-export-docx` 将编辑器的内容导出为 `.docx` 文件。此扩展将 `DOCX` 导出功能集成到您的编辑器中。
+使用 Tiptap 的 `@tiptap-pro/extension-export-docx` 扩展将编辑器内容导出为 `.docx` 文件。该扩展将 `DOCX` 导出功能集成到您的编辑器中。
 
-您可以在任何 JavaScript 环境下使用此扩展，包括由于 `exportDocx` 函数的同构特性而支持的服务器端应用程序。
+您可以在任何 JavaScript 环境使用此扩展，包括服务器端应用程序，这受益于 `exportDocx` 函数的同构特性。
 
-如果您更喜欢在我们的端处理转换，您还可以使用 [REST API](/conversion/import-export/docx/rest-api)。
+如果您更倾向于在我们的服务端处理转换，也可以使用 [REST API](/conversion/import-export/docx/rest-api)。
 
-默认情况下，此扩展将 Tiptap 节点映射到 DOCX 元素。如果您的内容包含自定义节点，请配置其 [导出行为](/conversion/import-export/docx/custom-node-conversion) 以确保它们能被正确转换。
-
-<Callout title="集成或测试转换" variant="warning">
-    要测试或集成此功能，您需要一个 [有效的试用或 Tiptap 订阅](https://cloud.tiptap.dev/v2/billing)。
-</Callout>
+默认情况下，该扩展将 Tiptap 节点映射为 DOCX 元素。如果您的内容包含自定义节点，请配置它们的[导出行为](/conversion/import-export/docx/custom-node-conversion)，确保正确转换。
 
 ## 安装 DOCX 导出扩展
 
-转换扩展发布在 Tiptap 的私有 npm 注册表中。通过遵循 [私有注册表指南](/guides/pro-extensions) 集成这些扩展。
+转换扩展发布在 Tiptap 私有 npm 注册表中。请遵循[私有注册表指南](/guides/pro-extensions)完成集成。
 
-完成后，您可以安装并导入 **Export DOCX** 扩展包
+完成后，您可以安装并导入 **Export DOCX** 扩展包：
 
 ```bash
 npm i @tiptap-pro/extension-export-docx
 ```
 
-使用导出扩展不需要任何 Tiptap 转换凭据，因为转换在扩展中立即处理。
+使用导出扩展不需要任何 Tiptap 转换凭据，因为转换在扩展内部即时处理。
 
 ```js
 import { ExportDocx } from '@tiptap-pro/extension-export-docx'
@@ -51,7 +50,7 @@ import { ExportDocx } from '@tiptap-pro/extension-export-docx'
 
 ## 配置扩展
 
-`ExportDocx` 扩展可以使用 `ExportDocxOptions` （`object`）作为 `configure` 方法的参数来配置，具有以下属性：
+`ExportDocx` 扩展可以通过 `ExportDocxOptions` （`object`）作为 `configure` 方法的参数进行配置，参数具有以下属性：
 
 ```ts
 // 导入 ExportDocx 扩展
@@ -61,96 +60,97 @@ const editor = new Editor({
   extensions: [
     // 其他扩展 ...
     ExportDocx.configure({
-      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => void, // 必需
-      exportType: 'blob', // 可选。默认: 'blob'
-      customNodes: [], // 可选。默认: []
-      styleOverrides: {}, // 可选。默认: {}
+      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => void, // 必填
+      exportType: 'blob', // 可选。默认值：'blob'
+      customNodes: [], // 可选。默认值：[]
+      styleOverrides: {}, // 可选。默认值：{}
     }),
     // 其他扩展 ...
   ],
-  // 其他编辑器设置 ...
+  // 其他编辑器配置 ...
 })
 ```
 
-| 参数 | 描述 | 默认 |
-|------|------|------|
-| onCompleteExport | 一个 **必需** 的回调函数，接收导出的数据。您可以根据需要处理数据（例如，提示文件下载） | `N/A` |
-| options | 一个对象，用于配置导出的某些部分：<br/><br/>**exportType**：方法返回的数据类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅限服务器端）<br/>- **stream**：返回 Node.js `Stream`（仅限服务器端）<br/>- **string**：返回一个 `String`<br/>- **blob**：返回一个 `Blob` | `blob` |
-| customNodes | 自定义节点定义的数组。如果您的内容包含自定义节点，请将其定义传递到这里，以确保它们能被正确转换 | `[]` |
-| styleOverrides | 一个对象，包含要应用于导出文档的自定义样式。使用此选项覆盖默认导出样式 | `{}` |
-
+| 参数 | 描述 | 默认值 |
+|------|------|-------|
+| onCompleteExport | 一个 **必填** 的回调函数，接收导出的数据。您可以根据需求处理数据（例如，提示文件下载） | N/A |
+| options | 一个对象，用于配置导出行为：<br/><br/>**exportType**：返回数据类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅服务器端）<br/>- **stream**：返回 Node.js `Stream`（仅服务器端）<br/>- **string**：返回一个字符串<br/>- **blob**：返回一个 `Blob` | 'blob' |
+| customNodes | 自定义节点定义数组。如果内容含自定义节点，请传入定义以确保正确转换 | [] |
+| styleOverrides | 用于覆盖导出文档默认样式的对象 | {} |
 
 ## 导出 DOCX 文件
-安装扩展后，您可以将编辑器的内容转换为 `.docx`。
 
-在提供一个示例之前，让我们先看一下可在编辑器命令中使用的 `exportDocx` 方法的签名：
+安装扩展后，您可以将编辑器内容导出为 `.docx` 文件。
+
+先查看可在编辑器命令中使用的 `exportDocx` 方法签名：
 
 ```ts
 /**
 * 导出当前文档为 .docx 文件
 *
-* 注意：'buffer' 和 'stream' 导出类型仅在服务器环境中可用
-* 因为它们分别使用 Node Buffer 和 Stream API
+* 注意：服务器环境中支持 'buffer' 和 'stream' 导出类型
+* 因为它们分别利用了 Node.js 的 Buffer 和 Stream API
 *
-* @param onCompleteExport - 回调函数以处理导出的文件
+* @param onCompleteExport - 回调函数以处理导出结果
 * @param options - 导出选项
-* @param customNodes - 自定义节点定义，以确保正确转换
-* @param styleOverrides - 应用于导出文档的自定义样式
+* @param customNodes - 自定义节点定义
+* @param styleOverrides - 导出文档样式覆盖
 * @example editor.commands.exportDocx((result) => {}, { exportType: 'buffer' }, [])
 *
 */
 exportDocx: (options?: ExportDocxOptions) => Promise<string | Buffer<ArrayBufferLike> | Blob | Stream>
 ```
 
-`exportDocx` 方法接受一个可选的 `ExportDocxOptions` （`object`）作为参数，具有以下属性，可以用来 *覆盖* 您通过 `ExportDocx.configure` 方法配置的属性：
+`exportDocx` 方法接受一个可选的 `ExportDocxOptions` （`object`），属性可用于 *覆盖* 您通过 `ExportDocx.configure` 配置的选项：
 
-| 参数 | 描述 | 默认 |
-|------|------|------|
-| onCompleteExport | 一个 **必需** 的回调函数（如果您未在配置扩展调用中定义）接收导出的数据。您可以根据需要处理数据（例如，提示文件下载） | `N/A` |
-| options | 一个对象，用于配置导出的某些部分：<br/><br/>**exportType**：方法返回的数据类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅限服务器端）<br/>- **stream**：返回 Node.js `Stream`（仅限服务器端）<br/>- **string**：返回一个 `String`<br/>- **blob**：返回一个 `Blob` | `blob` |
-| customNodes | 自定义节点定义的数组。如果您的内容包含自定义节点，请将其定义传递到这里，以确保它们能被正确转换 | `[]` |
-| styleOverrides | 一个对象，包含要应用于导出文档的自定义样式。使用此选项覆盖默认导出样式 | `{}` |
+| 参数 | 描述 | 默认值 |
+|------|------|-------|
+| onCompleteExport | 一个 **必填** 的回调函数（若未在配置中定义），用于接收导出的数据。您可据需处理(如提示下载) | N/A |
+| options | 用于配置导出行为：<br/><br/>**exportType**：返回数据类型类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅服务器端）<br/>- **stream**：返回 Node.js `Stream`（仅服务器端）<br/>- **string**：返回字符串<br/>- **blob**：返回 `Blob` | 'blob' |
+| customNodes | 自定义节点定义数组。如果包含自定义节点，请传入定义以确保转换正确 | [] |
+| styleOverrides | 用于覆盖导出文档默认样式的对象 | {} |
+
+示例如下：
 
 ```js
 // 导入 ExportDocx 扩展
 import { ExportDocx } from '@tiptap-pro/extension-export-docx'
 
-// 设置您的编辑器
+// 设置编辑器
 const editor = new Editor({
   extensions: [
     // 其他扩展 ...
     ExportDocx.configure({
-      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => {}, // 必需
-      exportType: 'blob', // 可选。默认: 'blob'
-      customNodes: [], // 可选。默认: []
-      styleOverrides: {}, // 可选。默认: {}
+      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => {}, // 必填
+      exportType: 'blob', // 可选，默认: 'blob'
+      customNodes: [], // 可选，默认: []
+      styleOverrides: {}, // 可选，默认: {}
     }),
     // 其他扩展 ...
   ],
-  // 其他编辑器设置 ...
+  // 其他编辑器配置 ...
 })
 
-// 声明一些将调用编辑器 exportDocx 方法的函数
+// 声明调用编辑器导出方法的函数
 
 function handleExportDocx() {
-  // 调用您的编辑器的 exportDocx 方法
+  // 调用编辑器的 exportDocx 方法
   editor
     .chain()
-    // 方法调用，没有任何覆盖
-    // 将采用在配置方法中设置的配置
+    // 企业配置中定义的选项，无覆盖
     .exportDocx()
     .run()
 }
 
 function handleExportDocxBuffer() {
-  // 调用您的编辑器的 exportDocx 方法
+  // 调用编辑器的 exportDocx 方法，带覆盖
   editor
     .chain()
-    // 方法调用，带有一些覆盖
+    // 覆盖部分设置
     .exportDocx({
-      // 覆盖 onCompleteExport 回调以处理覆盖的导出类型
+      // 覆盖 onCompleteExport 回调处理 Buffer 类型导出
       onCompleteExport: (result: Buffer) => {
-        // 处理以缓冲格式导出的文件
+        // 处理导出的缓冲数据
       },
       // 覆盖导出类型
       exportType: 'Buffer',
@@ -158,49 +158,49 @@ function handleExportDocxBuffer() {
     .run()
 }
 
-// 在您的应用程序的任何点调用这些函数
+// 在应用任意位置调用这些函数
 handleExportDocx()
 handleExportDocxBuffer()
 ```
 
 ### 工作原理
 
-上述示例完全在浏览器中运行，通过 ExportDocx 扩展生成一个 DOCX Blob，因为在导出类型中没有任何覆盖，因此它是默认值。然后我们以编程方式下载该文件。您可以调整此逻辑，例如，将 blob 发送到服务器而不是下载。
+上述示例完整运行于浏览器，ExportDocx 扩展生成一个 DOCX Blob。由于未覆写导出类型，采用默认的 `blob`。然后以编程方式触发文件下载。您也可以修改逻辑，例如，将 blob 上传至服务器，而非直接下载。
 
 | 参数 | 描述 |
 |------|------|
-| onCompleteExport | 当转换完成时，我们将获得转换的 `result`，作为回调函数的主要和唯一的参数，在这种情况下，它将是一个 `Blob`，因为我们在 `options` 参数中的 `exportType` 中声明了我们想要这种类型。您可以根据需要处理它，例如提示文件下载，如我们在上面的示例中展示的那样。 |
-| exportType | 我们使用默认的 `blob`，因此转换返回一个 `Blob`。 |
-| customNodes | 我们不会提供任何自定义节点映射，因为我们没有提供任何自定义节点。 |
-| styleOverrides | 我们不会提供任何样式覆盖，因此将应用 Microsoft Word 默认设置的一些通用指南下的默认 `DOCX` 样式到导出文档。 |
+| onCompleteExport | 转换完成时会获得转换结果 `result`，作为回调函数的唯一参数。在此示例中因 exportType 为 `blob`，result 即是一个 `Blob`。您可以按需处理，如触发文件下载。 |
+| exportType | 此示例中使用默认 `blob`，转换返回一个 `Blob`。 |
+| customNodes | 此示例中未传入任何自定义节点定义。 |
+| styleOverrides | 未传入任何样式覆盖，导出文档将应用 Microsoft Word 默认样式的通用规则。 |
 
 ## 服务器端导出
 
-对于需要复杂文档生成或减少客户端包大小的应用，您可以在服务器上导出 `.docx` 文件。
+对于需要复杂文档生成或减轻客户端包体积的应用，您可以在服务器端导出 `.docx` 文件。
 
-为此，您需要从 `@tiptap-pro/extension-export-docx` 包中导入 `exportDocx` 函数，将 Tiptap JSON 内容传递给它，并将结果转换返回给客户端。
+您需从 `@tiptap-pro/extension-export-docx` 包中导入 `exportDocx` 函数，将 Tiptap JSON 格式内容传入，并将结果返回给客户端。
 
-让我们先看一下 `exportDocx` 函数的签名：
+先看下 `exportDocx` 函数签名：
 
 ```ts
 /**
  * 导出当前文档为 .docx 文件
  *
- * 注意：'buffer' 和 'stream' 导出类型仅在服务器环境中可用
- * 因为它们分别使用 Node Buffer 和 Stream API
+ * 注意：服务器环境中支持 'buffer' 和 'stream' 导出类型
+ * 因为它们分别利用 Node 的 Buffer 和 Stream API
  *
  * @param options.document - 文档的 JSON 表示
- * @param options.exportType - 要执行的导出类型
+ * @param options.exportType - 导出类型
  * @param options.customNodes - 自定义节点定义
- * @param options.styleOverrides - 导出文档的样式覆盖
+ * @param options.styleOverrides - 样式覆盖
  * @example exportDocx({ document: editor.getJSON(), exportType: 'blob', customNodes: [], styleOverrides: {} })
  */
 async function exportDocx ({ document, exportType, customNodes, styleOverrides }: ExportDocxOptions) {}
 ```
 
-`exportDocx` 函数将返回一个准备好的 DOCX 文档，并转换为任何格式。
+`exportDocx` 函数将返回一个准备好的 DOCX 文档，以多种格式输出。
 
-这里有一个使用 `Express` 和 `@tiptap-pro/extension-export-docx` 在服务器端的简单示例：
+以下是使用 `Express` 和 `@tiptap-pro/extension-export-docx` 在服务器端导出简单示例：
 
 ```ts
 import { exportDocx } from '@tiptap-pro/extension-export-docx'
@@ -210,13 +210,13 @@ const app = express()
 
 app.post('/export-docx', async (req, res) => {
   try {
-    // 从请求中获取 Tiptap JSON 内容或从数据库中获取
+    // 从请求获取 Tiptap JSON 内容，或从数据库读取
     const { content } = req.body
 
-    // 将 Tiptap JSON 转换为 DOCX
+    // 转换为 DOCX Buffer
     const docxBuffer = await exportDocx({ document: content })
 
-    // 作为可下载文件发送
+    // 作为下载文件发送
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     res.setHeader('Content-Disposition', 'attachment; filename="document.docx"')
     res.send(docxBuffer)
@@ -228,27 +228,27 @@ app.post('/export-docx', async (req, res) => {
 
 ## 支持与限制
 
-从 Tiptap JSON 导出 `.docx` 文件提供了一种处理大多数标准 Word 内容的方法，但由于 DOCX 格式和 Tiptap 基于 CSS 的样式之间固有的差异，**这并不是一对一的映射**。
+从 Tiptap JSON 导出 `.docx` 文件能满足处理大多数标准 Word 内容需求，但由于 DOCX 格式与基于 CSS 的 Tiptap 样式间固有限制，**不存在一对一完美映射**。
 
-当前支持的功能和已知的限制：
+当前支持功能及已知限制：
 
-| **功能**                        | **支持**                                                                |
-|---------------------------------|-------------------------------------------------------------------------|
-| **文本内容**                    | ✓ 基本文本、间距、标点                                                  |
-| **文本格式**                    | ✓ 粗体、斜体、下划线、删除线、对齐、行高                                |
-| **块元素**                      | ✓ 段落、标题（1–6）、引用、排序和无序列表                               |
-| **表格**                        | ✓ 基本结构、表头行、跨列                                             |
-| **链接**                        | ✓ 超链接                                                               |
-| **媒体（图片）**                | ✓ 嵌入图像、大小保持                                                 |
-| **样式**                        | ✓ 字体系列*、字体颜色、字体大小、背景颜色、行高                       |
-| **页眉和页脚**                  | ~ 开发中                                                                |
-| **部分和分页**                  | ~ 开发中                                                                |
-| **脚注和尾注**                  | ~ 开发中                                                                |
-| **数学**                        | ~ 开发中                                                                |
-| **评论和修订**                  | ✗                                                                       |
-| **目录**                        | ✗                                                                       |
-| **高级格式**                    | ✗ 列、文本方向、表单、宏、嵌入脚本                                     |
-| **元数据**                      | ✗                                                                       |
-| **文本框、形状、智能艺术**      | ✗                                                                       |
+| **功能**                        | **支持情况**                                                        |
+|--------------------------------|-------------------------------------------------------------------|
+| **文本内容**                    | ✓ 基本文字、间距、标点                                             |
+| **文本格式**                    | ✓ 粗体、斜体、下划线、删除线、对齐、行距                         |
+| **块级元素**                   | ✓ 段落、标题（1–6 级）、引用、序列列表及无序列表                  |
+| **表格**                      | ✓ 基础结构、表头行、跨列                                          |
+| **链接**                      | ✓ 超链接                                                         |
+| **媒体（图片）**              | ✓ 内嵌图片，保持大小                                             |
+| **样式**                      | ✓ 字体系列*、字体颜色、字体大小、背景色、行距                    |
+| **页眉和页脚**                | ~ 正在开发                                                       |
+| **分节和分页**                | ~ 正在开发                                                       |
+| **脚注和尾注**                | ~ 正在开发                                                       |
+| **数学公式**                  | ~ 正在开发                                                       |
+| **评论和修订**                | ✗ 不支持                                                         |
+| **目录**                      | ✗ 不支持                                                         |
+| **高级格式**                  | ✗ 列、文本方向、表单、宏、嵌入脚本等不支持                        |
+| **元数据**                    | ✗ 不支持                                                         |
+| **文本框、形状、SmartArt**    | ✗ 不支持                                                         |
 
-<span style={{fontSize: '1rem'}}>* 字体系列被支持，前提是目标字体在打开 `.docx` 文件时已安装在操作系统上。</span>
+<span style={{fontSize: '1rem'}}>* 字体系列支持前提是目标字体已安装于打开 `.docx` 文件的操作系统中。</span>

@@ -25,19 +25,21 @@ Tiptap Pro 和云扩展解锁协作、版本历史、评论、AI 辅助编辑等
 
 ## 获取您的访问令牌
 
-1. 登录到您的 Tiptap 账户（或 [注册](https://cloud.tiptap.dev/register)）。
+1. 登录您的 Tiptap 账户（或[注册](https://cloud.tiptap.dev/register)）。
 2. 开始您的 [试用或订阅](https://cloud.tiptap.dev/v2/billing) Tiptap 计划。
 3. 从 [我的功能 → Pro 扩展](https://cloud.tiptap.dev/v2/features/pro-extensions) 复制您的个人 NPM 令牌。
 
-## 每个项目配置身份验证
+## 为每个项目配置身份验证
 
-将注册表和令牌添加到您项目根目录中的包管理器配置中。
+将注册表和令牌添加到项目根目录下的包管理器配置。
 
-<Callout title="提示" variant="info">将 `TIPTAP_PRO_TOKEN` 作为环境变量引用，以避免提交凭据。</Callout>
+<Callout title="提示" variant="info">
+  将 `TIPTAP_PRO_TOKEN` 作为环境变量引用，避免提交凭据。
+</Callout>
 
-### npm、pnpm 或 Yarn Classic
+### npm、pnpm 或 Yarn 经典版
 
-创建或更新 .npmrc:
+创建或更新 `.npmrc` 文件：
 
 ```
 @tiptap-pro:registry=https://registry.tiptap.dev/
@@ -46,7 +48,7 @@ Tiptap Pro 和云扩展解锁协作、版本历史、评论、AI 辅助编辑等
 
 ### Yarn 现代版 (Yarn 2+)
 
-创建或更新 .yarnrc.yml:
+创建或更新 `.yarnrc.yml` 文件：
 
 ```
 npmScopes:
@@ -62,9 +64,9 @@ npmScopes:
   这对于避免在配置文件中直接指定身份验证令牌而泄露凭据至关重要。
 </Callout>
 
-一旦您为项目配置了身份验证，您就可以像其他编辑器扩展一样安装 Pro 扩展。
+配置好项目身份验证后，您可以像安装其他编辑器扩展一样安装 Pro 扩展。
 
-如果您使用环境变量，请在安装期间传递身份验证令牌：
+如果您使用环境变量，请在安装时传递身份验证令牌：
 
 ```
 TIPTAP_PRO_TOKEN=实际的认证令牌 npm install --save @tiptap-pro/extension-comments
@@ -72,14 +74,14 @@ TIPTAP_PRO_TOKEN=实际的认证令牌 npm install --save @tiptap-pro/extension-
 
 ## 配置全局身份验证
 
-您可以通过更新用户级别的包管理器配置文件为**所有**项目设置一次身份验证。这对于 CI/CD 环境很有用。
+您可以通过更新用户级别的包管理器配置文件为**所有**项目一次性设置身份验证。这对于 CI/CD 环境非常有用。
 
-1. 登录到您的 Tiptap 账户（或创建一个免费的账户）。
+1. 登录您的 Tiptap 账户（或创建免费账户）。
 2. 开始您的 [试用或订阅](https://cloud.tiptap.dev/v2/billing) Tiptap 计划。
 3. （可选）[邀请团队成员](https://cloud.tiptap.dev/v2/team/members) 参与您的 CI/CD 流程。
 4. 从 [我的功能 → Pro 扩展](https://cloud.tiptap.dev/v2/features/pro-extensions) 复制您的个人 NPM 令牌。
 
-### npm 或 Yarn Classic
+### npm 或 Yarn 经典版
 
 ```bash
 npm config set "@tiptap-pro:registry" https://registry.tiptap.dev/

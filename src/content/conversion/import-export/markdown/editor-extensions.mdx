@@ -1,5 +1,8 @@
 ---
 title: 使用 Tiptap 转换 Markdown
+tags:
+  - type: start
+  - type: beta
 meta:
     title: Markdown | Tiptap 转换
     description: 学习如何在 Tiptap 编辑器中处理 Markdown 文件，包括编辑器内导入/导出和 REST API 使用。
@@ -17,16 +20,12 @@ Tiptap 的转换工具支持以三种方式处理 **Markdown** (`.md`) 文件：
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中启动免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+        在您的账户中[开始免费试用](https://cloud.tiptap.dev/v2?trial=true) 或者[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 通过私有注册表安装">
         按照[设置指南](/guides/pro-extensions)，通过验证登录 Tiptap 的私有 npm 注册表，安装此前端扩展。
     </RequirementItem>
 </Requirements>
-
-<Callout title="集成或测试转换功能" variant="warning">
-    若要测试或集成此功能，您需要一个 [激活的试用或 Tiptap 订阅](https://cloud.tiptap.dev/v2/billing)。
-</Callout>
 
 ## 编辑器 Markdown 导入
 转换扩展发布在 Tiptap 的私有 npm 注册表中。按照 [私有注册表指南](/guides/pro-extensions) 进行集成。
@@ -63,7 +62,7 @@ const editor = new Editor({
 ```js
 editor.chain().focus().import({ file }).run()
 ```
-此操作会将所选的 `.md` 文件上传到转换API，将其转换为 Tiptap JSON，并替换当前编辑器内容。
+此操作会将所选的 `.md` 文件上传到转换 API，将其转换为 Tiptap JSON，并替换当前编辑器内容。
 
 ### 自定义导入行为
 

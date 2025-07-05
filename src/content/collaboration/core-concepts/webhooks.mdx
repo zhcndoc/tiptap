@@ -1,5 +1,7 @@
 ---
 title: 协作中的 Webhook
+tags:
+  - type: team
 meta:
   title: Webhooks | Tiptap 协作文档
   description: 设置和理解 webhook 有效载荷，并管理设置以集成高级功能。在文档中了解更多信息！
@@ -78,3 +80,23 @@ import { Callout } from '@/components/ui/Callout'
 
 如果您返回一个 yjs 更新（在您的端使用 Y.encodeStateAsUpdate），它将应用于文档。如果您返回其他内容，文档将以空文档初始化。
 请注意，加载器 webhook 仅在文档创建时调用一次。
+
+## 觉知 Webhooks
+
+如果您希望在用户连接到或断开与文档的连接时收到通知，可以在 [这里](/collaboration/operations/configure#settings-overview) 启用觉知 Webhooks。
+
+如果您需要用户参数，请确保将其传递给 TiptapCollabProvider，如 [这里](/collaboration/provider/integration#configure-the-collaboration-provider) 所述。
+
+事件如下所示：
+
+```
+{
+  "trigger": "user.connected", // or user.disconnected
+  "user": "user_1",
+  "numConnectedUsers": 0,
+  "appName": "",
+  "name": "testdocument",
+  "time": "2025-04-21T19:32:55.632Z",
+  "type": "DOCUMENT"
+}
+```

@@ -1,5 +1,8 @@
 ---
-title: 在你的编辑器中导入 .docx
+title: 在编辑器中导入 .docx
+tags:
+  - type: start
+  - type: beta
 meta:
     title: 导入 DOCX | Tiptap 转换
     description: 学习如何使用我们的文档中的导入扩展将 DOCX（Word）文档导入 Tiptap 编辑器。
@@ -12,10 +15,10 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在你的账户中开始免费[试用](https://cloud.tiptap.dev/v2/billing)或订阅[Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+        在你的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅起始计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 从私有注册表安装">
-        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)的步骤验证 Tiptap 的私有 npm 注册表。
+        若要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)中的步骤验证 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
@@ -23,11 +26,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 将 `.docx` 文件转换为 Tiptap JSON 使用 `@tiptap-pro/extension-import-docx` 编辑器扩展很简单，该扩展可以直接集成到你的 Tiptap 编辑器中。
 
-如果需要在编辑器外部导入 `.docx` 内容，请使用[REST API](/conversion/import-export/docx/rest-api)。
-
-<Callout title="集成或测试转换" variant="warning">
-    要测试或集成此功能，你需要一个[活动的试用或 Tiptap 订阅](https://cloud.tiptap.dev/v2/billing)。
-</Callout>
+如果你需要在编辑器外导入 `.docx` 内容，请使用[REST API](/conversion/import-export/docx/rest-api)。
 
 ## 安装 DOCX 导入扩展
 
@@ -143,7 +142,7 @@ editor
 
 | **功能**                      | **支持**                                                                |
 |----------------------------------|----------------------------------------------------------------------------|
-| **文本内容**                 | ✓ 基本文本、间距、标点                                         |
+| **文本内容**                 | ✓ 基本金本文字、间距、标点                                         |
 | **文本格式**              | ✓ 粗体、斜体、下划线、删除线、对齐、行高           |
 | **块元素**               | ✓ 段落、标题（1-6）、引用、编号和未编号列表     |
 | **表格**                       | ✓ 基本结构、表头行、跨列                                    |

@@ -1,5 +1,9 @@
 ---
 title: 将评论集成到您的应用中
+tags:
+  - type: beginStart
+    tooltip: 评论在入门计划中有效。网络钩子和 REST API 需要团队计划。
+  - type: beta
 meta:
   title: 评论 | Tiptap 评论文档
   description: 使用 Tiptap 的评论扩展在您的编辑器中添加和管理评论，或通过 REST API 或 Webhook 进行管理。文档中有更多信息！
@@ -15,8 +19,8 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 评论可以通过 [Comments REST API](/comments/integrate/rest-api) 访问和操作，也可以通过 [webhooks](/comments/integrate/webhook) 接收，从而实现通知系统的创建以及从编辑器外部添加评论的功能。
 
 <Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+    <RequirementItem label="1. Activate trial or subscribe">
+        开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或在您的账户中[订阅开始计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 启动文档服务器">
         要存储评论，请在您的仪表板中 [添加一个环境](https://cloud.tiptap.dev/v2/configuration/document-server) 并配置您的 [文档服务器](https://cloud.tiptap.dev/v2/configuration/document-server)。
@@ -25,10 +29,6 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
         要安装此扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证，以访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
-
-<Callout title="集成或测试评论" variant="warning">
-    要测试或集成此功能，您需要一个 [有效的试用或 Tiptap 订阅](https://cloud.tiptap.dev/v2/billing)。
-</Callout>
 
 <CodeDemo isPro path="/Extensions/Comments?inline=false&hideSource=false" />
 对于简单的用例，请从 [安装](/comments/getting-started/install) 部分开始。

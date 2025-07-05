@@ -6,17 +6,17 @@ meta:
   category: 内容 AI
 ---
 
-AI Agent 提供者会触发事件，你可以订阅这些事件以响应代理状态的变化。这些事件允许你构建响应式 UI 并实现自定义逻辑。
+AI Agent 提供者会发出事件，你可以订阅这些事件以响应代理状态的变化。这些事件使你能够构建响应式的用户界面并实现自定义逻辑。
 
 ## 可用事件
 
-| 事件             | 描述                                       | 参数                              |
-| ---------------- | ------------------------------------------ | --------------------------------- |
-| `stateChange`    | 当提供者状态变化时触发                     | `(newState, previousState, context)` |
-| `loadingError`   | 加载过程中出现错误时触发                   | `(error, context)`                |
-| `beforeToolCall` | 工具调用执行前触发                         | `(toolCall, context)`             |
-| `afterToolCall`  | 工具调用执行后触发                         | `(toolCall, context)`             |
-| `runFinished`    | AI Agent 运行完成后触发                    | `(context)`                      |
+| 事件             | 描述                                     | 参数                                  |
+| ---------------- | ---------------------------------------- | ------------------------------------- |
+| `stateChange`    | 提供者状态变化时触发                     | `(newState, previousState, context)` |
+| `loadingError`   | 加载过程中发生错误时触发                 | `(error, context)`                    |
+| `beforeToolCall` | 工具调用执行前触发                       | `(toolCall, context)`                 |
+| `afterToolCall`  | 工具调用执行后触发                       | `(toolCall, context)`                 |
+| `stopRunning`    | AI Agent 运行完成时触发                  | `(context)`                          |
 
 ## 订阅事件
 

@@ -6,7 +6,14 @@ meta:
   category: 内容 AI
 ---
 
-[OpenAI 聊天补全 API](https://platform.openai.com/docs/api-reference/chat?lang=javascript) 允许你使用 OpenAI 的模型构建 AI 代理。
+import { Callout } from '@/components/ui/Callout'
+
+[OpenAI 聊天补全 API](https://platform.openai.com/docs/api-reference/chat?lang=javascript) 允许你使用 OpenAI 的模型构建 AI Agent。
+
+<Callout title="有代码演示" variant="info">
+  本指南包含代码演示，帮助你快速入门。查看 [GitHub
+  仓库](https://github.com/ueberdosis/ai-agent-custom-llm-demos)。
+</Callout>
 
 ## 客户端设置
 
@@ -37,22 +44,16 @@ const editor = new Editor({
 
 在 AI Agent 提供者中，定义一个调用后端的 `resolver` 函数。
 
-还需要定义一个 `adapter` 函数，将聊天消息转换为 OpenAI 聊天补全 API 所期望的格式。
-
 ```tsx
-import AiAgent, {
-  AiAgentProvider,
-  openaiChatCompletionsAdapter,
-} from '@tiptap-pro/extension-ai-agent'
+import AiAgent, { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
 
 const provider = new AiAgentProvider({
-  adapter: openaiChatCompletionsAdapter,
-  // llmMessages 属性包含了符合 OpenAI API 期望格式的聊天消息
-  resolver: async ({ llmMessages }) => {
+  // `chatMessages` 属性包含对话的聊天消息
+  resolver: async ({ chatMessages }) => {
     // 调用你的后端 API 端点
     const response = await fetch('/api-endpoint', {
       method: 'POST',
-      body: JSON.stringify({ llmMessages }),
+      body: JSON.stringify({ chatMessages }),
     })
     return await response.json()
   },
@@ -66,25 +67,53 @@ const provider = new AiAgentProvider({
 首先，安装 AI Agent 和 OpenAI 服务器端库。
 
 ```bash
-npm install @tiptap-pro/extension-ai-agent @tiptap-pro/extension-ai-agent-server openai
+npm install @tiptap-pro/extension-ai-agent-server openai
 ```
 
 然后，在你的 API 端点中，创建一个 `AiAgentToolkit` 实例。它允许你配置 AI 模型可使用的工具。
 
 ```ts
-import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
+import { AiAgentToolkit, openaiChatCompletionsAdapter } from '@tiptap-pro/extension-ai-agent-server'
 
-const toolkit = new AiAgentToolkit()
+const toolkit = new AiAgentToolkit({
+  adapter: openaiChatCompletionsAdapter,
+})
 ```
 
-创建工具包后，将请求发送到 OpenAI 聊天补全 API。
+同时定义一个 `ChatMessagesFormatter` 实例。它让你将聊天消息转换成 OpenAI 聊天补全 API 期望的格式。
 
 ```ts
-import { AiAgentToolkit } from '@tiptap-pro/extension-ai-agent-server'
-import { openaiChatCompletionsAdapter } from '@tiptap-pro/extension-ai-agent'
+import {
+  AiAgentToolkit,
+  openaiChatCompletionsAdapter,
+  ChatMessagesFormatter,
+} from '@tiptap-pro/extension-ai-agent-server'
+
+const formatter = new ChatMessagesFormatter({
+  initialMessages: chatMessages,
+  adapter: openaiChatCompletionsAdapter,
+})
+```
+
+创建工具包和格式化器后，向 OpenAI 聊天补全 API 发送请求。
+
+```ts
+import {
+  AiAgentToolkit,
+  openaiChatCompletionsAdapter,
+  ChatMessagesFormatter,
+} from '@tiptap-pro/extension-ai-agent-server'
 import OpenAI from 'openai'
 
-const toolkit = new AiAgentToolkit()
+const toolkit = new AiAgentToolkit({
+  adapter: openaiChatCompletionsAdapter,
+})
+
+const formatter = new ChatMessagesFormatter({
+  // 从请求体获取聊天消息
+  initialMessages: chatMessages,
+  adapter: openaiChatCompletionsAdapter,
+})
 
 // 初始化 OpenAI 客户端
 const openai = new OpenAI()
@@ -100,10 +129,10 @@ const response = await openai.chat.completions.create({
 ${toolkit.getSystemPrompt()}
 `,
     },
-    ...llmMessages,
+    ...formatter.format(),
   ],
   // 提供 AI 模型可调用的工具
-  tools: toolkit.getTools(openaiChatCompletionsAdapter),
+  tools: toolkit.format(),
 })
 ```
 
@@ -111,10 +140,12 @@ ${toolkit.getSystemPrompt()}
 
 关于如何编写系统提示，请参阅[系统提示指南](/content-ai/capabilities/agent/configure/system-prompt)。其中包含了可用作起点的示例系统提示。
 
-最后，使用 `openaiChatCompletionsAdapter` 将响应转换为 AI Agent 扩展期望的格式。
+最后，使用 `formatter` 将回复转换为 AI Agent 扩展期望的格式。
 
 ```ts
-const result = openaiChatCompletionsAdapter.parseResponse(response)
+formatter.addAiResponse(response)
+
+const response = formatter.getResolverResponse()
 ```
 
-`result` 应为 API 端点的响应，也是 `resolver` 函数的返回值。
+`formatter.getResolverResponse()` 返回的值应作为你的 API 端点响应以及 `resolver` 函数的返回值。

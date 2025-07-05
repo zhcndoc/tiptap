@@ -146,6 +146,10 @@ export const sidebarConfig: SidebarConfig = {
               title: '列表项',
             },
             {
+              href: '/editor/extensions/nodes/mathematics',
+              title: '数学',
+            },
+            {
               href: '/editor/extensions/nodes/mention',
               title: '提及',
             },
@@ -242,19 +246,27 @@ export const sidebarConfig: SidebarConfig = {
           title: '功能扩展',
           children: [
             {
+              href: '/editor/extensions/functionality/ai-agent',
+              title: 'AI Agent',
+              tags: ['Team'],
+              beta: true,
+            },
+            {
               href: '/editor/extensions/functionality/ai-changes',
               title: 'AI 修改',
-              tags: ['Beta', 'Pro'],
+              tags: ['Team'],
+              beta: true,
             },
             {
               href: '/editor/extensions/functionality/ai-generation',
               title: 'AI 生成',
-              tags: ['Pro'],
+              tags: ['Start'],
             },
             {
               href: '/editor/extensions/functionality/ai-suggestion',
               title: 'AI 建议',
-              tags: ['Beta', 'Pro'],
+              tags: ['Team'],
+              beta: true,
             },
             {
               href: '/editor/extensions/functionality/bubble-menu',
@@ -283,7 +295,8 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/comments',
               title: '评论',
-              tags: ['Beta', 'Pro'],
+              tags: ['Start'],
+              beta: true,
             },
             {
               href: '/editor/extensions/functionality/drag-handle',
@@ -304,7 +317,8 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/export',
               title: '导出',
-              tags: ['Beta', 'Pro'],
+              tags: ['Start'],
+              beta: true,
             },
             {
               href: '/editor/extensions/functionality/filehandler',
@@ -348,12 +362,9 @@ export const sidebarConfig: SidebarConfig = {
             },
             {
               href: '/editor/extensions/functionality/import',
-              title: '导入',
-              tags: ['Beta', 'Pro'],
-            },
-            {
-              href: '/editor/extensions/functionality/mathematics',
-              title: '数学公式',
+              title: 'Import',
+              tags: ['Start'],
+              beta: true,
             },
             {
               href: '/editor/extensions/functionality/placeholder',
@@ -362,12 +373,12 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/snapshot',
               title: '快照',
-              tags: ['Pro', 'Cloud'],
+              tags: ['Starter'],
             },
             {
               href: '/editor/extensions/functionality/snapshot-compare',
               title: '快照对比',
-              tags: ['Pro', 'Cloud'],
+              tags: ['Team'],
             },
             {
               href: '/editor/extensions/functionality/selection',

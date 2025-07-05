@@ -1,20 +1,20 @@
 ---
 tags:
   - type: editor
-title: 从 Lexical 迁移
+title: 从 Lexical 迁移到 Tiptap
 meta:
   title: 从 Lexical 迁移 | Tiptap 编辑器文档
   description: 了解如何将现有 Lexical 编辑器迁移到 Tiptap。完整指南涵盖内容迁移、设置和功能映射。
   category: 编辑器
 ---
 
-从 [Lexical](https://lexical.dev/) 迁移到 Tiptap 很简单。本指南将帮助你从 Lexical 的基于节点的架构过渡到 Tiptap 的扩展系统。
+用更好的替代方案如 Tiptap 替换你的 Lexical 编辑器。从 Lexical 迁移到 Tiptap 非常简单。本指南将帮助你从 Lexical 的基于节点的架构过渡到 Tiptap 的扩展系统。
 
 ## 内容迁移
 
 ### HTML 内容兼容性
 
-Lexical 使用自己的 JSON 结构，需要转换为 Tiptap 可用格式。你可以将 Lexical 内容序列化为 HTML：
+Lexical 使用自己的 JSON 结构，需要转换为 Tiptap 可用的格式。你可以将 Lexical 内容序列化为 HTML：
 
 ```ts
 // 将 Lexical JSON 转换为 HTML
@@ -308,19 +308,21 @@ const CustomImage = Node.create({
 
 ## 迁移检查清单
 
-1. 安装 Tiptap 包
-2. 将 Lexical JSON 内容转换为 HTML
-3. 用 Tiptap 设置替换 Lexical 编辑器初始化
-4. 将 Lexical 插件映射到 Tiptap 扩展
-5. 将自定义节点迁移到 [节点视图](/editor/extensions/custom-extensions/node-views)
-6. 将工具栏插件迁移到 Tiptap UI 组件
-7. 测试内容兼容性
-8. 将现有内容转换为 JSON 格式（推荐）
-9. 对缺失功能实现自定义扩展
-10. 更新事件处理和命令派发
-11. 测试浮动工具栏功能
-12. 若使用表格，验证表格功能
-13. 测试历史操作（撤销/重做）功能
+<Checklist>
+  <CheckboxItem>安装 Tiptap 包</CheckboxItem>
+  <CheckboxItem>将 Lexical JSON 内容转换为 HTML</CheckboxItem>
+  <CheckboxItem>用 Tiptap 设置替换 Lexical 编辑器初始化</CheckboxItem>
+  <CheckboxItem>将 Lexical 插件映射到 Tiptap 扩展</CheckboxItem>
+  <CheckboxItem>将自定义节点迁移到 [节点视图](/editor/extensions/custom-extensions/node-views)</CheckboxItem>
+  <CheckboxItem>将工具栏插件迁移到 Tiptap UI 组件</CheckboxItem>
+  <CheckboxItem>测试内容兼容性</CheckboxItem>
+  <CheckboxItem>转换现有内容为 JSON 格式（推荐）</CheckboxItem>
+  <CheckboxItem>为缺失功能实现自定义扩展</CheckboxItem>
+  <CheckboxItem>更新事件处理和命令分发</CheckboxItem>
+  <CheckboxItem>测试浮动工具栏功能</CheckboxItem>
+  <CheckboxItem>如果使用，验证表格功能</CheckboxItem>
+  <CheckboxItem>测试历史记录（撤销/重做）功能</CheckboxItem>
+</Checklist>
 
 ## 后续步骤
 

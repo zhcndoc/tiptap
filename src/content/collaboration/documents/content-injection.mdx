@@ -1,19 +1,20 @@
 ---
 title: 注入内容 REST API
+tags:
+  - type: team
 meta:
   title: 注入内容 API | Tiptap 协作文档
   description: 使用注入内容 API，通过 JSON 更新管理您的协作文档。了解更多信息，请查看我们的文档！
   category: 协作
 ---
 
-import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 要在服务器端注入内容到文档中，请使用本文档中描述的 PATCH 端点。此功能支持版本历史记录，跟踪更改以及通过此端点添加的内容。
 
 <Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费的 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [团队计划](https://cloud.tiptap.dev/v2/billing)。
+    <RequirementItem label="1. Activate trial or subscribe">
+        在您的账户中[开始免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅团队计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 启动文档服务器">
         在您的仪表板中 [添加环境](https://cloud.tiptap.dev/v2/configuration/document-server) 并配置您的 [文档服务器](https://cloud.tiptap.dev/v2/configuration/document-server)。
@@ -35,10 +36,6 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 - 在服务器端以编程方式标记或操作文档内容。
 - 集成服务器端组件，例如执行 SQL 查询并显示结果。
 - 版本历史集成和无冲突的并发编辑合并。
-
-<Callout title="集成或测试内容注入" variant="warning">
-    此功能需要 [有效的试用或 Tiptap 团队订阅](https://cloud.tiptap.dev/v2/billing)。
-</Callout>
 
 ## 更新文档
 

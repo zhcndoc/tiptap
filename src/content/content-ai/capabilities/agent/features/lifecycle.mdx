@@ -38,11 +38,11 @@ provider.run()
 
 ## 处理完成
 
-监听 `runFinished` 事件，以便在生命周期完成时收到通知。
+监听 `stopRunning` 事件以在生命周期完成且 AI 代理停止运行时收到通知。
 
 ```tsx
-// 订阅 runFinished 事件
-provider.on('runFinished', (context) => {
+// 订阅 stopRunning 事件
+provider.on('stopRunning', (context) => {
   console.log('AI 代理生命周期已完成')
   showCompletionNotification('AI 代理已完成任务')
 })

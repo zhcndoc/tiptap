@@ -1,14 +1,14 @@
 ---
 tags:
   - type: editor
-title: 从 TinyMCE 迁移
+title: 从 TinyMCE 迁移到 Tiptap
 meta:
   title: 从 TinyMCE 迁移 | Tiptap 编辑器文档
   description: 学习如何将现有的 TinyMCE 编辑器迁移到 Tiptap。完整指南涵盖内容迁移、设置和功能映射。
   category: 编辑器
 ---
 
-从 [TinyMCE](https://tiny.cloud/) 迁移到 Tiptap 非常简单。本文将逐步引导你完成迁移流程。
+Tiptap 是强大的 TinyMCE 替代方案。从 TinyMCE 迁移到 Tiptap 非常简单。本文将一步步带你完成迁移流程。
 
 ## 内容迁移
 
@@ -202,15 +202,17 @@ function MyEditor() {
 
 ## 迁移检查清单
 
-1. 安装 Tiptap 包
-2. 用 Tiptap 设置替换 TinyMCE 初始化
-3. 将 TinyMCE 插件映射为 Tiptap 扩展
-4. 将工具栏配置迁移为自定义 UI 组件
-5. 测试内容兼容性
-6. 转换现有内容为 JSON 格式（推荐）
-7. 为缺失的功能实现自定义扩展
-8. 更新事件处理程序和 API 调用
-9. 在所有用例中进行全面测试
+<Checklist>
+  <CheckboxItem>安装 Tiptap 相关包</CheckboxItem>
+  <CheckboxItem>用 Tiptap 替换 TinyMCE 初始化</CheckboxItem>
+  <CheckboxItem>映射 TinyMCE 插件到 Tiptap 扩展</CheckboxItem>
+  <CheckboxItem>迁移工具栏配置到自定义 UI 组件</CheckboxItem>
+  <CheckboxItem>测试内容兼容性</CheckboxItem>
+  <CheckboxItem>将现有内容转换为 JSON 格式（推荐）</CheckboxItem>
+  <CheckboxItem>为缺失功能实现自定义扩展</CheckboxItem>
+  <CheckboxItem>更新事件处理和 API 调用</CheckboxItem>
+  <CheckboxItem>在所有用例中进行彻底测试</CheckboxItem>
+</Checklist>
 
 ## 后续步骤
 

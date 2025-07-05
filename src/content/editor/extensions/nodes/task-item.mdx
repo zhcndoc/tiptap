@@ -97,6 +97,37 @@ TaskItem.configure({
 })
 ```
 
+### taskListTypeName
+
+该任务项所属的任务列表类型名。用于确定父任务列表类型。
+
+```js
+TaskItem.configure({
+  taskListTypeName: 'taskList',
+})
+```
+
+### a11y
+
+任务项的无障碍（a11y）特定设置。包括以下选项：
+
+- **`checkboxLabel`**：一个函数，根据任务项的选中状态返回复选框的 aria-label。对于屏幕阅读器来说，这有助于宣布复选框的状态。
+  - **参数**：
+    - `node`：任务项节点。
+    - `checked`：布尔值，表示任务项是否被选中。
+  - **返回值**：字符串，作为复选框的 `aria-label`。
+
+```js
+TaskItem.configure({
+  a11y: {
+    // 复选框的 aria-label
+    checkboxLabel: (node, checked) => {
+      return checked ? '任务已完成' : '任务未完成'
+    },
+  },
+})
+```
+
 ## 快捷键
 
 | 命令           | Windows/Linux                     | macOS                             |

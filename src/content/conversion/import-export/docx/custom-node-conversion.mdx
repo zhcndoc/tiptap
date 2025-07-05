@@ -1,5 +1,8 @@
 ---
-title: 导入和导出自定义节点至 .docx
+title: 使用 .docx 导入和导出自定义节点
+tags:
+  - type: start
+  - type: beta
 meta:
     title: DOCX 中的自定义节点 | Tiptap 转换
     description: 了解如何使用导出扩展将自定义节点导出到 DOCX（Word）文件。
@@ -12,8 +15,8 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 
 <Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始免费 [试用](https://cloud.tiptap.dev/v2/billing) 或订阅 [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+    <RequirementItem label="1. Activate trial or subscribe">
+        在您的账号中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 从私有注册表安装">
         要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行操作，先对 Tiptap 的私有 npm 注册表进行身份验证。
@@ -238,7 +241,7 @@ Import.configure({
 }),
 ```
 
-`@tiptap-pro/extension-import` 的最新版本提供了 `promisemirrorNodes` 配置选项。此选项允许您将 DOCX 中的自定义节点映射到您的 Tiptap 模式。在上面的示例中，我们将 DOCX 中的 `Hintbox` 自定义节点映射到我们 Tiptap 模式中的 `hintbox` 自定义节点。这样，每当 DOCX 包含 `Hintbox` 自定义节点时，它将被转换为 Tiptap 中的 `hintbox` 节点。
+`@tiptap-pro/extension-import-docx` 的最新版本提供了 `promisemirrorNodes` 配置选项。此选项允许您将 DOCX 中的自定义节点映射到您的 Tiptap 模式。在上例中，我们将 DOCX 的 `Hintbox` 自定义节点映射到 Tiptap 模式中的 `hintbox` 自定义节点。这样，当导入包含 `Hintbox` 自定义节点的 DOCX 文件时，它会转换为 Tiptap 中的 `hintbox` 节点。
 
 <Callout title='DOCX, "prosemirrorNodes" 和 "prosemirrorMarks"' variant="info">
   请注意，`promisemirrorNodes` 和 `prosemirrorMarks` 选项仅在您导入 `.docx` 文件时有效。如果您导入另一种类型的文件，例如 `.odt` 文件，则会使用 `/import` 端点而不是 `/import-docx` 端点，`promisemirrorNodes` 和 `prosemirrorMarks` 选项将不可用，因此您需要依赖于 [自定义节点和标记映射 API](/conversion/import-export/docx/rest-api#custom-node-and-mark-mapping) 处理这些端点。

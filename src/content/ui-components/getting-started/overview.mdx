@@ -1,9 +1,9 @@
 ---
 title: 集成 Tiptap UI 组件
 meta:
-    title: UI 组件 | Tiptap
-    description: 使用我们的一些预构建模板或集成单独组件设置 Tiptap UI 组件。更多信息请查看文档！
-    category: UI 组件
+  title: UI 组件 | Tiptap
+  description: 使用我们的预构建模板之一或集成单个组件来设置 Tiptap UI 组件。更多内容见文档！
+  category: UI 组件
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -13,72 +13,87 @@ import * as CardGrid from '@/components/CardGrid'
 import cardCoverSimpleEditorTemplate from '@/assets/card-covers/examples/simple-editor-template-preview.jpg'
 import cardCoverUIComponents from '@/assets/card-covers/examples/components-preview.jpg'
 
-Tiptap 是无头和模块化的，给予你对 UI 的完全控制。Tiptap UI 组件库提供预构建的接口，因此你无需从头构建所有内容。你可以按原样使用它们或根据需要进行定制。
+Tiptap 是无头且模块化的，赋予你对 UI 的完全控制权。Tiptap UI 组件库提供预构建界面，因此你无需从零构建所有内容。你可以直接使用它们，或根据你的需求进行自定义。
 
-<Section title="开始使用">
-    <CardGrid.Wrapper>
-        <CardGrid.Item asChild>
-            <Link href="/ui-components/templates/simple-editor">
-                <CardGrid.ItemImage asNextImage src={cardCoverSimpleEditorTemplate.src} width={cardCoverSimpleEditorTemplate.width} height={cardCoverSimpleEditorTemplate.height} alt="图像" />
-                <div>
-                    <CardGrid.ItemTitle>模板</CardGrid.ItemTitle>
-                    <CardGrid.ItemParagraph>使用一个包含常用功能的预构建编辑器快速入门。</CardGrid.ItemParagraph>
-                </div>
-                <CardGrid.ItemFooter>
-                </CardGrid.ItemFooter>
-            </Link>
-        </CardGrid.Item>
-        <CardGrid.Item asChild>
-            <Link href="/ui-components/components/overview">
-                <CardGrid.ItemImage asNextImage src={cardCoverUIComponents.src} width={cardCoverUIComponents.width} height={cardCoverUIComponents.height} alt="图像" />
-                <div>
-                    <CardGrid.ItemTitle>组件</CardGrid.ItemTitle>
-                    <CardGrid.ItemParagraph>已经在使用 Tiptap？直接添加你需要的部分。</CardGrid.ItemParagraph>
-                </div>
-                <CardGrid.ItemFooter>
-                </CardGrid.ItemFooter>
-            </Link>
-        </CardGrid.Item>
-    </CardGrid.Wrapper>
+<Section title="快速开始">
+  <CardGrid.Wrapper>
+    <CardGrid.Item asChild>
+      <Link href="/ui-components/templates/simple-editor">
+        <CardGrid.ItemImage
+          asNextImage
+          src={cardCoverSimpleEditorTemplate.src}
+          width={cardCoverSimpleEditorTemplate.width}
+          height={cardCoverSimpleEditorTemplate.height}
+          alt="图片"
+        />
+        <div>
+          <CardGrid.ItemTitle>模板</CardGrid.ItemTitle>
+          <CardGrid.ItemParagraph>
+            使用包含常用功能的预构建编辑器快速开始。
+          </CardGrid.ItemParagraph>
+        </div>
+      </Link>
+    </CardGrid.Item>
+    <CardGrid.Item asChild>
+      <Link href="/ui-components/components/overview">
+        <CardGrid.ItemImage
+          asNextImage
+          src={cardCoverUIComponents.src}
+          width={cardCoverUIComponents.width}
+          height={cardCoverUIComponents.height}
+          alt="图片"
+        />
+        <div>
+          <CardGrid.ItemTitle>组件</CardGrid.ItemTitle>
+          <CardGrid.ItemParagraph>
+            已经在使用 Tiptap ？只引入你需要的部分。
+          </CardGrid.ItemParagraph>
+        </div>
+      </Link>
+    </CardGrid.Item>
+  </CardGrid.Wrapper>
 </Section>
 
-## 许可证和源代码
+## 许可和源代码
 
-Tiptap [UI 组件](/ui-components/components/overview) 遵循与其构建的 [编辑器扩展](/editor/extensions/overview) 相同的许可证。
-- 如果扩展是开源的（例如 Bold、Heading 或 Image），那么 UI 组件也是 MIT 许可证的。
-- 你可以自由地查看源代码、复制它，并根据自己的需要进行定制。
+Tiptap 的 [UI 组件](/ui-components/components/overview) 遵循它们所基于的 [编辑器扩展](/editor/extensions/overview) 的相同许可协议。
 
-某些组件是为付费 **Tiptap 功能** 构建的，例如评论或版本历史。
+- 如果扩展是开源的（例如 Bold、Heading 或 Image），则 UI 组件也是 MIT 许可的。
+- 你可以自由查看源代码、复制并根据自己的需要自定义。
+
+部分组件构建于付费 **Tiptap 功能** 之上，例如评论或版本历史。
 
 - 这些组件 **不是** 开源的。
 - 大多数包含依赖于 Tiptap 后端服务的前端逻辑。
-- 使用它们需要 Tiptap Cloud 订阅或试用。
+- 需要 Tiptap Cloud 订阅或试用才能使用它们。
 
-无论类型（免费或云连接），你都可以检查源代码并根据你的用例进行调整。
+无论是免费组件还是云端连接组件，你都可以查看源代码并根据你的需求进行调整。
 
 <Callout title="Tiptap Cloud 功能" variant="hint">
-    我们将从开源组件开始。Tiptap Cloud 功能的组件将逐步推出。
+  我们将从开源组件开始。针对 Tiptap Cloud 功能的组件将逐步推出。
 </Callout>
 
-## 设计默认
-组件的设计旨在让人感觉简单并融入你的设计。它们采用中性色彩：最少的颜色、基本的间距，并且没有强烈的视觉观点。你可以按原样使用它们或进行定制以匹配你的品牌。
+## 设计默认值
 
-所有组件的设计一致且协调，因此如果你同时使用多个组件，它们将很好地匹配，而无需额外的工作。
+组件设计风格简洁自然，能够融入你的设计。它们采用中性色调：极简颜色、基础间距，没有强烈的视觉倾向。你可以直接使用，或按照你的品牌风格进行定制。
 
-- 不需要复杂的覆盖或 `!important` 黑客
-- 只需直接编辑代码，因为它旨在被分支或扩展
+设计在所有组件中保持一致和协调，因此如果你同时使用多个组件，它们将自然匹配，无需额外调整。
 
-## 组件和原语
-为了在你的 Tiptap 编辑器中构建出色的编辑体验，你可以集成 UI 元素。库提供了不同类型的构建模块：**组件**、**节点组件**和 **原语**。
+- 不需要复杂的覆盖或 `!important` 技巧
+- 直接编辑代码即可，因为它们被设计成可被分叉或扩展
+
+## 组件与低阶组件
+
+为了在你的 Tiptap 编辑器中构建出色的编辑体验，你可以集成 UI 元素。该库提供了不同类型的构建块：**组件**、**节点组件** 和 **低阶组件**。
 
 ### 组件
 
-现成的、特定功能的 React 组件，例如标题下拉菜单。每个 UI 组件通常与 Tiptap 扩展配对（例如，**ListButton** 依赖于与列表相关的扩展），并使用 React hooks 与编辑器的状态进行交互。
+现成的、功能特定的 React 组件，比如标题下拉菜单。每个 UI 组件通常会配合一个 Tiptap 扩展（例如，**ListButton** 依赖于列表相关扩展），并使用 React 钩子与编辑器状态进行交互。
 
-- **与扩展配合使用**：要使用组件（例如 `HeadingDropdownMenu`），请确保在编辑器中启用对应的 Tiptap 扩展（如 `@tiptap/extension-heading`）。
-- **利用 hooks**：许多组件内部使用 hooks（如 `useTiptapEditor` 或 `useFloatingElement`）以与编辑器状态同步、处理定位或管理键盘导航。你也可以在自己的自定义组件中使用这些 hooks。
-- **易于定制**：默认情况下，这些组件具有最少的样式，因此可以融入你的设计。你可以完全覆盖或扩展它们。每个组件的源代码都是公开的，可以直接编辑，没有 `!important` 黑客。
+- **与扩展配合使用**：要使用某个组件（例如 `HeadingDropdownMenu`），确保编辑器中启用了对应的 Tiptap 扩展（如 `@tiptap/extension-heading`）。
+- **利用钩子**：许多组件内部使用钩子（如 `useTiptapEditor` 或 `useFloatingElement`）来同步编辑器状态、处理位置或管理键盘导航。你也可以在自定义组件中使用这些钩子。
+- **易于定制**：默认情况下，这些组件拥有简约的样式，可以融入你的设计。你可以完全覆盖或扩展它们。每个组件的源代码公开可用，可直接编辑，无需 `!important` 技巧。
 
-### 原语
+### 低阶组件
 
-低级 UI 元素，如 `Button`、`DropdownMenu`、`Popover` 和 `Spacer`。它们是许多 UI 组件的基础，处理可访问性和基本行为。你可以将这些原语混合搭配，以创建自己的编辑器控件或进一步自定义现有组件。
+低级别的 UI 元素，如 `Button`、`DropdownMenu`、`Popover` 和 `Spacer`。它们是许多 UI 组件的基础，负责处理无障碍支持和基本行为。你可以将这些低阶组件混合搭配，创建自己的编辑器控件或进一步定制现有组件。

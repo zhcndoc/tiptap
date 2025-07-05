@@ -1,20 +1,20 @@
 ---
 tags:
   - type: editor
-title: 从 Quill 迁移
+title: 从 Quill 迁移到 Tiptap
 meta:
   title: 从 Quill 迁移 | Tiptap 编辑器文档
   description: 学习如何将现有的 Quill 编辑器迁移到 Tiptap。完整指南涵盖内容迁移、设置以及功能映射。
   category: Editor
 ---
 
-从 [Quill](https://quilljs.com/) 迁移到 Tiptap 非常简单。本指南将帮助你顺利完成从 Quill 的 Delta 格式到 Tiptap 扩展系统的过渡。
+Tiptap 是一个流行的 Quill 替代方案，从 Quill 迁移到 Tiptap 十分简便。本指南将帮助你顺利完成从 Quill 的 Delta 格式到 Tiptap 扩展系统的过渡。
 
 ## 内容迁移
 
 ### HTML 内容兼容性
 
-Quill 使用 Delta 格式存储内容，需要先转换为 HTML 以供 Tiptap 使用：
+Quill 使用 Delta 格式存储内容，需先转换为 HTML 以供 Tiptap 使用：
 
 ```ts
 // 先将 Quill Delta 转换为 HTML
@@ -29,7 +29,7 @@ const editor = new Editor({
 })
 ```
 
-如果你已经有 Quill 输出的 HTML，可以直接使用：
+如果你已有 Quill 输出的 HTML，可以直接使用：
 
 ```ts
 // 你的现有 Quill HTML 内容
@@ -42,7 +42,7 @@ const editor = new Editor({
 })
 ```
 
-虽然 HTML 已经完全兼容，我们建议转换为 Tiptap 的 JSON 格式以获得更好的性能和可读性。对于批量转换现有内容，可使用[HTML 工具](/editor/api/utilities/html)程序化地将 HTML 转为 JSON。
+虽然 HTML 已完全兼容，我们建议转换为 Tiptap 的 JSON 格式以获得更好的性能和可读性。对于批量转换现有内容，可使用[HTML 工具](/editor/api/utilities/html)程序化地将 HTML 转为 JSON。
 
 ## 编辑器设置
 
@@ -54,7 +54,7 @@ const editor = new Editor({
 npm install @tiptap/core @tiptap/starter-kit
 ```
 
-Tiptap 支持所有现代前端 UI 框架，例如 React 和 Vue。请参阅我们的[安装指南](/editor/getting-started/install)中针对具体框架的安装说明。
+Tiptap 支持所有现代前端 UI 框架，如 React 和 Vue。请参阅我们的[安装指南](/editor/getting-started/install)中针对具体框架的安装说明。
 
 ### 基础编辑器设置
 
@@ -93,7 +93,7 @@ Tiptap 使用模块化扩展系统，类似于 Quill 的模块系统。每个功
 
 [StarterKit](/editor/extensions/functionality/starterkit) 包含了所有基本扩展，你也可以根据需要增删其他扩展。
 
-在我们的[扩展指南](/editor/extensions/overview)中探索所有可用的扩展，或者[创建自定义扩展](/editor/extensions/custom-extensions)以支持自定义功能和 HTML 元素。
+在我们的[扩展指南](/editor/extensions/overview)中探索所有可用扩展，或者[创建自定义扩展](/editor/extensions/custom-extensions)以支持自定义功能和 HTML 元素。
 
 ### 常见 Quill 模块对应关系
 
@@ -143,7 +143,7 @@ const editor = new Editor({
 
 ### 自定义扩展
 
-对于 Quill 自定义模块或 blot，请创建对应的 Tiptap 自定义扩展。详见我们的[自定义扩展指南](/editor/extensions/custom-extensions)。
+针对 Quill 自定义模块或 blot，请创建对应的 Tiptap 自定义扩展。详见我们的[自定义扩展指南](/editor/extensions/custom-extensions)。
 
 ## UI 实现
 
@@ -311,18 +311,20 @@ function MyEditor() {
 
 ## 迁移清单
 
-1. 安装 Tiptap 包
-2. 将 Quill Delta 内容转换为 HTML
-3. 用 Tiptap 设置替换 Quill 初始化
-4. 映射 Quill 模块到 Tiptap 扩展
-5. 迁移工具栏配置为自定义 UI 组件
-6. 测试内容兼容性
-7. （推荐）将现有内容转换为 JSON 格式
-8. 针对缺失功能实现自定义扩展
-9. 更新事件处理与 API 调用
-10. 如果使用气泡主题，测试气泡菜单功能
-11. 验证图片上传与处理
-12. 测试格式和样式功能
+<Checklist>
+  <CheckboxItem>安装 Tiptap 包</CheckboxItem>
+  <CheckboxItem>将 Quill Delta 内容转换为 HTML</CheckboxItem>
+  <CheckboxItem>用 Tiptap 设置替换 Quill 初始化</CheckboxItem>
+  <CheckboxItem>映射 Quill 模块到 Tiptap 扩展</CheckboxItem>
+  <CheckboxItem>迁移工具栏配置至自定义 UI 组件</CheckboxItem>
+  <CheckboxItem>测试内容兼容性</CheckboxItem>
+  <CheckboxItem>将现有内容转换为 JSON 格式（推荐）</CheckboxItem>
+  <CheckboxItem>为缺失功能实现自定义扩展</CheckboxItem>
+  <CheckboxItem>更新事件处理和 API 调用</CheckboxItem>
+  <CheckboxItem>若使用气泡主题，测试气泡菜单功能</CheckboxItem>
+  <CheckboxItem>验证图片上传和处理</CheckboxItem>
+  <CheckboxItem>测试格式化与样式功能</CheckboxItem>
+</Checklist>
 
 ## 后续步骤
 
