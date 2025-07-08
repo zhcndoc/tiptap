@@ -17,8 +17,9 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
         在您的账户中[开始免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅团队计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
   <RequirementItem label="2. Integrate an AI provider">
-    Configure OpenAI in your [AI settings](https://cloud.tiptap.dev/v2/cloud/ai) or review the
-    [Custom LLM guide](/content-ai/capabilities/agent/custom-llms).
+    Configure OpenAI in your [AI settings](https://cloud.tiptap.dev/v2/cloud/ai) or follow the
+    [Custom AI Agent guide](/content-ai/capabilities/agent/custom-llms) to integrate it with other
+    AI providers.
   </RequirementItem>
   <RequirementItem label="3. 从私有注册表安装">
     要安装前端扩展，请通过遵循 [设置指南](/guides/pro-extensions) 认证访问 Tiptap 的私有 npm 注册表。
@@ -49,7 +50,9 @@ const provider = new AiAgentProvider({
 })
 ```
 
-AI 代理可以开箱即用 [与 Tiptap Cloud](/content-ai/capabilities/agent/use-with-content-ai-cloud) 作为后端。如果您想与自己的后端一起使用，请阅读我们的 [自定义 LLM 和后端集成指南](/content-ai/capabilities/agent/custom-llms)。
+AI 代理可以开箱即用 [与 Tiptap Cloud](/content-ai/capabilities/agent/use-with-content-ai-cloud) 作为后端。
+
+要为在后端运行的自定义 AI 代理添加文本编辑功能，请阅读 [集成指南](/content-ai/capabilities/agent/custom-llms)。
 
 ## 在编辑器中导入扩展
 

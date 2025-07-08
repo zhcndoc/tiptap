@@ -8,23 +8,23 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 
-客户端工具是运行在浏览器中的工具。使用它们来与编辑器的内容进行交互。例如：
+客户端工具是在浏览器中运行的工具。使用它们与编辑器的内容进行交互。例如：
 
-<Callout title="提供代码示例" variant="info">
-  本指南包含一个代码示例，帮助你快速上手。请参见 [GitHub 仓库](https://github.com/ueberdosis/ai-agent-custom-llm-demos)。
+- 计算文档中的单词数
+- 替换文档中某个单词的所有实例
+- 格式化文档。
+
+所有 [内置工具](/content-ai/capabilities/agent/custom-llms/tools#built-in-tools) 都是客户端工具。
+
+本指南展示了如何实现一个工具，将文档中所有出现的某个单词替换为另一个单词。它假设您已经 [设置了带有自定义后端的 AI 代理扩展](/content-ai/capabilities/agent/custom-llms/get-started)。
+
+<Callout title="Code demo available" variant="info">
+  本指南包括一个代码演示，以帮助您入门。请参阅 [GitHub 仓库](https://github.com/ueberdosis/ai-agent-custom-llm-demos)。
 </Callout>
-
-- 统计文档中的单词数量
-- 替换文档中所有的某个单词
-- 格式化文档内容。
-
-所有[内置工具](/content-ai/capabilities/agent/custom-llms/tools#built-in-tools)都是客户端工具。
-
-本指南展示如何实现一个工具，用于将文档中所有某个单词替换为另一个单词。假设你已经[设置好了带有自定义后端的 AI Agent 扩展](/content-ai/capabilities/agent/custom-llms/get-started)。
 
 ## 客户端设置
 
-为你的工具声明一个工具调用处理器。工具处理器是执行编辑器工具调用的函数。它们必须实现 `AiAgentToolHandler` 接口。
+为您的工具声明一个工具调用处理程序。工具处理程序是应用工具调用的函数。它们必须实现 `AiAgentToolHandler` 接口。
 
 ```ts
 import { z } from 'zod'

@@ -18,8 +18,106 @@ export const sidebarConfig: SidebarConfig = {
     },
     {
       type: 'group',
+      href: '',
+      title: '能力',
+      children: [
+        {
+          title: '生成内容',
+          isActive: false,
+          href: '/content-ai/capabilities/generation/overview',
+        },
+        {
+          title: '自动补全',
+          isActive: false,
+          href: '/content-ai/capabilities/generation/text-generation/autocompletion',
+        },
+        {
+          title: '建议内容',
+          isActive: false,
+          href: '/content-ai/capabilities/suggestion/overview',
+        },
+        {
+          title: '审查更改',
+          isActive: false,
+          href: '/content-ai/capabilities/changes/overview',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      href: '/content-ai/custom-llms',
+      title: '自定义 AI',
+      children: [
+        {
+          title: '集成自定义 LLM',
+          href: '/content-ai/custom-llms',
+        },
+        {
+          title: '集成自定义代理',
+          isActive: false,
+          href: '/content-ai/capabilities/agent/overview',
+          tags: ['New'],
+        },
+        {
+          title: '文本编辑工具',
+          href: '/content-ai/tools-for-ai-agents/text-editing-tools',
+          tags: ['New'],
+        },
+      ],
+    },
+    {
+      type: 'group',
+      href: '',
+      title: 'Capabilities',
+      children: [
+        {
+          title: 'Generate content',
+          isActive: false,
+          href: '/content-ai/capabilities/generation/overview',
+        },
+        {
+          title: 'Autocomplete',
+          isActive: false,
+          href: '/content-ai/capabilities/generation/text-generation/autocompletion',
+        },
+        {
+          title: 'Suggest content',
+          isActive: false,
+          href: '/content-ai/capabilities/suggestion/overview',
+        },
+        {
+          title: 'Review changes',
+          isActive: false,
+          href: '/content-ai/capabilities/changes/overview',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      href: '/content-ai/custom-llms',
+      title: 'Bring your own AI',
+      children: [
+        {
+          title: 'Integrate a custom LLM',
+          href: '/content-ai/custom-llms',
+        },
+        {
+          title: 'Integrate a custom agent',
+          isActive: false,
+          href: '/content-ai/capabilities/agent/overview',
+          tags: ['New'],
+        },
+        {
+          title: 'Text editing tools',
+          href: '/content-ai/tools-for-ai-agents/text-editing-tools',
+          tags: ['New'],
+        },
+      ],
+    },
+    {
+      type: 'group',
       href: '/content-ai/capabilities',
-      title: '功能',
+      title: 'AI Extensions',
       children: [
         {
           title: 'AI 生成',
@@ -197,67 +295,11 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/agent/install',
             },
             {
-              title: '配合 Content AI Cloud 使用',
+              title: '配合 Tiptap Cloud 使用',
               href: '/content-ai/capabilities/agent/use-with-content-ai-cloud',
             },
             {
-              title: '功能',
-              href: '/content-ai/capabilities/agent/features',
-              children: [
-                {
-                  title: '状态管理',
-                  href: '/content-ai/capabilities/agent/features/state',
-                },
-                {
-                  title: '事件机制',
-                  href: '/content-ai/capabilities/agent/features/events',
-                },
-                {
-                  title: '方法',
-                  href: '/content-ai/capabilities/agent/features/methods',
-                },
-                {
-                  title: '生命周期',
-                  href: '/content-ai/capabilities/agent/features/lifecycle',
-                },
-                {
-                  title: '审查变更',
-                  href: '/content-ai/capabilities/agent/features/review',
-                },
-                {
-                  title: '检查点',
-                  href: '/content-ai/capabilities/agent/features/checkpoints',
-                },
-                {
-                  title: '提供上下文',
-                  href: '/content-ai/capabilities/agent/features/context',
-                },
-                {
-                  title: '选择感知',
-                  href: '/content-ai/capabilities/agent/features/selection-awareness',
-                },
-                {
-                  title: '读取大型文档',
-                  href: '/content-ai/capabilities/agent/features/large-documents',
-                },
-              ],
-            },
-            {
-              title: '配置',
-              href: '/content-ai/capabilities/agent/configure',
-              children: [
-                {
-                  title: '配置选项',
-                  href: '/content-ai/capabilities/agent/configure/options',
-                },
-                {
-                  title: '系统提示词',
-                  href: '/content-ai/capabilities/agent/configure/system-prompt',
-                },
-              ],
-            },
-            {
-              title: '集成你的 LLM',
+              title: '配合自定义 AI 代理使用',
               href: '/content-ai/capabilities/agent/custom-llms',
               children: [
                 {
@@ -319,53 +361,128 @@ export const sidebarConfig: SidebarConfig = {
               ],
             },
             {
-              title: 'API 参考',
+              title: '与您的 AI 代理一起使用',
+              href: '/content-ai/capabilities/agent/custom-llms',
+              children: [
+                {
+                  title: '概述',
+                  href: '/content-ai/capabilities/agent/custom-llms/overview',
+                },
+                {
+                  title: '快速开始',
+                  href: '/content-ai/capabilities/agent/custom-llms/get-started',
+                  children: [
+                    {
+                      title: 'Vercel AI SDK',
+                      href: '/content-ai/capabilities/agent/custom-llms/get-started/vercel-ai-sdk',
+                    },
+                    {
+                      title: 'OpenAI Completions',
+                      href: '/content-ai/capabilities/agent/custom-llms/get-started/openai-chat-completions',
+                    },
+                    {
+                      title: 'OpenAI Responses',
+                      href: '/content-ai/capabilities/agent/custom-llms/get-started/openai-responses',
+                    },
+                    {
+                      title: 'Anthropic Claude',
+                      href: '/content-ai/capabilities/agent/custom-llms/get-started/anthropic-messages',
+                    },
+                  ],
+                },
+                {
+                  title: 'Tools overview',
+                  href: '/content-ai/capabilities/agent/custom-llms/tools',
+                },
+                {
+                  title: 'Client-side tools',
+                  href: '/content-ai/capabilities/agent/custom-llms/client-side-tools',
+                },
+                {
+                  title: 'Server-side tools',
+                  href: '/content-ai/capabilities/agent/custom-llms/server-side-tools',
+                  children: [
+                    {
+                      title: 'Vercel AI SDK',
+                      href: '/content-ai/capabilities/agent/custom-llms/server-side-tools/vercel-ai-sdk',
+                    },
+                    {
+                      title: 'OpenAI Completions',
+                      href: '/content-ai/capabilities/agent/custom-llms/server-side-tools/openai-chat-completions',
+                    },
+                    {
+                      title: 'OpenAI Responses',
+                      href: '/content-ai/capabilities/agent/custom-llms/server-side-tools/openai-responses',
+                    },
+                    {
+                      title: 'Anthropic Claude',
+                      href: '/content-ai/capabilities/agent/custom-llms/server-side-tools/anthropic-messages',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              title: 'Features',
+              href: '/content-ai/capabilities/agent/features',
+              children: [
+                {
+                  title: 'State',
+                  href: '/content-ai/capabilities/agent/features/state',
+                },
+                {
+                  title: 'Events',
+                  href: '/content-ai/capabilities/agent/features/events',
+                },
+                {
+                  title: 'Methods',
+                  href: '/content-ai/capabilities/agent/features/methods',
+                },
+                {
+                  title: 'Lifecycle',
+                  href: '/content-ai/capabilities/agent/features/lifecycle',
+                },
+                {
+                  title: 'Review changes',
+                  href: '/content-ai/capabilities/agent/features/review',
+                },
+                {
+                  title: 'Checkpoints',
+                  href: '/content-ai/capabilities/agent/features/checkpoints',
+                },
+                {
+                  title: 'Provide context',
+                  href: '/content-ai/capabilities/agent/features/context',
+                },
+                {
+                  title: 'Selection awareness',
+                  href: '/content-ai/capabilities/agent/features/selection-awareness',
+                },
+                {
+                  title: 'Read large documents',
+                  href: '/content-ai/capabilities/agent/features/large-documents',
+                },
+              ],
+            },
+            {
+              title: 'Configure',
+              href: '/content-ai/capabilities/agent/configure',
+              children: [
+                {
+                  title: 'Configuration options',
+                  href: '/content-ai/capabilities/agent/configure/options',
+                },
+                {
+                  title: 'System prompt',
+                  href: '/content-ai/capabilities/agent/configure/system-prompt',
+                },
+              ],
+            },
+            {
+              title: 'API Reference',
               href: '/content-ai/capabilities/agent/api-reference',
             },
           ],
-        },
-      ],
-    },
-    {
-      type: 'group',
-      href: '',
-      title: '示例',
-      children: [
-        {
-          title: '文本生成',
-          isActive: false,
-          href: '/content-ai/capabilities/generation/overview',
-        },
-        {
-          title: '自动补全',
-          isActive: false,
-          href: '/content-ai/capabilities/generation/text-generation/autocompletion',
-        },
-        {
-          title: '智能建议',
-          isActive: false,
-          href: '/content-ai/capabilities/suggestion/overview',
-        },
-        {
-          title: '追踪变更',
-          isActive: false,
-          href: '/content-ai/capabilities/changes/overview',
-        },
-        {
-          title: '起始模板',
-          href: 'https://tiptap.dev/product/templates',
-          external: true,
-        },
-      ],
-    },
-    {
-      type: 'group',
-      href: '/content-ai/custom-llms',
-      title: '自定义 LLM',
-      children: [
-        {
-          title: '集成你的 LLM',
-          href: '/content-ai/custom-llms',
         },
       ],
     },
