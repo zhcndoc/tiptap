@@ -49,11 +49,11 @@ import AiAgent, { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
 
 const provider = new AiAgentProvider({
   // `chatMessages` 属性包含了对话的聊天消息
-  resolver: async ({ chatMessages }) => {
+  resolver: async ({ chatMessages, schemaAwarenessData }) => {
     // 调用你的后端 API 端点
     const response = await fetch('/api-endpoint', {
       method: 'POST',
-      body: JSON.stringify({ chatMessages }),
+      body: JSON.stringify({ chatMessages, schemaAwarenessData }),
     })
     return await response.json()
   },
@@ -70,6 +70,13 @@ const provider = new AiAgentProvider({
 npm install @tiptap-pro/extension-ai-agent-server openai
 ```
 
+从请求参数中获取聊天消息和模式感知数据。
+
+```ts
+// Code inside your API endpoint. Code depends on your backend framework
+const { chatMessages, schemaAwarenessData } = request
+```
+
 然后，在你的 API 端点内，创建一个 `AiAgentToolkit` 实例。它允许你配置 AI 模型可用的工具。
 
 ```ts
@@ -77,6 +84,7 @@ import { AiAgentToolkit, openaiResponsesAdapter } from '@tiptap-pro/extension-ai
 
 const toolkit = new AiAgentToolkit({
   adapter: openaiResponsesAdapter,
+  schemaAwarenessData,
 })
 ```
 
@@ -105,8 +113,11 @@ import {
 } from '@tiptap-pro/extension-ai-agent-server'
 import OpenAI from 'openai'
 
+const { chatMessages, schemaAwarenessData } = request
+
 const toolkit = new AiAgentToolkit({
   adapter: openaiResponsesAdapter,
+  schemaAwarenessData,
 })
 
 const formatter = new ChatMessagesFormatter({

@@ -44,9 +44,31 @@ const CustomNode = Node.create({
 })
 ```
 
-这段代码创建了一个名为 `CustomNode` 的新节点扩展。它添加了一个 `addOptions` 方法来定义节点的选项，这些选项可由用户配置。它还添加了 `parseHTML` 和 `renderHTML` 方法来定义节点如何被解析和渲染为 HTML。
+你也可以使用回调函数来创建节点。如果你想封装扩展的逻辑，比如定义事件处理程序或其他自定义逻辑，这非常有用。
 
-它像其他扩展一样通过将其添加到 `extensions` 数组中安装到编辑器中。
+```js
+import { Node } from '@tiptap/core'
+
+const CustomNode = Node.create(() => {
+  // 你可以在这里定义变量或函数，用于你的架构定义
+  const customVariable = 'foo'
+
+  function onCreate() {}
+  function onUpdate() {}
+
+  return {
+    name: 'customNode',
+    onCreate,
+    onUpdate,
+
+    // 你的代码写在这里。
+  }
+})
+```
+
+这段代码创建了一个名为 `CustomNode` 的新节点扩展。它添加了一个 `addOptions` 方法来定义节点的选项，这些选项可由用户配置。同时它还添加了 `parseHTML` 和 `renderHTML` 方法，定义节点如何解析和渲染为 HTML。
+
+安装到编辑器时，与其他扩展一样，将其添加到 `extensions` 数组中。
 
 ```typescript
 import { Editor } from '@tiptap/core'

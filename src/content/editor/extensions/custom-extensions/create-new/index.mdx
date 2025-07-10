@@ -6,11 +6,11 @@ meta:
   category: 编辑器
 ---
 
-您可以从零开始构建自己的扩展，您知道吗？它的语法与上述扩展现有扩展是相同的。
+您知道吗？您可以从零开始构建自己的扩展！其语法与上述其他扩展或现有扩展是相同的。
 
 ### 创建一个扩展
 
-扩展为 Tiptap 添加新的功能，您会在这里经常看到“扩展”这个词，即使是对于节点和标记。但也有字面意义上的扩展。这些不能像标记和节点那样添加到模式中，但可以添加功能或改变编辑器的行为。
+扩展为 Tiptap 添加新的功能，您会经常看到“扩展”这个词，即使是用于节点和标记。但也存在字面意义上的扩展。这些不能像标记和节点那样添加到 schema 中，但可以添加功能或改变编辑器的行为。
 
 一个很好的学习示例可能是 [`TextAlign`](/editor/extensions/functionality/textalign)。
 
@@ -21,6 +21,28 @@ const CustomExtension = Extension.create({
   name: 'customExtension',
 
   // 您的代码写在这里。
+})
+```
+
+您也可以使用回调函数来创建扩展。当您想封装扩展的逻辑时非常有用，例如定义事件处理器或其他自定义逻辑。
+
+```js
+import { Extension } from '@tiptap/core'
+
+const CustomExtension = Extension.create(() => {
+  // 定义在扩展中使用的变量或函数
+  const customVariable = 'foo'
+
+  function onCreate() {}
+  function onUpdate() {}
+
+  return {
+    name: 'customExtension',
+    onCreate,
+    onUpdate,
+
+    // 您的代码写在这里。
+  }
 })
 ```
 
@@ -40,7 +62,29 @@ const CustomNode = Node.create({
 })
 ```
 
-节点不必是块状的。它们也可以与文本内联渲染，例如用于 [@mentions](/editor/extensions/nodes/mention)。
+您也可以使用回调函数来创建节点。当您想封装扩展的逻辑时非常有用，例如定义事件处理器或其他自定义逻辑。
+
+```js
+import { Node } from '@tiptap/core'
+
+const CustomNode = Node.create(() => {
+  // 定义在扩展中使用的变量或函数
+  const customVariable = 'foo'
+
+  function onCreate() {}
+  function onUpdate() {}
+
+  return {
+    name: 'customNode',
+    onCreate,
+    onUpdate,
+
+    // 您的代码写在这里。
+  }
+})
+```
+
+节点不必是块级的。它们也可以以内联方式渲染文本，例如用于 [@mentions](/editor/extensions/nodes/mention)。
 
 了解更多关于 [节点 API](/editor/extensions/custom-extensions/create-new/node)。
 
@@ -58,14 +102,36 @@ const CustomMark = Mark.create({
 })
 ```
 
+您也可以使用回调函数来创建标记。当您想封装扩展的逻辑时非常有用，例如定义事件处理器或其他自定义逻辑。
+
+```js
+import { Mark } from '@tiptap/core'
+
+const CustomMark = Mark.create(() => {
+  // 定义在扩展中使用的变量或函数
+  const customVariable = 'foo'
+
+  function onCreate() {}
+  function onUpdate() {}
+
+  return {
+    name: 'customMark',
+    onCreate,
+    onUpdate,
+
+    // 您的代码写在这里。
+  }
+})
+```
+
 了解更多关于 [标记 API](/editor/extensions/custom-extensions/create-new/mark)。
 
 ## 发布独立扩展
 
-如果您想为 Tiptap 创建并发布自己的扩展，可以使用我们的 CLI 工具来引导您的项目。只需运行 `npm init tiptap-extension` 并按照说明操作。CLI 将为您创建一个包含预配置项目的新文件夹，包括运行 Rollup 的构建脚本。
+如果您想为 Tiptap 创建并发布您自己的扩展，可以使用我们的 CLI 工具来引导您的项目。只需运行 `npm init tiptap-extension` 并按照提示操作。CLI 会为您创建一个包含预配置项目的新文件夹，其中包含用于运行 Rollup 的构建脚本。
 
-如果您想在本地测试您的扩展，可以在项目文件夹中运行 `npm link`，然后在您的项目中（例如 Vite 应用）运行 `npm link YOUR_EXTENSION`。
+如果您想在本地测试您的扩展，可以在扩展项目文件夹中运行 `npm link`，然后在您的项目中（例如 Vite 应用）运行 `npm link YOUR_EXTENSION`。
 
 ## 分享
 
-当一切正常时，不要忘记 [与社区分享](https://github.com/ueberdosis/tiptap/issues/819) 或在我们的 [awesome-tiptap](https://github.com/ueberdosis/awesome-tiptap) 仓库中分享。
+一切准备就绪后，别忘了 [与社区分享](https://github.com/ueberdosis/tiptap/issues/819) 或在我们的 [awesome-tiptap](https://github.com/ueberdosis/awesome-tiptap) 仓库里分享。

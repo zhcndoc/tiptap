@@ -372,12 +372,12 @@ export const sidebarConfig: SidebarConfig = {
             },
             {
               href: '/editor/extensions/functionality/snapshot',
-              title: '快照',
+              title: '版本',
               tags: ['Starter'],
             },
             {
               href: '/editor/extensions/functionality/snapshot-compare',
-              title: '快照对比',
+              title: '版本比较',
               tags: ['Team'],
             },
             {

@@ -30,9 +30,31 @@ const CustomExtension = Extension.create({
 })
 ```
 
-这个扩展监听编辑器的 `update` 事件，并将编辑器的当前 JSON 表示记录到控制台。
+您也可以使用回调函数创建扩展。这在您想封装扩展逻辑时非常有用，例如，当您想定义事件处理程序或其他自定义逻辑时。
 
-它以如下方式安装到编辑器中：
+```js
+import { Extension } from '@tiptap/core'
+
+const CustomExtension = Extension.create(() => {
+  // 定义扩展内部使用的变量或函数
+  const customVariable = 'foo'
+
+  function onCreate() {}
+  function onUpdate() {}
+
+  return {
+    name: 'customExtension',
+    onCreate,
+    onUpdate,
+
+    // 在这里编写您的代码。
+  }
+})
+```
+
+此扩展监听编辑器的 `update` 事件，并将编辑器当前的 JSON 表示日志输出到控制台。
+
+它这样安装到编辑器中：
 
 ```typescript
 import { Editor } from '@tiptap/core'
@@ -48,7 +70,7 @@ const editor = useEditor({
 })
 ```
 
-这个扩展数组可以包含任意数量的扩展。它们将按列出的顺序安装，或按它们的 `priority` 属性排序。
+此扩展数组可以包含任意数量的扩展。它们将按列出的顺序安装，或按它们的 `priority` 属性排序。
 
 现在我们已经看到扩展的基本结构，让我们深入了解您可以用来创建自己扩展的所有扩展选项。
 
@@ -270,7 +292,7 @@ const CustomExtension = Extension.create({
 
 ### `addPasteRules`
 
-粘贴规则的工作方式与输入规则（见上文）相似。但不同之处在于，它们应用于粘贴的内容，而不是听从用户输入。
+粘贴规则的工作方式与输入规则（见上文）相似。但不同之处在于，它们应用于粘贴的内容，而不是监听用户输入。
 
 正则表达式有一个微小的区别。输入规则通常以 `$` 符号结束（这意味着“在行尾断言位置”），而粘贴规则通常浏览所有内容，不带该 `$` 符号。
 

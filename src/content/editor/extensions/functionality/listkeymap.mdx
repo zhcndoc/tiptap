@@ -59,22 +59,7 @@ new Editor({
 
 ### listTypes
 
-一个包含列表项及其父包装节点类型的数组。
-
-默认值：
-
-```js
-;[
-  {
-    itemName: 'listItem',
-    wrapperNames: ['bulletList', 'orderedList'],
-  },
-  {
-    itemName: 'taskItem',
-    wrapperNames: ['taskList'],
-  },
-]
-```
+列表项及其父包裹节点类型的数组。
 
 ```js
 ListKeymap.configure({
@@ -85,6 +70,21 @@ ListKeymap.configure({
     },
   ],
 })
+```
+
+默认值：
+
+```json
+[
+  {
+    "itemName": "listItem",
+    "wrapperNames": ["bulletList", "orderedList"]
+  },
+  {
+    "itemName": "taskItem",
+    "wrapperNames": ["taskList"]
+  }
+]
 ```
 
 ## 源代码

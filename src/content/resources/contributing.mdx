@@ -6,60 +6,60 @@ meta:
   category: 编辑器
 ---
 
-Tiptap 离不开其活跃的社区。贡献一直以来都是被欢迎的，未来也将继续欢迎。以下是您在提交贡献之前需要了解的一些事项：
+Tiptap 离不开其充满活力的社区。贡献一直以来都受到欢迎，并且将永远欢迎。在您提交贡献之前，有一些事情您应该了解：
 
-## 欢迎示例
+## 欢迎的示例
 
-- 作为 Bug 报告的回归测试失败
-- 文档改进，例如修复拼写错误，添加某个部分
+- 失败的回归测试作为错误报告
+- 文档改进，例如修正错别字、添加章节
 - 为现有扩展添加新功能，例如新的可配置选项
-- 对核心的解释清晰、不破坏现有功能的变更
+- 对核心代码的解释充分且不破坏现有功能的更改
 
-## 不会合并
+## 不会合并的内容
 
-- 新扩展，这将需要我们支持和维护
+- 新的扩展，我们随后需要支持和维护的
 
 ## 提交想法
 
-请确保先打开一个问题并概述您的想法。我们会迅速回复您，让您知道是否有机会合并您的贡献。
+请确保先开启一个 issue 并概述您的想法。我们会尽快回复您，并告知您的贡献是否有合并的可能。
 
 ## 设置开发环境
 
-对官方仓库进行修改并不难。您需要安装 [Git](https://github.com/git-guides/install-git)、[Node 和 NPM](https://nodejs.org/en/download/)。接下来您需要做的是：
+在官方仓库里进行尝试并不难。您需要安装 [Git](https://github.com/git-guides/install-git)、[Node](https://nodejs.org/en/download/) 和 [pnpm](https://pnpm.io/installation)。接下来请按如下步骤操作：
 
-1. 将代码复制到本地计算机：`$ git clone git@github.com:ueberdosis/tiptap.git`
-2. 安装依赖：`$ npm install`
-3. 启动开发环境：`$ npm run start`
-4. 在您喜欢的浏览器中打开 http://localhost:3000。
+1. 将代码复制到本地机器：`$ git clone git@github.com:ueberdosis/tiptap.git`
+2. 安装依赖：`$ pnpm install`
+3. 启动开发环境：`$ pnpm run start`
+4. 在您喜欢的浏览器中打开 http://localhost:3000 。
 5. 开始玩耍吧！
 
 ## 我们的代码风格
 
-有一个 eslint 配置来确保一致的代码风格。要检查错误，请运行 `$ npm run lint`。在您发送拉取请求时也会进行检查。在发送拉取请求之前，确保代码通过检查。
+有一个 eslint 配置确保代码风格统一。要检查错误，请运行 `$ pnpm run lint`。这也会在您提交拉取请求时自动检查。请确保通过检查后再提交拉取请求。
 
-## 检查错误
+## 错误测试
 
-您的拉取请求会自动执行我们现有的所有测试。在提交拉取请求之前，请确保它们全部通过。可以使用 `$ npm run test` 在本地运行所有测试，或使用 `$ npm run test:open` 运行单个测试（例如，当编写新测试时）。
+您的拉取请求会自动执行我们现有的所有测试。请确保所有测试全部通过后再提交拉取请求。您可以通过 `$ pnpm run test` 在本地运行所有测试，或者使用 `$ pnpm run test:open` 运行单个测试（例如编写新测试时）。
 
-## 创建自己的扩展
+## 创建您自己的扩展
 
-如果您想创建和维护自己的扩展，可以使用 `create-tiptap-extension` CLI 工具。它会创建一个包含所有必要文件和构建过程的新扩展模板。只需运行
+如果您想创建并维护自己的扩展，可以使用 `create-tiptap-extension` CLI 工具。它会创建一个包含所有必要文件和构建流程的新扩展模板。只需运行：
 
 ```bash
-npm init tiptap-extension
+pnpm init tiptap-extension
 ```
 
-如果您想让我们知道您的扩展，可以在 [X](https://x.com/tiptap_editor) 或 [Discord](https://tiptap.dev/discord) 上给我们提示。
+如果您希望我们知道您的扩展，可以在 [X](https://x.com/tiptap_editor) 或 [Discord](https://tiptap.dev/discord) 上提示我们。
 
 ## 记录您的贡献
 
-在贡献 Tiptap 时，重要的是要理解 Tiptap 的代码库和文档是分别管理的。如果您对 Tiptap 进行了更改或增强，记录这些更改对于他人的清晰性和可用性当然是重要的。确保您更新与您在代码中所做的任何更改相对应的文档仓库。
+贡献 Tiptap 时，理解 Tiptap 的代码库和文档是分别管理的非常重要。如果您对 Tiptap 进行了更改或增强，记录这些更改对他人的清晰理解和使用至关重要。请确保您更新了与您代码更改相对应的文档仓库。
 
-1. Tiptap 仓库：[Tiptap 代码仓库](https://github.com/ueberdosis/tiptap) - 在此修改代码。
-2. 文档仓库：[Tiptap 文档仓库](https://github.com/ueberdosis/tiptap-docs) - 在此更新或添加文档，以反映在 Tiptap 仓库中所做的更改。
+1. Tiptap 仓库：[Tiptap 代码仓库](https://github.com/ueberdosis/tiptap) — 在这里修改代码。
+2. 文档仓库：[Tiptap 文档仓库](https://github.com/ueberdosis/tiptap-docs) — 在这里更新或添加文档，以反映在 Tiptap 仓库中所做的更改。
 
-在您对 Tiptap 代码仓库的拉取请求中，包含对您在文档仓库中所做的相应更新的引用。或者，在向文档仓库提交拉取请求时，如果与文档更新相关，确保包含对 Tiptap 仓库中任何相关代码更改的引用。
+请在您对 Tiptap 代码仓库的拉取请求中包含您在文档仓库中相应更新的引用。或者，在向文档仓库提交拉取请求时，如果涉及文档更新，请确保包含对 Tiptap 仓库中任何相关代码更改的引用。
 
 ## 进一步的问题
 
-还有其他问题吗？在仓库中创建一个新问题或讨论。我们会尽快回复您。
+还有其他问题？请在仓库中创建一个 [新 issue](https://github.com/ueberdosis/tiptap/issues) 或 [讨论](https://github.com/ueberdosis/tiptap/discussions)。我们会尽快回复您。

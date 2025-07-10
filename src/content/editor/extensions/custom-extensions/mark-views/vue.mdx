@@ -76,3 +76,33 @@ export default {
 明白了吗？让我们看看它是如何运作的。欢迎随意复制以下示例以开始使用。
 
 <CodeDemo path="/GuideMarkViews/VueComponent?inline=false&hideSource=false" />
+
+## 更新标记视图属性
+
+更新标记视图的属性非常简单。您可以使用组件属性提供的 `updateAttributes` 方法。
+
+```vue
+<template>
+  <span :id="HTMLAttributes.id" className="content">
+    <mark-view-content />
+  </span>
+</template>
+
+<script>
+import { MarkViewContent, markViewProps } from '@tiptap/vue-3'
+export default {
+  components: {
+    MarkViewContent,
+  },
+  props: markViewProps,
+  methods: {
+    increase() {
+      this.count += 1
+    },
+    updateId() {
+      this.updateAttributes({ id: Date.now() })
+    }
+  },
+}
+</script>
+```

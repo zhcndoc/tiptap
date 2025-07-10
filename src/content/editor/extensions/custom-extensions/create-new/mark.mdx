@@ -1,7 +1,7 @@
 ---
-title: 标记 API
+title: Mark API
 meta:
-  title: 标记 API | Tiptap 编辑器文档
+  title: Mark API | Tiptap 编辑器文档
   description: 为你的 Tiptap 编辑器创建一个新的标记，从零打造独特的编辑器体验。详情请参阅文档！
   category: 编辑器
 ---
@@ -44,9 +44,31 @@ const HighlightMark = Mark.create({
 })
 ```
 
-这段代码创建了一个名为 `HighlightMark` 的新标记扩展。它添加了一个 `addOptions` 方法来定义标记的选项，用户可以配置这些选项。它还添加了 `parseHTML` 和 `renderHTML` 方法，用于定义标记如何解析和渲染为 HTML。
+你也可以使用回调函数来创建标记。如果你想封装扩展的逻辑，比如定义事件处理器或其他自定义逻辑，这将非常有用。
 
-安装方法与其他扩展相同，将其添加到 `extensions` 数组中即可。
+```js
+import { Mark } from '@tiptap/core'
+
+const CustomMark = Mark.create(() => {
+  // 定义变量或函数供扩展内部使用
+  const customVariable = 'foo'
+
+  function onCreate() {}
+  function onUpdate() {}
+
+  return {
+    name: 'customMark',
+    onCreate,
+    onUpdate,
+
+    // 你的代码写在这里。
+  }
+})
+```
+
+这段代码创建了一个名为 `HighlightMark` 的新标记扩展。它添加了一个 `addOptions` 方法来定义标记的选项，这些选项可以由用户配置。它还添加了 `parseHTML` 和 `renderHTML` 方法，来定义标记如何被解析和渲染为 HTML。
+
+它的安装方式与其他扩展一样，通过将其添加到 `extensions` 数组中。
 
 ```typescript
 import { Editor } from '@tiptap/core'
