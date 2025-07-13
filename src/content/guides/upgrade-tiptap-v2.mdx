@@ -8,21 +8,15 @@ meta:
   category: 协作
 ---
 
-Tiptap v3 是一次重大更新，包含-breaking 改动。本指南将帮助您将 Tiptap v2 项目升级到版本 3。
+Tiptap v3 is a major update with breaking changes. This guide will help you upgrade your Tiptap v2 project to version 3.
 
-## 重大变更
+## Breaking Changes
 
-### 软件包变动
+### Package Changes
 
-- UMD 构建已被移除（现采用 tsup 进行打包）
+- UMD builds have been removed (now using tsup)
 
-我们合并了多个软件包，因此您可能需要更新导入方式。幸运的是，我们编写了一个代码迁移工具（codemod），可以协助完成此过程。在您的项目中运行以下命令：
-
-```bash
-npx codemod tiptap-2-migrate-imports
-```
-
-某些软件包可能已被移除或重命名，您可能需要更新依赖。以下是一些常见的变更示例：
+Some packages may have been removed or renamed, so you may need to update your imports and dependencies. Here are some common changes:
 
 ```diff
 表格相关软件包
@@ -67,8 +61,12 @@ Vue 2 菜单
 
 所有悬浮元素的库由 Tippy.js 替换为 Floating UI。这影响以下包：
 
-- @tiptap/extension-floating-menu
 - @tiptap/extension-bubble-menu
+- @tiptap/extension-drag-handle
+- @tiptap/extension-drag-handle-react
+- @tiptap/extension-drag-handle-vue-2
+- @tiptap/extension-drag-handle-vue-3
+- @tiptap/extension-floating-menu
 - @tiptap/extension-mention
 - @tiptap/suggestion
 
@@ -101,7 +99,13 @@ const 菜单 = (
 npm install @floating-ui/dom@^1.6.0
 ```
 
-### API 更新：文本样式相关
+Make sure to uninstall `tippy.js` if you were using it, as it is no longer needed.
+
+```bash
+npm uninstall tippy.js
+```
+
+### API Changes Text Style Updates
 
 - `mergeNestedSpanStyles` 现在默认为 `true`
 - 新增文本样式扩展：
@@ -322,13 +326,26 @@ StarterKit 现已默认包含以下扩展：
 - import Underline from '@tiptap/extension-underline'
 ```
 
+如果您正在使用禁用的扩展名，请确保在您的 StarterKit 配置中更新它们的名称：
+
+```diff
+const editor = new Editor({
+  extensions: [
+    StarterKit.configure({
+-      history: false, // disable history
++      undoRedo: false // disable undo/redo (previously history)
+    })
+  ]
+})
+```
+
 ## 迁移步骤
 
 1. 更新依赖
 
-   - 移除依赖 UMD 相关代码
-   - 安装 `@floating-ui/dom`（用于浮动菜单）
-   - 升级 Tiptap 核心包到 v3
+   - 移除依赖 UMD 的代码
+   - 安装 `@floating-ui/dom`（用于气泡和浮动菜单）
+   - 将 Tiptap 包更新到 v3
 
 2. 更新菜单实现
 
