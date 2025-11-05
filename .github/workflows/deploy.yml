@@ -1,30 +1,22 @@
-# Automate, customize, and execute your software development workflows right in your repository with GitHub Actions.
-# Documentation: https://docs.github.com/en/actions
-
-name: deploy
+name: Deploy
 
 on:
-  workflow_dispatch:
   push:
     branches:
-    - main
-    - next
-    - development
+      - main
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-vercel:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Trigger build
-      shell: bash
-      run: |
-        curl \
-        --fail \
-        --silent \
-        --request POST \
-        --form token=${{ secrets.CI_TOKEN }} \
-        --form ref=main \
-        --form 'variables[GITHUB_COMMIT_REF_NAME]'=$GITHUB_REF_NAME \
-        ${{ secrets.CI_WEBHOOK_URL }} \
-        &> /dev/null
+      - uses: actions/checkout@v4
+
+      - uses: amondnet/vercel-action@v25
+        with:
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          working-directory: ./
+          vercel-args: "--prod"
