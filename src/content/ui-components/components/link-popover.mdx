@@ -158,17 +158,17 @@ function MyLinkButton() {
 
 #### 返回值说明
 
-| 名称        | 类型                                                   | 描述                                             |
-| ----------- | ------------------------------------------------------ | ------------------------------------------------ |
-| isVisible   | boolean                                                | 是否应该渲染链接功能                             |
-| canSet      | boolean                                                | 当前上下文是否可以设置链接                       |
-| isActive    | boolean                                                | 是否当前链接处于活动/选中状态                   |
-| url         | string                                                 | 当前链接的 URL 值                                |
-| setUrl      | React.Dispatch<React.SetStateAction<string \| null>>  | 用于更新 URL 的函数                              |
-| setLink     | () => void                                             | 在编辑器中应用链接的函数                         |
-| removeLink  | () => void                                             | 从编辑器中移除链接的函数                         |
-| label       | string                                                 | 按钮的无障碍标签文本                             |
-| Icon        | React.FC                                               | 链接按钮的图标组件                               |
+| Name         | Type                                                   | Description                                       |
+| ------------ | ------------------------------------------------------ | ------------------------------------------------- |
+| `isVisible`  | `boolean`                                              | Whether the link functionality should be rendered |
+| `canSet`     | `boolean`                                              | If a link can be set in the current context       |
+| `isActive`   | `boolean`                                              | If a link is currently active/selected            |
+| `url`        | `string`                                               | Current URL value for the link                    |
+| `setUrl`     | `React.Dispatch<React.SetStateAction<string \| null>>` | Function to update the URL state                  |
+| `setLink`    | `() => void`                                           | Function to apply the link in the editor          |
+| `removeLink` | `() => void`                                           | Function to remove the link from the editor       |
+| `label`      | `string`                                               | Accessible label text for the button              |
+| `Icon`       | `React.FC`                                             | Icon component for the link button                |
 
 ### `useLinkHandler()`
 
@@ -199,19 +199,19 @@ function MyCustomLinkInterface() {
 
 #### 参数说明
 
-| 名称        | 类型             | 默认值 | 描述                       |
-| ----------- | ---------------- | ------- | -------------------------- |
-| editor      | Editor \| null   | -       | Tiptap 编辑器实例         |
-| onSetLink   | () => void       | -       | 设置链接后的回调           |
+| Name        | Type             | Default     | Description                         |
+| ----------- | ---------------- | ----------- | ----------------------------------- |
+| `editor`    | `Editor \| null` | `undefined` | The Tiptap editor instance          |
+| `onSetLink` | `() => void`     | `undefined` | Callback fired after setting a link |
 
 #### 返回值说明
 
-| 名称        | 类型                                                   | 描述                       |
-| ----------- | ------------------------------------------------------ | -------------------------- |
-| url         | string                                                 | 当前链接的 URL 值          |
-| setUrl      | React.Dispatch<React.SetStateAction<string \| null>>  | 用于更新 URL 的函数        |
-| setLink     | () => void                                             | 应用链接的函数             |
-| removeLink  | () => void                                             | 移除链接的函数             |
+| Name         | Type                                                   | Description                                 |
+| ------------ | ------------------------------------------------------ | ------------------------------------------- |
+| `url`        | `string`                                               | Current URL value for the link              |
+| `setUrl`     | `React.Dispatch<React.SetStateAction<string \| null>>` | Function to update the URL state            |
+| `setLink`    | `() => void`                                           | Function to apply the link in the editor    |
+| `removeLink` | `() => void`                                           | Function to remove the link from the editor |
 
 ## 工具函数
 

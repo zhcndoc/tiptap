@@ -16,7 +16,7 @@ export const sidebarConfig: SidebarConfig = {
         },
         {
           href: '/resources/whats-new',
-          title: "3.0 有哪些新内容",
+          title: '3.0 有哪些新内容',
         },
       ],
     },
