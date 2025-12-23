@@ -1,0 +1,65 @@
+---
+title: AI 工具包实时演示
+tags:
+  - type: addon
+  - type: beta
+meta:
+  title: AI 工具包实时演示 | Tiptap 内容 AI
+  description: 通过交互式 AI 代理，探索 AI 工具包的实时演示，该代理可以读取、编辑和操作文档。
+  category: 内容 AI
+sidebars:
+  hideSecondary: true
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Link } from '@/components/Link'
+import { Callout } from '@/components/ui/Callout'
+import { ExternalLinkIcon, Expand } from 'lucide-react'
+
+此交互式演示展示了 AI 工具包在真实文档编辑环境中的能力。演示中集成了一个 AI 代理，可利用工具包的基本功能读取、编辑和操作文档。
+
+<CodeDemo
+    isScrollable
+    isLarge
+    src="https://template.tiptap.dev/page-ai-toolkit"
+    caption={
+        <>
+            <strong>试用 AI 工具包</strong> ，通过此交互式演示体验一个能够读取、编辑和操作文档的 AI 代理。
+        </>
+    }
+    captionActions={
+        <>
+            <a
+                href="https://template.tiptap.dev/page-ai-toolkit"
+                target="_blank"
+                className="flex items-center gap-1 text-grayAlpha-600 hover:text-grayAlpha-800 font-medium whitespace-nowrap"
+            >
+                全屏
+                <Expand className="size-3" />
+            </a>
+            <span className="text-grayAlpha-300">|</span>
+            <Link
+                href="/content-ai/capabilities/ai-toolkit/live-demo"
+                className="flex items-center gap-1 text-grayAlpha-600 hover:text-grayAlpha-800 font-medium whitespace-nowrap"
+            >
+                了解更多
+                <ExternalLinkIcon className="size-3" />
+            </Link>
+        </>
+    }
+/>
+
+### 文档操作
+- **读取**：AI 可以按块读取和分析文档内容，高效处理大型文档
+- **编辑**：精准编辑特定部分，无需替换全部内容
+- **插入**：直接将内容流式插入编辑器
+- **建议**：在接受或拒绝前，先审阅 AI 生成的修改
+
+### 高级功能
+- **架构感知**：AI 理解文档中的自定义节点和标记
+- **选区感知提示**：操作可针对选中文本或整个文档进行
+- **变更追踪**：类似 Google Docs 的接受/拒绝 AI 编辑的工作流程
+
+<Callout title="获取源代码" variant="info">
+  该演示的完整源代码将在您将 AI 工具包添加到订阅后提供。我们将在您的入职通话中提供访问权限。使用受我们的[服务条款](https://tiptap.dev/terms-of-service)和[专业许可证](https://tiptap.dev/pro-license)约束。
+</Callout>

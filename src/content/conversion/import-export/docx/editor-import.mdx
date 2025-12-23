@@ -12,6 +12,9 @@ meta:
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
@@ -22,7 +25,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
     </RequirementItem>
 </Requirements>
 
-<CodeDemo src="https://develop--tiptap-pro.netlify.app/preview/Extensions/ImportDocx" />
+<CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ImportDocx" />
 
 将 `.docx` 文件转换为 Tiptap JSON 使用 `@tiptap-pro/extension-import-docx` 编辑器扩展很简单，该扩展可以直接集成到你的 Tiptap 编辑器中。
 
@@ -49,15 +52,10 @@ import Color from '@tiptap/extension-color'
 import FontFamily from '@tiptap/extension-font-family'
 import Highlight from '@tiptap/extension-highlight'
 import { Image } from '@tiptap/extension-image'
-import Link from '@tiptap/extension-link'
 import Paragraph from '@tiptap/extension-paragraph'
-import Table from '@tiptap/extension-table'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
-import TableRow from '@tiptap/extension-table-row'
+import { TableKit } from '@tiptap/extension-table'
 import TextAlign from '@tiptap/extension-text-align'
-import TextStyle from '@tiptap/extension-text-style'
-import Underline from '@tiptap/extension-underline'
+import { TextStyle } from '@tiptap/extension-text-style'
 ```
 
 ## 配置
@@ -134,6 +132,53 @@ editor
 | 错误处理       | 如果转换失败，可以显示一个提示或记录错误。                                                                                                                                                                                                                  |
 | 内容修改 | 可以插入额外的节点、删除某些节点，或根据需要调整转换后的 Tiptap JSON。                                                                                                                                                                          |
 | 编辑器插入     | 如果希望依赖扩展的默认插入行为（替换编辑器内容），可以调用回调中提供的 `setEditorContent()` 函数。如果你自己修改内容，必须手动使用 `editor.commands.setContent(content)` 设置它。 |
+
+## Verbose 输出
+
+DOCX 导入扩展提供了一个 `verbose` 配置属性，帮助你控制导入过程中的诊断输出级别。这对于调试或深入了解转换过程尤为有用。
+
+`verbose` 属性是一个位掩码（bitmask）数字，用于决定输出哪些类型的日志消息。扩展使用以下级别：
+
+| 值 | 级别   | 描述                |
+|-------|---------|----------------------------|
+| 1     | `log`   | 一般信息日志 |
+| 2     | `warn`  | 警告信息                   |
+| 4     | `error` | 错误信息                     |
+
+<Callout title="Verbose 位掩码">
+  你可以通过将值相加来组合级别。例如，`verbose: 3` 将启用 `log`（1）和 `warn`（2）两种日志。
+</Callout>
+
+verbose 输出会在返回的数据中（`data` 属性）附带一个名为 `logs` 的属性，`logs` 包含 `info`、`warn` 和 `error` 三个属性，每个都是一个包含对应日志信息的数组。
+
+```js
+{
+  "data": {
+    "content": {
+        // Tiptap JSON
+    }
+  },
+  "logs": {
+    "info": [],
+    "warn": [
+      {
+        "message": "Image file not found in media files",
+        "fileName": "image1.gif",
+        "availableMediaFiles": []
+      }
+    ],
+    "error": [
+      {
+        "message": "Image upload failed: General error",
+        "fileName": "image1.gif",
+        "url": "https://your-image-upload-endpoint.com",
+        "error": "Unable to connect. Is the computer able to access the url?",
+        "context": "uploadImage general error"
+      }
+    ]
+  }
+}
+```
 
 ## 支持 & 限制
 将 `.docx` 文件导入 Tiptap 提供了一种处理大多数标准 Word 内容的方法，但 **这并不是一对一的映射**，因为 DOCX 格式和 Tiptap 基于 CSS 的样式之间存在固有差异。

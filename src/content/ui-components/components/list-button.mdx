@@ -13,6 +13,8 @@ component:
   isOpen: true
   isNew: false
   icon: LayoutList
+tags:
+  - type: mit
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
@@ -22,32 +24,22 @@ import { CodeDemo } from '@/components/CodeDemo'
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/list-button" />
 
 ## 安装
-您可以通过 Tiptap CLI (适用于 Vite 或 Next.js) 添加组件。
+
+通过 Tiptap CLI 添加组件：
 
 ```bash
-npx @tiptap/cli add list-button
+npx @tiptap/cli@latest add list-button
 ```
 
-### 手动集成
-对于 Vite 或 Next.js 以外的框架，可以手动从 [https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/list-button) 添加组件。
+## 组件
 
-### 导入样式
+### `<ListButton />`
 
-此组件需要您导入我们的样式，这些样式已添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 中。
+一个预构建的 React 组件，可切换指定列表类型的格式。
 
-## 用法
+#### 用法
 
 ```tsx
-import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
-import { StarterKit } from '@tiptap/starter-kit'
-import { TaskList } from '@tiptap/extension-task-list'
-import { TaskItem } from '@tiptap/extension-task-item'
-import { ListButton } from '@/components/tiptap-ui/list-button'
-
-import '@/components/tiptap-node/code-block-node/code-block-node.scss'
-import '@/components/tiptap-node/list-node/list-node.scss'
-import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
-
 export default function MyEditor() {
   const editor = useEditor({
     immediatelyRender: false,
@@ -81,20 +73,19 @@ export default function MyEditor() {
   })
 
   return (
-    <EditorContext.Provider value={{ editor }}>
-      <div className="tiptap-button-group" data-orientation="horizontal">
-        <ListButton type="bulletList" />
-        <ListButton type="orderedList" />
-        <ListButton type="taskList" />
-      </div>
-
-      <EditorContent editor={editor} role="presentation" />
-    </EditorContext.Provider>
+    <ListButton
+      editor={editor}
+      type="bulletList"
+      text="Bullet List"
+      hideWhenUnavailable={true}
+      showShortcut={true}
+      onToggled={() => console.log('List toggled!')}
+    />
   )
 }
 ```
 
-## 属性
+#### 属性
 
 | 名称                | 类型                                        | 默认值   | 描述                                              |
 | ------------------- | ------------------------------------------- | -------- | -------------------------------------------------- |
@@ -102,19 +93,130 @@ export default function MyEditor() {
 | type                | 'bulletList' \| 'orderedList' \| 'taskList' | 必需     | 要切换的列表类型                                  |
 | hideWhenUnavailable | boolean                                     | false    | 当不可用时，按钮是否应隐藏                        |
 | text                | string                                      | -        | 显示在图标旁边的文本                               |
+| onToggled           | () => void                                 | -        | 成功切换列表后触发的回调                           |
+| showShortcut        | boolean                                     | false    | 是否显示快捷键提示                                 |
 
-## 需求
+## Hooks
 
-使用的参考组件
+### `useList()`
+
+一个自定义 Hook，帮助您构建自定义的列表切换按钮，全面控制渲染和行为。
+
+#### 用法
+
+```tsx
+function MyListButton() {
+  const { isVisible, isActive, canToggle, handleToggle, label, shortcutKeys, Icon } = useList({
+    editor: myEditor,
+    type: 'bulletList',
+    hideWhenUnavailable: true,
+    onToggled: () => console.log('List toggled!'),
+  })
+
+  if (!isVisible) return null
+
+  return (
+    <button onClick={handleToggle} disabled={!canToggle} aria-label={label} aria-pressed={isActive}>
+      <Icon />
+      {label}
+      {shortcutKeys && <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>}
+    </button>
+  )
+}
+```
+
+#### 参数
+
+| 名称                | 类型                | 默认值   | 描述                                                |
+| ------------------- | ------------------- | -------- | --------------------------------------------------- |
+| editor              | Editor \| null      | undefined| Tiptap 编辑器实例                                   |
+| type                | ListType            | 必填     | 要切换的列表类型                                    |
+| hideWhenUnavailable | boolean             | false    | 当无法切换时，是否隐藏按钮                          |
+| onToggled           | () => void          | undefined| 成功切换列表后触发的回调                            |
+
+#### 返回值
+
+| 名称           | 类型              | 描述                                               |
+| -------------- | ----------------- | -------------------------------------------------- |
+| isVisible      | boolean           | 按钮是否应被渲染                                   |
+| isActive       | boolean           | 指定列表类型当前是否激活                           |
+| canToggle      | boolean           | 当前是否允许切换列表格式                           |
+| handleToggle   | () => boolean     | 切换列表格式的函数                                 |
+| label          | string            | 按钮的可访问标签文本                               |
+| shortcutKeys   | string            | 列表类型的键盘快捷键                               |
+| Icon           | React.FC          | 列表按钮的图标组件                                 |
+
+## 工具函数
+
+### `canToggleList(editor, type, turnInto?)`
+
+判断当前编辑器状态是否允许切换指定类型的列表。
+
+```tsx
+import { canToggleList } from '@/components/tiptap-ui/list-button'
+
+const canToggle = canToggleList(editor, 'bulletList') // 判断是否可以切换
+const canTurnInto = canToggleList(editor, 'bulletList', true) // 判断是否可以转换为无序列表
+```
+
+### `toggleList(editor, type)`
+
+程序化地切换指定类型的列表格式。
+
+```tsx
+import { toggleList } from '@/components/tiptap-ui/list-button'
+
+const success = toggleList(editor, 'orderedList')
+if (success) {
+  console.log('有序列表切换成功！')
+}
+```
+
+### `isListActive(editor, type)`
+
+判断指定类型的列表当前是否激活。
+
+```tsx
+import { isListActive } from '@/components/tiptap-ui/list-button'
+
+const active = isListActive(editor, 'taskList')
+```
+
+### `getListOption(type)`
+
+获取指定列表类型的配置对象。
+
+```tsx
+import { getListOption } from '@/components/tiptap-ui/list-button'
+
+const option = getListOption('bulletList')
+// 返回示例: { label: "Bullet List", type: "bulletList", icon: ListIcon }
+```
+
+## 键盘快捷键
+
+每种列表类型都有独特的快捷键：
+
+- **Cmd/Ctrl + Shift + 8**：切换无序列表
+- **Cmd/Ctrl + Shift + 7**：切换有序列表
+- **Cmd/Ctrl + Shift + 9**：切换任务列表
+
+使用 `<ListButton />` 组件或 `useList()` Hook 时，这些快捷键会自动注册。
+
+## 依赖
+
+- `@tiptap/react` - Tiptap React 核心集成
+- `@tiptap/starter-kit` - 包含列表支持的基础扩展
+- `@tiptap/extension-task-list` - 任务列表扩展
+- `@tiptap/extension-task-item` - 任务项扩展
+- `react-hotkeys-hook` - 键盘快捷键管理
+
+### 参考组件
 
 - `use-tiptap-editor` (hook)
-- `tiptap-utils` (lib)
-- `button` (primitive)
-- `list-icon` (icon)
-- `list-todo-icon` (icon)
-- `list-ordered-icon` (icon)
-
-开源功能
-
-- `@tiptap/extension-task-list`
-- `@tiptap/extension-task-item`
+- `button` (基础组件)
+- `badge` (基础组件)
+- `tiptap-utils` (工具库)
+- `list-icon` (图标)
+- `list-ordered-icon` (图标)
+- `list-todo-icon` (图标)

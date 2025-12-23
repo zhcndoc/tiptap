@@ -14,7 +14,7 @@ const PageHeaderWrapper = forwardRef<HTMLDivElement, PageHeaderWrapperProps>(
   ({ asChild, children, className, ...props }, ref) => {
     const Component = asChild ? Slot : 'header'
 
-    const wrapperClass = cn('mb-12 max-w-[42rem]', className)
+    const wrapperClass = cn('mb-12', className)
 
     return (
       <Component className={wrapperClass} {...props} ref={ref}>
@@ -35,7 +35,7 @@ const PageHeaderTitle = forwardRef<HTMLHeadingElement, PageHeaderTitleProps>(
     const Component = asChild ? Slot : 'h1'
 
     const titleClass = cn(
-      'text-[3.125rem] font-bold text-black leading-none text-balance max-w-[18ch]',
+      'text-[3.125rem] font-bold text-black leading-none text-balance max-w-[42rem]',
       className,
     )
 
@@ -75,19 +75,26 @@ const isImageTag = (tag: PageTag): tag is ImagePageTag => {
 
 export type PageHeaderTagsProps = {
   tags: PageTag[]
+  isTemplate?: boolean
 }
 
-export const PageHeaderTags = ({ tags }: PageHeaderTagsProps) => {
+export const PageHeaderTags = ({ tags, isTemplate = false }: PageHeaderTagsProps) => {
   return (
     <div className="flex items-center gap-1 flex-wrap mt-6 last:mb-12">
       {tags.map((tag, index) => (
-        <PageHeaderTag tag={tag} key={index} />
+        <PageHeaderTag tag={tag} isTemplate={isTemplate} key={index} />
       ))}
     </div>
   )
 }
 
-export const PageHeaderTag = ({ tag }: { tag: PageTag }) => {
+export const PageHeaderTag = ({
+  tag,
+  isTemplate = false,
+}: {
+  tag: PageTag
+  isTemplate?: boolean
+}) => {
   if (isImageTag(tag)) {
     return (
       <Link href={tag.url} target="_blank" rel="noopener noreferrer">
@@ -113,11 +120,41 @@ export const PageHeaderTag = ({ tag }: { tag: PageTag }) => {
   }
 
   if (tag.type === 'start') {
-    return <Tag tooltip={tag.tooltip}>Available in Start plan</Tag>
+    const defaultTooltip = isTemplate
+      ? 'Integrate and use while subscribed to the Start plan. Usage of this template is subject to our Pro License and ToS.'
+      : 'Integrate and use while subscribed to the Start plan.'
+    return <Tag tooltip={tag.tooltip || defaultTooltip}>Available in Start plan</Tag>
+  }
+
+  if (tag.type === 'addon') {
+    return <Tag tooltip={tag.tooltip || 'Add AI Toolkit to your subscription'}>Paid add-on</Tag>
+  }
+
+  if (tag.type === 'mit') {
+    return (
+      <Tag variant="invert" tooltip={tag.tooltip || 'Free to use under MIT license.'}>
+        Available for free
+      </Tag>
+    )
   }
 
   if (tag.type === 'team') {
-    return <Tag tooltip={tag.tooltip}>Available in Team plan</Tag>
+    const defaultTooltip = isTemplate
+      ? 'Integrate and use while subscribed to the Team plan. Usage of this template is subject to our Pro License and ToS.'
+      : 'Integrate and use while subscribed to the Team plan.'
+    return <Tag tooltip={tag.tooltip || defaultTooltip}>Available in Team plan</Tag>
+  }
+
+  if (tag.type === 'business') {
+    return (
+      <Tag
+        tooltip={
+          tag.tooltip || 'Integrate and use while subscribed to the Business or Enterprise plan.'
+        }
+      >
+        Business plan
+      </Tag>
+    )
   }
 
   if (tag.type === 'ai') {
@@ -152,8 +189,44 @@ export const PageHeaderTag = ({ tag }: { tag: PageTag }) => {
     )
   }
 
+  if (tag.type === 'alpha') {
+    return (
+      <Tag variant="neutral" tooltip={tag.tooltip}>
+        Alpha
+      </Tag>
+    )
+  }
+
   if (tag.type === 'experiment') {
     return <Tag tooltip={tag.tooltip}>Experiment</Tag>
+  }
+
+  if (tag.type === 'restricted') {
+    return (
+      <Tag
+        variant="hint"
+        tooltip={
+          tag.tooltip ||
+          'This is a restricted release only available to our enterprise customers at the moment.'
+        }
+      >
+        Restricted Release
+      </Tag>
+    )
+  }
+
+  if (tag.type === 'deprecated') {
+    return (
+      <Tag
+        variant="warning"
+        tooltip={
+          tag.tooltip ||
+          'This extension is being deprecated in 2026 and will be replaced by AI Toolkit.'
+        }
+      >
+        Deprecated
+      </Tag>
+    )
   }
 }
 

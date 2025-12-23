@@ -13,8 +13,9 @@ const options = [
   { label: '协作', href: '/collaboration/getting-started/overview' },
   { label: '内容 AI', href: '/content-ai/getting-started/overview' },
   { label: '评论', href: '/comments/getting-started/overview' },
-  { label: '历史', href: '/collaboration/documents/history' },
+  { label: '快照', href: '/collaboration/documents/snapshot' },
   { label: '转换', href: '/conversion/getting-started/overview' },
+  { label: '页面', href: '/pages/getting-started/overview' },
   { label: '语义搜索', href: '/collaboration/documents/semantic-search' },
 ]
 

@@ -1,0 +1,157 @@
+---
+title: 位置工具
+meta:
+  title: 位置工具 | Tiptap 编辑器文档
+  description: 使用 MappablePosition 和 CollaborationMappablePosition 来跟踪和更新编辑器中的位置。了解如何序列化和反序列化位置。
+  category: 编辑器
+---
+
+位置工具帮助你在文档更改时跟踪和更新编辑器中的位置。
+
+## 创建位置
+
+使用 `createMappablePosition` 来创建一个位置实例。
+
+```js
+// 在偏移量 10 处创建一个位置
+const position = editor.utils.createMappablePosition(10)
+```
+
+`createMappablePosition` 方法默认返回一个 `MappablePosition` 实例。如果启用了[协作扩展](/editor/extensions/functionality/collaboration)，它将返回一个 `CollaborationMappablePosition` 实例。
+
+- **`MappablePosition`**：用于在标准编辑器中跟踪位置的基础类
+- **`CollaborationMappablePosition`**：启用协作时用于跟踪位置的扩展类
+
+## 更新位置
+
+在事务之后，使用 `getUpdatedPosition` 来更新位置。位置会根据文档的更改更新。
+
+```js
+// 在事务之后获取更新后的位置
+const { position: updatedPosition, mapResult } = editor.utils.getUpdatedPosition(
+  position,
+  transaction,
+)
+
+// 更新后的位置反映了事务后的新位置
+const newOffset = updatedPosition.position
+```
+
+`getUpdatedPosition` 方法返回一个包含以下属性的对象：
+
+- `position`（`MappablePosition`）：更新后的位置。
+- `mapResult`（`MapResult | null`）：映射操作的结果，作为 ProseMirror 的 [MapResult](https://prosemirror.net/docs/ref/#transform.MapResult)。它包含操作的信息，例如用来判断位置是否被删除。
+
+## 限制
+
+当协作事务将一段落拆成两部分时，[Y.js](https://docs.yjs.dev/) 视为删除段落的后半部分，然后插入一个新段落。因此，如果原始位置在换行符后，更新后的位置不会放在第二段，而是放在第一段的末尾。这是 [Y.js 相对位置](https://docs.yjs.dev/api/relative-positions) 的限制，我们正在研究解决方案。
+
+## API 参考
+
+### `MappablePosition`
+
+基础的 `MappablePosition` 类用于跟踪文档中的位置。
+
+#### 属性
+
+- `position`（`number`）：当前位置偏移量。
+
+#### 方法
+
+##### `toJSON`
+
+将位置序列化为 JSON 对象以便存储。
+
+```js
+const position = editor.utils.createMappablePosition(10)
+const json = position.toJSON()
+
+// 存储到 localStorage 或发送到服务器
+localStorage.setItem('savedPosition', JSON.stringify(json))
+```
+
+##### `fromJSON`
+
+从 JSON 对象反序列化位置。
+
+```js
+// 从存储中获取
+const json = JSON.parse(localStorage.getItem('savedPosition'))
+
+// 恢复位置
+const position = MappablePosition.fromJSON(json)
+```
+
+### 示例：存储位置
+
+```js
+import { MappablePosition } from '@tiptap/core'
+
+// 创建并序列化一个位置
+const position = editor.utils.createMappablePosition(25)
+const json = position.toJSON()
+
+// 存储它
+localStorage.setItem('bookmark', JSON.stringify(json))
+
+// 稍后恢复
+const savedJson = JSON.parse(localStorage.getItem('bookmark'))
+const restoredPosition = MappablePosition.fromJSON(savedJson)
+```
+
+### `CollaborationMappablePosition`
+
+`CollaborationMappablePosition` 扩展了 `MappablePosition`，支持 Y.js 相对位置以实现协作编辑。当启用协作扩展时会自动使用。
+
+#### 属性
+
+- `position`（`number`）：当前位置偏移量。
+- `yRelativePosition`（`any`）：[Y.js 相对位置](https://docs.yjs.dev/api/relative-positions)（内部使用，用于协作）。
+
+#### 方法
+
+##### `toJSON`
+
+将协作位置序列化为包括 Y.js 相对位置数据的 JSON 对象。
+
+```js
+// 在协作编辑器中
+const position = editor.utils.createMappablePosition(10)
+const json = position.toJSON()
+
+// json 包含 position 和 yRelativePosition
+// 存储以便以后恢复
+localStorage.setItem('collabPosition', JSON.stringify(json))
+```
+
+##### `fromJSON`
+
+从 JSON 对象反序列化协作位置。
+
+```js
+// 从存储中获取
+const json = JSON.parse(localStorage.getItem('collabPosition'))
+
+// 恢复位置（自动创建 CollaborationMappablePosition）
+const position = CollaborationMappablePosition.fromJSON(json)
+```
+
+### 示例：存储协作位置
+
+```js
+import { CollaborationMappablePosition } from '@tiptap/extension-collaboration'
+
+// 在协作编辑器中创建一个位置
+const position = editor.utils.createMappablePosition(42)
+
+// 序列化以存储
+const json = position.toJSON()
+// json: { position: 42, yRelativePosition: [...] }
+
+// 存储它
+localStorage.setItem('collabBookmark', JSON.stringify(json))
+
+// 稍后恢复
+const savedJson = JSON.parse(localStorage.getItem('collabBookmark'))
+const restoredPosition = CollaborationMappablePosition.fromJSON(savedJson)
+```

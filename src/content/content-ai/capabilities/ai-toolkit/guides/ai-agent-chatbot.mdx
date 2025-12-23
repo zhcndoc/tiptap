@@ -1,0 +1,186 @@
+---
+title: AI 代理聊天机器人
+meta:
+  title: AI 代理聊天机器人 | Tiptap 内容 AI
+  description: 使用 AI 工具包和 Vercel AI SDK 构建一个能够读取和编辑 Tiptap 文档的 AI 代理。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+
+<Requirements>
+  <RequirementItem label="1. 获取访问权限">
+    通过购买付费的 AI 工具包附加组件访问 AI 工具包扩展。<a href="https://tiptap.dev/contact-sales?form=ai-toolkit">联系团队</a>。
+  </RequirementItem>
+  <RequirementItem label="2. 访问私有注册表">
+    AI 工具包扩展发布于 Tiptap 的私有 npm 注册表。请按照[安装指南](/guides/pro-extensions)进行认证以访问 Tiptap 的私有 npm 注册表。
+  </RequirementItem>
+  <RequirementItem label="3. 安装扩展">
+    使用 npm 或你喜欢的包管理工具从私有注册表安装该扩展。
+  </RequirementItem>
+</Requirements>
+
+构建一个简单的 AI 代理聊天机器人，能读取和编辑 Tiptap 文档。
+
+<CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/ai-agent-chatbot" />
+
+查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 技术栈
+
+- [React](https://react.dev/) + [Next.js](https://nextjs.org/)
+- [Vercel 的 AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
+- Tiptap AI 工具包
+
+## 安装
+
+创建一个 [Next.js](https://nextjs.org/) 项目：
+
+```bash
+npx create-next-app@latest ai-agent-chatbot
+```
+
+安装核心的 Tiptap 包以及用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
+
+```bash
+npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/react @ai-sdk/openai
+```
+
+安装 Tiptap AI 工具包以及 Vercel AI SDK 的工具定义。
+
+<Callout title="专业包" variant="hint">
+  AI 工具包是一个专业版包。在安装之前，请按照[私有注册表指南](/guides/pro-extensions)设置对私有 NPM 注册表的访问权限。
+</Callout>
+
+```bash
+npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-ai-sdk
+```
+
+## API 端点
+
+创建一个使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型的 API 端点。包含用于 Tiptap AI 工具包的[工具定义](/content-ai/capabilities/ai-toolkit/tools/ai-sdk)。
+
+```ts
+// app/api/chat/route.ts
+import { openai } from '@ai-sdk/openai'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { convertToModelMessages, streamText, UIMessage } from 'ai'
+
+export async function POST(req: Request) {
+  const { messages }: { messages: UIMessage[] } = await req.json()
+
+  const result = streamText({
+    model: openai('gpt-5-mini'),
+    system: '你是一个可以编辑富文本档的助手。',
+    messages: convertToModelMessages(messages),
+    tools: toolDefinitions(),
+    providerOptions: {
+      openai: {
+        reasoningEffort: 'minimal',
+      },
+    },
+  })
+
+  return result.toUIMessageStreamResponse()
+}
+```
+
+要访问 OpenAI API，请在 [OpenAI 控制台](https://platform.openai.com/account/api-keys) 创建一个 API 密钥，并将其作为[环境变量](https://nextjs.org/docs/app/guides/environment-variables)添加。Vercel AI SDK 会自动检测该环境变量。
+
+```sh
+# .env
+OPENAI_API_KEY=your-api-key
+```
+
+## 客户端设置
+
+创建一个客户端的 React 组件，渲染 Tiptap 编辑器和一个简单的聊天 UI。该组件使用 Vercel AI SDK 的 [useChat 钩子](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat) 来调用 API 端点和管理聊天对话。当 AI 模型输出工具调用时，利用 Tiptap AI 工具包执行该工具。
+
+```tsx
+// app/page.tsx
+'use client'
+
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from 'ai'
+import { useChat } from '@ai-sdk/react'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { useRef, useState } from 'react'
+import { AiToolkit, getAiToolkit } from '@tiptap-pro/ai-toolkit'
+
+export default function Page() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit, AiToolkit],
+    content: `<h1>AI 代理演示</h1><p>请让 AI 改进这段内容。</p>`,
+  })
+
+  // 解决问题：https://github.com/vercel/ai/issues/8148
+  const editorRef = useRef(editor)
+  editorRef.current = editor
+
+  const { messages, sendMessage, addtoolOutput } = useChat({
+    transport: new DefaultChatTransport({ api: '/api/chat' }),
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    async onToolCall({ toolCall }) {
+      const editor = editorRef.current
+      if (!editor) return
+
+      const { toolName, input, toolCallId } = toolCall
+
+      // 使用 AI 工具包执行工具
+      const toolkit = getAiToolkit(editor)
+      const result = toolkit.executeTool({
+        toolName,
+        input,
+      })
+
+      addtoolOutput({ tool: toolName, toolCallId, output: result.output })
+    },
+  })
+
+  const [input, setInput] = useState('用一个关于 Tiptap 的短篇故事替换最后一段')
+
+  if (!editor) return null
+
+  return (
+    <div>
+      <EditorContent editor={editor} />
+      {messages?.map((message) => (
+        <div key={message.id} style={{ whiteSpace: 'pre-wrap' }}>
+          <strong>{message.role}</strong>
+          <br />
+          {message.parts
+            .filter((p) => p.type === 'text')
+            .map((p) => p.text)
+            .join('\n')}
+        </div>
+      ))}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          sendMessage({ text: input })
+          setInput('')
+        }}
+      >
+        <input value={input} onChange={(e) => setInput(e.target.value)} />
+      </form>
+    </div>
+  )
+}
+```
+
+## 最终效果
+
+配合额外的 CSS 样式，效果是一个简单但精致的 AI 聊天机器人应用：
+
+<CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/ai-agent-chatbot" />
+
+查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 下一步
+
+- 让用户通过[变更审核指南](/content-ai/capabilities/ai-toolkit/guides/review-changes)审核 AI 生成的更改
+- 添加实时工具流以即时查看变化，通过[工具流指南](/content-ai/capabilities/ai-toolkit/guides/tool-streaming)
+- 你的文档包含自定义节点和标记吗？学习如何让你的 AI 代理理解它们，参见[模式感知指南](/content-ai/capabilities/ai-toolkit/primitives/schema-awareness)。

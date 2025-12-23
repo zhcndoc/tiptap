@@ -1,0 +1,106 @@
+---
+title: Redis
+meta:
+  title: Redis | Hocuspocus 文档
+  category: Hocuspocus
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@hocuspocus/extension-redis.svg?label=version
+    url: https://www.npmjs.com/package/@hocuspocus/extension-redis
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@hocuspocus/extension-redis.svg
+    url: https://npmcharts.com/compare/@hocuspocus/extension-redis?minimal=true
+    label: 下载量
+  - type: image
+    src: https://img.shields.io/npm/l/@hocuspocus/extension-redis.svg
+    url: https://www.npmjs.com/package/@hocuspocus/extension-redis
+    label: 许可协议
+  - type: image
+    src: https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true
+    url: https://discord.gg/WtJ49jGshW
+    label: 聊天
+---
+
+Hocuspocus 可以通过 Redis 扩展进行水平扩展。你可以在负载均衡器后启动多个服务器实例，通过 Redis 同步更改和状态感知。Hocuspocus 会使用 Redis 将接收到的所有更新传播给其他所有实例，从而将更新转发给所有 Hocuspocus 实例的客户端。
+
+Redis 扩展不负责持久化数据；它仅在实例间同步数据。请使用 [数据库](/hocuspocus/server/extensions/database) 扩展来存储你的文档。
+
+请注意，所有消息都会在所有 Hocuspocus 实例上处理，因此如果你想通过启动多个服务器来降低 CPU 负载，就不应该通过 Redis 将它们连接起来。
+
+感谢 [@tommoor](https://github.com/tommoor) 编写了该扩展的初始实现。
+
+## 安装
+
+使用以下命令安装 Redis 扩展：
+
+```bash
+npm install @hocuspocus/extension-redis
+```
+
+## 配置
+
+关于所有可用的 Redis 和 Redis 集群选项的完整文档，请参考  
+[ioredis API 文档](https://github.com/luin/ioredis/blob/master/API.md)。
+
+```js
+import { Server } from "@hocuspocus/server";
+import { Redis } from "@hocuspocus/extension-redis";
+
+const server = new Server({
+  extensions: [
+    new Redis({
+      // [必填] 你的 Redis 实例主机名
+      host: "127.0.0.1",
+
+      // [必填] 你的 Redis 实例端口
+      port: 6379,
+    }),
+  ],
+});
+
+server.listen();
+```
+
+## 使用
+
+Redis 扩展与数据库扩展配合良好。一旦某个实例存储了文档，文档会在其他实例被锁定，以避免写冲突。
+
+```js
+import { Server } from "@hocuspocus/server";
+import { Logger } from "@hocuspocus/extension-logger";
+import { Redis } from "@hocuspocus/extension-redis";
+import { SQLite } from "@hocuspocus/extension-sqlite";
+
+// 服务器 1
+const server = new Server({
+  name: "server-1", // 请确保使用唯一的服务器名称
+  port: 1234,
+  extensions: [
+    new Logger(),
+    new Redis({
+      host: "127.0.0.1", // 请确保使用相同的 Redis 实例 :-)
+      port: 6379,
+    }),
+    new SQLite(),
+  ],
+});
+
+server.listen();
+
+// 服务器 2
+const anotherServer = new Server({
+  name: "server-2",
+  port: 1235,
+  extensions: [
+    new Logger(),
+    new Redis({
+      host: "127.0.0.1",
+      port: 6379,
+    }),
+    new SQLite(),
+  ],
+});
+
+anotherServer.listen();
+```

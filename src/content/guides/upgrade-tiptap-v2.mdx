@@ -3,20 +3,24 @@ tags:
   - type: editor
 title: 如何将 Tiptap v2 升级至 v3
 meta:
-  title: 升级 v2 到 v3 | Tiptap 协作文档
-  description: 将您的 Tiptap v2 项目升级到版本 3。了解相关更新内容及迁移方法。
-  category: 协作
+  title: Upgrade v2 to v3 | Tiptap Collaboration Docs
+  description: Upgrade your Tiptap v2 project to version 3. Learn about the changes and how to migrate your project.
+  category: Collaboration
 ---
 
-Tiptap v3 is a major update with breaking changes. This guide will help you upgrade your Tiptap v2 project to version 3.
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
-## Breaking Changes
+<EnterpriseCalloutAuto variant="migration" renderMode="sidebar" disableWaitlist/>
 
-### Package Changes
+Tiptap v3 是一次包含重大更改的主要更新。本指南将帮助你将 Tiptap v2 项目升级到版本 3。
 
-- UMD builds have been removed (now using tsup)
+## 重大更改
 
-Some packages may have been removed or renamed, so you may need to update your imports and dependencies. Here are some common changes:
+### 包更改
+
+- 已移除 UMD 构建（现在使用 tsup）
+
+某些包可能已被移除或重命名，因此你可能需要更新你的导入和依赖。以下是一些常见的更改：
 
 ```diff
 表格相关软件包
@@ -44,7 +48,15 @@ Some packages may have been removed or renamed, so you may need to update your i
 - import CharacterCount from '@tiptap/extension-character-count'
 + import { Focus, Placeholder, UndoRedo, Dropcursor, Gapcursor, CharacterCount } from '@tiptap/extensions'
 
-React 菜单
+CollaborationCursor
+- import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
++ import CollaborationCaret from '@tiptap/extension-collaboration-caret'
+
+Collaboration History
+- import CollaborationHistory from '@tiptap-pro/extension-collaboration-history'
++ import Snapshot from '@tiptap-pro/extension-snapshot'
+
+React Menus
 - import { BubbleMenu, FloatingMenu } from '@tiptap/react'
 + import { BubbleMenu, FloatingMenu } from '@tiptap/react/menus'
 
@@ -220,7 +232,7 @@ if (pos !== undefined) {
 - [CharacterCount](/editor/extensions/functionality/character-count)
 - [Dropcursor](/editor/extensions/functionality/dropcursor)
 - [Gapcursor](/editor/extensions/functionality/gapcursor)
-- [History](/editor/extensions/functionality/undo-redo)
+- [History](/editor/extensions/functionality/undo-redo) (now named `UndoRedo`)
 - [Placeholder](/editor/extensions/functionality/placeholder)
 - [TrailingNode](/editor/extensions/functionality/trailing-node)
 - [Focus](/editor/extensions/functionality/focus)

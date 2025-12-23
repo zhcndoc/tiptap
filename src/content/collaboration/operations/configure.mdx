@@ -20,7 +20,7 @@ import { Callout } from '@/components/ui/Callout'
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `secret`                        | [JWT 令牌密钥](/collaboration/getting-started/authenticate)，首次启动时自动生成                                                                                                                 |
 | `api_secret`                    | 用于授权头的 API 密钥，首次启动时自动生成                                                                                                                      |
-| `allowed_origins`               | 根据提供的值（以逗号分隔）验证 `Origin` 头，例如 `https://test.tiptap.dev,https://prod.tiptap.dev`；如果未设置，则禁用验证                                                   |
+| `allowed_origins`               | 根据提供的值（以逗号分隔）验证 `Origin` 头，例如 `https://test.tiptap.dev,https://*.tiptap.dev`；如果未设置，则禁用验证                                                   |
 | `authentication_disabled`       | 设置为 `1` 以禁用身份验证，设置为 `0` 以启用（默认值：`0`）                                                                                                             |
 | `webhook_url`                   | 用于接收 webhook 回调的 URL                                                                                                                                  |
 | `webhook_loader_url`            | 可选的 webhook URL，用于初始加载文档。有关更多信息，请参见 [webhooks](/collaboration/core-concepts/webhooks#loader-webhook)。 |
@@ -29,8 +29,11 @@ import { Callout } from '@/components/ui/Callout'
 | `webhook_log_errors_only`       | 仅记录 webhook 错误；成功的 webhook 日志被禁用                                                                                                           |
 | `default_auto_versioning`       | 设置为 `1` 以启用自动版本控制，设置为 `0` 以禁用（默认值：`0`）                                                                                                   |
 | `default_auto_versioning_interval` | 自动版本控制的时间间隔（以秒为单位，默认值：`30` 秒）                                                                                                    |
-| `auto_versioning_all_fragments` | 设置为 `1` 以使自动版本控制监听文档的任何片段/字段的更改（默认值仅为 `default`）                                                                                               |
-| `name`                          | 用于标识的实例名称                                                                                                                                             |
+| `auto_versioning_all_fragments` | 设置为 `1` 以使自动版本控制监听文档的任何片段/字段的更改（默认值为 `0`，只监听 `default` 片段）。这会影响自动和手动版本控制；当此设置为 `0` 时，手动版本控制需要 `force=true`。更改此项需服务器重新加载文档生效。                                                                                               |
+| `jwt_explicit_access`           | 设置为 `1` 可防止当 JWT 中未设置 `allowedDocumentNames` 时访问文档。                                                                                          |
+| `skip_s3_health_check`          | 设置为 `1` 可关闭 s3 健康检查（仅限本地部署）。适用于您的 s3 存储不支持 `getCalledIdentity` 的情况。                                                             |
+| `name`                         | 用于标识的实例名称                                                                                                                                             |
+| `webhook_include_ydoc_state`   | 设置为 `1` 会在所有 document.saved webhook 中包含完整的 yjs 文档状态                                                                                            |
 
 ## 通过 API 管理设置
 

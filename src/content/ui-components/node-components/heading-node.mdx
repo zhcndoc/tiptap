@@ -1,0 +1,66 @@
+---
+title: 标题节点
+meta:
+  title: 标题节点 | Tiptap UI 组件
+  description: 在你的 Tiptap 编辑器中集成一个显示标题的节点组件。更多内容请查看我们的文档！
+  category: UI 组件
+component:
+  name: 标题 UI 节点
+  description: 向你的编辑器添加一个标题节点组件。
+  type: node-component
+  isFree: true
+  isCloud: false
+  isOpen: true
+  isNew: false
+  icon: HeadingIcon
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个用于在编辑器中显示格式化标题的样式化标题节点。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-node/heading-node" />
+
+## 安装
+
+你可以通过 Tiptap CLI 添加该节点组件
+
+```bash
+npx @tiptap/cli@latest add heading-node
+```
+
+## 使用方法
+
+HeadingNode 主要是一个样式组件，用以增强编辑器中标题的外观。使用时，只需将其包含在项目中，并确保你正在使用 Tiptap 的 Heading 扩展。
+
+```tsx
+import { useEditor, EditorContent } from '@tiptap/react'
+import { StarterKit } from '@tiptap/starter-kit'
+
+import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
+import '@/components/tiptap-node/heading-node/heading-node.scss'
+
+export default function EditorWithHeading() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit],
+    content: `
+      <h1>Heading 1</h1>
+      <h2>Subheading 1</h2>
+      <h3>Subheading 2</h3>
+      <h4>Subheading 3</h4>
+      <h5>Subheading 4</h5>
+      <h6>Subheading 5</h6>
+    `,
+  })
+
+  return <EditorContent editor={editor} />
+}
+```
+
+## 功能
+
+- 具有语法高亮样式的标题  
+- 支持暗黑模式  
+- 合理的间距和边距  
+- 使用等宽字体提升可读性

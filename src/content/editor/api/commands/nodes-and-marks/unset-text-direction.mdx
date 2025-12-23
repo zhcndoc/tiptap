@@ -1,0 +1,37 @@
+---
+title: unsetTextDirection 命令
+meta:
+  title: unsetTextDirection 命令 | Tiptap 编辑器文档
+  description: 使用 unsetTextDirection 命令从节点中移除文本方向属性。更多内容请参见文档！
+  category: 编辑器
+---
+
+`unsetTextDirection` 命令会从当前选区或指定位置的节点中移除文本方向属性。这样节点就会继承编辑器全局的 `textDirection` 设置，或者完全没有方向属性。
+
+另请参阅：[setTextDirection](/editor/api/commands/nodes-and-marks/set-text-direction)
+
+## 参数
+
+### position
+
+可选。移除方向属性的位置或范围。如果未提供，命令将使用当前选区。
+
+可以是：
+- 表示具体位置的数字
+- 具有 `from` 和 `to` 属性表示范围的对象
+
+## 示例
+
+```js
+// 从当前选区移除方向属性
+editor.commands.unsetTextDirection()
+
+// 从指定位置移除方向属性
+editor.commands.unsetTextDirection(5)
+
+// 从指定范围移除方向属性
+editor.commands.unsetTextDirection({ from: 0, to: 10 })
+
+// 与其他命令链式调用
+editor.chain().focus().unsetTextDirection().run()
+```

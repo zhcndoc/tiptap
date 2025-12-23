@@ -1,0 +1,51 @@
+---
+title: Tiptap 的 Markdown 词汇表
+tags:
+  - type: beta
+meta:
+  title: Markdown 词汇表 | Tiptap 编辑器文档
+  description: 为 Tiptap 用户提供的 Markdown 术语和概念的全面词汇表。
+  category: Editor
+---
+
+在我们深入细节之前，先介绍一些我们在本指南中会使用的关键术语：
+
+## 令牌 (Token)
+
+一个普通的 JavaScript 对象，表示已解析 Markdown 的一部分。例如，一个标题令牌可能是 `{ type: "heading", depth: 2, text: "Hello" }`。令牌是描述文档结构的“乐高积木”。
+
+- 令牌是由 [MarkedJS](https://marked.js.org) 解析器生成的 Markdown 语法部分的结构化表示。
+- 每个令牌都有一个 `type`（例如 `heading`、`paragraph`、`list` 等）。
+- 每个令牌可能包括与该类型相关的附加属性（如标题的 `depth`，列表的 `ordered` 等）。
+- 令牌还可以在诸如 `tokens` 或 `items` 的属性中包含嵌套令牌，以表示 Markdown 内容的层级结构。
+- 令牌不能被 Tiptap 直接使用；它需要转换为 Tiptap 的 JSON 格式。
+- 令牌是通过 [Tokenizer](#tokenizer) 创建的。
+- 我们可以通过实现 [自定义分词器 (Custom Tokenizer)](./advanced-usage/custom-tokenizer) 来创建自己的令牌。
+
+> **注意**：MarkedJS 内置了标准 Markdown 语法的分词器，但你可以通过向 MarkdownManager 提供自定义分词器来扩展或替换它们。
+>
+> 你可以在 [MarkedJS 类型声明](https://github.com/markedjs/marked/blob/master/src/Tokens.ts) 中找到默认令牌列表。
+
+## Tiptap JSON
+
+- 与 Markdown 无关，是 Tiptap 和 ProseMirror 用来表示文档结构的 JSON 格式。
+- Tiptap JSON 由节点和标记组成，每个都有一个 `type`，可选的 `attrs`，以及可选的 `content` 或 `text`。
+- 节点代表块级元素（如段落、标题、列表），而标记代表内联格式（如加粗、斜体、链接）。
+- Tiptap JSON 是层级结构，节点包含其他节点或文本，反映文档的结构。
+- 我们可以使用 **令牌** 来创建编辑器能够理解的 **Tiptap JSON**。
+
+理解了令牌与 Tiptap JSON 的区别后，让我们深入了解如何解析令牌和序列化 Tiptap 内容。
+
+## 分词器 (Tokenizer)
+
+一组函数（或规则），扫描原始 Markdown 文本，并决定如何将文本块转换成令牌。例如，它识别 `## Heading` 并生成一个 `heading` 令牌。你可以自定义或重写分词器以改变 Markdown 的解析方式。
+
+如何创建自定义分词器，请参见[自定义分词器](./advanced-usage/custom-tokenizer) 指南。
+
+## 词法分析器 (Lexer)
+
+负责遍历整个 Markdown 字符串，按顺序应用 [分词器](#tokenizer)，并生成完整的令牌列表。可以把它想象成一个机器，不断将文本输入分词器，直到整个输入被分词完成。
+
+你无需直接操作词法分析器，因为 Tiptap 会自动创建一个词法分析器实例，并在编辑器生命周期内重复使用它，作为 MarkedJS 实例的一部分。
+
+该词法分析器实例会自动注册你所有扩展中的 [分词器](#tokenizer)。

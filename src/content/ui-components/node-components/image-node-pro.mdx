@@ -1,0 +1,135 @@
+---
+title: Image Node Pro
+meta:
+  title: Image Node Pro | Tiptap UI 组件
+  description: 在 Tiptap 编辑器中添加图片，支持对齐控制、下载功能及浮动工具栏管理。
+  category: UI 组件
+component:
+  name: Image Node Pro
+  description: 一个用于 Tiptap 编辑器的增强图片节点组件，带有浮动工具栏、对齐控制和高级管理功能。
+  type: node-component
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: ImageIcon
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个用于 Tiptap 编辑器的增强图片节点组件。具有浮动工具栏控制、图片对齐选项、下载功能，以及支持响应式样式和无障碍功能的高级管理能力。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-node/image-node-pro" />
+
+## 安装
+
+通过 Tiptap CLI 添加该组件：
+
+```bash
+npx @tiptap/cli@latest add image-node-pro
+```
+
+## 组件
+
+### `<ImageNode />`
+
+一个增强型图片节点组件，带浮动工具栏、对齐控制及高级管理功能。
+
+#### 使用示例
+
+```tsx
+import { useEditor, EditorContent } from '@tiptap/react'
+import { StarterKit } from '@tiptap/starter-kit'
+import { Image } from '@/components/tiptap-node/image-node/image-node-extension'
+
+export default function ImageEditor() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit,
+      Image.configure({
+        HTMLAttributes: {
+          class: 'custom-image-class',
+        },
+      }),
+    ],
+    content: '<img src="/images/example.png" alt="Image" data-align="center" />',
+  })
+
+  return <EditorContent editor={editor} />
+}
+```
+
+#### 特性
+
+- 带对齐控制的浮动工具栏
+- 图片下载功能
+- 删除节点按钮
+- 对齐选项（左、中、右）
+- 支持自定义 HTML 属性
+- 增强的无障碍支持
+- 响应式图片尺寸
+- 选区高亮显示
+
+## 扩展
+
+### `Image`（增强版）
+
+Tiptap 图片扩展的增强版本，增加了对齐支持及浮动工具栏集成。
+
+#### 使用示例
+
+```tsx
+import { Image } from '@/components/tiptap-node/image-node/image-node-extension'
+
+const editor = useEditor({
+  extensions: [StarterKit, Image],
+})
+```
+
+## 浮动工具栏组件
+
+图片节点包含多个浮动工具栏组件，选中图片时会显示：
+
+### `<DeleteNodeButton />`
+
+从编辑器中移除选中的图片节点。
+
+### `<ImageDownloadButton />`
+
+将图片下载到用户设备。
+
+### `<ImageAlignButton />`
+
+控制图片对齐，支持左对齐、居中、右对齐选项。
+
+## 工作原理
+
+图片节点系统通过多个集成层次实现：
+
+1. **增强显示**：扩展了基础的 Tiptap 图片扩展，增加样式和响应式行为
+2. **浮动工具栏**：提供上下文控制，图片选中时出现
+3. **对齐系统**：管理图片的左、中、右对齐
+4. **节点管理**：通过工具栏操作处理图片删除和下载功能
+5. **状态集成**：与 Tiptap 节点系统和命令架构无缝集成
+
+浮动工具栏在选中图片时自动出现，快速访问对齐控制、下载功能及删除节点操作。
+
+## 需求
+
+### 依赖
+
+- `@tiptap/extension-image` - 核心图片扩展
+- `@tiptap/react` - React 集成
+- `sass` / `sass-embedded` - 用于 SCSS 编译
+
+### 相关组件
+
+- `use-tiptap-editor`（hook）
+- `tiptap-utils`（库）
+- `delete-node-button`（组件）
+- `image-download-button`（组件）
+- `image-align-button`（组件）
+- `separator`（基础组件）

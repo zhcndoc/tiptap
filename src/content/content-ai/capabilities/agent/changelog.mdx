@@ -1,0 +1,71 @@
+---
+title: 更新日志
+meta:
+  title: 更新日志 | Tiptap AI 代理扩展
+  description: AI 代理扩展的更新日志
+  category: 内容 AI
+---
+
+## 3.0.0-beta.40
+
+### 修补更新
+
+- 修复不支持的导入路径问题
+
+## 3.0.0-beta.39
+
+### 修补更新
+
+- 为 `AiAgentStorage` 添加 TypeScript 模块声明以提升类型安全
+
+## 3.0.0-beta.38
+
+### 修补更新
+
+- 修复在使用 AI Changes 扩展的 AI 代理时，`rejectToolCall` 未能撤销所有更改的错误
+- 修复在使用 AI Suggestion 扩展的 AI 代理时，`acceptToolCall` 未能应用所有更改的错误
+
+## 3.0.0-beta.37
+
+### 次要更新
+
+- 将默认模型设置为 `gpt-5`
+
+## 3.0.0-beta.36
+
+### 修补更新
+
+- 修复 AI 代理扩展忽略 `systemPrompt` 选项的错误
+
+## 3.0.0-beta.35
+
+### 次要更新
+
+- 在 `AiAgentModelName` 类型中添加对 GPT-5 模型的支持
+  - 新增模型：`gpt-5`、`gpt-5-mini`、`gpt-5-nano`、`gpt-5-chat`
+  - 新增带时间戳版本：`gpt-5-2025-08-07`、`gpt-5-mini-2025-08-07`、`gpt-5-nano-2025-08-07`、`gpt-5-chat-2025-08-07`
+
+## 3.0.0-beta.34
+
+### 修补更新
+
+- 使用不固定版本的 Tiptap 依赖，避免与 Tiptap 3.x.x 的 peer 依赖冲突
+
+## 3.0.0-beta.33
+
+### 重大更新
+
+- `AiAgentProvider` 的 `useAiChangesExtension` 选项已重命名为 `reviewOptions.extension`
+- `AiAgentProvider` 的 `autoAccept` 选项已重命名为 `reviewOptions.autoAccept`
+- 需要 `@tiptap-pro/extension-ai-suggestion` 版本 `3.0.0-beta.33` 或更高版本
+
+### 次要更新
+
+- 在将更改插入文档之前，使用 AI Suggestion 扩展对更改进行审查
+
+## 3.0.0-beta.32
+
+### 重大更新
+
+- 发布适用于 Tiptap 3 的 AI 代理扩展（beta）
+- 本地部署客户：请升级 AI 服务器至版本 2.9.0 或更高版本

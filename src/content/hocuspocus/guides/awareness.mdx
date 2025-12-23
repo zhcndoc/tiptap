@@ -1,0 +1,67 @@
+---
+title: Awareness（意识）
+meta:
+    title: Awareness | Hocuspocus 文档
+    category: Hocuspocus
+---
+
+## 介绍
+
+通过意识（awareness），可以共享所有当前用户的信息。意识允许你同步姓名、光标位置，甚至是复杂 3D 世界中的坐标。它底层有自己的 CRDT，但不保留更新历史。你可以在 [Yjs 文档关于 awareness](https://docs.yjs.dev/getting-started/adding-awareness) 中了解更多。
+
+## 设置你的状态
+传入一个键和值来设置当前用户的意识信息，你可以自由传递任何想要与其他用户共享的数据。下面是一个示例，在 `user` 键下设置名字和十六进制颜色：
+
+你还可以在 [我们关于 provider 的事件部分](/hocuspocus/provider/events) 中了解到相关事件：`awarenessUpdate` 和 `awarenessChange`。
+
+## 设置你的状态
+
+```js
+// 为当前用户设置意识字段
+provider.setAwarenessField("user", {
+  name: "Kevin Jahns",
+  color: "#ffcc00",
+});
+```
+
+## 监听变化
+
+注册一个事件监听器，接收并响应所有已连接用户的任何意识状态变化，不仅仅是你自己的：
+
+```js
+// 监听所有用户状态的更新
+provider.on("awarenessUpdate", ({ states }) => {
+  console.log(states);
+});
+```
+
+## 使用示例
+
+哇，如此多的小代码片段。这里有一个在你的应用中完整可运行的示例：
+
+```js
+import * as Y from 'yjs'
+import { HocuspocusProvider } from '@hocuspocus/provider'
+
+// 设置 provider
+provider = new HocuspocusProvider({
+  url: "ws://127.0.0.1:1234",
+  name: "awareness-example",
+  document: new Y.Doc(),
+  // 监听更新...
+  onAwarenessUpdate: ({ states }) => {
+    console.log(states);
+  },
+});
+
+// 例如，监听鼠标移动
+document.addEventListener("mousemove", (event) => {
+  // 分享任何你想分享的信息
+  provider.setAwarenessField("user", {
+    name: "Kevin Jahns",
+    color: "#ffcc00",
+    mouseX: event.clientX,
+    mouseY: event.clientY,
+  });
+});
+```

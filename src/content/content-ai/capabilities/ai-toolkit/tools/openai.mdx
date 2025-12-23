@@ -1,0 +1,103 @@
+---
+title: OpenAI - AI 代理工具
+meta:
+  title: OpenAI - AI 代理工具 | Tiptap 内容 AI
+  description: 使用 OpenAI 的工具定义，让 AI 代理读取和编辑 Tiptap 文档。
+  category: 内容 AI
+---
+
+`@tiptap-pro/ai-toolkit-openai` 包提供了可以添加到你基于 [OpenAI 的 JavaScript SDK](https://github.com/openai/openai-node) 构建的 AI 代理中的工具定义。
+
+模型生成的工具调用随后可以在客户端使用 [`executeTool` 方法](/content-ai/capabilities/ai-toolkit/primitives/execute-tool) 执行。
+
+## 示例用法
+
+安装该包。
+
+```bash
+npm install @tiptap-pro/ai-toolkit-openai
+```
+
+将工具定义提供给你的 OpenAI 模型。
+
+```ts
+import OpenAI from 'openai'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-openai'
+
+const openai = new OpenAI()
+
+const response = await openai.responses.create({
+  model: 'gpt-5',
+  input: [{ role: 'user', content: '帮我编辑这份文档' }],
+  tools: toolDefinitions(),
+})
+```
+
+将工具定义与你的自定义工具结合使用。
+
+```ts
+import OpenAI from 'openai'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-openai'
+
+const openai = new OpenAI()
+
+const customTools = [
+  {
+    type: 'function',
+    name: 'get_weather',
+    description: '获取某地的天气',
+    parameters: {
+      type: 'object',
+      properties: {
+        location: {
+          type: 'string',
+          description: '城市和州，例如 San Francisco, CA',
+        },
+      },
+      required: ['location'],
+    },
+  },
+]
+
+const response = await openai.responses.create({
+  model: 'gpt-5',
+  input: [{ role: 'user', content: '天气如何，同时帮我编辑这份文档' }],
+  tools: [...toolDefinitions(), ...customTools],
+})
+```
+
+## API 参考
+
+### `toolDefinitions`
+
+为 Tiptap AI 工具包创建兼容 [OpenAI 的 responses API](https://platform.openai.com/docs/api-reference/responses) 的工具定义。
+
+#### 参数 (`ToolDefinitionsOptions`)
+
+- `tools?`: `EnabledTools` - 通过将值设置为 `true`（启用）或 `false`（禁用）来启用/禁用特定工具。
+  - `tiptapRead?`: `boolean` - 启用/禁用 `tiptapRead` 工具（默认: `true`）
+  - `tiptapEdit?`: `boolean` - 启用/禁用 `tiptapEdit` 工具（默认: `true`）
+  - `tiptapReadSelection?`: `boolean` - 启用/禁用 `tiptapReadSelection` 工具（默认: `true`）
+  - `getThreads?`: `boolean` - 启用/禁用 `getThreads` 工具（默认: `false`）
+  - `editThreads?`: `boolean` - 启用/禁用 `editThreads` 工具（默认: `false`）
+
+#### 返回值
+
+包含启用的工具定义的数组，可用于 [OpenAI 的 responses API](https://platform.openai.com/docs/api-reference/responses)。完整工具列表请参见 [可用工具](/content-ai/capabilities/ai-toolkit/tools/available-tools) 页面。
+
+### `completionsApiToolDefinitions`
+
+为 Tiptap AI 工具包创建兼容 [OpenAI 的 completions API](https://platform.openai.com/docs/api-reference/completions) 的工具定义。
+
+#### 参数 (`ToolDefinitionsOptions`)
+
+- `tools?`: `EnabledTools` - 通过将值设置为 `true`（启用）或 `false`（禁用）来启用/禁用特定工具。
+  - `tiptapRead?`: `boolean` - 启用/禁用 `tiptapRead` 工具（默认: `true`）
+  - `tiptapEdit?`: `boolean` - 启用/禁用 `tiptapEdit` 工具（默认: `true`）
+  - `tiptapReadSelection?`: `boolean` - 启用/禁用 `tiptapReadSelection` 工具（默认: `true`）
+  - `getThreads?`: `boolean` - 启用/禁用 `getThreads` 工具（默认: `false`）
+  - `editThreads?`: `boolean` - 启用/禁用 `editThreads` 工具（默认: `false`）
+
+#### 返回值
+
+包含启用的工具定义的数组，可用于 [OpenAI 的 completions API](https://platform.openai.com/docs/api-reference/completions)。完整工具列表请参见 [可用工具](/content-ai/capabilities/ai-toolkit/tools/available-tools) 页面。

@@ -79,6 +79,11 @@ const { chatMessages, schemaAwarenessData } = request
 
 然后，在你的 API 端点中，创建一个 `AiAgentToolkit` 实例。它允许你配置 AI 模型可用的工具。
 
+<Callout title="Use with Vercel AI SDK v4" variant="info">
+  To use the Vercel AI SDK v4 instead of v5, import the `vercelAiSdkV4Adapter` instead of
+  `vercelAiSdkAdapter`.
+</Callout>
+
 ```ts
 import { AiAgentToolkit, vercelAiSdkAdapter } from '@tiptap-pro/extension-ai-agent-server'
 

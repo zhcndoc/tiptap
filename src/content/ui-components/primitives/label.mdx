@@ -1,0 +1,68 @@
+---
+title: 集成 Label UI 组件
+meta:
+  title: Label | Tiptap UI 组件
+  description: 集成用于表单和 UI 元素的语义化标签组件。支持 label 和 div 元素，样式一致。详情请查阅文档。
+  category: UI 组件
+component:
+  name: Label
+  description: 一个语义化的标签组件，可以渲染为 label 或 div 元素，具备一致的排版和交互处理。
+  type: primitive
+  isFree: true
+  isCloud: false
+  isOpen: true
+  isNew: false
+  icon: TagIcon
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个灵活的标签组件，为表单标签和 UI 元素标签提供一致的排版，并具有智能交互处理，防止不必要的文本选中。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui-primitive/label" />
+
+## 安装
+
+您可以通过 Tiptap CLI 添加该基础组件
+
+```bash
+npx @tiptap/cli@latest add label
+```
+
+## 用法
+
+```tsx
+import { Label } from '@/components/tiptap-ui-primitive/label'
+
+export default function MyComponent() {
+  return (
+    <div>
+      {/* 基础 Label，默认渲染为 div */}
+      <Label>部分标题</Label>
+
+      {/* 作为 HTML label 元素的 Label */}
+      <Label as="label" htmlFor="email">
+        电子邮箱地址
+      </Label>
+
+      {/* 带自定义样式的 Label */}
+      <Label className="text-blue-600">自定义样式标签</Label>
+
+      {/* 带点击事件的 Label */}
+      <Label as="label" htmlFor="terms" onClick={() => console.log('标签被点击')}>
+        条款和条件
+      </Label>
+    </div>
+  )
+}
+```
+
+## 属性
+
+### Label
+
+一个灵活的标签组件，可以渲染为 `label` 或 `div` 元素。
+
+| 名称 | 类型                 | 默认值  | 说明                       |
+| ---- | -------------------- | ------- | -------------------------- |
+| as   | `"label" \| "div"`   | `"div"` | 渲染的 HTML 元素           |

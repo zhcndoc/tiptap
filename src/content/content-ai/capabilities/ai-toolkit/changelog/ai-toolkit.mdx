@@ -1,0 +1,389 @@
+---
+title: AI 工具包更新日志
+meta:
+  title: AI 工具包更新日志 | Tiptap AI 工具包
+  description: @tiptap-pro/ai-toolkit 包的更新日志
+  category: 内容 AI
+---
+
+# @tiptap-pro/ai-toolkit
+
+## 3.0.0-alpha.47
+
+### 重大更新
+
+- 添加了 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，并设为默认工具。移除了 `readNodeRange`、`readSelection`、`insertContent` 和 `applyPatch` 工具。
+
+## 3.0.0-alpha.46
+
+### 小幅更新
+
+- 新增实验性且需选择加入的 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，使编辑更快更高效。
+
+## 3.0.0-alpha.45
+
+### 小幅更新
+
+- 为 `diffUtility` 方法添加块级别差异比对选项。新的 `mode` 参数允许通过设置 `mode: 'block'` 以块（顶级节点）为单位比较文档。该模式适用于只需知道哪些段落、标题或其他块级元素发生变化，而无需字符级细节时使用。
+
+### 修复更新
+
+- 修复了 `diffUtility` 中使用 `changeMergeDistance` 时，不同顶级节点内相邻改动错误合并的问题。即使改动相距在合并阈值内，不同块的改动现在也能正确分离。
+- 修复了 `editThreads` 工具中的 bug：若文档未被读取即创建线程，会导致线程未创建。
+- 在 `startComparingDocuments` 方法中，确保待比较的另一文档与主文档具有相同的 schema。
+
+## 3.0.0-alpha.44
+
+### 小幅更新
+
+- 新增 `setMarkdownSuggestions` 方法，通过比较 Markdown 内容与当前文档显示建议。该方法类似 `setHtmlSuggestions`，但接受 Markdown 输入，需要安装配置 Tiptap Markdown 扩展。
+- 新增 `getMarkdownRange` 方法，用于提取文档特定范围的 Markdown 内容。需安装配置 Tiptap Markdown 扩展。
+
+### 修复更新
+
+- 修复了 `setHtmlSuggestions` 和 `setMarkdownSuggestions` 中，使用 `changes` 格式替换文本时会误改 HTML 标签的问题。例如，将 "a" 替换为 "an" 会错误地将 `<a>` 变成 `<an>`。修复后，若删除文本不包含 HTML 标签字符(`<` 或 `>`)，替换仅发生在文本内容中，不会影响 HTML 标签。
+
+## 3.0.0-alpha.43
+
+### 修复更新
+
+- 修复协作事务应用时装饰未正确更新的错误。
+
+## 3.0.0-alpha.42
+
+### 修复更新
+
+- 修复协作事务应用时装饰未正确更新的错误。
+
+## 3.0.0-alpha.41
+
+### 重大更新
+
+- 用 `diffUtilityConfig` 选项替代了 `changeMergeDistance`，以提供更丰富的文档比较定制选项。
+
+### 小幅更新
+
+- 在 `setSuggestions` 方法的 `compareDocuments` 格式中添加 `diffUtilityConfig` 选项，可配置文档比较工具。
+- 在 `Suggestion` 类型的 `displayOptions` 中添加 `diffAttributes` 选项，允许定制差异装饰的属性。
+
+## 3.0.0-alpha.40
+
+### 修复更新
+
+- 修复文档更新后 AI 读取了错误文档内容的 bug。
+
+## 3.0.0-alpha.39
+
+### 修复更新
+
+- 修复新线程和评论未创建在正确文档位置的 bug。
+
+## 3.0.0-alpha.38
+
+### 修复更新
+
+- 修复 `applyPatch` 和 `insertContent` 工具在流式处理时未正确工作的问题。
+
+## 3.0.0-alpha.37
+
+### 重大更新
+
+- `applyPatch` 工具采用了全新格式，显著提升速度和准确性。
+- 改进了所有内置工具的输入/输出格式和工具定义。
+- 需要升级以下提供者库版本至以下指定或更高版本：
+  - `@tiptap-pro/ai-toolkit-tool-definitions@3.0.0-alpha.11`
+  - `@tiptap-pro/ai-toolkit-ai-sdk@3.0.0-alpha.14`
+  - `@tiptap-pro/ai-toolkit-anthropic@3.0.0-alpha.6`
+  - `@tiptap-pro/ai-toolkit-langchain@3.0.0-alpha.10`
+  - `@tiptap-pro/ai-toolkit-openai@3.0.0-alpha.9`
+
+## 3.0.0-alpha.36
+
+### 重大更新
+
+- 使 `insertContent` 工具内容格式独立，将 `"html"` 属性重命名为 `"content"`。
+- 需要升级以下提供者库版本至以下指定或更高版本：
+  - `@tiptap-pro/ai-toolkit-tool-definitions@3.0.0-alpha.10`
+  - `@tiptap-pro/ai-toolkit-ai-sdk@3.0.0-alpha.13`
+  - `@tiptap-pro/ai-toolkit-anthropic@3.0.0-alpha.5`
+  - `@tiptap-pro/ai-toolkit-langchain@3.0.0-alpha.9`
+  - `@tiptap-pro/ai-toolkit-openai@3.0.0-alpha.8`
+
+### 修复更新
+
+- 修复 `insertContent` 工具中 `activeNodeRange` 位置值无效的 bug。
+- 修复 `insertContent` 工具导致 `activeNodeRange` 总是重置为 0 的问题。
+- 修正 `setHtmlSuggestions` 边界错误和格式丢失。文档边界现使用 `content.size` 而非 `nodeSize - 1`。应用建议时保留了 HTML 格式（加粗、斜体、链接等）。
+
+## 3.0.0-alpha.35
+
+### 修复更新
+
+- 修复 `streamText` 和 `streamHtml` 方法中不必要地将 ReadableStream 转换为 AsyncIterable 导致速度变慢的问题。
+
+## 3.0.0-alpha.34
+
+### 小幅更新
+
+- 为 `diffUtility`、`startComparingDocuments`、`setSuggestions`（`compareDocuments` 格式）、`setHtmlSuggestions` 及所有编辑方法的 `reviewOptions` 添加 `changeMergeDistance` 参数。此参数允许合并相近改动，通过指定改动之间最大文档位置距离将其合并为单一改动。
+- 为 `setHtmlSuggestions` 方法新增 `reviewOptions` 参数。用户可定制建议显示选项（如 `diffPosition`、`showAsDiff`、自定义 `renderDecorations`）和添加自定义元数据，遵循其他编辑方法的相同模式。
+- 修正 `setHtmlSuggestions` 中范围偏移计算。无 `range` 参数时，建议准确高亮文本，修复了位置错误偏移 -1 的 bug。
+- 修正 `setHtmlSuggestions` 默认 `diffPosition` 为 'after' 而非 'before'，并支持通过 `reviewOptions.displayOptions.diffPosition` 配置。
+
+## 3.0.0-alpha.33
+
+### 小幅更新
+
+- 新增 `getSelectedSuggestion` 方法，用于获取当前选中的建议。
+
+## 3.0.0-alpha.32
+
+### 小幅更新
+
+- 新增 `setActiveSelection` 方法，用于设置活动选择区域。设置后该范围会覆盖工具中如 `readSelection` 对编辑器当前选择的读取。
+
+## 3.0.0-alpha.31
+
+### 小幅更新
+
+- 在 `executeTool` 和 `streamTool` 方法添加 `commentsOptions` 属性，允许传递自定义数据给线程和评论操作。`data` 属性用于线程数据（`editor.commands.setThread`），`commentData` 用于评论数据（`editor.commands.createComment` 和 `editor.commands.setThread`）。
+
+## 3.0.0-alpha.30
+
+### 修复更新
+
+- 修复节点属性变化未正确检测的 bug。
+- 比较文档时忽略 Unique ID 扩展所做的更改。
+- 比较文档时忽略 Comments 扩展所做的更改。
+
+## 3.0.0-alpha.29
+
+### 小幅更新
+
+- 新增 `setHtmlSuggestions` 方法，通过比较 HTML 内容与当前文档显示建议。
+
+## 3.0.0-alpha.28
+
+### 修复更新
+
+- 修复库代码中错误导入导致打包失败的问题。
+
+## 3.0.0-alpha.27
+
+### 修复更新
+
+- 修复 `createThread` 操作中线程有时创建在错误位置的问题。
+- 优化当 `createThread` 操作失败时 AI 接收的错误信息。
+
+## 3.0.0-alpha.26
+
+### 重大更新
+
+- 新增基于 AI 的评论和线程管理工具 `editThreads` 和 `getThreads`
+- 需要升级以下提供者库版本至以下指定或更高版本：
+  - `@tiptap-pro/ai-toolkit-tool-definitions@3.0.0-alpha.9`
+  - `@tiptap-pro/ai-toolkit-ai-sdk@3.0.0-alpha.12`
+  - `@tiptap-pro/ai-toolkit-anthropic@3.0.0-alpha.4`
+  - `@tiptap-pro/ai-toolkit-langchain@3.0.0-alpha.8`
+  - `@tiptap-pro/ai-toolkit-openai@3.0.0-alpha.7`
+
+## 3.0.0-alpha.25
+
+### 修复更新
+
+- 修复因流式处理导致最后操作未正确解析的 `applyPatch` 工具回退问题，防止文本在流式过程中逐渐消失。
+
+## 3.0.0-alpha.24
+
+### 重大更新
+
+- 将 `applyDiff` 工具重命名为 `applyPatch`
+- 将 `applyHtmlDiff` 方法重命名为 `applyHtmlPatch`
+- 改进 `applyDiff`（现名 `applyPatch`）工具的格式和工具定义，使 AI 生成补丁操作列表，提升准确度（避免不必要跳转）并显著降低 token 使用
+- 需升级以下提供者库版本至以下指定或更高版本：
+  - `@tiptap-pro/ai-toolkit-tool-definitions@3.0.0-alpha.8`
+  - `@tiptap-pro/ai-toolkit-ai-sdk@3.0.0-alpha.11`
+  - `@tiptap-pro/ai-toolkit-langchain@3.0.0-alpha.7`
+  - `@tiptap-pro/ai-toolkit-openai@3.0.0-alpha.6`
+  - `@tiptap-pro/ai-toolkit-anthropic@3.0.0-alpha.3`
+
+## 3.0.0-alpha.23
+
+### 小幅更新
+
+- 在 `insertContent` 工具中添加 `activeNodeRange` 位置，允许 AI 在活动节点范围插入内容。当禁用 `applyDiff` 工具时可提高编辑准确性。
+- 需升级以下提供者库版本至以下指定或更高版本：
+  - `@tiptap-pro/ai-toolkit-tool-definitions@3.0.0-alpha.7`
+  - `@tiptap-pro/ai-toolkit-ai-sdk@3.0.0-alpha.10`
+  - `@tiptap-pro/ai-toolkit-langchain@3.0.0-alpha.6`
+  - `@tiptap-pro/ai-toolkit-openai@3.0.0-alpha.5`
+  - `@tiptap-pro/ai-toolkit-anthropic@3.0.0-alpha.2`
+
+## 3.0.0-alpha.22
+
+### 小幅更新
+
+- 为扩展配置新增 `addHtmlSchemaAwareness` 方法，用于提供自定义 Node 或 Mark 扩展的 schema 识别数据。
+
+## 3.0.0-alpha.21
+
+### 修复更新
+
+- 修复流式期间显示详细差异导致差异持续更新的问题。现在仅在流结束时显示详细差异。
+- 修复流式内容开头插入多余段落的问题。
+
+## 3.0.0-alpha.20
+
+### 重大更新
+
+- 将 `getSchemaAwareness` 方法重命名为 `getHtmlSchemaAwareness`
+- 改进 schema 识别方法生成的提示语，使 AI 模型更准确
+
+## 3.0.0-alpha.19
+
+### 小幅更新
+
+- 实验性实现 AI 工具包与 Pages 扩展集成，引入 `readPage` 工具。
+
+## 3.0.0-alpha.18
+
+### 修复更新
+
+- 使 `streamHtml` 和 `streamText` 方法返回一个在流结束时 resolve 的 Promise。
+
+## 3.0.0-alpha.17
+
+### 重大更新
+
+- 改进 `readSelection` 和 `insertContent` 工具定义，修复用户修改选区后 AI 错误插入内容位置的 bug。
+
+### 修复更新
+
+- 修复 `streamHtml` 和 `streamText` 方法不接受 `ReadableStream` 作为参数的问题。
+
+## 3.0.0-alpha.16
+
+### 重大更新
+
+- 在审核选项中将 `detailedDiff` 重命名为 `diffMode`，用于控制原内容与修改内容差异的显示方式。
+
+## 3.0.0-alpha.15
+
+### 重大更新
+
+- 在审核选项中新加 `detailedDiff` 选项，控制是否以详细差异形式显示更改。将原 `showDiff` 选项更名为 `detailedDiff`，以更明确表达含义。
+- 在工具执行和流处理选项中新增 `detailedDiff`，默认值为 `true`，使更改默认以详细差异显示。
+
+## 3.0.0-alpha.14
+
+### 重大更新
+
+- 需升级以下提供者库版本至以下指定或更高版本：
+  - `@tiptap-pro/ai-toolkit-tool-definitions@3.0.0-alpha.4`
+  - `@tiptap-pro/ai-toolkit-ai-sdk@3.0.0-alpha.7`
+  - `@tiptap-pro/ai-toolkit-langchain@3.0.0-alpha.3`
+  - `@tiptap-pro/ai-toolkit-openai@3.0.0-alpha.2`
+- 移除 `executeTool` 方法的 `currentChunk` 参数和返回值
+  - `executeTool` 不再接受 `currentChunk` 参数
+  - `executeTool` 返回值中不再包含 `currentChunk` 字段
+- 新增 `getActiveNodeRange` 方法，用于获取活动节点范围。活动节点范围指下次调用工具时可编辑的顶级节点范围，帮助 AI 更精准地编辑文档，替代了 `currentChunk` 参数。
+- 新增 `setActiveNodeRange` 方法，用于设置活动节点范围。
+- 移除 `readFirstChunk`、`readNextChunk` 和 `readPreviousChunk` 工具。
+- 新增 `readNodeRange` 工具，允许 AI 读取文档中任意范围的顶级节点，灵活性远高于之前的分块读取工具。
+
+### 小幅更新
+
+- 新增 `streamTool` 方法，用于向编辑器流式输入工具调用结果。
+
+## 3.0.0-alpha.13
+
+### 小幅更新
+
+- 在审核选项中新增 `metadata` 选项，允许向审核模式下生成的建议添加自定义元数据和属性。
+- 新增 `streamText` 和 `streamHtml` 方法，用于向编辑器流式输入文本和 HTML 内容。
+
+### 修复更新
+
+- 修复 `insertJson` 不支持 ProseMirror Fragment Tiptap JSON 的问题。
+- 修复建议差异视图中显示了多余元素（如段落）的问题。
+
+## 3.0.0-alpha.12
+
+### 修复更新
+
+- 当调用 `getAiToolkit` 但编辑器未安装 AiToolkit 扩展时，显示警告。
+- 修复 `getJsonChunks` 未正确返回 JSON 块格式的问题。
+- 改进 `readFirstChunk` 工具的响应格式。
+
+## 3.0.0-alpha.11
+
+### 修复更新
+
+- 修复 `diffUtility` 将完全相同的空文档误判为不同的问题。
+
+## 3.0.0-alpha.10
+
+### 重大更新
+
+- 新增 `replaceDocumentWhereChanged` 方法，用高效方式替换整个文档，凡只替换发生改变的部分，避免标注全部内容为替换。
+- 重新实现 `applyHtmlDiff` 和 `rejectAllChanges` 方法，内部基于 `replaceDocumentWhereChanged`。
+
+## 3.0.0-alpha.9
+
+### 重大更新
+
+- 新增 `rejectAllChanges` 方法，用于实时文档比较时拒绝所有更改。
+
+## 3.0.0-alpha.8
+
+### 重大更新
+
+- 新增 `acceptChange` 和 `rejectChange` 方法，用于实时文档比较时接受或拒绝更改。
+- 移除 `applySuggestionToOtherDoc` 方法，因其功能等同于 `acceptChange`，但命名更易引发混淆。
+
+## 3.0.0-alpha.7
+
+### 重大更新
+
+- 优化分块格式：包含了文档中分块的范围信息。
+- 提升 `getHtmlRange`、`getJsonRange` 和 `getTextRange` 方法返回分块索引的准确性。
+
+## 3.0.0-alpha.6
+
+### 修复更新
+
+- 修复错误导入问题。
+
+## 3.0.0-alpha.5
+
+### 小幅更新
+
+- 新增 `applySuggestionToOtherDoc` 方法，用于在实时比较文档时将建议应用到另一文档。
+- 启动时首次调用 `startComparingDocuments` 忽略防抖超时，使建议立即显示以提升响应感。
+
+## 3.0.0-alpha.4
+
+### 重大更新
+
+- 移除 `executeTool` 返回类型中的 `needsReview` 选项，改用 `docChanged`。
+- 当工具修改了文档时，`docChanged` 选项现在为 `true`。
+
+## 3.0.0-alpha.3
+
+### 小幅更新
+
+- 在 `executeTool` 返回类型新增 `needsReview` 选项，用于指示工具调用是否需要用户审核。
+- 新增 `applyAllSuggestions` 方法，一次性应用所有建议。
+- 改进工具调用失败时的错误提示信息。
+
+## 3.1.0-alpha.2
+
+### 修复更新
+
+- 修正 `executeTool` 方法参数中 `input` 类型，使其兼容 Vercel 的 AI SDK。
+
+## 3.1.0-alpha.1
+
+### 重大更新
+
+- AI 工具包初始 alpha 版本发布。

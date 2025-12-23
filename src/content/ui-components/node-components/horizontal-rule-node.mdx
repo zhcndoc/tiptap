@@ -1,0 +1,64 @@
+---
+title: 水平分隔线节点
+meta:
+  title: 水平分隔线节点 | Tiptap UI 组件
+  description: 在您的 Tiptap 编辑器中集成显示水平分隔线的节点组件。更多内容请参见我们的文档！
+  category: UI 组件
+component:
+  name: 水平分隔线 UI 节点
+  description: 向您的编辑器添加一个水平分隔线节点组件。
+  type: node-component
+  isFree: true
+  isCloud: false
+  isOpen: true
+  isNew: false
+  icon: DivideIcon
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个用于在编辑器中显示格式化水平分隔线的样式化水平分隔线节点。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-node/horizontal-rule-node" />
+
+## 安装
+
+您可以通过 Tiptap CLI 添加该节点组件
+
+```bash
+npx @tiptap/cli@latest add horizontal-rule-node
+```
+
+## 使用
+
+HorizontalRuleNode 主要是一个样式组件，用于增强编辑器中水平分隔线的外观。使用时，只需将其包含在您的项目中，并确保您在使用 Tiptap 的 HorizontalRule 扩展。
+
+```tsx
+import { useEditor, EditorContent } from '@tiptap/react'
+import { StarterKit } from '@tiptap/starter-kit'
+import HorizontalRule from '@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension'
+
+import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
+import '@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss'
+
+export default function EditorWithHorizontalRule() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit.configure({ horizontalRule: false }), HorizontalRule],
+    content: `
+      <p>这是水平分隔线前的一段文字。</p>
+      <hr />
+      <p>这是水平分隔线后的一段文字。</p>
+    `,
+  })
+
+  return <EditorContent editor={editor} />
+}
+```
+
+## 特性
+
+- 水平分隔线的语法高亮样式
+- 暗黑模式支持
+- 合理的间距和外边距
+- 使用等宽字体提升可读性

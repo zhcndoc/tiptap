@@ -6,85 +6,193 @@ meta:
   category: UI 组件
 component:
   name: 标题下拉菜单
-  description: 从下拉菜单中选择标题级别。
+  description: 预构建的 React 组件，提供一个用于选择标题级别的下拉菜单。
   type: component
   isFree: true
   isCloud: false
   isOpen: true
   isNew: false
   icon: Heading
+tags:
+  - type: mit
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-用于从多个标题级别中选择的下拉菜单。
+用于 Tiptap 编辑器的完全可访问的标题下拉菜单。通过简洁的下拉界面和灵活的定制选项，轻松选择并应用标题级别（H1-H6）。
 
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/heading-dropdown-menu" />
 
 ## 安装
-您可以通过 Tiptap CLI (适用于 Vite 或 Next.js) 添加此组件。
+
+通过 Tiptap CLI 添加此组件：
 
 ```bash
-npx @tiptap/cli add heading-dropdown-menu
+npx @tiptap/cli@latest add heading-dropdown-menu
 ```
 
-### 手动集成
-对于 Vite 或 Next.js 以外的框架，请从 [开源代码库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/heading-dropdown-menu) 手动添加组件。
+## 组件
 
-### 导入样式
+### `<HeadingDropdownMenu />`
 
-此组件要求您导入我们添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 的样式。
+预构建的 React 组件，提供一个用于选择标题级别的下拉菜单。
 
-## 用法
+#### 用法
 
 ```tsx
-import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
-import { StarterKit } from '@tiptap/starter-kit'
-import { HeadingDropdownMenu } from '@/components/tiptap-ui/heading-dropdown-menu'
-
-import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
-
 export default function MyEditor() {
-  const editor = useEditor({
-    immediatelyRender: false,
-    extensions: [StarterKit],
-    content: `
-          <h1>标题 1</h1>
-          <p>这是一段文本。</p>
-          <h2>标题 2</h2>
-          <p>这又是一段文本。</p>
-        `,
-  })
-
   return (
-    <EditorContext.Provider value={{ editor }}>
-      <div className="tiptap-button-group" data-orientation="horizontal">
-        <HeadingDropdownMenu levels={[1, 2, 3, 4]} />
-      </div>
-
-      <EditorContent editor={editor} role="presentation" />
-    </EditorContext.Provider>
+    <HeadingDropdownMenu
+      editor={editor}
+      levels={[1, 2, 3, 4, 5, 6]}
+      hideWhenUnavailable={true}
+      portal={false}
+      onOpenChange={(isOpen) => console.log('Dropdown', isOpen ? '打开' : '关闭')}
+    />
   )
 }
 ```
 
-## 属性
+#### 属性
 
-| 名称                | 类型                                | 默认值            | 描述                                         |
-| ------------------- | ----------------------------------- | ------------------ | -------------------------------------------- |
-| editor              | 编辑器 \| null                      | null               | Tiptap 编辑器实例                           |
-| levels              | `Array<1 \| 2 \| 3 \| 4 \| 5 \| 6>` | [1, 2, 3, 4, 5, 6] | 要在下拉菜单中包含的标题级别               |
-| hideWhenUnavailable | boolean                             | false              | 菜单是否在浮动上下文中                     |
-| onOpenChange        | (isOpen: boolean) => void           | -                  | 下拉菜单打开状态变化时的回调               |
+| 名称                  | 类型                      | 默认值               | 描述                                           |
+| --------------------- | ------------------------- | -------------------- | -------------------------------------------- |
+| `editor`              | `Editor \| null`          | `undefined`          | Tiptap 编辑器实例                             |
+| `levels`              | `Level[]`                 | `[1,2,3,4,5,6]`      | 下拉菜单中显示的可选标题级别                  |
+| `hideWhenUnavailable` | `boolean`                 | `false`              | 当无法使用标题时隐藏下拉菜单                   |
+| `portal`              | `boolean`                 | `false`              | 是否在 Portal 中渲染下拉菜单                   |
+| `onOpenChange`        | `(boolean) => void`       | `undefined`          | 下拉菜单打开或关闭时的回调函数                 |
+
+## Hooks
+
+### `useHeadingDropdownMenu()`
+
+自定义 Hook，帮助您构建完全可控的标题下拉菜单，实现自定义渲染和行为。
+
+#### 用法
+
+```tsx
+function MyHeadingDropdown() {
+  const { isVisible, activeLevel, isActive, canToggle, levels, label, Icon } =
+    useHeadingDropdownMenu({
+      editor: myEditor,
+      levels: [1, 2, 3],
+      hideWhenUnavailable: true,
+    })
+
+  if (!isVisible) return null
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button disabled={!canToggle} aria-label={label} aria-pressed={isActive}>
+          <Icon />
+          {label}
+          <ChevronDownIcon />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {levels.map((level) => (
+          <DropdownMenuItem key={level}>
+            <HeadingButton editor={editor} level={level} text={`标题 ${level}`} />
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+```
+
+#### 属性
+
+| 名称                  | 类型                      | 默认值               | 描述                                         |
+| --------------------- | ------------------------- | -------------------- | -------------------------------------------- |
+| `editor`              | `Editor \| null`          | `undefined`          | Tiptap 编辑器实例                           |
+| `levels`              | `Level[]`                 | `[1,2,3,4,5,6]`      | 下拉菜单中显示的可选标题级别                |
+| `hideWhenUnavailable` | `boolean`                 | `false`              | 当无法应用标题格式时隐藏下拉菜单             |
+
+#### 返回值
+
+| 名称          | 类型                 | 描述                                   |
+| ------------- | -------------------- | ------------------------------------ |
+| `isVisible`   | `boolean`            | 是否应渲染下拉菜单                     |
+| `activeLevel` | `Level \| undefined` | 当前激活的标题级别（1-6）              |
+| `isActive`    | `boolean`            | 是否处于标题激活状态                   |
+| `canToggle`   | `boolean`            | 是否可以切换标题格式                   |
+| `levels`      | `Level[]`            | 可用的标题级别数组                    |
+| `label`       | `string`             | 下拉菜单的无障碍标签文本               |
+| `Icon`        | `React.FC`           | 表示当前标题状态的图标组件             |
+
+## 工具函数
+
+### `getActiveHeadingLevel(editor, levels?)`
+
+获取当前激活的标题级别（可选指定级别列表）。
+
+```tsx
+import { getActiveHeadingLevel } from '@/components/tiptap-ui/heading-dropdown-menu'
+
+const activeLevel = getActiveHeadingLevel(editor, [1, 2, 3]) // 返回激活级别或 undefined
+```
+
+### 个别标题函数
+
+标题下拉菜单使用了标题按钮组件的相关函数：
+
+#### `isHeadingActive(editor, level?)`
+
+判断指定级别标题是否激活，或者任意标题是否激活。
+
+```tsx
+import { isHeadingActive } from '@/components/tiptap-ui/heading-button'
+
+const isH1Active = isHeadingActive(editor, 1) // 检查 H1 是否激活
+const isAnyHeadingActive = isHeadingActive(editor) // 检查是否有任意标题激活
+```
+
+#### `canToggle(editor)`
+
+检查当前编辑器状态是否允许切换标题格式。
+
+```tsx
+import { canToggle } from '@/components/tiptap-ui/heading-button'
+
+const canApplyHeading = canToggle(editor)
+```
+
+## 键盘快捷键
+
+使用 `HeadingButton` 组件时，每个标题级别支持以下快捷键：
+
+- **Cmd/Ctrl + Alt + 1**：切换 H1
+- **Cmd/Ctrl + Alt + 2**：切换 H2
+- **Cmd/Ctrl + Alt + 3**：切换 H3
+- **Cmd/Ctrl + Alt + 4**：切换 H4
+- **Cmd/Ctrl + Alt + 5**：切换 H5
+- **Cmd/Ctrl + Alt + 6**：切换 H6
+
+下拉菜单本身不注册快捷键，但提供一个界面访问所有标题选项。
 
 ## 依赖
 
-使用的参考组件
+### 依赖项
 
-- `use-tiptap-editor` (hook)
-- `tiptap-utils` (lib)
-- `heading-button` (ui)
-- `button` (primitive)
-- `dropdown-menu` (primitive)
-- `chevron-down-icon` (icon)
-- `heading-icon` (icon)
+- `@tiptap/react` - 核心 Tiptap React 集成
+- `@tiptap/starter-kit` - 包含标题支持的基础 Tiptap 扩展
+
+### 引用组件
+
+- `use-tiptap-editor`（Hook）
+- `use-heading-dropdown-menu`（Hook）
+- `heading-button`（组件）
+- `button`（基础组件）
+- `dropdown-menu`（基础组件）
+- `card`（基础组件）
+- `chevron-down-icon`（图标）
+- `heading-icon`（图标）
+- `heading-one-icon`（图标）
+- `heading-two-icon`（图标）
+- `heading-three-icon`（图标）
+- `heading-four-icon`（图标）
+- `heading-five-icon`（图标）
+- `heading-six-icon`（图标）

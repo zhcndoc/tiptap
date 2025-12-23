@@ -1,0 +1,113 @@
+---
+title: Hocuspocus Provider 事件
+meta:
+  title: 事件 | Tiptap 协作文档
+  description:
+  category: Hocuspocus
+---
+
+## 介绍
+
+事件是响应不同状态的绝佳方式，例如当 provider 成功连接时。你可以选择在初始化时绑定事件监听器，也可以稍后绑定，这取决于你。
+
+## 选项 1：配置
+将事件监听器传递给构造函数，确保它们在初始化期间注册。
+
+```js
+const provider = new HocuspocusProvider({
+  url: "ws://127.0.0.1:1234",
+  name: "example-document",
+  document: ydoc,
+  onOpen() {
+    // …
+  },
+  onConnect() {
+    // …
+  },
+  onAuthenticated() {
+    // …
+  },
+  onAuthenticationFailed: ({ reason }) => {
+    // …
+  },
+  onStatus: ({ status }) => {
+    // …
+  },
+  onMessage: ({ event, message }) => {
+    // …
+  },
+  onOutgoingMessage: ({ message }) => {
+    // …
+  },
+  onSynced: ({ state }) => {
+    // …
+  },
+  onClose: ({ event }) => {
+    // …
+  },
+  onDisconnect: ({ event }) => {
+    // …
+  },
+  onDestroy() {
+    // …
+  },
+  onAwarenessUpdate: ({ added, updated, removed }) => {
+    // …
+  },
+  onAwarenessChange: ({ states }) => {
+    // …
+  },
+  onStateless: ({ payload }) => {
+    // ...
+    // provider 也可以发送自定义消息到服务器: provider.sendStateless('任意字符串负载')
+  }
+});
+```
+
+## 选项 2：绑定
+有时你想在初始化之后（即使是紧接着初始化后）注册事件监听器。这也是绑定和解绑事件监听器的好方法。
+
+### 绑定事件监听器
+
+```js
+const provider = new HocuspocusProvider({
+  // …
+});
+
+provider.on("synced", () => {
+  // …
+});
+```
+
+### 解绑事件监听器
+
+```js
+const onMessage = () => {
+  // 收到一条新消息
+};
+
+// 绑定 …
+provider.on("onMessage", onMessage);
+
+// … 然后解绑。
+provider.off("onMessage", onMessage);
+```
+
+## 事件列表
+
+| 名称                 | 说明                                                                   |
+| -------------------- | --------------------------------------------------------------------- |
+| open                 | 当 WebSocket 连接创建时。                                               |
+| connect              | 当 provider 成功连接到服务器时。                                       |
+| authenticated        | 当客户端成功认证时。                                                   |
+| authenticationFailed | 当客户端认证未成功时。                                                 |
+| status               | 当连接状态发生变化时。                                                 |
+| message              | 当收到一条消息时。                                                     |
+| outgoingMessage      | 当即将发送一条消息时。                                                 |
+| synced               | 当 Y.js 文档成功同步（初始同步）时。                                  |
+| close                | 当 WebSocket 连接关闭时。                                              |
+| disconnect           | 当 provider 断开连接时。                                               |
+| destroy              | 当 provider 将被销毁时。                                               |
+| awarenessUpdate      | 当 awareness 更新时（详情见 https://docs.yjs.dev/api/about-awareness）|
+| awarenessChange      | 当 awareness 发生改变时（详情见 https://docs.yjs.dev/api/about-awareness）|
+| stateless            | 当收到无状态消息时。                                                   |

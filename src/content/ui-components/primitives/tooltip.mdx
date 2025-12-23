@@ -13,6 +13,8 @@ component:
   isOpen: true
   isNew: false
   icon: 星号
+tags:
+  - type: mit
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
@@ -29,7 +31,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加该原始组件。
 
 ```bash
-npx @tiptap/cli add tooltip
+npx @tiptap/cli@latest add tooltip
 ```
 
 ### 手动集成
@@ -63,23 +65,23 @@ export default function MyComponent() {
 
 ### Tooltip
 
-| 名称              | 类型                    | 默认值   | 描述                                   |
-|-------------------|------------------------|----------|----------------------------------------|
-| open              | boolean                | undefined| 受控的打开状态                        |
-| onOpenChange      | (open: boolean) => void| undefined| 打开状态变化时的回调                  |
-| defaultOpen       | boolean                | false    | 默认打开状态                          |
-| delayDuration     | number                 | 300      | 提示工具出现前的延时（毫秒）           |
-| skipDelayDuration | number                 | 300      | 在不同提示工具之间移动时跳过延时      |
+| 名称              | 类型                    | 默认值    | 描述                             |
+|-------------------|------------------------|-----------|----------------------------------|
+| open              | boolean                | undefined | 受控的打开状态                   |
+| onOpenChange      | (open: boolean) => void| undefined | 打开状态变化时的回调             |
+| defaultOpen       | boolean                | false     | 默认打开状态                     |
+| delayDuration     | number                 | 300       | 提示工具出现前的延时（毫秒）      |
+| skipDelayDuration | number                 | 300       | 在不同提示工具之间移动时跳过延时  |
 
 ### TooltipTrigger
 
-| 名称    | 类型    | 默认值 | 描述                           |
-|---------|---------|-------|---------------------------------|
-| asChild | boolean | false | 是否将属性与子元素合并         |
+| 名称    | 类型    | 默认值 | 描述                      |
+|---------|---------|--------|---------------------------|
+| asChild | boolean | false  | 是否将属性与子元素合并    |
 
 ### TooltipContent
 
-| 名称  | 类型                                   | 默认值  | 描述                           |
-|-------|----------------------------------------|---------|---------------------------------|
-| side  | 'top' \| 'right' \| 'bottom' \| 'left' | 'top'   | 显示内容的首选侧面             |
-| align | 'start' \| 'center' \| 'end'           | 'center'| 边缘对齐                       |
+| 名称  | 类型                                   | 默认值    | 描述                 |
+|-------|----------------------------------------|-----------|----------------------|
+| side  | 'top' \| 'right' \| 'bottom' \| 'left' | 'top'     | 显示内容的首选侧面    |
+| align | 'start' \| 'center' \| 'end'           | 'center'  | 边缘对齐             |

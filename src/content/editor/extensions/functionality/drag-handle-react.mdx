@@ -50,16 +50,17 @@ npm install @tiptap/extension-drag-handle-react @tiptap/extension-drag-handle @t
 </DragHandle>
 ```
 
-### tippyOptions
+### computePositionConfig
 
-tippy.js 的选项。你可以传递在 [tippy.js 文档](https://atomiks.github.io/tippyjs/v6/all-props/) 中可用的任何选项。
+拖动手柄的位置计算配置，使用 floating-ui/dom 包。你可以传递在 [floating-ui 文档](https://floating-ui.com/docs/computePosition) 中可用的任何选项。
 
-默认值：`undefined`
+默认值：`{ placement: 'left-start', strategy: 'absolute' }`
 
 ```jsx
 <DragHandle
-  tippyOptions={{
+  computePositionConfig={{
     placement: 'left',
+    strategy: 'fixed',
   }}
 >
   <div>拖动我！</div>
@@ -89,6 +90,35 @@ function Component() {
 }
 ```
 
+### getReferencedVirtualElement
+
+一个返回拖动手柄虚拟元素的函数。当菜单需要相对于特定的 DOM 元素定位时，这很有用。
+
+默认值：`undefined`
+
+```jsx
+<DragHandle
+  getReferencedVirtualElement={() => {
+    // 返回一个用于自定义定位的虚拟元素
+    return null
+  }}
+>
+  <div>拖动我！</div>
+</DragHandle>
+```
+
+### locked
+
+锁定拖动手柄的位置和可见性。如果拖动手柄原本可见，则会保持可见直到解除锁定；如果原本隐藏，则保持隐藏直到解除锁定。
+
+默认值：`false`
+
+```jsx
+<DragHandle locked={true}>
+  <div>拖动我！</div>
+</DragHandle>
+```
+
 ### pluginKey
 
 在编辑器中存储插件时应使用的键。如果在同一个编辑器中有多个拖动手柄，这非常有用。
@@ -97,6 +127,34 @@ function Component() {
 
 ```jsx
 <DragHandle pluginKey="myCustomDragHandle">
+  <div>拖动我！</div>
+</DragHandle>
+```
+
+### onElementDragStart
+
+当元素开始被拖动时调用的函数。可以用于添加拖动开始时的自定义逻辑。
+
+```jsx
+<DragHandle
+  onElementDragStart={(e: DragEvent) => {
+    // 拖动开始时执行某些操作
+  }}
+>
+  <div>拖动我！</div>
+</DragHandle>
+```
+
+### onElementDragEnd
+
+当元素停止被拖动时调用的函数。可以用于添加拖动结束时的自定义逻辑。
+
+```jsx
+<DragHandle
+  onElementDragEnd={(e: DragEvent) => {
+    // 拖动结束时执行某些操作
+  }}
+>
   <div>拖动我！</div>
 </DragHandle>
 ```

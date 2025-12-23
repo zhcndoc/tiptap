@@ -1,0 +1,216 @@
+---
+title: 复制锚点链接按钮
+meta:
+  title: 复制锚点链接按钮 | Tiptap UI 组件
+  description: 在 Tiptap 编辑器中复制指向特定节点和块的锚点链接，支持键盘快捷键、URL 生成和无障碍功能。
+  category: UI 组件
+component:
+  name: 复制锚点链接按钮
+  description: 一个预构建的 React 组件，用于复制编辑器中节点的锚点链接。
+  type: component
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: LinkIcon
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个完全支持无障碍的 Tiptap 编辑器复制锚点链接按钮。支持键盘快捷键和智能节点 ID 检测，可生成并复制指向编辑器中指定节点或块的深度链接。
+
+<CodeDemo
+  isScrollable
+  src="https://template.tiptap.dev/preview/tiptap-ui/copy-anchor-link-button"
+/>
+
+## 安装
+
+通过 Tiptap CLI 添加组件：
+
+```bash
+npx @tiptap/cli@latest add copy-anchor-link-button
+```
+
+## 组件
+
+### `<CopyAnchorLinkButton />`
+
+一个预构建的 React 组件，用于复制编辑器中节点的锚点链接。
+
+#### 用法
+
+```tsx
+export default function MyEditor() {
+  return (
+    <CopyAnchorLinkButton
+      editor={editor}
+      text="复制链接"
+      hideWhenUnavailable={true}
+      showShortcut={true}
+      onCopied={() => console.log('链接已复制！')}
+      onNodeIdNotFound={(found) => console.log(`节点ID是否找到：${found}`)}
+      onExtractedNodeId={(nodeId) => console.log(`提取的ID：${nodeId}`)}
+    />
+  )
+}
+```
+
+#### 参数
+
+| 名称                   | 类型                               | 默认值       | 描述                                                  |
+| ---------------------- | -------------------------------- | ------------ | ----------------------------------------------------- |
+| `editor`               | `Editor \| null`                 | `undefined`  | Tiptap 编辑器实例                                     |
+| `text`                 | `string`                        | `undefined`  | 可选的按钮文本标签                                   |
+| `hideWhenUnavailable`  | `boolean`                      | `false`      | 当没有可用节点ID时隐藏按钮                            |
+| `onCopied`             | `() => void`                   | `undefined`  | 复制成功后触发的回调函数                              |
+| `onNodeIdNotFound`     | `(found: boolean) => void`     | `undefined`  | 复制操作完成时，传入是否找到节点ID状态的回调          |
+| `onExtractedNodeId`    | `(nodeId: string \| null) => void` | `undefined`  | 节点 ID 提取后调用的回调                              |
+| `showShortcut`         | `boolean`                      | `false`      | 是否显示键盘快捷键徽章                               |
+
+## 钩子（Hooks）
+
+### `useCopyAnchorLink()`
+
+一个自定义钩子，允许您自定义复制锚点链接按钮的渲染及行为。
+
+#### 用法
+
+```tsx
+function MyCopyAnchorLinkButton() {
+  const { isVisible, handleCopyAnchorLink, canCopyAnchorLink, label, shortcutKeys, Icon } =
+    useCopyAnchorLink({
+      editor: myEditor,
+      hideWhenUnavailable: true,
+      onCopied: () => console.log('链接已复制！'),
+      onNodeIdNotFound: (found) => console.log(`节点ID是否找到：${found}`),
+      onExtractedNodeId: (nodeId) => console.log(`提取的ID：${nodeId}`),
+    })
+
+  if (!isVisible) return null
+
+  return (
+    <button onClick={handleCopyAnchorLink} disabled={!canCopyAnchorLink} aria-label={label}>
+      <Icon />
+      {label}
+      {shortcutKeys && <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>}
+    </button>
+  )
+}
+```
+
+#### 参数
+
+| 名称                   | 类型                               | 默认值       | 描述                                                  |
+| ---------------------- | -------------------------------- | ------------ | ----------------------------------------------------- |
+| `editor`               | `Editor \| null`                 | `undefined`  | Tiptap 编辑器实例                                     |
+| `hideWhenUnavailable`  | `boolean`                      | `false`      | 当没有可用节点ID时隐藏按钮                            |
+| `onCopied`             | `() => void`                   | `undefined`  | 复制成功后触发的回调函数                              |
+| `onNodeIdNotFound`     | `(found: boolean) => void`     | `undefined`  | 复制操作完成时，传入是否找到节点ID状态的回调          |
+| `onExtractedNodeId`    | `(nodeId: string \| null) => void` | `undefined`  | 节点 ID 提取后调用的回调                              |
+
+#### 返回值
+
+| 名称                   | 类型            | 描述                                             |
+| ---------------------- | --------------- | ------------------------------------------------ |
+| `isVisible`            | `boolean`       | 是否应渲染按钮                                   |
+| `canCopyAnchorLink`    | `boolean`       | 当前节点是否可以复制锚点链接                     |
+| `handleCopyAnchorLink` | `() => boolean` | 复制选中节点锚点链接的函数                       |
+| `label`                | `string`        | 按钮的无障碍标签文本                             |
+| `shortcutKeys`         | `string`        | 复制锚点链接的键盘快捷键                         |
+| `Icon`                 | `React.FC`      | 复制按钮的图标组件（LinkIcon）                    |
+
+## 工具函数
+
+### `canCopyAnchorLink(editor)`
+
+检查当前编辑器状态中节点是否具有可复制的数据 ID。
+
+```tsx
+import { canCopyAnchorLink } from '@/components/tiptap-ui/copy-anchor-link-button'
+
+const canCopy = canCopyAnchorLink(editor)
+```
+
+### `copyNodeId(editor, onExtractedNodeId, onNodeIdNotFound)`
+
+程序化提取节点 ID 并带完整 URL 复制到剪贴板。
+
+```tsx
+import { copyNodeId } from '@/components/tiptap-ui/copy-anchor-link-button'
+
+const success = await copyNodeId(
+  editor,
+  (nodeId) => console.log(`提取的ID：${nodeId}`),
+  (found) => console.log(`是否找到：${found}`),
+)
+if (success) {
+  console.log('锚点链接复制成功！')
+}
+```
+
+### `extractNodeId(node, attributeName)`
+
+从指定节点提取 data-id。
+
+```tsx
+import { extractNodeId } from '@/components/tiptap-ui/copy-anchor-link-button'
+
+const nodeId = extractNodeId(node, 'data-id')
+```
+
+### `shouldShowButton(props)`
+
+根据编辑器状态和配置判断复制锚点链接按钮是否应显示的实用函数。
+
+```tsx
+import { shouldShowButton } from '@/components/tiptap-ui/copy-anchor-link-button'
+
+const shouldShow = shouldShowButton({
+  editor,
+  hideWhenUnavailable: true,
+})
+```
+
+## 键盘快捷键
+
+复制锚点链接按钮支持以下快捷键：
+
+- **Cmd/Ctrl + Ctrl + L**：复制当前节点的锚点链接
+
+使用 `<CopyAnchorLinkButton />` 组件或 `useCopyAnchorLink()` 钩子时，该快捷键会自动注册。此快捷键适用于任何具有唯一 ID 的块级节点，包括段落、标题、引用和代码块。
+
+## 工作原理
+
+复制锚点链接功能通过以下步骤实现：
+
+1. **节点 ID 检测**：自动检测具有唯一 ID 的节点（通常使用 `data-id` 属性）
+2. **URL 生成**：创建带有当前页面 URL 以及指向节点 ID 的哈希片段的完整 URL
+3. **剪贴板集成**：使用原生剪贴板 API 复制生成的 URL
+4. **来源追踪**：添加 `source=copy_link` 查询参数用于分析追踪
+
+生成的 URL 格式示例：`https://example.com/page?source=copy_link#node-id`
+
+## 需求
+
+### 依赖
+
+- `@tiptap/react` - Tiptap React 核心集成
+- `@tiptap/pm` - ProseMirror 核心功能
+- `react-hotkeys-hook` - 键盘快捷键管理
+
+### 引用组件
+
+- `use-tiptap-editor`（钩子）
+- `use-mobile`（钩子）
+- `button`（基础组件）
+- `badge`（基础组件）
+- `tiptap-utils`（库）
+- `tiptap-advanced-utils`（库）
+- `link-icon`（图标）
+
+### 需要的扩展
+
+该组件最佳搭配 UniqueID 扩展，该扩展会自动为节点分配唯一标识符。扩展支持自定义属性名称（默认为 `data-id`）。

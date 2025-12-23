@@ -4,52 +4,73 @@ meta:
   title: 提及下拉菜单 | Tiptap UI 组件
   description: 在您的 Tiptap 编辑器中使用下拉菜单 UI 组件提及其他用户。更多信息请参考我们的文档！
   category: UI 组件
+component:
+  name: 提及下拉菜单
+  description: 一个预构建的 React 组件，提供在 Tiptap 编辑器中提及用户的下拉菜单。
+  type: 组件
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: AtSignIcon
+tags:
+  - type: start
 ---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个完全集成可访问性的提及用户下拉菜单，适用于 Tiptap 编辑器。支持键盘快捷键，且可灵活定制，轻松提及用户。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/mention-dropdown-menu" />
 
 ## 安装
 
+通过 Tiptap CLI 添加该组件：
+
 ```bash
-npx @tiptap/cli add mention-dropdown-menu
+npx @tiptap/cli@latest add mention-dropdown-menu
 ```
 
-## 使用方法
+## 组件
+
+### `<MentionDropdownMenu />`
+
+一个预构建的 React 组件，提供在 Tiptap 编辑器中提及用户的下拉菜单。
+
+#### 使用示例
 
 ```tsx
-import { MentionDropdownMenu } from '@/components/tiptap-ui/mention-dropdown-menu'
-import { useEditor, EditorContent } from '@tiptap/react'
+import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
+
+// --- Tiptap 核心扩展 ---
+import { StarterKit } from '@tiptap/starter-kit'
 import { Mention } from '@tiptap/extension-mention'
 
-export default function MyEditor() {
+// --- Tiptap UI ---
+import { MentionDropdownMenu } from '@/components/tiptap-ui/mention-dropdown-menu'
+
+// --- Tiptap 节点 ---
+import '@/components/tiptap-node/code-block-node/code-block-node.scss'
+import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
+
+export const MentionDropdownMenuExample = () => {
   const editor = useEditor({
-    extensions: [
-      // 其他扩展
-      Mention.configure({
-        // 提及配置
-      }),
-    ],
+    immediatelyRender: false,
+    extensions: [StarterKit, Mention],
+    content: `
+        <p>尝试输入 <code>@</code> 来打开提及下拉菜单。</p>
+        `,
   })
 
   return (
-    <div>
-      <EditorContent editor={editor} />
-      <MentionDropdownMenu editor={editor} />
-    </div>
+    <EditorContext.Provider value={{ editor }}>
+      <MentionDropdownMenu />
+      <EditorContent editor={editor} role="presentation" />
+    </EditorContext.Provider>
   )
 }
 ```
 
-## 组件属性
+#### 属性
 
-| 名称             | 类型             | 默认值                      | 描述                     |
-| ---------------- | ---------------- | --------------------------- | ------------------------ |
-| editor           | Editor \| null   | null                        | Tiptap 编辑器实例      |
-| floatingOptions  | object           | -                           | 浮动UI的选项            |
-| selector         | string           | 'tiptap-mention-dropdown-menu' | 目标选择器             |
-| char             | string           | '@'                         | 提及字符                |
-
-## 依赖组件
-
-- `tiptap-utils`（库）
-- `suggestion-menu`（UI）
-- `avatar`（原语）
-- `button`（原语）
+`MentionDropdownMenu` 继承自 [SuggestionMenuProps](/ui-components/utils-components/suggestion-menu#props) 的所有属性。

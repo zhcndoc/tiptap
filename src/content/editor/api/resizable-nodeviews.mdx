@@ -1,0 +1,148 @@
+---
+title: 可调整大小的节点视图
+meta:
+  title: 可调整大小的节点视图 | Tiptap 编辑器文档
+  description: 一个小巧、与框架无关的 NodeView，包裹任意 HTMLElement 并添加可配置的调整大小控点。
+  category: 编辑器
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个小巧、与框架无关的 NodeView，包裹任意 HTMLElement（图片、iframe、视频等）并添加可配置的调整大小控点。它管理用户交互，应用最小/最大约束，可选保持宽高比，并暴露回调用于实时更新和提交。
+
+---
+
+## 什么是可调整大小的节点视图？
+
+ResizableNodeView 是一个兼容 ProseMirror/Tiptap 的 NodeView，它：
+
+- 将你的元素包裹在一个容器和包装器中
+- 添加可配置的调整大小控点（角和边）
+- 拖动时持续触发 `onResize`
+- 用户完成调整大小时触发一次 `onCommit`（用来持久化新属性）
+- 支持最小/最大约束、宽高比锁定（配置 / Shift 键）和类名自定义
+- 活动状态时添加 `data-resize-state` 属性和可选的 `resizing` CSS 类
+
+---
+
+## 选项
+
+- `element: HTMLElement` — 要设置为可调整大小的元素（必需）
+- `contentElement?: HTMLElement` — 可选 HTML 节点，作为 contentElement 使用（针对 contenteditable 节点）
+- `node: Node` — ProseMirror 节点（必需）
+- `getPos: () => number | undefined` — 返回节点位置的函数（持久化时必需）
+- `onResize?: (width: number, height: number) => void` — 可选，拖动中持续调用
+- `onCommit: (width: number, height: number) => void` — 拖动结束时调用一次
+- `onUpdate?: NodeView['update']` — 可选的节点更新处理函数
+- `options?: object` — 可选配置（详见下文）
+
+### `options` 属性：
+
+- `directions?: ResizableNodeViewDirection[]`  
+  默认：`['bottom-left', 'bottom-right', 'top-left', 'top-right']`  
+  允许值：`'top' | 'right' | 'bottom' | 'left' | 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'`
+
+- `min?: Partial<{ width: number; height: number; }>`  
+  默认：`{ width: 8, height: 8 }`（像素）
+
+- `max?: Partial<{ width: number; height: number; }>`  
+  默认：`undefined`（无最大限制）
+
+- `preserveAspectRatio?: boolean`  
+  默认：`false`  
+  若为 `true` 始终保持宽高比。若为 `false`，拖动时按住 `Shift` 临时保持宽高比。
+
+- `className?: { container?: string; wrapper?: string; handle?: string; resizing?: string }`  
+  可选类名，分别应用于容器、包装器、每个控点，以及处于调整大小时的类。
+
+---
+
+## 回调
+
+- `onResize(width, height)`：拖动时视觉更新元素（style.width/height）。
+- `onCommit(width, height)`：持久化最终尺寸（例如调用 `editor.commands.updateAttributes(...)`）。
+- `onUpdate(node, decorations, innerDecorations)`：返回 `true` 接受更新，返回 `false` 重新创建节点视图。
+
+示例：在 `onCommit` 内持久化尺寸的模式：
+
+```ts
+const pos = getPos()
+if (pos !== undefined) {
+  editor.commands.updateAttributes('image', { width, height })
+}
+```
+
+## 使用示例
+
+极简图片扩展节点视图：
+
+```ts
+// 在 addNodeView() 内
+return ({ node, getPos, HTMLAttributes }) => {
+  const img = document.createElement('img')
+  img.src = HTMLAttributes.src
+
+  // 复制非尺寸属性到元素
+  Object.entries(HTMLAttributes).forEach(([key, value]) => {
+    if (value == null) return
+    if (key === 'width' || key === 'height') return
+    img.setAttribute(key, String(value))
+  })
+
+  // 实例化 ResizableNodeView
+  return new ResizableNodeView({
+    element: img,
+    node,
+    getPos,
+    onResize: (w, h) => {
+      img.style.width = `${w}px`
+      img.style.height = `${h}px`
+    },
+    onCommit: (w, h) => {
+      const pos = getPos()
+      if (pos === undefined) return
+      // 持久化新尺寸到节点
+      editor.commands.updateAttributes('image', { width: w, height: h })
+    },
+    onUpdate: (updatedNode) => {
+      if (updatedNode.type !== node.type) return false
+      return true
+    },
+    options: {
+      directions: ['bottom-right', 'bottom-left', 'top-right', 'top-left'],
+      min: { width: 50, height: 50 },
+      preserveAspectRatio: false, // 按住 Shift 锁定宽高比
+      className: {
+        container: 'my-resize-container',
+        wrapper: 'my-resize-wrapper',
+        handle: 'my-resize-handle',
+        resizing: 'is-resizing',
+      },
+    },
+  })
+}
+```
+
+### 注意：
+
+- 该类不注入视觉样式；请自行提供 `[data-resize-handle]`、`.is-resizing` 等 CSS（演示提供了最小样式）。
+- 当前 contentEditable 节点不完全支持，且不会调整其内容大小。
+
+---
+
+## 行为细节和边界情况
+
+- 宽高比 + 约束：当保持宽高比时，约束会先吸附发生最小/最大限制的维度，再按比例计算另一维度 —— 不破坏比例。
+- Shift键：调整大小时按 Shift 切换临时宽高比锁定（当 `preserveAspectRatio` 为 `false` 时）。
+
+---
+
+## 示例
+
+### 可调整大小的图片
+
+<CodeDemo path="/Examples/ResizableImages" />
+
+### 可调整大小的自定义节点
+
+<CodeDemo path="/Examples/ResizableNodes" />

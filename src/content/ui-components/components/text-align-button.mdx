@@ -13,6 +13,8 @@ component:
   isOpen: true
   isNew: false
   icon: AlignLeft
+tags:
+  - type: mit
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
@@ -25,7 +27,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加该组件。
 
 ```bash
-npx @tiptap/cli add text-align-button
+npx @tiptap/cli@latest add text-align-button
 ```
 
 ### 手动集成
@@ -60,12 +62,17 @@ export default function MyEditor() {
 
   return (
     <EditorContext.Provider value={{ editor }}>
-      <div className="tiptap-button-group" data-orientation="horizontal">
-        <TextAlignButton align="left" />
-        <TextAlignButton align="center" />
-        <TextAlignButton align="right" />
-        <TextAlignButton align="justify" />
-      </div>
+      <TextAlignButton
+        editor={editor}
+        align="left"
+        text="Left"
+        hideWhenUnavailable={true}
+        showShortcut={true}
+        onAligned={() => console.log('Text aligned!')}
+      />
+      <TextAlignButton align="center" />
+      <TextAlignButton align="right" />
+      <TextAlignButton align="justify" />
 
       <EditorContent editor={editor} role="presentation" />
     </EditorContext.Provider>
@@ -78,9 +85,9 @@ export default function MyEditor() {
 | 名称                | 类型                                       | 默认    | 描述                                             |
 | ------------------- | ------------------------------------------ | ------- | ------------------------------------------------ |
 | editor              | Editor \| null                             | null    | Tiptap 编辑器实例                                 |
-| align               | 'left' \| 'center' \| 'right' \| 'justify' | 必需    | 要应用的文本对齐方式                            |
-| hideWhenUnavailable | boolean                                    | false   | 如果不可用，按钮是否应隐藏                      |
-| text                | string                                     | -       | 显示在图标旁的文本                              |
+| align               | 'left' \| 'center' \| 'right' \| 'justify' | 必需    | 要应用的文本对齐方式                              |
+| hideWhenUnavailable | boolean                                    | false   | 如果不可用，按钮是否应隐藏                        |
+| text                | string                                     | -       | 显示在图标旁的文本                                |
 
 #### 要求
 

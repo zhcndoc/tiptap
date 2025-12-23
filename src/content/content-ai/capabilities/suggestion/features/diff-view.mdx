@@ -1,0 +1,143 @@
+---
+title: 差异视图
+meta:
+  title: 差异视图 | Tiptap AI 建议
+  description: 使用 AI Suggestion 扩展在应用更改前预览 AI 生成的更改。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+使用 AI Suggestion 扩展在更改应用到文档前预览更改。以差异视图显示更改，并允许用户接受/拒绝单个更改。
+
+<Callout title="注意" variant="info">
+  若要在更改 **应用后** 审查更改，请参见 [AI
+  Changes](/content-ai/capabilities/changes) 扩展。
+</Callout>
+
+<Callout title="测试版功能" variant="warning">
+  差异视图 API 是实验性功能，将来可能会有所变动。我们非常欢迎您的反馈！
+  [联系我们](mailto:humans@tiptap.dev)。
+</Callout>
+
+## 设置指南
+
+### 第一步：配置 AI Suggestion 扩展
+
+使用 AI Suggestion 扩展初始化 Editor 实例。禁用自动加载建议。
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import AiSuggestion from '@tiptap-pro/extension-ai-suggestion'
+
+const editor = new Editor({
+  content: '<p>这是文档的初始内容</p>',
+  extensions: [
+    StarterKit,
+    AiSuggestion.configure({
+      // 禁用建议的自动加载
+      loadOnStart: false,
+      reloadOnUpdate: false,
+    }),
+  ],
+})
+```
+
+### 第二步：定义规则以分组差异建议
+
+每条建议必须关联一个规则。在此例中，我们希望将差异显示为属于 `'diff'` 规则的建议列表。
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import AiSuggestion from '@tiptap-pro/extension-ai-suggestion'
+
+const editor = new Editor({
+  content: '<p>这是文档的初始内容</p>',
+  extensions: [
+    StarterKit,
+    AiSuggestion.configure({
+      // 禁用建议的自动加载
+      loadOnStart: false,
+      reloadOnUpdate: false,
+      rules: [
+        {
+          id: 'diff',
+          // 差异视图中不使用标题、提示和颜色
+          title: '',
+          prompt: '',
+          color: '#000',
+          backgroundColor: '#fff',
+          // 不将此规则发送给 AI 模型生成建议
+          ignoreInTiptapCloud: true,
+          // 以差异格式显示建议
+          displayAsDiff: true,
+        },
+      ],
+    }),
+  ],
+})
+```
+
+### 第三步：配置样式
+
+自定义编辑器中建议的显示样式。
+
+```css
+:root {
+  --color-green-100: oklch(0.962 0.044 156.743);
+  --color-green-700: oklch(0.527 0.154 150.069);
+  --color-red-100: oklch(0.936 0.032 17.717);
+  --color-red-700: oklch(0.505 0.213 27.518);
+}
+
+.tiptap-ai-diff-suggestion--old {
+  color: var(--color-red-700);
+  background-color: var(--color-red-100);
+}
+
+.tiptap-ai-diff-suggestion--new {
+  color: var(--color-green-700);
+  background-color: var(--color-green-100);
+}
+
+.tiptap-ai-diff-suggestion--new * {
+  background-color: var(--color-green-100);
+}
+```
+
+了解如何为建议添加高级样式，请参阅 [样式指南](/content-ai/capabilities/suggestion/features/display-suggestions)。
+
+### 第四步：生成建议
+
+通过将文档的新内容（HTML 格式）传递给解析器函数生成建议。AI Suggestion 扩展将比较新内容与当前内容，生成属于之前定义的 `'diff'` 规则的建议列表。
+
+```ts
+editor.commands.loadAiSuggestions({
+  resolver: async (options) => {
+    const newSuggestions = await options.defaultResolver({
+      ...options,
+      apiResolver: async () => {
+        return {
+          format: 'fullHtml',
+          content: {
+            items: [
+              {
+                ruleId: 'diff',
+                fullHtml: '<p>这是文档的新内容</p>',
+              },
+            ],
+          },
+        }
+      },
+    })
+
+    return newSuggestions
+  },
+})
+```
+
+### 第五步：审查建议
+
+基于差异的建议的审查方式与常规建议相同。更多信息请参阅 [应用建议](/content-ai/capabilities/suggestion/features/apply-suggestions) 指南。

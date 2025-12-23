@@ -1,0 +1,64 @@
+---
+title: 引用节点
+meta:
+  title: 引用节点 | Tiptap UI 组件
+  description: 在您的 Tiptap 编辑器中集成显示引用的节点组件。更多内容请参见我们的文档！
+  category: UI 组件
+component:
+  name: 引用 UI 节点
+  description: 向您的编辑器添加引用节点组件。
+  type: node-component
+  isFree: true
+  isCloud: false
+  isOpen: true
+  isNew: false
+  icon: QuoteIcon
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个样式化的引用节点，用于在编辑器中显示格式化的引用内容。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-node/blockquote-node" />
+
+## 安装
+
+您可以通过 Tiptap CLI 添加此节点组件：
+
+```bash
+npx @tiptap/cli@latest add blockquote-node
+```
+
+## 使用
+
+BlockquoteNode 主要是一个样式组件，用于增强编辑器中引用的外观。使用时，只需在项目中引入它，并确保您已使用 Tiptap 提供的 Blockquote 扩展。
+
+```tsx
+import { useEditor, EditorContent } from '@tiptap/react'
+import { StarterKit } from '@tiptap/starter-kit'
+
+import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
+import '@/components/tiptap-node/blockquote-node/blockquote-node.scss'
+
+export default function EditorWithBlockquote() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit],
+    content: `
+      <h2>引用示例</h2>
+      <blockquote>
+        这是一个引用。它可以包含 <strong>粗体文本</strong>，<em>斜体文本</em>。
+      </blockquote>
+    `,
+  })
+
+  return <EditorContent editor={editor} />
+}
+```
+
+## 特性
+
+- 引用的语法高亮样式
+- 支持暗黑模式
+- 合理的间距和外边距
+- 使用等宽字体提升可读性

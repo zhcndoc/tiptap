@@ -56,9 +56,27 @@ Image.configure({
 })
 ```
 
+### resize
+
+支持可调整大小的图像选项。如果定义了该选项，节点将被包裹在一个 [可调整大小的节点视图](/editor/api/resizable-nodeviews) 中，从而可以通过调整柄改变图像大小。
+
+默认值：`undefined`
+
+```js
+Image.configure({
+  resize: {
+    enabled: true,
+    directions: ['top', 'bottom', 'left', 'right'], // 可以是任意方向或对角线组合
+    minWidth: 50,
+    minHeight: 50,
+    alwaysPreserveAspectRatio: true,
+  }
+})
+```
+
 ### allowBase64
 
-允许图像被解析为 base64 字符串 `<img src="data:image/jpg;base64...">`。
+允许将图像解析为 base64 字符串 `<img src="data:image/jpg;base64...">`。
 
 默认值：`false`
 
@@ -94,6 +112,12 @@ editor.commands.setImage({
   title: '示例',
 })
 ```
+
+## 示例
+
+### 可调整大小的图片
+
+<CodeDemo path="/Examples/ResizableImages" />
 
 ## 源代码
 

@@ -34,6 +34,10 @@ cd my-tiptap-project
 
 接下来，安装 `@tiptap/react` 包，`@tiptap/pm`（ProseMirror 库）和 `@tiptap/starter-kit`，它包括启动时常用的扩展。
 
+- **@tiptap/react**：Tiptap 的 React 绑定，包括 Tiptap 的核心功能。
+- **@tiptap/pm**：Tiptap 的 ProseMirror 依赖，是编辑器正常工作的必需库。
+- **@tiptap/starter-kit**：一组常用扩展，提供段落、标题、加粗、斜体等基本功能。
+
 ```bash
 npm install @tiptap/react @tiptap/pm @tiptap/starter-kit
 ```
@@ -46,44 +50,14 @@ npm install @tiptap/react @tiptap/pm @tiptap/starter-kit
 
 ```jsx
 // src/Tiptap.tsx
-import { EditorProvider } from '@tiptap/react'
-import { FloatingMenu, BubbleMenu } from '@tiptap/react/menus'
-import StarterKit from '@tiptap/starter-kit'
-
-// 定义您的扩展数组
-const extensions = [StarterKit]
-
-const content = '<p>Hello World!</p>'
-
-const Tiptap = () => {
-  return (
-    <EditorProvider extensions={extensions} content={content}>
-      <FloatingMenu editor={null}>这是浮动菜单</FloatingMenu>
-      <BubbleMenu editor={null}>这是气泡菜单</BubbleMenu>
-    </EditorProvider>
-  )
-}
-
-export default Tiptap
-```
-
-**重要提示**：如果您希望避免使用 Editor 上下文，可以随时使用 `useEditor` 钩子。
-
-```jsx
-// src/Tiptap.tsx
 import { useEditor, EditorContent } from '@tiptap/react'
 import { FloatingMenu, BubbleMenu } from '@tiptap/react/menus'
 import StarterKit from '@tiptap/starter-kit'
 
-// 定义您的扩展数组
-const extensions = [StarterKit]
-
-const content = '<p>Hello World!</p>'
-
 const Tiptap = () => {
   const editor = useEditor({
-    extensions,
-    content,
+    extensions: [StarterKit], // 定义您的扩展数组
+    content: '<p>Hello World!</p>', // 初始内容
   })
 
   return (
@@ -189,6 +163,42 @@ function MyEditorComponent() {
 }
 ```
 
+## 使用 React 与 Tiptap 进行 SSR
+
+Tiptap 可以与 React 应用中的服务端渲染（SSR）一起使用。然而，为确保编辑器仅在客户端初始化，您需要在创建编辑器实例时使用 `immediatelyRender` 选项，防止它在服务器端渲染。
+
+以下是一个设置 React 组件中 Tiptap SSR 的示例：
+
+```jsx
+'use client'
+
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+
+export function MyEditor() {
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: '<p>Hello World!</p>',
+    // 禁用即时渲染以避免 SSR 问题
+    immediatelyRender: false,
+  })
+
+  if (!editor) {
+    return null // 确保编辑器初始化前不渲染
+  }
+
+  return <EditorContent editor={editor} />
+}
+```
+
 ## 优化您的性能
 
 我们建议您访问[React 性能指南](/guides/performance)，以高效集成 Tiptap 编辑器。这将帮助您避免应用规模扩大时可能出现的问题。
+
+## 接下来
+
+- [配置您的编辑器](/editor/getting-started/configure)
+- [为您的编辑器添加样式](/editor/getting-started/style-editor)
+- [了解更多 Tiptap 的概念](/editor/core-concepts/introduction)
+- [了解如何持久化编辑器状态](/editor/core-concepts/persistence)
+- [开始构建您自己的扩展](/editor/extensions/custom-extensions)

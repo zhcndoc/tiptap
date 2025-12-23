@@ -1,0 +1,284 @@
+---
+title: Hocuspocus 服务器示例
+meta:
+  title: Hocuspocus 服务器示例 | Hocuspocus 文档
+  category: Hocuspocus
+---
+
+## 运行 Hocuspocus
+
+### 命令行界面（CLI）
+
+有时候，你只想非常快速地启动一个本地 Hocuspocus 实例。也许只是想试用一下，或者本地测试你的 webhook。我们的 CLI 能在几秒内将 Hocuspocus 带到你的命令行。
+
+大多数情况下你只需用 npx 命令启动，当然你也可以通过 npm 或 yarn 全局安装或安装到你的项目中。
+
+```bash
+npx @hocuspocus/cli
+npx @hocuspocus/cli --port 8080
+npx @hocuspocus/cli --webhook http://localhost/webhooks/hocuspocus
+npx @hocuspocus/cli --sqlite
+npx @hocuspocus/cli --s3 --s3-bucket my-documents
+```
+
+### Express
+
+Hocuspocus 可以与任何底层使用 `ws` 的 WebSocket 实现一起使用。当你不调用 Hocuspocus 的 `listen()` 方法时，它不会自己启动 WebSocket 服务器，而是依赖你手动调用其 [`handleConnection()` 方法](/hocuspocus/server/methods)。
+
+要在 [Express](https://expressjs.com) 中使用 Hocuspocus，你需要使用 `express-ws` 包给 Express 应用添加 WebSocket 端点。然后添加新的 WebSocket 路由，并使用 Hocuspocus 的 `handleConnection()` 方法完成剩余工作。
+
+```js
+import express from "express";
+import expressWebsockets from "express-ws";
+import { Hocuspocus } from "@hocuspocus/server";
+
+// 配置 Hocuspocus
+const hocuspocus = new Hocuspocus({
+  // ...
+});
+
+// 使用 express-ws 扩展设置你的 express 实例
+const { app } = expressWebsockets(express());
+
+// 一个基础的 http 路由
+app.get("/", (request, response) => {
+  response.send("Hello World!");
+});
+
+// 添加一个用于 Hocuspocus 的 websocket 路由
+// 你可以像在 onConnect 钩子中一样设置上下文数据
+// 并传递给 handleConnection 方法。
+app.ws("/collaboration", (websocket, request) => {
+  const context = {
+    user: {
+      id: 1234,
+      name: "Jane",
+    },
+  };
+
+  hocuspocus.handleConnection(websocket, request, context);
+});
+
+// 启动服务器
+app.listen(1234, () => console.log("Listening on http://127.0.0.1:1234"));
+```
+
+重要提示！一些扩展会使用 `onRequest`、`onUpgrade` 和 `onListen` 钩子，这些钩子在此场景下不会被触发。
+
+### Hono
+
+Hono 是一个支持多运行时的现代 Web 框架。它支持原生 WebSocket 协议，非常适合用于 Hocuspocus。只有在 Node.js 环境下，Hono 的实现才需要额外代码来支持 WebSocket 协议。
+
+```ts
+import { Hono } from "hono";
+import { Hocuspocus } from "@hocuspocus/server";
+
+// Node.js 专用
+import { serve } from "@hono/node-server";
+import { createNodeWebSocket } from "@hono/node-ws";
+
+// 配置 Hocuspocus
+const hocuspocus = new Hocuspocus({
+  // …
+});
+
+// 设置 Hono 服务器
+const app = new Hono();
+
+// Node.js 专用
+const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
+
+// 在 Hono 服务器中挂载 Hocuspocus
+app.get(
+  "/hocuspocus",
+  upgradeWebSocket((c) => ({
+    onOpen(_evt, ws) {
+      hocuspocus.handleConnection(ws.raw, c.req.raw as any);
+    },
+  }))
+);
+
+// 启动服务器
+const server = serve({
+  fetch: app.fetch,
+  port: 8787,
+}, (info) => {
+  hocuspocus.hooks('onListen', {
+    instance: hocuspocus,
+    configuration: hocuspocus.configuration,
+    port: info.port
+  })
+});
+
+// 设置 WebSocket 支持（Node.js 专用）
+injectWebSocket(server);
+```
+
+重要提示！一些扩展会使用 `onUpgrade` 和 `onRequest` 钩子，这些钩子在此场景下不会被触发。
+
+### Koa
+
+```js
+import Koa from "koa";
+import websocket from "koa-easy-ws";
+import { Hocuspocus } from "@hocuspocus/server";
+import { Logger } from "@hocuspocus/extension-logger";
+
+// 配置 Hocuspocus
+const hocuspocus = new Hocuspocus({
+  // …
+});
+
+const app = new Koa();
+
+// 使用 koa-easy-ws 扩展设置你的 koa 实例
+app.use(websocket());
+
+// 添加用于 Hocuspocus 的 websocket 路由
+// 你可以像在 onConnect 钩子中一样设置上下文数据
+// 并传递给 handleConnection 方法。
+app.use(async (ctx, next) => {
+  const ws = await ctx.ws();
+
+  hocuspocus.handleConnection(
+    ws,
+    ctx.request,
+    // 额外数据（可选）
+    {
+      user_id: 1234,
+    }
+  );
+});
+
+// 启动服务器
+app.listen(1234);
+```
+
+重要提示！一些扩展会使用 `onRequest`、`onUpgrade` 和 `onListen` 钩子，这些钩子在此场景下不会被触发。
+
+### PHP / Laravel（草稿）
+
+我们创建了一个 Laravel 包来简化 Laravel 与 Hocuspocus 的集成。
+
+详情请查看：[ueberdosis/hocuspocus-laravel](https://github.com/ueberdosis/hocuspocus-laravel)
+
+Hocuspocus 的主要存储必须是 Y.Doc 的 Uint8Array 二进制格式。目前没有兼容的 PHP 库可以读取 YJS 格式，因此我们有两个选项来访问数据：将数据保存为 Laravel 兼容格式（如 JSON），作为主要存储的补充，或者创建一个独立的 nodejs 服务器，通过 API 读取主存储，解析 YJS 格式并返回给 Laravel。
+
+_注意：切勿尝试将 Y.Doc 存储为 JSON，并在用户连接时重新创建为 YJS 二进制。这会导致更新合并问题，内容在新连接时重复。数据必须以二进制格式存储，才能利用 YJS 格式的优势。_
+
+#### 在主存储中保存数据
+
+使用 Laravel 的迁移系统创建一个用于存储 YJS 二进制数据的表：
+
+```
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('documents', function (Blueprint $table) {
+            $table->id();
+            $table->binary('data');
+        });
+    }
+    public function down()
+    {
+        Schema::dropIfExists('documents');
+    }
+};
+```
+
+在 Hocuspocus 服务器中，你可以使用 dotenv 库从 `.env` 文件获取数据库登录信息：
+
+```
+import mysql from 'mysql2';
+import dotenv from 'dotenv';
+dotenv.config()
+const pool = mysql.createPool({
+    connectionLimit: 100, //重要
+    host: '127.0.0.1',
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
+    debug: false
+});
+```
+
+然后使用[数据库扩展](/hocuspocus/server/extensions/database)结合 `pool.query` 来存储和读取二进制数据。
+
+##### 方案 1：另外以其他格式存储数据
+
+使用[webhook 扩展](/hocuspocus/server/extensions/webhook)在文档更新时向 Laravel 发送请求，文档以 JSON 格式传递（详见[这里](https://tiptap.dev/hocuspocus/guide/transformations#tiptap>))。
+
+##### 方案 2：通过独立的 nodejs 守护进程按需获取数据（高级）
+
+使用 http 模块创建一个 nodejs 服务器：
+
+```
+const server = http.createServer(
+...
+).listen(3000, '127.0.0.1')
+```
+
+同样使用 dotenv 包获取 mysql 登录信息并执行请求。然后可使用 YJS 库解析二进制数据（`Y.applyUpdate(doc, row.data)`）。你可以根据需要格式化数据，然后返回给 Laravel。
+
+#### 身份认证集成
+
+你可以用 webhook 扩展实现身份认证——拒绝 `onConnect` 请求将导致 Hocuspocus 服务器断开连接——但对于安全性要求较高的应用，最好使用自定义 `onAuthenticate` 钩子，因为攻击者可能在被拒绝连接前从服务器获取一些数据。
+
+要实现与 Laravel 服务器的认证，我们可以用 Laravel 的内置认证系统，借助 session cookie 和 CSRF 令牌。为你的 Hocuspocus 服务器脚本添加一个 `onAuthenticate` 钩子，将请求头（及 session cookie）传递出去，并将 CSRF 令牌添加到发送给 Laravel 服务器的请求中：
+
+```
+const hocusServer = new Server({
+  ...
+  onAuthenticate(data) {
+        return new Promise((resolve, reject) => {
+            const headers = data.requestHeaders;
+            headers["X-CSRF-TOKEN"] = data.token;
+            axios.get(
+                process.env.APP_URL + '/api/hocus',
+                { headers: headers },
+            ).then(function (response) {
+                if (response.status === 200)
+                    resolve()
+                else
+                    reject()
+            }).catch(function (error) {
+                reject()
+            })
+        })
+    },
+```
+
+并在 provider 中给请求添加 CSRF 令牌：
+
+```
+const provider = new HocuspocusProvider({
+  ...
+  token: '{{ csrf_token() }}',
+```
+
+最终，在 `api.php` 中添加路由响应该请求。响应可以为空，仅通过请求状态码验证认证状态（例如 200 或 403）。示例中使用了 Laravel 内置中间件来验证 session cookie 和 CSRF 令牌。你也可以按需添加其它中间件，比如 `verified` 或自定义中间件：
+
+```
+Route::middleware(['web', 'auth'])->get('/hocus', function (Request $request) {
+    return response('');
+});
+```
+
+就是这样！
+
+## 本地编辑文档
+
+如果你想直接在服务器上编辑文档（同时保持钩子和同步运行），最简单的方式是使用 Hocuspocus 的 `getDirectConnection` 方法。
+
+```typescript
+const hocuspocus = new Hocuspocus();
+
+const docConnection = await hocuspocus.openDirectConnection('my-document', {})
+
+await docConnection.transact((doc) => {
+  doc.getMap('test').set('a', 'b');
+});
+
+await docConnection.disconnect()
+```

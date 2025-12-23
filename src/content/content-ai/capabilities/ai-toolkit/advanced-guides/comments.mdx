@@ -1,0 +1,158 @@
+---
+title: 使用 AI 工具包添加评论
+meta:
+  title: 使用 AI 工具包添加评论 | Tiptap 内容 AI
+  description: 让您的 AI 代理具备读取、编写和编辑文档评论的能力。
+  category: 内容 AI
+sidebars:
+  hideSecondary: true
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+让您的 AI 代理具备读取、编写和编辑文档中的评论的能力。
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/comments" />
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 初始设置
+
+首先，按照[评论指南](/comments/getting-started/overview)构建带有评论功能的 Tiptap 编辑器。
+
+## API 端点
+
+创建一个调用 AI 模型的 API 端点。在本例中，我们使用 [Next.js 框架](https://nextjs.org/) 构建 API 端点，并使用 [Vercel 的 AI SDK](https://ai-sdk.dev/) 调用 AI 模型。
+
+为 Tiptap AI 工具包提供[工具定义](/content-ai/capabilities/ai-toolkit/tools/ai-sdk)。启用 `getThreads` 和 `editThreads` 工具，使 AI 代理能够读取和编辑文档中的评论。
+
+可选地，您可以禁用 `tiptapEdit` 工具来防止 AI 对文档内容进行更改。
+
+```ts
+// app/api/chat/route.ts
+import { anthropic } from '@ai-sdk/anthropic'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { convertToModelMessages, streamText, UIMessage } from 'ai'
+
+export async function POST(req: Request) {
+  const { messages }: { messages: UIMessage[] } = await req.json()
+
+  const result = streamText({
+    model: anthropic('claude-haiku-4-5-20251001'),
+    system: '您是一名能够在富文本文档中添加评论的助手。',
+    messages: convertToModelMessages(messages),
+    tools: toolDefinitions({
+      tools: {
+        // 启用读取和编辑评论的工具
+        getThreads: true,
+        editThreads: true,
+        // （可选）阻止 AI 对文档进行更改
+        tiptapEdit: false,
+      },
+    }),
+  })
+
+  return result.toUIMessageStreamResponse()
+}
+```
+
+## 客户端设置
+
+在前端，创建一个 React 组件来渲染聊天机器人 UI。该组件利用 Vercel AI SDK 中的 [useChat hook](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat) 调用 API 端点并管理聊天对话。
+
+当 AI 模型输出工具调用时，使用 Tiptap AI 工具包执行该工具：
+
+- 如果工具是 `getThreads`，则读取文档中的评论。
+- 如果工具是 `editThreads`，则编辑文档中的评论。
+
+以下示例展示了如何实现：
+
+```tsx
+import { useChat } from '@ai-sdk/react'
+import { getAiToolkit } from '@tiptap-pro/ai-toolkit'
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from 'ai'
+import { useRef, useState } from 'react'
+
+export function CommentsAiChatbot({ editor }) {
+  const [input, setInput] = useState(
+    "请在最后一段的第一句添加一条评论，内容为“做得好”",
+  )
+
+  // 修复问题：https://github.com/vercel/ai/issues/8148
+  const editorRef = useRef(editor)
+  editorRef.current = editor
+
+  const { messages, sendMessage, addtoolOutput } = useChat({
+    transport: new DefaultChatTransport({ api: '/api/comments' }),
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    async onToolCall({ toolCall }) {
+      const editor = editorRef.current
+      if (!editor) return
+
+      const { toolName, input, toolCallId } = toolCall
+
+      // 使用 AI 工具包执行工具
+      const toolkit = getAiToolkit(editor)
+      const result = toolkit.executeTool({
+        toolName,
+        input,
+      })
+
+      addtoolOutput({ tool: toolName, toolCallId, output: result.output })
+    },
+  })
+
+  return (
+    <div>
+      <EditorContent editor={editor} />
+      {messages?.map((message) => (
+        <div key={message.id} style={{ whiteSpace: 'pre-wrap' }}>
+          <strong>{message.role}</strong>
+          <br />
+          {message.parts
+            .filter((p) => p.type === 'text')
+            .map((p) => p.text)
+            .join('\n')}
+        </div>
+      ))}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          sendMessage({ text: input })
+          setInput('')
+        }}
+      >
+        <input value={input} onChange={(e) => setInput(e.target.value)} />
+      </form>
+    </div>
+  )
+}
+```
+
+## 最终效果
+
+通过附加 CSS 样式，结果是一个简单且精致的 AI 聊天机器人应用：
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/comments" />
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 定制 AI 代理的行为
+
+您可以通过提供自定义系统提示影响 AI 代理的评论行为。例如，可以指示 AI 以特定风格或格式添加评论。
+
+```
+您是一名能够在富文本文档中添加评论的助手。评论内容应始终采用 Markdown 格式。
+```
+
+AI 也可以被指示执行特定操作。借助[工具定义](/content-ai/capabilities/ai-toolkit/tools/available-tools)，AI 理解线程、评论、已解决线程和回复的概念。
+
+```
+无论用户是否要求，永远不要解决线程。只有用户可以通过点击“解决”按钮来解决线程。
+```
+
+了解更多提示工程相关内容，请参见[AI 工程指南](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-engineering)。
+
+## 路线图
+
+在未来版本中，我们计划支持将评论流式写入编辑器，以提升用户体验。同时，我们也在探索改进令牌用量、速度和开发者体验的方法。

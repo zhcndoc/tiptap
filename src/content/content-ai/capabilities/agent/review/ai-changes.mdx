@@ -1,0 +1,113 @@
+---
+title: 审核更改
+meta:
+  title: 审核更改 | Tiptap 内容 AI
+  description: 了解如何将 AI 代理与 AI 更改扩展集成以审核 AI 生成的更改。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+AI 代理扩展可以与 AI 更改扩展集成，为 AI 生成的更改提供审核工作流程。这允许用户在 AI 代理对文档应用更改后，查看、接受或拒绝这些更改。
+
+## 设置 AI 更改集成
+
+本指南将引导你完成设置 AI 更改扩展，以便审核、接受和拒绝更改的过程。
+
+<Callout title="注意" variant="info">
+  我们在 [介绍页面](/content-ai/capabilities/agent) 提供了如何集成 AI 更改扩展的代码示例。
+</Callout>
+
+### 第一步：安装两个扩展
+
+```bash
+npm install @tiptap-pro/extension-ai-agent @tiptap-pro/extension-ai-changes
+```
+
+### 第二步：在你的编辑器中配置两个扩展
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import AiAgent from '@tiptap-pro/extension-ai-agent'
+import AiChanges from '@tiptap-pro/extension-ai-changes'
+
+const provider = new AiAgentProvider({
+  appId: 'YOUR_APP_ID',
+  token: 'YOUR_JWT_TOKEN',
+  reviewOptions: {
+    // 设置扩展为 "aiChanges" 以使用 AI 更改进行审核
+    extension: 'aiChanges',
+    // 可选：将 autoAccept 设置为 "never" 以始终要求审核
+    autoAccept: 'never',
+  },
+  // ... 其他选项
+})
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    AiAgent.configure({
+      provider,
+    }),
+    AiChanges.configure({
+      // 可选：自定义 AI 更改的外观，在选中更改时显示弹出框
+      getCustomDecorations({ change, isSelected, getDefaultDecorations }) {
+        const decorations = getDefaultDecorations()
+        // 如有需要，添加自定义装饰
+        return decorations
+      },
+    }),
+  ],
+})
+```
+
+### 第三步：配置样式
+
+自定义编辑器中建议显示的样式。
+
+```css
+.tiptap-ai-changes--old {
+  color: var(--color-red-700);
+  background-color: var(--color-red-100);
+}
+
+.tiptap-ai-changes--old * {
+  background-color: var(--color-red-100);
+}
+
+.tiptap-ai-changes--new {
+  color: var(--color-green-700);
+  background-color: var(--color-green-100);
+}
+```
+
+## 审核工作流程如何运作
+
+1. 当 AI 代理对文档进行更改时，这些更改会被 AI 更改扩展跟踪
+2. 如果 `autoAccept` 设置为 `never` 或 `onlyRead`（针对修改内容的更改），这些更改会显示为待处理状态
+3. 提供者的状态变为 `reviewingToolCall`
+4. 用户可以审核这些更改，并决定接受或拒绝
+5. 接受或拒绝后，对话继续进行
+
+## 接受和拒绝更改
+
+你可以调用以下方法来接受或拒绝更改：
+
+```tsx
+// 接受所有待处理更改
+provider.acceptToolCall()
+
+// 拒绝所有待处理更改
+provider.rejectToolCall()
+```
+
+<Callout title="注意" variant="warning">
+  如果工具调用被拒绝，AI 代理提供者会尝试通过 AI 更改扩展将文档重置到工具调用执行前的状态。但是，如果未导入 AI 更改扩展或将 `extension` 参数设置为 `null`，AI 代理将无法自动重置文档状态，因此你需要自己实现逻辑来处理被拒绝的工具调用，并将文档恢复到之前的状态。
+</Callout>
+
+在没有 AI 更改扩展的情况下处理被拒绝的工具调用的一种方法是，在工具调用应用前（触发 `beforeToolCall` 事件时）存储文档状态，并在工具调用被拒绝时恢复该状态。
+
+<Callout title="注意" variant="info">
+  AI 更改扩展允许用户在更改应用后进行审核。若要在更改应用前进行审核，请集成 [AI 建议](/content-ai/capabilities/agent/review/ai-suggestion) 扩展。
+</Callout>

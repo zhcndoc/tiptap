@@ -62,9 +62,15 @@ UniqueID.configure({
 
 ### generateID
 
-用于生成并返回唯一 ID 的函数。
+用于生成并返回唯一 ID 的函数。该函数接收一个上下文对象（例如 `{ node, pos }`），因此你可以根据节点的类型或其位置自定义 ID 的生成方式。
 
-默认值：`() => uuidv4()`
+默认值：`({ node, pos }) => uuidv4()`
+
+```js
+UniqueID.configure({
+  generateID: ({ node }) => `${node.type.name}-${uuidv4()}`,
+})
+```
 
 ### filterTransaction
 
@@ -80,3 +86,59 @@ UniqueID.configure({
   filterTransaction: (transaction) => !isChangeOrigin(transaction),
 })
 ```
+
+### updateDocument
+
+是否通过为节点添加唯一 ID 来更新文档。如果文档处于只读模式、不可变，或者你不希望它被修改，可以将此属性设置为 `false`。
+
+默认值：`true`
+
+```js
+UniqueID.configure({
+  updateDocument: false,
+})
+```
+
+## 服务端唯一 ID 工具
+
+`generateUniqueIds` 函数允许你在服务端为 Tiptap 文档添加唯一 ID，无需创建 `Editor` 实例。这对于在服务端处理文档或需要为现有内容添加 ID 非常有用。
+
+### 参数
+
+- **`doc`** (`JSONContent`)：要添加唯一 ID 的 Tiptap JSON 文档
+- **`extensions`** (`Extensions`)：要使用的扩展列表。必须包含 `UniqueID` 扩展。若要自定义 ID 生成方式，可以向 `UniqueID` 扩展传入选项。
+
+### 返回类型
+
+返回添加了唯一 ID 后的新 Tiptap 文档（一个 `JSONContent` 对象）。
+
+### 示例
+
+```js
+import { generateUniqueIds, UniqueID } from '@tiptap/extension-unique-id'
+import { StarterKit } from '@tiptap/starter-kit'
+
+const doc = {
+  type: 'doc',
+  content: [
+    { type: 'paragraph', content: [{ type: 'text', text: 'Hello, world!' }] },
+    { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'My Heading' }] },
+  ],
+}
+
+const newDoc = generateUniqueIds(doc, [
+  StarterKit,
+  UniqueID.configure({ types: ['paragraph', 'heading'] }),
+])
+
+// 结果：
+// {
+//   type: 'doc',
+//   content: [
+//     { type: 'paragraph', content: [{ type: 'text', text: 'Hello, world!' }], attrs: { id: 'd4590f81-52e8-45ec-b317-2e9a805b03e3' } },
+//     { type: 'heading', content: [{ type: 'text', text: 'My Heading' }], attrs: { level: 1, id: 'c88f9b5f-7b91-442f-b4d9-ee0d04104827' } }
+//   ]
+// }
+```
+
+该函数会自动获取 `UniqueID` 扩展中的配置，包括 `types`、`attributeName` 和 `generateID` 等选项。

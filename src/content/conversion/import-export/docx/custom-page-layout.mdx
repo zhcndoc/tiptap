@@ -1,0 +1,209 @@
+---
+title: DOCX 中的自定义页面布局
+tags:
+  - type: start
+  - type: beta
+meta:
+    title: DOCX 中的自定义页面布局 | Tiptap Conversion
+    description: 了解如何使用 Export 扩展自定义 DOCX（Word）页面和边距尺寸。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有注册表安装">
+        若要安装该前端扩展，请按照[设置指南](/guides/pro-extensions)认证使用 Tiptap 的私有 npm 注册表。
+    </RequirementItem>
+</Requirements>
+
+DOCX Export 扩展现在支持自定义页面尺寸和边距，允许您创建符合需求的精准布局文档。无论您需要 A5 页面、自定义纸张尺寸，还是特定的边距配置，都可以直接在扩展中进行设置。
+
+<CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ExportDocxCustomPageSize" />
+
+## 页面尺寸配置
+
+使用 `pageSize` 选项定义导出 DOCX 文件的自定义页面尺寸。页面尺寸配置支持带有各种度量单位的宽度和高度值。
+
+### 支持的单位
+
+所有页面尺寸和边距测量均支持以下通用单位：
+
+| 单位 | 描述            |
+|------|------------------|
+| `cm` | 厘米（默认）     |
+| `in` | 英寸             |
+| `pt` | 磅               |
+| `pc` | 派卡             |
+| `mm` | 毫米             |
+| `px` | 像素             |
+
+### 配置选项
+
+| 属性 | 类型 | 描述 | 默认值 |
+|----------|------|-------------|---------|
+| `width` | `PositiveUniversalMeasure` | 页面宽度。必须为正值 | `"21.0cm"`（A4 宽度） |
+| `height` | `PositiveUniversalMeasure` | 页面高度。必须为正值 | `"29.7cm"`（A4 高度） |
+
+<Callout title="PositiveUniversalMeasure">
+`PositiveUniversalMeasure` 是表示带单位的正长度的字符串，例如 `"21cm"`、`"8.5in"`、`"148mm"`、`"595pt"`、`"50pc"` 或 `"800px"`。支持的单位包括厘米（`cm`）、毫米（`mm`）、英寸（`in`）、磅（`pt`）、派卡（`pc`）和像素（`px`）。数值必须大于零。如果未提供单位，则默认使用厘米（`cm`）。
+</Callout>
+
+```js
+ExportDocx.configure({
+  onCompleteExport: (result) => {
+    // 处理导出的文件
+  },
+  pageSize: {
+    width: '14.8cm',    // A5 宽度
+    height: '21cm',     // A5 高度
+  },
+})
+```
+
+## 页面边距配置
+
+`pageMargins` 选项允许您为文档页面的各个边设置自定义边距。与页面尺寸不同，边距可以接受负值（如有需要）。
+
+### 配置选项
+
+| 属性 | 类型 | 描述 | 默认值 |
+|----------|------|-------------|---------|
+| `top` | `UniversalMeasure` | 页面顶部边距。<br />可为负值。 | `"1.0cm"` |
+| `bottom` | `UniversalMeasure` | 页面底部边距。<br />可为负值。 | `"1.0cm"` |
+| `left` | `PositiveUniversalMeasure` | 页面左侧边距。必须为正值。 | `"1.0cm"` |
+| `right` | `PositiveUniversalMeasure` | 页面右侧边距。必须为正值。 | `"1.0cm"` |
+
+<Callout title="UniversalMeasure">
+`UniversalMeasure` 是表示带单位长度的字符串，例如 `"21cm"`、`"8.5in"`、`"148mm"`、`"595pt"`、`"50pc"` 或 `"800px"`。支持的单位包括厘米（`cm`）、毫米（`mm`）、英寸（`in`）、磅（`pt`）、派卡（`pc`）和像素（`px`）。**数值可以为正或负**。如果未提供单位，则默认使用厘米（`cm`）。
+</Callout>
+
+<Callout title="PositiveUniversalMeasure">
+`PositiveUniversalMeasure` 是表示带单位的正长度的字符串，例如 `"21cm"`、`"8.5in"`、`"148mm"`、`"595pt"`、`"50pc"` 或 `"800px"`。支持的单位包括厘米（`cm`）、毫米（`mm`）、英寸（`in`）、磅（`pt`）、派卡（`pc`）和像素（`px`）。数值必须大于零。如果未提供单位，则默认使用厘米（`cm`）。
+</Callout>
+
+```js
+ExportDocx.configure({
+  onCompleteExport: (result) => {
+    // 处理导出的文件
+  },
+  pageMargins: {
+    top: '2cm',
+    bottom: '2cm', 
+    left: '1.5cm',
+    right: '1.5cm',
+  },
+})
+```
+
+## 完整示例
+
+以下为一个完整示例，演示如何使用 DOCX Export 扩展配置自定义页面布局：
+
+```js
+import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展...
+    ExportDocx.configure({
+      onCompleteExport: result => {
+        // 创建并下载 DOCX 文件
+        const blob = new Blob([result], {
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        
+        a.href = url
+        a.download = 'custom-layout.docx'
+        a.click()
+        URL.revokeObjectURL(url)
+      },
+      // A5 页面尺寸
+      pageSize: {
+        width: '14.8cm',
+        height: '21cm',
+      },
+      // 自定义边距
+      pageMargins: {
+        top: '2cm',
+        bottom: '2cm',
+        left: '2cm',
+        right: '2cm',
+      },
+    }),
+    // 其他扩展...
+  ],
+})
+```
+
+## 常用页面尺寸
+
+以下是一些常用页面尺寸，供参考：
+
+| 格式 | 宽度 | 高度 |
+|--------|-------|--------|
+| **A4** | `21.0cm` | `29.7cm` |
+| **A5** | `14.8cm` | `21.0cm` |
+| **Letter** | `8.5in` | `11in` |
+| **Legal** | `8.5in` | `14in` |
+| **Tabloid** | `11in` | `17in` |
+
+## 不同的测量单位
+
+您可以根据喜好混合使用不同单位：
+
+```js
+ExportDocx.configure({
+  onCompleteExport: (result) => {
+    // 处理导出的文件
+  },
+  // 美国 Letter 尺寸，单位为英寸
+  pageSize: {
+    width: '8.5in',
+    height: '11in',
+  },
+  // 使用不同单位的边距
+  pageMargins: {
+    top: '0.75in',    // 英寸
+    bottom: '72pt',   // 磅（1 英寸 = 72 磅）
+    left: '2cm',      // 厘米
+    right: '20mm',    // 毫米
+  },
+})
+```
+
+<Callout title="单位统一性" variant="hint">
+    虽然可以混合使用不同单位，但一般建议在整个配置中保持单位一致，以便于维护和理解。
+</Callout>
+
+## 运行时配置
+
+您还可以在直接调用导出命令时覆盖页面布局设置：
+
+```js
+// 使用不同的页面布局设置导出
+editor.commands.exportDocx({
+  onCompleteExport: (result) => {
+    // 处理导出的文件
+  },
+  pageSize: {
+    width: '11in',    // Tabloid 宽度
+    height: '17in',   // Tabloid 高度
+  },
+  pageMargins: {
+    top: '0.5in',
+    bottom: '0.5in',
+    left: '0.75in',
+    right: '0.75in',
+  },
+})
+```
+
+这可以让您针对不同场景创建不同的导出配置，无需重新配置整个扩展。

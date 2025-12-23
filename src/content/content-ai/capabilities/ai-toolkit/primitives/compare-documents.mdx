@@ -1,0 +1,218 @@
+---
+title: 比较文档
+meta:
+  title: 比较文档 | Tiptap Content AI
+  description: 实时比较文档并可视化差异。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+实时比较两个文档并在编辑器中显示差异。
+
+<CodeDemo
+  isPro
+  isLarge
+  path="/Extensions/AiToolkitCompareDocuments"
+  src="https://deploy-preview-405--tiptap-pro.netlify.app/src/Extensions/AiToolkitCompareDocuments/React/"
+/>
+
+<Callout title="适用于非 AI 场景">
+  此功能不依赖 AI 即可使用。它可以比较任意两个文档，无论它们是否由 AI 生成。一个常见的用例是在 AI 编辑之前和之后比较文档。请参阅[查看更改指南](/content-ai/capabilities/ai-toolkit/guides/review-changes-as-summary)。
+</Callout>
+
+## 指南：比较两个文档
+
+首先调用 `startComparingDocuments` 方法。它将比较编辑器的当前文档与您选择的另一个文档。此方法接受一个参数：`otherDoc`，用来指定要比较的文档。
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 开始与另一个文档比较更改
+toolkit.startComparingDocuments({
+  otherDoc,
+})
+```
+
+如果未提供 `otherDoc`，则 AI Toolkit 会从调用 `startComparingDocuments` 那一刻起开始跟踪当前文档的更改，并显示更改前后的文档差异。
+
+差异以编辑器中的[建议](/content-ai/capabilities/ai-toolkit/primitives/display-suggestions)形式显示。向你的应用中添加以下 CSS 文件，将建议格式化为红绿差异显示：
+
+```css
+/* 用绿色高亮插入的文本 */
+.tiptap-ai-suggestion,
+.tiptap-ai-suggestion > * {
+  background-color: oklch(87.1% 0.15 154.449);
+}
+
+/* 用红色高亮删除的文本 */
+.tiptap-ai-suggestion-diff,
+.tiptap-ai-suggestion-diff > * {
+  background-color: oklch(80.8% 0.114 19.571);
+}
+```
+
+调用 `getSuggestions` 获取文档间每一个独立更改的列表，均以[建议](/content-ai/capabilities/ai-toolkit/primitives/display-suggestions)形式存储。然后调用 `acceptChange` 或 `rejectChange` 来单独接受或拒绝它们。
+
+```ts
+// 获取所有更改（作为建议）
+const suggestions = toolkit.getSuggestions()
+
+// 接受第一个更改
+toolkit.acceptChange(suggestions[0].id)
+
+// 拒绝第一个更改
+toolkit.rejectChange(suggestions[0].id)
+```
+
+要停止比较文档，使用 `stopComparingDocuments` 方法。它将隐藏差异视图并清除建议。
+
+```ts
+toolkit.stopComparingDocuments()
+```
+
+## 示例演示
+
+下面是一个实时比较两个文档的演示。
+
+<CodeDemo
+  isPro
+  isLarge
+  path="/Extensions/AiToolkitCompareDocuments"
+  src="https://deploy-preview-405--tiptap-pro.netlify.app/preview/Extensions/AiToolkitCompareDocuments"
+/>
+
+尝试点击“开始比较文档”按钮，差异将出现。之后尝试编辑文档，观察差异变化。
+
+## API 参考
+
+## `startComparingDocuments`
+
+开始与另一个文档进行实时比较。差异作为建议显示在内联差异视图中，旧内容和新内容都在编辑器中显示。
+
+### 参数 (`StartComparingDocumentsOptions`)
+
+- `otherDoc?` (`Node`): 要比较的文档。它是[ProseMirror Node 对象](https://prosemirror.net/docs/ref/#model.Node)。如果省略，则默认为当前文档的快照。
+- `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 控制差异如何作为建议呈现
+  - `showAsDiff?` (`boolean`): 是否将替代内容显示为差异小部件。默认：比较流程中为 `true`
+  - `diffPosition?` (`'before' | 'after'`): 相对于建议的位置显示差异。默认：`'before'`
+  - `attributes?` (`Record<string, any>`): 添加到渲染元素的属性
+  - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 自定义渲染函数
+- `debounceTimeout?` (`number`): 在重新计算差异前等待的毫秒数。数值较低会使应用响应更快，但可能会影响大型文档性能。默认：`500`
+- `diffUtilityConfig?` (`DiffUtilityConfig`): 比较文档时使用的差异工具选项
+  - `simplifyChanges?` (`boolean`): 是否简化更改。如果为 `true`，例如同一单词中的两个更改将合并为一个更改。仅在模式为 `detailed` 时生效。默认：`true`
+  - `ignoreAttributes?` (`string[]`): 要忽略的属性。默认：`['id', 'data-thread-id']`
+  - `ignoreMarks?` (`string[]`): 要忽略的标记。默认：`['inlineThread']`
+  - `changeMergeDistance?` (`number | null`): 合并更改的最大距离（文档位置单位）。如果两个相邻更改在 rangeA 或 rangeB 的距离小于或等于该值，它们会合并为一个更改。设置为 `null` 或 `undefined` 以禁用合并。仅在模式为 `detailed` 时生效。默认：`null`
+  - `mode?` (`'detailed' | 'block'`): 比较时使用的差异模式。`'detailed'` 进行字符级差异，精确识别文本内更改（默认）。`'block'` 进行块级差异，将每个顶级节点视为单元。块模式适用于只需知道哪些段落、标题或其它块级元素发生变更的场景，不显示字符级细节。在块模式下，忽略 `simplifyChanges` 和 `changeMergeDistance` 设置。默认：`'detailed'`
+
+### 返回值
+
+`void`
+
+### 示例
+
+```ts
+// 开始与另一个文档比较更改
+toolkit.startComparingDocuments({
+  otherDoc,
+})
+```
+
+## `stopComparingDocuments`
+
+停止实时比较并清除所有建议，从而隐藏差异视图。
+
+### 返回值
+
+`void`
+
+### 示例
+
+```ts
+// 停止比较并清除装饰
+toolkit.stopComparingDocuments()
+```
+
+## `acceptChange`
+
+接受某个更改，使其实时比较时不再显示在差异中。
+
+这等同于根据建议 ID 应用该更改到另一个文档，即被比较的“其他文档”或 `otherDoc`。
+
+如需接受全部更改，调用 `stopComparingDocuments`。这会隐藏差异视图，效果相当于接受了所有更改。
+
+### 参数
+
+- `suggestionId` (`string`): 表示要接受的更改的建议唯一标识符
+
+### 返回值
+
+`void`
+
+### 示例
+
+```ts
+// 开始比较文档
+toolkit.startComparingDocuments({
+  otherDoc: otherDoc,
+})
+
+// 获取所有更改（作为建议）
+const suggestions = toolkit.getSuggestions()
+
+// 接受第一个更改
+toolkit.acceptChange(suggestions[0].id)
+```
+
+## `rejectChange`
+
+拒绝某个更改，使其实时比较时不再显示在差异中。
+
+这等同于根据建议 ID 应用该更改到当前文档。
+
+### 参数
+
+- `suggestionId` (`string`): 表示要拒绝的更改的建议唯一标识符
+
+### 返回值
+
+`void`
+
+### 示例
+
+```ts
+// 开始比较文档
+toolkit.startComparingDocuments({
+  otherDoc: otherDoc,
+})
+
+// 获取所有更改（作为建议）
+const suggestions = toolkit.getSuggestions()
+
+// 拒绝第一个更改
+toolkit.rejectChange(suggestions[0].id)
+```
+
+## `rejectAllChanges`
+
+拒绝所有更改，使其实时比较时不再显示在差异中。
+
+这相当于将当前文档设置为 `otherDoc`。
+
+### 返回值
+
+`void`
+
+### 示例
+
+```ts
+// 开始比较文档
+toolkit.startComparingDocuments({
+  otherDoc: otherDoc,
+})
+
+// 拒绝所有更改
+toolkit.rejectAllChanges()
+```

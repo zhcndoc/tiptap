@@ -59,8 +59,8 @@ curl -X POST "https://api.tiptap.dev/v1/convert/import?format=md" \
 curl -X POST "https://api.tiptap.dev/v1/convert/export" \
   -H "Authorization: Bearer <your-jwt-token>" \
   -H "X-App-Id: <your-app-id>" \
-  -H "Content-Type: application/json" \
-  -d '{"content":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hello from Tiptap!"}]}]},"format":"md"}' \
+  -F 'prosemirrorJson={"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hello from Tiptap!"}]}]}' \
+  -F 'to=md' \
   --output document.md
 ```
 
@@ -71,7 +71,7 @@ curl -X POST "https://api.tiptap.dev/v1/convert/export" \
 | `X-App-Id`       | 来自[https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings)的 Convert 应用 ID |
 
 #### 导出 API 字段
-| 字段      | 描述                                              |
-|-----------|---------------------------------------------------|
-| `content` | Tiptap JSON 内容                                  |
-| `format`  | 目标格式，`md` 或 `gfm`，用于 GitHub 风格 Markdown |
+| 字段             | 描述                                               |
+|------------------|----------------------------------------------------|
+| `prosemirrorJson` | Tiptap/ProseMirror JSON                            |
+| `to`             | 目标格式，`md` 或 `gfm`，用于 GitHub 风格 Markdown  |

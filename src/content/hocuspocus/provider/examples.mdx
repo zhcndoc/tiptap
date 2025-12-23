@@ -1,0 +1,268 @@
+---
+title: Hocuspocus 提供者示例
+meta:
+  title: Hocuspocus 提供者示例 | Tiptap 协作文档
+  category: Hocuspocus
+---
+
+## Tiptap
+
+[Tiptap](https://tiptap.dev) 是一个无头文本编辑器，完全可定制，且拥有一流的协作编辑集成，兼容 Hocuspocus。
+
+下面的示例代码展示了创建 Tiptap 实例所需的全部内容：包含所有默认扩展，启动你的 Hocuspocus 协作后端，并将一切连接起来。
+
+在你的 HTML 文档中添加一个元素，用于初始化 Tiptap：
+
+```html
+<div class="element"></div>
+```
+
+安装所需扩展：
+
+```bash
+npm install @hocuspocus/provider @tiptap/core @tiptap/pm @tiptap/starter-kit @tiptap/extension-collaboration @tiptap/extension-collaboration-caret yjs y-prosemirror
+```
+
+然后创建你的 Tiptap 实例：
+
+```js
+import { Editor } from '@tiptap/core'
+import { StarterKit } from '@tiptap/starter-kit'
+import Collaboration from '@tiptap/extension-collaboration'
+import CollaborationCaret from '@tiptap/extension-collaboration-caret'
+import * as Y from 'yjs'
+import { HocuspocusProvider } from '@hocuspocus/provider'
+
+const ydoc = new Y.Doc();
+
+const provider = new HocuspocusProvider({
+  url: "ws://127.0.0.1",
+  name: "example-document",
+  document: ydoc,
+});
+
+new Editor({
+  element: document.querySelector(".element"),
+  extensions: [
+    StarterKit.configure({
+      undoRedo: false,
+    }),
+    Collaboration.configure({
+      document: ydoc,
+    }),
+    CollaborationCaret.configure({
+      provider,
+      user: { name: "John Doe", color: "#ffcc00" },
+    }),
+  ],
+});
+```
+
+## CodeMirror
+
+```js
+import * as Y from "yjs";
+import { CodemirrorBinding } from "y-codemirror";
+import { WebsocketProvider } from "y-websocket";
+import CodeMirror from "codemirror";
+
+const ydoc = new Y.Doc();
+var provider = new WebsocketProvider(
+  "wss://websocket.tiptap.dev",
+  "hocuspocus-demos-codemirror",
+  ydoc
+);
+const yText = ydoc.getText("codemirror");
+const yUndoManager = new Y.UndoManager(yText);
+
+const editor = CodeMirror(document.querySelector(".editor"), {
+  mode: "javascript",
+  lineNumbers: true,
+});
+
+const binding = new CodemirrorBinding(yText, editor, provider.awareness, { yUndoManager });
+```
+
+了解更多：https://github.com/yjs/y-codemirror
+
+## Monaco
+
+```js
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+import { MonacoBinding } from "y-monaco";
+import * as monaco from "monaco-editor";
+
+window.MonacoEnvironment = {
+  getWorkerUrl: function (moduleId, label) {
+    if (label === "json") {
+      return "/monaco/dist/json.worker.bundle.js";
+    }
+    if (label === "css") {
+      return "/monaco/dist/css.worker.bundle.js";
+    }
+    if (label === "html") {
+      return "/monaco/dist/html.worker.bundle.js";
+    }
+    if (label === "typescript" || label === "javascript") {
+      return "/monaco/dist/ts.worker.bundle.js";
+    }
+    return "/monaco/dist/editor.worker.bundle.js";
+  },
+};
+
+window.addEventListener("load", () => {
+  const ydoc = new Y.Doc();
+  const provider = new WebsocketProvider(
+    "wss://websocket.tiptap.dev",
+    "hocuspocus-demos-monaco",
+    ydoc
+  );
+  const type = ydoc.getText("monaco");
+
+  const editor = monaco.editor.create(document.querySelector(".editor"), {
+    value: "",
+    language: "javascript",
+    theme: "vs-dark",
+  });
+  const monacoBinding = new MonacoBinding(
+    type,
+    editor.getModel(),
+    new Set([editor]),
+    provider.awareness
+  );
+
+  window.example = { provider, ydoc, type, monacoBinding };
+});
+```
+
+了解更多：https://github.com/yjs/y-monaco
+
+## Quill
+
+```js
+import Quill from "quill";
+import QuillCursors from "quill-cursors";
+import * as Y from "yjs";
+import { QuillBinding } from "y-quill";
+import { WebsocketProvider } from "y-websocket";
+
+Quill.register("modules/cursors", QuillCursors);
+
+var ydoc = new Y.Doc();
+var type = ydoc.getText("quill");
+var provider = new WebsocketProvider("wss://websocket.tiptap.dev", "hocuspocus-demos-quill", ydoc);
+
+var quill = new Quill(".editor", {
+  theme: "snow",
+  modules: {
+    cursors: true,
+    history: {
+      userOnly: true,
+    },
+  },
+});
+
+new QuillBinding(type, quill, provider.awareness);
+```
+
+了解更多：https://github.com/yjs/y-quill
+
+## Lexical
+
+```tsx
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
+import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
+import { CollaborationPlugin } from "@lexical/react/LexicalCollaborationPlugin";
+import * as Y from "yjs";
+import { TiptapCollabProvider } from "@hocuspocus/provider";
+
+export default function Editor({
+  initialEditorState,
+  key
+}: {
+  initialEditorState: string | null;
+  key: string;
+}) {
+  return (
+    <LexicalComposer
+      key={key}
+      initialConfig={{
+        editorState: null,
+        namespace: "test",
+      }}
+    >
+      <PlainTextPlugin
+        contentEditable={<ContentEditable />}
+        placeholder={<div>请输入一些文本...</div>}
+        ErrorBoundary={LexicalErrorBoundary}
+      />
+      <CollaborationPlugin
+        id={key}
+        providerFactory={createWebsocketProvider}
+        initialEditorState={initialEditorState}
+        shouldBootstrap={true}
+      />
+    </LexicalComposer>
+);
+}
+
+function createWebsocketProvider(
+  id: string,
+  yjsDocMap: Map<string, Y.Doc>
+): Provider {
+  const doc = new Y.Doc();
+  yjsDocMap.set(id, doc);
+
+// @TODO: 替换 APP ID
+// @TODO: 填写正确的 Token
+// @TODO: 或使用带 Hocuspocus URL 的 `HocuspocusProvider`
+  const hocuspocusProvider = new TiptapCollabProvider({
+    appId: 'YOUR_APP_ID',
+    name: `lexical-${id}`,
+    token: 'YOUR_TOKEN',
+    document: doc,
+  });
+
+  return hocuspocusProvider;
+}
+```
+
+## Slate（草稿）
+
+了解更多：https://github.com/BitPhinix/slate-yjs
+
+## 多路复用
+
+为了使用多路复用（即通过同一个 websocket 连接打开多个文档）与 TiptapCollab 或 Hocuspocus，你需要分别创建 socket 和 provider。
+下面的示例展示了它如何与 TiptapCollab 一起工作，但你也可以将 `TiptapCollabProviderWebsocket` 替换为 `HocuspocusProviderWebsocket`，将 `TiptapCollabProvider` 替换为 `HocuspocusProvider`，以配合 Hocuspocus 使用。
+
+请注意，认证需针对每个文档进行，因此 `token` 是 Provider 的一部分，而非 ProviderWebsocket。
+
+```typescript
+import {
+  TiptapCollabProvider,
+  TiptapCollabProviderWebsocket
+} from "@hocuspocus/provider";
+
+const socket = new TiptapCollabProviderWebsocket({
+  appId: '', // 如果使用 `HocuspocusProviderWebsocket` 则填写 `url`
+})
+
+const provider1 = new TiptapCollabProvider({
+  websocketProvider: socket,
+  name: 'document1',
+  token: '',
+})
+
+const provider2 = new TiptapCollabProvider({
+  websocketProvider: socket,
+  name: 'document2',
+  token: '',
+})
+
+provider1.attach() // 手动传入 socket 时，需要显式调用 attach
+provider2.attach() // 手动传入 socket 时，需要显式调用 attach
+```

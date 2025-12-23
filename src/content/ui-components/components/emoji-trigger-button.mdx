@@ -1,0 +1,166 @@
+---
+title: 表情符号触发按钮
+meta:
+  title: 表情符号触发按钮 | Tiptap UI 组件
+  description: 在 Tiptap 编辑器中插入表情符号触发字符，支持智能定位、自定义触发器、键盘快捷键以及无障碍支持。
+  category: UI 组件
+component:
+  name: 表情符号触发按钮
+  description: 一个预构建的 React 组件，用于在编辑器中插入表情符号触发字符。
+  type: component
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: SmileIcon
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个完全支持无障碍的 Tiptap 编辑器表情符号触发按钮。插入表情符号触发字符以激活表情符号选择，支持键盘快捷键以及灵活的位置选项。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/emoji-trigger-button" />
+
+## 安装
+
+通过 Tiptap CLI 添加该组件：
+
+```bash
+npx @tiptap/cli@latest add emoji-trigger-button
+```
+
+## 组件
+
+### `<EmojiTriggerButton />`
+
+一个预构建的 React 组件，用于在编辑器中插入表情符号触发字符。
+
+#### 用法
+
+```tsx
+export default function MyEditor() {
+  return (
+    <EmojiTriggerButton
+      editor={editor}
+      text="Emoji"
+      trigger="::"
+      hideWhenUnavailable={true}
+      showShortcut={true}
+      onTriggerApplied={(trigger) => console.log(`Trigger applied: ${trigger}`)}
+    />
+  )
+}
+```
+
+#### 属性
+
+| 名称                   | 类型                         | 默认值       | 说明                                                      |
+| ---------------------- | ---------------------------- | ------------ | --------------------------------------------------------- |
+| `editor`               | `Editor \| null`             | `undefined`  | Tiptap 编辑器实例                                          |
+| `node`                 | `Node \| null`               | `undefined`  | 可选，插入触发字符后面的节点                              |
+| `nodePos`              | `number \| null`             | `undefined`  | 可选，节点位置，用于插入触发字符的位置                    |
+| `text`                 | `string`                     | `undefined`  | 按钮的可选文本标签                                        |
+| `trigger`              | `string`                     | `":"`        | 要插入的触发文本                                          |
+| `hideWhenUnavailable`  | `boolean`                    | `false`      | 当无法插入触发字符时隐藏按钮                              |
+| `onTriggerApplied`     | `(trigger: string) => void`  | `undefined`  | 成功插入触发字符后调用的回调函数                          |
+| `showShortcut`         | `boolean`                    | `false`      | 显示键盘快捷键徽章（如果可用）                            |
+
+## 钩子
+
+### `useEmojiTrigger()`
+
+用于自定义构建表情符号触发按钮的钩子，提供对渲染和行为的完全控制。
+
+#### 用法
+
+```tsx
+function MyEmojiTriggerButton() {
+  const { isVisible, handleAddTrigger, canAddTrigger, label, shortcutKeys, trigger, Icon } =
+    useEmojiTrigger({
+      editor: myEditor,
+      trigger: '::',
+      hideWhenUnavailable: true,
+      onTriggerApplied: (trigger) => console.log(`Applied: ${trigger}`),
+    })
+
+  if (!isVisible) return null
+
+  return (
+    <button onClick={handleAddTrigger} disabled={!canAddTrigger} aria-label={label}>
+      <Icon />
+      {label} ({trigger}){shortcutKeys && <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>}
+    </button>
+  )
+}
+```
+
+#### 属性
+
+| 名称                   | 类型                         | 默认值       | 说明                                                      |
+| ---------------------- | ---------------------------- | ------------ | --------------------------------------------------------- |
+| `editor`               | `Editor \| null`             | `undefined`  | Tiptap 编辑器实例                                          |
+| `node`                 | `Node \| null`               | `undefined`  | 可选，插入触发字符后面的节点                              |
+| `nodePos`              | `number \| null`             | `undefined`  | 可选，节点位置，用于插入触发字符的位置                    |
+| `trigger`              | `string`                     | `":"`        | 要插入的触发文本                                          |
+| `hideWhenUnavailable`  | `boolean`                    | `false`      | 无法插入触发字符时隐藏按钮                                |
+| `onTriggerApplied`     | `(trigger: string) => void`  | `undefined`  | 成功插入触发字符后调用的回调函数                          |
+
+#### 返回值
+
+| 名称                | 类型              | 说明                                                         |
+| ------------------- | ----------------- | ------------------------------------------------------------ |
+| `isVisible`         | `boolean`         | 按钮是否应该被渲染                                           |
+| `canAddTrigger`     | `boolean`         | 是否可以插入表情符号触发字符                                 |
+| `handleAddTrigger`  | `() => boolean`   | 插入表情符号触发字符的函数                                   |
+| `label`             | `string`          | 按钮的无障碍标签文本                                         |
+| `shortcutKeys`      | `string`          | 键盘快捷键（Cmd/Ctrl + Shift + E）                          |
+| `trigger`           | `string`          | 当前触发文本                                                 |
+| `Icon`              | `React.FC`        | 表情符号触发按钮的图标组件（SmilePlusIcon）                 |
+
+## 工具函数
+
+### `canAddEmojiTrigger(editor)`
+
+检查当前编辑器状态是否可以插入表情符号触发字符。
+
+```tsx
+import { canAddEmojiTrigger } from '@/components/tiptap-ui/emoji-trigger-button'
+
+const canAdd = canAddEmojiTrigger(editor)
+```
+
+### `addEmojiTrigger(editor, trigger?, node?, nodePos?)`
+
+在当前选区或指定位置以编程方式插入表情符号触发字符。
+
+```tsx
+import { addEmojiTrigger } from '@/components/tiptap-ui/emoji-trigger-button'
+
+const success = addEmojiTrigger(editor, ':') // 在光标处插入
+const successAtNode = addEmojiTrigger(editor, '::', node, nodePos) // 在节点处插入
+```
+
+## 键盘快捷键
+
+表情符号触发按钮支持以下键盘快捷键：
+
+- **Cmd/Ctrl + Shift + E**：在光标位置插入表情符号触发字符
+
+使用 `<EmojiTriggerButton />` 组件或 `useEmojiTrigger()` 钩子时，快捷键会自动注册。
+
+## 需求
+
+### 依赖
+
+- `@tiptap/react` - Tiptap React 核心集成
+- `react-hotkeys-hook` - 键盘快捷键管理
+
+### 引用组件
+
+- `use-tiptap-editor`（钩子）
+- `button`（基础组件）
+- `badge`（基础组件）
+- `tiptap-utils`（库）
+- `smile-plus-icon`（图标）

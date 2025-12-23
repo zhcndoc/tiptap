@@ -1,0 +1,61 @@
+---
+title: 分页符
+meta:
+  title: 分页符 | Tiptap Pages 文档
+  description: 了解如何在 Tiptap Pages 扩展中更改页面间的背景颜色和页面间距。
+  category: Pages
+sidebars:
+  hideSecondary: true
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+`pageBreakBackground` 和 `pageGap` 选项允许您更改页面之间区域的背景颜色和页面之间的间距。这有助于视觉上区分页码，或使其与您的应用背景颜色设计保持一致。
+
+<CodeDemo isPro src="https://feature-pages-extension--tiptap-pro.netlify.app/preview/extensions/pagescustompagebreak" />
+
+## 如何设置分页符背景
+
+分页符的初始编辑器配置可以在 `.configure()` 扩展级别完成：
+
+```js
+Pages.configure({
+  pageBreakBackground: '#f8f8f8', // 页面之间的浅灰色背景
+})
+```
+
+然后，您可以随时使用暴露的编辑器命令 `setPageBreakBackground(color: string)` 来更改分页符颜色：
+
+```js
+editor.commands.setPageBreakBackground(pageBreakBackground)
+// 你还应该这样做！👇🏻
+document.body.style.backgroundColor = pageBreakBackground
+```
+
+<Callout title="实用提示">
+您应该同时更改 body（或编辑器容器）的背景颜色以匹配分页符背景，因为分页符背景只应用于分页符本身，而不适用于整个文档或 Tiptap 编辑器。
+</Callout>
+
+## 页面间距
+
+- 设置每页之间的空间。
+- 默认值：`50`（像素）
+
+### 初始配置
+
+```js
+Pages.configure({
+  pageGap: 20, // 单位为像素
+})
+```
+
+### 编辑器命令
+
+```js
+editor.commands.setPageGap(20) // 单位为像素
+```
+
+<Callout title="提示">
+`pageGap` 属性只影响页面之间的间距，不影响页面本身。
+</Callout>

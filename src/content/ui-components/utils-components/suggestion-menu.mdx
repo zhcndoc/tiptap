@@ -1,0 +1,304 @@
+---
+title: 建议菜单
+meta:
+  title: 建议菜单 | Tiptap UI 组件
+  description: 一个灵活的自动完成和建议系统，适用于 Tiptap 编辑器，支持触发字符、过滤、键盘导航及可扩展的项目支持。
+  category: UI 组件
+component:
+  name: 建议菜单
+  description: 一个强大且灵活的建议菜单系统，适用于 Tiptap 编辑器。基于可配置的触发字符创建浮动下拉菜单，支持完整的键盘导航、过滤和自定义渲染。
+  type: utils-component
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: LightBulbIcon
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个强大且灵活的建议菜单系统，适用于 Tiptap 编辑器。基于可配置的触发字符创建浮动下拉菜单，支持完整的键盘导航、过滤和自定义渲染。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui-utils/suggestion-menu" />
+
+## 安装
+
+通过 Tiptap CLI 添加该组件：
+
+```bash
+npx @tiptap/cli@latest add suggestion-menu
+```
+
+## 组件
+
+### `<SuggestionMenu />`
+
+核心的建议菜单组件，通过输入特定字符触发，提供一个浮动的下拉界面。
+
+#### 用法
+
+```tsx
+<SuggestionMenu
+  editor={editor}
+  char="@"
+  pluginKey="myMentionMenu"
+  items={async ({ query, editor }) => [
+    {
+      title: 'John Doe',
+      subtext: '软件工程师',
+      onSelect: ({ editor, range }) => {
+        editor.chain().focus().insertContentAt(range, '@john').run()
+      },
+    },
+  ]}
+>
+  {({ items, selectedIndex, onSelect }) => (
+    <MenuList items={items} selectedIndex={selectedIndex} onSelect={onSelect} />
+  )}
+</SuggestionMenu>
+```
+
+#### 属性说明
+
+| 名称                | 类型                                   | 默认值                    | 描述                                                                                        |
+| ------------------- | ------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------- |
+| `editor`            | `Editor \| null`                      | `undefined`               | Tiptap 编辑器实例                                                                           |
+| `char`              | `string`                              | `"@"`                     | 触发建议菜单的字符                                                                         |
+| `items`             | `(props) => Item[] \| Promise<Item[]>` | `() => []`                | 返回建议项的函数                                                                           |
+| `children`          | `(props) => ReactNode`                | `undefined`               | 菜单内容的渲染函数                                                                         |
+| `floatingOptions`   | `Partial<UseFloatingOptions>`         | `undefined`               | 额外的浮动 UI 定位选项                                                                     |
+| `selector`          | `string`                              | `"tiptap-suggestion-menu"` | 菜单容器的 CSS 选择器                                                                      |
+| `pluginKey`         | `string \| PluginKey`                 | `SuggestionPluginKey`     | 建议插件的唯一标识符                                                                       |
+| `maxHeight`         | `number`                             | `384`                     | 建议菜单最大高度（像素）。内容超过高度时会滚动                                           |
+| `allowSpaces`       | `boolean`                            | `false`                   | 允许在查询中使用空格                                                                       |
+| `allowToIncludeChar`| `boolean`                            | `false`                   | 查询中是否包含触发字符                                                                     |
+| `allowedPrefixes`   | `string[] \| null`                   | `[" "]`                   | 触发字符前允许出现的字符                                                                   |
+| `startOfLine`       | `boolean`                           | `false`                   | 仅在行首触发                                                                              |
+| `decorationTag`     | `string`                             | `"span"`                  | 装饰元素的 HTML 标签                                                                       |
+| `decorationClass`   | `string`                             | `"suggestion"`            | 装饰元素的 CSS 样式类                                                                      |
+| `decorationContent` | `string`                             | `""`                      | 装饰元素中的占位文本                                                                       |
+
+## 类型
+
+### `SuggestionItem<T>`
+
+定义建议项结构的接口。
+
+```tsx
+interface SuggestionItem<T = any> {
+  title: string // 主显示文本
+  subtext?: string // 次级上下文文本
+  badge?: React.MemoExoticComponent<IconComponent> | React.FC<IconProps> | string // 图标或徽章组件
+  group?: string // 组织分组标识
+  keywords?: string[] // 补充搜索关键词
+  context?: T // 传递给 onSelect 的自定义数据
+  onSelect: (props: {
+    // 选择事件处理器
+    editor: Editor
+    range: Range
+    context?: T
+  }) => void
+}
+```
+
+### `SuggestionMenuRenderProps<T>`
+
+传递给 children 渲染函数的属性。
+
+```tsx
+type SuggestionMenuRenderProps<T = any> = {
+  items: SuggestionItem<T>[] // 已过滤的建议项
+  selectedIndex?: number // 当前选中项索引
+  onSelect: (item: SuggestionItem<T>) => void // 项选择处理函数
+}
+```
+
+## 工具函数
+
+### `filterSuggestionItems(items, query)`
+
+根据搜索查询过滤和优先排序建议项。
+
+```tsx
+import { filterSuggestionItems } from '@/components/tiptap-ui-utils/suggestion-menu'
+
+const filteredItems = filterSuggestionItems(allItems, 'john')
+```
+
+#### 参数
+
+| 名称     | 类型               | 描述                            |
+| -------- | ------------------ | ------------------------------- |
+| `items`  | `SuggestionItem[]` | 需要过滤的建议项数组             |
+| `query`  | `string`           | 搜索查询字符串                  |
+
+#### 过滤规则
+
+- 匹配 `title`、`subtext` 和 `keywords` 属性
+- 不区分大小写匹配
+- 优先返回完全匹配和“以…开头”的匹配项
+- 查询为空时返回所有项
+
+### `calculateStartPosition(cursorPosition, previousNode, triggerChar)`
+
+计算建议命令在文本中的起始位置。
+
+```tsx
+import { calculateStartPosition } from '@/components/tiptap-ui-utils/suggestion-menu'
+
+const startPos = calculateStartPosition(100, textNode, '@')
+```
+
+#### 参数
+
+| 名称              | 类型            | 描述                         |
+| ----------------- | --------------- | ---------------------------- |
+| `cursorPosition`  | `number`        | 文档中当前光标位置           |
+| `previousNode`    | `Node \| null`  | 光标前的文本节点             |
+| `triggerChar`     | `string`        | 触发建议的字符               |
+
+## 高级用法
+
+### 自定义建议菜单
+
+创建一个对项和渲染完全可控的自定义建议菜单：
+
+```tsx
+function CustomMentionMenu() {
+  const getSuggestionItems = async ({ query, editor }) => {
+    const users = await fetchUsers(query)
+
+    return users.map((user) => ({
+      title: user.name,
+      subtext: user.email,
+      context: user,
+      badge: UserIcon,
+      keywords: [user.department, user.role],
+      onSelect: ({ editor, range, context }) => {
+        editor
+          .chain()
+          .focus()
+          .insertContentAt(range, {
+            type: 'mention',
+            attrs: { id: context.id, label: context.name },
+          })
+          .run()
+      },
+    }))
+  }
+
+  return (
+    <SuggestionMenu
+      char="@"
+      pluginKey="customMention"
+      items={getSuggestionItems}
+      allowSpaces={false}
+      decorationClass="my-mention-decoration"
+    >
+      {({ items, selectedIndex, onSelect }) => (
+        <Card>
+          <CardBody>
+            {items.map((item, index) => (
+              <MentionItem
+                key={item.title}
+                item={item}
+                isSelected={index === selectedIndex}
+                onSelect={() => onSelect(item)}
+              />
+            ))}
+          </CardBody>
+        </Card>
+      )}
+    </SuggestionMenu>
+  )
+}
+```
+
+### 使用分组项
+
+将建议项分组以便更好地导航：
+
+```tsx
+function GroupedSuggestionMenu() {
+  const getSuggestionItems = async ({ query, editor }) => {
+    return [
+      {
+        title: '添加标题',
+        group: '格式',
+        badge: HeadingIcon,
+        onSelect: ({ editor, range }) => {
+          editor.chain().focus().deleteRange(range).toggleHeading({ level: 1 }).run()
+        },
+      },
+      {
+        title: '添加表格',
+        group: '插入',
+        badge: TableIcon,
+        onSelect: ({ editor, range }) => {
+          editor.chain().focus().deleteRange(range).insertTable().run()
+        },
+      },
+    ]
+  }
+
+  return (
+    <SuggestionMenu char="/" items={getSuggestionItems}>
+      {({ items, selectedIndex, onSelect }) => (
+        <Card>
+          <CardBody>
+            {Object.entries(groupBy(items, 'group')).map(([groupName, groupItems]) => (
+              <div key={groupName}>
+                <CardGroupLabel>{groupName}</CardGroupLabel>
+                <CardItemGroup>
+                  {groupItems.map((item, index) => (
+                    <SuggestionItem
+                      key={item.title}
+                      item={item}
+                      isSelected={index === selectedIndex}
+                      onSelect={() => onSelect(item)}
+                    />
+                  ))}
+                </CardItemGroup>
+              </div>
+            ))}
+          </CardBody>
+        </Card>
+      )}
+    </SuggestionMenu>
+  )
+}
+```
+
+## 样式
+
+建议菜单设置了一个 CSS 自定义属性，可用于样式定制：
+
+### CSS 自定义属性
+
+| 属性                          | 描述                                     | 默认值     |
+| ----------------------------- | ---------------------------------------- | ---------- |
+| `--suggestion-menu-max-height` | 菜单最大高度，动态计算                     | `384px`    |
+
+菜单容器具有类名 `tiptap-suggestion-menu`，并包含 `data-selector` 属性用于精准样式定位。
+
+### 示例样式
+
+```css
+.tiptap-suggestion-menu {
+  max-height: var(--suggestion-menu-max-height);
+  overflow-y: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+```
+
+## 无障碍性
+
+组件内置无障碍功能：
+
+- 使用 `role="listbox"` 以便于屏幕阅读器识别
+- 通过 `aria-label="Suggestions"` 描述菜单用途
+- 支持箭头键和回车键进行键盘导航和选择
+- 支持 Esc 键关闭菜单
+- 防止默认指针事件以保持编辑器焦点

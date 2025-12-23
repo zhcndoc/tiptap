@@ -1,0 +1,104 @@
+---
+title: 持久化
+meta:
+  title: 持久化 | Tiptap 编辑器文档
+  description: 了解如何在 Tiptap 中持久化编辑器状态。探索如何保存和恢复编辑器内容。
+---
+
+在你设置好编辑器、配置并添加了一些内容后，你可能会想知道如何持久化编辑器。
+由于 Tiptap 能返回 **HTML** 或 **JSON**，你可以轻松地将内容保存到数据库、本地存储（LocalStorage）或任何其他存储方案，比如 sqlite 或 IndexedDB。
+
+虽然保存 HTML 是可行的，并且可能是获取可渲染内容的最简单方式，但我们建议使用 JSON 来持久化编辑器状态，因为 JSON 更灵活、解析更简单，
+并且允许在需要时进行外部编辑，而无需对其运行额外的 HTML 解析器。
+
+## 将状态持久化到 LocalStorage
+
+你可以使用 `localStorage` API 在浏览器中持久化编辑器状态。下面是一个使用 LocalStorage 保存和恢复编辑器内容的简单示例：
+
+```js
+// 将编辑器内容保存到 LocalStorage
+localStorage.setItem('editorContent', JSON.stringify(editor.getJSON()))
+
+// 从 LocalStorage 恢复编辑器内容
+const savedContent = localStorage.getItem('editorContent')
+if (savedContent) {
+  editor.setContent(JSON.parse(savedContent))
+}
+```
+
+你也可以在初始化编辑器时从 localStorage 获取数据：
+
+```js
+const savedContent = localStorage.getItem('editorContent')
+const editor = new Editor({
+  content: savedContent ? JSON.parse(savedContent) : '',
+  extensions: [
+    // 你的扩展
+  ],
+})
+```
+
+## 将状态持久化到数据库
+
+要将编辑器状态持久化到数据库，你可以使用与 LocalStorage 相同的方法，但不是使用 `localStorage`，而是将 JSON 数据发送到你的后端 API。
+
+在下面的示例中，我们使用 Fetch API 将编辑器内容发送到一个假设的接口：
+
+```js
+// 将编辑器内容保存到数据库
+fetch('/api/editor/content', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(editor.getJSON()),
+})
+```
+
+要从数据库恢复编辑器内容，你需要从你的 API 获取内容并设置到编辑器中：
+
+```js
+// 从数据库恢复编辑器内容
+fetch('/api/editor/content')
+  .then(response => response.json())
+  .then(data => {
+    editor.setContent(data)
+  })
+  .catch(error => {
+    console.error('获取编辑器内容错误:', error)
+  })
+```
+
+## 在 React 中恢复编辑器状态
+
+如果你使用 React，可以使用 `useEffect` 钩子在组件挂载时恢复编辑器状态。以下是针对 LocalStorage 情况的示例：
+
+```jsx
+function MyEditor() {
+  const content = useMemo(() => {
+    const savedContent = localStorage.getItem('editorContent')
+    return savedContent ? JSON.parse(savedContent) : ''
+  }, [])
+
+  const editor = useEditor({
+    content,
+    extensions: [
+      // 你的扩展
+    ],
+  })
+
+  return (
+    <div>
+      <EditorContent editor={editor} />
+      <button
+        onClick={() => {
+          // 将编辑器内容保存到 LocalStorage
+          localStorage.setItem('editorContent', JSON.stringify(editor.getJSON()))
+        }}
+      >
+        保存内容
+      </button>
+    </div>
+  )
+}
+```

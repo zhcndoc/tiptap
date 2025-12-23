@@ -29,6 +29,7 @@ export const sidebarConfig: SidebarConfig = {
           title: 'DOCX',
           href: '/conversion/import-export/docx',
           beta: true,
+          tags: ['Start'],
           children: [
             {
               title: '编辑器导入',
@@ -41,6 +42,16 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: 'REST API',
               href: '/conversion/import-export/docx/rest-api',
+            },
+            {
+              title: '页眉和页脚',
+              href: '/conversion/import-export/docx/headers-footers',
+              tags: ['Team', 'New'],
+            },
+            {
+              title: '自定义页面布局',
+              href: '/conversion/import-export/docx/custom-page-layout',
+              tags: ['New'],
             },
             {
               title: '转换自定义节点',

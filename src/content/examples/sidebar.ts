@@ -53,6 +53,10 @@ export const sidebarConfig: SidebarConfig = {
           title: '任务列表',
           href: '/examples/basics/tasks',
         },
+        {
+          title: 'Text direction & RTL support',
+          href: '/examples/basics/text-direction',
+        },
       ],
     },
     {
@@ -134,10 +138,6 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: '斜杠命令',
           href: '/examples/experiments/slash-commands',
-        },
-        {
-          title: '尾部节点',
-          href: '/examples/experiments/trailing-node',
         },
       ],
     },

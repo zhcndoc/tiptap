@@ -1,0 +1,39 @@
+---
+title: 配置 Hocuspocus 服务器
+meta:
+  title: 配置 Hocuspocus 服务器 | Tiptap 协作文档
+  description:
+  category: Hocuspocus
+---
+
+## 介绍
+
+目前只需传入少量设置。大多数功能通过 [hooks](/hocuspocus/server/hooks) 控制。
+
+## 设置
+
+| 设置           | 描述                                                                                                                               | 默认值           |
+|---------------|--------------------------------------------------------------------------------------------------------------------------------------|-----------------|
+| `name`        | 实例的名称，用于日志记录。                                                                                                           |                 |
+| `port`        | 服务器监听的端口。                                                                                                                   | `80`            |
+| `timeout`     | 连接健康检查的时间间隔，单位为毫秒。                                                                                                | `30000 (= 30秒)` |
+| `debounce`    | 对 `onStoreDocument` 钩子的调用进行防抖，时间单位为毫秒。否则每次更新都会被持久化。                                                    | `2000 (= 2秒)`   |
+| `maxDebounce` | 确保至少在给定时间（毫秒）内调用一次 `onStoreDocument`。                                                                            | `10000 (= 10秒)` |
+| `quiet`       | 默认情况下，服务器会显示启动屏幕。如果传入 `false`，服务器将安静启动。                                                               | `false`         |
+
+## 使用示例
+
+```js
+import { Server } from "@hocuspocus/server";
+
+const server = new Server({
+  name: "hocuspocus-fra1-01",
+  port: 1234,
+  timeout: 30000,
+  debounce: 5000,
+  maxDebounce: 30000,
+  quiet: true,
+});
+
+server.listen();
+```

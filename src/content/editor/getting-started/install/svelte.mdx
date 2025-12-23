@@ -10,7 +10,7 @@ meta:
 
 ## 走捷径：带 Tiptap 的 Svelte REPL
 
-如果您想立即开始，这里有一个 [带 Tiptap 的 Svelte REPL](https://svelte.dev/repl/798f1b81b9184780aca18d9a005487d2?version=3.31.2)。
+如果您想立即开始，这里有一个 [带 Tiptap 的 Svelte REPL](https://svelte.dev/playground/66be82691d304dc981502659e93f8b92)。
 
 ### 先决条件
 
@@ -35,7 +35,7 @@ npm run dev
 既然我们已经完成了样板代码，让我们安装 Tiptap！在以下示例中，您需要 `@tiptap/core` 包，以及一些组件、`@tiptap/pm` 和 `@tiptap/starter-kit`，它们包括了最常用的扩展，以便快速入门。
 
 ```bash
-npm install @tiptap/core @tiptap/pm @tiptap/starter-kit
+npm install @tiptap/core @tiptap/pm @tiptap/starter-kit @tiptap/extension-bubble-menu
 ```
 
 如果您完成了步骤 1 和 2，现在可以使用 `npm run dev` 启动您的项目，并在您喜欢的浏览器中打开 [http://localhost:3000/](http://localhost:3000/)。如果您正在处理现有项目，这可能会有所不同。
@@ -45,6 +45,103 @@ npm install @tiptap/core @tiptap/pm @tiptap/starter-kit
 要开始使用 Tiptap，您需要向您的应用添加一个新组件。我们称之为 `Tiptap`，并在 `src/lib/Tiptap.svelte` 中添加以下示例代码。
 
 这是让 Tiptap 在 SvelteKit 上快速启动和运行的最快方法。它将为您提供一个非常基本的 Tiptap 版本，没有任何按钮。别担心，您将很快能够添加更多功能。
+
+```svelte
+<script>
+  import { onMount, onDestroy } from 'svelte'
+  import { Editor } from '@tiptap/core'
+  import { StarterKit } from '@tiptap/starter-kit'
+  import BubbleMenu from '@tiptap/extension-bubble-menu'
+
+  let bubbleMenu = $state()
+  let element = $state()
+  let editorState = $state({editor: null})
+
+  onMount(() => {
+    editorState.editor = new Editor({
+      element: element,
+      extensions: [
+        StarterKit,
+        BubbleMenu.configure({
+          element: bubbleMenu,
+        }),
+      ],
+      content: `
+        <h1>Hello Svelte! 🌍️ </h1>
+        <p>This editor is running in Svelte.</p>
+        <p>Select some text to see the bubble menu popping up.</p>
+      `,
+      onTransaction: ({editor}) => {
+        // Increment the state signal to force a re-render
+        editorState = { editor }
+      },
+    })
+  })
+  onDestroy(() => {
+    editorState.editor?.destroy()
+  })
+</script>
+
+<div style="position: relative" class="app">
+  {#if editorState.editor}
+    <div class="fixed-menu">
+      <button
+        onclick={() => editorState.editor.chain().focus().toggleHeading({ level: 1 }).run()}
+        class:active={editorState.editor.isActive('heading', { level: 1 })}
+      >
+        H1
+      </button>
+      <button
+        onclick={() => editorState.editor.chain().focus().toggleHeading({ level: 2 }).run()}
+        class:active={editorState.editor.isActive('heading', { level: 2 })}
+      >
+        H2
+      </button>
+      <button onclick={() => editorState.editor.chain().focus().setParagraph().run()} class:active={editorState.editor.isActive('paragraph')}>
+        P
+      </button>
+    </div>
+  {/if}
+
+  <div bind:this={element}></div>
+</div>
+
+<style>
+  button.active {
+    background: black;
+    color: white;
+  }
+</style>
+
+```
+
+## 将其添加到您的应用中
+
+现在，让我们将 `src/routes/+page.svelte` 的内容替换为以下示例代码，以在我们的应用中使用新的 `Tiptap` 组件。
+
+```svelte
+<script>
+  import Tiptap from '$lib/Tiptap.svelte'
+</script>
+
+<main>
+  <Tiptap />
+</main>
+```
+
+Tiptap 现在应该在您的浏览器中可见。祝贺您，给自己一个赞吧！ :)
+
+## 后续步骤
+
+- [配置您的编辑器](/editor/getting-started/configure)
+- [为编辑器添加样式](/editor/getting-started/style-editor)
+- [了解更多 Tiptap 概念](/editor/core-concepts/introduction)
+- [学习如何持久化编辑器状态](/editor/core-concepts/persistence)
+- [开始构建您自己的扩展](/editor/extensions/custom-extensions)
+
+## 使用 Svelte 传统语法的设置
+
+上面的示例使用了 [Svelte 符号语法](https://svelte.dev/docs/svelte/what-are-runes)。如果您的 Svelte 应用处于 [传统模式](https://svelte.dev/docs/svelte/legacy-let)，请改用以下代码为 `Tiptap.svelte` 组件。
 
 ```svelte
 <script>
@@ -104,19 +201,3 @@ npm install @tiptap/core @tiptap/pm @tiptap/starter-kit
 	}
 </style>
 ```
-
-## 将其添加到您的应用中
-
-现在，让我们将 `src/routes/+page.svelte` 的内容替换为以下示例代码，以在我们的应用中使用新的 `Tiptap` 组件。
-
-```svelte
-<script>
-  import Tiptap from '$lib/Tiptap.svelte'
-</script>
-
-<main>
-  <Tiptap />
-</main>
-```
-
-Tiptap 现在应该在您的浏览器中可见。祝贺您，给自己一个赞吧！ :)

@@ -1,0 +1,126 @@
+---
+title: 粘贴规则
+meta:
+  title: Tiptap 中的粘贴规则 | Tiptap 编辑器文档
+  description: 创建粘贴规则以在 Tiptap 中自动转换粘贴的内容。学习如何在文档中使用和创建粘贴规则！
+  category: 编辑器
+---
+
+粘贴规则是 Tiptap 中的强大功能，允许你在内容粘贴到编辑器时自动进行转换。它们可以用来创建格式化快捷方式、插入内容或基于粘贴文本中的特定模式触发命令。
+
+## 什么是粘贴规则？
+
+粘贴规则是基于模式的触发器，会监听粘贴到编辑器中的特定文本或内容，并自动将其转换为其他内容。例如，粘贴 `**bold**` 可以自动将文本转换为加粗格式，或者粘贴图片 URL 能创建一个图片节点。粘贴规则对于实现类似 Markdown 的快捷方式以及提升从外部来源粘贴内容时的用户体验尤其有用。
+
+## Tiptap 中的粘贴规则如何工作？
+
+Tiptap 使用粘贴规则来提供许多针对粘贴内容的默认快捷方式和行为。粘贴规则定义为正则表达式或自定义匹配器，用以匹配粘贴的文本。当检测到该模式时，规则执行转换操作——例如应用标记、插入节点或运行命令。
+
+粘贴规则通常在扩展（节点、标记或通用扩展）中通过 `addPasteRules()` 方法注册。Tiptap 提供了 `markPasteRule` 和 `nodePasteRule` 等辅助函数，简化为标记和节点创建粘贴规则的过程。
+
+## 在扩展中创建粘贴规则
+
+要添加自定义粘贴规则，请在你的扩展中定义 `addPasteRules()` 方法。该方法应返回一个粘贴规则数组。
+
+### 示例：使用粘贴规则创建高亮标记
+
+```ts
+import { Mark, markPasteRule } from '@tiptap/core'
+
+const HighlightMark = Mark.create({
+  name: 'highlight',
+
+  addPasteRules() {
+    return [
+      markPasteRule({
+        find: /(?:==)((?:[^=]+))(?:==)/g, // 匹配 ==highlight==
+        type: this.type,
+      }),
+    ]
+  },
+})
+```
+
+### 示例：使用粘贴规则创建自定义 figure 节点
+
+```ts
+import { Node, nodePasteRule } from '@tiptap/core'
+
+const FigureNode = Node.create({
+  name: 'figure',
+
+  addPasteRules() {
+    return [
+      nodePasteRule({
+        find: /!\[(.*?)\]\((.*?)(?:\s+"(.*?)")?\)/g, // 匹配 ![alt](src "title")
+        type: this.type,
+        getAttributes: match => {
+          const [, alt, src, title] = match
+          return { src, alt, title }
+        },
+      }),
+    ]
+  },
+})
+```
+
+## 理解 `markPasteRule` 和 `nodePasteRule`
+
+Tiptap 提供了两个辅助函数来简化粘贴规则的创建：
+
+- **`markPasteRule`**：基于粘贴内容中的模式应用标记（如加粗、斜体、高亮）。
+- **`nodePasteRule`**：基于粘贴内容中的模式插入或转换节点（如图片、figure、自定义块）。
+
+这两个函数都接受一个配置对象，至少包含以下属性：
+
+- `find`：匹配粘贴模式的正则表达式或匹配函数。
+- `type`：要应用或插入的标记或节点类型。
+- `getAttributes`（可选）：从正则匹配中提取并返回属性的函数。
+- `getContent`（仅限 nodePasteRule，可选）：提供节点内容的函数或值。
+
+### 使用 `getAttributes` 提取信息
+
+`getAttributes` 函数允许你从匹配到的输入中提取数据，并将其作为属性传递给节点或标记。这对于像图片或 figure 这样的节点特别有效，你可以从粘贴的内容中获取 `src`、`alt` 或 `title` 等值。
+
+#### 示例：在节点粘贴规则中使用 `getAttributes`
+
+```ts
+addPasteRules() {
+  return [
+    nodePasteRule({
+      find: /!\[(.*?)\]\((.*?)(?:\s+"(.*?)")?\)/g, // 匹配 ![alt](src "title")
+      type: this.type,
+      getAttributes: match => {
+        const [, alt, src, title] = match
+        return { src, alt, title }
+      },
+    }),
+  ]
+},
+```
+
+此示例中，当用户粘贴类似 `![Alt text](image.png "Optional title")` 的内容时，粘贴规则会提取 `alt`、`src` 和 `title` 并作为属性传递给节点。
+
+#### 示例：在标记粘贴规则中使用 `getAttributes`
+
+```ts
+addPasteRules() {
+  return [
+    markPasteRule({
+      find: /\*\*([^*]+)\*\*/g, // 匹配 **bold**
+      type: this.type,
+      getAttributes: match => {
+        // 如有需要，可以在这里提取自定义属性
+        return {}
+      },
+    }),
+  ]
+},
+```
+
+### 小贴士
+
+- `getAttributes` 中的 `match` 参数是正则表达式的匹配结果，可以解构以获取捕获组。
+- 你可以使用 `getAttributes` 设置节点或标记支持的任意属性，例如链接的 `href`、图片的 `src` 或自定义数据字段。
+- 如果不需要提取属性，可以省略 `getAttributes`。
+- 在正则表达式中使用 `g`（全局）标志，以匹配粘贴内容中的所有出现位置。

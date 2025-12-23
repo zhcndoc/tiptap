@@ -1,0 +1,118 @@
+---
+title: MarkdownManager API
+tags:
+  - type: beta
+meta:
+  title: Markdown Manager API | Tiptap 编辑器文档
+  description: 了解 Tiptap 编辑器中的 Markdown Manager API。获取处理 Markdown 内容的方法和选项。
+  category: 编辑器
+---
+
+`MarkdownManager` 类是一个独立的类，提供支持将 Markdown 内容解析和序列化为 Tiptap 的文档模型。
+
+## 方法
+
+### 构造函数
+
+```typescript
+new MarkdownManager(options?: {
+  marked?: typeof marked,
+  markedOptions?: MarkedOptions,
+  indentation?: {
+    style?: 'space' | 'tab',
+    size?: number,
+  },
+})
+```
+
+### `MarkdownManager.hasMarked()`
+
+根据 `marked` 库是否可用，返回 `true` 或 `false`。
+
+- **返回**: `boolean`
+
+```js
+const manager = new MarkdownManager()
+manager.hasMarked() // true 或 false
+```
+
+### `MarkdownManager.registerExtension()`
+
+注册一个 Tiptap 扩展，用于解析和序列化 Markdown 内容。
+
+- **返回**: `void`
+- **参数**:
+  - `extension`: 要注册的 Tiptap 扩展。
+
+```js
+const manager = new MarkdownManager()
+manager.registerExtension(MyCustomExtension)
+```
+
+### `MarkdownManager.parse()`
+
+将 Markdown 字符串解析为 Tiptap 文档。
+
+- **返回**: `JSON` - Tiptap 文档的 JSON 格式。
+- **参数**:
+  - `markdown`: 要解析的 Markdown 内容字符串。
+
+```js
+const manager = new MarkdownManager()
+const doc = manager.parse('# Hello World')
+```
+
+### `MarkdownManager.serialize()`
+
+将 Tiptap 文档或 JSON 内容序列化为 Markdown 字符串。
+
+- **返回**: `string` - 序列化后的 Markdown 字符串。
+- **参数**:
+  - `content`: 要序列化的 Tiptap 文档或 JSON 内容。
+
+```js
+const manager = new MarkdownManager()
+const markdown = manager.serialize(doc)
+```
+
+### `MarkdownManager.renderNodeToMarkdown()`
+
+渲染单个 ProseMirror 节点为其 Markdown 表示。
+
+- **返回**: `string` - 给定节点对应的 Markdown 字符串。
+- **参数**:
+  - **node**: 要渲染的 ProseMirror 节点。
+  - **parentNode**: （可选）该节点的父 ProseMirror 节点。
+  - **index**: （可选）节点在其父节点中的索引。
+  - **level**: （可选）节点的嵌套层级。
+
+```
+const manager = new MarkdownManager()
+const markdown = manager.renderNodeToMarkdown(node)
+```
+
+### `MarkdownManager.renderNodes()`
+
+渲染一组 ProseMirror 节点为其合并的 Markdown 表示。
+
+- **返回**: `string` - 给定节点集合的合并 Markdown 字符串。
+- **参数**:
+  - **nodes**: 要渲染的 ProseMirror 节点数组。
+  - **parentNode**: （可选）父 ProseMirror 节点。
+  - **separator**: （可选）用于分隔渲染后节点的字符串，默认值为 `''`。
+  - **level**: （可选）节点的嵌套层级，默认值为 `0`。
+  - **level**: `number` - 节点的嵌套层级，默认值为 `0`。
+
+## 属性
+
+### `Markdown.instance`
+
+用于解析 Markdown 内容的 MarkedJS 实例。
+
+### `Markdown.indentCharacter`
+
+用于列表缩进的字符。默认为空格（`' '`）。
+
+### `Markdown.indentString`
+
+用于列表缩进的字符串。默认为两个空格（`'  '`）。

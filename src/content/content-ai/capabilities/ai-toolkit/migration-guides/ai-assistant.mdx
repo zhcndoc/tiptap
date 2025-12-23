@@ -1,0 +1,33 @@
+---
+title: 从 AI 助手迁移到 AI 工具包
+meta:
+  title: 从 AI 助手迁移到 AI 工具包 | Tiptap 内容 AI
+  description: 了解如何从 AI 助手扩展迁移到 AI 工具包。
+  category: 内容 AI
+---
+
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="deprecated" renderMode="sidebar" />
+
+AI 助手扩展允许你集成一个 AI 聊天机器人，该机器人可以基于用户定义的任务对文档进行编辑。
+
+你可以通过遵循 [AI 代理聊天机器人指南](/content-ai/capabilities/ai-toolkit/guides/ai-agent-chatbot)，使用 AI 工具包实现相同的功能。
+
+要查看 AI 聊天机器人所做的更改，可以使用 [审查更改指南](/content-ai/capabilities/ai-toolkit/guides/review-changes)。AI 工具包内置了一个系统来显示用户可以接受或拒绝的建议，因此无需将其与 AI 变更或 AI 建议扩展结合使用来实现此功能。
+
+## 实现检查点
+
+AI 助手扩展具有检查点系统，允许你存储和恢复文档及对话在之前某一时刻的状态。
+
+借助 Tiptap 的编辑器命令，你也可以在特定时间点保存文档内容的快照，并在之后恢复它。
+
+```ts
+// 拍摄文档快照
+const document = editor.getJSON()
+
+// 之后恢复该快照
+editor.setContent(document)
+```
+
+该系统为你提供了在任意时间点保存和恢复文档的灵活性。这比 AI 助手扩展中的检查点系统有改进，后者仅在聊天对话的几个事件中创建检查点。

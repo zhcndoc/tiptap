@@ -49,7 +49,7 @@ https://YOUR_APP_ID.collab.tiptap.cloud/
 | 列出文档           | GET        | `/api/documents`                             | 检索带有分页选项的所有文档列表。                                              |
 | 复制文档           | POST + GET | `/api/documents/:identifier` (GET 然后 POST) | 通过检索文档然后使用新标识符创建文档来复制文档。                             |
 | 加密文档           | POST       | `/api/documents/:identifier/encrypt`         | 使用 Base64 加密文档。                                                       |
-| 回退到版本         | POST       | `/api/documents/:identifier/versions`        | 批量导入多个文档。                                                            |
+| 回退到版本         | POST       | `/api/documents/:identifier/versions`        | 回退文档到指定版本。                                                          |
 | 更新文档           | PATCH      | `/api/documents/:identifier`                 | 将 Yjs 更新消息应用于现有文档。                                              |
 | 删除文档           | DELETE     | `/api/documents/:identifier`                 | 从服务器中删除文档。                                                          |
 | 搜索文档           | POST       | `/api/search`                                | 对所有文档执行搜索。                                                          |
@@ -71,7 +71,7 @@ POST /api/documents/:identifier
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA' \
---data '@yjsUpdate.binary.txt'
+--data '@yjsUpdate.binary'
 ```
 
 - **JSON 格式**：要使用 JSON 创建文档，传递查询参数 `format=json` 并在 Tiptap JSON 格式中包含文档的内容。
@@ -236,6 +236,8 @@ await axios.post(
 )
 ```
 
+请注意，新文档将不会拥有源文档的版本记录。如果您想保留版本，可以使用导入/导出端点（参见 Postman 集合）。
+
 ## 加密文档
 
 ```bash
@@ -299,7 +301,7 @@ PATCH /api/documents/:identifier
 ```bash
 curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA' \
---data '@yjsUpdate.binary.txt'
+--data '@yjsUpdate.binary'
 ```
 
 API 端点还支持 JSON 文档更新、用于跟踪更改的文档历史记录以及特定节点的更新。

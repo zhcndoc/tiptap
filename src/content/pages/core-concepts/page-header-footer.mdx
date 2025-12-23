@@ -1,0 +1,167 @@
+---
+title: 页面页眉和页脚
+meta:
+  title: 页面页眉和页脚 | Tiptap Pages 文档
+  description: 了解如何在 Tiptap Pages 扩展中调整页面页眉高度和页脚高度。
+  category: 页面
+sidebars:
+  hideSecondary: true
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+你可以调整页面布局的一些方面，以更好地满足你的需求。主要选项有 `header`，`footer`，`headerHeight` 和 `footerHeight`。
+
+<CodeDemo isPro src="https://feature-pages-extension--tiptap-pro.netlify.app/preview/extensions/pagesheaderfooter" />
+
+## 页眉内容
+
+- 将在页面页眉中渲染的内容
+- 默认值：`''` – 空字符串
+
+### 初始配置（字符串）
+
+```js
+Pages.configure({
+  header: 'Awesome Tiptap header', // 字符串！
+})
+```
+
+### 初始配置（HTML）
+
+```js
+Pages.configure({
+  header: () => '<bold>Awesome Tiptap header</bold>', // 返回 HTML 或字符串的函数！
+})
+```
+
+### 页眉内容编辑命令
+
+```js
+editor.commands.setHeader('My awesome header') // 字符串！
+// 或者
+editor.commands.Header((page, total) => `${page} of ${total}`) // 返回 HTML 或字符串的函数！
+```
+
+### 页眉替换模板
+
+当 `header` 属性使用字符串时，提供了两个便捷的模板替换：
+
+- `{page}`：被替换为当前页码。
+- `{total}`：被替换为文档的总页数。
+
+`header` 属性也可以接受一个函数，传递相同的信息，这次通过函数参数提供：
+
+```js
+Pages.configure({
+  header: (page, total) => `${page} of ${total}` // 示例，显示："1 of 10"
+})
+```
+
+## 页眉高度
+
+- 控制每页顶部页眉区域的高度。
+- 默认值：`50`（像素）
+
+### 初始配置
+
+```js
+Pages.configure({
+  headerHeight: 80, // 使页眉区域更高
+})
+```
+
+### 页眉高度编辑命令
+
+```js
+editor.commands.setHeaderHeight(30) // 较小的页眉！
+```
+
+## 页脚内容
+
+- 将在页面页脚中渲染的内容
+- 默认值：`{page}` – 带有页码模板替换的字符串
+
+### 初始配置（字符串）
+
+```js
+Pages.configure({
+  footer: 'Awesome Tiptap footer', // 字符串！
+})
+```
+
+### 初始配置（HTML）
+
+```js
+Pages.configure({
+  footer: () => '<bold>Awesome Tiptap footer</bold>', // 返回 HTML 或字符串的函数！
+})
+```
+
+### 页脚内容编辑命令
+
+```js
+editor.commands.setFooter('My awesome footer') // 字符串！
+// 或者
+editor.commands.setFooter((page, total) => `${page} of ${total}`) // 返回 HTML 或字符串的函数！
+```
+
+### 页脚替换模板
+
+当 `footer` 属性使用字符串时，提供了两个便捷的模板替换：
+
+- `{page}`：被替换为当前页码。
+- `{total}`：被替换为文档的总页数。
+
+`footer` 属性也可以接受一个函数，传递相同的信息，这次通过函数参数提供：
+
+```js
+Pages.configure({
+  footer: (page, total) => `${page} of ${total}` // 示例，显示："1 of 10"
+})
+```
+
+## 页脚高度
+
+- 控制每页底部页脚区域的高度。
+- 默认值：`50`（像素）
+
+### 初始配置
+
+```js
+Pages.configure({
+  footerHeight: 80, // 使页脚区域更高
+})
+```
+
+### 编辑器页脚高度命令
+
+```js
+editor.commands.setFooterHeight(30) // 较小的页脚！
+```
+
+## 页面边距
+
+页面边距可以通过使用自定义页面格式进行自定义。内置格式具有固定边距，但你可以创建自己的带有自定义边距的格式：
+
+```js
+Pages.configure({
+  pageFormat: {
+    id: 'custom-layout',
+    width: 794,   // px
+    height: 1123, // px
+    margins: {
+      top: 60,    // px
+      right: 40,  // px
+      bottom: 60, // px
+      left: 40,   // px
+    },
+  },
+})
+```
+
+<Callout title="灵活性" variant="info">
+  使用自定义页面格式，你可以完全控制页面尺寸和边距，创建你需要的精确布局。  
+  有关详细指南和更多示例，请参阅 [页面格式](/pages/core-concepts/page-format) 文档中的 [自定义页面格式章节](/pages/core-concepts/page-format#custom-page-formats)。
+</Callout> 

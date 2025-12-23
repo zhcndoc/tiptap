@@ -1,0 +1,456 @@
+---
+title: AI 菜单
+meta:
+  title: AI 菜单 | Tiptap UI 组件
+  description: 基于智能 AI 的内容编辑和生成上下文菜单。更多详情请查看文档。
+  category: UI 组件
+component:
+  name: AI 菜单
+  description: 添加智能 AI 支持的菜单，用于内容编辑、生成和转换。
+  type: component
+  isFree: false
+  isCloud: true
+  isOpen: false
+  isNew: false
+  icon: Sparkles
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个功能完备、基于 AI 的 Tiptap 编辑器上下文菜单。提供智能的内容编辑、生成和转换功能，支持浮动菜单定位和可自定义的 AI 操作。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/ai-menu" />
+
+## 安装
+
+通过 Tiptap CLI 添加该组件：
+
+```bash
+npx @tiptap/cli@latest add ai-menu
+```
+
+## 组件
+
+### `<AiMenu />`
+
+一个全面的 AI 菜单，提供上下文的编辑和生成能力。
+
+#### 使用示例
+
+```tsx
+import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
+
+// --- Tiptap 核心扩展 ---
+import { StarterKit } from '@tiptap/starter-kit'
+import { Ai } from '@tiptap-pro/extension-ai'
+import { UiState } from '@/components/tiptap-extension/ui-state-extension'
+
+import { HorizontalRule } from '@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension'
+import { Selection } from '@tiptap/extensions'
+import { AiProvider, useAi } from '@/components/contexts/ai-context'
+
+// --- Tiptap UI ---
+import { AiMenu } from '@/components/tiptap-ui/ai-menu'
+import { AiAskButton } from '@/components/tiptap-ui/ai-ask-button'
+
+// --- UI 基础组件 ---
+import { ButtonGroup } from '@/components/tiptap-ui-primitive/button'
+
+// --- 工具 ---
+import { TIPTAP_AI_APP_ID } from '@/lib/tiptap-collab-utils'
+
+// --- Tiptap 节点样式 ---
+import '@/components/tiptap-node/blockquote-node/blockquote-node.scss'
+import '@/components/tiptap-node/code-block-node/code-block-node.scss'
+import '@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss'
+import '@/components/tiptap-node/heading-node/heading-node.scss'
+import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
+
+export const AiMenuExample = () => {
+  return (
+    <AiProvider>
+      <AiEditorWrapper />
+    </AiProvider>
+  )
+}
+
+const AiEditorWrapper = () => {
+  const { aiToken } = useAi()
+
+  if (!aiToken) {
+    return <div className="tiptap-editor-wrapper">正在加载 AI...</div>
+  }
+
+  return <AiEditor aiToken={aiToken} />
+}
+
+const AiEditor = ({ aiToken }: { aiToken: string }) => {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit.configure({
+        horizontalRule: false,
+      }),
+      HorizontalRule,
+      Selection,
+      UiState,
+      Ai.configure({
+        appId: TIPTAP_AI_APP_ID,
+        token: aiToken,
+        autocompletion: false,
+        showDecorations: true,
+        hideDecorationsOnStreamEnd: false,
+        onLoading: (context) => {
+          context.editor.commands.aiGenerationSetIsLoading(true)
+          context.editor.commands.aiGenerationHasMessage(false)
+        },
+        onChunk: (context) => {
+          context.editor.commands.aiGenerationSetIsLoading(true)
+          context.editor.commands.aiGenerationHasMessage(true)
+        },
+        onSuccess: (context) => {
+          const hasMessage = !!context.response
+          context.editor.commands.aiGenerationSetIsLoading(false)
+          context.editor.commands.aiGenerationHasMessage(hasMessage)
+        },
+      }),
+    ],
+    content: `
+<p>今天，我们探索 AI 如何改变创意工作流程。从写作辅助到智能摘要，我们手中的工具快速演进。但我们如何负责任地使用它们？</p>
+<p>本文将展示 AI 如何增强——而非替代——人类创造力的真实案例。</p>
+        `,
+  })
+
+  return (
+    <EditorContext.Provider value={{ editor }}>
+      <div className="controls-bar">
+        <div className="control-item">
+          <ButtonGroup orientation="horizontal">
+            <AiAskButton />
+          </ButtonGroup>
+        </div>
+      </div>
+
+      <EditorContent editor={editor} role="presentation" className="control-showcase">
+        <AiMenu />
+      </EditorContent>
+    </EditorContext.Provider>
+  )
+}
+```
+
+#### 属性
+
+| 名称       | 类型              | 默认值      | 描述                   |
+| --------- | ----------------- | ---------- | ---------------------- |
+| `editor`  | `Editor \| null`  | `undefined` | Tiptap 编辑器实例      |
+
+### `<AiMenuStateProvider />`
+
+管理 AI 菜单状态的状态提供器，覆盖整个应用。
+
+#### 使用示例
+
+```tsx
+import { AiMenuStateProvider } from '@/components/tiptap-ui/ai-menu'
+
+function App() {
+  return <AiMenuStateProvider>{/* 你的编辑器组件 */}</AiMenuStateProvider>
+}
+```
+
+### `<AiMenuContent />`
+
+渲染 AI 菜单界面的主内容组件。
+
+#### 属性
+
+| 名称       | 类型              | 默认值      | 描述                   |
+| --------- | ----------------- | ---------- | ---------------------- |
+| `editor`  | `Editor \| null`  | `undefined` | Tiptap 编辑器实例      |
+
+## Hooks
+
+### `useAiMenuState()`
+
+用于访问和管理 AI 菜单状态的 Hook。
+
+#### 使用示例
+
+```tsx
+import { useAiMenuState } from '@/components/tiptap-ui/ai-menu'
+
+function MyComponent() {
+  const { state, updateState, setFallbackAnchor, reset } = useAiMenuState()
+
+  const handleOpenMenu = () => {
+    updateState({ isOpen: true, shouldShowInput: true })
+  }
+
+  const handleCloseMenu = () => {
+    reset()
+  }
+
+  return (
+    <button onClick={state.isOpen ? handleCloseMenu : handleOpenMenu}>
+      {state.isOpen ? '关闭 AI 菜单' : '打开 AI 菜单'}
+    </button>
+  )
+}
+```
+
+#### 返回值
+
+| 名称                 | 类型                                            | 描述                       |
+| ------------------- | ----------------------------------------------- | -------------------------- |
+| `state`             | `AiMenuState`                                   | 当前 AI 菜单状态           |
+| `updateState`       | `(updates: Partial<AiMenuState>) => void`       | 更新菜单状态的函数         |
+| `setFallbackAnchor` | `(element: HTMLElement \| null, rect?) => void` | 设置备用定位锚点           |
+| `reset`             | `() => void`                                    | 重置菜单状态到初始状态     |
+
+### `useAiContentTracker()`
+
+用于追踪编辑器中 AI 生成内容变化的 Hook。
+
+#### 使用示例
+
+```tsx
+import { useAiContentTracker } from '@/components/tiptap-ui/ai-menu'
+
+function MyComponent() {
+  const { editor } = useTiptapEditor()
+
+  useAiContentTracker(editor, {
+    onContentChange: (hasAiContent) => {
+      console.log('检测到 AI 内容:', hasAiContent)
+    },
+  })
+
+  return <div>带 AI 内容跟踪的组件</div>
+}
+```
+
+### `useTextSelectionTracker()`
+
+用于追踪文本选择变化以调整菜单定位的 Hook。
+
+#### 使用示例
+
+```tsx
+import { useTextSelectionTracker } from '@/components/tiptap-ui/ai-menu'
+
+function MyComponent() {
+  const { editor } = useTiptapEditor()
+
+  useTextSelectionTracker(editor, {
+    onSelectionChange: (selection) => {
+      console.log('选择发生变化:', selection)
+    },
+  })
+
+  return <div>带选择跟踪的组件</div>
+}
+```
+
+## 子组件
+
+### `<AiMenuItems />`
+
+根据类别分组展示可用 AI 操作的组件。
+
+#### 使用示例
+
+```tsx
+import { AiMenuItems } from '@/components/tiptap-ui/ai-menu'
+
+function CustomAiMenu() {
+  const { editor } = useTiptapEditor()
+
+  return (
+    <AiMenuItems
+      editor={editor}
+      availableActions={['improveWriting', 'aiFixSpellingAndGrammar', 'summarize']}
+    />
+  )
+}
+```
+
+### `<AiMenuActions />`
+
+渲染 AI 菜单相关操作按钮（接受、重新生成等）的组件。
+
+#### 使用示例
+
+```tsx
+import { AiMenuActions } from '@/components/tiptap-ui/ai-menu'
+
+function CustomAiMenu() {
+  const { editor } = useTiptapEditor()
+
+  return (
+    <AiMenuActions
+      editor={editor}
+      onAccept={() => console.log('AI 内容已接受')}
+      onRegenerate={() => console.log('重新生成 AI 内容')}
+    />
+  )
+}
+```
+
+### `<AiMenuInputTextarea />`
+
+用于自定义 AI 提示语的输入组件。
+
+#### 使用示例
+
+```tsx
+import { AiMenuInputTextarea } from '@/components/tiptap-ui/ai-menu'
+
+function CustomPromptInput() {
+  const handleSubmit = (prompt: string) => {
+    console.log('用户提示:', prompt)
+  }
+
+  return (
+    <AiMenuInputTextarea
+      onSubmit={handleSubmit}
+      placeholder="请向 AI 提问以帮助完善内容..."
+    />
+  )
+}
+```
+
+## 工具函数
+
+### `getContextAndInsertAt(editor)`
+
+确定上下文及 AI 操作插入点的工具函数。
+
+```tsx
+import { getContextAndInsertAt } from '@/components/tiptap-ui/ai-menu'
+
+const { context, insertAt, isSelection } = getContextAndInsertAt(editor)
+
+if (isSelection) {
+  // 处理基于选择的 AI 操作
+  editor.chain().aiEdit({ prompt: '改进这段文字', insertAt }).run()
+} else {
+  // 处理基于插入点的 AI 操作
+  editor.chain().aiGenerate({ prompt: '写一段关于 AI 的内容', insertAt }).run()
+}
+```
+
+### `findPrioritizedAIElement(editor)`
+
+查找最合适用于 AI 菜单定位的 DOM 元素。
+
+```tsx
+import { findPrioritizedAIElement } from '@/components/tiptap-ui/ai-menu'
+
+const targetElement = findPrioritizedAIElement(editor)
+if (targetElement) {
+  // 将菜单相对于此元素定位
+}
+```
+
+## AI 操作
+
+AI 菜单提供若干内置操作，按类别组织：
+
+### 编辑类操作
+
+- **调整语气**：改变所选文字的语气
+- **拼写与语法修正**：纠正拼写和语法错误
+- **扩展**：扩展所选内容
+- **缩短**：使内容更简洁
+- **简化语言**：使用更简单、更清晰的语言
+- **改进写作**：增强整体写作质量
+- **表情符号化**：为内容添加相关表情符号
+
+### 写作类操作
+
+- **继续写作**：生成内容的延续部分
+- **摘要**：对所选文本进行总结
+- **翻译到**：将内容翻译成不同语言
+
+## 状态管理
+
+### `AiMenuState` 接口
+
+```tsx
+interface AiMenuState {
+  isOpen: boolean
+  tone?: string
+  language: string
+  shouldShowInput: boolean
+  inputIsFocused: boolean
+  fallbackAnchor: {
+    element: HTMLElement | null
+    rect: DOMRect | null
+  }
+}
+```
+
+### 状态更新
+
+可以使用 `updateState` 函数更新 AI 菜单状态：
+
+```tsx
+const { updateState } = useAiMenuState()
+
+// 打开菜单并聚焦输入框
+updateState({
+  isOpen: true,
+  shouldShowInput: true,
+  inputIsFocused: true,
+})
+
+// 设置翻译语言
+updateState({ language: 'es' })
+
+// 设置内容调整语气
+updateState({ tone: 'professional' })
+```
+
+## 依赖与要求
+
+### 依赖包
+
+- `@tiptap/react` - Tiptap React 核心集成
+- `@tiptap-pro/extension-ai` - 内容生成的 AI 扩展
+- `@tiptap/starter-kit` - 基础 Tiptap 扩展
+- `react-hotkeys-hook` - 键盘快捷键管理
+
+### 扩展
+
+- `ui-state-extension` - 管理 AI 操作的 UI 状态
+- `selection-extension` - 增强文本选择处理
+
+### 相关组件
+
+- `use-tiptap-editor`（Hook）
+- `use-ui-editor-state`（Hook）
+- `menu`（基础组件）
+- `button`, `button-group`（基础组件）
+- `card`（基础组件）
+- `combobox`（基础组件）
+- `tiptap-utils`（工具库）
+- `sparkles-icon`, `stop-circle-2-icon`（图标）
+
+## 配置
+
+### AI 提供者配置示例
+
+```tsx
+import { AiProvider } from '@/contexts/ai-context'
+
+function App() {
+  return (
+    <AiProvider appId="your-app-id" token="your-ai-token">
+      <YourEditor />
+    </AiProvider>
+  )
+}
+```

@@ -1,0 +1,302 @@
+---
+title: 协同编辑
+meta:
+    title: 协同编辑 | Hocuspocus 文档
+    category: Hocuspocus
+---
+
+## 介绍
+实时协作、多设备同步以及离线工作曾经很难实现。我们利用 [Y.js](https://github.com/yjs/yjs) 的强大功能提供了所有你需要的同步方案。以下指南将帮助你开始在 Tiptap 中使用 Hocuspocus 进行协同编辑。别担心，生产级别的配置并不需要太多代码。
+
+## 配置编辑器
+Tiptap 使用的基础 schema 是同步文档的极佳基础。借助 [`Collaboration`](https://tiptap.dev/docs/editor/api/extensions/collaboration) 扩展，你可以让 Tiptap 使用 [Y.js](https://github.com/yjs/yjs) 跟踪文档的变更。
+
+Y.js 是无冲突复制数据类型（CRDT）的实现，换句话说：它非常擅长合并变更。为了实现这一点，变更甚至不需要有序。离线修改文档并在设备重新上线时与其他变更合并是完全没问题的。
+
+所有客户端在某个时刻都需要交换文档修改。最常见的技术是 [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) 和 [WebSockets](https://developer.mozilla.org/de/docs/Web/API/WebSocket)，让我们进一步了解一下它们：
+
+### WebRTC
+WebRTC 仅使用服务器将客户端相互连接，实际数据在客户端之间流动，服务器并不知情，这对于协同编辑的入门非常有利。
+
+首先，安装依赖：
+
+```bash
+npm install @tiptap/extension-collaboration yjs y-webrtc y-prosemirror
+```
+
+现在，创建一个新的 Y 文档，并在 Tiptap 中注册它：
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Collaboration from '@tiptap/extension-collaboration'
+import * as Y from 'yjs'
+import { WebrtcProvider } from 'y-webrtc'
+
+// 新的 Y 文档
+const ydoc = new Y.Doc()
+// 使用 WebRTC 提供者注册
+const provider = new WebrtcProvider('example-document', ydoc)
+
+const editor = new Editor({
+  extensions: [
+    StarterKit.configure({
+      // Collaboration 扩展自带自己的历史/撤销重做处理
+      undoRedo: false,
+    }),
+    // 在 Tiptap 中注册文档
+    Collaboration.configure({
+      document: ydoc,
+    }),
+  ],
+})
+```
+
+这就足以创建一个协同编辑的 Tiptap 实例。很神奇，不是吗？试试看，把编辑器打开在两个不同浏览器窗口，变动会在不同窗口间同步。
+
+这神奇的机制是如何工作的？所有客户端都需要相互连接，这正是 *provider* 的职责。[WebRTC provider](https://github.com/yjs/y-webrtc) 是最简单的入门方式，它使用公共服务器将客户端直接连接起来，但并不是用来同步实际变更的。这有两个缺点。
+
+1. 浏览器拒绝与过多客户端连接。对 Y.js 来说，只要所有客户端间至少间接连接就够了，但在某个点以后这也不可能了。换句话说，它在同一文档超过 100+ 并发客户端时扩展性不佳。
+2. 你可能仍然想通过服务器来持久保存改动。但 WebRTC 信令服务器（负责连接客户端）并不会接收改动，因此也不知道文档内容。
+
+如果想深入了解，可以访问 [Y WebRTC 仓库](https://github.com/yjs/y-webrtc)。
+
+### WebSocket（推荐）
+在大多数使用场景中，WebSocket 提供者是推荐选择。它非常灵活且具备良好的扩展性。为了方便，我们发布了 [Hocuspocus](/hocuspocus/introduction)，作为 Tiptap 的开源后端。
+
+客户端示例几乎相同，只是提供者不同。先安装依赖：
+
+```bash
+npm install @tiptap/extension-collaboration @hocuspocus/provider y-prosemirror
+```
+
+然后向 Tiptap 注册 WebSocket 提供者：
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Collaboration from '@tiptap/extension-collaboration'
+import { HocuspocusProvider } from '@hocuspocus/provider'
+
+// 配置 Hocuspocus WebSocket 提供者
+const provider = new HocuspocusProvider({
+  url: 'ws://127.0.0.1:1234',
+  name: 'example-document',
+})
+
+const editor = new Editor({
+  extensions: [
+    StarterKit.configure({
+      // Collaboration 扩展自带历史处理
+      undoRedo: false,
+    }),
+    // 在 Tiptap 中注册文档
+    Collaboration.configure({
+      document: provider.document,
+    }),
+  ],
+})
+```
+
+此示例无法直接运行。正如你看到的，它配置为连接 `ws://127.0.0.1:1234`（WebSocket 协议 `ws://`，本地 IP `127.0.0.1` 及端口 `1234`）上的 WebSocket 服务器。你还需要搭建该服务器。
+
+#### WebSocket 后端
+为了让服务器端尽可能简单，我们提供了一个开箱即用的服务器包，名为 [Hocuspocus](/hocuspocus/introduction)。它是一个灵活的 Node.js 包，可以用来构建你定制的后端。
+
+在本指南中，演示使用命令行工具，几秒钟内启动一个最简服务器：
+
+```bash
+npx @hocuspocus/cli --port 1234 --sqlite
+```
+
+此命令下载 Hocuspocus 命令行工具、启动监听 1234 端口的服务器，并将改动存储于内存中（命令停止后内容消失）。输出示例如下：
+
+```
+Hocuspocus v1.0.0 running at:
+
+> HTTP: http://127.0.0.1:1234
+> WebSocket: ws://127.0.0.1:1234
+
+Ready.
+```
+
+在浏览器打开 http://127.0.0.1:1234，若一切正常你将看到纯文本 “OK”。
+
+返回你的 Tiptap 编辑器并刷新，现在它应已连接到 Hocuspocus WebSocket 服务器，变更将与其他客户端同步。太棒了，不是吗？
+
+### 多网络提供者
+你甚至可以组合多个提供者。虽非必需，但可以保证即使某一连接（例如 WebSocket 服务器）暂时断开，客户端仍能保持连接。例如：
+
+```js
+new WebrtcProvider('example-document', ydoc)
+new HocuspocusProvider({
+  url: 'ws://127.0.0.1:1234',
+  name: 'example-document',
+  document: ydoc,
+})
+```
+
+就这么简单。
+
+注意 WebRTC 需要信令服务器帮助连接客户端。信令服务器不接收同步数据，但帮助客户端互相发现。你可以[运行自己的信令服务器](https://github.com/yjs/y-webrtc#signaling)，否则默认使用包内置的 URL。
+
+### 显示其他光标
+为使用户能看到彼此的光标和文本选区，添加 [`CollaborationCaret`](https://tiptap.dev/docs/editor/api/extensions/collaboration-caret) 扩展。
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Collaboration from '@tiptap/extension-collaboration'
+import CollaborationCaret from '@tiptap/extension-collaboration-caret'
+import { HocuspocusProvider } from '@hocuspocus/provider'
+
+// 配置 Hocuspocus WebSocket 提供者
+const provider = new HocuspocusProvider({
+  url: 'ws://127.0.0.1:1234',
+  name: 'example-document',
+})
+
+const editor = new Editor({
+  extensions: [
+    StarterKit.configure({
+      // Collaboration 扩展自带历史处理
+      undoRedo: false,
+    }),
+    Collaboration.configure({
+      document: provider.document,
+    }),
+    // 注册协作光标扩展
+    CollaborationCaret.configure({
+      provider: provider,
+      user: {
+        name: 'Cyndi Lauper',
+        color: '#f783ac',
+      },
+    }),
+  ],
+})
+```
+
+如你所见，你可以为每个用户传入姓名和颜色。更多高级示例请看[协同编辑示例](https://tiptap.dev/docs/editor/examples/collaborative-editing)。
+
+### 离线支持
+得益于优秀的 [Y IndexedDB 适配器](https://github.com/yjs/y-indexeddb)，为协同编辑器添加离线支持基本只需一行代码。先安装：
+
+```bash
+npm install y-indexeddb
+```
+
+然后将其连接到 Y 文档：
+
+```js
+import { Editor } from '@tiptap/core'
+import Collaboration from '@tiptap/extension-collaboration'
+import * as Y from 'yjs'
+import { IndexeddbPersistence } from 'y-indexeddb'
+
+const ydoc = new Y.Doc()
+
+// 在浏览器存储 Y 文档
+new IndexeddbPersistence('example-document', ydoc)
+
+const editor = new Editor({
+  extensions: [
+    // …
+    Collaboration.configure({
+      document: ydoc,
+    }),
+  ],
+})
+```
+
+所有变更都会存储在浏览器中，即使你关闭标签页、离线，或者在离线状态下进行编辑。下一次线上时，WebSocket 提供者会尝试建立连接并最终同步变更。
+
+是的，这就是魔法。正如前面提到的，所有实现都基于极棒的 Y.js 框架。如果你在使用它或者我们的集成，请务必[在 GitHub 支持 Kevin Jahns](https://github.com/dmonad)，他是 Y.js 背后的大脑。
+
+## 我们的开箱即用协作后端
+我们的协作编辑后端 Hocuspocus 负责同步、授权、持久化和扩展。让我们看一些常见用例！
+
+### 文档名称
+示例中所有案例的文档名称均为 `'example-document'`，但它可以是任意字符串。在实际应用中，你可能会用实体名和实体 ID 来命名。比如：
+
+```js
+const documentName = 'page.140'
+```
+
+在后端，你可以拆分字符串，以知道用户正在编辑 ID 为 140 的页面，从而进行相应的权限管理等操作。新文档会动态创建，无需额外告诉后端，只需将字符串传给提供者即可。
+
+如果想用一个 Y.js 文档同步多个字段，只需向协作扩展传入不同的字段名：
+
+```js
+// 对某个字段的 Tiptap 实例
+Collaboration.configure({
+  document: ydoc,
+  field: 'title',
+})
+
+// 另一个用于摘要的实例，同处一个 Y.js 文档
+Collaboration.configure({
+  document: ydoc,
+  field: 'summary',
+})
+```
+
+如果你的配置更复杂，比如有嵌套片段，也可以传入原始 Y.js 片段，此时 `document` 和 `field` 将被忽略。
+
+```js
+// 原始 Y.js 片段
+Collaboration.configure({
+  fragment: ydoc.getXmlFragment('custom'),
+})
+```
+
+### 认证与授权
+利用 `onAuthenticate` 钩子，你可以检查客户端是否已认证且有权限查看当前文档。在实际应用中，这可能是 API 请求、数据库查询等。
+
+抛出错误（或拒绝返回的 Promise）将导致断开客户端连接。如客户端认证通过，可以返回上下文数据，在其他钩子里访问，但这不是必需的。
+
+```js
+import { Server } from '@hocuspocus/server'
+
+const server = Server.configure({
+  async onAuthenticate({ token }) {
+    // 示例：检查用户是否已认证
+    if (token !== 'super-secret-token') {
+      throw new Error('未授权！')
+    }
+
+    // 返回上下文数据，供其他钩子使用
+    return {
+      user: {
+        id: 1234,
+        name: 'John',
+      },
+    }
+  },
+})
+
+server.listen()
+```
+
+## Tiptap Collaboration —— 我们的托管解决方案
+
+如果你不想自己部署和扩展 Hocuspocus，推荐查看我们的托管方案 [Tiptap Collaboration](https://tiptap.dev/docs/editor/collaboration/overview)。
+
+只需轻点几下，即可搞定。
+
+## 注意事项
+
+### Schema 更新
+Tiptap 对 [schema](https://tiptap.dev/docs/editor/api/schema) 非常严格，也就是说，如果你添加了一些根据现有 schema 不被允许的内容，它们会被丢弃。当多个客户端使用不同 schema 共享文档变更时，可能导致奇怪的行为。
+
+比如，你在应用中集成了编辑器，首批用户都加载了带有默认扩展的 Tiptap，schema 只允许这些节点。后来你想添加任务列表扩展，并发布了新版本。
+
+新用户打开应用时，拥有更新带任务列表的 schema，其他用户仍是旧 schema。新用户添加任务列表到文档中，想向其他用户展示该功能，但它会神奇地马上消失。发生了什么？
+
+当某个用户添加新的节点（或标记），变更会同步给其他已连接客户端，其他客户端应用这些变更，但由于 Tiptap 严格遵守自己的（旧）schema，会删除新节点。变更再同步给其他客户端，如此一来，新节点在所有地方都被移除了。为避免此问题，你有以下几种选择：
+
+1. 永不更改 schema（不太现实）。
+2. 部署新 schema 时强制客户端更新（较难实现）。
+3. 跟踪 schema 版本，并为使用旧 schema 的客户端禁用编辑器（视情况而定）。
+
+我们正在开发相关功能以简化处理流程。如果你有改进建议，欢迎告诉我们！

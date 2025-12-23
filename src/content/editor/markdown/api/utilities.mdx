@@ -1,0 +1,986 @@
+---
+title: Markdown 工具
+tags:
+  - type: beta
+meta:
+  title: Markdown 工具 | Tiptap 编辑器文档
+  description: 使用 @tiptap/core 内置的工具处理标准 Markdown 模式。查看更多请查阅我们的文档！
+  category: 编辑器
+---
+
+## 块级工具
+
+### `createBlockMarkdownSpec`
+
+使用 Pandoc 风格的语法 (`:::blockName`) 创建完整的块级节点 Markdown 规范。
+
+此工具可从 `@tiptap/core` 导入。
+
+#### 语法
+
+```markdown
+:::blockName {attributes}
+
+内容写在这里
+可以是**多段**文本
+
+:::
+```
+
+#### 使用示例
+
+```typescript
+import { Node } from '@tiptap/core'
+import { createBlockMarkdownSpec } from '@tiptap/core'
+
+const Callout = Node.create({
+  name: 'callout',
+
+  group: 'block',
+  content: 'block+',
+
+  addAttributes() {
+    return {
+      type: { default: 'info' },
+      title: { default: null },
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'div[data-callout]' }]
+  },
+
+  renderHTML({ node }) {
+    return ['div', { 'data-callout': node.attrs.type }, 0]
+  },
+
+  // 使用此工具生成 Markdown 支持
+  ...createBlockMarkdownSpec({
+    nodeName: 'callout',
+    defaultAttributes: { type: 'info' },
+    allowedAttributes: ['type', 'title'],
+    content: 'block', // 允许嵌套块级内容
+  }),
+})
+```
+
+#### 选项
+
+| 选项                 | 类型                   | 默认值       | 说明                         |
+| -------------------- | ---------------------- | ------------ | ---------------------------- |
+| `nodeName`           | `string`               | _必填_       | Tiptap 节点名称              |
+| `name`               | `string`               | `nodeName`   | Markdown 语法名称            |
+| `content`            | `'block' \| 'inline'`  | `'block'`    | 内容类型                     |
+| `defaultAttributes`  | `Object`               | `{}`         | 解析时的默认属性             |
+| `allowedAttributes`  | `string[]`             | 全部         | 渲染时的属性白名单           |
+| `getContent`         | `(token) => string`    | 自动         | 自定义内容提取               |
+| `parseAttributes`    | `(str) => Object`      | 自动         | 自定义属性解析器             |
+| `serializeAttributes`| `(attrs) => string`    | 自动         | 自定义序列化函数             |
+
+#### 示例 Markdown
+
+```markdown
+:::callout {type="warning" title="重要"}
+
+这是一个带标题的警告提示框。
+
+它可以包含多段文字和**格式化内容**。
+
+:::
+
+:::note
+
+简单无属性的注释。
+
+:::
+```
+
+---
+
+### `createAtomBlockMarkdownSpec`
+
+使用 Pandoc 语法为原子（自闭合）块级节点创建 Markdown 规范。
+
+此工具可从 `@tiptap/core` 导入。
+
+#### 语法
+
+```markdown
+:::nodeName {attributes} :::
+```
+
+无闭合标签，无内容。适合嵌入、图片、水平线等。
+
+#### 使用示例
+
+```typescript
+import { Node } from '@tiptap/core'
+import { createAtomBlockMarkdownSpec } from '@tiptap/core'
+
+const Youtube = Node.create({
+  name: 'youtube',
+
+  group: 'block',
+  atom: true,
+
+  addAttributes() {
+    return {
+      src: { default: null },
+      start: { default: 0 },
+      width: { default: 640 },
+      height: { default: 480 },
+    }
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'iframe[src*="youtube.com"]',
+        getAttrs: dom => ({
+          src: dom.getAttribute('src'),
+        }),
+      },
+    ]
+  },
+
+  renderHTML({ node }) {
+    return ['iframe', { src: node.attrs.src }, 0]
+  },
+
+  // 使用此工具生成原子块 Markdown
+  ...createAtomBlockMarkdownSpec({
+    nodeName: 'youtube',
+    requiredAttributes: ['src'], // 必须包含 src 属性
+    defaultAttributes: { start: 0 },
+    allowedAttributes: ['src', 'start', 'width', 'height'],
+  }),
+})
+```
+
+#### 选项
+
+| 选项                 | 类型                 | 默认值       | 说明                          |
+| -------------------- | -------------------- | ------------ | ----------------------------- |
+| `nodeName`           | `string`             | _必填_       | Tiptap 节点名称               |
+| `name`               | `string`             | `nodeName`   | Markdown 语法名称             |
+| `requiredAttributes` | `string[]`           | `[]`         | 解析时必需的属性              |
+| `defaultAttributes`  | `Object`             | `{}`         | 解析时的默认属性              |
+| `allowedAttributes`  | `string[]`           | 全部         | 渲染时的属性白名单            |
+| `parseAttributes`    | `(str) => Object`    | 自动         | 自定义属性解析器              |
+| `serializeAttributes`| `(attrs) => string`  | 自动         | 自定义序列化函数              |
+
+#### 示例 Markdown
+
+```markdown
+:::youtube {src="https://youtube.com/watch?v=dQw4w9WgXcQ" start="30"}
+
+:::image {src="photo.jpg" alt="美丽的照片" width="800"}
+
+:::hr
+```
+
+---
+
+## 行内工具
+
+### `createInlineMarkdownSpec`
+
+使用简写语法（`[nodeName]`）为行内节点创建 Markdown 规范。
+
+此工具可从 `@tiptap/core` 导入。
+
+#### 语法
+
+```markdown
+<!-- 自闭合标签 -->
+
+[nodeName attribute="value" other="data"]
+
+<!-- 带内容 -->
+
+[nodeName attribute="value"]内容[/nodeName]
+```
+
+#### 使用示例 — 自闭合
+
+```typescript
+import { Node } from '@tiptap/core'
+import { createInlineMarkdownSpec } from '@tiptap/core'
+
+const Mention = Node.create({
+  name: 'mention',
+
+  group: 'inline',
+  inline: true,
+  atom: true,
+
+  addAttributes() {
+    return {
+      id: { default: null },
+      label: { default: null },
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'span[data-mention]' }]
+  },
+
+  renderHTML({ node }) {
+    return ['span', { 'data-mention': node.attrs.id }, `@${node.attrs.label}`]
+  },
+
+  // 使用此工具生成自闭合行内 Markdown
+  ...createInlineMarkdownSpec({
+    nodeName: 'mention',
+    selfClosing: true,
+    allowedAttributes: ['id', 'label'],
+  }),
+})
+```
+
+#### 使用示例 — 带内容
+
+```typescript
+const Highlight = Node.create({
+  name: 'highlight',
+
+  group: 'inline',
+  content: 'inline*',
+
+  addAttributes() {
+    return {
+      color: { default: 'yellow' },
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'mark' }]
+  },
+
+  renderHTML({ node }) {
+    return ['mark', { 'data-color': node.attrs.color }, 0]
+  },
+
+  // 使用此工具生成带内容行内 Markdown
+  ...createInlineMarkdownSpec({
+    nodeName: 'highlight',
+    selfClosing: false, // 有内容
+    allowedAttributes: ['color'],
+  }),
+})
+```
+
+#### 选项
+
+| 选项                 | 类型                 | 默认值       | 说明                         |
+| -------------------- | -------------------- | ------------ | ---------------------------- |
+| `nodeName`           | `string`             | _必填_       | Tiptap 节点名称              |
+| `name`               | `string`             | `nodeName`   | 简写语法名称                 |
+| `selfClosing`        | `boolean`            | `false`      | 是否无内容                   |
+| `defaultAttributes`  | `Object`             | `{}`         | 解析时的默认属性             |
+| `allowedAttributes`  | `string[]`           | 全部         | 渲染时的属性白名单           |
+| `getContent`         | `(node) => string`   | 自动         | 自定义内容提取               |
+| `parseAttributes`    | `(str) => Object`    | 自动         | 自定义属性解析器             |
+| `serializeAttributes`| `(attrs) => string`  | 自动         | 自定义序列化函数             |
+
+#### 示例 Markdown
+
+```markdown
+<!-- 提及 -->
+
+嘿 [mention id="user123" label="John"]！
+
+<!-- 表情 -->
+
+聚会时间 [emoji name="party_popper"]！
+
+<!-- 带内容高亮 -->
+
+这是[highlight color="yellow"]重要文本[/highlight]，请注意阅读。
+```
+
+---
+
+## 解析辅助函数
+
+为扩展的解析处理函数提供的辅助方法。
+
+### `parseInline(tokens)`
+
+解析行内 token（加粗、斜体、链接等）。
+
+```typescript
+helpers.parseInline(tokens: MarkdownToken[]): JSONContent[]
+```
+
+**参数：**
+
+- `tokens`：行内 Markdown token 数组
+
+**返回值：**
+
+- `JSONContent[]` - Tiptap JSON 节点数组
+
+**示例：**
+
+```typescript
+parse: (token, helpers) => {
+  return {
+    type: 'paragraph',
+    content: helpers.parseInline(token.tokens || []),
+  }
+}
+```
+
+---
+
+### `parseChildren(tokens)`
+
+解析块级子节点 token。
+
+```typescript
+helpers.parseChildren(tokens: MarkdownToken[]): JSONContent[]
+```
+
+**参数：**
+
+- `tokens`：块级 Markdown token 数组
+
+**返回值：**
+
+- `JSONContent[]` - Tiptap JSON 节点数组
+
+**示例：**
+
+```typescript
+parse: (token, helpers) => {
+  return {
+    type: 'blockquote',
+    content: helpers.parseChildren(token.tokens || []),
+  }
+}
+```
+
+---
+
+### `createTextNode(text, marks)`
+
+创建带可选标记的文本节点。
+
+```typescript
+helpers.createTextNode(
+  text: string,
+  marks?: Array<{ type: string; attrs?: any }>
+): JSONContent
+```
+
+**参数：**
+
+- `text`：文本内容
+- `marks`：可选的标记数组
+
+**返回值：**
+
+- `JSONContent` - 文本节点
+
+**示例：**
+
+```typescript
+parse: (token, helpers) => {
+  return helpers.createTextNode('Hello', [{ type: 'bold' }, { type: 'italic' }])
+}
+```
+
+---
+
+### `createNode(type, attrs, content)`
+
+创建指定类型、属性和内容的节点。
+
+```typescript
+helpers.createNode(
+  type: string,
+  attrs?: Record<string, any>,
+  content?: JSONContent[]
+): JSONContent
+```
+
+**参数：**
+
+- `type`：节点类型名称
+- `attrs`：可选节点属性
+- `content`：可选节点内容
+
+**返回值：**
+
+- `JSONContent` - 创建的节点
+
+**示例：**
+
+```typescript
+parse: (token, helpers) => {
+  return helpers.createNode('heading', { level: 2 }, [helpers.createTextNode('Title')])
+}
+```
+
+---
+
+### `applyMark(markType, content, attrs)`
+
+给内容应用标记（用于行内格式化）。
+
+```typescript
+helpers.applyMark(
+  markType: string,
+  content: JSONContent[],
+  attrs?: Record<string, any>
+): MarkdownParseResult
+```
+
+**参数：**
+
+- `markType`：标记类型名称
+- `content`：应用标记的内容
+- `attrs`：可选标记属性
+
+**返回值：**
+
+- `MarkdownParseResult` - 标记结果对象
+
+**示例：**
+
+```typescript
+parse: (token, helpers) => {
+  const content = helpers.parseInline(token.tokens || [])
+  return helpers.applyMark('bold', content)
+}
+```
+
+---
+
+## 渲染辅助函数
+
+为扩展的渲染处理函数提供的辅助方法。
+
+### `renderChildren(nodes, separator)`
+
+渲染子节点为 Markdown。
+
+```typescript
+helpers.renderChildren(
+  nodes: JSONContent | JSONContent[],
+  separator?: string
+): string
+```
+
+**参数：**
+
+- `nodes`：要渲染的节点或节点数组
+- `separator`：节点间可选分隔符（默认：`''`）
+
+**返回值：**
+
+- `string` - 渲染后的 Markdown
+
+**示例：**
+
+```typescript
+render: (node, helpers) => {
+  const content = helpers.renderChildren(node.content || [])
+  return `> ${content}\n\n`
+}
+```
+
+---
+
+### `indent(content)`
+
+为内容添加缩进。
+
+```typescript
+helpers.indent(content: string): string
+```
+
+**参数：**
+
+- `content`：要缩进的内容
+
+**返回值：**
+
+- `string` - 缩进后的内容
+
+**示例：**
+
+```typescript
+render: (node, helpers) => {
+  const content = helpers.renderChildren(node.content || [])
+  return helpers.indent(content)
+}
+```
+
+---
+
+### `wrapInBlock(prefix, content)`
+
+为内容每行添加前缀。
+
+```typescript
+helpers.wrapInBlock(
+  prefix: string,
+  content: string
+): string
+```
+
+**参数：**
+
+- `prefix`：每行添加的前缀
+- `content`：要包裹的内容
+
+**返回值：**
+
+- `string` - 包裹后的内容
+
+**示例：**
+
+```typescript
+render: (node, helpers) => {
+  const content = helpers.renderChildren(node.content || [])
+  return helpers.wrapInBlock('> ', content) + '\n\n'
+}
+```
+
+---
+
+## 其他工具
+
+### `parseAttributes`
+
+`parseAttributes` 工具主要用于内部将 Pandoc 风格字符串解析成属性对象。除非你需要实现类似 Pandoc 属性风格的自定义语法，否则一般不需单独使用。
+
+此工具可从 `@tiptap/core` 导入。
+
+#### 支持格式
+
+```typescript
+import { parseAttributes } from '@tiptap/core'
+
+// 类名（以 . 开头）
+parseAttributes('.btn .primary')
+// → { class: 'btn primary' }
+
+// ID（以 # 开头）
+parseAttributes('#submit')
+// → { id: 'submit' }
+
+// 键值对（值用引号包裹）
+parseAttributes('type="button" disabled')
+// → { type: 'button', disabled: true }
+
+// 组合写法
+parseAttributes('.btn #submit type="button" disabled')
+// → { class: 'btn', id: 'submit', type: 'button', disabled: true }
+
+// 复杂示例
+parseAttributes('.card .elevated #main-card title="My Card" data-id="123" visible')
+// → {
+//   class: 'card elevated',
+//   id: 'main-card',
+//   title: 'My Card',
+//   'data-id': '123',
+//   visible: true
+// }
+```
+
+#### 使用示例
+
+```typescript
+import { parseAttributes } from '@tiptap/core'
+
+const attrString = '.highlight #section-1 color="yellow" bold'
+const attrs = parseAttributes(attrString)
+
+console.log(attrs)
+// {
+//   class: 'highlight',
+//   id: 'section-1',
+//   color: 'yellow',
+//   bold: true
+// }
+```
+
+---
+
+### `serializeAttributes`
+
+`serializeAttributes` 工具主要用于内部将属性对象转换回 Pandoc 风格字符串。除非你需要实现类似 Pandoc 属性风格的自定义语法，否则一般不需单独使用。
+
+此工具可从 `@tiptap/core` 导入。
+
+#### 使用示例
+
+```typescript
+import { serializeAttributes } from '@tiptap/core'
+
+const attrs = {
+  class: 'btn primary',
+  id: 'submit',
+  type: 'button',
+  disabled: true,
+  'data-value': '123',
+}
+
+const attrString = serializeAttributes(attrs)
+console.log(attrString)
+// .btn.primary #submit disabled type="button" data-value="123"
+```
+
+#### 规则
+
+- 类名前缀为 `.` ，多个用空格分隔
+- ID 前缀为 `#`
+- 布尔值 `true` 作为独立属性输出
+- 字符串值用引号 `"` 包裹
+- null 或 undefined 值被忽略
+
+---
+
+### `parseIndentedBlocks`
+
+高级工具，用于解析层级缩进块（列表、任务列表等）。
+
+此工具可从 `@tiptap/core` 导入。
+
+#### 使用场景
+
+当需要解析 Markdown 中：
+
+- 基于缩进的嵌套项目
+- 层次结构（非扁平）
+- 自定义块模式
+
+时使用。
+
+#### 任务列表示例
+
+```typescript
+import { parseIndentedBlocks } from '@tiptap/core'
+
+const src = `
+- [ ] 任务 1
+  - [x] 子任务 1.1
+  - [ ] 子任务 1.2
+- [x] 任务 2
+`
+
+const result = parseIndentedBlocks(
+  src,
+  {
+    // 匹配任务条目的模式
+    itemPattern: /^(\s*)([-+*])\s+\[([ xX])\]\s+(.*)$/,
+
+    // 从匹配行中提取数据
+    extractItemData: match => ({
+      indentLevel: match[1].length,
+      mainContent: match[4],
+      checked: match[3].toLowerCase() === 'x',
+    }),
+
+    // 创建最终 token
+    createToken: (data, nestedTokens) => ({
+      type: 'taskItem',
+      checked: data.checked,
+      text: data.mainContent,
+      nestedTokens, // 嵌套子项
+    }),
+  },
+  lexer,
+)
+
+console.log(result)
+// {
+//   items: [
+//     {
+//       type: 'taskItem',
+//       checked: false,
+//       text: '任务 1',
+//       nestedTokens: [
+//         { type: 'taskItem', checked: true, text: '子任务 1.1' },
+//         { type: 'taskItem', checked: false, text: '子任务 1.2' }
+//       ]
+//     },
+//     {
+//       type: 'taskItem',
+//       checked: true,
+//       text: '任务 2'
+//     }
+//   ]
+// }
+```
+
+#### 选项接口
+
+```typescript
+interface BlockParserConfig {
+  itemPattern: RegExp // 匹配项目的正则表达式
+  extractItemData: (match) => {
+    mainContent: string
+    indentLevel: number
+    [key: string]: any
+  }
+  createToken: (data, nestedTokens?) => ParsedBlock
+  baseIndentSize?: number // 基础缩进大小（默认 2）
+  customNestedParser?: (src) => any[] // 自定义嵌套解析器
+}
+```
+
+---
+
+### `renderNestedMarkdownContent`
+
+用于渲染含有嵌套内容的节点，正确缩进子元素的工具。
+
+此工具可从 `@tiptap/core` 导入。
+
+#### 适用场景
+
+用于渲染：
+
+- 含嵌套内容的列表项
+- 含嵌套元素的引用块
+- 含子任务的任务项
+- 任何带前缀及嵌套子节点的节点
+
+#### 列表项示例
+
+```typescript
+import { renderNestedMarkdownContent } from '@tiptap/core'
+
+const ListItem = Node.create({
+  name: 'listItem',
+
+  renderMarkdown: (node, h) => {
+    // 静态前缀
+    return renderNestedMarkdownContent(node, h, '- ')
+  },
+})
+```
+
+#### 任务项示例
+
+```typescript
+const TaskItem = Node.create({
+  name: 'taskItem',
+
+  renderMarkdown: (node, h) => {
+    // 根据是否选中动态前缀
+    const prefix = `- [${node.attrs?.checked ? 'x' : ' '}] `
+    return renderNestedMarkdownContent(node, h, prefix)
+  },
+})
+```
+
+#### 基于上下文的前缀示例
+
+```typescript
+const ListItem = Node.create({
+  name: 'listItem',
+
+  renderMarkdown: (node, h, ctx) => {
+    // 根据父节点类型变换前缀
+    return renderNestedMarkdownContent(
+      node,
+      h,
+      ctx => {
+        if (ctx.parentType === 'orderedList') {
+          return `${ctx.index + 1}. `
+        }
+        return '- '
+      },
+      ctx,
+    )
+  },
+})
+```
+
+#### 函数签名
+
+```typescript
+function renderNestedMarkdownContent(
+  node: JSONContent,
+  helpers: {
+    renderChildren: (nodes: JSONContent[]) => string
+    indent: (text: string) => string
+  },
+  prefixOrGenerator: string | ((ctx: any) => string),
+  ctx?: any,
+): string
+```
+
+---
+
+## 完整示例
+
+### 示例 1：提示框块
+
+```typescript
+import { Node } from '@tiptap/core'
+import { createBlockMarkdownSpec } from '@tiptap/core'
+
+export const Callout = Node.create({
+  name: 'callout',
+  group: 'block',
+  content: 'block+',
+
+  addAttributes() {
+    return {
+      type: { default: 'info' },
+      title: { default: null },
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'div[data-callout]' }]
+  },
+
+  renderHTML({ node }) {
+    return [
+      'div',
+      {
+        'data-callout': '',
+        'data-type': node.attrs.type,
+        'data-title': node.attrs.title,
+      },
+      0,
+    ]
+  },
+
+  ...createBlockMarkdownSpec({
+    nodeName: 'callout',
+    defaultAttributes: { type: 'info' },
+    allowedAttributes: ['type', 'title'],
+  }),
+})
+```
+
+**Markdown:**
+
+```markdown
+:::callout {type="warning" title="请注意！"}
+这是需要关注的重要信息。
+:::
+```
+
+---
+
+### 示例 2：YouTube 嵌入
+
+```typescript
+import { Node } from '@tiptap/core'
+import { createAtomBlockMarkdownSpec } from '@tiptap/core'
+
+export const Youtube = Node.create({
+  name: 'youtube',
+  group: 'block',
+  atom: true,
+
+  addAttributes() {
+    return {
+      src: { default: null },
+      start: { default: 0 },
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'iframe[src*="youtube.com"]' }]
+  },
+
+  renderHTML({ node }) {
+    return ['iframe', { src: node.attrs.src }]
+  },
+
+  ...createAtomBlockMarkdownSpec({
+    nodeName: 'youtube',
+    requiredAttributes: ['src'],
+    allowedAttributes: ['src', 'start'],
+  }),
+})
+```
+
+**Markdown:**
+
+```markdown
+:::youtube {src="https://youtube.com/watch?v=dQw4w9WgXcQ" start="30"}
+```
+
+---
+
+### 示例 3：提及（行内）
+
+```typescript
+import { Node } from '@tiptap/core'
+import { createInlineMarkdownSpec } from '@tiptap/core'
+
+export const Mention = Node.create({
+  name: 'mention',
+  group: 'inline',
+  inline: true,
+  atom: true,
+
+  addAttributes() {
+    return {
+      id: { default: null },
+      label: { default: null },
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'span[data-mention]' }]
+  },
+
+  renderHTML({ node }) {
+    return ['span', { 'data-mention': node.attrs.id }, `@${node.attrs.label}`]
+  },
+
+  ...createInlineMarkdownSpec({
+    nodeName: 'mention',
+    selfClosing: true,
+    allowedAttributes: ['id', 'label'],
+  }),
+})
+```
+
+**Markdown:**
+
+```markdown
+嘿 [mention id="user123" label="John"]，快看看这个！
+```
+
+## 何时使用何种方案
+
+### 何时使用工具：
+
+- ✅ 遵循标准 Markdown 规范（Pandoc，简写）
+- ✅ 属性解析标准即可满足需求
+- ✅ 块/行内区别明确
+- ✅ 追求快速实现
+- ✅ 希望扩展间保持一致性
+
+### 何时使用自定义实现：
+
+- ✅ 需要非标准 Markdown 语法
+- ✅ 复杂解析逻辑
+- ✅ 需要对 token 进行细粒度控制
+- ✅ 自定义属性格式
+
+---
+
+## 相关文档
+
+- [自定义分词器](../advanced-usage/custom-tokenizer) — 适用于不遵循规范的自定义语法
+- [扩展集成指南](../guides/integrate-markdown-in-your-extension) — 添加 Markdown 到扩展的一般指南
+- [高级自定义](../advanced-usage) — 自定义解析与渲染处理
+- [API 参考](../) — 完整 API 文档
+
+---
+
+**专业提示**：优先使用标准模式的工具，当需要工具无法满足的特定行为时，再考虑使用自定义实现。

@@ -1,0 +1,122 @@
+---
+title: 使用 AI Suggestion 扩展预览更改
+meta:
+  title: 使用 AI Suggestion 预览更改 | Tiptap 内容 AI
+  description: 了解如何将 AI 代理与 AI Suggestion 扩展集成，以预览 AI 生成的更改。
+  category: 内容 AI
+sidebars:
+  hideSecondary: true
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+将 AI 代理扩展与 AI Suggestion 扩展集成，提供 AI 生成更改的审核工作流。允许用户在更改应用到文档之前进行审核。
+
+<CodeDemo
+  isPro
+  isLarge
+  path="/Extensions/AiAgentPreviewChanges"
+  src="https://feature-beta-ai-extensions--tiptap-pro.netlify.app/preview/Extensions/AiAgentPreviewChanges"
+/>
+
+## 设置 AI Suggestion 集成
+
+本指南将引导你完成设置 AI Suggestion 扩展以预览、接受和拒绝更改的过程。
+
+### 第 1 步：安装两个扩展
+
+```bash
+npm install @tiptap-pro/extension-ai-agent @tiptap-pro/extension-ai-suggestion
+```
+
+### 第 2 步：在编辑器中配置两个扩展
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import AiAgent from '@tiptap-pro/extension-ai-agent'
+import AiSuggestion from '@tiptap-pro/extension-ai-suggestion'
+
+const provider = new AiAgentProvider({
+  appId: 'YOUR_APP_ID',
+  token: 'YOUR_JWT_TOKEN',
+  reviewOptions: {
+    // 设置扩展为 "aiSuggestion"，以使用 AI Suggestion 预览更改
+    extension: 'aiSuggestion',
+    // 可选：设置 autoAccept 为 "never"，始终要求用户审核后再应用更改
+    autoAccept: 'never',
+  },
+  // ... 其他选项
+})
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    AiAgent.configure({
+      provider,
+    }),
+    AiSuggestion.configure({
+      loadOnStart: false,
+      reloadOnUpdate: false,
+      // 可选：自定义建议的显示样式
+      // 例如，在选中建议时显示弹出框
+      getCustomDecorations({ change, isSelected, getDefaultDecorations }) {
+        const decorations = getDefaultDecorations()
+        // 如需要，可添加自定义装饰（示例请参见上方演示）
+        return decorations
+      },
+    }),
+  ],
+})
+```
+
+### 第 3 步：配置样式
+
+自定义编辑器中建议的显示样式。
+
+```css
+:root {
+  --color-green-100: oklch(0.962 0.044 156.743);
+  --color-green-700: oklch(0.527 0.154 150.069);
+  --color-red-100: oklch(0.936 0.032 17.717);
+  --color-red-700: oklch(0.505 0.213 27.518);
+}
+
+.tiptap-ai-diff-suggestion--old {
+  color: var(--color-red-700);
+  background-color: var(--color-red-100);
+}
+
+.tiptap-ai-diff-suggestion--new {
+  color: var(--color-green-700);
+  background-color: var(--color-green-100);
+}
+
+.tiptap-ai-diff-suggestion--new * {
+  background-color: var(--color-green-100);
+}
+```
+
+## 审核工作流程如何运作
+
+1. 当 AI 代理对文档进行更改时，如果 `autoAccept` 设置为 `never` 或 `onlyRead`，这些更改不会直接应用到文档，而是发送给 AI Suggestion 扩展
+2. AI Suggestion 扩展将更改显示为建议
+3. 用户可以审核这些建议，决定接受或拒绝
+4. 接受或拒绝后，更改被应用到文档，且对话继续进行
+
+## 接受和拒绝更改
+
+你可以调用以下方法来接受或拒绝更改：
+
+```tsx
+// 接受所有待处理更改
+provider.acceptToolCall()
+
+// 拒绝所有待处理更改
+provider.rejectToolCall()
+```
+
+<Callout title="注意" variant="info">
+  AI Suggestion 扩展允许用户在更改应用到文档前进行预览。若需在更改应用后进行审核，请集成 [AI Changes](/content-ai/capabilities/agent/review/ai-changes) 扩展。
+</Callout>

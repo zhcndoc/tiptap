@@ -1,0 +1,41 @@
+---
+title: 配置 Hocuspocus 提供者
+meta:
+  title: 配置 Hocuspocus 提供者 | Tiptap 协作文档
+  description:
+  category: Hocuspocus
+---
+
+## 设置
+
+### HocuspocusProvider
+
+| 设置                | 描述                                                                                                               | 默认值                              |
+|---------------------|-------------------------------------------------------------------------------------------------------------------|-------------------------------------|
+| `url`               | Hocuspocus/WebSocket 服务器的 URL。                                                                               | `''`                                |
+| `websocketProvider` | HocuspocusProviderWebsocket 的一个实例，适用于在多个提供者之间共享同一个 socket。                                   | `new HocuspocusProviderWebsocket()` |
+| `name`              | 文档的名称。                                                                                                       | `''`                                |
+| `document`          | 实际的 Y.js 文档。可选，默认会创建一个新文档，可通过 provider.document 访问。                                         | `new Y.Doc()`                       |
+| `token`             | 发送给服务器的认证令牌（支持字符串、函数和 Promise）。                                                              | `''`                                |
+| `awareness`         | Awareness 对象，默认附加到传入的 Y.js 文档。                                                                       | `new Awareness()`                   |
+| `forceSyncInterval` | 每隔 x 毫秒向服务器请求更新。                                                                                       | `false`                             |
+
+### HocuspocusProviderWebsocket
+
+| 设置                       | 描述                                                                                                                                             | 默认值       |
+|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| `url`                      | Hocuspocus/WebSocket 服务器的 URL。                                                                                                              | `''`        |
+| `WebSocketPolyfill`        | 在 Node.js 环境中运行时：传入 WebSocket 的 polyfill，例如 ws。                                                                                   | `WebSocket` |
+| `timeout`                  | 毫秒为单位的超时时间。如果超时非零，则设置一个 setTimeout 定时器触发。如果触发超时，后续尝试将终止。                                            | `0`         |
+| `factor`                   | 用于以指数方式增长延迟的因子选项。                                                                                                               | `2`         |
+| `maxAttempts`              | 最大尝试次数，若为 0，则尝试次数无上限。                                                                                                        | `0`         |
+| `minDelay`                 | 当抖动（jitter）启用时，用于设置延迟的下限。如果关闭抖动，则此属性无效。                                                                        | `1000`      |
+| `maxDelay`                 | 用于设置当启用因子调整时的延迟上限。如果不需要上限，可设置为 0。                                                                                 | `30000`     |
+| `jitter`                   | 若为 true，则当前迭代的延迟将在 minDelay 与计算得出的延迟之间随机取整数值。                                                                       | `true`      |
+| `messageReconnectTimeout`  | 如果在配置的 messageReconnectTimeout 时间内未收到消息，则关闭连接。                                                                               | `30000`     |
+| `delay`                    | 每次尝试之间的延迟时间（毫秒）。可传入因子以实现延迟指数增长。                                                                                    | `1000`      |
+| `initialDelay`             | 首次尝试前的等待时间。该选项通常为 0，因为通常希望首次尝试立即进行。                                                                               | `0`         |
+
+## 使用
+
+配置提供者不需要过多步骤，一个简单示例可见于 [快速入门](/hocuspocus/provider/install)

@@ -1,0 +1,52 @@
+---
+title: 持久化
+meta:
+  title: 持久化 | Hocuspocus 文档
+  category: Hocuspocus
+---
+
+要持久化文档，必须指示服务器：
+
+1. 在 `onStoreDocument` 钩子中存储文档（该钩子与 `onChange` 相同，但已经配置了防抖）。
+2. 使用 `onLoadDocument` 钩子从数据库加载文档。
+
+实际上，你甚至不必使用这两个钩子！我们已经在它们之上创建了一个简单的抽象，形式为 [数据库扩展](/hocuspocus/server/extensions/database)。
+
+- [数据库扩展](/hocuspocus/server/extensions/database) - 适用于任何数据库的通用数据库驱动
+- [SQLite 扩展](/hocuspocus/server/extensions/sqlite) - 开箱即用的 SQLite 持久化
+- [S3 扩展](/hocuspocus/server/extensions/s3) - 将文档存储在 Amazon S3 或兼容 S3 的服务中
+
+不过，如果你是个好奇心强的人，这里有一个使用钩子来实现的示例（这也是熟悉概念的好方法）。
+
+```ts
+import { debounce } from "debounce";
+import { Server } from "@hocuspocus/server";
+import { Doc } from "yjs";
+
+let debounced;
+
+const server = new Server({
+  async onStoreDocument(data) {
+    // 保存到数据库。例如：
+    // saveToDatabase(data.document, data.documentName);
+  },
+
+  async onLoadDocument(data): Doc {
+    return loadFromDatabase(data.documentName) || createInitialDocTemplate();
+  },
+});
+
+server.listen();
+
+function createInitialDocTemplate() {
+  return new Doc();
+  // 这里可以做你想做的任何事情
+}
+```
+
+## 常见问题：我应该以什么格式保存我的文档？
+
+应为 Uint8Array，[Yjs 就是用此格式编码文档的](https://docs.yjs.dev/api/document-updates)。
+如果出于某些原因需要，你也可以额外将文档持久化为其他格式，比如 JSON。
+
+注意：不要尝试将 Y.Doc 存储为 JSON，用户连接时再重新创建为 Yjs 的二进制格式。这会导致更新合并出现问题，并且在新连接时内容会重复。数据必须以二进制格式存储，才能正确利用 Yjs 格式。

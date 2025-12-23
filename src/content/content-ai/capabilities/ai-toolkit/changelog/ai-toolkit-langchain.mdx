@@ -1,0 +1,122 @@
+---
+title: 更新日志 - LangChain.js
+meta:
+  title: 更新日志 - LangChain.js | Tiptap AI Toolkit
+  description: @tiptap-pro/ai-toolkit-langchain 包的更新日志
+  category: 内容 AI
+---
+
+# @tiptap-pro/ai-toolkit-langchain
+
+## 3.0.0-alpha.17
+
+### 小改动
+
+- 服务器 AI Toolkit 工具定义
+
+## 3.0.0-alpha.16
+
+### 重大改动
+
+- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，并将其设置为默认工具。移除 `readNodeRange`、`readSelection`、`insertContent` 和 `applyPatch` 工具。
+
+## 3.0.0-alpha.15
+
+### 小改动
+
+- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，使编辑更快更高效。这些工具处于试验阶段，需主动启用。
+
+## 3.0.0-alpha.14
+
+### 修补改动
+
+- 修复一个导致 AI 在聊天交互开始时未能读取文档的错误。
+
+## 3.0.0-alpha.13
+
+### 修补改动
+
+- 修复一个导致 AI 在不必要时读取整个文档的错误。
+
+## 3.0.0-alpha.12
+
+### 修补改动
+
+- 修复一个导致 AI 在文档更新后读取到错误内容的错误。
+
+## 3.0.0-alpha.11
+
+### 修补改动
+
+- 修复一个新线程和评论未能创建在文档正确位置的错误。
+
+## 3.0.0-alpha.10
+
+### 重大改动
+
+- 为 `applyPatch` 工具引入新的工具输入格式，使工具定义更简洁、一致。
+- 改进所有内置工具的输出和工具定义。
+- 需要升级到 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.37`
+
+## 3.0.0-alpha.9
+
+### 重大改动
+
+- 通过将 "html" 属性重命名为 "content"，使 `insertContent` 工具与内容格式无关。
+- 需要升级到 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.36`
+
+### 修补改动
+
+- 修复 `insertContent` 工具中 `activeNodeRange` 作为位置值无效的错误。
+- 修复 `insertContent` 工具导致 `activeNodeRange` 总是重置为 0 的错误。
+
+## 3.0.0-alpha.8
+
+### 重大改动
+
+- 新增 `editThreads` 和 `getThreads` 工具，实现 AI 驱动的评论和线程管理。
+- 需要升级到 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.26`
+
+## 3.0.0-alpha.7
+
+### 重大改动
+
+- 将 `applyDiff` 工具重命名为 `applyPatch`。
+- 改进 `applyDiff` 工具（现称 `applyPatch`）的格式和工具定义，使 AI 生成补丁操作列表，提升准确性（避免不必要跳转）并显著减少令牌使用。
+
+## 3.0.0-alpha.6
+
+### 小改动
+
+- 为 `insertContent` 工具新增 `activeNodeRange` 位置，允许 AI 在活动节点区间插入内容，提高当禁用 `applyDiff` 工具时编辑的准确性。
+
+## 3.0.0-alpha.5
+
+### 小改动
+
+- AI Toolkit 与 Pages 扩展集成的试验性实现。引入 `readPage` 工具。
+
+## 3.0.0-alpha.4
+
+### 重大改动
+
+- 改进 `readSelection` 和 `insertContent` 工具的定义，修复用户在 AI 读取选区后改变选区导致 AI 将内容插入错误位置的错误。需要 AI Toolkit 版本不低于 `3.0.0-alpha-17`
+
+## 3.0.0-alpha.3
+
+### 重大改动
+
+- 需要升级到 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.14`
+- 优化了文档读取与编辑的工具定义
+
+## 3.0.0-alpha.2
+
+### 小改动
+
+- 改善 `readFirstChunk` 工具说明
+
+## 3.0.0-alpha.1
+
+### 重大改动
+
+- 初始版本，带有适用于 Tiptap AI Toolkit 的 LangChain.js 工具定义

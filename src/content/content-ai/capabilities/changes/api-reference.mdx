@@ -21,7 +21,7 @@ export interface AiChangesOptions {
    * @param options 当前的变更、变更列表、当前变更是否被选中、获取默认装饰的函数、编辑器实例、AI 修改前的文档以及 AI 修改后的文档。
    * @returns 应用于文档的 ProseMirror 装饰列表
    */
-  getCustomDecorations: (options: GetCustomDecorationsOptions) => Decoration[];
+  getCustomDecorations: (options: GetCustomDecorationsOptions) => Decoration[]
 }
 
 /**
@@ -31,33 +31,33 @@ export interface GetCustomDecorationsOptions {
   /**
    * 当前正在处理的变更
    */
-  change: AiChange;
+  change: AiChange
   /**
    * AI 进行的变更列表
    */
-  changes: AiChange[];
+  changes: AiChange[]
   /**
    * 当前变更是否被选中
    */
-  isSelected: boolean;
+  isSelected: boolean
   /**
    * 获取扩展在未提供 `getCustomDecorations` 函数时，会默认应用于文档的装饰。
    *
    * @returns 要应用于文档的默认装饰列表
    */
-  getDefaultDecorations: () => Decoration[];
+  getDefaultDecorations: () => Decoration[]
   /**
    * Tiptap 编辑器实例
    */
-  editor: Editor;
+  editor: Editor
   /**
    * AI 修改前的文档
    */
-  previousDoc: Node | null;
+  previousDoc: Node | null
   /**
    * AI 修改后的当前文档
    */
-  currentDoc: Node;
+  currentDoc: Node
 }
 ```
 
@@ -69,7 +69,7 @@ export interface GetCustomDecorationsOptions {
  */
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
-    previewAiAgentChanges: {
+    aiChanges: {
       /**
        * 开始跟踪文档中的 AI 变更，并在编辑器中显示当前文档与初始文档之间的差异。
        *

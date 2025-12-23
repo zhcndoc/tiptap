@@ -1,0 +1,60 @@
+---
+title: 文字方向与 RTL 支持
+meta:
+  title: 文字方向与 RTL 支持示例 | Tiptap 编辑器文档
+  description: 通过这个全面的 Tiptap 示例，学习如何使用文字方向控件来支持 RTL 语言和双向内容。
+  category: 示例
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+Tiptap 内置支持从右到左（RTL）语言和双向文本。此示例展示了如何设置全局文字方向以及控制单个节点的文字方向。
+
+## 功能
+
+- **全局方向控制**：为所有内容设置默认文字方向（`ltr`、`rtl` 或 `auto`）
+- **单节点方向**：使用命令覆盖特定节点的文字方向
+- **双向文本**：正确渲染混合的 LTR 和 RTL 内容
+- **多语言支持**：支持英语、阿拉伯语、希伯来语等多种语言
+
+`auto` 设置对于双向内容特别有用，会自动根据每个节点中第一个强方向字符检测文字方向。
+
+<CodeDemo path="/Examples/TextDirection" />
+
+## 使用方法
+
+### 设置全局方向
+
+配置编辑器时设置默认文字方向：
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+
+const editor = new Editor({
+  extensions: [StarterKit],
+  textDirection: 'auto', // 或 'ltr'，'rtl'
+})
+```
+
+### 使用命令控制方向
+
+对特定内容覆盖文字方向：
+
+```js
+// 设置选中文本为 RTL 方向
+editor.commands.setTextDirection('rtl')
+
+// 设置选中文本为 LTR 方向
+editor.commands.setTextDirection('ltr')
+
+// 使用自动检测
+editor.commands.setTextDirection('auto')
+
+// 移除方向覆盖
+editor.commands.unsetTextDirection()
+```
+
+### 与框架搭配使用
+
+文字方向可以通过重新创建编辑器并传入新的 `textDirection` 选项动态改变。此用法在上方使用 React `useEditor` 钩子的示例中有所展示。

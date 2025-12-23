@@ -1,8 +1,8 @@
 ---
-title: Tiptap 介绍
+title: Tiptap 文档
 meta:
-  title: Tiptap 介绍
-  description: Tiptap 提供了一个框架来创建自定义内容编辑器。探索无数可扩展的功能和方便的云服务。
+  title: Tiptap 文档
+  description: Tiptap 提供创建定制内容编辑器的框架。探索无数可扩展功能和便捷的云服务。
   category: 编辑器
 ---
 
@@ -22,6 +22,8 @@ import conversionIcon from '@/assets/conversion.png'
 import collabIcon from '@/assets/collaboration.png'
 import commentsIcon from '@/assets/comments.png'
 import contentAIIcon from '@/assets/content-ai.png'
+import aiGenerationIcon from '@/assets/ai-generation.png'
+import aiToolkitIcon from '@/assets/ai-toolkit.png'
 import DedicatedCloudIcon from '@/assets/icons/dedicated-cloud.svg'
 import DiscordIcon from '@/assets/icons/discord.svg'
 import documentsIcon from '@/assets/documents.png'
@@ -32,46 +34,19 @@ import XIcon from '@/assets/icons/x.svg'
 import cardCoverSimpleEditorTemplate from '@/assets/card-covers/examples/simple-editor-template-preview.jpg'
 import cardCoverUIComponents from '@/assets/card-covers/examples/components-preview.jpg'
 
-构建正好满足您产品需要的编辑器，从轻量级开源核心开始，然后扩展到完全托管的云服务和 AI 扩展。
+打造完全符合您产品需求的编辑器，从轻量级开源核心开始，结合完全托管的云服务和 AI 扩展进行扩展。
 
 在您的应用中直接使用无头编辑器和 100 多个扩展，添加实时协作、评论、AI 集成、文件转换等功能。
 
 <div className="grid gap-20">
-    <Section title="从模板开始"
-             description="使用我们的编辑器模板将 Tiptap 编辑器集成到您的应用中，或选择您自己的 UI 组件。一旦集成，您可以使用更多无头 Tiptap 扩展进行扩展，并根据您的喜好进行自定义。">
-    <CardGrid.Wrapper>
-            <CardGrid.Item asChild>
-                <Link href="/ui-components/templates/simple-editor">
-                    <CardGrid.ItemImage asNextImage src={cardCoverSimpleEditorTemplate.src} width={cardCoverSimpleEditorTemplate.width} height={cardCoverSimpleEditorTemplate.height} alt="图像" />
-                    <div>
-                        <CardGrid.ItemTitle>模板</CardGrid.ItemTitle>
-                        <CardGrid.ItemParagraph>使用包含常用功能的预构建编辑器快速入门。</CardGrid.ItemParagraph>
-                    </div>
-                    <CardGrid.ItemFooter>
-                    </CardGrid.ItemFooter>
-                </Link>
-            </CardGrid.Item>
-            <CardGrid.Item asChild>
-                <Link href="/ui-components/components/overview">
-                    <CardGrid.ItemImage asNextImage src={cardCoverUIComponents.src} width={cardCoverUIComponents.width} height={cardCoverUIComponents.height} alt="图像" />
-                    <div>
-                        <CardGrid.ItemTitle>组件</CardGrid.ItemTitle>
-                        <CardGrid.ItemParagraph>已经在使用 Tiptap？只需添加您需要的部分。</CardGrid.ItemParagraph>
-                    </div>
-                    <CardGrid.ItemFooter>
-                    </CardGrid.ItemFooter>
-                </Link>
-            </CardGrid.Item>
-        </CardGrid.Wrapper>
-    </Section>
   <Section
     title="按功能浏览"
-    description="查看我们的文档和示例，了解如何将更高级的 Tiptap 功能合并到您的技术栈中。"
+    description="查看我们的文档和示例，了解如何将更高级的 Tiptap 功能集成到您的技术栈中。"
   >
     <div className="grid sm:grid-cols-2 gap-5">
       <ProductCard
         title="编辑器"
-        description="无头且框架无关的富文本编辑器，基于 ProseMirror。"
+        description="基于 ProseMirror 的无头且框架无关的富文本编辑器。"
         tags={["开源"]}
         documentationUrl="/editor/getting-started/overview"
         secondaryUrl="/examples/basics/default-text-editor"
@@ -80,107 +55,180 @@ import cardCoverUIComponents from '@/assets/card-covers/examples/components-prev
       <ProductCard
         title="协作"
         description="支持离线优先的实时文档编辑。"
-        tags={["云", "本地"]}
+        tags={["云端", "本地部署"]}
         documentationUrl="/collaboration/getting-started/overview"
         secondaryUrl="/collaboration/getting-started/install"
         icon={collabIcon.src}
       />
       <ProductCard
-        title="内容 AI"
-        description="在 AI 建议、内联 AI 编辑器命令和流式响应的帮助下编写内容。"
-        tags={["云", "本地"]}
-        documentationUrl="/content-ai/getting-started/overview"
+        title="AI 生成"
+        description="智能自动完成、自定义命令，及通过 OpenAI 或您自有大语言模型生成图像。"
+        tags={["自定义大语言模型", "云端"]}
+        documentationUrl="/content-ai/capabilities/generation/overview"
         secondaryUrl="/content-ai/capabilities/generation/overview#example"
-        icon={contentAIIcon.src}
+        secondaryButtonText="查看示例"
+        icon={aiGenerationIcon.src}
+      />
+      <ProductCard
+        title="AI 工具包"
+        description="构建可读取、插入和编辑文档的 AI 代理，支持工具定义或原语。"
+        tags={["自定义大语言模型"]}
+        documentationUrl="/content-ai/capabilities/ai-toolkit/overview"
+        secondaryUrl="/content-ai/capabilities/ai-toolkit/live-demo"
+        secondaryButtonText="查看演示"
+        icon={aiToolkitIcon.src}
+      />
+      <ProductCard
+        title="服务器端 AI 工具包"
+        description="构建可以在服务器端操作文档的 AI 代理，无需浏览器环境。"
+        tags={["自定义大语言模型"]}
+        documentationUrl="/content-ai/capabilities/server-ai-toolkit/overview"
+        icon={aiToolkitIcon.src}
       />
       <ProductCard
         title="评论"
-        description="向您的编辑器添加评论，并通过评论 REST API 对其进行管理。"
-        tags={["云", "本地"]}
+        description="为您的编辑器添加评论功能，并使用评论 REST API 进行管理。"
+        tags={["云端", "本地部署"]}
         documentationUrl="/comments/getting-started/overview"
         secondaryUrl="/comments/getting-started/overview#comments-example"
         icon={commentsIcon.src}
       />
       <ProductCard
         title="文档"
-        description="在您的前端或服务器端管理和处理文档。"
-        tags={["云", "本地"]}
+        description="在前端或服务器端管理并操作文档。"
+        tags={["云端", "本地部署"]}
         documentationUrl="/collaboration/documents"
         icon={documentsIcon.src}
       />
       <ProductCard
         title="转换"
-        description="在编辑器或 REST API 中导入和导出 DOCX 和其他文件类型"
-        tags={["云", "本地"]}
+        description="在编辑器或 REST API 中导入和导出 DOCX 及其它文件类型。"
+        tags={["云端", "本地部署"]}
         documentationUrl="/conversion/getting-started/overview"
         icon={conversionIcon.src}
       />
     </div>
   </Section>
 
-  <Section
-    title="集成或部署 Tiptap 云"
-    description="将 Tiptap 云服务集成到您的环境中，或在您自己的基础设施中部署我们的本地版本。选择最适合您性能、管理和可伸缩性需求的解决方案。"
-  >
-    <Grid.Wrapper className="sm:grid-cols-2 lg:grid-cols-3">
-      <Grid.Item>
-        <Grid.ItemHeader>
-          <CloudIcon className="w-6 h-6" />
-        </Grid.ItemHeader>
-        <Grid.ItemContent>
-          <Grid.ItemTitle>云</Grid.ItemTitle>
-          <Grid.ItemParagraph>集成我们每天都被数十万用户测试的云服务。</Grid.ItemParagraph>
-        </Grid.ItemContent>
-      </Grid.Item>
-      <Grid.Item>
-        <Grid.ItemHeader>
-          <DedicatedCloudIcon className="w-6 h-6" />
-        </Grid.ItemHeader>
-        <Grid.ItemContent>
-          <Grid.ItemTitle>专用云</Grid.ItemTitle>
-          <Grid.ItemParagraph>访问专用服务器，优化以处理更大项目和更高负载。</Grid.ItemParagraph>
-        </Grid.ItemContent>
-      </Grid.Item>
+{' '}
+
+<Section
+  title="使用模板快速上手"
+  description="通过我们的编辑器模板将 Tiptap 编辑器集成到您的应用中，或者自由选择 UI 组件。一旦集成，您可以用更多无头 Tiptap 扩展进行扩展并根据喜好自定义。"
+>
+  <CardGrid.Wrapper>
+    <CardGrid.Item asChild>
+      <Link href="/ui-components/templates/simple-editor">
+        <CardGrid.ItemImage
+          asNextImage
+          src={cardCoverSimpleEditorTemplate.src}
+          width={cardCoverSimpleEditorTemplate.width}
+          height={cardCoverSimpleEditorTemplate.height}
+          alt="图片"
+        />
+        <div>
+          <CardGrid.ItemTitle>模板</CardGrid.ItemTitle>
+          <CardGrid.ItemParagraph>
+            使用预构建的编辑器快速启动，内含常用功能。
+          </CardGrid.ItemParagraph>
+        </div>
+      </Link>
+    </CardGrid.Item>
+    <CardGrid.Item asChild>
+      <Link href="/ui-components/components/overview">
+        <CardGrid.ItemImage
+          asNextImage
+          src={cardCoverUIComponents.src}
+          width={cardCoverUIComponents.width}
+          height={cardCoverUIComponents.height}
+          alt="图片"
+        />
+        <div>
+          <CardGrid.ItemTitle>组件</CardGrid.ItemTitle>
+          <CardGrid.ItemParagraph>
+            已使用 Tiptap？直接引入您需要的部分即可。
+          </CardGrid.ItemParagraph>
+        </div>
+      </Link>
+    </CardGrid.Item>
+  </CardGrid.Wrapper>
+</Section>
+
+{' '}
+
+<Section
+  title="集成或部署 Tiptap 云服务"
+  description="将 Tiptap 云服务集成到您的环境中，或在您自己的基础设施内部署本地版本。选择最适合您性能、管理及可扩展性需求的方案。"
+>
+  <Grid.Wrapper className="sm:grid-cols-2 lg:grid-cols-3">
     <Grid.Item>
-        <Grid.ItemHeader>
-            <OnPremisesIcon className="w-6 h-6" />
-        </Grid.ItemHeader>
-        <Grid.ItemContent>
-            <Grid.ItemTitle>本地部署</Grid.ItemTitle>
-            <Grid.ItemParagraph>使用 Docker 镜像在您的服务器上实施 Tiptap 云。</Grid.ItemParagraph>
-        </Grid.ItemContent>
+      <Grid.ItemHeader>
+        <CloudIcon className="w-6 h-6" />
+      </Grid.ItemHeader>
+      <Grid.ItemContent>
+        <Grid.ItemTitle>云端</Grid.ItemTitle>
+        <Grid.ItemParagraph>
+          集成我们的云服务，数十万用户每日使用并验证。
+        </Grid.ItemParagraph>
+      </Grid.ItemContent>
     </Grid.Item>
-    </Grid.Wrapper>
-  </Section>
-        <CtaBox.Wrapper variant="light">
-            <CtaBox.Title>免费试用所有 Tiptap 功能 30 天</CtaBox.Title>
-            <CtaBox.Description>
-                创建一个 Tiptap 云帐户，打开您的仪表板，并开始 30 天的试用，以测试 Tiptap 提供的所有付费功能。
-            </CtaBox.Description>
-            <CtaBox.List>
-                <CtaBox.ListItem title="30 天试用：">无需信用卡</CtaBox.ListItem>
-                <CtaBox.ListItem title="编辑器功能：">集成所有 Pro 和 Cloud 扩展。</CtaBox.ListItem>
-                <CtaBox.ListItem title="所有付费功能：">测试协作、评论、版本历史等更多功能。</CtaBox.ListItem>
-                <CtaBox.ListItem title="AI 功能：">在您的编辑器中集成 AI 功能。</CtaBox.ListItem>
-            </CtaBox.List>
-            <CtaBox.Actions className="-mx-3">
-                <Button variant="tertiary" asChild>
-                    <Link href="https://cloud.tiptap.dev/register">
-                        开始试用
-                        <ArrowRightIcon className="w-4 h-4" />
-                    </Link>
-                </Button>
-            </CtaBox.Actions>
-        </CtaBox.Wrapper>
+    <Grid.Item>
+      <Grid.ItemHeader>
+        <DedicatedCloudIcon className="w-6 h-6" />
+      </Grid.ItemHeader>
+      <Grid.ItemContent>
+        <Grid.ItemTitle>专用云</Grid.ItemTitle>
+        <Grid.ItemParagraph>
+          访问专用服务器，针对大型项目和高负载进行优化。
+        </Grid.ItemParagraph>
+      </Grid.ItemContent>
+    </Grid.Item>
+    <Grid.Item>
+      <Grid.ItemHeader>
+        <OnPremisesIcon className="w-6 h-6" />
+      </Grid.ItemHeader>
+      <Grid.ItemContent>
+        <Grid.ItemTitle>本地部署</Grid.ItemTitle>
+        <Grid.ItemParagraph>
+          使用 Docker 镜像在您自己的服务器上实现 Tiptap 云服务。
+        </Grid.ItemParagraph>
+      </Grid.ItemContent>
+    </Grid.Item>
+  </Grid.Wrapper>
+</Section>
+<CtaBox.Wrapper variant="light">
+  <CtaBox.Title>免费试用所有 Tiptap 功能 30 天</CtaBox.Title>
+  <CtaBox.Description>
+    创建 Tiptap 云账户，打开仪表盘，开启 30 天试用，体验 Tiptap 所有付费功能。
+  </CtaBox.Description>
+  <CtaBox.List>
+    <CtaBox.ListItem title="30 天试用：">无需信用卡</CtaBox.ListItem>
+    <CtaBox.ListItem title="编辑器功能：">
+      集成所有专业与云端扩展。
+    </CtaBox.ListItem>
+    <CtaBox.ListItem title="所有付费功能：">
+      试用协作、评论、版本历史等功能。
+    </CtaBox.ListItem>
+    <CtaBox.ListItem title="AI 功能：">编辑器中集成 AI 功能。</CtaBox.ListItem>
+  </CtaBox.List>
+  <CtaBox.Actions className="-mx-3">
+    <Button variant="tertiary" asChild>
+      <Link href="https://cloud.tiptap.dev/register">
+        开始试用
+        <ArrowRightIcon className="w-4 h-4" />
+      </Link>
+    </Button>
+  </CtaBox.Actions>
+</CtaBox.Wrapper>
 
         <Section title="示例" moreLink={{ label: '浏览示例', url: '/docs/examples' }}>
     <CardGrid.Wrapper>
       <CardGrid.Item asChild>
         <Link href="/examples/basics/default-text-editor">
-          <CardGrid.ItemImage asNextImage src={cardCoverDefaultEditor.src} width={cardCoverDefaultEditor.width} height={cardCoverDefaultEditor.height} alt="图像" />
+          <CardGrid.ItemImage asNextImage src={cardCoverDefaultEditor.src} width={cardCoverDefaultEditor.width} height={cardCoverDefaultEditor.height} alt="图片" />
           <div>
             <CardGrid.ItemTitle>文本编辑器</CardGrid.ItemTitle>
-            <CardGrid.ItemParagraph>使用 Tiptap 开发一个富文本编辑器，代码量极少。</CardGrid.ItemParagraph>
+            <CardGrid.ItemParagraph>使用 Tiptap 以最少代码开发富文本编辑器。</CardGrid.ItemParagraph>
           </div>
           <CardGrid.ItemFooter>
             <Tag>编辑器</Tag>
@@ -189,10 +237,10 @@ import cardCoverUIComponents from '@/assets/card-covers/examples/components-prev
       </CardGrid.Item>
       <CardGrid.Item asChild>
         <Link href="/examples/advanced/collaborative-editing">
-          <CardGrid.ItemImage asNextImage src={cardCoverCollaborativeEditing.src} width={cardCoverCollaborativeEditing.width} height={cardCoverCollaborativeEditing.height} alt="图像" />
+          <CardGrid.ItemImage asNextImage src={cardCoverCollaborativeEditing.src} width={cardCoverCollaborativeEditing.width} height={cardCoverCollaborativeEditing.height} alt="图片" />
           <div>
-            <CardGrid.ItemTitle>协同编辑</CardGrid.ItemTitle>
-            <CardGrid.ItemParagraph>构建一个具有多用户协作功能的文本编辑器。</CardGrid.ItemParagraph>
+            <CardGrid.ItemTitle>协作编辑</CardGrid.ItemTitle>
+            <CardGrid.ItemParagraph>构建支持多用户协作的文本编辑器。</CardGrid.ItemParagraph>
           </div>
           <CardGrid.ItemFooter>
             <Tag>编辑器</Tag>
@@ -201,12 +249,13 @@ import cardCoverUIComponents from '@/assets/card-covers/examples/components-prev
         </Link>
       </CardGrid.Item>
     </CardGrid.Wrapper>
+
   </Section>
   <Section title="指南" moreLink={{ label: '浏览指南', url: '/docs/guides' }}>
     <CardGrid.Wrapper>
       <CardGrid.Item asChild>
           <Link href="/editor/getting-started/configure">
-          <CardGrid.Subtitle size="sm">第一步</CardGrid.Subtitle>
+          <CardGrid.Subtitle size="sm">入门</CardGrid.Subtitle>
           <div>
             <CardGrid.ItemTitle>如何设置和配置 Tiptap 编辑器？</CardGrid.ItemTitle>
           </div>
@@ -217,9 +266,9 @@ import cardCoverUIComponents from '@/assets/card-covers/examples/components-prev
       </CardGrid.Item>
       <CardGrid.Item asChild>
           <Link href="/guides/pro-extensions">
-          <CardGrid.Subtitle size="sm">第一步</CardGrid.Subtitle>
+          <CardGrid.Subtitle size="sm">入门</CardGrid.Subtitle>
           <div>
-            <CardGrid.ItemTitle>如何集成 Pro 扩展？</CardGrid.ItemTitle>
+            <CardGrid.ItemTitle>如何集成专业扩展？</CardGrid.ItemTitle>
           </div>
           <CardGrid.ItemFooter>
             <Tag>编辑器</Tag>
@@ -229,9 +278,9 @@ import cardCoverUIComponents from '@/assets/card-covers/examples/components-prev
       </CardGrid.Item>
       <CardGrid.Item asChild>
           <Link href="/collaboration/getting-started/install">
-          <CardGrid.Subtitle size="sm">第一步</CardGrid.Subtitle>
+          <CardGrid.Subtitle size="sm">入门</CardGrid.Subtitle>
           <div>
-              <CardGrid.ItemTitle>如何使您的编辑器具备协作功能？</CardGrid.ItemTitle>
+              <CardGrid.ItemTitle>如何使您的编辑器支持协作？</CardGrid.ItemTitle>
           </div>
           <CardGrid.ItemFooter>
             <Tag>编辑器</Tag>
@@ -243,7 +292,7 @@ import cardCoverUIComponents from '@/assets/card-covers/examples/components-prev
           <Link href="/editor/getting-started/style-editor">
             <CardGrid.Subtitle size="sm">样式</CardGrid.Subtitle>
           <div>
-              <CardGrid.ItemTitle>如何应用样式到无头 Tiptap 编辑器</CardGrid.ItemTitle>
+              <CardGrid.ItemTitle>如何为无头 Tiptap 编辑器应用样式</CardGrid.ItemTitle>
           </div>
           <CardGrid.ItemFooter>
             <Tag>编辑器</Tag>
@@ -260,8 +309,8 @@ import cardCoverUIComponents from '@/assets/card-covers/examples/components-prev
             <XIcon className="w-6 h-6" />
           </Grid.ItemHeader>
           <Grid.ItemContent>
-            <Grid.ItemTitle><span className="line-through">Twitter</span> X</Grid.ItemTitle>
-            <Grid.ItemParagraph>关注我们获取最新消息和更新。</Grid.ItemParagraph>
+            <Grid.ItemTitle><span className="line-through">推特</span> X</Grid.ItemTitle>
+            <Grid.ItemParagraph>在 X 上关注我们，获取最新新闻和更新。</Grid.ItemParagraph>
           </Grid.ItemContent>
           <div className="mt-4">
             <Button className="inline-block" size="small" variant="secondary">
@@ -277,7 +326,7 @@ import cardCoverUIComponents from '@/assets/card-covers/examples/components-prev
           </Grid.ItemHeader>
           <Grid.ItemContent>
             <Grid.ItemTitle>Discord</Grid.ItemTitle>
-            <Grid.ItemParagraph>与 Tiptap 社区联系。</Grid.ItemParagraph>
+            <Grid.ItemParagraph>与 Tiptap 社区连接交流。</Grid.ItemParagraph>
           </Grid.ItemContent>
           <div className="mt-4">
             <Button className="inline-block" size="small" variant="secondary">
@@ -293,7 +342,7 @@ import cardCoverUIComponents from '@/assets/card-covers/examples/components-prev
           </Grid.ItemHeader>
           <Grid.ItemContent>
             <Grid.ItemTitle>GitHub</Grid.ItemTitle>
-            <Grid.ItemParagraph>关注进展并为代码库做出贡献。</Grid.ItemParagraph>
+            <Grid.ItemParagraph>关注项目进展并参与代码贡献。</Grid.ItemParagraph>
           </Grid.ItemContent>
           <div className="mt-4">
             <Button className="inline-block" size="small" variant="secondary">

@@ -1,0 +1,267 @@
+---
+title: 自定义 Markdown 解析
+tags:
+  - type: beta
+meta:
+  title: 自定义 Markdown 解析 | Tiptap 编辑器文档
+  description: 通过这份全面指南，学习如何在 Tiptap 编辑器中实现自定义 Markdown 解析。
+  category: 编辑器
+---
+
+本指南将带你了解如何在 Tiptap 编辑器中实现自定义 Markdown 解析。完成本教程后，你将能够从 [Tokens](../glossary#token) 中提取 [Tiptap JSON](../glossary#tiptap-json)。
+
+扩展可以提供自定义的解析逻辑来处理特定的 Markdown token。这个过程是通过 `markdown.parse` 处理器完成的。
+
+## 创建并理解解析处理器
+
+解析处理器接收来自 MarkedJS 的 Markdown token，并返回可被编辑器使用的 Tiptap JSON 内容。  
+除了 token 外，解析函数还会接收一个带有辅助功能的 `helpers` 对象，以帮助解析。
+
+这些辅助函数对于创建节点、标记，或解析 `token.tokens` 中的子 `MarkedJS` token 非常有用。
+
+```typescript
+const MyHeading = Node.create({
+  name: 'customHeading',
+  // ...
+
+  markdownTokenName: 'heading', // 要处理的 Token 类型（可选，默认是扩展名称）
+  parseMarkdown: (token, helpers) => {
+    return {
+      type: 'heading',
+      attrs: { level: token.depth },
+      content: helpers.parseInline(token.tokens || []),
+    }
+  },
+})
+```
+
+在这个例子中，解析处理器处理由 MarkedJS 传递到我们的 Markdown 管理器的 `heading` token。  
+该 token 会被捕获并转换成一个 type 为 `heading` 的 Tiptap 节点。
+
+相应的 `level` 属性从 token 中提取，且其内联内容（因为标题只能包含标记或内联文本）通过 `helpers.parseInline()` 函数解析。
+
+> **重要提示**：Token 上的属性可能会根据 [Tokenizer](../glossary#tokenizer) 的配置有所不同。
+
+## 解析辅助函数
+
+如上节所述，`helpers` 对象提供了用于解析子 token 或创建节点和标记的工具函数。  
+让我们逐一介绍这些辅助函数及其用法。
+
+### 使用 `helpers.parseInline(tokens)` 解析内联级别的子 token
+
+该辅助函数接收一组 token，并**尝试**将其解析为内联内容（带标记的文本节点）。  
+它不会验证传入的 token 是否真的为内联 token，因此请确保这里传入的确实是内联 token。
+
+函数返回可用作 Tiptap 节点 `content` 的 `TiptapJSON[]`。
+
+```typescript
+parse: (token, helpers) => {
+  const content = helpers.parseInline(token.tokens || [])
+
+  return {
+    type: 'paragraph',
+    content,
+  }
+}
+```
+
+### 使用 `helpers.parseChildren(tokens)` 解析块级子 token
+
+与 `parseInline()` 类似，但它将 token 解析为块级内容（例如列表项、引用块、代码块等）。  
+它不会验证传入的 token 是否真的为块级 token，因此请确保只传入块级 token。
+
+函数返回可用作 Tiptap 节点 `content` 的 `TiptapJSON[]`。
+
+```typescript
+parse: (token, helpers) => {
+  // 解析嵌套的块级内容（例如列表项）
+  const content = helpers.parseChildren(token.tokens || [])
+
+  return {
+    type: 'blockquote',
+    content,
+  }
+}
+```
+
+### 使用 `helpers.parseInline()` 和 `helpers.applyMark()` 解析标记
+
+使用 `helpers.applyMark()` 为内容应用标记：
+
+```typescript
+const Bold = Mark.create({
+  name: 'bold',
+
+  markdownTokenName: 'strong',
+  parseMarkdown: (token, helpers) => {
+    const content = helpers.parseInline(token.tokens || []) // 解析标记内的内联内容
+    return helpers.applyMark('bold', content) // 将 'bold' 标记应用到解析后的内容
+  },
+})
+```
+
+## Markdown 中的 HTML 解析
+
+当 Markdown 中包含 HTML 时，解析过程会调用您的扩展现有的 `parseHTML` 方法。
+
+```markdown
+# Regular Markdown
+
+<custom-component data-foo="bar">
+  <p>This HTML is parsed by your extensions</p>
+</custom-component>
+
+More **Markdown** here.
+```
+
+## 定义 Markdown token 名称
+
+在将 token 解析为节点或标记时，可能出现 token 与节点或标记名称不一一对应的情况。此时，可以通过 `markdownTokenName` 指定要解析的 token 名称以及对应的节点或标记类型名称。
+
+```typescript
+const CustomBold = Mark.create({
+  name: 'bold',
+  // ...
+
+  markdownTokenName: 'strong', // 解析时匹配 'strong' token
+  parseMarkdown: (token, helpers) => { /* ... */ },
+  renderMarkdown: (node, helpers) => { /* ... */ },
+})
+```
+
+这在以下情况下特别有用：
+
+- Markdown token 名称与节点名称不同  
+- 多个 Markdown token 映射到同一节点类型  
+- 一个节点类型可以序列化成多种 Markdown 格式  
+
+## 回退解析
+
+如果没有扩展处理特定的 token 类型，MarkdownManager 会为常见 token 提供回退解析：
+
+- `paragraph` → `{ type: 'paragraph' }`  
+- `heading` → `{ type: 'heading', attrs: { level } }`  
+- `text` → `{ type: 'text', text }`  
+- `html` → 通过扩展的 `parseHTML` 方法解析  
+
+你可以通过为这些 token 类型提供自己的处理器来覆盖回退逻辑。
+
+## 调试解析
+
+打印 token 内容以了解 MarkedJS 的输出：
+
+```typescript
+const markdown = '# Hello **World**'
+const tokens = editor.markdown.instance.lexer(markdown)
+console.log(JSON.stringify(tokens, null, 2))
+```
+
+### 单独解析 token
+
+```typescript
+const token = {
+  type: 'heading',
+  depth: 1,
+  tokens: [{ type: 'text', text: 'Hello' }],
+}
+
+const helpers = {
+  parseInline: tokens => [{ type: 'text', text: 'Hello' }],
+  // ... 其它辅助函数
+}
+
+const result = myExtension.options.markdown.parse(token, helpers)
+console.log(result)
+```
+
+## 性能注意事项
+
+### 惰性解析
+
+针对大型文档，考虑按需解析：
+
+```typescript
+let cachedJSON = null
+
+function getJSON() {
+  if (!cachedJSON) {
+    cachedJSON = editor.markdown.parse(largeMarkdownString)
+  }
+  return cachedJSON
+}
+```
+
+### 增量更新
+
+避免每次变更都重新解析整个文档，通过更新特定部分来提升性能：
+
+```typescript
+editor.commands.insertContentAt(position, newMarkdown, { contentType: 'markdown' })
+```
+
+## 示例
+
+### 自定义标题解析器
+
+构建一个 `customHeading` 扩展的自定义标题解析器，将提取标题级别并为每个标题生成唯一 ID。
+
+```typescript
+import { Node } from '@tiptap/core'
+
+const CustomHeading = Node.create({
+  name: 'customHeading',
+
+  // ... 其它配置
+
+  parseMarkdown: (token, helpers) => {
+    const level = token.depth || 1 // 从 token 获取标题级别
+
+    // 添加自定义属性
+    return {
+      type: 'customHeading',
+      attrs: {
+        level,
+        id: `heading-${Math.random()}`, // 生成 ID
+      },
+      content: helpers.parseInline(token.tokens || []), // 解析标题 token 的内联内容
+    }
+  },
+})
+```
+
+### 自定义 YouTube 嵌入解析器
+
+创建一个 `youtube` token 的自定义解析器，将 token 转换成带有属性的 `youtubeEmbed` 节点。
+
+```typescript
+import { Node } from '@tiptap/core'
+
+const YoutubeEmbed = Node.create({
+  name: 'youtubeEmbed',
+  atom: true, // 该节点为原子节点，自包含
+
+  // ... 其它配置
+
+  parseMarkdown: (token) => {
+    // 这些属性从 youtube token 中提取
+    // 假设自定义分词器提供了这些 token
+    // 来自类似 Markdown 语法: ![youtube](videoId?start=60&width=800&height=450)
+    const videoId = token.videoId || ''
+    const start = token.start || 0
+    const width = token.width || 560
+    const height = token.height || 315
+
+
+    // 由于这是原子节点，无需 helpers 来解析子节点
+    return {
+      type: 'youtubeEmbed',
+      attrs: {
+        videoId,
+        start,
+        width,
+        height,
+      },
+    }
+  },
+})
+```

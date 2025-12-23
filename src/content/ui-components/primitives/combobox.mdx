@@ -1,0 +1,112 @@
+---
+title: 集成组合框 UI 组件
+meta:
+  title: 组合框 | Tiptap UI 组件
+  description: 集成一个可搜索的下拉组件，将输入框与可过滤的选项列表结合。更多内容请参阅文档。
+  category: UI 组件
+component:
+  name: 组合框
+  description: 一个可搜索的下拉组件，将输入框与可过滤的选项列表结合，提升用户交互体验。
+  type: primitive
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: SearchIcon
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个结合了输入框与可过滤选项列表的可搜索下拉组件，基于 Ariakit 构建，实现无障碍访问，采用先进的交互模式。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui-primitive/combobox" />
+
+## 安装
+
+你可以通过 Tiptap CLI 添加此基础组件
+
+```bash
+npx @tiptap/cli@latest add combobox
+```
+
+## 用法
+
+```tsx
+import {
+  ComboboxProvider,
+  Combobox,
+  ComboboxPopover,
+  ComboboxList,
+  ComboboxItem,
+} from '@/components/tiptap-ui-primitive/combobox'
+
+export default function MyComponent() {
+  const [value, setValue] = React.useState('')
+  const [selectedValue, setSelectedValue] = React.useState('')
+
+  return (
+    <ComboboxProvider value={selectedValue} setValue={setSelectedValue}>
+      <Combobox
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="搜索选项..."
+      />
+      <ComboboxPopover>
+        <ComboboxList>
+          <ComboboxItem value="apple">苹果</ComboboxItem>
+          <ComboboxItem value="banana">香蕉</ComboboxItem>
+          <ComboboxItem value="cherry">樱桃</ComboboxItem>
+          <ComboboxItem value="date">枣</ComboboxItem>
+        </ComboboxList>
+      </ComboboxPopover>
+    </ComboboxProvider>
+  )
+}
+```
+
+## 属性
+
+### ComboboxProvider
+
+基于 Ariakit 的 ComboboxProvider，拥有优化的默认值。
+
+| 名称                  | 类型                        | 默认   | 说明                                    |
+| --------------------- | --------------------------- | ------ | --------------------------------------- |
+| includesBaseElement   | `boolean`                   | false  | 是否将基础元素包含在 Tab 顺序中          |
+| resetValueOnHide      | `boolean`                   | true   | 弹出层隐藏时是否重置值                   |
+| value                 | `string`                    | -      | 当前选中的值                            |
+| setValue              | `(value: string) => void`   | -      | 更新选中值的函数                        |
+
+### Combobox
+
+用于输入和过滤的输入框组件。
+
+| 名称        | 类型       | 默认   | 说明                     |
+| ----------- | ---------- | ------ | ------------------------ |
+| autoSelect  | `boolean`  | true   | 是否自动选中第一个选项   |
+
+### ComboboxItem
+
+组合框列表中可单独选择的选项。
+
+| 名称    | 类型      | 默认   | 说明                         |
+| ------- | --------- | ------ | ---------------------------- |
+| value   | `string`  | -      | 选择该项时设置的值           |
+
+## 样式
+
+组合框组件使用 CSS 自定义属性来支持主题定制：
+
+```scss
+.tiptap-combobox-list {
+  --tt-combobox-bg-color: var(--white);
+  --tt-combobox-border-color: var(--tt-gray-light-a-100);
+  --tt-combobox-text-color: var(--tt-gray-light-a-600);
+
+  .dark & {
+    --tt-combobox-border-color: var(--tt-gray-dark-a-50);
+    --tt-combobox-bg-color: var(--tt-gray-dark-50);
+    --tt-combobox-text-color: var(--tt-gray-dark-a-600);
+  }
+}
+```

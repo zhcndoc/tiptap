@@ -6,6 +6,8 @@ meta:
   category: UI 组件
 sidebars:
   hideSecondary: true
+tags:
+  - type: mit
 ---
 
 import { ArrowRightIcon } from 'lucide-react'
@@ -16,12 +18,10 @@ import { Callout } from '@/components/ui/Callout'
 
 简单编辑器模板是一个完整工作的 Tiptap 编辑器设置。它包括常用的开源扩展和 UI 组件，所有组件都采用 MIT 许可证，并且可以随意自定义。
 
-<CodeDemo isLarge src="https://template.tiptap.dev/preview/templates/simple" />
-
 <div className="flex items-center gap-4 mt-8">
   <Button variant="primary" size="medium">
     <Link
-      href="http://template.tiptap.dev/preview/templates/simple"
+      href="https://template.tiptap.dev/preview/templates/simple"
       className="flex items-center justify-center gap-2"
     >
       全屏查看
@@ -38,19 +38,25 @@ import { Callout } from '@/components/ui/Callout'
   </Button>
 </div>
 
+<CodeDemo isScrollable isLarge src="https://template.tiptap.dev/preview/templates/simple" />
+
 ## 安装
 
-使用 Tiptap CLI（适用于 Vite 或 Next.js）将简单编辑器模板添加到您的项目中：
+### 适用于现有项目
 
 ```bash
-npx @tiptap/cli add simple-editor
+npx @tiptap/cli@latest add simple-editor
+```
+
+### 适用于新项目
+
+```bash
+npx @tiptap/cli@latest init simple-editor
 ```
 
 ## 样式
 
-<Callout title="缺少样式？" variant="info">
-  如果您尚未添加样式，请务必[按照样式设置指南](/ui-components/getting-started/style)进行操作，以确保编辑器和组件能够正确渲染。
-</Callout>
+此模板需要进行样式设置。我们对样式框架保持中立，因此您需要将其与您的项目样式配置集成。请按照 [样式设置指南](/ui-components/getting-started/style) 进行操作，以确保编辑器能够正确显示。
 
 ## 使用
 

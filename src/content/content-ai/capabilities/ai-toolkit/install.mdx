@@ -1,0 +1,51 @@
+---
+title: 安装
+meta:
+  title: 安装 AI 工具包 | Tiptap 内容 AI
+  description: AI 工具包扩展的安装指南。了解如何安装、配置并开始在你的 Tiptap 编辑器中使用 AI 工具包。
+  category: 内容 AI
+---
+
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<Requirements>
+  <RequirementItem label="1. 获取访问权限">
+    通过购买付费的 AI 工具包附加组件获得 AI 工具包扩展的访问权限。{' '}
+    <a href="https://tiptap.dev/contact-sales?form=ai-toolkit">联系我们团队</a>。
+  </RequirementItem>
+  <RequirementItem label="2. 访问私有注册表">
+    AI 工具包扩展发布在 Tiptap 的私有 npm 注册表中。请按照[设置指南](/guides/pro-extensions)进行认证以访问 Tiptap 的私有 npm 注册表。
+  </RequirementItem>
+  <RequirementItem label="3. 安装扩展">
+    使用 npm 或你偏好的包管理器从私有注册表安装该扩展。
+  </RequirementItem>
+</Requirements>
+
+<EnterpriseCalloutAuto variant="ai-toolkit" renderMode="sidebar" />
+
+<a href="https://tiptap.dev/contact-sales?form=ai-toolkit">联系我们团队</a>购买付费的 AI 工具包附加组件。获得访问权限后，按照[私有注册表指南](/guides/pro-extensions)配置你的包管理器。
+
+然后，安装该包：
+
+```bash
+npm install @tiptap-pro/ai-toolkit
+```
+
+将扩展添加到你的编辑器，并访问其方法：
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { AiToolkit, getAiToolkit } from '@tiptap-pro/ai-toolkit'
+
+const editor = new Editor({
+  extensions: [StarterKit, AiToolkit],
+})
+
+// 获取 AI 工具包实例
+const toolkit = getAiToolkit(editor)
+
+// 调用 AI 工具包方法
+toolkit.insertText('AI 生成的内容')
+```

@@ -1,0 +1,247 @@
+---
+title: 移动节点按钮
+meta:
+  title: 移动节点按钮 | Tiptap UI 组件
+  description: 通过键盘快捷键、智能选择处理和无障碍支持，在 Tiptap 编辑器中将选定的节点和块上移或下移。
+  category: UI 组件
+component:
+  name: 移动节点按钮
+  description: 一个预构建的 React 组件，可以在编辑器中向上或向下移动节点。
+  type: component
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: AlignTopIcon
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个适用于 Tiptap 编辑器的完全无障碍移动节点按钮。支持键盘快捷键和智能选择处理，可重新排序编辑器中选定的节点或块。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/move-node-button" />
+
+## 安装
+
+通过 Tiptap CLI 添加该组件：
+
+```bash
+npx @tiptap/cli@latest add move-node-button
+```
+
+## 组件
+
+### `<MoveNodeButton />`
+
+一个预构建的 React 组件，可在编辑器中向上或向下移动节点。
+
+#### 用法
+
+```tsx
+import { MoveNodeButton } from '@/components/tiptap-ui/move-node-button'
+import { useEditor } from '@tiptap/react'
+
+export default function MyEditor() {
+  const editor = useEditor({
+    // 你的编辑器配置
+  })
+
+  return (
+    <>
+      <MoveNodeButton
+        editor={editor}
+        direction="up"
+        text="向上移动"
+        hideWhenUnavailable={true}
+        showShortcut={true}
+        onMoved={(direction) => console.log(`节点已向${direction}移动！`)}
+      />
+      <MoveNodeButton
+        editor={editor}
+        direction="down"
+        text="向下移动"
+        hideWhenUnavailable={true}
+        showShortcut={true}
+        onMoved={(direction) => console.log(`节点已向${direction}移动！`)}
+      />
+    </>
+  )
+}
+```
+
+#### 属性
+
+| 名称                   | 类型                                   | 默认值       | 说明                                          |
+| ---------------------- | ------------------------------------ | ------------ | --------------------------------------------- |
+| `editor`               | `Editor \| null`                     | `undefined`  | Tiptap 编辑器实例                             |
+| `direction`            | `"up" \| "down"`                    | **必填**     | 节点移动的方向                               |
+| `text`                 | `string`                           | `undefined`  | 按钮的可选文本标签                           |
+| `hideWhenUnavailable`  | `boolean`                          | `false`      | 当无法移动时隐藏按钮                         |
+| `onMoved`              | `(direction: "up" \| "down") => void` | `undefined` | 移动成功后的回调                             |
+| `showShortcut`         | `boolean`                          | `false`      | 显示键盘快捷键标识（如果可用）               |
+
+## Hooks
+
+### `useMoveNode()`
+
+一个自定义 Hook，用于构建你自己的移动节点按钮，完全控制渲染和行为。
+
+#### 用法
+
+```tsx
+import { useMoveNode } from '@/components/tiptap-ui/move-node-button'
+import { parseShortcutKeys } from '@/lib/tiptap-utils'
+import { Badge } from '@/components/ui/badge'
+import { useEditor } from '@tiptap/react'
+
+function MyMoveNodeButton({ direction }: { direction: 'up' | 'down' }) {
+  const editor = useEditor({
+    // 你的编辑器配置
+  })
+
+  const { isVisible, handleMoveNode, canMoveNode, label, shortcutKeys, Icon } = useMoveNode({
+    editor,
+    direction,
+    hideWhenUnavailable: true,
+    onMoved: (direction) => console.log(`节点已向${direction}移动！`),
+  })
+
+  if (!isVisible) return null
+
+  return (
+    <button onClick={handleMoveNode} disabled={!canMoveNode} aria-label={label}>
+      <Icon />
+      {label}
+      {shortcutKeys && <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>}
+    </button>
+  )
+}
+```
+
+#### 属性
+
+| 名称                   | 类型                                   | 默认值       | 说明                                          |
+| ---------------------- | ------------------------------------ | ------------ | --------------------------------------------- |
+| `editor`               | `Editor \| null`                     | `undefined`  | Tiptap 编辑器实例                             |
+| `direction`            | `"up" \| "down"`                    | **必填**     | 节点移动的方向                               |
+| `hideWhenUnavailable`  | `boolean`                          | `false`      | 如果不能移动时隐藏按钮                       |
+| `onMoved`              | `(direction: "up" \| "down") => void` | `undefined` | 移动成功后的回调                             |
+
+#### 返回值
+
+| 名称             | 类型              | 说明                                             |
+| ---------------- | ----------------- | ------------------------------------------------ |
+| `isVisible`      | `boolean`         | 按钮是否应被渲染                                 |
+| `canMoveNode`    | `boolean`         | 是否可以按指定方向移动节点                       |
+| `handleMoveNode` | `() => boolean`   | 移动选中节点的函数                               |
+| `label`          | `string`          | 按钮的无障碍标签文本                             |
+| `shortcutKeys`   | `string`          | 方向的键盘快捷键                                 |
+| `Icon`           | `React.FC`        | 移动按钮的图标组件（AlignTopIcon/AlignBottomIcon） |
+
+## 工具函数
+
+### `canMoveNode(editor, direction)`
+
+检查当前编辑器状态中节点是否可以按指定方向移动。
+
+#### 参数
+
+- `editor` (`Editor | null`) - Tiptap 编辑器实例
+- `direction` (`"up" | "down"`) - 要检查的方向
+
+#### 返回值
+
+`boolean` - 如果节点可以按指定方向移动，则返回 true，否则返回 false
+
+#### 用法
+
+```tsx
+import { canMoveNode } from '@/components/tiptap-ui/move-node-button'
+import type { Editor } from '@tiptap/react'
+
+const canMoveUp = canMoveNode(editor, 'up')
+const canMoveDown = canMoveNode(editor, 'down')
+```
+
+### `moveNode(editor, direction)`
+
+以编程方式将所选节点或块按指定方向移动。
+
+#### 参数
+
+- `editor` (`Editor | null`) - Tiptap 编辑器实例
+- `direction` (`"up" | "down"`) - 节点移动方向
+
+#### 返回值
+
+`boolean` - 如果移动成功，返回 true，否则返回 false
+
+#### 用法
+
+```tsx
+import { moveNode } from '@/components/tiptap-ui/move-node-button'
+import type { Editor } from '@tiptap/react'
+
+const success = moveNode(editor, 'up')
+if (success) {
+  console.log('节点移动成功！')
+}
+```
+
+### `shouldShowButton(props)`
+
+根据编辑器状态和配置判断是否应该显示移动按钮。
+
+#### 参数
+
+- `props` - 配置对象
+  - `editor` (`Editor | null`) - Tiptap 编辑器实例
+  - `direction` (`"up" | "down"`) - 要检查的方向
+  - `hideWhenUnavailable` (`boolean`) - 如果无法移动时是否隐藏按钮
+
+#### 返回值
+
+`boolean` - 如果按钮应显示，返回 true，否则返回 false
+
+#### 用法
+
+```tsx
+import { shouldShowButton } from '@/components/tiptap-ui/move-node-button'
+import type { Editor } from '@tiptap/react'
+
+const shouldShow = shouldShowButton({
+  editor,
+  direction: 'up',
+  hideWhenUnavailable: true,
+})
+```
+
+## 键盘快捷键
+
+移动节点按钮支持以下键盘快捷键：
+
+- **Cmd/Ctrl + Shift + ↑箭头**：将选中的节点上移
+- **Cmd/Ctrl + Shift + ↓箭头**：将选中的节点下移
+
+使用 `<MoveNodeButton />` 组件或 `useMoveNode()` Hook 时，快捷键会自动注册。快捷键适用于任何块级节点，包括段落、标题、引用和代码块。
+
+## 依赖
+
+### 依赖包
+
+- `@tiptap/react` - Tiptap React 核心集成
+- `@tiptap/pm/state` - ProseMirror 状态管理
+- `react-hotkeys-hook` - 键盘快捷键管理
+
+### 引用组件
+
+- `use-tiptap-editor`（Hook）
+- `use-mobile`（Hook）
+- `button`（基础组件）
+- `badge`（基础组件）
+- `tiptap-utils`（工具库）
+- `tiptap-advanced-utils`（工具库）
+- `align-top-icon`（图标）
+- `align-bottom-icon`（图标）

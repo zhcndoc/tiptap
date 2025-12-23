@@ -13,41 +13,53 @@ meta:
  * AI 建议扩展的配置选项。
  */
 export interface AiSuggestionOptions {
-  /** 校对时要应用的规则
+  /**
+   * 校对时要应用的规则
    * @default []
    */
   rules: AiSuggestionRule[]
-  /** 在完成任何校对之前显示的初始建议
+  /**
+   * 在完成任何校对之前显示的初始建议
    * @default []
    */
   initialSuggestions: Suggestion[]
-  /** 在完成任何校对之前应用的初始拒绝项
+  /**
+   * 在完成任何校对之前应用的初始拒绝项
    * @default []
    */
   initialRejections: AiSuggestionRejection[]
-  /** 自定义编辑器中建议装饰的方法
+  /**
+   * 自定义编辑器中建议装饰的方法
    * @default `getDefaultDecorations()`
-   * @param args - 自定义建议装饰的选项。
+   * @param options - 自定义建议装饰的选项。
    * @return 返回一个 `Decoration` 对象数组。
    */
-  getCustomSuggestionDecoration: (args: GetCustomSuggestionDecorationOptions) => Decoration[]
-  /** 内容变化后等待重新加载建议的时间，单位毫秒。
+  getCustomSuggestionDecoration: (options: GetCustomSuggestionDecorationOptions) => Decoration[]
+  /**
+   * 内容变化后等待重新加载建议的时间，单位毫秒。
    * @default 800
    */
   debounceTimeout: number
-  /** 编辑器初始化时是否加载建议
+  /**
+   * 编辑器初始化时是否加载建议
    * @default true
    */
   loadOnStart: boolean
-  /** 编辑器内容变化时是否重新加载建议
+
+  /**
+   * 编辑器内容变化时是否重新加载建议
    * @default true
    */
   reloadOnUpdate: boolean
-  /** 加载建议时发生错误的回调函数
+
+  /**
+   * 加载建议时发生错误的回调函数。如果加载建议的操作被中止，则不会调用此回调。
+   *
    * @param error - 加载建议时发生的错误。
+   * @param context - 操作的上下文，包括编辑器实例
    * @default console.error
    */
-  onLoadSuggestionsError: (error: unknown) => void
+  onLoadSuggestionsError: (error: unknown, context: AiSuggestionEventContext) => void
   /**
    * 用于校对内容并生成建议的 AI 模型。
    * @default "gpt-4o-mini"
@@ -75,6 +87,7 @@ export interface AiSuggestionOptions {
   baseUrl: string
   /**
    * 可选的上下文，用于向 AI 模型提供额外信息以生成建议。
+   * @default null
    */
   context: string | null
   /**
@@ -111,11 +124,11 @@ declare module '@tiptap/core' {
       /**
        * 立即加载 AI 建议。
        */
-      loadAiSuggestions: () => ReturnType
+      loadAiSuggestions: (options?: LoadAiSuggestionsOptions) => ReturnType
       /**
        * 在扩展选项中定义的防抖超时后加载 AI 建议。
        */
-      loadAiSuggestionsDebounced: () => ReturnType
+      loadAiSuggestionsDebounced: (options?: LoadAiSuggestionsOptions) => ReturnType
       /**
        * 设置显示的 AI 建议。
        *
@@ -137,9 +150,18 @@ declare module '@tiptap/core' {
       /**
        * 标记一个建议为已拒绝，从建议列表中移除。
        *
+       * 它会将该建议加入拒绝列表，从而在 AI 再次生成时忽略它。
+       *
        * @param suggestionId 被拒绝建议的 id
        */
       rejectAiSuggestion: (suggestionId: string) => ReturnType
+
+      /**
+       * 删除一个建议，从建议列表中移除。
+       *
+       * @param suggestionId 要删除的建议的 id
+       */
+      removeAiSuggestion: (suggestionId: string) => ReturnType
 
       /**
        * 设置多个被拒绝的建议。该命令对于撤销拒绝或清空所有拒绝项很有用。
@@ -176,6 +198,15 @@ declare module '@tiptap/core' {
        * @param context 可选上下文，用于向 AI 模型提供额外信息
        */
       setAiSuggestionContext: (context: string | null) => ReturnType
+
+      /**
+       * 设置是否在编辑器内容变化时重新加载建议。
+       * 这允许你动态启用或禁用内容更新时自动重新加载建议。
+       *
+       * @param reloadOnUpdate 是否在内容更新时重新加载建议
+       * @default true
+       */
+      setAiSuggestionReloadOnUpdate: (reloadOnUpdate: boolean) => ReturnType
     }
   }
 }
@@ -217,25 +248,45 @@ export interface ApplyAllAiSuggestionOptions {
  * AI 建议扩展的内部存储。
  */
 export interface AiSuggestionStorage {
-  /** 扩展使用的 ProseMirror 插件的键 */
+  /**
+   * 扩展使用的 ProseMirror 插件的键
+   */
   pluginKey: PluginKey<AiSuggestionProsemirrorPluginState>
-  /** 校对时要应用的规则 */
+  /**
+   * 校对时要应用的规则
+   */
   rules: AiSuggestionRule[]
-  /** 获取当前建议的函数 */
+  /**
+   * 获取当前建议的函数
+   */
   getSuggestions: () => Suggestion[]
-  /** 获取被拒绝建议的函数 */
+  /**
+   * 获取被拒绝建议的函数
+   */
   getRejections: () => AiSuggestionRejection[]
-  /** 获取当前所选建议的函数 */
+  /**
+   * 获取当前所选建议的函数
+   */
   getSelectedSuggestion: () => Suggestion | null
-  /** 是否正在加载建议 */
+  /**
+   * 是否正在加载建议
+   */
   isLoading: boolean
-  /** 是否至少加载过一次建议 */
+  /**
+   * 是否至少加载过一次建议
+   */
   firstLoad: boolean
-  /** 上次加载尝试时出现的错误（如果有） */
+  /**
+   * 上次加载尝试时出现的错误（如果有）
+   */
   error: unknown | null
-  /** 用于加载建议的防抖函数 */
-  debouncedFunction: DebouncedFunction<() => void>
-  /** 用于中止加载建议的控制器 */
+  /**
+   * 用于加载建议的防抖函数
+   */
+  debouncedFunction: DebouncedFunction<(options?: LoadAiSuggestionsOptions) => void>
+  /**
+   * 用于中止加载建议的控制器
+   */
   abortController: AbortController
   /**
    * 可选上下文，用于向 AI 模型提供额外信息以生成建议。
@@ -245,6 +296,10 @@ export interface AiSuggestionStorage {
    * 用于存储文档每块建议的缓存。
    */
   cache: AiSuggestionCache
+  /**
+   * 是否在编辑器内容变化时重新加载建议
+   */
+  reloadOnUpdate: boolean
 }
 
 /**
@@ -289,6 +344,20 @@ export interface AiSuggestionRule {
    * 规则背景色。在选中建议时用于突出显示内容。
    */
   backgroundColor: string
+  /**
+   * 是否在向 Tiptap Cloud 的 AI 模型发送请求时忽略此规则。
+   *
+   * 如果为 `true`，此规则不会被发送给 Tiptap Cloud 的 AI 模型。
+   *
+   * @default false
+   */
+  ignoreInTiptapCloud?: boolean
+  /**
+   * 以差异格式显示该规则的建议，其中删除的内容显示为红色，新增内容显示为绿色。
+   *
+   * @default false
+   */
+  displayAsDiff?: boolean
   /**
    * 规则的额外元数据，可用于存储附加信息（例如其来源或类别）。
    * 扩展内部不使用，但可帮助开发者自定义规则在 UI 中的展示。

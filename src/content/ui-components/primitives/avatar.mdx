@@ -4,6 +4,15 @@ meta:
   title: 头像 | Tiptap UI 组件
   description: 将用户或实体的视觉表示集成到您的编辑器中。请在文档中了解更多信息。
   category: UI 组件
+component:
+  name: Avatar
+  description: 将用户或实体的视觉表示集成到您的 Tiptap 编辑器中。
+  type: primitive
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: UserIcon
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
@@ -13,13 +22,15 @@ import { CodeDemo } from '@/components/CodeDemo'
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui-primitive/avatar" />
 
 ## 安装
-您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加这个原始组件
+
+您可以通过 Tiptap CLI 添加这个原始组件
 
 ```bash
-npx @tiptap/cli add avatar
+npx @tiptap/cli@latest add avatar
 ```
 
 ### 手动集成
+
 对于 Vite 或 Next.js 以外的框架，可以从 [开源代码库](https://github.com/ueberdosis/tiptap-ui-components) 手动添加该组件。
 
 ### 导入样式
@@ -79,25 +90,25 @@ export default function MyComponent() {
 
 ### 头像
 
-| 名称 | 类型                      | 默认值   | 描述         |
-| ---- | ------------------------- | -------- | ------------ |
-| size | 'default' \| 'sm' \| 'lg' | 'default' | 头像大小     |
+| 名称 | 类型                      | 默认值   | 描述     |
+| ---- | ------------------------- | -------- | -------- |
+| size | 'default' \| 'sm' \| 'lg' | 'default' | 头像大小 |
 
 ### 头像图片
 
-| 名称 | 类型   | 默认值  | 描述                             |
-| ---- | ------ | -------- | --------------------------------- |
-| src  | string | 必需    | 图片源 URL                        |
-| alt  | string | 必需    | 屏幕阅读器的替代文本             |
+| 名称 | 类型   | 默认值 | 描述                 |
+| ---- | ------ | ------ | -------------------- |
+| src  | string | 必需   | 图片源 URL           |
+| alt  | string | 必需   | 屏幕阅读器的替代文本 |
 
 ### 头像后备
 
-| 名称    | 类型   | 默认值 | 描述                                       |
-| ------- | ------ | ------- | ----------------------------------------- |
-| delayMs | number | 0       | 显示后备内容之前的延迟（毫秒）           |
+| 名称    | 类型   | 默认值 | 描述                     |
+| ------- | ------ | ------ | ------------------------ |
+| delayMs | number | 0      | 显示后备内容之前的延迟（毫秒） |
 
 ### 头像组
 
-| 名称       | 类型   | 默认值   | 描述                                           |
-| ---------- | ------ | -------- | ---------------------------------------------- |
-| maxVisible | number | 未定义   | 在折叠之前显示的最大头像数量                 |
+| 名称       | 类型   | 默认值 | 描述                       |
+| ---------- | ------ | ------ | -------------------------- |
+| maxVisible | number | 未定义 | 在折叠之前显示的最大头像数量 |

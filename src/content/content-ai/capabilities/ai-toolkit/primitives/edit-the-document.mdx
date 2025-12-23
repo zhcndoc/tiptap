@@ -1,0 +1,215 @@
+---
+title: 编辑文档
+meta:
+  title: 编辑文档 | Tiptap 内容 AI
+  description: 以文本、HTML 或 JSON 格式插入、流式传输和修补 AI 生成的内容。包括用于用户审批工作流程的审查选项。
+  category: 内容 AI
+---
+
+AI 工具包提供了用于以不同格式编辑文档的原语。
+
+## `insertText`
+
+在编辑器中插入纯文本。
+
+### 参数
+
+- `content` (`string`): 要插入的文本
+- `options?` (`InsertTextOptions`): `insertText` 方法的选项
+  - `position?` (`InsertPosition`): 插入位置。详见[选项](#insertposition-type)。默认值：`'selection'`
+  - `reviewOptions?` (`ReviewOptions`): 控制预览/审查行为
+    - `mode?` (`'disabled' | 'review' | 'preview'`): 是否在应用更改之前或之后审查更改。`'disabled'` 表示不审查，`'review'` 表示应用后审查，`'preview'` 表示应用前预览。默认值：`'disabled'`
+    - `diffMode?` (`'detailed' | 'full'`): 当启用审查模式时，如何显示原始内容与修改内容之间的差异。`'detailed'` 比较修改前后的文档，并以丰富差异显示删除和新增内容。`'full'` 将删除和新增内容以整块形式显示，作为包含删除和新增内容的单个更改。默认值：`'detailed'`
+    - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议的显示方式
+      - `showAsDiff?` (`boolean`): 是否将建议显示为差异，插入内容和原始内容并列显示。默认值：`true`
+      - `diffPosition?` (`'before' | 'after'`): 差异相对于建议的位置。默认值：`'before'`
+      - `attributes?` (`Record<string, any>`): 额外添加到建议的 HTML 属性
+      - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 用于将建议渲染为 ProseMirror 装饰的函数
+    - `metadata?` (`Record<string, any>`): 用于存储建议额外信息的元数据（如来源或类别）。此字段不会被扩展本身内部使用，但有助于开发者自定义 UI 中建议的显示。
+    - `diffUtilityConfig?` (`DiffUtilityConfig`): 用于差异比较工具的选项
+      - `simplifyChanges?` (`boolean`): 是否简化变更，若为 `true`，例如同一词中的两处变更会合并为单一变更。仅适用于 `'detailed'` 模式。默认值：`true`
+      - `ignoreAttributes?` (`string[]`): 忽略的属性。默认值：`['id', 'data-thread-id']`
+      - `ignoreMarks?` (`string[]`): 忽略的标记。默认值：`['inlineThread']`
+      - `changeMergeDistance?` (`number | null`): 允许合并的变更最大距离（文档位置）。若两个相邻变更在 rangeA 或 rangeB 中的距离小于或等于此值，则会合并为单一变更。设置为 `null` 或 `undefined` 禁用合并。仅适用于 `'detailed'` 模式。默认值：`null`
+      - `mode?` (`'detailed' | 'block'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，识别文本内精确变更（默认）。`'block'` 执行块级差异，将每个顶级节点视为单元。块模式适用于只需了解段落、标题等块级元素是否变更，不关注字符级细节。块模式下，忽略 `simplifyChanges` 和 `changeMergeDistance`。默认值：`'detailed'`
+
+### 返回
+
+`void`
+
+### 示例
+
+```ts
+// 在当前选区插入文本并显示审查标记
+toolkit.insertText('AI content', { position: 'selection', reviewOptions: { mode: 'review' } })
+```
+
+## `insertHtml`
+
+在编辑器中插入 HTML。
+
+### 参数
+
+- `content` (`string`): 要插入的 HTML
+- `options?` (`InsertHtmlOptions`): `insertHtml` 方法的选项
+  - `position?` (`InsertPosition`): 插入位置。详见[选项](#insertposition-type)。默认值：`'selection'`
+  - `reviewOptions?` (`ReviewOptions`): 控制预览/审查行为（同上 `insertText` 中定义）
+
+### 返回
+
+`void`
+
+### 示例
+
+```ts
+// 在选区后面插入一个段落
+toolkit.insertHtml('<p>AI paragraph</p>', { position: 'selectionEnd' })
+```
+
+## `insertJson`
+
+在编辑器中插入 ProseMirror JSON。
+
+### 参数
+
+- `content` (`any`): ProseMirror JSON 节点或切片
+- `options?` (`InsertJsonOptions`): `insertJson` 方法的选项
+  - `position?` (`InsertPosition`): 插入位置。详见[选项](#insertposition-type)。默认值：`'selection'`
+  - `reviewOptions?` (`ReviewOptions`): 控制预览/审查行为（同上 `insertText` 中定义）
+
+### 返回
+
+`void`
+
+### 示例
+
+```ts
+// 插入一个段落节点
+toolkit.insertJson({ type: 'paragraph', content: [{ type: 'text', text: 'AI' }] })
+```
+
+## `streamText`
+
+实时将纯文本内容流式插入编辑器。
+
+### 参数
+
+- `stream` (`AsyncIterable<string | Uint8Array>`): 文本内容流。可以是任何实现了[异步迭代协议](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#the_async_iterator_and_async_iterable_protocols)的对象，如[生成器](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_generators)。
+- `options?` (`StreamTextOptions`): `streamText` 方法的选项
+  - `position?` (`InsertPosition`): 插入位置。详见[选项](#insertposition-type)。默认值：`'selection'`
+  - `reviewOptions?` (`ReviewOptions`): 控制预览/审查行为（同上 `insertText` 中定义）
+  - `checkChunkForError?` (`(status: { chunk: string; content: string; range: Range }) => boolean`): 检查数据块是否包含错误的函数。返回 `true` 表示此块有错误，流将停止并抛出 `StreamingChunkCheckFailedError`。
+  - `onError?` (`(event: { error: unknown; chunk: string; content: string; range: Range }) => void`): 处理流式传输时发生错误的函数。
+  - `onChunkInserted?` (`(event: { chunk: string; content: string; range: Range }) => void`): 每当数据块被流式插入时调用的函数，调用时机发生在块插入到编辑器之后。
+
+### 返回
+
+`Promise<void>`：流式传输完成时解析的 Promise。
+
+### 示例
+
+```ts
+const response = await fetch('/api/generate-text')
+// API 返回一个文本内容流
+const stream = response.body
+
+toolkit.streamText(stream)
+```
+
+## `streamHtml`
+
+实时将 HTML 内容流式插入编辑器。
+
+### 参数
+
+- `stream` (`AsyncIterable<string | Uint8Array> | ReadableStream<string | Uint8Array>`): HTML 内容流。可以是任何实现了[异步迭代协议](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#the_async_iterator_and_async_iterable_protocols)的对象，如 [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream) 或 [生成器](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_generators)。
+- `options?` (`StreamHtmlOptions`): `streamHtml` 方法的选项
+  - `position?` (`InsertPosition`): 插入位置。详见[选项](#insertposition-type)。默认值：`'selection'`
+  - `reviewOptions?` (`ReviewOptions`): 控制预览/审查行为（同上 `insertText` 中定义）
+  - `checkChunkForError?` (`(status: { chunk: string; content: string; range: Range }) => boolean`): 检查数据块是否包含错误的函数。返回 `true` 表示此块有错误，流将停止并抛出 `StreamingChunkCheckFailedError`。
+  - `onError?` (`(event: { error: unknown; chunk: string; content: string; range: Range }) => void`): 处理流式传输时发生错误的函数。
+  - `onChunkInserted?` (`(event: { chunk: string; content: string; range: Range }) => void`): 每当数据块被流式插入时调用的函数，调用时机发生在块插入到编辑器之后。
+
+### 返回
+
+`Promise<void>`：流式传输完成时解析的 Promise。
+
+### 示例
+
+```ts
+const response = await fetch('/api/generate-html')
+// API 返回一个 HTML 内容流
+const stream = response.body
+toolkit.streamHtml(stream)
+```
+
+## `applyHtmlPatch`
+
+对文档的某个块或整个文档应用上下文感知的 HTML 差异补丁。
+
+### 参数
+
+- `operations` (`PatchOperation[]`): 待应用的补丁操作列表。
+- `options?` (`ApplyHtmlPatchOptions`): `applyHtmlPatch` 方法的选项
+  - `chunkIndex?` (`number`): 目标数据块索引。默认值：`0`
+  - `chunkSize?` (`number`): AI 模型可接受的输入字符串最大长度，防止 AI 一次读取过多内容导致上下文窗口超出限制。默认值：`32000`
+  - `reviewOptions?` (`Omit<ReviewOptions, 'diffMode'>`): 控制预览/审查行为。
+    - `mode?` (`'disabled' | 'review' | 'preview'`): 是否在应用更改之前或之后审查更改。`'disabled'` 表示不审查，`'review'` 表示应用后审查，`'preview'` 表示应用前预览。默认值：`'disabled'`
+    - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议的显示方式（同前）
+    - `metadata?` (`Record<string, any>`): 建议元数据（同前）
+    - `diffUtilityConfig?` (`DiffUtilityConfig`): 差异比较工具选项（同前）
+
+#### `PatchOperation`（类型）
+
+`PatchOperation` 可以是以下两种类型之一：
+
+`JumpOperation`：导航操作，将光标移动到文档中特定上下文位置。
+
+- `type` (`'jump'`): 操作类型标识符
+- `context` (`string`): 要搜索的上下文字符串（光标将定位在此字符串之后）
+
+`ReplaceOperation`：替换操作，在当前光标位置删除并插入文本。
+
+替换操作通过删除指定文本并插入新文本来进行内容修改。删除文本必须在当前光标位置找到，操作才会成功。
+
+- `type` (`'replace'`): 操作类型标识符
+- `delete` (`string`): 文档中要删除的确切文本（纯插入时可为空）
+- `insert` (`string`): 用以替换被删除文本的插入文本
+
+### 返回 (`ApplyHtmlPatchResult`)
+
+- `docChanged` (`boolean`): 文档是否被修改
+- `error` (`ApplyPatchError | null`): 若部分补丁应用失败，返回错误；成功则为 null
+
+该方法可能会修改文档，但同时返回错误。此情况发生在部分操作成功应用、部分失败时。
+
+#### `ApplyPatchError`（类型）
+
+应用通用补丁格式操作失败时抛出的错误。此错误包含丰富的故障上下文，包括失败的操作索引、之前成功应用的操作及当前内容状态。
+
+- `operationIndex` (`number`): 失败操作的零基索引
+- `previousOperations` (`PatchOperation[]`): 失败前成功应用的操作数组
+- `operation` (`PatchOperation`): 未能应用的操作
+- `contentAfterCursor` (`string`): 出错时光标后方的内容
+
+### 示例
+
+```ts
+// 在第一个数据块中将 "fine" 替换为加重的 "great"
+toolkit.applyHtmlPatch([{ type: 'replace', delete: 'fine', insert: '<em>great</em>' }])
+```
+
+---
+
+## `InsertPosition`（类型）
+
+内容将被插入的位置。可为以下任一值：
+
+- `Range`: 文档中的一个范围
+- `number`: 文档中的一个位置
+- `'selection'`: 用新内容替换当前选区
+- `'selectionStart'`: 当前选区的起始位置
+- `'selectionEnd'`: 当前选区的结束位置
+- `'document'`: 用新内容替换整个文档
+- `'documentStart'`: 文档起始位置
+- `'documentEnd'`: 文档结束位置

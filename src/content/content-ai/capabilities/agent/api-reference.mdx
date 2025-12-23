@@ -1,14 +1,14 @@
 ---
-title: AI 建议扩展 API 参考
+title: AI 代理扩展 API 参考
 meta:
-  title: API 参考 | Tiptap AI Agent
-  description: Tiptap AI Agent 扩展的 API 参考。
+  title: API 参考 | Tiptap AI 代理
+  description: Tiptap AI 代理扩展的 API 参考。
   category: 内容 AI
 ---
 
 ## 配置选项
 
-````tsx
+```ts
 export interface AiAgentEventContext {
   editor: Editor
   provider: AiAgentProvider
@@ -27,7 +27,7 @@ export type EventHandlers = {
 }
 
 /**
- * AI Agent 提供者的配置选项
+ * AI 代理提供者的配置选项
  */
 export interface AiAgentProviderOptions extends Omit<BaseAiAgentProviderOptions, 'onStateChange'> {
   /**
@@ -44,74 +44,105 @@ export interface AiAgentProviderOptions extends Omit<BaseAiAgentProviderOptions,
    * AI 服务 API 的基础 URL。
    */
   baseUrl: string
+
   /**
-   * 与 AI Agent 对话的初始聊天消息。
+   * 与 AI 代理对话的初始聊天消息。
    * @default []
    * @example
-   * ```ts
    * [
    *   {
    *     type: 'ai',
    *     text: "你好，我是一个可以编辑你的文档的 AI 助手。需要我帮忙吗？",
    *   },
    * ]
-   * ```
    */
   initialChatMessages: ChatMessage[]
 
-  /**
-   * 控制 AI Agent 是否应该自动接受修改编辑器内容的工具调用。
-   * @default "onlyRead"
-   */
-  autoAccept: 'always' | 'never' | 'onlyRead'
   /**
    * 控制是否在用户发送消息或接受工具调用时自动保存检查点。
    * 如果为 false，setCheckpoint 函数不会被调用。
    * @default false
    */
-  autoSaveCheckpoints?: boolean
+  autoSaveCheckpoints: boolean
+
   /**
-   * AI Agent 使用的 OpenAI 模型。
-   * 推荐使用 gpt-4.1 和 gpt-4o 模型，因为它们与 AI Agent 配合效果最佳。
-   * 模型需要支持工具调用。
+   * 审核 AI 代理对文档所做更改的选项。
+   */
+  reviewOptions: AiAgentReviewOptions
+
+  /**
+   * AI 代理所使用的 OpenAI 模型。
+   * 推荐模型为 gpt-4.1 和 gpt-4o，因为它们最适合 AI 代理。
+   * 该模型需要支持工具调用。
    * @default "gpt-4.1"
    */
-  modelName?: AiAgentModelName
+  modelName: AiAgentModelName
 
   onLoadingError: EventHandlers['loadingError']
   onStateChange: EventHandlers['stateChange']
   onBeforeToolCall: EventHandlers['beforeToolCall']
   onAfterToolCall: EventHandlers['afterToolCall']
+  /**
+   * AI 代理停止运行时调用的回调函数。
+   */
   onStopRunning: EventHandlers['stopRunning']
 
   /**
-   * 是否让 AI Agent 使用 AI Changes 扩展。
-   * @default true
-   */
-  useAiChangesExtension: boolean
-
-  /**
-   * 解析 AI Agent 请求的函数。允许你将 AI Agent 集成到你自己的后端服务。
-   * @param options AI Agent 请求的选项，包括聊天消息、工具处理器和模型名称。
+   * 用于解析 AI 代理请求的函数。允许您将 AI 代理与自己的后端服务集成。
+   * @param options AI 代理请求的选项，包含聊天消息、工具处理器和模型名称。
    * @returns 来自 AI 服务的聊天消息和工具调用消息
    * @default defaultAiAgentResolver
    */
   resolver: (options: AiAgentResolverOptions) => Promise<AiAgentResolverReturn>
 
   /**
-   * AI Agent 使用的系统提示。在使用 Tiptap Cloud 的 AI Agent 时覆盖默认系统提示。
+   * 与 AI 代理一起使用的系统提示。使用 Tiptap Cloud 的 AI 代理时覆盖默认系统提示。
    */
   systemPrompt: string | null
+
+  /**
+   * AI 代理需要关注的自定义节点。
+   */
+  schemaAwarenessCustomElements: SchemaAwarenessItem[]
 }
 
+export type AutoAcceptBehavior = 'always' | 'never' | 'onlyRead'
+export type ReviewChangesExtension = 'aiSuggestion' | 'aiChanges' | null
+
+export interface AiAgentReviewOptions {
+  /**
+   * 用于审查更改的 Tiptap AI 扩展。
+   *
+   * - `"aiSuggestion"`: 使用 AI 建议扩展在插入之前预览更改
+   * - `"aiChanges"` 使用 AI 更改扩展在插入之前审查更改
+   * - `null`: 不使用扩展，更改直接插入文档。
+   *
+   * @default null（不使用扩展）
+   */
+  extension: ReviewChangesExtension
+  /**
+   * 控制 AI 代理是否自动接受修改编辑器内容的工具调用。
+   * - `"always"`: 自动接受所有工具调用。
+   * - `"never"`: 永不自动接受工具调用，需要手动审核。
+   * - `"onlyRead"`: 自动接受不修改编辑器内容的工具调用。
+   *
+   * @default "onlyRead"
+   */
+  autoAccept: AutoAcceptBehavior
+}
+```
+
+## AI 代理扩展状态
+
+```ts
 /**
- * AI Agent 提供者的内部状态。
+ * AI 代理提供者的内部状态。
  */
 export interface AiAgentProviderState {
   /**
-   * AI Agent 当前的状态。它决定下一步采取的操作。
+   * AI 代理当前的状态。它决定下一步采取的操作。
    *
-   * AI Agent 工作方式类似有限状态机，可以从一个状态转换到另一个状态。
+   * AI 代理类似有限状态机，可在各状态间转换。
    *
    * @see AiAgentStatus
    */
@@ -126,7 +157,7 @@ export interface AiAgentProviderState {
     reject: ChatMessage[]
   }
   /**
-   * 控制 AI Agent 的自动接受行为。
+   * 控制 AI 代理的自动接受行为。
    * - "always"：自动接受所有工具调用。
    * - "never"：永不自动接受工具调用，需要人工审核。
    * - "onlyRead"：自动接受不修改编辑器内容的工具调用。
@@ -134,8 +165,8 @@ export interface AiAgentProviderState {
   autoAccept: 'always' | 'never' | 'onlyRead'
 
   /**
-   * AI Agent 使用的系统提示。在使用 Tiptap Cloud 的 AI Agent 时覆盖默认系统提示。
+   * 与 AI 代理一起使用的系统提示。使用 Tiptap Cloud 的 AI 代理时覆盖默认系统提示。
    */
   systemPrompt: string | null
 }
-````
+```

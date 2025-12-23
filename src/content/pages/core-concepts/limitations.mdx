@@ -1,0 +1,27 @@
+---
+title: 限制
+meta:
+  title: 限制 | Tiptap Pages 文档
+  description: 了解 Tiptap Pages 扩展的当前限制和已知问题。
+  category: Pages
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+虽然 Pages 扩展功能强大，但目前有一些限制需要注意：
+
+- **表格** 需要从此包中导入 `Table` 扩展，而不是从我们的开源库中导入 `Table` 扩展。
+- **无法对单页进行独立样式设置**（所有页面共享相同的布局和外观）。
+- **无页面模板**（每个页面使用相同结构）。
+- **无直接打印/导出集成**（不支持浏览器打印，但你可以依赖我们的 [转换扩展或端点](/conversion/import-export/docx)）。
+- **不可拆分的内容块**：分页系统使用 CSS 浮动定位元素以绕过页面间隙。创建了 [块格式化上下文 (BFC)](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_display/Block_formatting_context) 的内容块（如表格、图形或某些样式容器）无法跨页拆分。如果此类块太大无法放入单页，则会破坏分页布局。**解决方案：**
+  - **设置最大高度：** 对较大的不可拆分块应用 `max-height`，确保它们适合单页。你可以使用 `--page-max-height` CSS 属性以确保元素不超过页面边界。
+  - **手动拆分节点：** 对需要跨多页的内容，手动拆分成更小的节点。请注意，此方法会引入结构变动，可能影响文档的语义结构。
+- **无运行时依赖**：所有逻辑均自包含于扩展中。
+
+<Callout title="帮我们改进！" variant="info">
+  如果你需要尚未支持的功能，请告诉我们！你的反馈帮助我们优先开发新功能。
+  <a href="https://tiptap-suite.notion.site/1b601ffa3ebc80a281a8ea0b03b19bdd">
+    与 Tiptap 分享你的使用案例
+  </a>
+</Callout>

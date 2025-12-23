@@ -1,0 +1,95 @@
+---
+title: Mastra - AI 代理工具
+meta:
+  title: Mastra - AI 代理工具 | Tiptap 内容 AI
+  description: 使用 Mastra 的工具定义，允许 AI 代理读取和编辑 Tiptap 文档。
+  category: 内容 AI
+---
+
+`@tiptap-pro/ai-toolkit-ai-sdk` 包提供了工具定义，您可以将其添加到使用 [Mastra](https://mastra.ai/) AI 代理框架构建的 AI 代理中。
+
+模型生成的工具调用随后可以通过 [`executeTool` 方法](/content-ai/capabilities/ai-toolkit/primitives/execute-tool)执行。
+
+## 示例用法
+
+安装该包。
+
+```bash
+npm install @tiptap-pro/ai-toolkit-ai-sdk
+```
+
+将工具定义传递给 Mastra 代理的 `tools` 参数。
+
+```ts
+import { Agent } from '@mastra/core/agent'
+import { openai } from '@ai-sdk/openai'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+
+const agent = new Agent({
+  name: 'Tiptap AI 代理',
+  instructions: '你是一个可以读取和编辑 Tiptap 文档的 AI 助手。',
+  model: openai('gpt-4o-mini'),
+  tools: toolDefinitions(),
+})
+
+const result = await agent.generate('读取文档并总结内容')
+```
+
+将工具定义与您的自定义工具结合使用。
+
+```ts
+import { Agent } from '@mastra/core/agent'
+import { openai } from '@ai-sdk/openai'
+import { createTool } from '@mastra/core/tools'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { z } from 'zod'
+
+// 使用 Mastra 的 createTool 创建自定义天气工具
+const weatherTool = createTool({
+  id: '获取天气信息',
+  description: '获取某地天气',
+  inputSchema: z.object({
+    location: z.string().describe('要获取天气的地点'),
+  }),
+  outputSchema: z.object({
+    temperature: z.number(),
+  }),
+  execute: async ({ context: { location } }) => ({
+    temperature: 72,
+  }),
+})
+
+const agent = new Agent({
+  name: '带天气功能的 Tiptap AI 代理',
+  instructions:
+    '你是一个可以读取和编辑 Tiptap 文档并获取天气信息的 AI 助手。',
+  model: openai('gpt-4o-mini'),
+  tools: {
+    // AI 工具包中的工具定义
+    ...toolDefinitions(),
+    // 自定义天气工具
+    weather: weatherTool,
+  },
+})
+
+const result = await agent.generate('读取文档并获取纽约的天气')
+```
+
+## API 参考
+
+### `toolDefinitions`
+
+为兼容 [Mastra](https://mastra.ai/) 的 Tiptap AI 工具包创建工具定义。
+
+#### 参数 (`ToolDefinitionsOptions`)
+
+- `tools?`: `EnabledTools` - 通过将对应值设为 `true`（启用）或 `false`（禁用）来启用/禁用特定工具。
+  - `tiptapRead?`: `boolean` - 启用/禁用 `tiptapRead` 工具（默认：`true`）
+  - `tiptapEdit?`: `boolean` - 启用/禁用 `tiptapEdit` 工具（默认：`true`）
+  - `tiptapReadSelection?`: `boolean` - 启用/禁用 `tiptapReadSelection` 工具（默认：`true`）
+  - `getThreads?`: `boolean` - 启用/禁用 `getThreads` 工具（默认：`false`）
+  - `editThreads?`: `boolean` - 启用/禁用 `editThreads` 工具（默认：`false`）
+
+#### 返回值
+
+返回一个包含启用的工具定义的对象，可与 [Mastra](https://mastra.ai/) 的工具调用系统配合使用。欲了解完整工具列表，请参阅 [可用工具](/content-ai/capabilities/ai-toolkit/tools/available-tools) 页面。

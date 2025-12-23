@@ -1,0 +1,178 @@
+---
+title: 集成菜单 UI 组件
+meta:
+  title: 菜单 | Tiptap UI 组件
+  description: 集成一个灵活的菜单系统，支持搜索、筛选和层级导航。基于 Ariakit 构建，拥有无障碍及顺畅的键盘导航体验。更多内容请参阅文档。
+  category: UI 组件
+component:
+  name: Menu
+  description: 一个全面的菜单系统，支持层级导航、搜索功能、筛选及键盘交互，完全支持无障碍访问。
+  type: primitive
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: MenuIcon
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个基于 Ariakit 构建的强大菜单组件，提供层级导航、搜索功能、筛选能力和完全的键盘无障碍支持。非常适合命令面板、下拉菜单及复杂的导航系统。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui-primitive/menu" />
+
+## 安装
+
+你可以通过 Tiptap CLI 添加该原语组件
+
+```bash
+npx @tiptap/cli@latest add menu
+```
+
+## 使用示例
+
+```tsx
+import {
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuGroup,
+  MenuGroupLabel,
+  MenuButton,
+  MenuButtonArrow,
+  useComboboxValueState,
+} from '@/components/tiptap-ui-primitive/menu'
+import { Button } from '@/components/tiptap-ui-primitive/button'
+import { ComboboxList } from '@/components/tiptap-ui-primitive/combobox'
+
+export default function MyComponent() {
+  const [searchValue] = useComboboxValueState()
+
+  return (
+    <Menu trigger={<Button>打开菜单</Button>}>
+      <MenuContent>
+        <ComboboxList>
+          <MenuGroup>
+            <MenuGroupLabel>操作</MenuGroupLabel>
+            <MenuItem
+              onClick={() => console.log('剪切')}
+              render={<Button data-style="ghost">剪切</Button>}
+            />
+            <MenuItem
+              onClick={() => console.log('复制')}
+              render={<Button data-style="ghost">复制</Button>}
+            />
+            <MenuItem
+              onClick={() => console.log('粘贴')}
+              render={<Button data-style="ghost">粘贴</Button>}
+            />
+          </MenuGroup>
+        </ComboboxList>
+      </MenuContent>
+    </Menu>
+  )
+}
+```
+
+## 组件
+
+### Menu
+
+根菜单提供者，负责状态管理和上下文。
+
+| 名称           | 类型                         | 默认值 | 描述                                   |
+| -------------- | ---------------------------- | ------ | ------------------------------------- |
+| trigger        | `React.ReactNode`            | -      | 触发菜单显示的元素                     |
+| value          | `string`                     | -      | 当前搜索值（用于可搜索菜单）           |
+| onOpenChange   | `(open: boolean) => void`    | -      | 菜单开关状态变化的回调                 |
+| onValueChange  | `(value: string) => void`    | -      | 搜索值变化的回调                       |
+| onValuesChange | `(values: string[]) => void` | -      | 多选时的回调                         |
+| open           | `boolean`                    | -      | 控制菜单的打开状态                     |
+
+### MenuContent
+
+菜单项的容器，负责定位和样式。
+
+| 名称           | 类型                                                      | 默认值 | 描述                       |
+| -------------- | --------------------------------------------------------- | ------ | -------------------------- |
+| onClickOutside | `(event: MouseEvent \| TouchEvent \| FocusEvent) => void` | -      | 点击菜单外部时的回调       |
+
+### MenuItem
+
+单个可选的菜单项。
+
+| 名称         | 类型                 | 默认值 | 描述                                  |
+| ------------ | -------------------- | ------ | ------------------------------------- |
+| group        | `string`             | -      | 菜单项所属组标识                      |
+| name         | `string`             | -      | 菜单项名称标识                        |
+| parentGroup  | `string`             | -      | 父级组标识                           |
+| preventClose | `boolean`            | false  | 选中时是否阻止菜单关闭               |
+| render       | `React.ReactElement` | -      | 自定义渲染元素                      |
+
+## 钩子
+
+### useComboboxValueState
+
+用于访问和更新可搜索菜单中的搜索值的钩子。
+
+```tsx
+const [searchValue, setSearchValue] = useComboboxValueState()
+```
+
+**返回值：** `readonly [string, (value: string) => void]`
+
+### useMenuPlacement
+
+获取当前菜单定位侧的钩子。
+
+```tsx
+const side = useMenuPlacement()
+```
+
+**返回值：** `string` - 当前侧（"top", "bottom", "left", "right"）
+
+### useMenuItemClick
+
+用于处理菜单项点击并可选阻止菜单关闭的钩子。
+
+```tsx
+const handleClick = useMenuItemClick(menu, preventClose)
+```
+
+**参数：**
+
+- `menu?: Ariakit.MenuStore` - 菜单状态实例
+- `preventClose?: boolean` - 是否阻止菜单关闭
+
+## 筛选与搜索
+
+Menu 组件包含强大的筛选功能：
+
+### filterMenuItems
+
+基于搜索条件筛选菜单项的工具函数。
+
+```tsx
+import { filterMenuItems } from '@/components/tiptap-ui-primitive/menu'
+
+const filteredItems = filterMenuItems({ items: menuItems, label: '操作' }, searchValue)
+```
+
+### filterMenuGroups
+
+用于筛选整个菜单组的工具函数。
+
+```tsx
+import { filterMenuGroups } from '@/components/tiptap-ui-primitive/menu'
+
+const filteredGroups = filterMenuGroups(menuGroups, searchValue)
+```
+
+## 依赖
+
+- **@ariakit/react** - 无障碍和交互原语
+- **combobox** - 搜索功能
+- **separator** - 分组视觉分隔
+- **label** - 分组标签
+- **use-on-click-outside** - 外部点击检测
+- **use-composed-ref** - 引用组合工具

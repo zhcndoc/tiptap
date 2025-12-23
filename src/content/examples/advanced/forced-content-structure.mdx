@@ -11,3 +11,5 @@ import { CodeDemo } from '@/components/CodeDemo'
 您的编辑器是否需要特定结构的内容？您可以通过 **自定义文档** 强制特定的内容结构，该文档扩展了我们默认的 `@tiptap/extension-document` 扩展。请查看以下内容以了解如何创建自定义文档模式。
 
 <CodeDemo path="/Examples/CustomDocument" />
+
+> **注意**：如果您将 Trailing Node 扩展与自定义文档结构结合使用，请手动调整 `node` 选项——否则 ProseMirror 将回落到您的 schema 中的默认节点。例如，在标题 + 块演示中，可能会假定标题节点作为默认的尾随节点。详情请参阅 [Trailing Node 文档](/editor/extensions/functionality/trailing-node) 。

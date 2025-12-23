@@ -1,0 +1,49 @@
+---
+title: 链接弹出框中的 XSS 漏洞
+meta:
+  title: 链接弹出框中的 XSS 漏洞 | Tiptap 资源
+  description: 链接弹出框 UI 组件接受恶意 URL，导致潜在的 XSS 攻击。
+  category: 资源
+incident:
+  product: UI 组件
+  date: 2025年6月25日，格林尼治时间+2时区晚上9:39
+  status: 已解决
+  severity: 高
+---
+import { Callout } from '@/components/ui/Callout'
+
+[链接弹出框 UI 组件](/ui-components/components/link-popover) 接受恶意 URL，导致潜在的 XSS 攻击。
+
+**受影响的组件**
+- [链接弹出框组件](/ui-components/components/link-popover)，截止至 2025年6月25日，格林尼治时间+2时区晚上9:39
+- [简单编辑器模板](/ui-components/templates/simple-editor)，截止至 2025年6月25日，格林尼治时间+2时区晚上9:39
+
+**未受影响**
+
+- 其他 UI 组件或模板
+- 链接扩展本身
+- 2025年6月25日 格林尼治时间+2时区晚上9:39 后下载的组件或模板
+
+### 漏洞原因
+该组件跳过了 `editor.commands.setLink()` 方法，该方法通常会拒绝诸如 `javascript:` 之类的协议，以确保即使缺少链接扩展时组件依旧可用。由于这个捷径，根本没有进行任何验证。无论是在插入链接时，还是用户点击“在新窗口打开”按钮时，均未进行验证。
+
+<Callout title="注意" variant="info">
+链接扩展本身包括了正确的 URL 验证（参见 [isAllowedUri](/editor/extensions/marks/link#isalloweduri)）。
+</Callout>
+
+## 修复方案
+目前，我们对每次链接插入都调用 `editor.commands.setLink()`，并且在点击“在新窗口打开”按钮时，额外执行一遍 URL 检查。
+
+## 更新方法
+
+在已有项目中的终端执行以下命令以更新代码：
+
+```bash
+npx @tiptap/cli@latest add link-popover
+```
+
+此操作将下载最新版本的链接弹出框 UI 组件。
+
+## 感谢
+
+感谢 [Daniyal Nasir](https://dunicot.com) 报告此漏洞。

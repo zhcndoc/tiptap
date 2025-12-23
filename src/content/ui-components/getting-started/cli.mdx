@@ -13,7 +13,7 @@ Tiptap CLI 帮助您快速搭建编辑器，安装 UI 组件或原件，并更�
 ## 使用方法
 
 ```bash
-npx @tiptap/cli [命令] [选项]
+npx @tiptap/cli@latest [command] [options]
 ```
 
 ## 命令
@@ -23,7 +23,7 @@ npx @tiptap/cli [命令] [选项]
 初始化您的项目并安装依赖项。此命令设置您的项目配置并添加任何指定的组件。
 
 ```bash
-npx @tiptap/cli init
+npx @tiptap/cli@latest init
 ```
 
 #### 参数
@@ -33,43 +33,102 @@ npx @tiptap/cli init
 #### 选项
 
 ```bash
-用法: @tiptap/cli init [选项] [组件...]
+Usage: @tiptap/cli@latest init [options] [components...]
 
-选项:
+Options:
 -f, --framework <framework>   要使用的框架（例如：next, vite）
--f, --force                   强制覆盖现有配置
 -c, --cwd <cwd>               工作目录（默认为当前目录）
 -s, --silent                  静默输出
---src-dir                     默认：创建新项目时使用 src 目录
---no-src-dir                  创建新项目时不使用 src 目录
+--src-dir                     创建新项目时使用 src 目录
 ```
 
 ### `add`
 
-向您的项目添加一个或多个组件。
+向您的项目添加一个或多个 Tiptap UI 组件或模板。
 
 ```bash
-npx @tiptap/cli add [组件]
+npx @tiptap/cli@latest add [components...]
 ```
 
 #### 示例
 
 ```bash
-npx @tiptap/cli add button
+npx @tiptap/cli@latest add button
 ```
 
 #### 选项
 
 ```bash
-用法: @tiptap/cli add [选项] [组件...]
+Usage: @tiptap/cli@latest add [options] [components...]
 
-参数
+Arguments:
+  components                    要添加的组件
 
-    components          要添加的组件
+Options:
+  -o, --overwrite              覆盖已存在的文件
+  -c, --cwd <cwd>              工作目录（默认为当前目录）
+  -p, --path <path>            添加组件的路径
+  -s, --silent                 静默输出
+```
 
-选项
+### `info`
 
-    -c, --cwd <cwd>     工作目录（默认为当前目录）
-    -p, --path <path>   添加组件的路径
-    -s, --silent        静默输出
+获取有关您的项目配置和设置的信息。
+
+```bash
+npx @tiptap/cli@latest info
+```
+
+#### 选项
+
+```bash
+Usage: @tiptap/cli@latest info [options]
+
+Options:
+  -c, --cwd <cwd>              工作目录（默认为当前目录）
+```
+
+### `login`
+
+登录到您的 Tiptap Cloud 账户，以访问付费组件和模板。
+
+```bash
+npx @tiptap/cli@latest login
+```
+
+#### 选项
+
+```bash
+Usage: @tiptap/cli@latest login [options]
+
+Options:
+  -e, --email <email>          您的账户邮箱
+  -p, --password <password>    您的账户密码
+  --write-config               将认证令牌写入包管理器配置
+  -c, --cwd <cwd>              工作目录（默认为当前目录）
+```
+
+### `logout`
+
+登出您的 Tiptap Cloud 账户。
+
+```bash
+npx @tiptap/cli@latest logout
+```
+
+### `status`
+
+查看您的 Tiptap Cloud 身份验证状态和激活的计划。
+
+```bash
+npx @tiptap/cli@latest status
+```
+
+#### 选项
+
+```bash
+Usage: @tiptap/cli@latest status [options]
+
+Options:
+  -c, --cwd <cwd>              工作目录（默认为当前目录）
 ```

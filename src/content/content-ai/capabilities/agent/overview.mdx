@@ -5,27 +5,21 @@ meta:
   description: 构建编辑富文本文件的 AI 代理——从简单的聊天助手到复杂的文档编辑工作流。
   category: 内容 AI
 tags:
-  - type: team
   - type: beta
+  - type: deprecated
 sidebars:
   hideSecondary: true
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
-import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
-<Requirements>
-  <RequirementItem label="1. 激活试用或订阅">
-    在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅团队计划](https://cloud.tiptap.dev/v2/billing)。
-  </RequirementItem>
-  <RequirementItem label="2. 集成 AI 提供商">
-    在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或按照[自定义 AI 代理指南](/content-ai/capabilities/agent/custom-llms)将其与其他 AI 提供商集成。
-  </RequirementItem>
-  <RequirementItem label="3. 从私有注册表安装">
-    要安装前端扩展，请按照[设置指南](/guides/pro-extensions)认证访问 Tiptap 的私有 npm 注册表。
-  </RequirementItem>
-</Requirements>
+<Callout title="Deprecated" variant="warning">
+  该扩展正在被 AI 工具包逐步取代，AI 工具包提供了增强的功能和现代化的 API。虽然您仍然可以继续使用此扩展，但我们建议您在新的实现中探索 AI 工具包。
+</Callout>
+
+<EnterpriseCalloutAuto variant="deprecated" renderMode="sidebar" />
 
 集成 AI 代理扩展，构建能编辑富文本文档的代理。集成现成的助手，或为您自己的代理添加编辑工具。
 
@@ -33,7 +27,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
   isPro
   isLarge
   path="/Extensions/AiAgent"
-  src="https://develop--tiptap-pro.netlify.app/preview/Extensions/AiAgent"
+  src="https://feature-beta-ai-extensions--tiptap-pro.netlify.app/preview/Extensions/AiAgent"
 />
 
 AI 代理扩展使您能够构建一个 AI 助手，该助手可以根据用户定义的任务读取、回答问题并编辑您的文档。
@@ -57,6 +51,12 @@ AI 代理扩展使您能够构建一个 AI 助手，该助手可以根据用户�
 - [与 Tiptap Cloud 一起使用](/content-ai/capabilities/agent/use-with-content-ai-cloud)，提供托管的、即用型 AI 代理。
 - [将其添加到您现有的 AI 代理中](/content-ai/capabilities/agent/custom-llms)，在您的后端托管。
 
+AI 代理扩展为流行的 AI 提供商库提供工具定义：
+
+- [Vercel 的 AI SDK](/content-ai/capabilities/ai-toolkit/tools/ai-sdk)
+- [LangChain.js](/content-ai/capabilities/ai-toolkit/tools/langchain-js)
+- [OpenAI](/content-ai/capabilities/ai-toolkit/tools/openai)
+
 ## 什么是 AI 代理？
 
 AI 代理是能够通过自主决策完成复杂任务的系统。不同于简单的聊天助手，AI 代理不仅能以文本回复，还能调用“工具”与环境交互。
@@ -74,3 +74,5 @@ Tiptap AI 代理扩展为 AI 代理提供执行以下操作的工具：
 可以把 LLM 看作 AI 代理的“大脑”，负责决定调用哪些工具。Tiptap AI 代理扩展则充当“手”和“眼”，使代理能够读取和交互文档。
 
 通过将 AI 代理扩展与 Tiptap Cloud 结合使用，您无需担心服务器 — 我们为您构建好了。但如果您想自定义 LLM 以及 AI 代理可用的工具（使其能执行其他操作，如搜索外部数据源），可以将 AI 代理扩展与您自己的后端集成。
+
+<EnterpriseCalloutAuto variant="ai-agent" renderMode="inline" />

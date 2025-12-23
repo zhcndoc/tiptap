@@ -14,32 +14,31 @@ import Link from '@/components/Link'
 import { Button } from '@/components/ui/Button'
 import { Callout } from '@/components/ui/Callout'
 
-Tiptap 是无头编辑器，这意味着它不提供任何样式。这也意味着你可以完全控制编辑器的外观。下面的方法允许你向编辑器应用自定义样式。
+Tiptap 遵循无头优先（headless-first）方法，这意味着核心扩展不包含任何样式或 UI 组件——只有纯逻辑。这让你可以完全控制编辑器的外观和行为。
+
+不过，我们现在也提供可选的 UI 组件和模板，帮助你加快开发速度。
 
 <ImageCard.Card>
   <ImageCard.Image src={contentTemplatesImage.src} alt="Tiptap 的用户界面模板" />
   <ImageCard.Content>
     <ImageCard.Title>想快速入门吗？</ImageCard.Title>
     <ImageCard.Paragraph>
-      使用我们的 UI 模板加速你在 React 应用中的 Tiptap 集成。它可以直接部署，
-      也可以根据你的需求进行自定义。
+      我们的 UI 模板包含常见编辑器功能的预构建组件。下载源代码并根据你的需求自定义。
     </ImageCard.Paragraph>
     <div className="flex items-center gap-2 mt-8">
       <Button asChild variant="secondary">
-        <Link href="https://templates.tiptap.dev/">
-          试用演示
-          <ArrowRightIcon className="size-4" />
-        </Link>
-      </Button>
-      <Button asChild variant="tertirary">
-        <Link href="https://cloud.tiptap.dev/react-templates">
-          获取访问权限
+        <Link href="/ui-components/getting-started/overview">
+          获取 UI 组件
           <ArrowRightIcon className="size-4" />
         </Link>
       </Button>
     </div>
   </ImageCard.Content>
 </ImageCard.Card>
+
+### 构建你自己的 UI
+
+如果你倾向于自己构建 UI，或者想了解 Tiptap 中的样式如何工作，下面是可用的方法。
 
 ## 使用普通 HTML 样式
 
@@ -142,16 +141,65 @@ new Editor({
 
 ## 使用 Tailwind CSS 样式
 
-编辑器也兼容 Tailwind CSS。下面演示了一个使用 `@tailwindcss/typography` 插件样式的示例。
+由于 Tiptap 中管理的内容是普通的 HTML，默认情况下没有 Tailwind CSS 类，你有几种方法可以为编辑器添加样式：
+
+### 使用全局 CSS 文件和 `@apply`
+
+尽管 Tailwind 官方不推荐大量使用 `@apply`，但我们认为它是为像 Tiptap 这类灵活的用户编辑内容定义样式的最佳方式。你可以在全局 CSS 文件里，对编辑器内的 HTML 标签应用 Tailwind 样式。由于嵌套选择器得到了广泛支持，你可以用 `.tiptap` 类限制作用范围：
+
+```css
+.tiptap {
+  p {
+    @apply my-4 first:mt-0 last:mb-0 text-base leading-relaxed;
+  }
+
+  h1 {
+    @apply text-3xl font-bold mt-8 mb-4 first:mt-0 last:mb-0;
+  }
+}
+```
+
+### 向扩展添加类
+
+如果你不想使用全局 CSS 文件，更复杂的做法是扩展现有组件并在 `renderHTML` 的 `HTMLAttributes` 中添加 Tailwind 类。
+
+```js
+import Paragraph from '@tiptap/extension-paragraph'
+
+const TailwindParagraph = Paragraph.extend({
+  renderHTML({ HTMLAttributes }) {
+    return [
+      'p',
+      {
+        ...HTMLAttributes,
+        class: 'my-4 first:mt-0 last:mb-0 text-base leading-relaxed',
+      },
+      0,
+    ]
+  },
+})
+```
+
+该方法可行，但随着更复杂的扩展或使用 NodeViews，会变得更加复杂，因此我们依然建议大多数情况下使用带 `@apply` 的全局 CSS 文件。
+
+### 使用 `@tailwindcss/typography` 插件
+
+编辑器同样兼容 Tailwind CSS。下面示例展示了使用 `@tailwindcss/typography` 插件样式的用法。
 
 <CodeDemo path="/Experiments/Tailwind?inline=false" />
 
 ### 智能提示
 
-如果你使用 [TailwindCSS 智能提示](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)，请将以下代码片段添加到你的 `.vscode/setting.json` 中，以启用对 Tiptap 对象内的智能提示支持：
+如果你使用 [TailwindCSS 智能提示](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)，请将以下代码片段添加到你的 `.vscode/settings.json` 中，以启用对 Tiptap 对象内的智能提示支持：
 
 ```json
 "tailwindCSS.experimental.classRegex": [
   "class:\\s*?[\"'`]([^\"'`]*).*?,"
 ]
 ```
+
+## 后续步骤
+
+- [了解更多 Tiptap 的核心概念](/editor/core-concepts/introduction)
+- [学习如何持久化编辑器状态](/editor/core-concepts/persistence)
+- [开始构建你自己的扩展](/editor/extensions/custom-extensions)

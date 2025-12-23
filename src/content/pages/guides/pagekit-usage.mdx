@@ -1,0 +1,65 @@
+---
+title: "PageKit"
+tags:
+  - type: alpha
+meta:
+  title: PageKit 使用 | Tiptap Pages 文档
+  description: 了解如何使用 PageKit 扩展快速为编辑器添加分页和表格支持。
+  category: Pages
+sidebars:
+  hideSecondary: true
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+PageKit 是一个便捷的扩展包，集成了 Pages 和 Table 两个扩展。它让你能同时配置这两个扩展，打造支持分页和表格的编辑器。
+
+<CodeDemo isPro src="https://feature-pages-extension--tiptap-pro.netlify.app/preview/extensions/pagespagekit" />
+
+---
+
+## 1. 安装 Pages 扩展
+
+```bash
+npm install @tiptap-pro/extension-page-kit
+```
+
+## 2. 导入并使用 PageKit
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { PageKit } from '@tiptap-pro/extension-page-kit'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    PageKit.configure({
+      pages: {
+        pageFormat: 'A4',
+        header: '我的项目',
+        footer: '第 {page} 页，共 {total} 页',
+      },
+      table: {
+        // 表格选项（可选）
+        resizable: true,
+      },
+    }),
+  ],
+})
+```
+
+<Callout title="工作原理" variant="info">
+  PageKit 会帮你配置 Pages 和 Table 两个扩展。将 Pages 的相关选项放在 <code>pages</code> 中，表格选项放在 <code>table</code> 中。
+</Callout>
+
+## 3. 何时使用 PageKit？
+
+- 需要同时支持分页和表格时，使用 PageKit 可以最快速完成设置。
+- 如果你需要对 Table 或 Pages 进行深入定制，建议分别导入并单独配置它们。
+
+## 4. 后续步骤
+
+- 探索 [Pages 选项](/pages/core-concepts/options) 以获得更多布局控制能力。
+- 查看手动设置及扩展技巧的 [分页与表格指南](/pages/guides/table-with-pages)。 

@@ -1,0 +1,117 @@
+---
+title: 更新日志 - OpenAI
+meta:
+  title: 更新日志 - OpenAI | Tiptap Content AI
+  description: @tiptap-pro/ai-toolkit-openai 包的更新日志
+  category: 内容 AI
+---
+
+# @tiptap-pro/ai-toolkit-openai
+
+## 3.0.0-alpha.16
+
+
+### 小幅更改
+
+- 服务器 AI 工具包工具定义
+
+## 3.0.0-alpha.15
+
+### 重大更改
+
+- 添加了 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，并将其设为默认。移除了 `readNodeRange`、`readSelection`、`insertContent` 和 `applyPatch` 工具。
+
+## 3.0.0-alpha.14
+
+### 小幅更改
+
+- 添加了 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，提升编辑速度和效率。这些工具目前处于实验阶段，需主动选择使用。
+
+## 3.0.0-alpha.13
+
+### 修补更改
+
+- 修复了导致 AI 在聊天交互开始时未读取文档的错误。
+
+## 3.0.0-alpha.12
+
+### 修补更改
+
+- 修复了 AI 在不必要时读取整个文档的错误。
+
+## 3.0.0-alpha.11
+
+### 修补更改
+
+- 修复了文档更新后 AI 读取了错误内容的错误。
+
+## 3.0.0-alpha.10
+
+### 修补更改
+
+- 修复了新线程和评论未创建在文档正确位置的错误。
+
+## 3.0.0-alpha.9
+
+### 重大更改
+
+- `applyPatch` 工具的输入格式更新，使工具定义更简单且更一致。
+- 改进了所有内置工具的输出和工具定义。
+- 需要升级 `@tiptap-pro/ai-toolkit` 包版本至 `3.0.0-alpha.37` 或更高。
+
+## 3.0.0-alpha.8
+
+### 重大更改
+
+- 通过将内容格式的 "html" 属性重命名为 "content"，使 `insertContent` 工具独立于内容格式。
+- 需要升级 `@tiptap-pro/ai-toolkit` 包版本至 `3.0.0-alpha.36` 或更高。
+
+### 修补更改
+
+- 修复了 `insertContent` 工具中 `activeNodeRange` 位置无效的问题。
+- 修复了 `insertContent` 工具导致 `activeNodeRange` 总是重置为 0 的错误。
+
+## 3.0.0-alpha.7
+
+### 重大更改
+
+- 新增用于 AI 驱动的评论和线程管理的 `editThreads` 和 `getThreads` 工具。
+- 需要升级 `@tiptap-pro/ai-toolkit` 包版本至 `3.0.0-alpha.26` 或更高。
+
+## 3.0.0-alpha.6
+
+### 重大更改
+
+- 将 `applyDiff` 工具重命名为 `applyPatch`。
+- 改进了 `applyDiff`（现称 `applyPatch`）工具的格式和定义，使 AI 生成补丁操作列表，提高准确性（避免 AI 进行不必要的跳转），并显著减少令牌使用量。
+
+## 3.0.0-alpha.5
+
+### 小幅更改
+
+- 为 `insertContent` 工具添加了 `activeNodeRange` 位置，允许 AI 在活动节点范围内插入内容。当禁用 `applyDiff` 工具时，这提升了编辑的准确度。
+
+## 3.0.0-alpha.4
+
+### 小幅更改
+
+- AI 工具包与 Pages 扩展集成的实验性实现。引入了 `readPage` 工具。
+
+## 3.0.0-alpha.3
+
+### 重大更改
+
+- 改进了 `readSelection` 和 `insertContent` 工具的定义，修复了用户在 AI 读取选区后改变选区时，AI 将内容插入错误位置的错误。需要 AI 工具包版本为 `3.0.0-alpha-17` 或更高。
+
+## 3.0.0-alpha.2
+
+### 重大更改
+
+- 需要升级 `@tiptap-pro/ai-toolkit` 包版本至 `3.0.0-alpha.14` 或更高。
+- 改进了用于读取和编辑文档的工具定义。
+
+## 3.0.0-alpha.1
+
+### 重大更改
+
+- 初始版本发布

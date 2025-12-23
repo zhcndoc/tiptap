@@ -1,0 +1,100 @@
+---
+title: Logger
+meta:
+  title: Logger | Hocuspocus 文档
+  category: Hocuspocus
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@hocuspocus/extension-logger.svg?label=version
+    url: https://www.npmjs.com/package/@hocuspocus/extension-logger
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@hocuspocus/extension-logger.svg
+    url: https://npmcharts.com/compare/@hocuspocus/extension-logger?minimal=true
+    label: 下载次数
+  - type: image
+    src: https://img.shields.io/npm/l/@hocuspocus/extension-logger.svg
+    url: https://www.npmjs.com/package/@hocuspocus/extension-logger
+    label: 许可证
+  - type: image
+    src: https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true
+    url: https://discord.gg/WtJ49jGshW
+    label: 聊天
+---
+
+Hocuspocus 本身不记录任何日志。借助这个简单的扩展，它将开始记录日志。
+
+## 安装
+
+使用以下命令安装 Logger 包：
+
+```bash
+npm install @hocuspocus/extension-logger
+```
+
+## 配置
+
+**实例名称**
+
+你可以为所有日志消息添加一个配置的字符串前缀。
+
+```js
+import { Server } from "@hocuspocus/server";
+import { Logger } from "@hocuspocus/extension-logger";
+
+const server = new Server({
+  name: "hocuspocus-fra1-01",
+  extensions: [new Logger()],
+});
+
+server.listen();
+```
+
+**禁用消息**
+
+你可以禁用特定消息的日志记录。
+
+```js
+import { Server } from "@hocuspocus/server";
+import { Logger } from "@hocuspocus/extension-logger";
+
+const server = new Server({
+  extensions: [
+    new Logger({
+      onLoadDocument: false,
+      onChange: false,
+      onConnect: false,
+      onDisconnect: false,
+      onUpgrade: false,
+      onRequest: false,
+      onListen: false,
+      onDestroy: false,
+      onConfigure: false,
+    }),
+  ],
+});
+
+server.listen();
+```
+
+**自定义日志记录器**
+
+你甚至可以传递一个自定义函数来记录日志消息。
+
+```js
+import { Server } from "@hocuspocus/server";
+import { Logger } from "@hocuspocus/extension-logger";
+
+const server = new Server({
+  extensions: [
+    new Logger({
+      log: (message) => {
+        // 在这里做一些自定义操作
+        console.log(message);
+      },
+    }),
+  ],
+});
+
+server.listen();
+```

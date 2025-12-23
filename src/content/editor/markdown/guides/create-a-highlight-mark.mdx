@@ -1,0 +1,310 @@
+---
+title: 创建支持 Markdown 的高亮标记
+tags:
+  - type: beta
+meta:
+  title: 使用 Markdown 创建高亮标记 | Tiptap 编辑器文档
+  description: 学习如何在 Tiptap 中创建支持 Markdown 语法的自定义高亮标记，从而增强文本格式化效果。
+  category: Editor
+---
+
+本指南介绍如何为一个使用 `==text==` 简写（某些 Markdown 语法中常见）生成 HTML 中 `mark` 元素的小型内联 `highlight` 标记添加 Markdown 支持。
+
+我们将按四个清晰步骤进行讲解，每个步骤都会附上完整示例，确保你始终掌握完整上下文：
+
+1. 创建基本的 Tiptap `Mark` 扩展（不带 Markdown 支持）。
+2. 添加自定义 Markdown 分词器，将原始 Markdown 转成 token。
+3. 添加解析器，将 token 转换成 Tiptap JSON（并应用标记）。
+4. 添加渲染器（序列化器），将 Tiptap 内容转换回 Markdown。
+
+我们支持的示例简写：
+
+```js
+This is ==highlighted== text.
+```
+
+---
+
+## 第 1 步：创建基本的 `highlight` Mark
+
+从最简 `Mark` 定义开始，描述标记名称、HTML 解析/渲染行为及任何选项。暂时跳过 Markdown 集成，先专注于 schema 和 HTML 输入输出。
+
+```js
+import { Mark } from '@tiptap/core'
+
+export const Highlight = Mark.create({
+  name: 'highlight',
+
+  addOptions() {
+    return {
+      HTMLAttributes: {},
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'mark' }]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['mark', HTMLAttributes, 0]
+  },
+
+  addCommands() {
+    return {
+      toggleHighlight:
+        () =>
+        ({ commands }) => {
+          return commands.toggleMark(this.name)
+        },
+    }
+  },
+})
+```
+
+**说明：**
+- 该标记简单映射为 HTML 中的 `<mark>` 标签。
+- `toggleHighlight` 命令可用于程序化切换该标记。
+
+---
+
+## 第 2 步：添加自定义 Markdown 分词器
+
+分词器负责识别原始 Markdown 中的 `==text==`，并返回包含内部文本及任何嵌套内联 token 的标记。此步重点先实现分词器，方便单独测试识别功能。
+
+```js
+import { Mark } from '@tiptap/core'
+
+export const Highlight = Mark.create({
+  name: 'highlight',
+
+  addOptions() {
+    return {
+      HTMLAttributes: {},
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'mark' }]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['mark', HTMLAttributes, 0]
+  },
+
+  // 定义自定义 Markdown 分词器以识别 ==text==
+  markdownTokenizer: {
+    name: 'highlight',
+    level: 'inline', // 内联元素
+    // lexer 的快速提示，用于寻找候选位置
+    start: (src) => src.indexOf('=='),
+    tokenize: (src, tokens, lexer) => {
+      // 在剩余文本开头匹配 ==text==
+      const match = /^==([^=]+)==/.exec(src)
+      if (!match) return undefined
+
+      return {
+        type: 'highlight',       // token 类型（必须与 name 一致）
+        raw: match[0],           // 完整匹配字符串：==text==
+        text: match[1],          // 内部内容：text
+        // 让 Markdown lexer 解析嵌套的内联格式
+        tokens: lexer.inlineTokens(match[1]),
+      }
+    },
+  },
+
+  addCommands() {
+    return {
+      toggleHighlight:
+        () =>
+        ({ commands }) => {
+          return commands.toggleMark(this.name)
+        },
+    }
+  },
+})
+```
+
+**实现要点：**
+- `start` 用于优化，帮助 lexer 快速定位潜在匹配位置。
+- 分词器返回 `tokens: lexer.inlineTokens(match[1])`，以保留内部的加粗、斜体、链接等嵌套格式。
+
+---
+
+## 第 3 步：添加解析器
+
+`parseMarkdown` 函数将分词器产生的 token 转换成 Tiptap 表示。对于标记，通常将内部 tokens 解析为内联节点，再对内容应用标记。
+
+```js
+import { Mark } from '@tiptap/core'
+
+export const Highlight = Mark.create({
+  name: 'highlight',
+
+  addOptions() {
+    return {
+      HTMLAttributes: {},
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'mark' }]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['mark', HTMLAttributes, 0]
+  },
+
+  // 定义自定义 Markdown 分词器以识别 ==text==
+  markdownTokenizer: {
+    name: 'highlight',
+    level: 'inline', // 内联元素
+    // lexer 的快速提示，用于寻找候选位置
+    start: (src) => src.indexOf('=='),
+    tokenize: (src, tokens, lexer) => {
+      // 在剩余文本开头匹配 ==text==
+      const match = /^==([^=]+)==/.exec(src)
+      if (!match) return undefined
+
+      return {
+        type: 'highlight',       // token 类型（必须与 name 一致）
+        raw: match[0],           // 完整匹配字符串：==text==
+        text: match[1],          // 内部内容：text
+        // 让 Markdown lexer 解析嵌套的内联格式
+        tokens: lexer.inlineTokens(match[1]),
+      }
+    },
+  },
+
+  // 将 Markdown token 解析为 Tiptap JSON
+  parseMarkdown: (token, helpers) => {
+    // 将嵌套的内联 tokens 解析为 Tiptap 内联内容
+    const content = helpers.parseInline(token.tokens || [])
+    // 对解析出的内容应用 'highlight' 标记
+    return helpers.applyMark('highlight', content)
+  },
+
+  addCommands() {
+    return {
+      toggleHighlight:
+        () =>
+        ({ commands }) => {
+          return commands.toggleMark(this.name)
+        },
+    }
+  },
+})
+```
+
+**说明：**
+- `helpers.parseInline` 将嵌套内联 token 转为 tiptap 兼容的 `content` 数组。
+- `helpers.applyMark('highlight', content)` 对解析出的内联内容应用标记，并返回 Markdown 解析器预期的结构。
+
+---
+
+## 第 4 步：添加渲染器
+
+为了支持将编辑器状态序列化回 Markdown，需实现 `renderMarkdown` 函数。它接收 Tiptap 节点（或标记节点结构），应返回 Markdown 字符串。使用 `helpers.renderChildren` 序列化嵌套内容。
+
+```js
+import { Mark } from '@tiptap/core'
+
+export const Highlight = Mark.create({
+  name: 'highlight',
+
+  addOptions() {
+    return {
+      HTMLAttributes: {},
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'mark' }]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['mark', HTMLAttributes, 0]
+  },
+
+  // 定义自定义 Markdown 分词器以识别 ==text==
+  markdownTokenizer: {
+    name: 'highlight',
+    level: 'inline', // 内联元素
+    // lexer 的快速提示，用于寻找候选位置
+    start: (src) => src.indexOf('=='),
+    tokenize: (src, tokens, lexer) => {
+      // 在剩余文本开头匹配 ==text==
+      const match = /^==([^=]+)==/.exec(src)
+      if (!match) return undefined
+
+      return {
+        type: 'highlight',       // token 类型（必须与 name 一致）
+        raw: match[0],           // 完整匹配字符串：==text==
+        text: match[1],          // 内部内容：text
+        // 让 Markdown lexer 解析嵌套的内联格式
+        tokens: lexer.inlineTokens(match[1]),
+      }
+    },
+  },
+
+  // 将 Markdown token 解析为 Tiptap JSON
+  parseMarkdown: (token, helpers) => {
+    // 将嵌套的内联 tokens 解析为 Tiptap 内联内容
+    const content = helpers.parseInline(token.tokens || [])
+    // 对解析出的内容应用 'highlight' 标记
+    return helpers.applyMark('highlight', content)
+  },
+
+  // 将 Tiptap 节点渲染回 Markdown
+  renderMarkdown: (node, helpers) => {
+    const content = helpers.renderChildren(node.content || [])
+    // 用 == 包裹序列化后的子内容
+    return `==${content}==`
+  },
+
+  addCommands() {
+    return {
+      toggleHighlight:
+        () =>
+        ({ commands }) => {
+          return commands.toggleMark(this.name)
+        },
+    }
+  },
+})
+```
+
+**说明：**
+- `helpers.renderChildren` 用于序列化节点／标记子节点回 Markdown，支持嵌套格式。
+- 请确保 `renderMarkdown` 输出和分词器匹配（空格、换行等），这种内联标记使用简单的 `==content==` 形式即可。
+
+---
+
+## 使用方法
+
+将扩展添加到编辑器，并从 Markdown 设置内容：
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Markdown from 'some-markdown-integration' // 替换为你的 Markdown 集成
+import { Highlight } from './highlight'
+
+const editor = new Editor({
+  extensions: [StarterKit, Markdown, Highlight],
+})
+
+// 设置 Markdown 内容（Markdown 集成必须支持 'contentType' 或类似选项）
+editor.commands.setContent('This is ==highlighted== text', { contentType: 'markdown' })
+
+// 程序化切换高亮标记
+editor.commands.toggleHighlight()
+```
+
+---
+
+## 测试与边界情况
+
+- 嵌套内联格式：分词器使用了 `lexer.inlineTokens(match[1])`，因此嵌套内联 token（加粗、斜体、链接）应能正确解析和渲染。
+- 贪婪匹配：分词器使用简单正则 `^==([^=]+)==`，不能匹配包含 `==` 的内容。如果需要支持嵌套 `==` 或多行高亮，请相应扩展正则表达式。
+- 空白处理：部分 Markdown 语法允许定界符内含空格（如 `== text ==`）。如需支持，请更新分词器和 `renderMarkdown` 的输出，保持该格式一致。
+- 与其他分词器冲突：`start` 优化帮助 lexer 寻找候选位置，但请确保正则不与 Markdown 工具链中其他内联分词器冲突。

@@ -13,6 +13,8 @@ component:
   isOpen: true
   isNew: false
   icon: PencilLine
+tags:
+  - type: mit
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
@@ -25,20 +27,19 @@ import { CodeDemo } from '@/components/CodeDemo'
 您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加该组件。
 
 ```bash
-npx @tiptap/cli add mark-button
+npx @tiptap/cli@latest add mark-button
 ```
 
-### 手动集成
-对于非 Vite 或 Next.js 的框架，可以从 [开源仓库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-ui/mark-button) 手动添加组件。
+## 组件
 
-### 导入样式
+### `<MarkButton />`
 
-此组件需要您导入我们的样式，样式已添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss` 中。
+一个预构建的 React 组件，用于切换特定标记类型的文本格式。
 
-## 用法
+#### 用法
 
 ```tsx
-import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
+import { useEditor, EditorContent, EditorContext } from '@tiptap/react'
 import { StarterKit } from '@tiptap/starter-kit'
 import { Underline } from '@tiptap/extension-underline'
 import { Superscript } from '@tiptap/extension-superscript'
@@ -79,15 +80,20 @@ export default function MyEditor() {
 
   return (
     <EditorContext.Provider value={{ editor }}>
-      <div className="tiptap-button-group" data-orientation="horizontal">
-        <MarkButton type="bold" />
-        <MarkButton type="italic" />
-        <MarkButton type="strike" />
-        <MarkButton type="code" />
-        <MarkButton type="underline" />
-        <MarkButton type="superscript" />
-        <MarkButton type="subscript" />
-      </div>
+      <MarkButton
+        editor={editor}
+        type="bold"
+        text="Bold"
+        hideWhenUnavailable={true}
+        showShortcut={true}
+        onToggled={() => console.log('Mark toggled!')}
+      />
+      <MarkButton type="italic" />
+      <MarkButton type="strike" />
+      <MarkButton type="code" />
+      <MarkButton type="underline" />
+      <MarkButton type="superscript" />
+      <MarkButton type="subscript" />
 
       <EditorContent editor={editor} role="presentation" />
     </EditorContext.Provider>
@@ -97,30 +103,204 @@ export default function MyEditor() {
 
 ## 属性
 
-| 名称                | 类型                                                                                    | 默认值  | 描述                                              |
-| ------------------- | --------------------------------------------------------------------------------------- | -------- | -------------------------------------------------- |
-| editor              | Editor \| null                                                                          | null     | Tiptap 编辑器实例                                 |
-| type                | 'bold' \| 'italic' \| 'strike' \| 'code' \| 'underline' \| 'superscript' \| 'subscript' | 必填     | 要切换的标记类型                                 |
-| hideWhenUnavailable | boolean                                                                                 | false    | 如果不可用，按钮是否隐藏                          |
-| text                | string                                                                                  | -        | 显示在图标旁边的文本                              |
+| 名称                | 类型                                                                                    | 默认值      | 描述                                              |
+| ------------------- | --------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------- |
+| editor              | Editor \| null                                                                          | null        | Tiptap 编辑器实例                                 |
+| type                | 'bold' \| 'italic' \| 'strike' \| 'code' \| 'underline' \| 'superscript' \| 'subscript' | 必填         | 要切换的标记类型                                 |
+| text                | string                                                                                  | -           | 显示在图标旁边的文本                              |
+| hideWhenUnavailable | boolean                                                                                 | false       | 如果不可用，按钮是否隐藏                          |
+| onToggled           | () => void                                                                             | -           | 成功切换标记后触发的回调                          |
+| showShortcut        | boolean                                                                                | false       | 是否显示键盘快捷键提示徽章                        |
 
-## 要求
+## 钩子
 
-使用的参考组件
+### `useMark()`
 
-- `use-tiptap-editor` (钩子)
-- `tiptap-utils` (库)
-- `button` (原语)
-- `bold-icon` (图标)
-- `code2-icon` (图标)
-- `italic-icon` (图标)
-- `strike-icon` (图标)
-- `subscript-icon` (图标)
-- `underline-icon` (图标)
-- `superscript-icon` (图标)
+一个自定义钩子，可以让你构建自己的标记按钮，完全控制渲染和行为。
 
-开源功能
+#### 用法
 
-- `@tiptap/extension-underline`
-- `@tiptap/extension-subscript`
-- `@tiptap/extension-superscript`
+```tsx
+import { useMark } from '@/components/tiptap-ui/mark-button'
+import { parseShortcutKeys } from '@/lib/tiptap-utils'
+import { Badge } from '@/components/tiptap-ui-primitive/badge'
+
+function MyMarkButton() {
+  const { isVisible, isActive, canToggle, handleMark, label, shortcutKeys, Icon } = useMark({
+    editor: myEditor,
+    type: 'bold',
+    hideWhenUnavailable: true,
+    onToggled: () => console.log('Mark toggled!'),
+  })
+
+  if (!isVisible) return null
+
+  return (
+    <button
+      onClick={handleMark}
+      disabled={!canToggle}
+      aria-label={label}
+      aria-pressed={isActive}
+      title={label}
+    >
+      <Icon />
+      {label}
+      {shortcutKeys && <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>}
+    </button>
+  )
+}
+```
+
+#### 属性
+
+| 名称                  | 类型             | 默认值      | 描述                                              |
+| --------------------- | ---------------- | ----------- | ------------------------------------------------- |
+| editor                | Editor \| null   | undefined   | Tiptap 编辑器实例                                 |
+| type                  | Mark             | 必填        | 要切换的标记类型                                 |
+| hideWhenUnavailable   | boolean          | false       | 当标记不可切换时是否隐藏按钮                      |
+| onToggled             | () => void       | undefined   | 成功切换标记后触发的回调                          |
+
+#### 返回值
+
+| 名称           | 类型            | 描述                                            |
+| -------------- | --------------- | ------------------------------------------------ |
+| isVisible      | boolean         | 按钮是否应被渲染                                |
+| isActive       | boolean         | 当前是否激活了该标记类型                        |
+| canToggle      | boolean         | 是否允许切换该标记                              |
+| handleMark     | () => boolean   | 切换标记的函数，返回是否成功                    |
+| label          | string          | 格式化后的显示名称（例如“Bold”，“Italic”）    |
+| shortcutKeys   | string          | 该标记的键盘快捷键                              |
+| Icon           | React.FC        | 标记按钮的图标组件                              |
+
+## 工具函数
+
+### `canToggleMark(editor, type)`
+
+检查当前编辑器状态下指定的标记类型是否可以切换。
+
+**参数:**
+
+- `editor`: `Editor | null` - Tiptap 编辑器实例
+- `type`: `Mark` - 要检查的标记类型
+
+**返回:** `boolean` - 是否可以切换该标记
+
+```tsx
+import { canToggleMark } from '@/components/tiptap-ui/mark-button'
+
+const canToggle = canToggleMark(editor, 'bold') // 检查是否可以切换粗体
+```
+
+### `toggleMark(editor, type)`
+
+程序化切换指定类型的标记格式。
+
+**参数:**
+
+- `editor`: `Editor | null` - Tiptap 编辑器实例
+- `type`: `Mark` - 要切换的标记类型
+
+**返回:** `boolean` - 切换是否成功
+
+```tsx
+import { toggleMark } from '@/components/tiptap-ui/mark-button'
+
+const success = toggleMark(editor, 'italic')
+if (success) {
+  console.log('斜体标记切换成功！')
+}
+```
+
+### `isMarkActive(editor, type)`
+
+检查指定标记类型当前是否处于激活状态。
+
+**参数:**
+
+- `editor`: `Editor | null` - Tiptap 编辑器实例
+- `type`: `Mark` - 要检查的标记类型
+
+**返回:** `boolean` - 标记是否激活
+
+```tsx
+import { isMarkActive } from '@/components/tiptap-ui/mark-button'
+
+const active = isMarkActive(editor, 'underline')
+```
+
+### `getFormattedMarkName(type)`
+
+获取标记类型的格式化显示名称。
+
+**参数:**
+
+- `type`: `Mark` - 标记类型
+
+**返回:** `string` - 格式化后的名称（例如 “Bold”，“Italic”）
+
+```tsx
+import { getFormattedMarkName } from '@/components/tiptap-ui/mark-button'
+
+const name = getFormattedMarkName('bold') // 返回 "Bold"
+const name2 = getFormattedMarkName('superscript') // 返回 "Superscript"
+```
+
+### `shouldShowButton(props)`
+
+根据编辑器状态和配置确定是否应显示标记按钮。
+
+**参数:**
+
+- `props`: `object`
+  - `editor`: `Editor | null` - Tiptap 编辑器实例
+  - `type`: `Mark` - 标记类型
+  - `hideWhenUnavailable`: `boolean` - 不可用时是否隐藏按钮
+
+**返回:** `boolean` - 是否应显示按钮
+
+```tsx
+import { shouldShowButton } from '@/components/tiptap-ui/mark-button'
+
+const shouldShow = shouldShowButton({
+  editor,
+  type: 'bold',
+  hideWhenUnavailable: true,
+})
+```
+
+## 键盘快捷键
+
+每种标记类型都有自己的键盘快捷键：
+
+- **Cmd/Ctrl + B**：切换粗体
+- **Cmd/Ctrl + I**：切换斜体
+- **Cmd/Ctrl + U**：切换下划线
+- **Cmd/Ctrl + Shift + S**：切换删除线
+- **Cmd/Ctrl + E**：切换代码
+- **Cmd/Ctrl + .**：切换上标
+- **Cmd/Ctrl + ,**：切换下标
+
+当使用 `<MarkButton />` 组件或 `useMark()` 钩子时，快捷键会自动注册。
+
+## 依赖项
+
+- `@tiptap/react` - 核心 Tiptap React 集成
+- `@tiptap/starter-kit` - 包含标记支持的基础 Tiptap 扩展
+- `@tiptap/extension-underline` - 下划线标记扩展
+- `@tiptap/extension-superscript` - 上标标记扩展
+- `@tiptap/extension-subscript` - 下标标记扩展
+- `react-hotkeys-hook` - 键盘快捷键管理
+
+## 使用的参考组件
+
+- `use-tiptap-editor`（钩子）
+- `button`（原语）
+- `badge`（原语）
+- `tiptap-utils`（库）
+- `bold-icon`（图标）
+- `italic-icon`（图标）
+- `underline-icon`（图标）
+- `strike-icon`（图标）
+- `code-2-icon`（图标）
+- `superscript-icon`（图标）
+- `subscript-icon`（图标）

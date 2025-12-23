@@ -1,0 +1,520 @@
+---
+title: S3
+meta:
+  title: S3 | Hocuspocus 文档
+  category: Hocuspocus
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@hocuspocus/extension-s3.svg?label=version
+    url: https://www.npmjs.com/package/@hocuspocus/extension-s3
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@hocuspocus/extension-s3.svg
+    url: https://npmcharts.com/compare/@hocuspocus/extension-s3?minimal=true
+    label: 下载量
+  - type: image
+    src: https://img.shields.io/npm/l/@hocuspocus/extension-s3.svg
+    url: https://www.npmjs.com/package/@hocuspocus/extension-s3
+    label: 许可协议
+  - type: image
+    src: https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true
+    url: https://discord.gg/WtJ49jGshW
+    label: 聊天
+---
+
+S3 扩展为 Hocuspocus 提供了兼容 S3 的存储持久化支持。它支持 Amazon S3 以及 MinIO、DigitalOcean Spaces、Wasabi 等兼容 S3 的服务。文档以二进制文件形式存储于 S3 中，使你的协作文档具备持久性和可扩展性。
+
+## 安装
+
+通过以下命令安装 S3 扩展：
+
+```bash
+npm install @hocuspocus/extension-s3
+```
+
+## 配置
+
+**bucket**（必填）
+
+用于存储文档的 S3 存储桶名称。该存储桶必须已存在且凭证可访问。
+
+**region**
+
+S3 服务的 AWS 区域。
+
+默认值：`us-east-1`
+
+**prefix**
+
+文档存储的键前缀。所有文档将存储在此前缀下。
+
+默认值：`hocuspocus-documents/`
+
+**credentials**
+
+AWS 凭证对象，包含 `accessKeyId` 和 `secretAccessKey`。如果未提供，扩展会使用默认的 AWS 凭证链（环境变量、IAM 角色等）。
+
+**endpoint**
+
+自定义的 S3 端点 URL，适用于 MinIO 或 DigitalOcean Spaces 等兼容 S3 的服务。
+
+**forcePathStyle**
+
+使用路径样式 URL 代替虚拟托管样式 URL。MinIO 及部分兼容服务需要开启此项。
+
+默认值：`false`
+
+**s3Client**
+
+自定义的 S3Client 实例。如果提供，其他连接选项将被忽略。
+
+## 使用方法
+
+### 基础 AWS S3 配置
+
+```js
+import { Server } from "@hocuspocus/server";
+import { S3 } from "@hocuspocus/extension-s3";
+
+const server = new Server({
+  extensions: [
+    new S3({
+      bucket: 'my-documents-bucket',
+      region: 'us-east-1',
+      credentials: {
+        accessKeyId: 'your-access-key',
+        secretAccessKey: 'your-secret-key'
+      }
+    }),
+  ],
+});
+
+server.listen();
+```
+
+### 使用环境变量
+
+```js
+import { Server } from "@hocuspocus/server";
+import { S3 } from "@hocuspocus/extension-s3";
+
+// 设置环境变量：
+// AWS_ACCESS_KEY_ID=your-access-key
+// AWS_SECRET_ACCESS_KEY=your-secret-key
+// AWS_REGION=us-west-2
+
+const server = new Server({
+  extensions: [
+    new S3({
+      bucket: 'my-documents-bucket',
+      // 凭证将从环境变量加载
+    }),
+  ],
+});
+
+server.listen();
+```
+
+### 使用 IAM 角色（EC2/Lambda）
+
+```js
+import { Server } from "@hocuspocus/server";
+import { S3 } from "@hocuspocus/extension-s3";
+
+const server = new Server({
+  extensions: [
+    new S3({
+      bucket: 'my-documents-bucket',
+      region: 'us-east-1',
+      // 使用 IAM 角色时无需凭证
+    }),
+  ],
+});
+
+server.listen();
+```
+
+### MinIO 配置
+
+本地开发使用 MinIO 时，传入 endpoint 并自动启用路径样式 URL：
+
+```js
+import { Server } from "@hocuspocus/server";
+import { S3 } from "@hocuspocus/extension-s3";
+
+const server = new Server({
+  extensions: [
+    new S3({
+      bucket: 'hocuspocus-documents',
+      endpoint: 'http://localhost:9000',
+      forcePathStyle: true, // MinIO 必须启用
+      credentials: {
+        accessKeyId: 'minioadmin',
+        secretAccessKey: 'minioadmin'
+      }
+    }),
+  ],
+});
+
+server.listen();
+```
+
+### DigitalOcean Spaces
+
+```js
+import { Server } from "@hocuspocus/server";
+import { S3 } from "@hocuspocus/extension-s3";
+
+const server = new Server({
+  extensions: [
+    new S3({
+      bucket: 'my-spaces-bucket',
+      region: 'nyc3',
+      endpoint: 'https://nyc3.digitaloceanspaces.com',
+      credentials: {
+        accessKeyId: 'your-spaces-key',
+        secretAccessKey: 'your-spaces-secret'
+      }
+    }),
+  ],
+});
+
+server.listen();
+```
+
+### 自定义 S3 客户端
+
+```js
+import { Server } from "@hocuspocus/server";
+import { S3 } from "@hocuspocus/extension-s3";
+import { S3Client } from "@aws-sdk/client-s3";
+
+const customS3Client = new S3Client({
+  region: 'eu-west-1',
+  credentials: {
+    accessKeyId: 'your-access-key',
+    secretAccessKey: 'your-secret-key'
+  },
+  // 你可以在这里添加自定义的 S3Client 配置
+});
+
+const server = new Server({
+  extensions: [
+    new S3({
+      bucket: 'my-documents-bucket',
+      s3Client: customS3Client
+    }),
+  ],
+});
+
+server.listen();
+```
+
+## 文档存储
+
+文档以二进制文件格式存储于 S3，命名规则如下：
+
+- **键名**: `{prefix}{documentName}.bin`
+- **Content-Type**: `application/octet-stream`
+
+例如，名为 "my-document" 的文档，使用默认前缀，将存储为：  
+`hocuspocus-documents/my-document.bin`
+
+## CLI 使用
+
+你也可以在 Hocuspocus CLI 中使用 S3 扩展：
+
+```bash
+# 基础用法
+hocuspocus --s3 --s3-bucket my-documents
+
+# 自定义区域和前缀
+hocuspocus --s3 --s3-bucket my-docs --s3-region eu-west-1 --s3-prefix "collab/"
+
+# MinIO 配置（自动启用 forcePathStyle）
+hocuspocus --s3 --s3-bucket hocuspocus-documents --s3-endpoint http://localhost:9000
+
+# 使用环境变量
+export S3_BUCKET=my-documents
+export AWS_ACCESS_KEY_ID=your-key
+export AWS_SECRET_ACCESS_KEY=your-secret
+hocuspocus --s3
+```
+
+### CLI 支持的环境变量
+
+- `AWS_ACCESS_KEY_ID` - AWS 访问密钥 ID
+- `AWS_SECRET_ACCESS_KEY` - AWS 访问密钥
+- `AWS_REGION` - AWS 区域
+- `S3_BUCKET` - S3 存储桶名称
+
+## IAM 权限
+
+你的 AWS 凭证或 IAM 角色需要对指定存储桶拥有以下权限：
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:HeadObject"
+      ],
+      "Resource": "arn:aws:s3:::your-bucket-name/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:HeadBucket"
+      ],
+      "Resource": "arn:aws:s3:::your-bucket-name"
+    }
+  ]
+}
+```
+
+## 与 Redis 联合扩展实现横向扩展
+
+S3 扩展可与 Redis 扩展无缝配合实现横向扩展。Redis 负责服务器实例间的实时同步，S3 提供持久存储。
+
+### 基础 S3 + Redis 配置示例
+
+```js
+import { Server } from "@hocuspocus/server";
+import { Logger } from "@hocuspocus/extension-logger";
+import { Redis } from "@hocuspocus/extension-redis";
+import { S3 } from "@hocuspocus/extension-s3";
+
+// 服务器 1
+const server1 = new Server({
+  name: "server-1",
+  port: 8001,
+  extensions: [
+    new Logger(),
+    new Redis({
+      host: "127.0.0.1",
+      port: 6379,
+    }),
+    new S3({
+      bucket: 'my-documents-bucket',
+      region: 'us-east-1',
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+      }
+    }),
+  ],
+});
+
+server1.listen();
+
+// 服务器 2
+const server2 = new Server({
+  name: "server-2",
+  port: 8002,
+  extensions: [
+    new Logger(),
+    new Redis({
+      host: "127.0.0.1",
+      port: 6379,
+    }),
+    new S3({
+      bucket: 'my-documents-bucket',
+      region: 'us-east-1',
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+      }
+    }),
+  ],
+});
+
+server2.listen();
+```
+
+### 本地开发使用 MinIO + Redis
+
+```js
+import { Server } from "@hocuspocus/server";
+import { Logger } from "@hocuspocus/extension-logger";
+import { Redis } from "@hocuspocus/extension-redis";
+import { S3 } from "@hocuspocus/extension-s3";
+
+// 本地开发服务器配置，使用 MinIO 和 Redis
+const createServer = (name, port) => new Server({
+  name,
+  port,
+  extensions: [
+    new Logger(),
+    new Redis({
+      host: "127.0.0.1",
+      port: 6379,
+    }),
+    new S3({
+      bucket: 'hocuspocus-documents',
+      endpoint: 'http://localhost:9000',
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: 'minioadmin',
+        secretAccessKey: 'minioadmin'
+      }
+    }),
+  ],
+});
+
+// 启动多个实例
+createServer("dev-server-1", 8001).listen();
+createServer("dev-server-2", 8002).listen();
+```
+
+### 基于环境变量的配置
+
+```js
+import { Server } from "@hocuspocus/server";
+import { Logger } from "@hocuspocus/extension-logger";
+import { Redis } from "@hocuspocus/extension-redis";
+import { S3 } from "@hocuspocus/extension-s3";
+
+const server = new Server({
+  name: process.env.SERVER_NAME || `server-${Math.random()}`,
+  port: Number(process.env.PORT) || 8000,
+  extensions: [
+    new Logger(),
+    new Redis({
+      host: process.env.REDIS_HOST || "127.0.0.1",
+      port: Number(process.env.REDIS_PORT) || 6379,
+    }),
+    new S3({
+      bucket: process.env.S3_BUCKET,
+      region: process.env.S3_REGION || 'us-east-1',
+      endpoint: process.env.S3_ENDPOINT, // MinIO 使用
+      forcePathStyle: process.env.S3_ENDPOINT ? true : false,
+      prefix: process.env.S3_PREFIX || 'hocuspocus-documents/',
+      credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+      } : undefined
+    }),
+  ],
+});
+
+server.listen();
+```
+
+## 开发环境搭建
+
+### 快速开始
+
+本地开发使用 MinIO（兼容 S3 的存储），可使用内置开发脚本：
+
+```bash
+# 初始化完整开发环境
+npm run dev:setup
+
+# 测试 S3 配置
+npm run dev:test-s3
+
+# 启动 S3 Playground 示例
+npm run playground:s3
+```
+
+### 可用的开发脚本
+
+```bash
+# 环境搭建
+npm run dev:setup         # 完整搭建（.env + Docker 服务）
+npm run dev:env           # 从模板创建 .env 文件
+npm run dev:services      # 启动 Docker 服务（Redis + MinIO）
+npm run dev:services:down # 停止 Docker 服务
+npm run dev:services:reset # 重置服务与数据
+
+# S3 配置测试
+npm run dev:test-s3        # 测试完整 S3 配置
+npm run dev:test-s3:minio  # 仅测试 MinIO 连接
+npm run dev:test-s3:nodejs # 仅测试 Node.js S3 客户端
+
+# Playground 示例
+npm run playground:s3       # S3 扩展示例（端口 8000-8003）
+npm run playground:s3-redis # S3 + Redis 扩展示例
+```
+
+### 本地 MinIO 设置
+
+开发环境包含：
+
+- **MinIO 服务器**：http://localhost:9000（兼容 S3 API）
+- **MinIO 控制台**：http://localhost:9001（Web UI）
+- **Redis**：localhost:6379（用于扩表示例）
+
+本地开发默认凭证：  
+- 访问密钥：`minioadmin`  
+- 密钥：`minioadmin`
+
+### 环境变量
+
+创建 `.env` 文件（`npm run dev:setup` 会自动创建）：
+
+```env
+# MinIO S3 配置（本地开发用）
+S3_ENDPOINT=http://localhost:9000
+S3_BUCKET=hocuspocus-documents
+S3_REGION=us-east-1
+AWS_ACCESS_KEY_ID=minioadmin
+AWS_SECRET_ACCESS_KEY=minioadmin
+
+# 生产环境 AWS S3 配置
+# S3_BUCKET=your-production-bucket
+# S3_REGION=us-west-2
+# AWS_ACCESS_KEY_ID=your-aws-access-key
+# AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+```
+
+## 最佳实践
+
+### 安全
+
+- 运行在 AWS 基础设施上时，优先使用 IAM 角色替代访问密钥
+- 将凭证存储于环境变量，避免写死在代码中
+- 遵循最小权限原则配置 IAM 权限
+- 启用 S3 存储桶加密以提升安全性
+
+### 性能
+
+- 使用距离用户最近的区域以降低延迟
+- 针对全球应用考虑使用 S3 传输加速（Transfer Acceleration）
+- 监控 S3 请求指标及费用
+
+### 可靠性
+
+- 启用 S3 版本控制防止误删
+- 配置合理的 S3 生命周期策略优化成本
+- 关键应用考虑跨区域复制
+
+### 横向扩展架构
+
+- **Redis**：负责服务器实例间的实时同步
+- **S3**：提供持久存储，是数据的权威来源
+- **负载均衡器**：在服务器实例间分发连接
+- **多区域部署**：在多个 AWS 区域部署以提升全球性能
+
+## 故障排查
+
+### 常见问题
+
+**“存储桶未找到”或权限被拒：**  
+- 核实存储桶名称和区域是否正确  
+- 检查 IAM 权限设置  
+- 确认凭证配置无误  
+
+**MinIO 连接超时：**  
+- 确保已设置 `forcePathStyle: true`  
+- 检查 endpoint URL 是否可达  
+- 查看防火墙及网络配置  
+
+**大文档性能问题：**  
+- 监控 S3 传输时间  
+- 大文件考虑使用 S3 分段上传  
+- 优化文档结构减少大小

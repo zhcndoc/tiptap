@@ -1,0 +1,311 @@
+---
+title: 拖拽上下文菜单
+meta:
+  title: 拖拽上下文菜单 | Tiptap UI 组件
+  description: 一个带有上下文菜单的综合拖拽句柄，用于块级操作。详见文档。
+  category: UI 组件
+component:
+  name: 拖拽上下文菜单
+  description: 添加一个带有上下文菜单的拖拽句柄，提供块级操作，如转换、样式设置、复制和删除节点。
+  type: component
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: GripVertical
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+DragContextMenu 提供了一个带有丰富上下文菜单的拖拽句柄，用于块级操作。当你将鼠标悬停在编辑器中的任何块上时，左侧会出现一个拖拽句柄。点击该句柄将打开一个上下文菜单，包含以下选项：
+
+- 将块转换为不同类型（标题、列表、引用块等）
+- 应用颜色和高亮
+- 复制、复制并插入或删除块
+- 重置格式
+- 触发 AI 协助（如果启用）
+- 下载图片（针对图片节点）
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/drag-context-menu" />
+
+## 安装
+
+### 第 1 步：设置项目
+
+> 如果你的项目已经使用 Tiptap CLI 进行过设置，可跳过此步，直接查看[第 2 步：配置路径别名](#step-2-configure-path-aliases)。
+
+如果尚未设置，可以运行以下命令初始化新项目：
+
+```bash
+npx @tiptap/cli@latest init
+```
+
+安装过程中选择你偏好的框架，等待安装完成。
+当出现提示 **“是否要向项目中添加模板或 UI 组件？”** 时，选择 **否** —— 我们将在后续步骤中添加 **DragContextMenu** 组件。
+
+---
+
+### 第 2 步：配置路径别名
+
+进入你的项目目录。
+如果你使用的是 **Next.js**、**React Router**、**Laravel** 或 **Astro**，可以跳过此步，直接进入下一步。
+否则，参考下列指南为你的框架正确配置路径别名：
+
+- [Vite](/ui-components/install/vite)
+- [Next.js](/ui-components/install/next)
+- [React Router](/ui-components/install/react-router)
+- [Laravel](/ui-components/install/laravel)
+- [Astro](/ui-components/install/astro)
+- [手动设置](/ui-components/install/manual)
+
+---
+
+### 第 3 步：安装组件
+
+使用 Tiptap CLI 安装 **DragContextMenu** 组件及其所有依赖：
+
+```bash
+npx @tiptap/cli@latest add drag-context-menu
+```
+
+此命令将：
+
+- 下载所有组件文件到你配置的组件目录
+- 安装 npm 依赖（`@floating-ui/react`，`@tiptap/extension-drag-handle-react`）
+- 安装约 60 个注册依赖（hooks，UI 原语，图标，按钮等）
+- 创建必要的文件夹结构
+
+**安装的目录结构：**
+
+- `{components}/tiptap-ui/drag-context-menu/` — 主要组件文件
+- `{components}/hooks/` — 自定义 hooks（如 `use-tiptap-editor`，`use-mobile` 等）
+- `{components}/tiptap-ui-primitive/` — UI 原语（按钮、菜单、组合框等）
+- `{components}/tiptap-icons/` — 图标组件
+- `{components}/tiptap-ui/` — 操作按钮组件（复制，删除，重复等）
+- `{components}/tiptap-extension/` — 自定义 Tiptap 扩展（如 `UiState`）
+- `{components}/lib/` — 工具函数
+
+### 第 4 步：安装节点
+
+你可能还想安装节点组件，以确保编辑器中块的样式正常。
+
+```bash
+npx @tiptap/cli@latest add paragraph-node
+npx @tiptap/cli@latest add heading-node
+npx @tiptap/cli@latest add blockquote-node
+npx @tiptap/cli@latest add code-block-node
+npx @tiptap/cli@latest add list-node
+npx @tiptap/cli@latest add horizontal-rule-node
+```
+
+### 第 5 步：配置样式
+
+安装 `drag-context-menu` 组件时，其样式会自动包含。
+请根据你的框架参考以下指南，了解如何添加或自定义样式：
+
+- [Vite](/ui-components/install/vite#add-styles)
+- [Next.js](/ui-components/install/next#add-styles)
+- [React Router](/ui-components/install/react-router#add-styles)
+- [Laravel](/ui-components/install/laravel#add-styles)
+- [Astro](/ui-components/install/astro#add-styles)
+- [手动设置](/ui-components/getting-started/style)
+
+### 第 6 步：配置你的编辑器扩展
+
+首先，这是一组最小扩展配置示例，能使 DragContextMenu 正常工作：
+
+```tsx
+import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
+import { StarterKit } from '@tiptap/starter-kit'
+import { Highlight } from '@tiptap/extension-highlight'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-color'
+
+// 自定义扩展
+import { UiState } from '@/components/tiptap-extension/ui-state-extension'
+import { NodeBackground } from '@/components/tiptap-extension/node-background-extension'
+
+// UI 组件
+import { DragContextMenu } from '@/components/tiptap-ui/drag-context-menu'
+
+// 编辑器样式
+import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
+import '@/components/tiptap-node/blockquote-node/blockquote-node.scss'
+import '@/components/tiptap-node/code-block-node/code-block-node.scss'
+import '@/components/tiptap-node/heading-node/heading-node.scss'
+import '@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss'
+import '@/components/tiptap-node/list-node/list-node.scss'
+
+// 全局样式
+import '@/styles/_keyframe-animations.scss'
+import '@/styles/_variables.scss'
+
+export default function TiptapEditor() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      // 基础扩展
+      StarterKit,
+
+      // 处理“颜色”菜单的文本样式扩展
+      TextStyle,
+      Highlight,
+      Color,
+      NodeBackground,
+
+      // UI 状态管理（拖拽上下文菜单必需）
+      // 由 CLI 自动安装
+      UiState,
+    ],
+    content: `
+      <h1>欢迎使用 Tiptap</h1>
+      <p>悬停在任何块上以在左侧显示拖拽句柄。</p>
+      <blockquote>
+        <p>点击拖拽句柄以访问上下文菜单。</p>
+      </blockquote>
+    `,
+  })
+
+  return (
+    <EditorContext.Provider value={{ editor }}>
+      <EditorContent editor={editor} />
+
+      <DragContextMenu />
+    </EditorContext.Provider>
+  )
+}
+```
+
+你应该能在悬停时看到拖拽句柄，点击句柄即可打开上下文菜单。
+
+### 扩展说明
+
+| 扩展                 | 作用                                                               | 必需？     |
+| -------------------- | ----------------------------------------------------------------- | ---------- |
+| `StarterKit`          | 提供基本编辑功能（段落、标题、列表等）                             | 是         |
+| `Highlight`           | 支持文本高亮颜色                                                   | 可选       |
+| `TextStyle` + `Color` | 支持文本颜色更改                                                   | 可选       |
+| `NodeBackground`      | 支持块级背景颜色更改                                               | 可选       |
+| `UiState`             | 管理拖拽操作的 UI 状态                                             | 是         |
+
+这些扩展虽为可选，但能启用上下文菜单中的特定功能。缺失时，这些功能会自动隐藏。
+
+#### 属性参考
+
+| 属性                     | 类型               | 默认值                               | 说明                                                      |
+| ------------------------ | ------------------ | ---------------------------------- | --------------------------------------------------------- |
+| `editor`                 | `Editor \| null`   | 必需（如果未使用 EditorContext）   | 你的 Tiptap 编辑器实例                                    |
+| `withSlashCommandTrigger`| `boolean`          | `true`                             | 拖拽句柄旁是否显示斜杠命令按钮                            |
+| `mobileBreakpoint`       | `number`           | `768`                              | 小屏幕（px）宽度阈值，低于此值时隐藏拖拽句柄             |
+
+> **注意：** 除非你使用 `EditorContext`（或类似上下文提供器）传递编辑器实例，否则 `editor` 属性是必需的。如果上下文可用，可省略该属性。
+
+## 高级自定义
+
+### 禁用斜杠命令触发
+
+如果不想显示斜杠命令按钮：
+
+```tsx
+<DragContextMenu editor={editor} withSlashCommandTrigger={false} />
+```
+
+### 自定义移动端断点
+
+调整拖拽句柄在更小屏幕上的隐藏点：
+
+```tsx
+<DragContextMenu
+  editor={editor}
+  mobileBreakpoint={1024} // 同时在平板设备上隐藏
+/>
+```
+
+### 编程控制
+
+可以通过编辑器命令以编程方式控制拖拽句柄行为：
+
+```tsx
+// 锁定拖拽句柄（防止隐藏）
+editor.commands.setLockDragHandle(true)
+// 隐藏拖拽句柄
+editor.commands.setMeta('hideDragHandle', true)
+// 设置拖拽状态
+editor.commands.setIsDragging(true)
+```
+
+---
+
+## 功能参考
+
+### 可用的上下文菜单操作
+
+上下文菜单会根据以下因素动态显示操作：
+
+- 当前节点类型
+- 已启用的扩展
+- 编辑器选区
+- 内容状态
+
+#### 颜色操作
+
+- **文本颜色**：更改文本颜色（需 `TextStyle` + `Color` 扩展）
+- **高亮**：应用背景高亮（需 `Highlight` 扩展）
+
+#### 转换操作
+
+将当前块转换为：
+
+- 段落
+- 标题 1、2、3 级
+- 无序列表
+- 有序列表
+- 任务列表（需 `TaskList` + `TaskItem` 扩展）
+- 引用块
+- 代码块
+
+#### 核心操作
+
+- **复制**：将块内容复制到剪贴板
+- **复制并插入**：创建当前块的副本
+- **复制锚点链接**：复制当前块链接（需支持 ID）
+
+#### 格式操作
+
+- **重置格式**：清除所有格式标记
+
+#### 图片操作（针对图片节点）
+
+- **下载**：下载图片（需 `Image` 扩展）
+
+#### 删除操作
+
+- **删除**：移除当前块
+
+### 键盘快捷键
+
+上下文菜单遵从标准 Tiptap 快捷键：
+
+- Command/Ctrl + D：复制块
+- Command/Ctrl + Shift + C：复制至剪贴板
+- Command/Ctrl + Delete/Backspace：删除块
+
+---
+
+## 下一步
+
+集成 DragContextMenu 后，你可能想要：
+
+1. **添加更多扩展**：探索更多 Tiptap 扩展以增强功能
+2. **自定义样式**：调整颜色、间距和动画以匹配品牌
+3. **添加斜杠命令**：集成 SlashDropdownMenu 组件快速插入
+4. **启用 AI 功能**：设置 AI 集成，实现“询问 AI”菜单选项
+5. **添加协作**：使用 Tiptap Collaboration 实现实时协作编辑
+
+## 需要帮助？
+
+- [Tiptap 文档](https://tiptap.dev)
+- [GitHub 问题](https://github.com/ueberdosis/tiptap/issues)
+- [Discord 社区](https://discord.gg/tiptap)

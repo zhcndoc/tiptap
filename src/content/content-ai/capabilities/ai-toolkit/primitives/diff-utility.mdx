@@ -1,0 +1,64 @@
+---
+title: Diff 实用工具
+meta:
+  title: Diff 实用工具 | Tiptap Content AI
+  description: 以编程方式计算两个文档之间的变化。
+  category: Content AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+## `diffUtility`
+
+比较两个文档并返回它们之间变化的列表。
+
+### 支持的格式
+
+Diff 实用工具可用于比较整个文档或其部分内容。
+
+要比较整个文档，可以以 [Tiptap JSON 格式](/editor/core-concepts/introduction#content) 或 [ProseMirror Node](https://prosemirror.net/docs/ref/#model.Node) 提供它们。
+
+要比较文档的部分内容，可以将其作为 Tiptap JSON 片段（Tiptap JSON 节点列表）或 [ProseMirror Fragment](https://prosemirror.net/docs/ref/#model.Fragment) 提供。
+
+### 参数 (`DiffUtilityOptions`)
+
+- `schema` (`Schema`)：编辑器使用的 ProseMirror schema。可从编辑器实例获取：`editor.schema`
+- `docA` (`Node | Fragment | JSONContent | JSONContent[]`)：原始文档。可以是 ProseMirror Node/Fragment 或 Tiptap JSON
+- `docB` (`Node | Fragment | JSONContent | JSONContent[]`)：修改后的文档。可以是 ProseMirror Node/Fragment 或 Tiptap JSON
+- `simplifyChanges?` (`boolean`)：是否简化变更，使得如果同一单词中有多个变更，它们会合并为一个变更。仅在模式为 'detailed' 时应用。默认值：`true`
+- `ignoreAttributes?` (`string[]`)：要忽略的属性。默认值：`['id', 'data-thread-id']`
+- `ignoreMarks?` (`string[]`)：要忽略的标记。默认值：`['inlineThread']`
+- `changeMergeDistance?` (`number | null`)：合并变更的最大距离（以文档位置计算）。如果两个相邻变更在 rangeA 或 rangeB 中的距离小于或等于此值，它们将合并为一个变更。设置为 `null` 或 `undefined` 可禁用合并。仅在模式为 'detailed' 时应用。默认值：`null`
+- `mode?` (`'detailed' | 'block'`)：比较使用的 diff 模式。`'detailed'` 进行字符级别 diff，识别文本中具体的变更（默认）。`'block'` 进行块级 diff，将每个顶级节点视为单个单元。块级模式适用于仅需了解哪些段落、标题或其他块级元素已更改，而不需要字符级细节的情况。在块级模式下，`simplifyChanges` 和 `changeMergeDistance` 选项被忽略。默认值：`'detailed'`
+
+<Callout title="Schema 问题" variant="warning">
+  两个文档必须使用相同的 schema。如果文档来自不同的编辑器，请将它们转换为共同的编辑器 schema：`Node.fromJSON(editor.state.schema, otherEditor.getJSON())`
+</Callout>
+
+### 返回值 (`Change[]`)
+
+返回一个变更列表。每个 `Change` 项目包含：
+
+- `rangeA` (`Range`)：原始文档中发生变化的范围
+- `rangeB` (`Range`)：修改后文档中发生变化的范围
+
+### 示例
+
+```ts
+import { diffUtility } from '@tiptap-pro/ai-toolkit'
+
+// 计算两个文档之间的变更
+const changes = diffUtility({
+  schema: editor.schema,
+  docA,
+  docB,
+})
+
+// 使用块级 diff
+const blockChanges = diffUtility({
+  schema: editor.schema,
+  docA,
+  docB,
+  mode: 'block',
+})
+```

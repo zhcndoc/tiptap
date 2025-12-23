@@ -1,0 +1,159 @@
+---
+title: 复制按钮
+meta:
+  title: 复制按钮 | Tiptap UI 组件
+  description: 在 Tiptap 编辑器中智能检测节点，通过键盘快捷键和辅助功能支持复制选中的节点和区块。
+  category: UI 组件
+component:
+  name: 复制按钮
+  description: 一个预构建的 React 组件，用于复制编辑器中的节点。
+  type: component
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: CopyPlusIcon
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个对 Tiptap 编辑器完全无障碍的复制按钮。支持通过键盘快捷键和智能内容复制，克隆编辑器中选中的节点或区块。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/duplicate-button" />
+
+## 安装
+
+通过 Tiptap CLI 添加该组件：
+
+```bash
+npx @tiptap/cli@latest add duplicate-button
+```
+
+## 组件
+
+### `<DuplicateButton />`
+
+一个预构建的 React 组件，用于复制编辑器中的节点。
+
+#### 使用示例
+
+```tsx
+export default function MyEditor() {
+  return (
+    <DuplicateButton
+      editor={editor}
+      text="复制"
+      hideWhenUnavailable={true}
+      showShortcut={true}
+      onDuplicated={() => console.log('节点已复制！')}
+    />
+  )
+}
+```
+
+#### 参数说明
+
+| 名称                   | 类型               | 默认值       | 说明                                                 |
+| --------------------- | ---------------- | ---------- | ---------------------------------------------------- |
+| `editor`              | `Editor \| null` | `undefined` | Tiptap 编辑器实例                                    |
+| `text`                | `string`         | `undefined` | 按钮的可选文本标签                                   |
+| `hideWhenUnavailable` | `boolean`        | `false`    | 在不可复制时隐藏按钮                                 |
+| `onDuplicated`        | `() => void`     | `undefined` | 复制成功后调用的回调                                 |
+| `showShortcut`        | `boolean`        | `false`    | 显示快捷键徽章（如果可用）                           |
+
+## Hook
+
+### `useDuplicate()`
+
+一个自定义 hook，允许你完全控制复制按钮的渲染和行为，自行构建复制按钮。
+
+#### 使用示例
+
+```tsx
+function MyDuplicateButton() {
+  const { isVisible, handleDuplicate, canDuplicate, label, shortcutKeys, Icon } = useDuplicate({
+    editor: myEditor,
+    hideWhenUnavailable: true,
+    onDuplicated: () => console.log('节点已复制！'),
+  })
+
+  if (!isVisible) return null
+
+  return (
+    <button onClick={handleDuplicate} disabled={!canDuplicate} aria-label={label}>
+      <Icon />
+      {label}
+      {shortcutKeys && <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>}
+    </button>
+  )
+}
+```
+
+#### 参数说明
+
+| 名称                   | 类型               | 默认值       | 说明                                                  |
+| --------------------- | ---------------- | ---------- | ----------------------------------------------------- |
+| `editor`              | `Editor \| null` | `undefined` | Tiptap 编辑器实例                                     |
+| `hideWhenUnavailable` | `boolean`        | `false`    | 复制不可用时隐藏按钮                                  |
+| `onDuplicated`        | `() => void`     | `undefined` | 复制成功后调用的回调                                  |
+
+#### 返回值说明
+
+| 名称               | 类型            | 说明                                                  |
+| ----------------- | -------------- | ---------------------------------------------------- |
+| `isVisible`       | `boolean`      | 按钮是否应该被渲染                                   |
+| `canDuplicate`    | `boolean`      | 是否可以复制节点                                     |
+| `handleDuplicate` | `() => boolean` | 复制选中节点的函数                                   |
+| `label`           | `string`       | 按钮的无障碍标签文本                                 |
+| `shortcutKeys`    | `string`       | 键盘快捷键（Cmd/Ctrl + D）                           |
+| `Icon`            | `React.FC`     | 复制按钮的图标组件（CopyIcon）                       |
+
+## 工具函数
+
+### `canDuplicateNode(editor)`
+
+检查当前编辑器状态下是否可以复制节点。
+
+```tsx
+import { canDuplicateNode } from '@/components/tiptap-ui/duplicate-button'
+
+const canDuplicate = canDuplicateNode(editor)
+```
+
+### `duplicateNode(editor)`
+
+以编程方式复制选中的节点或区块。
+
+```tsx
+import { duplicateNode } from '@/components/tiptap-ui/duplicate-button'
+
+const success = duplicateNode(editor)
+if (success) {
+  console.log('节点复制成功！')
+}
+```
+
+## 键盘快捷键
+
+复制按钮支持以下快捷键：
+
+- **Cmd/Ctrl + D**：复制选中的节点或区块
+
+使用 `<DuplicateButton />` 组件或 `useDuplicate()` hook 时，快捷键会自动注册。注意：当编辑器聚焦时，这会覆盖浏览器默认的书签快捷键功能。
+
+## 依赖
+
+### 依赖包
+
+- `@tiptap/react` - Tiptap React 核心集成
+- `react-hotkeys-hook` - 键盘快捷键管理
+
+### 引用组件
+
+- `use-tiptap-editor`（hook）
+- `button`（基础组件）
+- `badge`（基础组件）
+- `tiptap-utils`（工具库）
+- `copy-icon`（图标）

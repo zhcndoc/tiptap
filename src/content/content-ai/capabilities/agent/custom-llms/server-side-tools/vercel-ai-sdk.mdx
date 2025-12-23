@@ -31,6 +31,10 @@ const weatherTool = tool({
 
 别忘了将 `maxSteps` 设置为大于 1 的值，以启用[多步工具调用](https://ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling#multi-step-calls-using-maxsteps)。该参数允许 AI 按顺序调用多个工具。例如，它可以先调用获取天气报告的工具，然后调用另一个工具将该信息编辑到文档中。
 
+<Callout title="在 Vercel AI SDK v4 中使用" variant="info">
+  若要使用 Vercel AI SDK v4 而非 v5，请导入 `vercelAiSdkV4Adapter`，而不是 `vercelAiSdkAdapter`。
+</Callout>
+
 ```ts
 import {
   AiAgentToolkit,

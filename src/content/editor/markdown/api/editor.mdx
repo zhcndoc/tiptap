@@ -1,0 +1,317 @@
+---
+title: 编辑器
+tags:
+  - type: beta
+meta:
+  title: Markdown 编辑器 API | Tiptap 编辑器文档
+  description: 了解 Tiptap 编辑器 API 中的 `content` 和 `contentAsMarkdown` 选项，用于处理 HTML、Markdown 和 Tiptap JSON 内容。
+  category: 编辑器
+---
+
+Markdown 包并不导出新的 Editor 类，而是扩展了现有的 Tiptap Editor 类。这意味着您可以使用 Tiptap Editor 的所有标准方法和选项，同时享受 Markdown 包提供的额外功能。
+
+## 方法
+
+### `Editor.getMarkdown()`
+
+获取编辑器当前内容的 Markdown 格式。
+
+- **返回值**：`string`
+
+```js
+const markdown = editor.getMarkdown()
+```
+
+## 属性
+
+### `Editor.markdown`
+
+访问 MarkdownManager 实例。
+
+```typescript
+editor.markdown: MarkdownManager
+```
+
+#### 示例
+
+```typescript
+// 解析 Markdown 为 JSON
+const json = editor.markdown.parse('# Hello')
+
+// 序列化 JSON 为 Markdown
+const markdown = editor.markdown.serialize(json)
+
+// 访问 marked 实例
+const marked = editor.markdown.instance
+```
+
+## 选项
+
+### `Editor.content`
+
+编辑器内容支持 **HTML**、**Markdown** 或 **Tiptap JSON** 格式作为值。
+
+> **注意**：要支持 Markdown，必须将 `editor.contentAsMarkdown` 设置为 `true`。
+
+- **类型**：`string | object`
+- **默认值**：`''`
+- **是否必填**：否
+
+```js
+const editor = new Editor({
+  content: '<h1>Hello world</h1>',
+})
+```
+
+```js
+const editor = new Editor({
+  content: [
+    { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Hello world' }] },
+  ],
+})
+```
+
+```js
+const editor = new Editor({
+  content: '# Hello world',
+  contentType: 'markdown',
+})
+```
+
+### `Editor.contentType`
+
+定义传给编辑器的内容类型。默认是 `json`。如果设置了不匹配的组合（例如内容是 JSON 对象，但 contentType 设置为 `markdown`），编辑器会自动回退为 `json`，反之亦然。
+
+- **类型**：`string`
+- **默认值**：`json`
+- **是否必填**：否
+- **可选值**：`json`，`html`，`markdown`
+
+```js
+const editor = new Editor({
+  content: '# Hello world',
+  contentType: 'markdown',
+})
+```
+
+## 命令选项
+
+### `setContent(content, options)`
+
+从 Markdown 设置编辑器内容。
+
+```typescript
+editor.commands.setContent(
+  content: string,
+  options?: {
+    contentType?: string,
+    emitUpdate?: boolean,
+    parseOptions?: ParseOptions,
+  }
+): boolean
+```
+
+#### 参数
+
+- **`content`**：要设置的 Markdown 字符串
+- **`options.contentType`**：插入内容的类型，可为 `json`、`html` 或 `markdown`。格式不匹配时自动检测（默认：`json`）
+- **`options.emitUpdate`**：是否触发更新事件（默认：`true`）
+- **`options.parseOptions`**：附加的解析选项
+
+#### 返回值
+
+`boolean` - 命令是否成功
+
+#### 示例
+
+```typescript
+editor.commands.setContent('# New Content\n\nThis is **bold**.', { contentType: 'markdown' })
+```
+
+---
+
+### `insertContent(value, options)`
+
+在当前选择位置插入 Markdown 内容。
+
+```typescript
+editor.commands.insertContent(
+  value: string,
+  options?: {
+    contentType?: string,
+    parseOptions?: ParseOptions,
+    updateSelection?: boolean,
+  }
+): boolean
+```
+
+#### 参数
+
+- **`value`**：要插入的 Markdown 字符串
+- **`options.contentType`**：插入内容的类型，可为 `json`、`html` 或 `markdown`。格式不匹配时自动检测（默认：`json`）
+- **`options.updateSelection`**：是否在插入后更新选择范围
+- **`options.parseOptions`**：附加的解析选项
+
+#### 返回值
+
+`boolean` - 命令是否成功
+
+#### 示例
+
+```typescript
+editor.commands.insertContent('**Bold text** at cursor', { contentType: 'markdown' })
+```
+
+---
+
+### `insertContentAt(position, value, options)`
+
+在指定位置插入 Markdown 内容。
+
+```typescript
+editor.commands.insertContentAt(
+  position: number | Range,
+  value: string,
+  options?: {
+    contentType?: string,
+    parseOptions?: ParseOptions,
+    updateSelection?: boolean,
+  }
+): boolean
+```
+
+#### 参数
+
+- **`position`**：位置（数字）或范围（`{ from, to }`）
+- **`value`**：要插入的 Markdown 字符串
+- **`options.contentType`**：插入内容的类型，可为 `json`、`html` 或 `markdown`。格式不匹配时自动检测（默认：`json`）
+- **`options.updateSelection`**：是否在插入后更新选择范围
+- **`options.parseOptions`**：附加的解析选项
+
+#### 返回值
+
+`boolean` - 命令是否成功
+
+#### 示例
+
+```typescript
+// 在位置插入
+editor.commands.insertContentAt(10, '## Heading', { contentType: 'markdown' })
+
+// 替换范围
+editor.commands.insertContentAt({ from: 10, to: 20 }, '**replacement**', { contentType: 'markdown' })
+```
+
+---
+
+## 扩展规范
+
+扩展规范还增加了以下选项：
+
+### `markdownTokenName`
+
+用于 Markdown 解析的 token 名称。
+
+- **类型**：`string`
+- **默认值**：`undefined`
+- **是否必填**：否
+
+```typescript
+const CustomNode = Node.create({
+  // ...
+
+  markdownTokenName: 'custom_token',
+})
+```
+
+### `parseMarkdown`
+
+自定义如何将 Markdown token 解析为 ProseMirror 节点的函数。
+
+- **类型**：`(token: MarkdownToken, helpers: MarkdownParseHelpers) => ProseMirrorNode[] | null`
+- **默认值**：`undefined`
+- **是否必填**：否
+
+```typescript
+const CustomNode = Node.create({
+  // ...
+
+  parseMarkdown: (token, helpers) => {
+    return {
+      type: 'customNode',
+      attrs: { type: token.type },
+      content: helpers.parseChildren(token.tokens || [])
+    }
+  },
+})
+```
+
+### `renderMarkdown`
+
+自定义如何将 ProseMirror 节点渲染为 Markdown token 的函数。
+
+- **类型**：`(node: JSONContent, helpers: MarkdownRenderHelpers, context: RenderContext) => string | null`
+- **默认值**：`undefined`
+- **是否必填**：否
+
+```typescript
+const CustomNode = Node.create({
+  // ...
+
+  renderMarkdown: (node, helpers, context) => {
+    const content = helpers.renderChildren(node.content, context)
+
+    return `[${context.parentType}] ${content}`
+  },
+})
+```
+
+### `markdownTokenizer`
+
+创建自定义 tokenizer 的配置对象，用于将 Markdown 字符串转换为 tokens。
+
+- **类型**：`object`
+- **默认值**：`undefined`
+- **是否必填**：否
+
+```typescript
+const CustomNode = Node.create({
+  // ...
+
+  // 示例 tokenizer，用于匹配 ::custom text::
+  markdownTokenizer: {
+    name: 'custom_token',
+    level: 'inline',
+    start(src) { return src.indexOf('::') },
+    tokenizer(src, tokens) {
+      const rule = /^::(.*?)::/
+      const match = rule.exec(src)
+      if (match) {
+        return {
+          type: 'custom_token',
+          raw: match[0],
+          text: match[1].trim(),
+        }
+      }
+    },
+  },
+})
+```
+
+### `markdownOptions`
+
+一个可选对象，用于传递额外的参数给 Markdown 解析器和序列化器。
+
+- **类型**：`object`
+- **默认值**：`undefined`
+- **是否必填**：否
+
+```typescript
+const CustomNode = Node.create({
+  // ...
+
+  markdownOptions: {
+    indentsContent: true, // 此设置将在渲染上下文中，使该节点内的缩进级别增加
+  }
+})
+```

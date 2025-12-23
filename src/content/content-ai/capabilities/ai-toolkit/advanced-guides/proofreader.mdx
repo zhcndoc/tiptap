@@ -1,0 +1,228 @@
+---
+title: 使用 AI 工具包构建校对器
+meta:
+  title: 使用 AI 工具包构建校对器 | Tiptap 内容 AI
+  description: 使用 AI 工具包构建一个能够检测和纠正文档中的语法和拼写错误的校对器。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+
+<Requirements>
+  <RequirementItem label="1. 获取访问权限">
+      通过购买付费的 AI 工具包插件来访问 AI 工具包扩展。<a href="https://tiptap.dev/contact-sales?form=ai-toolkit">联系我们的团队</a>。
+  </RequirementItem>
+  <RequirementItem label="2. 访问私有注册表">
+    AI 工具包扩展发布在 Tiptap 的私有 npm 注册表中。请按照[设置指南](/guides/pro-extensions)进行认证，访问 Tiptap 的私有 npm 注册表。
+  </RequirementItem>
+  <RequirementItem label="3. 安装扩展">
+    使用 npm 或你喜欢的包管理器从私有注册表安装扩展。
+  </RequirementItem>
+</Requirements>
+
+使用 AI 构建一个可以检测并纠正你 Tiptap 文档中语法和拼写错误的校对器。
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/proofreader" />
+
+查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 技术栈
+
+- [React](https://react.dev/) + [Next.js](https://nextjs.org/)
+- [Vercel 的 AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
+- Tiptap AI 工具包
+
+## 项目概述
+
+该演示使用 AI 工具包的 `setHtmlSuggestions()` 方法结合流式传输，提供实时的语法检查。当 AI 发现纠正内容时，它们会立即在编辑器中高亮显示，带来响应迅速的用户体验。用户可以单独接受或拒绝建议，也可以一次性接受或拒绝所有建议。
+
+## 安装
+
+创建一个 [Next.js](https://nextjs.org/) 项目：
+
+```bash
+npx create-next-app@latest proofreader
+```
+
+安装核心的 Tiptap 包和用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
+
+```bash
+npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/react @ai-sdk/openai zod
+```
+
+安装 Tiptap AI 工具包：
+
+<Callout title="专业版包" variant="hint">
+  AI 工具包是专业版包。安装前，请先按照[私有注册表指南](/guides/pro-extensions)设置访问私有 NPM 注册表。
+</Callout>
+
+```bash
+npm install @tiptap-pro/ai-toolkit
+```
+
+## 服务器设置
+
+创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型进行语法检查。该端点会以流式方式返回纠正结果，允许实时展示。
+
+```ts
+// app/api/grammar-check-changes/route.ts
+import { openai } from '@ai-sdk/openai'
+import { streamObject } from 'ai'
+import { z } from 'zod'
+
+export async function POST(req: Request) {
+  const { html } = await req.json()
+
+  const result = streamObject({
+    model: openai('gpt-4o-mini'),
+    prompt: `修正下面 HTML 中所有的拼写和语法错误。返回需要做的具体修改列表。
+
+针对发现的每个错误：
+- 只提供需要修改的精确文本，而非整个句子
+- 示例：如果 "I didn't knew" 需要改为 "I didn't know"，只需提供 delete: "knew" 和 insert: "know"
+- "insert" 和 "delete" 字段必须都包含非空文本
+- 每个修改应尽可能简洁且具体
+
+需要纠正的 HTML:
+${html}`,
+    schema: z.object({
+      changes: z.array(
+        z.object({
+          insert: z.string().describe('需要插入的正确文本'),
+          delete: z.string().describe('需要删除的错误文本'),
+        }),
+      ),
+    }),
+  })
+
+  return result.toTextStreamResponse()
+}
+```
+
+## 客户端设置
+
+创建一个 React 组件，用于渲染编辑器并处理语法检查。该组件使用 Vercel AI SDK 的 `useObject` hook 处理流式传输，利用 AI 工具包的 `setHtmlSuggestions()` 方法实时显示纠正建议。
+
+```tsx
+// app/proofreader/page.tsx
+'use client'
+
+import { experimental_useObject as useObject } from '@ai-sdk/react'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { AiToolkit, getAiToolkit } from '@tiptap-pro/ai-toolkit'
+import { useEffect, useRef, useState } from 'react'
+import { z } from 'zod'
+
+const INITIAL_CONTENT = `<h1>Grammar Check Demo</h1><p>This is a excelent editor for writng documents. It have many feature's that makes it very powerfull.</p>`
+
+// 辅助函数：过滤流式传输中无效的部分修改
+function filterValidChanges(changes: Array<{ insert?: string; delete?: string } | undefined>) {
+  return changes.filter(
+    (change): change is { insert: string; delete: string } =>
+      !!change && !!change.insert?.trim() && !!change.delete?.trim(),
+  )
+}
+
+export default function Page() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit, AiToolkit],
+    content: INITIAL_CONTENT,
+  })
+
+  const editorRef = useRef(editor)
+  editorRef.current = editor
+
+  const [isReviewing, setIsReviewing] = useState(false)
+
+  const { submit, isLoading, object } = useObject({
+    api: '/api/grammar-check-changes',
+    schema: z.object({
+      changes: z.array(
+        z.object({
+          insert: z.string(),
+          delete: z.string(),
+        }),
+      ),
+    }),
+    onFinish: () => {
+      setIsReviewing(true)
+    },
+  })
+
+  // 实时应用流式建议
+  useEffect(() => {
+    const currentEditor = editorRef.current
+    if (!currentEditor || !object?.changes) return
+
+    const validChanges = filterValidChanges(object.changes)
+    if (validChanges.length > 0) {
+      const toolkit = getAiToolkit(currentEditor)
+      toolkit.setHtmlSuggestions({ changes: validChanges })
+    }
+  }, [object?.changes])
+
+  const checkGrammar = () => {
+    const currentEditor = editorRef.current
+    if (!currentEditor) return
+
+    const htmlToCheck = currentEditor.getHTML()
+    submit({ html: htmlToCheck })
+  }
+
+  if (!editor) return null
+
+  return (
+    <div>
+      <EditorContent editor={editor} />
+
+      {!isReviewing && (
+        <button onClick={checkGrammar} disabled={isLoading}>
+          {isLoading ? '正在检查...' : '检查语法'}
+        </button>
+      )}
+
+      {isReviewing && (
+        <div>
+          <p>文档中的纠正内容已高亮显示。</p>
+          <button
+            onClick={() => {
+              const toolkit = getAiToolkit(editor)
+              toolkit.applyAllSuggestions()
+              setIsReviewing(false)
+            }}
+          >
+            全部接受
+          </button>
+          <button
+            onClick={() => {
+              const toolkit = getAiToolkit(editor)
+              toolkit.setSuggestions([])
+              setIsReviewing(false)
+            }}
+          >
+            全部拒绝
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+## 最终效果
+
+通过添加附加的 CSS 样式，效果是一个拥有实时语法检查功能的精致校对应用：
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/proofreader" />
+
+查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 相关指南
+
+- [显示建议](/content-ai/capabilities/ai-toolkit/primitives/display-suggestions#sethtmlsuggestions) - 了解更多 `setHtmlSuggestions()` 方法
+- [审阅更改](/content-ai/capabilities/ai-toolkit/guides/review-changes) - 构建审阅更改 UI
+- [AI 工程指南](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-engineering) - AI 集成最佳实践

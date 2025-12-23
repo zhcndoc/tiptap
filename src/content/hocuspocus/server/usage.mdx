@@ -1,0 +1,90 @@
+---
+title: 使用方法
+meta:
+  title: 使用方法 | Hocuspocus 文档
+  category: Hocuspocus
+---
+
+## 使用方法
+
+有两种方式可以使用 hocuspocus。可以使用内置服务器，也可以与其它框架一起使用，例如与 [Express](/hocuspocus/server/examples#express)。
+
+### Hocuspocus 服务器
+
+使用内置服务器时，请确保从 `@hocuspocus/server` 导入 `Server`。服务器配置请参考 [配置说明](/hocuspocus/server/configuration)。内置服务器会启动一个 web 服务器和一个 websocket 服务器。
+
+```js
+import { Server } from "@hocuspocus/server";
+
+// 配置服务器
+const server = new Server({
+  port: 1234,
+});
+
+// 监听…
+server.listen();
+
+// 销毁…
+server.destroy();
+```
+
+你可以通过 web 服务器访问 hocuspocus 实例，并调用其[方法](/hocuspocus/server/methods)。
+
+```js
+// …
+
+server.hocuspocus.getDocumentsCount();
+```
+
+### Hocuspocus
+
+如前所述，你也可以在不使用内置服务器的情况下使用 hocuspocus。请确保从 `@hocuspocus/server` 包中导入 `Hocuspocus`。
+
+```js
+import { Hocuspocus } from "@hocuspocus/server";
+
+// 配置 hocuspocus
+const hocuspocus = new Hocuspocus({
+  name: "hocuspocus-fra1-01",
+})
+
+// …
+```
+
+请查看[示例](/hocuspocus/server/examples)以了解更多内容。
+
+
+## 方法
+
+### Server
+
+| 方法                      | 描述                                             |
+|---------------------------|--------------------------------------------------|
+| `listen(port, callback)`  | 启动服务器。                                     |
+| `destroy()`               | 停止服务器。                                     |
+
+```js
+import { Server } from "@hocuspocus/server";
+
+// 配置…
+const server = new Server({
+  port: 1234,
+});
+
+// 监听…
+server.listen();
+
+// 销毁…
+server.destroy();
+```
+
+### Hocuspocus
+
+| 方法                                            | 描述                                             |
+|-------------------------------------------------|--------------------------------------------------|
+| `configure(configuration)`                      | 传入自定义配置。                                 |
+| `handleConnection(incoming, request, context)` | 绑定服务器到现有的服务器实例。                   |
+| `getDocumentsCount()`                           | 获取活跃文档的总数。                             |
+| `getConnectionsCount()`                         | 获取活跃连接的总数。                             |
+| `closeConnections(documentName?)`               | 关闭所有连接，或指定文档的连接。                 |
+| `openDirectConnection(documentName, context)`   | 创建与文档的本地连接。                           |

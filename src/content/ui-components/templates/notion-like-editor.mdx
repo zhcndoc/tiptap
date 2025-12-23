@@ -1,0 +1,344 @@
+---
+title: 类 Notion 编辑器
+meta:
+  title: 类 Notion 编辑器 | Tiptap UI 组件
+  description: 一个具有协作、AI 和丰富 UI 组件的 Notion 风格 Tiptap 编辑器。完全可定制，易于集成。
+  category: UI 组件
+sidebars:
+  hideSecondary: true
+tags:
+  - type: start
+---
+
+import { ArrowRightIcon } from 'lucide-react'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+import { Button } from '@/components/ui/Button'
+import { Link } from '@/components/Link'
+
+**类 Notion 编辑器模板** 是一个功能齐全的基于区块的编辑器，复制了熟悉的 Notion 体验。它支持协作、AI 助手、表情符号、拖放、高级格式化——并且完全可定制。
+
+<div className="flex items-center gap-4 mt-8">
+  <Button variant="primary" size="medium">
+    <Link
+      href="https://template.tiptap.dev/preview/templates/notion-like"
+      className="flex items-center justify-center gap-2"
+    >
+      全屏查看
+      <ArrowRightIcon className="size-3.5" />
+    </Link>
+  </Button>
+</div>
+
+<CodeDemo isScrollable isLarge src="https://template.tiptap.dev/preview/templates/notion-like" />
+
+<Callout title="需要 Start 计划" variant="warning">
+  类 Notion 模板要求至少订阅 **Start 计划** 才能在生产环境中使用。您可以在试用期间集成并测试它。此模板的使用须遵守我们的
+  [服务条款](https://tiptap.dev/terms-of-service) 和 [专业许可](https://tiptap.dev/pro-license)。
+</Callout>
+
+## 安装
+
+您需要一个拥有有效订阅或试用的 Tiptap 账户。请访问 [cloud.tiptap.dev/register](https://cloud.tiptap.dev/register) 创建账户。
+
+### 针对现有项目
+
+```bash
+npx @tiptap/cli@latest add notion-like-editor
+```
+
+### 针对新项目
+
+```bash
+npx @tiptap/cli@latest init notion-like-editor
+```
+
+此模板需要样式和配置的设置。
+
+### 样式
+
+我们对样式框架保持中立，因此您需要将其集成到自己的环境中。
+请遵循[样式设置指南](/ui-components/getting-started/style)以确保编辑器正确显示。
+
+### 配置
+
+在运行应用之前，请在 `tiptap-collab-utils.ts` 文件中配置必要的常量。这是启用 AI 或协作功能所必须的。
+
+### 环境变量
+
+请提供以下环境变量的值：
+
+- `TIPTAP_COLLAB_DOC_PREFIX` - 用于识别协作文档的前缀
+- `TIPTAP_COLLAB_APP_ID` - 您的协作应用 ID
+- `TIPTAP_COLLAB_TOKEN` - 访问协作服务的 JWT 令牌
+- `TIPTAP_AI_APP_ID` - 您的 AI 应用 ID
+- `TIPTAP_AI_TOKEN` - 访问 AI 服务的 JWT 令牌
+
+上述环境变量应可在客户端访问。根据您的框架，使用以下前缀将其暴露给客户端：
+
+- [Next.js](/ui-components/install/next): `NEXT_PUBLIC_`，例如 `NEXT_PUBLIC_TIPTAP_COLLAB_DOC_PREFIX`
+- [Vite + React](/ui-components/install/vite): `VITE_`，例如 `VITE_TIPTAP_COLLAB_DOC_PREFIX`
+- 其他框架：请遵循您的框架具体规则，并在 `tiptap-collab-utils.ts` 文件中定义变量。
+
+### JWT 认证
+
+协作和 AI 功能需要向编辑器传入有效的服务端生成 JWT 令牌。请查看 `tiptap-collab-utils.ts` 中的 `fetchCollabToken` 函数示例。
+
+> 详见[JWT 认证完整指南](https://tiptap.dev/docs/guides/authentication)。
+
+<Callout title="生成 JWT 令牌" variant="info">
+  为快速开始，您可以使用您 Tiptap Cloud 账户中的示例 JWT 令牌，并存储在 `TIPTAP_COLLAB_TOKEN` 和 `TIPTAP_AI_TOKEN` 环境变量中。然而示例令牌有效期较短，不应用于生产环境。在生产环境，应实现服务器端生成 JWT 的 API 端点。
+</Callout>
+
+### `room` 属性
+
+使用 `room` 属性区分协作文档。每个会话应使用唯一的房间 ID。
+
+### 图片上传
+
+图片上传需要服务器端支持，且不包含在我们的 UI 组件中。下面给出了一个示例服务器端代码，该服务器接受图片，上传至 S3 并返回其永久 URL。请注意，生产环境时可能需要实现额外的校验以防止滥用。
+
+服务端（通过 `node --experimental-strip-types` 运行）：
+
+```typescript
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { Hono } from 'hono'
+import { serve } from '@hono/node-server'
+import { cors } from 'hono/cors'
+import { v4 } from 'uuid'
+
+const S3_REGION = 'xxx'
+const S3_BUCKET = 'xxx'
+const S3_ACCESS_KEY= 'xxx'
+const S3_ACCESS_SECRET_KEY='xxx'
+
+const PORT = 1234
+const BASE_URL = `http://127.0.0.1:${PORT}`
+
+const app = new Hono()
+const client = new S3Client({
+  region: S3_REGION,
+  credentials: {
+    accessKeyId: S3_ACCESS_KEY,
+    secretAccessKey: S3_ACCESS_SECRET_KEY,
+  }
+});
+
+// 生产环境中，确保设置严格的 cors 规则
+app.use('/upload', cors())
+
+// 生产环境建议对两个端点添加敏感的速率限制
+// 建议添加 content-type、文件名和文件大小校验
+app.post('/upload', async (c) => {
+  const body = await c.req.arrayBuffer()
+  const remoteFileKey = `upload-${v4()}`
+
+  const command = new PutObjectCommand({
+    Bucket: S3_BUCKET,
+    Key: remoteFileKey,
+    Body: body,
+    ContentType: c.req.header('content-type') ?? ''
+  });
+
+  try{
+    await client.send(command)
+  } catch(e) {
+    console.error(e)
+    c.status(500)
+    return c.text('')
+  }
+
+  return c.text(`${BASE_URL}/files/${remoteFileKey}`)
+})
+
+app.get('/files/:name', async (c) => {
+  const { name } = c.req.param()
+  const remoteFileKey = `${name}`
+
+  // 生产环境中，您可能想实现缓存，
+  // 或者使用预签名 URL 让客户端能直接从 S3 获取文档。
+  const command = new GetObjectCommand({
+    Bucket: S3_BUCKET,
+    Key: remoteFileKey,
+  })
+
+  try{
+    const r = await client.send(command)
+    return c.body(r.Body, 200, {
+      'content-type': r.ContentType ?? ''
+    })
+  } catch(e) {
+    console.error(e)
+    c.status(500)
+    return c.text('')
+  }
+
+})
+
+serve({...app, port: PORT})
+```
+
+要使用该端点，请调整 `tiptap-utils.ts` 中的 `handleImageUpload`。您需要删除校验后的全部代码，并替换为类似如下代码：
+
+```typescript
+const response = await fetch('http://YOUR_URL/upload', {
+    body: file,
+    method: 'post',
+    headers: {
+        'content-type': file.type,
+    }
+})
+
+if( response.ok ) {
+    return response.text()
+}
+
+throw new Error('上传失败')
+```
+
+## 使用方法
+
+在您的 React 应用中导入并渲染 `NotionEditor` 组件：
+
+```tsx
+import { NotionEditor } from '@/components/tiptap-templates/notion/notion-like-editor'
+
+export default function App() {
+  return <NotionEditor room="my-document-room" placeholder="开始写作..." />
+}
+```
+
+## 功能
+
+该模板涵盖了现代 Notion 风格编辑器的所有基础：
+
+- **实时协作**：实时光标和用户状态显示
+- **AI 辅助**：内嵌 AI 写作和编辑工具
+- **响应式设计**：移动端友好，工具栏自适应
+- **暗/亮模式**：盒装完整主题支持
+- **斜杠命令**：通过 `/` 快速格式化菜单
+- **浮动工具栏**：上下文相关格式化
+- **拖放操作**：区块级拖拽排序
+- **表情支持**：GitHub 风格表情选择器
+- **@提及**：自动补全用户
+- **丰富格式**：
+
+  - 粗体、斜体、下划线、删除线
+  - 高亮和颜色
+  - 上标 / 下标
+  - 语法高亮代码块
+
+- **区块类型**：
+
+  - 标题、列表、引用块、分隔符、数学公式
+
+- **媒体支持**：拖放图片上传
+- **链接管理**：包含内联预览
+- **文本对齐**：左、居中、右、两端对齐
+- **撤销/重做**：完整的编辑历史
+- **上下文菜单**：右键增强菜单
+
+## 组件拆解
+
+### Hooks
+
+- `use-mobile`
+- `use-window-size`
+- `use-ui-editor-state`
+
+### 图标
+
+- `arrow-left-icon`
+- `chevron-right-icon`
+- `highlighter-icon`
+- `link-icon`
+- `more-vertical-icon`
+
+### Tiptap 扩展
+
+- `collaboration`, `collaboration-cursor`
+- `selection-extension`
+- `link-extension`
+- `trailing-node-extension`
+- `ai-extension`
+- `emoji-extension`
+- `mention-extension`
+- `mathematics-extension`
+- `unique-id-extension`
+
+### 库
+
+- `tiptap-utils`
+- `tiptap-collab-utils`
+
+### UI 组件
+
+- `ai-menu`
+- `blockquote-button`
+- `code-block-button`
+- `color-highlight-button`, `color-highlight-popover`
+- `drag-context-menu`
+- `emoji-dropdown-menu`
+- `heading-button`, `heading-dropdown-menu`
+- `image-upload-button`
+- `link-popover`
+- `list-button`, `list-dropdown-menu`
+- `mark-button`
+- `mention-dropdown-menu`
+- `slash-dropdown-menu`
+- `text-align-button`
+- `turn-into-dropdown`
+- `undo-redo-button`
+
+### 节点
+
+- `code-block-node`
+- `image-node`, `image-upload-node`
+- `list-node`
+- `paragraph-node`
+
+### 基础组件
+
+- `button`, `button-group`
+- `dropdown-menu`
+- `separator`, `spacer`, `toolbar`
+
+### 上下文
+
+- `app-context`
+- `user-context`
+- `collab-context`
+
+## 协作
+
+使用协作功能：
+
+1. 向 `NotionEditor` 传入唯一的 `room` ID
+2. 为每个用户会话启用 JWT 认证
+3. 用户状态及光标自动处理
+4. 操作转换处理并发编辑
+5. 同步和保存开箱即用
+
+```tsx
+<NotionEditor room="team-notes" placeholder="分享你的想法..." />
+```
+
+## AI 集成
+
+内置 AI 工具支持：
+
+- **根据提示生成内容**
+- **优化**已有文本
+- **基于上下文获得智能补全**
+
+<Callout title="AI 配置" variant="info">
+  请确保配置您的 AI 服务提供商。参阅 [AI 生成扩展文档](/content-ai/capabilities/generation/overview) 了解配置步骤。
+</Callout>
+
+## 可扩展性
+
+该模板设计灵活，适应您的需求不断成长。新的 Tiptap Cloud 功能将与相同 UI 系统无缝兼容，无需重写代码。

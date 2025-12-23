@@ -127,13 +127,26 @@ const jwt = jsonwebtoken.sign(data, 'your_secret')
 
 在此示例中，用户将可以访问 'project-alpha' 和 'project-beta' 下的所有文档，从而更轻松地管理新文档添加到这些项目时的权限。
 
+## 短期 JWT
+
+您可能希望通过设置过期时间来限制 JWT 的寿命。JWT 每隔几秒钟进行验证，所以过期的令牌将在过期后不久被拒绝，无法重新连接。
+
+不用说，对于会过期的令牌，处理过期情况是必要的——无论是在会话中途，还是在初次连接或重新连接时。您的用户可能会打开标签页数周，您不希望他们因为令牌过期而丢失数据（参见 [未同步的更改](/collaboration/provider/integration#unsynced-changes)）。
+
+- 如果在创建连接（或重新连接）时 JWT 无效，将触发 `onAuthenticationFailed` 回调（原因 `permission-denied`）。
+- 如果在已建立连接期间 JWT 过期，将触发 `onClose` 回调，原因是 `JWT verification failed`。
+
+在这两种情况下，您都需要重新创建提供程序并提供新的 JWT。
+
+Tiptap Collab 提供了撤销 JWT 的 API，以备需要，因此不建议将令牌设置得过短寿命。([查看撤销 JWT API](https://www.postman.com/docking-module-explorer-14290287/tiptap-collaboration-public/request/5kcbhde/revoke-jwt))
+
 ## 服务器端集成 JWT
 
 JWT，或 JSON Web Token，是一种紧凑的、URL 安全的方式，用于表示在两个方之间传输的声明。JWT 中的信息使用加密算法进行数字签名，以确保在令牌发布后声明不能被更改。这种数字签名使 JWT 成为 Web 应用程序中安全信息交换的可靠载体，提供了身份验证和信息交换的方法。
 
 ### 创建用于测试的静态 JWT
 
-出于测试目的，您可能不想设置完整的后端系统来生成 JWT。在这种情况下，可以使用 http://jwtbuilder.jamiekurtz.com/ 之类的在线工具作为快速解决方案。这些工具允许您通过输入必要的有效负载并使用密钥签名来创建 JWT。
+出于测试目的，您可能不想设置完整的后端系统来生成 JWT。在这种情况下，可以使用 http://jwtbuilder.jamiekurtz.com/ 之类的在线工具作为快速解决方案。这些工具允许您通过输入必要的有效载荷并使用密钥签名来创建 JWT。
 
 使用这些工具时，请确保将 "Key" 字段替换为您的 [协作设置](https://collab.tiptap.dev/apps/settings) 页中的秘密密钥。您不需要更改任何其他信息。
 
@@ -155,7 +168,7 @@ const payload = {
   sub: 'your_local_user_identifier',
 }
 
-// `sign` 方法创建 JWT，使用有效负载和您的秘密密钥作为输入。
+// `sign` 方法创建 JWT，使用有效载荷和您的秘密密钥作为输入。
 const jwt = jsonwebtoken.sign(payload, 'your_secret_key_here')
 // 生成的 JWT 用于 API 请求中的身份验证，确保安全访问。
 // 重要提示：切勿在客户端代码中暴露您的秘密密钥！

@@ -1,0 +1,81 @@
+---
+title: 输入规则
+meta:
+  title: Tiptap 中的输入规则 | Tiptap 编辑器文档
+  description: 在 Tiptap 中创建输入规则，实现打字时自动转换文本。了解如何使用和创建输入规则！
+  category: 编辑器
+---
+
+输入规则是 Tiptap 中的一项强大功能，它允许你在输入文本时自动对文本进行转换。它们可以用来创建格式化快捷方式、插入内容或根据文本中的特定模式触发命令。
+
+## 什么是输入规则？
+
+输入规则是基于模式的触发器，它们监视特定的文本输入并自动将其转换为其他内容。例如，输入 `**bold**` 可以自动将文本变为粗体格式，或者在行首输入 `1.` 可以创建有序列表。输入规则特别适合实现类似 Markdown 的快捷方式，提升用户体验。
+
+## Tiptap 中的输入规则如何工作？
+
+Tiptap 在底层使用输入规则来提供许多默认快捷方式（如列表、引用和标记）。输入规则被定义为匹配用户输入的正则表达式。当检测到匹配模式时，规则会执行转换——比如应用标记、插入节点或运行命令。
+
+输入规则通常在扩展（节点、标记或通用扩展）内部通过 `addInputRules()` 方法注册。Tiptap 提供了辅助函数 `markInputRule` 和 `nodeInputRule`，简化为标记和节点创建输入规则的过程。
+
+## 理解 `markInputRule` 和 `nodeInputRule`
+
+Tiptap 提供了两个辅助函数来简化输入规则的创建：
+
+- **`markInputRule`**：基于模式应用标记（如加粗、斜体、高亮）。
+- **`nodeInputRule`**：基于模式插入或转换节点（如图片、图形、自定义区块）。
+
+这两个函数接受一个配置对象，至少包含以下属性：
+
+- `find`：用于匹配输入模式的正则表达式。
+- `type`：要应用或插入的标记或节点类型。
+- `getAttributes`（可选）：一个从正则匹配结果中提取并返回属性的函数。
+- `undoable`（可选）：输入规则是否支持撤销，默认值为 `true`。
+
+### 使用 `getAttributes` 提取信息
+
+`getAttributes` 函数允许你从匹配的输入中提取数据，并作为属性传递给节点或标记。这对像图片或图形这样的节点特别有用，可以从用户输入中捕获 `src`、`alt` 或 `title` 等值。
+
+#### 示例：在节点输入规则中使用 `getAttributes`
+
+```ts
+addInputRules() {
+  return [
+    nodeInputRule({
+      find: /!\[(.*?)\]\((.*?)(?:\s+"(.*?)")?\)$/, // 匹配 ![alt](src "title")
+      type: this.type,
+      getAttributes: match => {
+        const [, alt, src, title] = match
+        return { src, alt, title }
+      },
+    }),
+  ]
+},
+```
+
+在此示例中，当用户输入类似 `![Alt text](image.png "Optional title")` 时，输入规则会从匹配结果中提取 `alt`、`src` 和 `title`，并将它们作为属性传递给节点。
+
+#### 示例：在标记输入规则中使用 `getAttributes`
+
+```ts
+addInputRules() {
+  return [
+    markInputRule({
+      find: /\*\*([^*]+)\*\*$/, // 匹配 **bold**
+      type: this.type,
+      getAttributes: match => {
+        // 如果需要，可以在这里提取自定义属性
+        return {}
+      },
+    }),
+  ]
+},
+```
+
+### 小贴士
+
+- `getAttributes` 中的 `match` 参数是正则表达式的结果，你可以通过解构获取捕获组。
+- 你可以使用 `getAttributes` 设置节点或标记支持的任意属性，比如链接的 `href`、图片的 `src` 或自定义数据字段。
+- 如果不需要提取属性，可以省略 `getAttributes`。
+
+更多详情请见 [ProseMirror 输入规则文档](https://prosemirror.net/docs/ref/#inputrules.InputRule)。

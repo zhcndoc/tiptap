@@ -10,7 +10,7 @@ import { Callout } from '@/components/ui/Callout'
 
 每个扩展都有一个 `extend()` 方法，该方法接受一个对象，包含您希望更改或添加的所有内容。
 
-假设您想更改项目符号列表的键盘快捷键。您应该首先查看扩展的源代码，在本例中是 [`BulletList` 节点](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-bullet-list/src/bullet-list.ts)。对于覆盖键盘快捷键的示例，您的代码可以如下所示：
+假设您想更改项目符号列表的键盘快捷键。您应该首先查看扩展的源代码，在本例中是 [`BulletList` 节点](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-list/src/bullet-list/bullet-list.ts)。对于覆盖键盘快捷键的示例，您的代码可以如下所示：
 
 ```js
 // 1. 导入扩展
@@ -28,7 +28,7 @@ const CustomBulletList = BulletList.extend({
 // 3. 将自定义扩展添加到您的编辑器
 new Editor({
   extensions: [
-    CustomBulletList(),
+    CustomBulletList,
     // …
   ],
 })

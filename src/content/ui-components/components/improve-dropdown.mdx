@@ -1,0 +1,316 @@
+---
+title: 改进下拉菜单
+meta:
+  title: 改进下拉菜单 | Tiptap UI 组件
+  description: 为您的 Tiptap 编辑器添加 AI 驱动的文本改进功能。详情请参阅文档！
+  category: UI 组件
+component:
+  name: 改进下拉菜单
+  description: 利用 AI 提供语法修正、语气调整和翻译等文本优化改进。
+  type: 组件
+  isFree: false
+  isCloud: true
+  isOpen: false
+  isNew: false
+  icon: AudioLinesIcon
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个为 Tiptap 编辑器打造的完全可访问的 AI 驱动下拉菜单。通过键盘快捷键和移动端支持，使用智能建议提升您的文本，包括语法修正、语气调整、翻译及内容修改。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/improve-dropdown" />
+
+## 安装
+
+通过 Tiptap CLI 添加此组件：
+
+```bash
+npx @tiptap/cli@latest add improve-dropdown
+```
+
+## 组件
+
+### `<ImproveDropdown />`
+
+一个预构建的 React 组件，在下拉界面中提供 AI 驱动的文本改进选项。
+
+#### 使用示例
+
+```tsx
+import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
+
+// --- Tiptap 核心扩展 ---
+import { StarterKit } from '@tiptap/starter-kit'
+import { Ai } from '@tiptap-pro/extension-ai'
+import { Selection } from '@tiptap/extensions'
+
+// --- Tiptap UI ---
+import { ImproveDropdown } from '@/components/tiptap-ui/improve-dropdown'
+import { AiMenu } from '@/components/tiptap-ui/ai-menu'
+import { TIPTAP_AI_APP_ID } from '@/lib/tiptap-collab-utils'
+import { UiState } from '@/components/tiptap-extension/ui-state-extension'
+import { AiProvider, useAi } from '@/components/contexts/ai-context'
+
+// --- UI 原语 ---
+import { ButtonGroup } from '@/components/tiptap-ui-primitive/button'
+
+// --- Tiptap 节点 ---
+import '@/components/tiptap-node/blockquote-node/blockquote-node.scss'
+import '@/components/tiptap-node/code-block-node/code-block-node.scss'
+import '@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss'
+import '@/components/tiptap-node/heading-node/heading-node.scss'
+import '@/components/tiptap-node/list-node/list-node.scss'
+import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
+
+export const ImproveDropdownExample = () => {
+  return (
+    <AiProvider>
+      <AiEditorWrapper />
+    </AiProvider>
+  )
+}
+
+const AiEditorWrapper = () => {
+  const { aiToken } = useAi()
+
+  if (!aiToken) {
+    return <div className="tiptap-editor-wrapper">正在加载 AI...</div>
+  }
+
+  return <AiEditor aiToken={aiToken} />
+}
+
+const AiEditor = ({ aiToken }: { aiToken: string }) => {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit,
+      Selection,
+      UiState,
+      Ai.configure({
+        appId: TIPTAP_AI_APP_ID,
+        token: aiToken,
+        autocompletion: false,
+        showDecorations: true,
+        hideDecorationsOnStreamEnd: false,
+        onLoading: (context) => {
+          context.editor.commands.aiGenerationSetIsLoading(true)
+          context.editor.commands.aiGenerationHasMessage(false)
+        },
+        onChunk: (context) => {
+          context.editor.commands.aiGenerationSetIsLoading(true)
+          context.editor.commands.aiGenerationHasMessage(true)
+        },
+        onSuccess: (context) => {
+          const hasMessage = !!context.response
+          context.editor.commands.aiGenerationSetIsLoading(false)
+          context.editor.commands.aiGenerationHasMessage(hasMessage)
+        },
+      }),
+    ],
+    content: `
+        <p>选中此文本以查看带有 AI 驱动文本增强选项的改进下拉菜单。</p>
+        <p>您可以尝试改进这句话：“这是一个示例句子，有提升空间，也许它有点太长，您可以根据需求简化或扩展它。”</p>
+        <p>或者这句：“ai 可以帮助修正您写作中的语法和拼写错误”</p>
+        `,
+  })
+
+  return (
+    <EditorContext.Provider value={{ editor }}>
+      <div className="controls-bar">
+        <div className="control-item">
+          <ButtonGroup orientation="horizontal">
+            <ImproveDropdown
+              textOptions={{
+                stream: true,
+                format: 'rich-text',
+              }}
+              hideWhenUnavailable={false}
+            />
+          </ButtonGroup>
+        </div>
+      </div>
+
+      <EditorContent editor={editor} role="presentation" className="control-showcase">
+        <AiMenu />
+      </EditorContent>
+    </EditorContext.Provider>
+  )
+}
+```
+
+#### 属性
+
+| 名称                   | 类型                | 默认值                                 | 描述                                                 |
+| ---------------------- | ------------------- | ------------------------------------ | ---------------------------------------------------- |
+| `editor`               | `Editor \| null`    | `undefined`                          | Tiptap 编辑器实例                                    |
+| `textOptions`          | `TextOptions`       | `{ stream: true, format: "rich-text" }` | AI 文本处理的配置选项                                 |
+| `hideWhenUnavailable`  | `boolean`           | `false`                             | 当 AI 功能不可用时隐藏下拉菜单                        |
+| `onImproved`           | `() => void`        | `undefined`                         | 成功改进文本后触发的回调                              |
+| `portal`               | `boolean`           | `false`                             | 是否在 portal 中渲染下拉菜单                          |
+
+## Hooks
+
+### `useImproveDropdown()`
+
+一个自定义 Hook，用于构建完全掌控渲染和行为的改进下拉菜单。
+
+#### 使用示例
+
+```tsx
+function MyImproveDropdown() {
+  const {
+    isVisible,
+    isDisabled,
+    isOpen,
+    handleOpenChange,
+    executeAICommand,
+    adjustTone,
+    translate,
+    Icon,
+  } = useImproveDropdown({
+    editor: myEditor,
+    hideWhenUnavailable: true,
+    onImproved: () => console.log('文本已改进！'),
+  })
+
+  if (!isVisible) return null
+
+  return (
+    <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
+      <DropdownMenuTrigger asChild>
+        <button disabled={isDisabled} aria-label="改进文本">
+          <Icon />
+          改进
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={() => executeAICommand('fixSpellingAndGrammar')}>
+          修正拼写和语法
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => executeAICommand('extend')}>扩展文本</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => adjustTone('professional')}>
+          变得专业
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+```
+
+#### 属性
+
+| 名称                   | 类型                | 默认值     | 描述                                             |
+| ---------------------- | ------------------- | ---------- | ------------------------------------------------ |
+| `editor`               | `Editor \| null`    | `undefined`| Tiptap 编辑器实例                                |
+| `hideWhenUnavailable`  | `boolean`           | `false`    | 当 AI 功能不可用时隐藏下拉菜单                    |
+| `onImproved`           | `() => void`        | `undefined`| 成功改进文本后触发的回调                          |
+
+#### 返回值
+
+| 名称                 | 类型                      | 描述                                           |
+| -------------------- | ------------------------- | ---------------------------------------------- |
+| `isVisible`          | `boolean`                 | 是否显示下拉菜单                              |
+| `isDisabled`         | `boolean`                 | 是否禁用 AI 命令                              |
+| `isOpen`             | `boolean`                 | 下拉菜单当前是否打开                          |
+| `handleOpenChange`   | `(open: boolean) => void` | 处理下拉菜单打开/关闭状态的函数              |
+| `executeAICommand`   | `(command: string) => void` | 执行 AI 改进命令的函数                        |
+| `adjustTone`         | `(tone: string) => void`  | 调整文本语气的函数                            |
+| `translate`          | `(language: string) => void` | 翻译文本的函数                                |
+| `Icon`               | `React.FC`                | 改进下拉菜单的图标组件                        |
+
+## AI 功能
+
+改进下拉菜单提供多种 AI 驱动的文本增强选项：
+
+### 文本增强
+
+- **修正拼写和语法** - 自动纠正拼写和语法错误
+- **扩展文本** - 用更多相关信息扩展内容
+- **缩减文本** - 在保持意义的前提下缩短内容
+- **简化文本** - 使复杂文本更易读、更易理解
+- **表情符号化** - 添加相关表情符号使文本更生动
+
+### 内容操作
+
+- **补全句子** - 智能完成不完整的句子
+- **摘要** - 创建较长文本的简洁摘要
+
+### 高级选项
+
+- **调整语气** - 修改文本语气（专业、随意、亲切等）
+- **翻译** - 将文本翻译为不同语言
+
+## 工具函数
+
+### `canUseAi(editor)`
+
+检查当前选区是否可以使用 AI 功能。
+
+```tsx
+import { canUseAi } from '@/components/tiptap-ui/improve-dropdown'
+
+const aiAvailable = canUseAi(editor)
+if (aiAvailable) {
+  // 显示 AI 选项
+}
+```
+
+### `shouldShowImproveDropdown(params)`
+
+基于编辑器状态和配置，判断是否应显示改进下拉菜单。
+
+```tsx
+import { shouldShowImproveDropdown } from '@/components/tiptap-ui/improve-dropdown'
+
+const shouldShow = shouldShowImproveDropdown({
+  editor,
+  hideWhenUnavailable: true,
+})
+```
+
+### `executeAICommand(editor, command, textOptions?)`
+
+程序化执行 AI 改进命令，对当前选区进行处理。
+
+```tsx
+import { executeAICommand } from '@/components/tiptap-ui/improve-dropdown'
+
+const success = executeAICommand(editor, 'fixSpellingAndGrammar')
+if (success) {
+  console.log('语法已成功修正！')
+}
+```
+
+## 需求
+
+### 依赖
+
+- `@tiptap/react` - Tiptap React 核心集成
+- `@tiptap-pro/extension-ai` - AI 文本改进扩展
+- `react-hotkeys-hook` - 键盘快捷键管理
+
+### 相关组件
+
+- `use-tiptap-editor`（Hook）
+- `dropdown-menu`（原语）
+- `button`（原语）
+- `card`（原语）
+- `separator`（原语）
+- `ai-sparkles-icon`（图标）
+- `check-ai-icon`（图标）
+- `text-extend-icon`（图标）
+- `text-reduce-icon`（图标）
+- `simplify-2-icon`（图标）
+- `smile-ai-icon`（图标）
+- `complete-sentence-icon`（图标）
+- `summarize-text-icon`（图标）
+- `languages-icon`（图标）
+- `mic-ai-icon`（图标）
+
+### AI 配置
+
+该组件需要在您的 Tiptap 编辑器配置中正确设置 AI 扩展，方能实现完整功能。

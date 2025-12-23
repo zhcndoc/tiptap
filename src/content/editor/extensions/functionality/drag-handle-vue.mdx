@@ -56,14 +56,14 @@ npm install @tiptap/extension-drag-handle-vue-3 @tiptap/extension-drag-handle @t
 </drag-handle>
 ```
 
-### tippyOptions
+### computePositionConfig
 
-tippy.js 的配置选项。您可以传入在 [tippy.js 文档](https://atomiks.github.io/tippyjs/v6/all-props/) 中列出的任意选项。
+拖拽句柄位置计算的配置，使用 floating-ui/dom 包。您可以传入在 [floating-ui 文档](https://floating-ui.com/docs/computePosition) 中列出的任意选项。
 
-默认值： `undefined`
+默认值： `{ placement: 'left-start', strategy: 'absolute' }`
 
 ```vue
-<drag-handle :tippy-options="{ placement: 'left' }">
+<drag-handle :compute-position-config="{ placement: 'left', strategy: 'fixed' }">
   <div>拖拽我！</div>
 </drag-handle>
 ```
@@ -106,9 +106,50 @@ export default {
 </script>
 ```
 
+### getReferencedVirtualElement
+
+返回拖拽句柄虚拟元素的函数。当菜单需要相对于特定 DOM 元素定位时，这很有用。
+
+默认值： `undefined`
+
+```vue
+<template>
+  <drag-handle :get-referenced-virtual-element="getVirtualElement">
+    <div>拖拽我！</div>
+  </drag-handle>
+</template>
+
+<script>
+export default {
+  setup() {
+    const getVirtualElement = () => {
+      // 返回用于自定义定位的虚拟元素
+      return null
+    }
+
+    return {
+      getVirtualElement,
+    }
+  },
+}
+</script>
+```
+
+### locked
+
+锁定拖拽句柄的位置和可见性。如果拖拽句柄原本可见，则保持可见直到解除锁定；如果原本隐藏，则保持隐藏直到解除锁定。
+
+默认值： `false`
+
+```vue
+<drag-handle :locked="true">
+  <div>拖拽我！</div>
+</drag-handle>
+```
+
 ### pluginKey
 
-编辑器中用于存储插件的键。若您在同一编辑器中使用多个拖拽句柄，此属性非常有用。
+编辑器中用于存储插件的键。当您在同一编辑器中使用多个拖拽句柄时，该属性非常有用。
 
 默认值： `undefined`
 

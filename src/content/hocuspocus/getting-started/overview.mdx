@@ -1,0 +1,49 @@
+---
+title: Hocuspocus
+meta:
+  title: Hocuspocus | Tiptap 协作文档
+  description: Hocuspocus
+  category: Hocuspocus
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@hocuspocus/server.svg?label=version
+    url: https://www.npmjs.com/package/@hocuspocus/server
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@hocuspocus/server.svg
+    url: https://npmcharts.com/compare/@hocuspocus/server?minimal=true
+    label: 下载量
+  - type: image
+    src: https://img.shields.io/npm/l/@hocuspocus/server.svg
+    url: https://www.npmjs.com/package/@hocuspocus/server
+    label: 许可协议
+  - type: image
+    src: https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true
+    url: https://discord.gg/WtJ49jGshW
+    label: 聊天
+---
+
+Hocuspocus 是一套为你的应用带来协作功能的工具集。它基于 [Y.js](https://github.com/yjs/yjs) （由 Kevin Jahns 开发），这是一款出色的用于实时同步和合并客户端改动的库。但你也可以用它来构建离线优先（offline-first）的应用，然后在之后同步变更。我们会确保解决冲突，并且始终保持所有内容同步。
+
+## 什么是 Y.js？
+
+Y.js 能够实时合并用户的更改且不会产生冲突。与其他实现相比，它性能极佳，并且“表现远超其他”（Joseph Gentle，前 Google Wave 工程师，[来源](https://josephg.com/blog/crdts-are-the-future/)）。
+
+作为一种无冲突复制数据类型（CRDT），其应用更改的顺序无关紧要。这有点像 Git，无论更改何时提交都无影响。而且，每个数据副本的价值是相同的。
+
+这使你能够构建高性能的实时应用，为已有应用添加协作功能，同步状态感知，并且考虑离线优先的设计。
+
+## Hocuspocus 服务器
+
+使用 Y.js，你可以选用任何网络协议将更改发送给其他客户端，但最流行的是 WebSocket。Hocuspocus 服务器就是一个 WebSocket 后端，包含了快速入门所需的一切，方便你将 Y.js 集成进现有基础设施，并支持扩展到百万用户。
+
+## 功能
+
+- 无冲突地合并更改
+- 不在意更改到达的先后顺序
+- 可同步整个应用状态
+- 支持协作文本编辑（配合 Tiptap、Slate、Quill、Monaco 或 ProseMirror）
+- 易于集成到现有应用
+- 支持将更改发送到 Webhooks
+- 通过 Redis 实现百万级用户扩展
+- 使用 TypeScript 编写

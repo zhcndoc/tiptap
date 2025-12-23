@@ -5,26 +5,18 @@ meta:
   description: 了解如何安装和设置 Tiptap 的 AI Agent 扩展。
   category: 内容 AI
 tags:
-  - type: team
   - type: beta
+  - type: deprecated
 ---
 
 import { Callout } from '@/components/ui/Callout'
-import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
-<Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
-        在您的账户中[开始免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅团队计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-  <RequirementItem label="2. Integrate an AI provider">
-    Configure OpenAI in your [AI settings](https://cloud.tiptap.dev/v2/cloud/ai) or follow the
-    [Custom AI Agent guide](/content-ai/capabilities/agent/custom-llms) to integrate it with other
-    AI providers.
-  </RequirementItem>
-  <RequirementItem label="3. 从私有注册表安装">
-    要安装前端扩展，请通过遵循 [设置指南](/guides/pro-extensions) 认证访问 Tiptap 的私有 npm 注册表。
-  </RequirementItem>
-</Requirements>
+<Callout title="已废弃" variant="warning">
+  该扩展正在逐步被 AI 工具包（AI Toolkit）取代，后者提供了增强的功能和现代化的 API。您仍然可以继续使用此扩展，但我们建议在新项目中优先考虑使用 AI 工具包。
+</Callout>
+
+<EnterpriseCalloutAuto variant="deprecated" renderMode="sidebar" />
 
 ## 安装包
 

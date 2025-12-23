@@ -1,0 +1,139 @@
+---
+tags:
+  - type: editor
+title: 协作 API
+meta:
+  title: 协作 API | Tiptap 编辑器文档
+  description: 协作 API
+  category: Editor
+---
+
+## 向文档添加初始内容
+
+为了向文档添加初始内容（或创建空文档），你可以使用我们的创建文档 API。
+
+请注意，你需要将 `APP_ID`、`DOCUMENT_NAME` 和 `API_SECRET` 替换成你自己的值。
+如果你只想创建一个空文档，可以将空数组作为 `content` 发送。
+
+请求的负载应该是 Tiptap JSON，可以通过调用 `editor.getJSON()` 获取（详见 [获取 JSON](/guides/output-json-html#option-1-json)）
+
+```curl
+curl --location \
+'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: API_SECRET' \
+--data '{
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "attrs": {
+          "indent": 0,
+          "textAlign": "left"
+        },
+        "content": [
+          {
+            "text": "This is my initial content.",
+            "type": "text"
+          }
+        ]
+      }
+    ]
+}'
+```
+
+## 更新文档的全部内容
+
+更新文档非常简单，只需获取当前的 JSON 文档，对其进行修改，然后发送回来即可。
+
+使用以下请求获取当前 JSON 文档。
+
+```curl
+curl --location \
+'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json' \
+--header 'Authorization: API_SECRET' \
+```
+
+然后，你可以对 JSON 应用修改，再发送给我们。我们会计算你新 JSON 与当前文档状态之间的差异，并以协作的方式应用更新。
+如果你只想更新单个节点，请参见[更新文档中的单个节点](#update-a-single-node-in-a-document)。
+
+```curl
+curl --location --request PATCH \
+'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: API_SECRET' \
+--data 'UPDATED_JSON'
+```
+
+## 更新文档中的单个节点
+
+使用以下请求获取当前 JSON 文档。
+
+```curl
+curl --location \
+'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json' \
+--header 'Authorization: API_SECRET'
+```
+
+然后，你可以找到需要更新的节点并在 JSON 中应用修改。你只需将该更新后的节点单独发送给我们，但必须是完整的 Tiptap JSON 格式。
+为告诉我们你想更新哪个节点，需要传递查询参数 `nodeAttributeName` 和 `nodeAttributeValue`。例如，如果你使用我们的 unique-id
+扩展，且目标节点具有值为 `12345` 的 `id` 属性，你应传递 `nodeAttributeName=id&nodeAttributeValue=12345`。请注意，这仅对顶级节点有效。
+
+```curl
+curl --location --request PATCH \
+'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json&nodeAttributeName=id&nodeAttributeValue=12345' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: API_SECRET' \
+--data 'UPDATED_JSON'
+```
+
+下面是一个 `UPDATED_JSON` 的示例。只包含需要更新的节点，省略 "content" 数组中的其他节点。
+
+```json
+{
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "attrs": {
+          "id": "12345"
+        },
+        "content": [
+          {
+            "text": "API 会用此节点的内容更新匹配查询过滤条件（查询中的 nodeAttributeName 和 nodeAttributeValue）的节点。",
+            "type": "text"
+          }
+        ]
+      }
+    ]
+}
+```
+
+## 删除文档中的节点
+
+要删除文档中的整个节点，可以发送如下请求。
+
+确保将 `ATTR_NAME` 和 `ATTR_VALUE` 替换为你自己的值，例如 "id" 和 "12345"。
+
+```curl
+curl --location --request PATCH \
+'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json&nodeAttributeName=ATTR_NAME&nodeAttributeValue=ATTR_VALUE&mode=delete' \
+--header 'Authorization: API_SECRET'
+```
+
+## 更新文档中节点的属性
+
+如果你想更新节点的属性，可以发送如下请求。
+请注意，这会删除请求中未包含的所有属性，如果不想这样，可以在 URL 中添加 `mergeAttributes=1`。
+
+确保将 `ATTR_NAME` 和 `ATTR_VALUE` 替换为你自己的值，例如 "id" 和 "12345"。
+
+```curl
+curl --location --request PATCH \
+'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json&nodeAttributeName=ATTR_NAME&nodeAttributeValue=ATTR_VALUE&mode=attrs' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: API_SECRET' \
+--data '{
+    "level": 3
+}'
+```

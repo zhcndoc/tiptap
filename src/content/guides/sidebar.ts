@@ -65,6 +65,10 @@ export const sidebarConfig: SidebarConfig = {
           href: '/guides/upgrade-tiptap-v2',
           title: '升级到 Tiptap V2',
         },
+        {
+          href: '/guides/collaboration-api',
+          title: 'Collaboration API',
+        },
       ],
     },
     {

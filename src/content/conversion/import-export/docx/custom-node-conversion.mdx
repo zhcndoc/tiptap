@@ -15,7 +15,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
+    <RequirementItem label="1. 激活试用或订阅">
         在您的账号中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 从私有注册表安装">
@@ -33,7 +33,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 ## 导出自定义节点至 .docx
 
-<CodeDemo src="https://develop--tiptap-pro.netlify.app/preview/Extensions/ExportDocxCustomNode" />
+<CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ExportDocxCustomNode" />
 
 调用 `editor.exportDocx()` 时，可以在 `ExportDocxOptions` 参数中传递一个自定义节点定义数组。每个定义指定节点类型和渲染函数。
 
@@ -220,7 +220,7 @@ editor
 
 ## 从 .docx 导入自定义节点
 
-<CodeDemo src="https://develop--tiptap-pro.netlify.app/preview/Extensions/ImportDocxCustomNode" />
+<CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ImportDocxCustomNode" />
 
 在导入 DOCX 文件时，您还可以定义自定义节点应如何转换回 Tiptap 节点。这是通过将自定义节点定义数组传递给 `import` 命令来完成的。
 
@@ -234,15 +234,15 @@ Import.configure({
   // 注意：这仅用于演示目的
   endpoint: 'https://your-endpoint.com',
   imageUploadCallbackUrl: 'https://your-endpoint.com/image-upload',
-  // Promisemirror 自定义节点映射
-  promisemirrorNodes: {
+  // ProseMirror 自定义节点映射
+  prosemirrorNodes: {
     Hintbox: 'hintbox',
   },
 }),
 ```
 
-`@tiptap-pro/extension-import-docx` 的最新版本提供了 `promisemirrorNodes` 配置选项。此选项允许您将 DOCX 中的自定义节点映射到您的 Tiptap 模式。在上例中，我们将 DOCX 的 `Hintbox` 自定义节点映射到 Tiptap 模式中的 `hintbox` 自定义节点。这样，当导入包含 `Hintbox` 自定义节点的 DOCX 文件时，它会转换为 Tiptap 中的 `hintbox` 节点。
+`@tiptap-pro/extension-import-docx` 的最新版本提供了 `prosemirrorNodes` 配置选项。此选项允许您将 DOCX 中的自定义节点映射到您的 Tiptap 模式。在上例中，我们将 DOCX 的 `Hintbox` 自定义节点映射到 Tiptap 模式中的 `hintbox` 自定义节点。这样，当导入包含 `Hintbox` 自定义节点的 DOCX 文件时，它会转换为 Tiptap 中的 `hintbox` 节点。
 
 <Callout title='DOCX, "prosemirrorNodes" 和 "prosemirrorMarks"' variant="info">
-  请注意，`promisemirrorNodes` 和 `prosemirrorMarks` 选项仅在您导入 `.docx` 文件时有效。如果您导入另一种类型的文件，例如 `.odt` 文件，则会使用 `/import` 端点而不是 `/import-docx` 端点，`promisemirrorNodes` 和 `prosemirrorMarks` 选项将不可用，因此您需要依赖于 [自定义节点和标记映射 API](/conversion/import-export/docx/rest-api#custom-node-and-mark-mapping) 处理这些端点。
+  请注意，`prosemirrorNodes` 和 `prosemirrorMarks` 选项仅在您导入 `.docx` 文件时有效。如果您导入另一种类型的文件，例如 `.odt` 文件，则会使用 `/import` 端点而不是 `/import-docx` 端点，`prosemirrorNodes` 和 `prosemirrorMarks` 选项将不可用，因此您需要依赖于 [自定义节点和标记映射 API](/conversion/import-export/docx/rest-api#custom-node-and-mark-mapping) 处理这些端点。
 </Callout>

@@ -1,0 +1,75 @@
+---
+title: 认证
+meta:
+  title: 认证 | Hocuspocus 文档
+  category: Hocuspocus
+---
+
+## 介绍
+
+通过 `onAuthenticate` 钩子，你可以检查客户端是否已认证并被授权查看当前文档。在实际应用中，这通常是向 API 发起请求、数据库查询或其他操作。
+
+## 示例
+
+当抛出错误或拒绝返回的 Promise 时，将终止与客户端的连接（参见[服务器钩子生命周期](/hocuspocus/server/hooks#lifecycle)）。如果客户端已被授权和认证，你还可以返回上下文数据，例如用户 id，这些数据将在其他钩子中可访问。但这并非必须。
+
+有关该钩子及其负载的更多信息，请查看其[章节](/hocuspocus/server/hooks#on-authenticate)。
+
+```js
+import { Server } from "@hocuspocus/server";
+
+const server = new Server({
+  async onAuthenticate(data) {
+    const { token } = data;
+
+    // 示例：测试用户是否通过客户端传递的 token 认证
+    if (token !== "super-secret-token") {
+      throw new Error("未授权！");
+    }
+
+    // 你可以设置上下文数据，以便在其他钩子中使用
+    return {
+      user: {
+        id: 1234,
+        name: "John",
+      },
+    };
+  },
+});
+
+server.listen();
+```
+
+在客户端，你可以将 "token" 参数作为 Hocuspocus 选项之一传递，如下所示：
+
+```js
+new HocuspocusProvider({
+  url: "ws://127.0.0.1:1234",
+  name: "example-document",
+  document: ydoc,
+  token: "super-secret-token",
+});
+```
+
+## 只读模式
+
+如果你想限制当前用户只能读取文档及其更新，而不能应用更新，可以在 `onAuthenticate` 钩子的负载中使用 `connection` 属性：
+
+```js
+import { Server } from "@hocuspocus/server";
+
+const usersWithWriteAccess = ["jane", "john", "christina"];
+
+const server = new Server({
+  async onAuthenticate(data): Doc {
+    // 示例代码，通过请求参数检查当前用户是否拥有写权限。
+    // 在实际应用中，你可能会通过 token 从数据库获取用户信息
+    if (!usersWithWriteAccess.includes(data.requestParameters.get("user"))) {
+      // 将连接设置为只读
+      data.connection.readOnly = true;
+    }
+  },
+});
+
+server.listen();
+```

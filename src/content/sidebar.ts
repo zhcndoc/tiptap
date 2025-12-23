@@ -16,7 +16,7 @@ export const sidebarConfig: SidebarConfig = {
         },
         {
           href: '/resources/whats-new',
-          title: 'V3 有什么新内容',
+          title: "3.0 有哪些新功能",
         },
       ],
     },
@@ -42,12 +42,16 @@ export const sidebarConfig: SidebarConfig = {
           title: '内容 AI',
         },
         {
-          href: '/collaboration/documents/history',
-          title: '历史',
+          href: '/collaboration/documents/snapshot',
+          title: '快照',
         },
         {
           href: '/conversion/getting-started/overview',
           title: '转换',
+        },
+        {
+          href: '/pages/getting-started/overview',
+          title: '页面',
         },
         {
           href: '/collaboration/documents/semantic-search',
@@ -78,7 +82,11 @@ export const sidebarConfig: SidebarConfig = {
         },
         {
           href: '/resources/changelog',
-          title: '更新日志',
+          title: 'Editor changelog',
+        },
+        {
+          href: '/resources/incidents',
+          title: 'Incidents',
         },
         {
           href: 'https://tiptap.dev/pro-license',

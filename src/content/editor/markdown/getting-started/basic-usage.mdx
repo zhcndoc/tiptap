@@ -1,0 +1,266 @@
+---
+title: 基本用法
+tags:
+  - type: beta
+meta:
+  title: Markdown 基本用法 | Tiptap 编辑器文档
+  description: 学习在 Tiptap 中使用 Markdown 的基本操作。本指南涵盖解析、序列化及常见任务。
+  category: 编辑器
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+本指南涵盖使用 Markdown 的核心操作：将 Markdown 解析到编辑器中，以及将编辑器内容序列化回 Markdown。
+
+## 从编辑器获取 Markdown
+
+使用 `getMarkdown()` 将编辑器内容序列化为 Markdown：
+
+```typescript
+const markdown = editor.getMarkdown()
+console.log(markdown)
+// # Hello
+//
+// 这是一个 **测试**。
+```
+
+<CodeDemo src="https://embed.tiptap.dev/preview/Markdown/Serialize" />
+
+## 从 Markdown 设置内容
+
+所有内容命令均支持 `contentType` 选项：
+
+```typescript
+// 1. 初始化内容
+const editor = new Editor({
+  extensions: [StarterKit, Markdown],
+  content: '# Hello World\n\n这是 **markdown**！',
+  contentType: 'markdown',
+})
+
+// 2. 替换所有内容
+editor.commands.setContent('# 新内容', { contentType: 'markdown' })
+
+// 3. 在光标处插入
+editor.commands.insertContent('**加粗** 文本', { contentType: 'markdown' })
+
+// 4. 在指定位置插入
+editor.commands.insertContentAt(10, '## 标题', { contentType: 'markdown' })
+
+// 5. 替换一个范围
+editor.commands.insertContentAt({ from: 10, to: 20 }, '**替换内容**', { contentType: 'markdown' })
+```
+
+<CodeDemo src="https://embed.tiptap.dev/preview/Markdown/Parse" />
+
+## 直接使用 MarkdownManager
+
+若需更细粒度控制，可通过 `editor.markdown` 访问 `MarkdownManager`：
+
+```typescript
+// 解析 Markdown 到 JSON
+const json = editor.markdown.parse('# Hello World')
+console.log(json)
+// { type: 'doc', content: [...] }
+
+// 序列化 JSON 到 Markdown
+const markdown = editor.markdown.serialize(json)
+console.log(markdown)
+// # Hello World
+```
+
+这在编辑器上下文之外处理 JSON 内容时非常有用。
+
+## GitHub 风格 Markdown (GFM)
+
+启用 GFM 以支持表格和任务列表等功能：
+
+```typescript
+import { Markdown } from '@tiptap/markdown'
+import StarterKit from '@tiptap/starter-kit'
+import Table from '@tiptap/extension-table'
+import TableRow from '@tiptap/extension-table-row'
+import TableCell from '@tiptap/extension-table-cell'
+import TableHeader from '@tiptap/extension-table-header'
+import TaskList from '@tiptap/extension-task-list'
+import TaskItem from '@tiptap/extension-task-item'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    Table,
+    TableRow,
+    TableCell,
+    TableHeader,
+    TaskList,
+    TaskItem,
+    Markdown.configure({
+      markedOptions: { gfm: true },
+    }),
+  ],
+})
+```
+
+## 行内格式化
+
+标准 Markdown 格式自动生效：
+
+```typescript
+const markdown = `
+**加粗文本** 或 __加粗文本__
+*斜体文本* 或 _斜体文本_
+***加粗且斜体***
+[链接文本](https://example.com)
+\`行内代码\`
+`
+
+editor.commands.setContent(markdown, { contentType: 'markdown' })
+const result = editor.getMarkdown() // 格式化保持不变
+```
+
+## 处理块元素
+
+标题、列表、代码块等块级元素均按预期工作：
+
+### 标题
+
+```typescript
+const markdown = `
+# 标题 1
+## 标题 2
+### 标题 3
+#### 标题 4
+##### 标题 5
+###### 标题 6
+`
+```
+
+### 列表
+
+```typescript
+// 无序列表
+const markdown = `
+- 项目 1
+- 项目 2
+  - 嵌套项目 2.1
+  - 嵌套项目 2.2
+- 项目 3
+`
+
+// 有序列表
+const markdown = `
+1. 第一项
+2. 第二项
+   1. 嵌套项目 2.1
+   2. 嵌套项目 2.2
+3. 第三项
+`
+```
+
+### 代码块
+
+```typescript
+const markdown = `
+\`\`\`javascript
+function hello() {
+  console.log('Hello World')
+}
+\`\`\`
+`
+```
+
+### 块引用
+
+```typescript
+const markdown = `
+> 这是一个块引用。
+> 它可以跨多行。
+>
+> > 并且可以嵌套。
+`
+```
+
+## 处理 Markdown 中的 HTML
+
+Markdown 扩展可利用 Tiptap 现有的 `parseHTML` 方法解析 Markdown 中嵌入的 HTML：
+
+```typescript
+const markdown = `
+# 标题
+
+<div class="custom">
+  <p>此 HTML 将被解析</p>
+</div>
+
+常规 **Markdown** 继续。
+`
+
+editor.commands.setContent(markdown, { contentType: 'markdown' })
+```
+
+HTML 会根据扩展的 `parseHTML` 规则解析，允许你支持自定义 HTML 节点。
+
+## 最佳实践
+
+**设置 Markdown 内容时，务必使用 `contentType` 并设为 `markdown`**（否则会被当作 HTML 处理）：
+
+```typescript
+editor.commands.setContent(markdown, { contentType: 'markdown' })
+```
+
+**包含所有必要扩展，否则可能丢失内容**：
+
+```typescript
+const editor = new Editor({
+  extensions: [StarterKit, Markdown], // StarterKit 覆盖大多数常用节点
+})
+```
+
+**测试往返转换**，确保自定义的 Markdown 内容在解析 → 序列化后保持一致：
+
+```typescript
+editor.commands.setContent('# Hello **World**', { contentType: 'markdown' })
+const result = editor.getMarkdown() // 应与原文相同
+```
+
+## 关键组件
+
+### `MarkdownManager`
+
+`MarkdownManager` 类是处理解析和序列化的核心引擎。它：
+
+- 封装并配置 MarkedJS 实例
+- 维护扩展处理程序的注册表
+- 创建 [Lexer](../glossary/#lexer) 实例并注册所有 [Tokenizers](../glossary/#tokenizer)
+- 协调 Markdown 令牌和 Tiptap JSON 节点之间的关系
+
+### `Markdown` 扩展
+
+`Markdown` 扩展是你添加到编辑器中的主要扩展，提供：
+
+- 重写编辑器所有 **内容相关** 命令以支持 Markdown 输入/输出
+- `getMarkdown()` 方法用于将内容序列化为 Markdown
+- 带有 `contentType: 'markdown'` 选项的 `setContent()` 命令来解析 Markdown 输入
+- 通过 `editor.markdown` 访问 [`MarkdownManager`](#markdownmanager) 实例
+
+### 扩展处理程序
+
+每个 Tiptap 扩展都可以通过配置扩展提供 Markdown 支持：
+
+```typescript
+const MyExtension = Node.create({
+  // ...
+
+  renderMarkdown: (token, helpers) => { /* ... */ },
+  parseMarkdown: (node, helpers) => { /* ... */ },
+  markdownTokenizer: { /* ... */ },
+})
+```
+
+这些处理程序实现 Markdown 令牌和 Tiptap 节点之间双向转换，并由 [`MarkdownManager`](../glossary/#markdownmanager) 自动注册，基于它们创建 [Tokenizers](../glossary/#tokenizer) 并注册给 [Lexer](../glossary/#lexer)。
+
+深入了解：
+
+- [`renderMarkdown`](../advanced-usage/custom-serializing)
+- [`parseMarkdown`](../advanced-usage/custom-parsing)
+- [`markdownTokenizer`](../advanced-usage/custom-tokenizer)

@@ -15,6 +15,35 @@ ProseMirror 使用一个严格的 [Schema](/editor/core-concepts/schema)，它�
 
 文档存储在一个状态中。所有的更改都是作为事务应用到这个状态上的。状态详细描述了当前的内容、光标位置和选择。你可以挂钩到几个不同的 [事件](/editor/api/events)，例如在事务应用之前对其进行修改。
 
+文档在内部被存储为一个 [ProseMirror 节点](https://prosemirror.net/docs/ref/#model.Node)，并且可以通过调用 `editor.getJSON()` 以 Tiptap JSON 对象的形式获取。
+
+Tiptap JSON 是存储文档和操作文档的推荐格式。下面是一个示例的 Tiptap JSON 文档：
+
+```json
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": "center"
+      },
+      "content": [
+        { "type": "text", "text": "Hello, " },
+        {
+          "type": "text",
+          "text": "world",
+          "marks": [{ "type": "bold" }, { "type": "italic" }]
+        },
+        { "type": "text", "text": "!" }
+      ]
+    }
+  ]
+}
+```
+
+Tiptap JSON 文档是一个节点树。有些节点可以有子节点，但只有文本节点（`type: 'text'`）能包含文本内容。文本节点和其他内联节点可以附加标记。部分节点和标记可以具有属性。
+
 ## 扩展
 
 扩展为编辑器增加 [节点](/editor/extensions/nodes)、[标记](/editor/extensions/marks) 和/或 [功能](/editor/extensions/functionality)。许多扩展将它们的命令绑定到常用的 [键盘快捷键](/editor/core-concepts/keyboard-shortcuts)。

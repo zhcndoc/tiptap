@@ -1,9 +1,9 @@
 ---
-title: 将段落节点添加到您的编辑器
+title: 段落节点
 meta:
-  title: 图片上传节点 | Tiptap UI 组件
-  description: 将段落节点 UI 组件添加到您的 Tiptap 编辑器。更多信息请查看文档！
-  category: UI 组件
+  title: 段落节点 | Tiptap UI 组件
+  description: Add a paragraph node UI component to your Tiptap editor. More in the documentation!
+  category: UI Components
 component:
   name: 段落节点
   description: 添加段落 UI 节点组件
@@ -12,7 +12,9 @@ component:
   isCloud: false
   isOpen: true
   isNew: false
-  icon: 文本
+  icon: Text
+tags:
+  - type: mit
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
@@ -23,19 +25,11 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ## 安装
 
-您可以通过 Tiptap CLI（适用于 Vite 或 Next.js）添加该节点组件：
+你可以通过 Tiptap CLI 添加节点组件
 
 ```bash
-npx @tiptap/cli add paragraph-node
+npx @tiptap/cli@latest add paragraph-node
 ```
-
-### 手动集成
-
-对于除 Vite 或 Next.js 以外的框架，可从[开源仓库](https://github.com/ueberdosis/tiptap-ui-components/tree/main/apps/web/src/components/tiptap-node/paragraph-node)手动添加该节点组件。
-
-### 导入样式
-
-此组件需要您导入我们的样式，这些样式已添加到 `styles/keyframe-animation.scss` 和 `styles/_variables.scss`。
 
 ## 用法
 
@@ -60,7 +54,7 @@ export default function BasicEditor() {
     `,
   })
 
-  return <EditorContent editor={editor} className="control-showcase" />
+  return <EditorContent editor={editor} />
 }
 ```
 

@@ -1,0 +1,449 @@
+---
+title: 转换为下拉菜单
+meta:
+  title: 转换为下拉菜单 | Tiptap UI 组件
+  description: 用于在不同内容类型之间（如标题、列表和引用块）转换的块转换下拉菜单。详细内容请见文档。
+  category: UI 组件
+component:
+  name: 转换为下拉菜单
+  description: 添加一个下拉菜单，用于在不同内容类型之间转换块元素。
+  type: component
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: ArrowUpDown
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一款完全可访问的 Tiptap 编辑器块转换下拉菜单。通过直观的下拉菜单界面，在标题、段落、列表、引用块和代码块等不同内容类型之间转换。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/turn-into-dropdown" />
+
+## 安装
+
+通过 Tiptap CLI 添加组件：
+
+```bash
+npx @tiptap/cli@latest add turn-into-dropdown
+```
+
+## 组件
+
+### `<TurnIntoDropdown />`
+
+用于在 Tiptap 编辑器中转换块类型的综合下拉组件。
+
+#### 用法
+
+```tsx
+import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
+import { StarterKit } from '@tiptap/starter-kit'
+import { TurnIntoDropdown } from '@/components/tiptap-ui/turn-into-dropdown'
+
+import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
+import '@/components/tiptap-node/heading-node/heading-node.scss'
+import '@/components/tiptap-node/list-node/list-node.scss'
+import '@/components/tiptap-node/blockquote-node/blockquote-node.scss'
+import '@/components/tiptap-node/code-block-node/code-block-node.scss'
+
+export default function MyEditor() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit],
+    content: `
+      <h1>文档标题</h1>
+      <p>欢迎使用富文本编辑器。您可以将此段落转换为不同的块类型。</p>
+      <ul>
+        <li>转换任何块元素</li>
+        <li>从多种内容类型中选择</li>
+        <li>在改变结构时保持内容不变</li>
+      </ul>
+    `,
+  })
+
+  return (
+    <EditorContext.Provider value={{ editor }}>
+      <div className="toolbar">
+        <TurnIntoDropdown
+          editor={editor}
+          hideWhenUnavailable={false}
+          blockTypes={['paragraph', 'heading', 'bulletList', 'orderedList', 'blockquote']}
+          portal={false}
+          useCardLayout={true}
+          onOpenChange={(isOpen) => console.log('下拉菜单切换:', isOpen)}
+        />
+      </div>
+
+      <EditorContent editor={editor} role="presentation" />
+    </EditorContext.Provider>
+  )
+}
+```
+
+#### 属性
+
+| 名称                  | 类型                        | 默认               | 说明                                             |
+| --------------------- | --------------------------- | ------------------ | ------------------------------------------------ |
+| `editor`              | `Editor \| null`            | `undefined`        | Tiptap 编辑器实例                                |
+| `hideWhenUnavailable` | `boolean`                   | `false`            | 当块转换不可用时隐藏下拉菜单                      |
+| `blockTypes`          | `string[]`                  | 所有支持的类型     | 下拉菜单中显示的块类型                            |
+| `portal`              | `boolean`                   | `false`            | 是否在 portal 中渲染下拉菜单                      |
+| `useCardLayout`       | `boolean`                   | `true`             | 是否为下拉内容使用卡片布局                        |
+| `onOpenChange`        | `(isOpen: boolean) => void` | `undefined`        | 下拉菜单状态变化时的回调                          |
+
+### `<TurnIntoDropdownContent />`
+
+渲染可用块类型选项的下拉内容组件。
+
+#### 用法
+
+```tsx
+import { TurnIntoDropdownContent } from '@/components/tiptap-ui/turn-into-dropdown'
+
+function CustomDropdownContent() {
+  return (
+    <TurnIntoDropdownContent
+      blockTypes={['paragraph', 'heading', 'bulletList']}
+      useCardLayout={false}
+    />
+  )
+}
+```
+
+#### 属性
+
+| 名称            | 类型       | 默认   | 说明                              |
+| --------------- | ---------- | ------ | --------------------------------- |
+| `blockTypes`    | `string[]` | 全部   | 显示的块类型列表                  |
+| `useCardLayout` | `boolean`  | `true` | 是否将内容包装在卡片布局中        |
+
+## Hooks
+
+### `useTurnIntoDropdown()`
+
+一个自定义 Hook，允许完全控制渲染和行为，打造自己的块转换下拉菜单。
+
+#### 用法
+
+```tsx
+import { useTurnIntoDropdown } from '@/components/tiptap-ui/turn-into-dropdown'
+
+function MyTurnIntoDropdown() {
+  const {
+    isVisible,
+    canToggle,
+    isOpen,
+    activeBlockType,
+    handleOpenChange,
+    filteredOptions,
+    label,
+    Icon,
+  } = useTurnIntoDropdown({
+    editor: myEditor,
+    hideWhenUnavailable: true,
+    blockTypes: ['paragraph', 'heading', 'bulletList'],
+    onOpenChange: (isOpen) => console.log('下拉菜单切换:', isOpen),
+  })
+
+  if (!isVisible) return null
+
+  return (
+    <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
+      <DropdownMenuTrigger asChild>
+        <button disabled={!canToggle} aria-label={label}>
+          <span>{activeBlockType?.label || '文本'}</span>
+          <Icon />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {filteredOptions.map((option) => (
+          <DropdownMenuItem key={option.type}>{option.label}</DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+```
+
+#### 属性
+
+| 名称                  | 类型                        | 默认       | 说明                                             |
+| --------------------- | --------------------------- | ---------- | ------------------------------------------------ |
+| `editor`              | `Editor \| null`            | `undefined`| Tiptap 编辑器实例                                |
+| `hideWhenUnavailable` | `boolean`                   | `false`    | 当块转换不可用时隐藏下拉菜单                      |
+| `blockTypes`          | `string[]`                  | 所有类型   | 下拉菜单中显示的块类型                            |
+| `onOpenChange`        | `(isOpen: boolean) => void` | `undefined`| 下拉菜单状态变化时的回调                          |
+
+#### 返回值
+
+| 名称               | 类型                      | 说明                                |
+| ------------------ | ------------------------- | ----------------------------------- |
+| `isVisible`        | `boolean`                 | 是否应渲染下拉菜单                   |
+| `canToggle`        | `boolean`                 | 当前是否允许转换块                   |
+| `isOpen`           | `boolean`                 | 下拉菜单当前是否打开                 |
+| `setIsOpen`        | `(open: boolean) => void` | 设置下拉菜单打开状态的函数           |
+| `activeBlockType`  | `BlockTypeOption`         | 当前激活的块类型信息                 |
+| `handleOpenChange` | `(open: boolean) => void` | 处理下拉菜单开关的函数               |
+| `filteredOptions`  | `BlockTypeOption[]`       | 过滤后的可用块类型选项列表           |
+| `label`            | `string`                  | 下拉菜单的无障碍标签文本             |
+| `Icon`             | `React.FC`                | 下拉菜单触发器的图标组件             |
+
+## 块类型
+
+转换为下拉菜单支持多种块类型之间的转换：
+
+### 支持的块类型
+
+- **paragraph**：普通文本段落
+- **heading**：标题（1、2、3 级）
+- **bulletList**：无序（项目符号）列表
+- **orderedList**：有序（编号）列表
+- **taskList**：带复选框的任务列表
+- **blockquote**：引用块，用于强调文本
+- **codeBlock**：带语法高亮的代码块
+
+### 块类型选项
+
+每个块类型包含：
+
+```tsx
+interface BlockTypeOption {
+  type: string // 节点类型名称
+  label: string // 显示标签
+  level?: number // 仅用于标题（1、2、3）
+  isActive: (editor: Editor) => boolean // 用于检查是否激活的函数
+}
+```
+
+## 工具函数
+
+### `canTurnInto(editor, allowedBlockTypes?)`
+
+检测当前编辑器状态是否可以执行块转换。
+
+```tsx
+import { canTurnInto } from '@/components/tiptap-ui/turn-into-dropdown'
+
+const canTransform = canTurnInto(editor, ['paragraph', 'heading'])
+if (canTransform) {
+  console.log('块转换可用')
+}
+```
+
+#### 参数
+
+| 名称                | 类型             | 说明                           |
+| ------------------- | ---------------- | ------------------------------ |
+| `editor`            | `Editor \| null` | Tiptap 编辑器实例              |
+| `allowedBlockTypes` | `string[]`       | 可选，允许的块类型数组          |
+
+#### 返回值
+
+`boolean` - 是否可以执行块转换。
+
+### `getFilteredBlockTypeOptions(blockTypes?)`
+
+获取基于指定类型过滤后的块类型选项。
+
+```tsx
+import { getFilteredBlockTypeOptions } from '@/components/tiptap-ui/turn-into-dropdown'
+
+const options = getFilteredBlockTypeOptions(['paragraph', 'heading', 'bulletList'])
+console.log(
+  '可用选项:',
+  options.map((o) => o.label),
+)
+```
+
+#### 参数
+
+| 名称         | 类型       | 说明                     |
+| ------------ | ---------- | ------------------------ |
+| `blockTypes` | `string[]` | 可选，过滤的块类型列表   |
+
+#### 返回值
+
+`BlockTypeOption[]` - 过滤后的块类型选项数组。
+
+### `getActiveBlockType(editor, blockTypes?)`
+
+获取当前激活的块类型（来自可用选项）。
+
+```tsx
+import { getActiveBlockType } from '@/components/tiptap-ui/turn-into-dropdown'
+
+const activeType = getActiveBlockType(editor, ['paragraph', 'heading'])
+console.log('当前块类型:', activeType?.label)
+```
+
+#### 参数
+
+| 名称         | 类型             | 说明                     |
+| ------------ | ---------------- | ------------------------ |
+| `editor`     | `Editor \| null` | Tiptap 编辑器实例        |
+| `blockTypes` | `string[]`       | 可选，允许的块类型列表   |
+
+#### 返回值
+
+`BlockTypeOption` - 当前激活的块类型选项。
+
+### `shouldShowTurnInto(params)`
+
+根据编辑器状态判断是否应该显示转换为下拉菜单。
+
+```tsx
+import { shouldShowTurnInto } from '@/components/tiptap-ui/turn-into-dropdown'
+
+const shouldShow = shouldShowTurnInto({
+  editor: myEditor,
+  hideWhenUnavailable: true,
+  blockTypes: ['paragraph', 'heading'],
+})
+```
+
+#### 参数
+
+| 名称                         | 类型             | 说明                                   |
+| ---------------------------- | ---------------- | -------------------------------------- |
+| `params.editor`              | `Editor \| null` | Tiptap 编辑器实例                      |
+| `params.hideWhenUnavailable` | `boolean`        | 是否在不可用时隐藏                     |
+| `params.blockTypes`          | `string[]`       | 可选，允许的块类型列表                 |
+
+#### 返回值
+
+`boolean` - 是否应显示下拉菜单。
+
+## 行为与限制
+
+### 选区要求
+
+转换为下拉菜单适用于不同选区类型：
+
+- **文本选区**：在块元素内有效
+- **节点选区**：整块被选中时有效
+- **空选区**：光标置于块内时有效
+
+### 支持的转换
+
+该组件智能处理不同块类型间的转换：
+
+- **内容保留**：转换时文本内容保持不变
+- **结构变更**：块结构变化，但内联格式保留
+- **列表处理**：支持不同列表类型转换
+- **标题级别**：允许选择不同标题级别
+
+### 编辑器状态依赖
+
+- **可编辑编辑器**：仅在编辑器可编辑时生效
+- **有效块上下文**：光标需处于可转换块内
+- **扩展可用性**：需要相关扩展（StarterKit 通常覆盖大部分）
+
+## 集成示例
+
+### 使用自定义块类型
+
+```tsx
+function EditorWithCustomBlocks() {
+  const customBlockTypes = ['paragraph', 'heading', 'bulletList', 'blockquote']
+
+  return <TurnIntoDropdown blockTypes={customBlockTypes} hideWhenUnavailable={true} />
+}
+```
+
+### 使用 Portal 渲染
+
+```tsx
+function FloatingTurnIntoDropdown() {
+  return (
+    <TurnIntoDropdown
+      portal={true} // 在 portal 中渲染以获得更好层级控制
+      useCardLayout={false} // 简化布局
+      hideWhenUnavailable={true}
+    />
+  )
+}
+```
+
+### 状态跟踪示例
+
+```tsx
+function EditorWithStateTracking() {
+  const [currentBlockType, setCurrentBlockType] = useState<string>('paragraph')
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      // 下拉关闭时更新状态
+      const activeType = getActiveBlockType(editor)
+      setCurrentBlockType(activeType?.type || 'paragraph')
+    }
+  }
+
+  return (
+    <div>
+      <p>当前块类型：{currentBlockType}</p>
+      <TurnIntoDropdown onOpenChange={handleOpenChange} />
+    </div>
+  )
+}
+```
+
+### 自定义下拉菜单实现
+
+```tsx
+function CustomTurnIntoDropdown() {
+  const { isVisible, canToggle, activeBlockType, filteredOptions, handleOpenChange } =
+    useTurnIntoDropdown({
+      hideWhenUnavailable: true,
+      blockTypes: ['paragraph', 'heading', 'bulletList', 'orderedList'],
+    })
+
+  if (!isVisible) return null
+
+  return (
+    <div className="custom-turn-into">
+      <select
+        disabled={!canToggle}
+        value={activeBlockType?.type || 'paragraph'}
+        onChange={(e) => {
+          const option = filteredOptions.find((opt) => opt.type === e.target.value)
+          if (option?.onClick) {
+            option.onClick()
+          }
+        }}
+      >
+        {filteredOptions.map((option) => (
+          <option key={option.type} value={option.type}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+```
+
+## 依赖项
+
+### 依赖包
+
+- `@tiptap/react` - Tiptap 核心 React 集成
+
+### 扩展
+
+提供你想支持块类型的相关扩展：
+
+- `@tiptap/starter-kit` - 提供大部分常用块类型
+- 针对特定块类型的单独扩展
+
+### 引用组件
+
+- `use-tiptap-editor`（hook）
+- `text-button`、`heading-button`、`list-button`、`blockquote-button`、`code-block-button`（UI 组件）
+- `button`、`button-group`（基础组件）
+- `dropdown-menu`（基础组件）
+- `card`（基础组件）
+- `chevron-down-icon`（图标）

@@ -14,6 +14,7 @@ import { DocsSidebar } from '../SidebarRenderer'
 import { MobileNavigationDropdown } from '../MobileNavigationDropdown'
 import { SidebarTableOfContent } from '../SidebarTableOfContent'
 // import { VersionSwitch } from '../VersionSwitch'
+import styles from './Layout.module.css'
 import Link from '@/components/Link'
 import { cn } from '@/utils'
 import { getAllMetadata } from '@/server/getAllMetadata'
@@ -31,7 +32,7 @@ const PageEditFooter = async () => {
 }
 
 export const LayoutCTABar = () => {
-  if (!CTA_BAR) {
+  if (!CTA_BAR || !CTA_BAR.enabled) {
     return null
   }
 
@@ -41,7 +42,10 @@ export const LayoutCTABar = () => {
     <Link
       href={CTA_BAR.url}
       target={target}
-      className="flex items-center justify-center gap-2 px-2 py-3 text-sm font-semibold text-center text-white bg-gradient-to-r from-purple-600 to-purple-800 group"
+      className={cn(
+        styles.notificationBar,
+        'flex items-center justify-center gap-2 px-2 py-3 text-sm font-semibold text-center text-white group',
+      )}
     >
       <span className="leading-none">{CTA_BAR.text}</span>
       <ArrowRightIcon className="transition size-4 group-hover:translate-x-1" />
@@ -210,11 +214,7 @@ export const LayoutContent = forwardRef<HTMLDivElement, LayoutContentProps>(
           </div>
           <div className="flex flex-col items-start justify-between gap-4 text-sm mt-14">
             {/* <div className="flex flex-wrap items-center flex-none gap-3">
-              <Link
-                className="hover:underline"
-                target="_blank"
-                href="https://tiptap.dev/docs/hocuspocus/introduction"
-              >
+              <Link className="hover:underline" href="/hocuspocus/getting-started/overview">
                 Hocuspocus
               </Link>
               <Link

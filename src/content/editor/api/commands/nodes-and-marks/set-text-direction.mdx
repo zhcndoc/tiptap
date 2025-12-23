@@ -1,0 +1,47 @@
+---
+title: setTextDirection 命令
+meta:
+  title: setTextDirection 命令 | Tiptap 编辑器文档
+  description: 使用 setTextDirection 命令为节点设置文本方向。控制 LTR、RTL 和自动方向，以实现正确的双向文本渲染。
+  category: 编辑器
+---
+
+`setTextDirection` 命令为当前选区或指定位置的节点设置文本方向。这对于控制从右到左（RTL）语言（如阿拉伯语和希伯来语）或双向文本内容非常有用。
+
+另请参见：[unsetTextDirection](/editor/api/commands/nodes-and-marks/unset-text-direction)
+
+## 参数
+
+### direction
+
+要设置的文本方向。可以是 `'ltr'`（从左到右）、`'rtl'`（从右到左）或 `'auto'`（根据内容自动检测）。
+
+### position
+
+可选。应用方向的位置或范围。如果未提供，命令将使用当前选区。
+
+可以是：
+- 表示具体位置的数字
+- 包含 `from` 和 `to` 属性的范围对象
+
+## 示例
+
+```js
+// 为当前选区设置 RTL 方向
+editor.commands.setTextDirection('rtl')
+
+// 为当前选区设置 LTR 方向
+editor.commands.setTextDirection('ltr')
+
+// 为当前选区设置自动方向
+editor.commands.setTextDirection('auto')
+
+// 在指定位置设置方向
+editor.commands.setTextDirection('rtl', 5)
+
+// 在指定范围设置方向
+editor.commands.setTextDirection('ltr', { from: 0, to: 10 })
+
+// 与其他命令链式调用
+editor.chain().focus().setTextDirection('rtl').run()
+```

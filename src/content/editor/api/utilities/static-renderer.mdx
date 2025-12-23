@@ -178,7 +178,7 @@ function renderToReactElement(options: {
 - `options.unhandledNode`: 当遇到未处理的节点时调用的函数。
 - `options.unhandledMark`: 当遇到未处理的标记时调用的函数。
 
-### React NodeViews
+### React 节点视图
 
 静态渲染器不自动支持节点视图，因此您需要为每个希望作为节点视图渲染的节点类型提供映射。以下是如何将节点视图渲染为 React 组件的示例：
 
@@ -370,7 +370,7 @@ import { renderToReactElement } from '@tiptap/static-renderer/pm/react'
 import { renderToHTMLString, renderToMarkdown, renderToReactElement } from '@tiptap/static-renderer'
 ```
 
-在 `json` 命名空间中的包也可用于无运行时依赖地静态渲染。但是，这些包无法自动将 Prosemirror 节点和标记映射到目标格式。您需要为这些包中的每个节点和标记提供自定义映射。
+Packages in the `json` namespace are also available for statically rendering without a runtime dependency on any ProseMirror packages. But, these packages cannot automatically map Prosemirror nodes and marks to the target format. You will need to provide custom mappings for every node and mark in these packages.
 
 ```ts
 // 仅 HTML 渲染器

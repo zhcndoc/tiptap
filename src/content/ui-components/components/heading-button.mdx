@@ -13,6 +13,8 @@ component:
   isOpen: true
   isNew: false
   icon: Heading
+tags:
+  - type: mit
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
@@ -26,7 +28,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 你可以通过 Tiptap CLI 添加此组件（适用于 Vite 或 Next.js）
 
 ```bash
-npx @tiptap/cli add heading-button
+npx @tiptap/cli@latest add heading-button
 ```
 
 ### 手动集成
@@ -59,12 +61,22 @@ export default function MyEditor() {
 
   return (
     <EditorContext.Provider value={{ editor }}>
-      <div className="tiptap-button-group" data-orientation="horizontal">
-        <HeadingButton level={1}></HeadingButton>
-        <HeadingButton level={2}></HeadingButton>
-        <HeadingButton level={3}></HeadingButton>
-        <HeadingButton level={4}></HeadingButton>
-      </div>
+      <HeadingButton
+        editor={editor}
+        level={1}
+        text="标题 1"
+        hideWhenUnavailable={true}
+        showShortcut={true}
+        onToggled={() => console.log(`标题 ${level} 已切换！`)}
+      />
+      <HeadingButton
+        editor={editor}
+        level={2}
+        text="标题 2"
+        hideWhenUnavailable={true}
+        showShortcut={true}
+        onToggled={() => console.log(`标题 ${level} 已切换！`)}
+      />
 
       <EditorContent editor={editor} role="presentation" />
     </EditorContext.Provider>
@@ -80,6 +92,108 @@ export default function MyEditor() {
 | level                | 1 \| 2 \| 3 \| 4 \| 5 \| 6   | 必填     | 标题级别                                          |
 | hideWhenUnavailable  | boolean                      | false    | 当按钮不可用时是否隐藏                              |
 | text                 | string                       | -        | 图标旁显示的文本                                   |
+| onToggled            | () => void                   | -        | 标题切换成功后触发的回调函数                        |
+| showShortcut         | boolean                      | false    | 是否显示快捷键提示                                 |
+
+## 钩子（Hooks）
+
+### `useHeading()`
+
+一个自定义钩子，用于构建你自己的标题按钮，支持完全控制渲染和行为。
+
+#### 用法
+
+```tsx
+function MyHeadingButton() {
+  const { isVisible, isActive, canToggle, handleToggle, label, shortcutKeys, Icon } = useHeading({
+    editor: myEditor,
+    level: 3,
+    hideWhenUnavailable: true,
+    onToggled: () => console.log('标题 3 已切换！'),
+  })
+
+  if (!isVisible) return null
+
+  return (
+    <button onClick={handleToggle} disabled={!canToggle} aria-label={label} aria-pressed={isActive}>
+      <Icon />
+      {label}
+      {shortcutKeys && <HeadingShortcutBadge level={3} shortcutKeys={shortcutKeys} />}
+    </button>
+  )
+}
+```
+
+#### 属性
+
+| 名称                  | 类型                         | 默认值   | 说明                                              |
+| --------------------- | ---------------------------- | -------- | ------------------------------------------------- |
+| editor                | Editor \| null               | null     | Tiptap 编辑器实例                                |
+| level                 | 1 \| 2 \| 3 \| 4 \| 5 \| 6   | 必填     | 标题级别                                          |
+| hideWhenUnavailable   | boolean                      | false    | 当标题不可用时是否隐藏                            |
+| onToggled             | () => void                   | -        | 标题切换成功后触发的回调函数                        |
+
+#### 返回值
+
+| 名称           | 类型             | 说明                                            |
+| -------------- | ---------------- | ----------------------------------------------- |
+| isVisible      | boolean          | 按钮是否应该渲染                                  |
+| isActive       | boolean          | 当前标题级别是否处于激活状态                        |
+| canToggle      | boolean          | 是否可以切换到该标题                                |
+| handleToggle   | () => boolean    | 切换标题格式的函数                                  |
+| label          | string           | 按钮的无障碍标签文本                                |
+| shortcutKeys   | string           | 该标题级别的键盘快捷键                              |
+| Icon           | React.FC         | 标题级别对应的图标组件                              |
+
+## 工具函数
+
+### `canToggle(editor, level?, turnInto?)`
+
+检查当前编辑器状态是否可以切换标题。
+
+```tsx
+import { canToggle } from '@/components/tiptap-ui/heading-button'
+
+const canToggleH2 = canToggle(editor, 2) // 检查是否可切换为标题 2
+const canTurnInto = canToggle(editor, 1, true) // 检查是否可以转换成标题 1
+```
+
+### `isHeadingActive(editor, level?)`
+
+检查指定标题级别当前是否处于激活状态。
+
+```tsx
+import { isHeadingActive } from '@/components/tiptap-ui/heading-button'
+
+const isH1Active = isHeadingActive(editor, 1) // 检查标题 1 是否激活
+const isAnyHeadingActive = isHeadingActive(editor) // 检查是否有任意标题激活
+```
+
+### `toggleHeading(editor, level)`
+
+以编程方式切换当前选区的标题格式。
+
+```tsx
+import { toggleHeading } from '@/components/tiptap-ui/heading-button'
+
+const success = toggleHeading(editor, 3) // 切换为标题 3
+if (success) {
+  console.log('标题切换成功！')
+}
+```
+
+## 键盘快捷键
+
+标题按钮支持与标题级别对应的键盘快捷键，自动注册如下：
+
+- **Ctrl + Alt + 1**：切换到标题 1
+- **Ctrl + Alt + 2**：切换到标题 2
+- **Ctrl + Alt + 3**：切换到标题 3
+- **Ctrl + Alt + 4**：切换到标题 4
+- **Ctrl + Alt + 5**：切换到标题 5
+- **Ctrl + Alt + 6**：切换到标题 6
+
+在使用 `<HeadingButton />` 组件或 `useHeading()` 钩子时，快捷键会自动注册。每个标题级别都有专属快捷键。
 
 ## 依赖组件
 

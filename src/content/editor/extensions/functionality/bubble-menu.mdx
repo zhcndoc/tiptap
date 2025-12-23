@@ -45,10 +45,13 @@ npm install @tiptap/extension-bubble-menu
 
 默认: `null`
 
+在 React 版本的 `BubbleMenu` 中，可通过 `BubbleMenu` 组件的 `ref` 属性访问 DOM 元素，方法是将 [ref 传递](https://react.dev/learn/manipulating-the-dom-with-refs) 给它。
+
 ### updateDelay
 
-`BubbleMenu` 使 `update` 方法去抖动，以允许气泡菜单不是在每次选择更新时进行更新。这个延迟可以以毫秒为单位来控制。
-BubbleMenuPlugin 默认将有 250 毫秒的延迟。通过将延迟设置为 `0` 可以停用此功能，从而停用去抖动。
+`BubbleMenu` 会对 `update` 方法进行去抖动，以允许气泡菜单不会在每次选择更新时进行更新。此延迟可以以毫秒为单位进行控制。
+
+`BubbleMenuPlugin` 默认有 250 毫秒的延迟。将延迟设置为 `0` 可禁用该功能，从而禁用去抖动。
 
 类型: `Number`
 
@@ -56,7 +59,7 @@ BubbleMenuPlugin 默认将有 250 毫秒的延迟。通过将延迟设置为 `0`
 
 ### resizeDelay
 
-`BubbleMenu` 对气泡菜单的大小计算进行去抖，以允许气泡菜单不在每次调整大小事件时更新。这个延迟可以以毫秒为单位来控制。
+`BubbleMenu` 会对气泡菜单大小的计算进行去抖动，以允许气泡菜单不会在每次调整大小事件时更新。此延迟可以以毫秒为单位进行控制。
 
 类型: `Number`
 
@@ -71,21 +74,21 @@ BubbleMenuPlugin 默认将有 250 毫秒的延迟。通过将延迟设置为 `0`
 默认: `{ strategy: 'absolute', placement: 'right' }`
 
 | 选项           | 类型                                   | 描述                                                                                                                                                         |
-| -------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `strategy`     | `string`                               | 定位策略。请参见 [这里](https://floating-ui.com/docs/computePosition#strategy)                                                                               |
-| `placement`    | `string`                               | 菜单的位置。请参见 [这里](https://floating-ui.com/docs/computePosition#placement)                                                                            |
+| -------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `strategy`     | `string`                              | 定位策略。请参见 [这里](https://floating-ui.com/docs/computePosition#strategy)                                                                               |
+| `placement`    | `string`                              | 菜单的位置。请参见 [这里](https://floating-ui.com/docs/computePosition#placement)                                                                            |
 | `offset`       | `number`, `OffsetOptions` 或 `boolean` | [偏移中间件选项](https://floating-ui.com/docs/offset#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                                |
-| `flip`         | `FlipOptions` 或 `boolean`             | [翻转中间件选项](https://floating-ui.com/docs/flip#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                                  |
-| `shift`        | `ShiftOptions` 或 `boolean`            | [移动中间件选项](https://floating-ui.com/docs/shift#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                                |
-| `arrow`        | `ArrowOptions` 或 `false`              | [箭头中间件选项](https://floating-ui.com/docs/arrow#options)。如果为 `false`，则禁用中间件                                                                |
-| `size`         | `SizeOptions` 或 `boolean`             | [大小中间件选项](https://floating-ui.com/docs/size#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                                  |
-| `autoPlacement`| `AutoPlacementOptions` 或 `boolean`    | [自动定位中间件选项](https://floating-ui.com/docs/autoPlacement#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                  |
-| `hide`         | `HideOptions` 或 `boolean`             | [隐藏中间件选项](https://floating-ui.com/docs/hide#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                               |
-| `inline`       | `InlineOptions` 或 `boolean`           | [内联中间件选项](https://floating-ui.com/docs/inline#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                            |
-| `onShow`        | `Function` or `undefined`              | A callback that is called when the menu is shown. This can be used to add custom logic or styles when the menu is displayed.                                 |
-| `onHide`        | `Function` or `undefined`              | A callback that is called when the menu is hidden. This can be used to add custom logic or styles when the menu is hidden.                                   |
-| `onUpdate`      | `Function` or `undefined`              | A callback that is called when the menu is updated. This can be used to add custom logic or styles when the menu is updated.                                 |
-| `onDestroy`     | `Function` or `undefined`              | A callback that is called when the menu is destroyed. This can be used to add custom logic or styles when the menu is removed.                               |
+| `flip`         | `FlipOptions` 或 `boolean`            | [翻转中间件选项](https://floating-ui.com/docs/flip#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                                  |
+| `shift`        | `ShiftOptions` 或 `boolean`           | [移动中间件选项](https://floating-ui.com/docs/shift#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                                |
+| `arrow`        | `ArrowOptions` 或 `false`             | [箭头中间件选项](https://floating-ui.com/docs/arrow#options)。如果为 `false`，则禁用中间件                                                                    |
+| `size`         | `SizeOptions` 或 `boolean`            | [大小中间件选项](https://floating-ui.com/docs/size#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                                  |
+| `autoPlacement`| `AutoPlacementOptions` 或 `boolean`   | [自动定位中间件选项](https://floating-ui.com/docs/autoPlacement#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                    |
+| `hide`         | `HideOptions` 或 `boolean`            | [隐藏中间件选项](https://floating-ui.com/docs/hide#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                                  |
+| `inline`       | `InlineOptions` 或 `boolean`          | [内联中间件选项](https://floating-ui.com/docs/inline#options)。如果为 `true`，则使用默认选项；如果为 `false`，则禁用中间件                                |
+| `onShow`       | `Function` 或 `undefined`             | 菜单显示时调用的回调函数。可用于在菜单显示时添加自定义逻辑或样式。                                                                                         |
+| `onHide`       | `Function` 或 `undefined`             | 菜单隐藏时调用的回调函数。可用于在菜单隐藏时添加自定义逻辑或样式。                                                                                         |
+| `onUpdate`     | `Function` 或 `undefined`             | 菜单更新时调用的回调函数。可用于在菜单更新时添加自定义逻辑或样式。                                                                                         |
+| `onDestroy`    | `Function` 或 `undefined`             | 菜单销毁时调用的回调函数。可用于在菜单移除时添加自定义逻辑或样式。                                                                                         |
 
 ### pluginKey
 
@@ -100,6 +103,22 @@ BubbleMenuPlugin 默认将有 250 毫秒的延迟。通过将延迟设置为 `0`
 一个回调，用于控制菜单是否应该显示。
 
 类型: `(props) => boolean`
+
+### appendTo
+
+气泡菜单应该被附加到 DOM 中的元素。可以是 `HTMLElement`，也可以是返回 `HTMLElement` 的回调函数。
+
+类型: `HTMLElement | (() => HTMLElement) | undefined`
+
+默认: `undefined`，菜单将附加到编辑器的父元素（`editor.view.dom.parentElement`）。
+
+### getReferencedVirtualElement
+
+一个回调，用于提供用于定位菜单的锚点坐标。应返回 Floating UI 预期的 [虚拟元素](https://floating-ui.com/docs/virtual-elements)。
+
+类型: `() => VirtualElement | null`
+
+默认: `null`，锚点由编辑器选区隐式确定。
 
 ## 源代码
 
@@ -180,4 +199,12 @@ new Editor({
     }),
   ],
 })
+```
+
+### 强制更新气泡菜单位置
+
+如果气泡菜单在初次渲染后尺寸发生变化，其位置不会自动调整。为了解决此问题，可以通过触发 `'updatePosition'` 事件强制更新气泡菜单的位置。
+
+```ts
+editor.commands.setMeta('bubbleMenu', 'updatePosition')
 ```

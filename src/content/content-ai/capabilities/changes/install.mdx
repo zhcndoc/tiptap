@@ -5,12 +5,12 @@ meta:
   description: 在你的编辑器中设置 Tiptap AI Changes 扩展。
   category: 内容 AI
 tags:
-  - type: team
   - type: beta
+  - type: deprecated
 ---
 
 import { Callout } from '@/components/ui/Callout'
-import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
@@ -25,6 +25,12 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 </Requirements>
 
 AI Changes 扩展作为 npm 包通过我们的私有注册表提供。请遵循以下步骤在你的项目中安装并设置它。
+
+<Callout title="已弃用" variant="warning">
+  此扩展正在被 AI Toolkit 取代，后者提供了更强大的功能和现代化的 API。虽然你可以继续使用此扩展，但我们推荐在新项目中使用 AI Toolkit。
+</Callout>
+
+<EnterpriseCalloutAuto variant="deprecated" renderMode="sidebar" />
 
 AI Changes 扩展发布在 Tiptap 私有 npm 注册表中。通过遵循[私有注册表指南](/guides/pro-extensions)集成该扩展。
 

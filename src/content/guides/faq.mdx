@@ -46,7 +46,7 @@ new Editor({
 
 ## 我的拖放功能无法正常工作
 
-一些库，比如 `react-dnd` 或 `react-beautiful-dnd` 可能会通过全局注册干扰 Tiptap 的拖放功能。
+一些库，比如 `react-dnd` 或 `react-beautiful-dnd` 可能会通过全局注册干扰 Tiptap 的拖放功能。  
 如果你正在使用这些库中的一个，你可能需要禁用它们（或者至少限制它们监听的元素），以使编辑器的拖放功能正常工作。
 
 ## 为什么同时有 `parseHTML` 和 `renderHTML`
@@ -58,18 +58,18 @@ new Editor({
 
 这使得 Tiptap 能够在内容表示上非常灵活。你可以将内容定义为 JSON，然后将其渲染为 HTML，或你可以将内容定义为 HTML，然后将其解析为 JSON。
 
-此外，`parseHTML` 和 `renderHTML` 也可以在不同的上下文中使用：
-`renderHTML` 在 _复制事件_ 中使用，因为你从编辑器中复制的内容需要序列化为 HTML 以进入剪贴板。
+此外，`parseHTML` 和 `renderHTML` 也可以在不同的上下文中使用：  
+`renderHTML` 在 _复制事件_ 中使用，因为你从编辑器中复制的内容需要序列化为 HTML 以进入剪贴板。  
 `parseHTML` 在 _粘贴事件_ 中使用，因为你剪贴板中的 HTML 被序列化为 HTML，需要解析为 JSON。
 
-在初次渲染时，如果你的内容被定义为 JSON，`parseHTML` 将完全被跳过，仅在粘贴时使用。
+在初次渲染时，如果你的内容被定义为 JSON，`parseHTML` 将完全被跳过，仅在粘贴时使用。  
 而你的 `renderHTML` 方法确定内容在编辑器内的 HTML 表示方式。
 
 `renderHTML` 可以在编辑器视图中通过节点视图和标记视图被覆盖，以允许对节点和标记的自定义渲染。
 
 ## 我想用 Tiptap 编辑 HTML 内容
 
-Tiptap 是基于 Prosemirror构建的，并不是一个任意的 HTML 编辑器，它是一个富文本编辑器，需要对正在编辑的 HTML 拥有完全的控制权来进行更改。Prosemirror 通过尝试以符合模式的方式解析内容来实现这一点（该模式源于你作为 Tiptap 扩展指定的节点和标记），这意味着不符合模式的内容将会丢失。这是一个权衡，Prosemirror 可以接受相当数量的 HTML 内容，并将其解析为结构化格式，但无法可靠地处理任意 HTML（在接受内容时比较宽松，但在输出时却很严格）。
+Tiptap 是基于 Prosemirror 构建的，并不是一个任意的 HTML 编辑器，它是一个富文本编辑器，需要对正在编辑的 HTML 拥有完全的控制权来进行更改。Prosemirror 通过尝试以符合模式的方式解析内容来实现这一点（该模式源于你作为 Tiptap 扩展指定的节点和标记），这意味着不符合模式的内容将会丢失。这是一个权衡，Prosemirror 可以接受相当数量的 HTML 内容，并将其解析为结构化格式，但无法可靠地处理任意 HTML（在接受内容时比较宽松，但在输出时却很严格）。  
 一个常见的情况是试图嵌套不同类型的标记，如：`<span class="my-class"><span style="color: red">可编辑文本</span></span>` 这两个标记无法这样嵌套，Prosemirror 将通过丢弃其中一个来试图修复这一点，以遵循标记无法相互包裹的规则。要解决此问题，输入到编辑器的 HTML 应该采用一个带有多个属性的元素的格式，如：`<span class="my-class" style="color: red">可编辑文本</span>`，Prosemirror 将正确解析这一格式，因为它试图将两个标记应用于文本。
 
 在 Prosemirror 中没有配置此行为的方法，因为解析任意 HTML 已经相当复杂。根据你试图解析的 HTML 来源，你可以：

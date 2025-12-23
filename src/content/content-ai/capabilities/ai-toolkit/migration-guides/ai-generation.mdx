@@ -1,0 +1,144 @@
+---
+title: 从 AI 生成迁移到 AI 工具包  
+meta:  
+  title: 从 AI 生成迁移到 AI 工具包 | Tiptap 内容 AI  
+  description: 从 AI 生成迁移到 AI 工具包，以全面掌控 AI 提供者、自定义后端和高级审核工作流。  
+  category: 内容 AI  
+---
+
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+AI 生成扩展允许你选择内容并根据你的指令让 AI 模型重写它。
+
+要使用 AI 工具包实现相同功能，推荐的路径是遵循[内联编辑指南](/content-ai/capabilities/ai-toolkit/guides/inline-edits)。
+
+## 步骤1：服务器端设置
+
+AI 生成扩展开箱即用，适用于 [Tiptap Cloud](https://cloud.tiptap.dev/v2/cloud/ai)。
+
+AI 工具包不包含 Tiptap Cloud 服务。相反，它与自定义 AI 后端协作。这赋予你充分的灵活性，可以配合任何 AI 模型提供者和框架使用。
+
+首先，构建一个 API 端点，返回以 HTML 格式生成的 AI 内容。使用诸如 [AI SDK](https://ai-sdk.dev/) 之类的库来调用你的后端。
+
+```ts
+import { openai } from '@ai-sdk/openai'
+import { streamText } from 'ai'
+
+export async function POST(req: Request) {
+  const { userRequest, selection } = await req.json()
+
+  const result = streamText({
+    model: openai('gpt-5-mini'),
+    system: `你是一位能编辑富文本文档的专家作者。
+用户已经选中了文档的一部分。你将收到所选内容的当前
+HTML 格式及用户的请求。请根据用户请求重写该选区内容。
+生成新内容的 HTML 代码。如果用户请求不明确或不涉及编辑文档，
+生成一段 HTML 代码，询问用户澄清请求。你的回复应仅包含
+HTML 代码，不要包含其他文字或解释，不要使用 Markdown，
+且 HTML 回复不应被反引号、Markdown 代码块或其他多余格式包裹。`,
+    prompt: `用户请求：
+"""
+${userRequest}
+"""
+选区内容：
+"""
+${selection}
+"""`,
+  })
+
+  // 直接返回文本流响应
+  return result.toTextStreamResponse()
+}
+```
+
+要访问 OpenAI API，请在 [OpenAI 控制台](https://platform.openai.com/account/api-keys) 创建 API 密钥，并将其作为环境变量添加。Vercel AI SDK 会自动检测该环境变量。
+
+```sh
+# .env
+OPENAI_API_KEY=your-api-key
+```
+
+## 步骤2：客户端设置
+
+在客户端代码中，首先调用刚才定义的 API 端点，让 AI 生成内容。该端点返回一个 HTML 内容流。使用 AI 工具包的 `streamHtml` 方法将内容流导入编辑器。
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 使用 AI 工具包获取选区的 HTML 格式内容
+const selection = toolkit.getHtmlSelection()
+
+// 调用 API 端点获取编辑后的 HTML 内容
+const response = await fetch('/api', {
+  body: JSON.stringify({
+    userRequest: '给这段文字添加表情符号',
+    selection,
+  }),
+})
+
+// 响应是一个 HTML 内容流
+const readableStream = response.body
+
+// 使用 AI 工具包将 HTML 流输入到选区
+await toolkit.streamHtml(readableStream, { position: 'selection' })
+```
+
+## 审核 AI 生成的更改
+
+若要显示 AI 生成内容的预览，供用户审核并接受或拒绝更改，可以在 `streamHtml` 方法中使用 `reviewOptions` 参数。
+
+```ts
+await toolkit.streamHtml(readableStream, {
+  position: 'selection',
+  // 显示内容预览，用户可审核并接受或拒绝更改
+  reviewOptions: { mode: 'preview' },
+})
+```
+
+了解更多关于审核选项的信息，请参阅[审核更改指南](/content-ai/capabilities/ai-toolkit/guides/review-changes)及 `streamHtml` 方法的[API 参考](/content-ai/capabilities/ai-toolkit/primitives/edit-the-document#streamhtml)。
+
+## 实现自动补全
+
+要实现自动补全功能，当用户按下 `Tab` 键时调用 API 端点生成内容，然后利用 `streamHtml` 方法插入内容。`position` 参数也可以设置为 `'selection'`，因为它与光标所在位置一致。
+
+下面是当用户按下 `Tab` 键时触发自动补全建议的简化代码片段。
+
+```ts
+const toolkit = getAiToolkit(editor)
+const cursorPosition = editor.state.selection.to
+
+const contentBefore = toolkit.getHtmlRange({ from: 0, to: cursorPosition })
+const response = await fetch('/api', {
+  body: JSON.stringify({
+    userRequest: '自动补全之前的文本',
+    selection: contentBefore,
+  }),
+})
+
+const readableStream = response.body
+
+await toolkit.streamHtml(readableStream, {
+  position: 'selection',
+})
+```
+
+你也可以选择在插入内容之前预览 AI 生成的内容，而非立即插入。
+
+```ts
+await toolkit.streamHtml(readableStream, {
+  position: 'selection',
+  reviewOptions: { mode: 'preview' },
+})
+```
+
+生成后，调用 `acceptSuggestion` 方法可接受建议。
+
+```ts
+const suggestions = toolkit.getSuggestions()
+await toolkit.acceptSuggestion(suggestions[0].id)
+```
+
+## 下一步
+
+- 查看如何在[内联编辑指南](/content-ai/capabilities/ai-toolkit/guides/inline-edits)中使用 AI 工具包实现内联编辑的演示。  
+- 在[AI 代理聊天机器人指南](/content-ai/capabilities/ai-toolkit/guides/ai-agent-chatbot)中构建可以编辑 Tiptap 文档的 AI 助手。

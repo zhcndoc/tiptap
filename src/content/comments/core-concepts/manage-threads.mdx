@@ -234,6 +234,19 @@ editor.commands.unresolveThread({
 })
 ```
 
+## 查找文档中的所有线程
+
+要查找编辑器文档中的所有线程，你可以使用 `findThreadsInDocument` 工具函数。该函数返回包含所有线程节点和标记的数组，包括它们在文档中的位置。
+
+```js
+const threads = findThreadsInDocument(editor, {
+  blockTypeName: 'blockThread',
+  markTypeName: 'inlineThread',
+})
+```
+
+这将返回一个线程对象数组，每个对象包含线程标识符、节点、它的位置以及可选的相关标记。
+
 ## 选择线程
 
 要选择线程，你可以使用 `selectThread` 命令。该命令选择具有指定 ID 的线程。

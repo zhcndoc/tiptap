@@ -1,0 +1,30 @@
+---
+title: 介绍
+meta:
+  title: 身份验证指南 | Tiptap 协作文档
+  description: 使用 JWT 在协作编辑器中确保和管理访问权限，涵盖设置、测试及生产环境集成。
+  category: Hocuspocus
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@hocuspocus/provider.svg?label=version
+    url: https://www.npmjs.com/package/@hocuspocus/provider
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@hocuspocus/provider.svg
+    url: https://npmcharts.com/compare/@hocuspocus/provider?minimal=true
+    label: 下载量
+  - type: image
+    src: https://img.shields.io/npm/l/@hocuspocus/provider.svg
+    url: https://www.npmjs.com/package/@hocuspocus/provider
+    label: 许可证
+  - type: image
+    src: https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true
+    url: https://discord.gg/WtJ49jGshW
+    label: 聊天
+---
+
+Providers（提供者）是 Y.js 用来建立不同用户之间通信或在浏览器中缓存更新的方式。Hocuspocus 自带其专有的 provider，自 v2 起不再兼容其他 y-providers，因为我们支持多路复用，以便通过同一个 websocket 连接同步多个文档。
+
+它带有 WebSocket 消息身份验证、一个可以在控制台添加详细输出的调试模式、更多的事件钩子、一种不同的重连策略、改进的错误处理以及对 Awareness 协议友好的 API。
+
+所有 Y.js 的 providers 都可以一起使用。包括 Hocuspocus provider，以及原始的 [y-websocket](https://github.com/yjs/y-websocket) provider、[y-webrtc](https://github.com/yjs/y-webrtc)、[y-indexeddb](https://github.com/yjs/y-indexeddb)（用于浏览器缓存）或 [y-dat](https://github.com/yjs/y-dat)（正在开发中）。你可以将 Hocuspocus provider 与 y-webrtc 及其他 y-providers 一起使用，但使用 Hocuspocus 时必须使用我们的 HocuspocusProvider，且除 hocuspocus 外的服务器实现可能无法工作。不过，如果你想同时与 Hocuspocus 和其他服务器同步，也可以实例化多个 provider。

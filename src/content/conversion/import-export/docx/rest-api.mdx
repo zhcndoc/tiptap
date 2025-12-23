@@ -41,7 +41,7 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import" \
     -H "X-App-Id: YOUR_APP_ID" \
     -F "file=@/path/to/your/file.docx" \
     -F "imageUploadCallbackUrl=https://your-image-upload-endpoint.com" \
-    -F "promisemirrorNodes={\"nodeKey\":\"nodeValue\"}" \
+    -F "prosemirrorNodes={\"nodeKey\":\"nodeValue\"}" \
     -F "prosemirrorMarks={\"markKey\":\"markValue\"}"
 ```
 
@@ -58,50 +58,98 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import" \
 
 ### 请求体
 
-| 名称                     | 类型     | 描述                                                                                                                  |
-| ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `file`                   | `File`   | 要转换的文件                                                                                                          |
-| `imageUploadCallbackUrl` | `string` | 上传文档中遇到的图像的回调端点，[查看更多信息](#image-uploading) |
-| `prosemirrorNodes`       | `Object string` | 转换的自定义节点映射，[查看更多信息](/conversion/import-export/docx/custom-node-conversion)。       |
-| `prosemirrorMarks`       | `Object string` | 转换的自定义标记映射，[查看更多信息](/conversion/import-export/docx/custom-mark-conversion)        |
+| 名称                     | 类型             | 描述                                                                                                                  |
+| ------------------------ | ---------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `file`                   | `File`           | 要转换的文件                                                                                                            |
+| `imageUploadCallbackUrl` | `string`         | 上传文档中遇到的图像的回调端点，[查看更多信息](#image-uploading)                                                     |
+| `prosemirrorNodes`       | `Object string`  | 转换的自定义节点映射，[查看更多信息](/conversion/import-export/docx/custom-node-conversion)。                      |
+| `prosemirrorMarks`       | `Object string`  | 转换的自定义标记映射，[查看更多信息](/conversion/import-export/docx/custom-mark-conversion)                      |
+| `verbose`                | `string \| number` | 配置属性，帮助您控制导入过程中诊断输出的详细级别，尤其适用于调试或深入了解转换过程。[详见Verbose output](#import-verbose-output) |
+
+### 导入详细输出 (Import verbose output)
+
+DOCX 导入扩展提供了一个 `verbose` 配置属性，帮助您控制导入过程中诊断输出的详细级别。此功能对调试或深入了解转换过程非常有用。
+
+`verbose` 属性是一个位掩码数字，决定输出哪类日志消息。扩展使用以下级别：
+
+| 值     | 级别     | 描述                       |
+|-------|---------|----------------------------|
+| 1     | `log`   | 一般信息日志                |
+| 2     | `warn`  | 警告                       |
+| 4     | `error` | 错误                       |
+
+<Callout title="Verbose 位掩码">
+  您可以通过将值相加来组合级别。例如，`verbose: 3` 将启用 `log` (1) 和 `warn` (2) 消息。
+</Callout>
+
+详细输出会在返回结果中除了 `data` 属性外，还包含一个 `logs` 属性，其中包括 `info`、`warn` 和 `error`，每个都是对应日志类别的数组。
+
+```js
+{
+  "data": {
+    "content": {
+        // Tiptap JSON
+    }
+  },
+  "logs": {
+    "info": [],
+    "warn": [
+      {
+        "message": "Image file not found in media files",
+        "fileName": "image1.gif",
+        "availableMediaFiles": []
+      }
+    ],
+    "error": [
+      {
+        "message": "Image upload failed: General error",
+        "fileName": "image1.gif",
+        "url": "https://your-image-upload-endpoint.com",
+        "error": "Unable to connect. Is the computer able to access the url?",
+        "context": "uploadImage general error"
+      }
+    ]
+  }
+}
+```
 
 ### 自定义节点和标记映射
 
 您可以通过在请求体中分别指定 `prosemirrorNodes` 和 `prosemirrorMarks` 来覆盖导入期间使用的默认 `node/mark` 类型。如果您的编辑器使用自定义的 `nodes/marks`，并且希望导入的 `JSON` 使用这些内容，则需要提供这些。
 
-例如，如果您的架构使用一个名为 `textBlock` 的自定义节点类型，而不是默认的段落，您可以在请求体中包含 `"{\"paragraph\":\"textBlock\"}"`。
+例如，如果您的架构使用一个名为 `textBlock` 的自定义节点类型，而不是默认的段落，您可以在请求体中包含 `"{\"textBlock\":\"paragraph\"}"`。
 
 您还可以类似地调整标题、列表、加粗或斜体等标记。
 
 #### 默认节点
 
 | 名称             | 描述                                                          |
-| ---------------- | -------------------------------------------------------------------- |
-| `paragraph`      | 定义段落转换使用的 prosemirror 类型      |
-| `heading`        | 定义标题转换使用的 prosemirror 类型        |
-| `blockquote`     | 定义引用转换使用的 prosemirror 类型     |
-| `codeblock`      | 定义代码块转换使用的 prosemirror 类型      |
-| `bulletlist`     | 定义无序列表转换使用的 prosemirror 类型     |
-| `orderedlist`    | 定义有序列表转换使用的 prosemirror 类型    |
-| `listitem`       | 定义列表项转换使用的 prosemirror 类型       |
-| `hardbreak`      | 定义硬换行转换使用的 prosemirror 类型      |
-| `horizontalrule` | 定义水平线转换使用的 prosemirror 类型 |
-| `table`          | 定义表格转换使用的 prosemirror 类型          |
-| `tablecell`      | 定义表格单元格转换使用的 prosemirror 类型      |
-| `tableheader`    | 定义表格头部转换使用的 prosemirror 类型    |
-| `tablerow`       | 定义表格行转换使用的 prosemirror 类型       |
-| `image`          | 定义图片转换使用的 prosemirror 标记          |
+| ---------------- | ------------------------------------------------------------- |
+| `paragraph`      | 定义段落转换使用的 prosemirror 类型                           |
+| `heading`        | 定义标题转换使用的 prosemirror 类型                           |
+| `blockquote`     | 定义引用转换使用的 prosemirror 类型                           |
+| `codeblock`      | 定义代码块转换使用的 prosemirror 类型                         |
+| `bulletlist`     | 定义无序列表转换使用的 prosemirror 类型                       |
+| `orderedlist`    | 定义有序列表转换使用的 prosemirror 类型                       |
+| `listitem`       | 定义列表项转换使用的 prosemirror 类型                         |
+| `hardbreak`      | 定义硬换行转换使用的 prosemirror 类型                         |
+| `horizontalrule` | 定义水平线转换使用的 prosemirror 类型                         |
+| `table`          | 定义表格转换使用的 prosemirror 类型                           |
+| `tablecell`      | 定义表格单元格转换使用的 prosemirror 类型                     |
+| `tableheader`    | 定义表格头部转换使用的 prosemirror 类型                       |
+| `tablerow`       | 定义表格行转换使用的 prosemirror 类型                         |
+| `image`          | 定义图片转换使用的 prosemirror 标记                           |
 
 #### 默认标记
 
 | 名称             | 描述                                                          |
-| ---------------- | -------------------------------------------------------------------- |
-| `bold`           | 定义粗体转换使用的 prosemirror 标记           |
-| `italic`         | 定义斜体转换使用的 prosemirror 标记         |
-| `underline`      | 定义下划线转换使用的 prosemirror 标记      |
-| `strikethrough`  | 定义删除线转换使用的 prosemirror 标记  |
-| `link`           | 定义链接转换使用的 prosemirror 标记           |
-| `code`           | 定义代码转换使用的 prosemirror 标记           |
+| ---------------- | ------------------------------------------------------------- |
+| `bold`           | 定义粗体转换使用的 prosemirror 标记                           |
+| `italic`         | 定义斜体转换使用的 prosemirror 标记                           |
+| `underline`      | 定义下划线转换使用的 prosemirror 标记                         |
+| `strikethrough`  | 定义删除线转换使用的 prosemirror 标记                         |
+| `link`           | 定义链接转换使用的 prosemirror 标记                           |
+| `code`           | 定义代码转换使用的 prosemirror 标记                           |
 
 
 ## 导出 DOCX
@@ -109,7 +157,6 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import" \
 `POST /v2/convert/export`
 
 `/v2/convert/export` 端点将 Tiptap 文档转换为 `DOCX` 格式。用户可以将文档 `POST` 到此端点，并使用各种参数自定义在转换过程中如何处理不同的文档元素。
-
 
 <Callout title="导出自定义支持" variant="info">
     `/v2/convert/export` 端点不支持自定义节点转换，因为函数无法序列化，但它支持 [自定义样式覆盖](/conversion/import-export/docx/export-styles)。如果您希望在您自己的服务器上转换文档以拥有此选项，可以按照 [服务器端导出指南](/conversion/import-export/docx/editor-export#server-side-export)进行操作。
@@ -138,8 +185,110 @@ curl --output example.docx -X POST https://api.tiptap.dev/v2/convert/export \
 
 ### 请求体
 
-| 名称                     | 类型     | 描述              | 默认值 |
-| ------------------------ | -------- | -------------------------|---------|
-| `doc`                    | `String` | Tiptap 的 JSON            | `N/A`   |
-| `exportType`             | `string` | 预期的导出类型 | `blob`  |
-| `styleOverrides`         | `Object` | 样式覆盖          | `{}`    |
+| 名称             | 类型     | 描述               | 默认值     |
+| ---------------- | -------- | ------------------ | ---------- |
+| `doc`            | `String` | Tiptap 的 JSON     | `N/A`      |
+| `exportType`     | `string` | 预期的导出类型     | `blob`     |
+| `styleOverrides` | `Object` | 样式覆盖           | `{}`       |
+| `pageSize`       | `Object` | 页面尺寸配置       | `undefined`|
+| `pageMargins`    | `Object` | 页面边距配置       | `undefined`|
+| `headers`        | `Object` | 页面页眉配置       | `undefined`|
+| `footers`        | `Object` | 页面页脚配置       | `undefined`|
+
+#### 页面尺寸配置（Page Size Configuration）
+
+`pageSize` 对象允许您自定义导出 DOCX 文档的尺寸：
+
+| 属性    | 类型     | 描述                                                                                 | 默认值       |
+| ------- | -------- | ------------------------------------------------------------------------------------ | ------------ |
+| `width` | `string` | 页面宽度。必须是正数，后跟有效单位（cm、in、pt、pc、mm、px）。                       | `"21.0cm"`   |
+| `height`| `string` | 页面高度。必须是正数，后跟有效单位（cm、in、pt、pc、mm、px）。                       | `"29.7cm"`   |
+
+**带自定义页面尺寸的示例 cURL：**
+```bash
+curl --output example.docx -X POST https://api.tiptap.dev/v2/convert/export \
+    -H "Authorization: Bearer <your-jwt-token>" \
+    -H "X-App-Id: <your-app-id>" \
+    -F 'doc={"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Document with custom page size"}]}]}' \
+    -F 'exportType=blob' \
+    -F 'pageSize={"width":"21.0cm","height":"29.7cm"}'
+```
+
+#### 页面边距配置（Page Margins Configuration）
+
+`pageMargins` 对象允许您自定义导出 DOCX 文档的边距：
+
+| 属性   | 类型     | 描述                                                                                                                   | 默认值     |
+| ------ | -------- | ---------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `top`  | `string` | 页面上边距。可为负数。必须是数字，后跟有效单位（cm、in、pt、pc、mm、px）。                                              | `"1.0cm"`  |
+| `bottom`| `string`| 页面下边距。可为负数。必须是数字，后跟有效单位（cm、in、pt、pc、mm、px）。                                              | `"1.0cm"`  |
+| `left` | `string` | 页面左边距。必须是正数，后跟有效单位（cm、in、pt、pc、mm、px）。                                                        | `"1.0cm"`  |
+| `right`| `string` | 页面右边距。必须是正数，后跟有效单位（cm、in、pt、pc、mm、px）。                                                        | `"1.0cm"`  |
+
+**带自定义页面边距的示例 cURL：**
+```bash
+curl --output example.docx -X POST https://api.tiptap.dev/v2/convert/export \
+    -H "Authorization: Bearer <your-jwt-token>" \
+    -H "X-App-Id: <your-app-id>" \
+    -F 'doc={"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Document with custom margins"}]}]}' \
+    -F 'exportType=blob' \
+    -F 'pageMargins={"top":"2.0cm","bottom":"2.0cm","left":"1.5cm","right":"1.5cm"}'
+```
+
+#### 页眉和页脚配置（Headers and footers）
+
+`headers` 和 `footers` 对象允许您配置导出 DOCX 的页眉和页脚选项。
+
+<Callout title="团队许可证要求">
+    要在 REST API 中使用页眉和页脚，您必须拥有 `Team` 许可证。
+</Callout>
+
+##### 页眉配置（Headers Configuration）
+
+`headers` 对象允许您自定义导出 DOCX 文档的页眉：
+
+| 属性                   | 类型     | 描述                                              |
+| ---------------------- | -------- | ------------------------------------------------- |
+| `evenAndOddHeaders`    | `boolean`| 是否为奇数页和偶数页使用不同的页眉                 |
+| `default`              | `string` | 标准默认页眉（所有页使用）或启用 `evenAndOddHeaders` 时奇数页页眉 |
+| `first`                | `string` | 启用“首页不同页眉”选项时首页的页眉                  |
+| `even`                 | `string` | 启用 `evenAndOddHeaders` 选项时偶数页的页眉         |
+
+<Callout title="限制">
+    由于 API 调用无法正确序列化非常复杂的对象或函数，页眉配置限制为纯文本字符串，我们会为您转换为无样式的标准 DOCX 页眉。
+</Callout>
+
+**带自定义页眉的示例 cURL：**
+```bash
+curl --output example.docx -X POST https://api.tiptap.dev/v2/convert/export \
+    -H "Authorization: Bearer <your-jwt-token>" \
+    -H "X-App-Id: <your-app-id>" \
+    -F 'doc={"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Document with custom headers"}]}]}' \
+    -F 'exportType=blob' \
+    -F 'headers={"evenAndOddHeaders":true,"default":"Default Header","first":"First Page Header","even":"Even Page Header"}'
+```
+
+#### 页脚配置（Footers Configuration）
+
+`footers` 对象允许您自定义导出 DOCX 文档的页脚：
+
+| 属性                   | 类型     | 描述                                              |
+| ---------------------- | -------- | ------------------------------------------------- |
+| `evenAndOddFooters`    | `boolean`| 是否为奇数页和偶数页使用不同的页脚                |
+| `default`              | `string` | 标准默认页脚（所有页使用）或启用 `evenAndOddFooters` 时奇数页页脚 |
+| `first`                | `string` | 启用“首页不同页脚”选项时首页的页脚                 |
+| `even`                 | `string` | 启用 `evenAndOddFooters` 选项时偶数页的页脚        |
+
+<Callout title="限制">
+    由于 API 调用无法正确序列化非常复杂的对象或函数，页脚配置限制为纯文本字符串，我们会为您转换为无样式的标准 DOCX 页脚。
+</Callout>
+
+**带自定义页脚的示例 cURL：**
+```bash
+curl --output example.docx -X POST https://api.tiptap.dev/v2/convert/export \
+    -H "Authorization: Bearer <your-jwt-token>" \
+    -H "X-App-Id: <your-app-id>" \
+    -F 'doc={"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Document with custom footers"}]}]}' \
+    -F 'exportType=blob' \
+    -F 'footers={"evenAndOddFooters":true,"default":"Default Footer","first":"First Page Footer","even":"Even Page Footer"}'
+```

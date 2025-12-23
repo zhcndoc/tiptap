@@ -1,0 +1,377 @@
+---
+title: 自定义 Markdown 序列化
+tags:
+  - type: beta
+meta:
+  title: 自定义 Markdown 序列化 | Tiptap 编辑器文档
+  description: 学习如何在 Tiptap 中创建自定义 Markdown 序列化。
+  category: 编辑器
+---
+
+本指南将带你了解在 Tiptap 编辑器中实现自定义 Markdown 序列化的过程。完成本教程后，你将能够将 [Tiptap JSON](../glossary#tiptap-json) 序列化为 Markdown 内容。
+
+将 Tiptap JSON 内容序列化为 Markdown 是通过 `markdown.render` 处理函数完成的。
+
+## 理解 Render 处理函数
+
+把 Tiptap JSON 节点转换为 Markdown 字符串的过程由扩展配置中定义的 `renderMarkdown` 函数处理。
+
+该函数可以很简单，仅返回一个字符串，也可以非常复杂，考虑节点的属性、子节点、嵌套以及它出现的上下文。
+
+`renderMarkdown` 函数接收以下参数：
+
+- `node`：要序列化的 Tiptap JSON 节点。
+- `helpers`：一个包含辅助渲染的实用函数对象（详情见[渲染辅助函数](#render-helper-functions)）。
+- `context`：提供当前节点在文档树中位置等额外上下文信息的对象（详情见[渲染上下文](#render-context)）。
+
+渲染函数返回值应为一个字符串，代表节点对应的 Markdown 内容，该字符串将与其他字符串拼接形成完整的 Markdown 文档。
+
+```typescript
+const CustomHeading = Node.create({
+  name: 'customHeading',
+
+  // ...
+
+  renderMarkdown: (node, helpers) => {
+    const content = helpers.renderChildren(node.content)
+    return `# ${content}\n\n`
+  },
+})
+```
+
+## 渲染辅助函数
+
+如上所述，`helpers` 对象提供了用于渲染子节点和格式化内容的辅助函数。
+下面将逐一介绍它们的用途。
+
+### `helpers.renderChildren(nodes, separator)`
+
+`helpers.renderChildren` 函数接收一个 Tiptap JSON 节点列表，并使用它们各自的渲染处理函数将其渲染为 Markdown 字符串。
+
+可选的 `separator` 参数用于指定连接渲染后子节点的分隔符（默认是 `''`）。
+
+```typescript
+render: (node, helpers) => {
+  // 渲染所有子节点
+  const content = helpers.renderChildren(node.content || [])
+
+  return `> ${content}\n\n`
+}
+```
+
+或者使用自定义分隔符：
+
+```typescript
+render: (node, helpers) => {
+  // 使用换行符连接列表项
+  const items = helpers.renderChildren(node.content || [], '\n')
+
+  return items + '\n\n'
+}
+```
+
+### `helpers.indent(content)`
+
+`helpers.indent(content)` 函数会根据当前上下文级别和配置的缩进样式（空格或制表符）为传入内容字符串的每一行添加缩进。
+
+当渲染嵌套结构（如列表）时非常有用。
+
+```typescript
+render: (node, helpers) => {
+  const content = helpers.renderChildren(node.content || [])
+
+  return helpers.indent(content) // 根据当前上下文级别缩进渲染内容
+}
+```
+
+### `helpers.wrapInBlock(prefix, content)`
+
+`helpers.wrapInBlock` 函数会在内容每一行前添加一个前缀，适用于块级元素如引用或代码块。
+
+```typescript
+render: (node, helpers) => {
+  const content = helpers.renderChildren(node.content || [])
+
+  // 为每行添加 "> "，表示区块引用
+  return helpers.wrapInBlock('> ', content)
+}
+```
+
+## 序列化 Marks
+
+Marks 不同于节点处理，因为它们包裹内联内容，需要应用于节点内部的文本。
+
+渲染 Mark 时，通常先渲染节点的子内容，然后用该 Mark 的 Markdown 语法包裹起来。
+
+```typescript
+const Bold = Mark.create({
+  name: 'bold',
+
+  renderMarkdown: (node, helpers) => {
+    const content = helpers.renderChildren(node) // 直接渲染节点内容
+    return `**${content}**` // 返回加粗的 Markdown 语法
+  },
+})
+```
+
+### 带属性的 Marks
+
+```typescript
+const Link = Mark.create({
+  name: 'link',
+
+  // ...
+
+  parseMarkdown: (token, helpers) => {
+    const content = helpers.parseInline(token.tokens || [])
+
+    // 使用第三个参数传入 Mark 的属性
+    return helpers.applyMark('link', content, {
+      href: token.href,
+      title: token.title || null,
+    })
+  },
+
+  renderMarkdown: (node, helpers) => {
+    const content = helpers.renderChildren(node)
+    const href = node.attrs?.href || ''
+    const title = node.attrs?.title
+
+    if (title) {
+      return `[${content}](${href} "${title}")`
+    }
+    return `[${content}](${href})`
+  },
+})
+```
+
+## 渲染上下文
+
+渲染处理函数的第三个参数是上下文对象，包含了当前节点在文档树中的位置信息，如索引、级别、父节点类型和自定义元数据。
+
+```typescript
+renderMarkdown: (node, helpers, context) => {
+  const lines = []
+
+  lines.push(`我是父上下文中的第 ${context.index} 个子节点。`) // 节点在父节点中的零基索引
+  lines.push(`我的当前嵌套级别是 ${context.level}`) // 当前嵌套级别（每遇到一个 indentsContent 为 true 的父节点则加 1）
+  lines.push(`我的父节点类型是 ${context.parentType}`) // 父节点的类型
+  lines.push(`我的自定义元数据是 ${JSON.stringify(context.meta)}`) // 父节点传递的自定义元数据
+
+  return lines.join('\n')
+}
+```
+
+## 带缩进的渲染
+
+`isIndenting` 标记告诉 MarkdownManager 该节点会增加嵌套级别：
+
+```typescript
+const CustomNode = Node.create({
+  name: 'customNode',
+
+  // ...
+
+  markdownOptions: {
+    indentsContent: true,
+  },
+
+  renderMarkdown: (node, helpers, context) => {
+    // 如果使用 helpers.indent() 渲染子节点，会基于 context.level + 1 进行缩进
+    const content = helpers.renderChildren(node.content || [])
+    return content
+  },
+})
+```
+
+这对正确缩进嵌套列表和代码块很重要。
+
+### 自定义缩进逻辑
+
+你也可以实现自定义缩进：
+
+```typescript
+render: (node, helpers, context) => {
+  const content = helpers.renderChildren(node.content || [])
+
+  // 根据级别添加自定义缩进
+  const indent = '  '.repeat(context.level)
+  const lines = content.split('\n')
+  const indented = lines.map(line => indent + line).join('\n')
+
+  return indented
+}
+```
+
+## 调试序列化
+
+对序列化前的 JSON 结构进行打印：
+
+```typescript
+const json = editor.getJSON()
+console.log(JSON.stringify(json, null, 2))
+
+const markdown = editor.markdown.serialize(json)
+console.log(markdown)
+```
+
+### 独立调试序列化
+
+```typescript
+const node = {
+  type: 'heading',
+  attrs: { level: 1 },
+  content: [{ type: 'text', text: 'Hello' }],
+}
+
+const renderHelpers = {
+  renderChildren: nodes => 'Hello',
+  // ... 其他辅助函数
+}
+
+const markdown = myExtension.options.markdown.render(node, renderHelpers, {})
+console.log(markdown)
+```
+
+## 性能注意事项
+
+### 缓存序列化结果
+
+缓存 Markdown 序列化结果：
+
+```typescript
+let markdownCache = null
+let lastJSON = null
+
+editor.on('update', () => {
+  markdownCache = null // 使缓存失效
+})
+
+function getMarkdown() {
+  const currentJSON = editor.getJSON()
+
+  if (markdownCache && JSON.stringify(lastJSON) === JSON.stringify(currentJSON)) {
+    return markdownCache
+  }
+
+  lastJSON = currentJSON
+  markdownCache = editor.getMarkdown()
+  return markdownCache
+}
+```
+
+## 示例
+
+### 自定义标题渲染器
+
+```typescript
+const CustomHeading = Node.create({
+  name: 'customHeading',
+
+  renderMarkdown: (node, helpers, context) => {
+    const level = node.attrs?.level || 1 // 从节点属性获取标题级别
+    const prefix = '#'.repeat(level) // 根据级别生成对应的 # 前缀
+    const content = helpers.renderChildren(node.content || []) // 渲染标题的内联内容
+
+    return `${prefix} ${content}\n\n` // 根据已有信息构建 Markdown 字符串
+  },
+})
+```
+
+### YouTube 嵌入渲染器
+
+本例中，我们希望将 `youtubeEmbed` 节点序列化为能被自定义 YouTube 解析器识别的 Markdown 字符串。
+
+语法形如： `![youtube](videoId?start=60&width=800&height=450)`
+
+```typescript
+const YouTubeEmbed = Node.create({
+  name: 'youtubeEmbed',
+
+  renderMarkdown: (node, helpers) => {
+    // 从节点属性中提取信息
+    const videoId = node.attrs?.videoId || ''
+    const start = node.attrs?.start || 0
+    const width = node.attrs?.width || 800
+    const height = node.attrs?.height || 450
+
+    // 拼接成 Markdown 字符串
+    return `![youtube](${videoId}?start=${start}&width=${width}&height=${height})\n\n`
+  },
+})
+```
+
+### 带缩进的列表项渲染
+
+本例中，我们希望渲染一个自定义列表节点，包含列表项，每个列表项语法形式为 `=> item`。
+
+```typescript
+const CustomList = Node.create({
+  name: 'customList',
+
+  // ...
+
+  markdownOptions: {
+    indentsContent: true,
+  },
+
+  renderMarkdown: (node, helpers, context) => {
+    // 使用自定义分隔符用换行符连接列表项
+    const items = helpers.renderChildren(node.content || [], '\n')
+
+    return items
+  },
+})
+
+const CustomListItem = Node.create({
+  name: 'customListItem',
+
+  // ...
+
+  renderMarkdown: (node, helpers, context) => {
+    // 首先提取列表项的第一个子节点作为内容（段落节点）
+    // 其余子节点用来之后手动渲染
+    const [content, ...children] = node.content
+    const output = [`=> ${content}`]
+
+    // 先渲染列表项的直接内容
+    const mainContent = helpers.renderChildren(node.content || [])
+
+    // 再遍历其他子节点并带缩进渲染
+    if (children && children.length > 0) {
+      children.forEach((child) => {
+        const childContent = helpers.renderChildren([child]) // 渲染子节点，同时递归渲染其子节点
+        if (childContent) {
+          // 拆分子内容的行并为每行添加缩进
+          const indentedChild = childContent
+            .split('\n')
+            .map((line) => (line ? helpers.indent(line) : ''))
+            .join('\n')
+          output.push(indentedChild) // 添加带有正确缩进的子内容
+        }
+      })
+    }
+
+    return output.join('\n') // 用换行符连接所有行
+  },
+})
+```
+
+由于这非常繁琐，Tiptap 提供了一个 `@tiptap/markdown` 包中的 `renderNestedMarkdownContent()` 辅助函数，可以简化此操作：
+
+```typescript
+import { Node } from '@tiptap/core'
+import { renderNestedMarkdownContent } from '@tiptap/markdown'
+
+const CustomListItem = Node.create({
+  name: 'customListItem',
+
+  // ...
+
+  renderMarkdown: (node, helpers, context) => {
+    return renderNestedMarkdownContent(node, helpers, '=> ', context)
+  },
+})
+```
+
+阅读更多内容请访问我们的[工具函数](../api/utilities#rendernestedmarkdowncontent)页面。

@@ -1,0 +1,169 @@
+---
+title: 安装和配置 Markdown 包
+tags:
+  - type: beta
+meta:
+  title: 安装 Markdown | Tiptap 编辑器文档
+  description: 学习如何在 Tiptap 中安装和使用 Markdown 包以启用编辑器的 Markdown 支持。
+  category: 编辑器
+---
+
+本指南将引导你安装和配置 Tiptap 编辑器中的 Markdown 扩展。
+
+## 安装
+
+使用你喜欢的包管理器安装 Markdown 扩展：
+
+```bash
+npm install @tiptap/markdown
+```
+
+## 基本配置
+
+将 Markdown 扩展添加到你的编辑器中：
+
+```typescript
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { Markdown } from '@tiptap/markdown'
+
+const editor = new Editor({
+  element: document.querySelector('#editor'),
+  extensions: [StarterKit, Markdown],
+  content: '<p>Hello World!</p>',
+})
+```
+
+就是这样！你的编辑器现在支持 Markdown 的解析与序列化。
+
+### 将初始内容设为 Markdown
+
+创建编辑器时加载 Markdown 内容：
+
+```typescript
+const editor = new Editor({
+  extensions: [StarterKit, Markdown],
+  content: '# Hello World\n\nThis is **Markdown**!',
+  contentType: 'markdown',
+})
+```
+
+## 配置选项
+
+Markdown 扩展接受多个配置选项：
+
+### 缩进风格
+
+配置序列化 Markdown 时嵌套结构（列表、代码块）的缩进方式：
+
+```typescript
+Markdown.configure({
+  indentation: {
+    style: 'space', // 'space' 或 'tab'
+    size: 2, // 空格数或制表符数
+  },
+})
+```
+
+**示例：**
+
+```typescript
+// 使用 4 个空格作为缩进（默认 2 个空格）
+Markdown.configure({
+  indentation: { style: 'space', size: 4 },
+})
+
+// 使用制表符作为缩进
+Markdown.configure({
+  indentation: { style: 'tab', size: 1 },
+})
+```
+
+### 自定义 Marked 实例
+
+如需使用自定义的 marked 版本或预先配置 marked：
+
+```typescript
+import { marked } from 'marked'
+
+// 配置 marked
+marked.setOptions({
+  gfm: true,
+  breaks: true,
+})
+
+// 使用自定义的 marked 实例
+Markdown.configure({
+  marked: marked,
+})
+```
+
+### Marked 选项
+
+你也可以直接传入 marked 的选项给扩展：
+
+```typescript
+Markdown.configure({
+  markedOptions: {
+    gfm: true, // GitHub 风格 Markdown
+    breaks: false, // 将 \n 转换为 <br>
+    pedantic: false, // 严格 Markdown 模式
+    smartypants: false, // 智能引号和破折号
+  },
+})
+```
+
+详见 [marked 文档](https://marked.js.org/using_advanced#options) 获取所有可用选项。
+
+## 验证安装
+
+验证扩展是否正确安装：
+
+```typescript
+// 检查 Markdown 管理器是否可用
+console.log(editor.markdown) // 应输出 MarkdownManager 实例
+
+// 尝试解析
+const json = editor.markdown.parse('# Hello')
+console.log(json)
+// { type: 'doc', content: [...] }
+
+// 尝试序列化
+const markdown = editor.markdown.serialize(json)
+console.log(markdown)
+// # Hello
+```
+
+## 常见问题
+
+### 找不到扩展
+
+如果出现 `@tiptap/markdown` 找不到的错误：
+
+1. 确认已安装：`npm list @tiptap/markdown`
+2. 清理构建缓存和 node_modules
+3. 重新安装依赖
+
+### Markdown 未解析
+
+如果 Markdown 无法解析：
+
+1. 确认设置初始内容时使用了 `contentType: 'markdown'`
+2. 或调用 `setContent()` 时使用 `contentType: 'markdown'` 选项
+
+### TypeScript 错误
+
+如果出现 TypeScript 错误：
+
+1. 确保安装了 `@tiptap/core`（它包含类型定义）
+2. 更新两个包到最新版本
+3. 检查 `tsconfig.json` 是否包含正确的模块解析配置
+
+```json
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "esModuleInterop": true
+  }
+}
+```

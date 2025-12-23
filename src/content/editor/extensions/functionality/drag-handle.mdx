@@ -39,7 +39,7 @@ npm install @tiptap/extension-drag-handle
 
 ### render
 
-定义一个通过 tippy.js 定位的元素。该元素作为拖动节点时显示的手柄。
+渲染使用 floating-ui/dom 包定位的元素。该元素将在拖拽节点时作为手柄显示。
 
 ```js
 DragHandle.configure({
@@ -54,23 +54,51 @@ DragHandle.configure({
 })
 ```
 
-### tippyOptions
+### computePositionConfig
 
-tippy.js 的配置项。你可以传入 [tippy.js 文档](https://atomiks.github.io/tippyjs/v6/all-props/) 中的任意选项。
+拖拽手柄位置计算的配置，使用 floating-ui/dom 包。你可以传入 [floating-ui 文档](https://floating-ui.com/docs/computePosition) 中的任意选项。
+
+默认值：`{ placement: 'left-start', strategy: 'absolute' }`
+
+```js
+DragHandle.configure({
+  computePositionConfig: {
+    placement: 'left',
+    strategy: 'fixed',
+  },
+})
+```
+
+### getReferencedVirtualElement
+
+返回拖拽手柄的虚拟元素的函数。当菜单需要相对于特定 DOM 元素定位时，这很有用。
 
 默认值：`undefined`
 
 ```js
 DragHandle.configure({
-  tippyOptions: {
-    placement: 'left',
+  getReferencedVirtualElement: () => {
+    // 返回自定义定位的虚拟元素
+    return null
   },
+})
+```
+
+### locked
+
+锁定拖拽手柄的位置和可见性。如果拖拽手柄之前可见，保持可见直到解锁；若之前隐藏，保持隐藏直到解锁。
+
+默认值：`false`
+
+```js
+DragHandle.configure({
+  locked: true,
 })
 ```
 
 ### onNodeChange
 
-当鼠标悬停在某个节点时，返回该节点或 null。可以用来高亮悬停的节点。
+当鼠标悬停在某个节点时，返回该节点或 null。可用于高亮显示悬停的节点。
 
 默认值：`undefined`
 

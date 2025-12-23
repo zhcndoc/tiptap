@@ -1,0 +1,172 @@
+---
+title: 彩色文本按钮
+meta:
+  title: 彩色文本按钮 | Tiptap UI 组件
+  description: 在 Tiptap 编辑器中应用预定义颜色选项、键盘快捷键和完整无障碍支持的自定义文本颜色。
+  category: UI 组件
+component:
+  name: 彩色文本按钮
+  description: 在 Tiptap 编辑器中应用预定义颜色选项、键盘快捷键和完整无障碍支持的自定义文本颜色。
+  type: 组件
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: BaselineIcon
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个用于 Tiptap 编辑器的完全无障碍文本颜色按钮。可为选中文本应用前景色，支持键盘快捷键和灵活的自定义选项。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/color-text-button" />
+
+## 安装
+
+通过 Tiptap CLI 添加该组件：
+
+```bash
+npx @tiptap/cli@latest add color-text-button
+```
+
+## 组件
+
+### `<ColorTextButton />`
+
+预构建的 React 组件，可为选中文本应用文本颜色。
+
+#### 用法
+
+```tsx
+export default function MyEditor() {
+  return (
+    <ColorTextButton
+      editor={editor}
+      textColor="var(--tt-color-text-blue)"
+      text="蓝色文本"
+      hideWhenUnavailable={true}
+      showShortcut={true}
+      onApplied={({ color, label }) => console.log(`应用了${label}文本颜色: ${color}`)}
+    />
+  )
+}
+```
+
+#### 属性
+
+| 名称                   | 类型                           | 默认值       | 描述                                               |
+| ---------------------- | ------------------------------ | ------------ | -------------------------------------------------- |
+| `editor`               | `Editor \| null`               | `undefined`  | Tiptap 编辑器实例                                  |
+| `textColor`            | `string`                      | `必填`       | 需要应用的文本颜色（CSS 颜色值）                    |
+| `text`                 | `string`                      | `undefined`  | 按钮的可选文本标签                                   |
+| `hideWhenUnavailable`  | `boolean`                     | `false`      | 当文本颜色不可应用时隐藏按钮                         |
+| `onApplied`            | `({ color, label }) => void`  | `undefined`  | 应用文本颜色后触发的回调函数                         |
+| `showShortcut`         | `boolean`                     | `false`      | 显示键盘快捷键徽章（如果可用）                       |
+
+## Hooks
+
+### `useColorText(config)`
+
+自定义 Hook，构建完全可控的彩色文本按钮，控制渲染和行为。
+
+#### 用法
+
+```tsx
+function MyColorTextButton() {
+  const { isVisible, isActive, canColorText, handleColorText, label, shortcutKeys, Icon } =
+    useColorText({
+      editor: myEditor,
+      textColor: 'var(--tt-color-text-red)',
+      label: '红色文本',
+      hideWhenUnavailable: true,
+      onApplied: ({ color, label }) => console.log(`已应用: ${label}`),
+    })
+
+  if (!isVisible) return null
+
+  return (
+    <button
+      onClick={handleColorText}
+      disabled={!canColorText}
+      aria-label={label}
+      aria-pressed={isActive}
+      style={{ color: isActive ? textColor : 'inherit' }}
+    >
+      <Icon />
+      {label}
+      {shortcutKeys && <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>}
+    </button>
+  )
+}
+```
+
+#### 属性
+
+| 名称                  | 类型                           | 默认值      | 描述                                             |
+| --------------------- | ------------------------------ | ----------- | ------------------------------------------------- |
+| `editor`              | `Editor \| null`               | `undefined` | Tiptap 编辑器实例                                |
+| `textColor`           | `string`                      | `必填`      | 需要应用的文本颜色                               |
+| `label`               | `string`                      | `必填`      | 按钮的无障碍标签                                 |
+| `hideWhenUnavailable` | `boolean`                     | `false`     | 如果文本颜色无法应用，则隐藏按钮                 |
+| `onApplied`           | `({ color, label }) => void`  | `undefined` | 应用文本颜色后触发的回调函数                     |
+
+#### 返回值
+
+| 名称              | 类型            | 描述                                     |
+| ----------------- | --------------- | ---------------------------------------- |
+| `isVisible`       | `boolean`       | 按钮是否应被渲染                         |
+| `isActive`        | `boolean`       | 文本颜色当前是否处于激活状态             |
+| `canColorText`    | `boolean`       | 是否可以应用文本颜色                     |
+| `handleColorText` | `() => boolean` | 应用文本颜色的函数                       |
+| `label`           | `string`        | 按钮的无障碍标签文本                     |
+| `shortcutKeys`    | `string`        | 键盘快捷键（Cmd/Ctrl + Shift + T）      |
+| `Icon`            | `React.FC`      | 彩色文本按钮的图标组件                   |
+
+## 工具函数
+
+### `canColorText(editor)`
+
+检查当前编辑器状态下是否可以应用文本颜色。
+
+```tsx
+import { canColorText } from '@/components/tiptap-ui/color-text-button'
+
+const canApply = canColorText(editor)
+```
+
+### `isColorTextActive(editor, color)`
+
+检查选区中是否已激活指定的文本颜色。
+
+```tsx
+import { isColorTextActive } from '@/components/tiptap-ui/color-text-button'
+
+const isRedActive = isColorTextActive(editor, 'red')
+const isBlueActive = isColorTextActive(editor, 'var(--tt-color-text-blue)')
+```
+
+## 键盘快捷键
+
+彩色文本按钮支持以下键盘快捷键：
+
+- **Cmd/Ctrl + Shift + T**：应用文本颜色
+
+使用 `<ColorTextButton />` 组件或 `useColorText()` Hook 时，快捷键会被自动注册，并将配置的文本颜色应用于当前选区。
+
+## 需求
+
+### 依赖
+
+- `@tiptap/react` - Tiptap React 核心集成
+- `@tiptap/extension-text-style` - 支持颜色的文本样式扩展
+- `react-hotkeys-hook` - 键盘快捷键管理
+
+### 关联组件
+
+- `use-tiptap-editor`（Hook）
+- `button`（原子组件）
+- `badge`（原子组件）
+- `tiptap-utils`（工具库）
+- `text-color-small-icon`（图标）

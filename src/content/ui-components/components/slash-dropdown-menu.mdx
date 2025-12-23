@@ -6,23 +6,122 @@ meta:
   category: UI 组件
 ---
 
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个完全可访问的斜杠命令下拉菜单，适用于 Tiptap 编辑器。通过输入“/”并从带有上下文感知、可自定义项目和分组的菜单中选择，快速插入内容、格式和 AI 功能。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/slash-dropdown-menu" />
+
 ## 安装
 
+通过 Tiptap CLI 添加该组件：
+
 ```bash
-npx @tiptap/cli add slash-dropdown-menu
+npx @tiptap/cli@latest add slash-dropdown-menu
 ```
 
-## 用法
+## 组件
+
+### `<SlashDropdownMenu />`
+
+一个预构建的 React 组件，提供斜杠命令界面，用于快速插入内容和格式化。
+
+#### 用法
+
+```tsx
+function MySlashMenu() {
+  return (
+    <SlashDropdownMenu
+      editor={editor}
+      config={{
+        enabledItems: ['text', 'heading_1', 'heading_2', 'bullet_list', 'quote'],
+        showGroups: true,
+        itemGroups: {
+          text: '样式',
+          heading_1: '样式',
+          heading_2: '样式',
+          bullet_list: '列表',
+          quote: '样式',
+        },
+      }}
+    />
+  )
+}
+```
+
+#### 属性
+
+| 名称       | 类型                | 默认值      | 描述                       |
+| ---------- | ------------------- | ----------- | -------------------------- |
+| `editor`   | `Editor \| null`    | `undefined` | Tiptap 编辑器实例           |
+| `config`   | `SlashMenuConfig`   | `undefined` | 菜单项和行为的配置          |
+
+## Hooks
+
+### `useSlashDropdownMenu()`
+
+一个自定义 Hook，允许你完全控制菜单项和行为，构建自己的斜杠命令菜单。
+
+#### 用法
+
+```tsx
+function MySlashMenu() {
+  const { getSlashMenuItems, config } = useSlashDropdownMenu({
+    enabledItems: ['text', 'heading_1', 'bullet_list', 'quote'],
+    showGroups: true,
+    customItems: [
+      {
+        title: '自定义项目',
+        subtext: '自定义功能',
+        aliases: ['custom'],
+        badge: MyIcon,
+        group: '自定义',
+        onSelect: ({ editor }) => {
+          // 自定义操作
+          console.log('自定义项目已选中！')
+        },
+      },
+    ],
+  })
+
+  // 与 SuggestionMenu 或自定义实现一起使用
+  return (
+    <SuggestionMenu
+      char="/"
+      items={({ query, editor }) => filterSuggestionItems(getSlashMenuItems(editor), query)}
+    >
+      {(props) => <MyCustomList {...props} />}
+    </SuggestionMenu>
+  )
+}
+```
+
+#### 配置项
+
+`SlashMenuConfig` 接口支持以下选项：
+
+| 名称           | 类型                     | 描述                           |
+| -------------- | ------------------------ | ------------------------------ |
+| `enabledItems` | `SlashMenuItemType[]`    | 启用的菜单项类型数组            |
+| `customItems`  | `SuggestionItem[]`       | 追加的自定义菜单项              |
+| `itemGroups`   | `Record<string, string>` | 菜单项所属分组                  |
+| `showGroups`   | `boolean`                | 是否显示分组标签（默认：true） |
+
+#### 返回值
+
+| 名称                | 类型                                  | 描述                             |
+| ------------------- | ------------------------------------ | -------------------------------- |
+| `getSlashMenuItems` | `(editor: Editor) => SuggestionItem[]` | 获取可用菜单项的函数             |
+| `config`            | `SlashMenuConfig`                    | 处理后的配置对象                 |
+
+## 使用示例
+
+### 基础配置
 
 ```tsx
 import { SlashDropdownMenu } from '@/components/tiptap-ui/slash-dropdown-menu'
-import { useEditor, EditorContent } from '@tiptap/react'
 
-export default function MyEditor() {
-  const editor = useEditor({
-    // 编辑器配置
-  })
-
+function MyEditor() {
   return (
     <div>
       <EditorContent editor={editor} />
@@ -32,26 +131,124 @@ export default function MyEditor() {
 }
 ```
 
-## 属性
+### 自定义配置
 
-| 名称             | 类型           | 默认值                      | 描述                      |
-| ---------------- | -------------- | --------------------------- | ------------------------- |
-| editor           | Editor \| null | null                        | Tiptap 编辑器实例         |
-| floatingOptions  | object         | -                           | 用于浮动 UI 的选项        |
-| selector         | string         | 'tiptap-slash-dropdown-menu' | 目标的选择器             |
-| char             | string         | '/'                         | 斜杠字符                  |
+```tsx
+<SlashDropdownMenu
+  editor={editor}
+  config={{
+    enabledItems: [
+      'text',
+      'heading_1',
+      'heading_2',
+      'bullet_list',
+      'ordered_list',
+      'quote',
+      'code_block',
+    ],
+    showGroups: true,
+    itemGroups: {
+      text: '格式化',
+      heading_1: '格式化',
+      heading_2: '格式化',
+      bullet_list: '列表',
+      ordered_list: '列表',
+      quote: '块级',
+      code_block: '块级',
+    },
+  }}
+/>
+```
+
+### 使用自定义项目
+
+```tsx
+<SlashDropdownMenu
+  editor={editor}
+  config={{
+    enabledItems: ['text', 'heading_1', 'bullet_list'],
+    customItems: [
+      {
+        title: '插入表格',
+        subtext: '添加数据表格',
+        aliases: ['table', 'grid'],
+        badge: TableIcon,
+        group: '内容',
+        onSelect: ({ editor }) => {
+          editor
+            .chain()
+            .focus()
+            .insertTable({
+              rows: 3,
+              cols: 3,
+              withHeaderRow: true,
+            })
+            .run()
+        },
+      },
+      {
+        title: '行动号召',
+        subtext: '插入 CTA 按钮',
+        aliases: ['cta', 'button'],
+        badge: ButtonIcon,
+        group: '内容',
+        onSelect: ({ editor }) => {
+          editor.chain().focus().insertContent('<button>点击我</button>').run()
+        },
+      },
+    ],
+  }}
+/>
+```
+
+### 不显示分组
+
+```tsx
+<SlashDropdownMenu
+  editor={editor}
+  config={{
+    enabledItems: ['text', 'heading_1', 'bullet_list', 'quote'],
+    showGroups: false,
+  }}
+/>
+```
+
+## 键盘导航
+
+斜杠下拉菜单支持完整键盘导航：
+
+- **方向键** - 上下浏览项目
+- **回车** - 选择高亮项目
+- **Esc** - 关闭菜单
+- **Tab** - 关闭菜单并继续输入
+- **输入** - 通过搜索过滤项目
 
 ## 需求
 
-使用的参考组件
+### 依赖
 
+- `@tiptap/react` - Tiptap React 核心集成
+- `@tiptap-pro/extension-ai` - AI 扩展，用于 AI 功能
+- `@tiptap/extension-mention` - 提及扩展
+- `@tiptap/extension-emoji` - 表情扩展
+
+### 参考组件
+
+- `suggestion-menu`（UI实用工具）
+- `button`（原始组件）
+- `card`（原始组件）
 - `tiptap-utils`（库）
-- `button`（原语）
-- `suggestion-menu`（UI）
+- `code-block-icon`（图标）
 - `heading-one-icon`（图标）
 - `heading-two-icon`（图标）
-- `code-block-icon`（图标）
+- `heading-three-icon`（图标）
+- `image-icon`（图标）
 - `list-icon`（图标）
 - `list-ordered-icon`（图标）
-- `image-icon`（图标）
-- `heading-three-icon`（图标）
+- `block-quote-icon`（图标）
+- `list-todo-icon`（图标）
+- `ai-sparkles-icon`（图标）
+- `minus-icon`（图标）
+- `type-icon`（图标）
+- `at-sign-icon`（图标）
+- `smile-plus-icon`（图标）

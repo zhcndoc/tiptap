@@ -55,9 +55,12 @@ npm install @tiptap-pro/extension-snapshot-compare
 | provider            | `TiptapCollabProvider`  | `null`    | 协作提供者实例                                            |
 | mapDiffToDecorations| `function`              | `() => {}`| 控制将 diff 映射到装饰以显示其内容                          |
 
+注意，你需要为 `TiptapCollabProvider` 提供 `user` 标识符，因为该信息用于优化 diffs。
+
 ```js
 const provider = new TiptapCollabProvider({
   // ...
+  user: 'your user identifier' // 必填！我们使用用户标识符来优化 diffs，因此提供它非常重要。
 })
 
 const editor = new Editor({
@@ -73,7 +76,7 @@ const editor = new Editor({
 
 #### 使用 `mapDiffToDecorations` 进行 diff 装饰
 
-该扩展具有默认映射 (`defaultMapDiffToDecorations`) 来表示 diffs 作为 ProseMirror 装饰。
+该扩展具有默认映射 (`defaultMapDiffToDecorations`) 来表示 diffs 作为 ProseMirror 装饰。  
 对于更复杂的集成和控制，你可以使用 `mapDiffToDecorations` 选项自定义此映射。
 
 **示例：** 对内联插入应用自定义预定义背景颜色
@@ -82,7 +85,7 @@ const editor = new Editor({
 SnapshotCompare.configure({
   mapDiffToDecorations: ({ diff, tr, editor, defaultMapDiffToDecorations }) => {
     if (diff.type === 'inline-insert') {
-      // 返回 prosemirror 装饰或 null
+      // 返回 ProseMirror 装饰或 null
       return Decoration.inline(
         diff.from,
         diff.to,
@@ -117,9 +120,9 @@ SnapshotCompare.configure({
 
 | 键               | 类型                   | 描述                                     |
 | ---------------- | ---------------------- | ---------------------------------------- |
-| isPreviewing     | `boolean`             | 指示 diff 视图是否处于激活状态          |
-| diffs            | `Diff[]`              | 在 diff 视图中显示的 diffs              |
-| previousContent  | `JSONContent \| null` | 应用 diff 视图之前的内容                |
+| isPreviewing     | `boolean`              | 指示 diff 视图是否处于激活状态          |
+| diffs            | `Diff[]`               | 在 diff 视图中显示的 diffs              |
+| previousContent  | `JSONContent \| null`  | 应用 diff 视图之前的内容                |
 
 使用 `isPreviewing` 属性检查 diff 视图是否当前处于激活状态：
 
@@ -263,6 +266,114 @@ editor.commands.showDiff(tr, { diffs: diffsToDisplay })
 editor.commands.hideDiff()
 ```
 
+## 添加样式
+
+Snapshot Compare 扩展为 diff 视图的元素应用了类，以帮助你为插入及删除的文本设置样式。请参见本页面上方的[代码示例](#page-title)中的完整示例，了解如何为 diff 视图设置样式。
+
+### 基础 diff 样式
+
+扩展为 diff 元素添加了以下属性：
+
+- `data-diff-type="inline-insert"` - 插入的文本
+- `data-diff-type="inline-delete"` - 删除的文本
+- `data-diff-type="inline-update"` - 更新的文本
+- `data-diff-type="block-insert"` - 插入的块
+- `data-diff-type="block-delete"` - 删除的块
+
+你可以通过 CSS 选择器针对这些带有数据属性的元素进行样式设置。
+
+下面是插入和删除文本的基础样式示例：
+
+```css
+/* 当没有用户信息时，退回到红色和绿色的颜色 */
+
+/* 样式插入的文本 */
+[data-diff-type='inline-insert'],
+[data-diff-type='inline-update'],
+[data-diff-type='block-insert'] {
+  background-color: green;
+}
+
+/* 样式删除的文本 */
+[data-diff-type='inline-delete'],
+[data-diff-type='block-delete'] {
+  background-color: red;
+  text-decoration: line-through;
+}
+```
+
+### 重置删除文本的标记样式
+
+当应用了样式标记（比如 **粗体**、_斜体_ 或 `代码`）时，删除的文本（即应用格式前的文本）会继承这些格式。这是因为删除的文本出现在相应HTML标签内部。为避免此问题，请在删除内容中重置这些标记样式。
+
+首先，在删除的内容内部重置外层标记样式。
+
+```scss
+/* 为删除内容重置粗体/strong 样式 */
+strong {
+  [data-diff-type='inline-delete'],
+  [data-diff-type='block-delete'] {
+    font-weight: normal;
+  }
+}
+
+/* 为删除内容重置斜体/em 样式 */
+em {
+  [data-diff-type='inline-delete'],
+  [data-diff-type='block-delete'] {
+    font-style: normal;
+  }
+}
+
+/* 为删除内容重置代码/code 样式 */
+code {
+  [data-diff-type='inline-delete'],
+  [data-diff-type='block-delete'] {
+    font-family: sans-serif;
+  }
+}
+```
+
+然后，如果删除内容内部有标记标签，则重新应用这些标记样式，确保格式正确应用。
+
+```scss
+/* 确保删除内容内的标记样式正常工作 */
+[data-diff-type='inline-delete'],
+[data-diff-type='block-delete'] {
+  strong {
+    font-weight: bold;
+  }
+  em {
+    font-style: italic;
+  }
+  code {
+    font-family: monospace;
+  }
+}
+```
+
+### 用户归属样式
+
+当有用户归属信息时，你可以根据进行更改的用户来为 diffs 设置样式：
+
+```css
+/* 带用户归属的 diffs 样式 */
+[data-diff-user-id] {
+  position: relative;
+}
+
+/* 用于显示用户名的提示信息 */
+[data-diff-user-id]::before {
+  content: attr(data-diff-user-id);
+  position: absolute;
+  visibility: hidden;
+}
+
+[data-diff-user-id]:hover::before {
+  visibility: visible;
+}
+```
+
 ## 使用 NodeView （高级）
 
 在使用 [自定义节点视图](/editor/extensions/custom-extensions/node-views) 时，默认的 diff 映射可能无法按预期工作。你可以自定义映射并直接在自定义节点视图中渲染 diffs。
@@ -357,7 +468,7 @@ declare module '@tiptap-pro/extension-snapshot-compare' {
 
 ### ChangeTrackingTransform
 
-`ChangeTrackingTransform` 是一个记录对文档所做更改的类（基于 ProseMirror 的 `Transform`）。
+`ChangeTrackingTransform` 是一个记录对文档所做更改的类（基于 ProseMirror 的 `Transform`）。  
 它表示一个变换，其步骤描述了从文档的一个版本到另一个版本所做的所有更改。它具有以下属性：
 
 | 属性      | 类型                   | 描述                                                        |
@@ -368,7 +479,7 @@ declare module '@tiptap-pro/extension-snapshot-compare' {
 
 ### ChangeTrackingStep
 
-`ChangeTrackingStep` 是一个基于 ProseMirror 的 `ReplaceStep` 类表示的类，代表对文档所做的单个更改。它具有以下属性：
+`ChangeTrackingStep` 是一个基于 ProseMirror 的 `ReplaceStep` 类表示的类，代表对文档所做的单更改。它具有以下属性：
 
 | 属性         | 类型          | 描述                                           |
 | ------------ | ------------- | ---------------------------------------------- |

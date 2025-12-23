@@ -1,0 +1,86 @@
+---
+title: SQLite
+meta:
+  title: SQLite | Hocuspocus 文档
+  category: Hocuspocus
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@hocuspocus/extension-sqlite.svg?label=version
+    url: https://www.npmjs.com/package/@hocuspocus/extension-sqlite
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@hocuspocus/extension-sqlite.svg
+    url: https://npmcharts.com/compare/@hocuspocus/extension-sqlite?minimal=true
+    label: 下载量
+  - type: image
+    src: https://img.shields.io/npm/l/@hocuspocus/extension-sqlite.svg
+    url: https://www.npmjs.com/package/@hocuspocus/extension-sqlite
+    label: 许可证
+  - type: image
+    src: https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true
+    url: https://discord.gg/WtJ49jGshW
+    label: 聊天
+---
+
+## 介绍
+
+对于本地开发来说，能够用几行代码快速准备好一个数据库非常方便。这就是 SQLite 扩展的作用。
+
+## 安装
+
+像这样安装 SQLite 扩展：
+
+```bash
+npm install @hocuspocus/extension-sqlite
+```
+
+## 配置
+
+**database**
+
+有效值可以是文件名，`:memory:` 代表匿名的内存数据库，空字符串代表匿名的基于磁盘的数据库。匿名数据库不会被持久化，当关闭数据库句柄时，其内容会丢失。
+
+https://github.com/mapbox/node-sqlite3/wiki/API#new-sqlite3databasefilename-mode-callback
+
+默认值: `:memory:`
+
+**schema**
+
+为您创建的 SQLite 模式。
+
+默认:
+
+```sql
+CREATE TABLE IF NOT EXISTS "documents" (
+  "name" varchar(255) NOT NULL,
+  "data" blob NOT NULL,
+  UNIQUE(name)
+)
+```
+
+**fetch**
+
+一个用于从 SQLite 中检索数据的异步函数。如果您更改了模式，可能需要重写该查询。
+
+**store**
+
+一个用于将数据存储到 SQLite 的异步函数。如果您更改了模式，可能需要重写该查询。
+
+**用法**
+
+默认情况下，数据只是存储在 `:memory:` 中，因此当您停止服务器时数据会被清除。您可以传递文件名来将数据持久化到磁盘上。
+
+```js
+import { Server } from "@hocuspocus/server";
+import { SQLite } from "@hocuspocus/extension-sqlite";
+
+const server = new Server({
+  extensions: [
+    new SQLite({
+      database: "db.sqlite",
+    }),
+  ],
+});
+
+server.listen();
+```

@@ -9,12 +9,14 @@ meta:
     category: 转换
 ---
 
-import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
+    <RequirementItem label="1. 开通试用或订阅">
         在您的账户中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门套餐](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 从私有注册表安装">
@@ -22,11 +24,11 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
     </RequirementItem>
 </Requirements>
 
-<CodeDemo src="https://develop--tiptap-pro.netlify.app/preview/Extensions/ExportDocx" />
+<CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ExportDocx" />
 
 使用 Tiptap 的 `@tiptap-pro/extension-export-docx` 扩展将编辑器内容导出为 `.docx` 文件。该扩展将 `DOCX` 导出功能集成到您的编辑器中。
 
-您可以在任何 JavaScript 环境使用此扩展，包括服务器端应用程序，这受益于 `exportDocx` 函数的同构特性。
+您可以在任何 JavaScript 环境使用此扩展，包括服务器端应用程序，这得益于 `exportDocx` 函数的同构特性。
 
 如果您更倾向于在我们的服务端处理转换，也可以使用 [REST API](/conversion/import-export/docx/rest-api)。
 
@@ -232,23 +234,23 @@ app.post('/export-docx', async (req, res) => {
 
 当前支持功能及已知限制：
 
-| **功能**                        | **支持情况**                                                        |
-|--------------------------------|-------------------------------------------------------------------|
-| **文本内容**                    | ✓ 基本文字、间距、标点                                             |
-| **文本格式**                    | ✓ 粗体、斜体、下划线、删除线、对齐、行距                         |
-| **块级元素**                   | ✓ 段落、标题（1–6 级）、引用、序列列表及无序列表                  |
-| **表格**                      | ✓ 基础结构、表头行、跨列                                          |
-| **链接**                      | ✓ 超链接                                                         |
-| **媒体（图片）**              | ✓ 内嵌图片，保持大小                                             |
-| **样式**                      | ✓ 字体系列*、字体颜色、字体大小、背景色、行距                    |
-| **页眉和页脚**                | ~ 正在开发                                                       |
-| **分节和分页**                | ~ 正在开发                                                       |
-| **脚注和尾注**                | ~ 正在开发                                                       |
-| **数学公式**                  | ~ 正在开发                                                       |
-| **评论和修订**                | ✗ 不支持                                                         |
-| **目录**                      | ✗ 不支持                                                         |
-| **高级格式**                  | ✗ 列、文本方向、表单、宏、嵌入脚本等不支持                        |
-| **元数据**                    | ✗ 不支持                                                         |
-| **文本框、形状、SmartArt**    | ✗ 不支持                                                         |
+| **功能**                 | **支持情况**                                      |
+|------------------------|-------------------------------------------------|
+| **文本内容**            | ✓ 基本文字、间距、标点                           |
+| **文本格式**            | ✓ 粗体、斜体、下划线、删除线、对齐、行距       |
+| **块级元素**            | ✓ 段落、标题（1–6 级）、引用、序列列表及无序列表 |
+| **表格**                | ✓ 基础结构、表头行、跨列                         |
+| **链接**                | ✓ 超链接                                       |
+| **媒体（图片）**        | ✓ 内嵌图片，保持大小                             |
+| **样式**                | ✓ 字体系列*、字体颜色、字体大小、背景色、行距   |
+| **页眉和页脚**          | ~ 正在开发                                     |
+| **分节和分页**          | ~ 正在开发                                     |
+| **脚注和尾注**          | ~ 正在开发                                     |
+| **数学公式**            | ~ 正在开发                                     |
+| **评论和修订**          | ✗ 不支持                                       |
+| **目录**                | ✗ 不支持                                       |
+| **高级格式**            | ✗ 列、文本方向、表单、宏、嵌入脚本等不支持     |
+| **元数据**              | ✗ 不支持                                       |
+| **文本框、形状、SmartArt** | ✗ 不支持                                     |
 
-<span style={{fontSize: '1rem'}}>* 字体系列支持前提是目标字体已安装于打开 `.docx` 文件的操作系统中。</span>
+<span style={{fontSize: '1rem'}}>* 字体系列支持的前提是目标字体已安装于打开 `.docx` 文件的操作系统中。</span>

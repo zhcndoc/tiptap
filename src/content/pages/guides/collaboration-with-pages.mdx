@@ -1,0 +1,93 @@
+---
+title: "为 Pages 添加协作功能"
+tags:
+  - type: alpha
+meta:
+  title: Pages 协作 | Tiptap Pages 文档
+  description: 了解如何使用 Pages 扩展为您的分页编辑器添加实时协作功能。
+  category: Pages
+sidebars:
+  hideSecondary: true
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+您可以通过将 Pages 扩展与协作提供者（例如 TiptapCollabProvider）结合使用，在分页编辑器中启用实时协作。
+
+<CodeDemo isPro src="https://feature-pages-extension--tiptap-pro.netlify.app/preview/extensions/pagescollaboration" />
+
+---
+
+## 1. 需求
+- 支持协作功能的 Tiptap Pro 计划
+- 访问 Tiptap 云服务或您自己的协作后端
+- `@tiptap-pro/extension-pages@alpha` 包
+- `@tiptap-pro/provider-collab` 包（或您自己的提供者）
+
+## 2. 安装所需包
+
+```bash
+npm install @tiptap-pro/extension-pages@alpha @tiptap-pro/provider @tiptap/extension-collaboration
+```
+
+## 3. 设置您的协作提供者
+
+```js
+import { TiptapCollabProvider } from '@tiptap-pro/provider'
+import Collaboration from '@tiptap/extension-collaboration'
+import * as Y from 'yjs'
+
+const doc = new Y.Doc() // 初始化 Y.Doc 用于共享编辑
+
+const provider = new TiptapCollabProvider({
+    name: 'document.name', // 用于同步的唯一文档标识。这是您的文档名称。
+    appId: 'your-app-id', // 您的云端控制台 AppID，或用于本地部署的 `baseURL`
+    token: 'your-jwt-token', // 您的 JWT 令牌
+    document: doc,
+})
+
+```
+
+## 4. 配置您的编辑器，启用 Pages 和协作功能
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { Pages } from '@tiptap-pro/extension-pages'
+import { TiptapCollabProvider } from '@tiptap-pro/provider'
+import Collaboration from '@tiptap/extension-collaboration'
+import * as Y from 'yjs'
+
+const doc = new Y.Doc() // 初始化 Y.Doc 用于共享编辑
+
+const provider = new TiptapCollabProvider({
+    name: 'document.name', // 用于同步的唯一文档标识。这是您的文档名称。
+    appId: 'your-app-id', // 您的云端控制台 AppID，或用于本地部署的 `baseURL`
+    token: 'your-jwt-token', // 您的 JWT 令牌
+    document: doc,
+})
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    Pages.configure({
+      pageFormat: 'A4',
+      header: 'My Project',
+      footer: 'Page {page} of {total}',
+    }),
+    Collaboration.configure({
+      document: doc, // 配置 Y.Doc 以支持协作
+    }),
+  ],
+})
+```
+
+## 5. 流畅体验的小贴士
+- 确保您的提供者已连接后再开始编辑
+- 在界面中处理连接错误和用户在线状态
+- 可与其他协作扩展（评论、光标等）结合使用
+
+## 6. 下一步
+- 探索 [Pages 选项](/pages/core-concepts/options) 以获得更多布局控制
+- 查看 [Tiptap 协作文档](https://tiptap.dev/collaboration) 了解高级用法

@@ -1,0 +1,130 @@
+---
+title: 升级指南
+meta:
+  title: 升级指南 | Tiptap 协作文档
+  description: 从 2.x 升级到 3.0
+  category: Hocuspocus
+---
+
+## 从 2.x 升级到 3.0（Provider）
+
+TiptapCollabProvider 已移至 `@tiptap-pro/provider` 包。
+
+在使用多路复用时，提供者现在需要显式调用 `attach` 来附加到 websocket。
+
+```typescript
+import {
+  TiptapCollabProvider,
+  TiptapCollabProviderWebsocket
+} from "@tiptap-pro/provider";
+
+const socket = new TiptapCollabProviderWebsocket({
+  appId: '', // 或者如果使用 `HocuspocusProviderWebsocket` 则使用 `url`
+})
+
+const provider1 = new TiptapCollabProvider({
+  websocketProvider: socket,
+  name: 'document1',
+  token: '',
+})
+
+provider1.attach() // 当手动传入 socket 时，需要显式调用 attach
+```
+
+更多信息请参见：https://github.com/ueberdosis/hocuspocus/releases/tag/v3.1.0
+
+## 从 2.x 升级到 3.0（服务器端）
+
+升级到新版本后，hocuspocus 的初始化方式发生了变化。如 [使用说明](/hocuspocus/server/usage) 所述，
+使用 hocuspocus 有两种方式：内置服务器，或作为库用于其他框架（如 [express](/hocuspocus/server/examples#express)）。
+为了简化操作并支持更多未来功能，我们将类进行了分离，并把服务器放入了它自己的类中。
+
+### 使用 .configure() 的方式变更
+
+不再支持使用 `.configure()` 来使用 hocuspocus。你现在必须自己创建一个新的实例。
+
+**旧方式**
+```js
+import { Server } from "@hocuspocus/server";
+
+const server = Server.configure({
+  port: 1234,
+});
+
+server.listen();
+```
+
+**新方式**
+```js
+import { Server } from "@hocuspocus/server";
+
+const server = new Server({
+  port: 1234,
+});
+
+server.listen();
+```
+
+注意，导入方式未变，配置选项也保持不变。
+
+### 不使用内置服务器的 Hocuspocus 用法
+
+如果之前使用过不带内置服务器的 Hocuspocus，也需要更新你的设置。
+
+**旧方式**
+```js
+import { Server } from "@hocuspocus/server";
+
+const server = Server.configure({
+  // ...
+});
+```
+
+**新方式**
+```js
+import { Hocuspocus } from "@hocuspocus/server";
+
+const hocuspocus = new Hocuspocus({
+  // ...
+});
+
+// 你仍然可以像以前一样使用 handleConnection。
+hocuspocus.handleConnection(...);
+```
+
+注意导入从 `Server` 改为 `Hocuspocus`，并通过 `new Hocuspocus()` 进行初始化。
+更多内容请参阅 [示例](/hocuspocus/server/examples)。
+
+### 服务器 listen 方法签名的变更
+
+服务器的 `.listen()` 方法曾经非常灵活，我们简化了它的签名，但仍可达到之前相同的行为。
+
+**旧签名**
+```js
+async listen(
+    portOrCallback: number | ((data: onListenPayload) => Promise<any>) | null = null,
+    callback: any = null,
+): Promise<Hocuspocus>
+```
+
+**新签名**
+```js
+async listen(port?: number, callback: any = null): Promise<Hocuspocus>
+```
+
+listen 方法依然返回一个 Promise，成功时解析为 Hocuspocus。
+
+旧版本中你能传入的两种回调现在都合并到了 `onListen` 钩子中。新版本中的回调参数依然有效，
+但你无法再只把回调函数放在第一个参数。如果你只想添加回调，也可以将其配置在服务器初始化时。
+
+```js
+import { Server } from "@hocuspocus/server";
+
+const server = new Server({
+  async onListen(data) {
+    console.log(`服务器已在端口 "${data.port}" 上监听！`);
+  },
+});
+
+server.listen()
+```

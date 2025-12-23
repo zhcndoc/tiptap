@@ -1,0 +1,292 @@
+---
+title: 创建支持 Markdown 的 Emoji 内联节点
+tags:
+  - type: beta
+meta:
+  title: 创建支持 Markdown 的 Emoji 内联节点 | Tiptap 编辑器文档
+  description: 学习如何在 Tiptap 中创建一个支持短码 Markdown（例如 :smile:）的自定义 Emoji 内联节点。
+  category: Editor
+---
+
+本指南展示如何为一个小型原子内联节点添加 Markdown 支持，该节点渲染 emoji 短码（例如 `:smile:`）。我们将分四个步骤讲解，每个步骤都会附上完整示例，确保你始终拥有完整的上下文：
+
+1. 创建基础的 `emoji` 节点（无 Markdown 支持）。
+2. 步骤 2：添加一个分词器，将 `:name:` 转换为 token。
+3. 步骤 3：添加解析器，将 token 转为 Tiptap 的 JSON。
+4. 步骤 4：添加渲染器，将 Tiptap JSON 序列化回 Markdown。
+
+我们将支持的示例简写：
+
+```md
+Hello :smile: world!
+```
+
+---
+
+## 步骤 1：创建基础的 `emoji` 节点
+
+首先定义一个小型的原子内联节点，存储一个 `name` 属性，并在 HTML 中渲染对应的 emoji。
+
+```js
+import { Node } from '@tiptap/core'
+
+const emojiMap = {
+  smile: '😊',
+  heart: '❤️',
+  thumbsup: '👍',
+  fire: '🔥',
+  // 根据需要添加更多映射
+}
+
+export const Emoji = Node.create({
+  name: 'emoji',
+
+  group: 'inline',
+  inline: true,
+  atom: true,
+
+  addAttributes() {
+    return {
+      name: { default: 'smile' },
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'span[data-emoji]' }]
+  },
+
+  renderHTML({ node }) {
+    const emoji = emojiMap[node.attrs.name] || node.attrs.name || 'smile'
+    return ['span', { 'data-emoji': node.attrs.name }, emoji]
+  },
+})
+```
+
+**说明：**
+- 该节点设置了 `atom: true` 和 `inline`，使其表现为一个不可分割的内联内容片段。
+- `emojiMap` 用来将短名映射成实际的 emoji 字符用于 HTML 输出。
+
+---
+
+## 步骤 2：添加自定义 Markdown 分词器
+
+该分词器在内联 Markdown 中识别 `:name:` 短码，并返回带有 emoji 名称的 token。下面展示包括分词器在内的完整扩展代码，方便你了解如何将其与基础节点整合。
+
+```js
+import { Node } from '@tiptap/core'
+
+const emojiMap = {
+  smile: '😊',
+  heart: '❤️',
+  thumbsup: '👍',
+  fire: '🔥',
+  // 根据需要添加更多映射
+}
+
+export const Emoji = Node.create({
+  name: 'emoji',
+
+  group: 'inline',
+  inline: true,
+  atom: true,
+
+  addAttributes() {
+    return {
+      name: { default: 'smile' },
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'span[data-emoji]' }]
+  },
+
+  renderHTML({ node }) {
+    const emoji = emojiMap[node.attrs.name] || node.attrs.name || 'smile'
+    return ['span', { 'data-emoji': node.attrs.name }, emoji]
+  },
+
+  // 定义 Markdown 分词器，识别 :name: 短码
+  markdownTokenizer: {
+    name: 'emoji',
+    level: 'inline',
+    // 提供给词法分析器的快速定位提示
+    start: (src) => src.indexOf(':'),
+    tokenize: (src, tokens, lexer) => {
+      // 匹配格式为 :name:，其中 name 可包含字母、数字、下划线及加号
+      const match = /^:([a-z0-9_+]+):/i.exec(src)
+      if (!match) return undefined
+
+      return {
+        type: 'emoji',
+        raw: match[0],       // 完整匹配，如 ":smile:"
+        emojiName: match[1], // 捕获的名称，如 "smile"
+      }
+    },
+  },
+})
+```
+
+**实现说明：**
+- `start` 是词法分析器用于快速寻找候选位置的优化提示。
+- 分词器返回一个包含 `type`、`raw` 和 `emojiName` 字段的 token，供解析器使用。
+- 保持分词器为内联级别（`level: 'inline'`），以便与内联解析集成。
+
+---
+
+## 步骤 3：添加解析器
+
+`parseMarkdown` 函数将分词器生成的 token 转换成 Tiptap 节点对象。对于原子内联节点，应返回包含 `type` 和 `attrs` 的节点对象。以下示例为包含分词器与解析器的完整扩展。
+
+```js
+import { Node } from '@tiptap/core'
+
+const emojiMap = {
+  smile: '😊',
+  heart: '❤️',
+  thumbsup: '👍',
+  fire: '🔥',
+  // 根据需要添加更多映射
+}
+
+export const Emoji = Node.create({
+  name: 'emoji',
+
+  group: 'inline',
+  inline: true,
+  atom: true,
+
+  addAttributes() {
+    return {
+      name: { default: 'smile' },
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'span[data-emoji]' }]
+  },
+
+  renderHTML({ node }) {
+    const emoji = emojiMap[node.attrs.name] || node.attrs.name || 'smile'
+    return ['span', { 'data-emoji': node.attrs.name }, emoji]
+  },
+
+  markdownTokenizer: {
+    name: 'emoji',
+    level: 'inline',
+    start: (src) => src.indexOf(':'),
+    tokenize: (src, tokens, lexer) => {
+      const match = /^:([a-z0-9_+]+):/i.exec(src)
+      if (!match) return undefined
+
+      return {
+        type: 'emoji',
+        raw: match[0],
+        emojiName: match[1],
+      }
+    },
+  },
+
+  // 将分词器 token 解析为 Tiptap 节点
+  parseMarkdown: (token, helpers) => {
+    return {
+      type: 'emoji',
+      attrs: { name: token.emojiName },
+    }
+  },
+})
+```
+
+**说明：**
+- `parseMarkdown` 函数返回的对象中，`type` 应当与节点名保持一致。
+- 原子节点不包含 `content`，它们是带有属性的独立节点。
+
+---
+
+## 步骤 4：添加渲染器
+
+为支持将编辑器状态序列化回 Markdown 短码，实现 `renderMarkdown` 函数。该函数接收一个 Tiptap 节点对象，返回表示该节点的 Markdown 字符串。下面是包括分词器、解析器和渲染器的完整扩展。
+
+```js
+import { Node } from '@tiptap/core'
+
+const emojiMap = {
+  smile: '😊',
+  heart: '❤️',
+  thumbsup: '👍',
+  fire: '🔥',
+  // 根据需要添加更多映射
+}
+
+export const Emoji = Node.create({
+  name: 'emoji',
+
+  group: 'inline',
+  inline: true,
+  atom: true,
+
+  addAttributes() {
+    return {
+      name: { default: 'smile' },
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'span[data-emoji]' }]
+  },
+
+  renderHTML({ node }) {
+    const emoji = emojiMap[node.attrs.name] || node.attrs.name || 'smile'
+    return ['span', { 'data-emoji': node.attrs.name }, emoji]
+  },
+
+  markdownTokenizer: {
+    name: 'emoji',
+    level: 'inline',
+    start: (src) => src.indexOf(':'),
+    tokenize: (src, tokens, lexer) => {
+      const match = /^:([a-z0-9_+]+):/i.exec(src)
+      if (!match) return undefined
+
+      return {
+        type: 'emoji',
+        raw: match[0],
+        emojiName: match[1],
+      }
+    },
+  },
+
+  parseMarkdown: (token, helpers) => {
+    return {
+      type: 'emoji',
+      attrs: { name: token.emojiName },
+    }
+  },
+
+  // 将 Tiptap 节点渲染回 Markdown
+  renderMarkdown: (node, helpers) => {
+    // 序列化为 :name: 短码，使用存储的 name 属性
+    return `:${node.attrs?.name || 'unknown'}:`
+  },
+})
+```
+
+---
+
+## 使用方法
+
+从包含 emoji 短码的 Markdown 设置编辑器内容。根据你的 Markdown 集成方式，传入 `contentType: 'markdown'` 或使用相应的 API：
+
+```js
+editor.commands.setContent('Hello :smile: :heart: :thumbsup:', { contentType: 'markdown' })
+```
+
+这会生成带有对应 `name` 属性的内联 `emoji` 节点，HTML 渲染时将显示映射的 emoji 字符（通过 `emojiMap`）。
+
+---
+
+## 测试及边界情况
+
+- 未知名称：如果短码名不在 `emojiMap` 中，节点当前会在 `span` 中渲染原始名称（你可能希望显示替代符号或移除该节点）。如果需要，请在 `markdownTokenizer` 或 `parseMarkdown` 中校验或规范化名称。
+- 大小写敏感：分词器使用了 `i` 标志实现不区分大小写；请确保你的 `emojiMap` 键与你的命名规范一致，或者使用 `.toLowerCase()` 统一处理。
+- 内联解析：因为这是条内联分词器，会在段落和内联上下文中尝试匹配，确保它不会与其它内联分词规则（例如强调）冲突，必要时通过调整正则或使用周围空白检查以避免误匹配。
+- 原子行为：该节点为原子节点，不可作为文本编辑。这很适合 emoji 元素，但如果你希望短码可编辑，需要采用不同策略。

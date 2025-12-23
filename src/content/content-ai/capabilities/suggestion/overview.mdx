@@ -1,8 +1,8 @@
 ---
 title: 在您的编辑器中显示 AI 建议
 tags:
-  - type: team
   - type: beta
+  - type: deprecated
 meta:
   title: AI 建议 | Tiptap 内容 AI
   description: 了解 AI 建议扩展的概述、功能及其工作原理。
@@ -11,26 +11,20 @@ meta:
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
-import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
-<Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        开始您的[免费试用](https://cloud.tiptap.dev/v2?trial=true)或在您的账户中[订阅团队计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 集成 AI 提供商">
-        在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查阅[自定义大语言模型指南](/content-ai/capabilities/suggestion/custom-llms)。
-    </RequirementItem>
-    <RequirementItem label="3. 从私有仓库安装">
-        要安装前端扩展，请参考[设置指南](/guides/pro-extensions)进行身份验证，登录到 Tiptap 的私有 npm 仓库。
-    </RequirementItem>
-</Requirements>
+<Callout title="已弃用" variant="warning">
+  此扩展正在逐步被 AI 工具包取代，后者提供了更强大的功能和现代化的 API。您仍可以继续使用此扩展，但我们建议在新项目中优先考虑 AI 工具包。
+</Callout>
+
+<EnterpriseCalloutAuto variant="deprecated" renderMode="sidebar" />
 
 AI 建议扩展会分析文档并提供用户可接受或拒绝的建议。它开箱即用地支持 Content AI Cloud，并且可以轻松扩展以支持您自己的后端和大语言模型（LLM）。
 
 <CodeDemo
   isPro
   path="/Extensions/AiSuggestion"
-  src="https://develop--tiptap-pro.netlify.app/preview/Extensions/AiSuggestion"
+  src="https://feature-beta-ai-extensions--tiptap-pro.netlify.app/preview/Extensions/AiSuggestion"
 />
 
 ## 功能
@@ -40,6 +34,7 @@ AI 建议扩展会分析文档并提供用户可接受或拒绝的建议。它�
 - 支持建议中的富文本，因此您可以强制执行样式规则，如将关键词设为加粗或斜体。
 - [集成您自己的后端和大语言模型](/content-ai/capabilities/suggestion/custom-llms)
 - [自定义用户界面](/content-ai/capabilities/suggestion/features/display-suggestions)：完全控制建议在编辑器中的显示方式。
+- 与 Tiptap 协作功能无缝集成（[了解更多](/content-ai/resources/collaboration)）
 
 ## 工作原理
 

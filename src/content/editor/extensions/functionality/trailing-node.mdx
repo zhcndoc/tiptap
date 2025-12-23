@@ -48,9 +48,9 @@ new Editor({
 
 ### node
 
-应在文档末尾插入的节点类型。
+应在文档末尾插入的节点类型。当未设置此项时，尾节点扩展会向 ProseMirror schema 查询其定义的回退节点（通常是默认块节点），但你可以通过 `node` 选项覆盖此行为。当你定义了自定义文档结构时，这一点尤为重要——请参阅[强制内容结构示例](/examples/advanced/forced-content-structure)了解自定义文档如何影响默认回退节点。
 
-默认值：`'paragraph'`
+默认值：`undefined`
 
 ```js
 TrailingNode.configure({

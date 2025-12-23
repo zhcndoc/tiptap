@@ -6,112 +6,75 @@ meta:
   category: 内容 AI
 ---
 
-import contentAIIcon from '@/assets/content-ai.png'
+import { ArrowRightIcon } from 'lucide-react'
 import Link from '@/components/Link'
 import { ProductCard } from '@/components/ProductCard'
-import { Callout } from '@/components/ui/Callout'
-import * as CardGrid from '@/components/CardGrid'
-import cardCoverSimpleEditorTemplate from '@/assets/card-covers/examples/simple-editor-template-preview.jpg'
-import cardCoverUIComponents from '@/assets/card-covers/examples/components-preview.jpg'
+import aiToolkitIcon from '@/assets/ai-toolkit.svg?url'
+import aiGenerationIcon from '@/assets/ai-generation.svg?url'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
-Content AI 扩展提供了简单集成 AI 功能的方法，如智能自动补全、校对、图像生成等。
+<EnterpriseCalloutAuto variant="ai-toolkit" renderMode="sidebar" />
 
-- **AI 编辑器扩展：** 编辑器扩展处理流式传输、差异计算和 UI 装饰的复杂性，助您专注于业务逻辑。
-- **即插即用 OpenAI：** 将扩展指向您的 Content AI 应用 ID 并集成您的 OpenAI 账户。
-- **支持自定义大语言模型（LLM）：** 覆盖解析器钩子调用您的自定义 AI LLM 后端。
+了解如何通过指南、API 参考和集成示例构建 AI 驱动的编辑器。
 
-## Content AI 扩展
+## 快速开始
 
-我们的 AI 扩展与 Tiptap Cloud 开箱即用，无需担心 AI 后端即可部署，但也易于扩展以支持您的自定义后端和大语言模型。
+Tiptap 提供了两款可直接集成到您的编辑器中的前端扩展。
 
 <div className="grid sm:grid-cols-2 gap-5">
   <ProductCard
+    title="AI 工具包"
+    description="为 AI 代理提供工具定义，用于读取、插入及修补编辑器内容。包含文档分块、模式感知生成、实时流式传输和基于建议的审阅功能。"
+    tags={['付费插件']}
+    documentationUrl="/content-ai/capabilities/ai-toolkit/overview"
+    secondaryUrl="/content-ai/capabilities/use-cases"
+    secondaryButtonText="使用案例"
+    icon={aiToolkitIcon.src}
+    doubleWidth={true}
+  />
+  <ProductCard
+    title="服务器端 AI 工具包"
+    description="构建能够在服务器端读取和编辑 Tiptap 文档的 AI 代理。支持后台文档处理和 AI 驱动的文档工作流。"
+    tags={['限制发布']}
+    documentationUrl="/content-ai/capabilities/server-ai-toolkit/overview"
+    icon={aiToolkitIcon.src}
+    doubleWidth={true}
+  />
+  <ProductCard
     title="AI 生成"
-    description="通过您的自定义大语言模型或 OpenAI 实现内联内容生成与编辑。"
-    tags={['云端', '本地部署']}
+    description="执行内置或自定义的文本命令（摘要、改写、翻译），支持流式响应。包括 Tab 触发的自动补全和响应管理。"
+    tags={['入门']}
     documentationUrl="/content-ai/capabilities/generation/overview"
-    icon={contentAIIcon.src}
-  />
-  <ProductCard
-    title="AI 建议"
-    description="在编辑器中显示校对建议。"
-    tags={['测试版', '云端', '本地部署']}
-    documentationUrl="/content-ai/capabilities/suggestion/overview"
-    icon={contentAIIcon.src}
-  />
-  <ProductCard
-    title="AI 修改"
-    description="审阅 AI 生成的内容。"
-    tags={['测试版']}
-    documentationUrl="/content-ai/capabilities/changes/overview"
-    icon={contentAIIcon.src}
-  />
-  <ProductCard
-    title="AI 助手"
-    description="集成一个能根据用户定义任务读取并编辑您文档的 AI 助手。"
-    tags={['测试版', '云端', '本地部署']}
-    documentationUrl="/content-ai/capabilities/agent/overview"
-    icon={contentAIIcon.src}
+    secondaryUrl="/content-ai/capabilities/use-cases"
+    secondaryButtonText="使用案例"
+    icon={aiGenerationIcon.src}
+    doubleWidth={true}
   />
 </div>
 
-## 集成 UI 组件
+## 探索使用案例
 
-插入我们现成的 React 组件库和功能完整的模板，即可得到一个精致的编辑器，并可在此基础上进行定制。
+探索用于 AI 驱动编辑的技术实现。构建具备文档编辑能力的 AI 代理，如聊天机器人、内联编辑和校对，或添加简单的 AI 命令，如自动补全、翻译和摘要。
 
-<Callout title="内容 AI 组件即将推出" variant="hint">
-  内容 AI 的 UI 组件和模板正在开发中。如果您已经在使用 Tiptap 的 UI 组件，届时可以几乎不做改动地直接使用。
-</Callout>
+<Link href="/content-ai/capabilities/use-cases" className="font-semibold text-blue-600 hover:text-blue-700 inline-flex items-center gap-1.5">
+  <ArrowRightIcon className="size-3.5" />
+  查看使用案例
+</Link>
 
-<div>
-  <CardGrid.Wrapper>
-    <CardGrid.Item asChild>
-      <Link href="/ui-components/templates/simple-editor">
-        <CardGrid.ItemImage
-          asNextImage
-          src={cardCoverSimpleEditorTemplate.src}
-          width={cardCoverSimpleEditorTemplate.width}
-          height={cardCoverSimpleEditorTemplate.height}
-          alt="图片"
-        />
-        <div>
-          <CardGrid.ItemTitle>模板</CardGrid.ItemTitle>
-          <CardGrid.ItemParagraph>
-            使用包含常用功能的预构建编辑器快速入门。
-          </CardGrid.ItemParagraph>
-        </div>
-        <CardGrid.ItemFooter />
-      </Link>
-    </CardGrid.Item>
-    <CardGrid.Item asChild>
-      <Link href="/ui-components/components/overview">
-        <CardGrid.ItemImage
-          asNextImage
-          src={cardCoverUIComponents.src}
-          width={cardCoverUIComponents.width}
-          height={cardCoverUIComponents.height}
-          alt="图片"
-        />
-        <div>
-          <CardGrid.ItemTitle>组件</CardGrid.ItemTitle>
-          <CardGrid.ItemParagraph>
-            已在使用 Tiptap？只需导入您需要的部分组件。
-          </CardGrid.ItemParagraph>
-        </div>
-        <CardGrid.ItemFooter />
-      </Link>
-    </CardGrid.Item>
-  </CardGrid.Wrapper>
-</div>
+## 使用您自己的 AI 基础设施
 
-Tiptap 新的 AI 就绪 UI 组件库和模板正在开发中。在此之前，您可以查看我们的[旧版 Notion 风格模板](https://templates.tiptap.dev/)以获取将 AI 集成到编辑器的灵感。我们不再维护该模板或提供其源代码。建议迁移到即将发布的组件和模板，以获得更便捷的升级路径。
+所有扩展均支持自定义 AI 基础设施，且不向 Tiptap 发送任何数据：
 
-## 示例和演示
+- **AI 工具包**：框架无关。支持 Vercel AI SDK、LangChain、OpenAI SDK、Anthropic SDK，或您自定义的实现。[了解更多](/content-ai/capabilities/ai-toolkit/overview)
 
-我们提供了将 AI 功能集成到编辑器的示例。查看我们的演示：
+- **AI 生成**：通过重写解析器连接您自己的大语言模型(LLM)。另一种方式是将 Tiptap AI 服务器作为 OpenAI 的中间件（目前仅支持 OpenAI 模型）。[了解更多](/content-ai/capabilities/generation/custom-llms)
 
-- [AI 文本生成](/content-ai/capabilities/generation/overview)
-- [AI 自动补全](/content-ai/capabilities/generation/text-generation/autocompletion)
-- [AI 建议](/content-ai/capabilities/suggestion/overview)
-- [AI 修改](/content-ai/capabilities/changes/overview)
-- [AI 助手](/content-ai/capabilities/agent/overview)
+**隐私与安全：** 使用 Tiptap AI 后端搭配 AI 生成时，请参阅我们的[隐私文档](/content-ai/resources/privacy)，了解我们如何处理 AI 数据和内容隐私。
+
+## 旧版扩展
+
+[AI 建议](/content-ai/capabilities/suggestion/overview)、[AI 修改](/content-ai/capabilities/changes/overview) 和 [AI 助手](/content-ai/capabilities/agent/overview) 将于 2026 年弃用，并由 AI 工具包替代。这些扩展不再新增功能，仅为现有用户维护。
+
+**迁移至 AI 工具包：** AI 工具包提供更强大的 AI 代理工作流功能。请查阅[迁移指南](/content-ai/capabilities/ai-toolkit/migration-guides)，了解如何转移您的应用。
+
+<EnterpriseCalloutAuto variant="migration" renderMode="inline" disableWaitlist={true} />

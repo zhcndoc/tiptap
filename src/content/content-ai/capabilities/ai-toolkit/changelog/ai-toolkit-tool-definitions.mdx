@@ -1,0 +1,128 @@
+---
+title: 更新日志 - 工具定义
+meta:
+  title: 更新日志 - 工具定义 | Tiptap AI 工具包
+  description: @tiptap-pro/ai-toolkit-tool-definitions 包的更新日志
+  category: 内容 AI
+---
+
+# @tiptap-pro/ai-toolkit-tool-definitions
+
+## 3.0.0-alpha.18
+
+### 小改动
+
+- 服务器端 AI 工具包工具定义
+
+## 3.0.0-alpha.17
+
+### 重大改动
+
+- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，并设为默认。移除 `readNodeRange`、`readSelection`、`insertContent` 和 `applyPatch` 工具。
+
+## 3.0.0-alpha.16
+
+### 小改动
+
+- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，使编辑更快速高效。此类工具为实验性且需自行选择使用。
+
+## 3.0.0-alpha.15
+
+### 补丁改动
+
+- 修复了导致 AI 在聊天交互开始时未读取文档的缺陷。
+
+## 3.0.0-alpha.14
+
+### 补丁改动
+
+- 修复了导致 AI 在不必要时读取整个文档的缺陷。
+
+## 3.0.0-alpha.13
+
+### 补丁改动
+
+- 修复了文档更新后 AI 读取到错误内容的缺陷。
+
+## 3.0.0-alpha.12
+
+### 补丁改动
+
+- 修复了新建的线程和评论未创建在文档正确位置的缺陷。
+
+## 3.0.0-alpha.11
+
+### 重大改动
+
+- `applyPatch` 工具输入格式全新设计，使工具定义更简洁一致。
+- 改进所有内置工具的输出和工具定义。
+- 需要升级至 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.37`
+
+## 3.0.0-alpha.10
+
+### 重大改动
+
+- 通过将 “html” 属性重命名为 “content”，使 insertContent 工具内容格式独立。
+- 需要升级至 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.36`
+
+### 补丁改动
+
+- 修复 insertContent 工具中 activeNodeRange 不是有效位置的缺陷。
+- 修复 insertContent 工具导致 activeNodeRange 总是重置为 0 的缺陷。
+
+## 3.0.0-alpha.9
+
+### 重大改动
+
+- 新增 AI 驱动的评论和线程管理工具 `editThreads` 和 `getThreads`
+- 需要升级至 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.26`
+
+## 3.0.0-alpha.8
+
+### 重大改动
+
+- 将 `applyDiff` 工具重命名为 `applyPatch`
+- 改进 `applyDiff`（现名 `applyPatch`）工具格式和定义，使 AI 生成补丁操作列表。此改进提升准确性（避免 AI 产生不必要跳跃）且显著减少代币使用。
+
+## 3.0.0-alpha.7
+
+### 小改动
+
+- 在 `insertContent` 工具添加 `activeNodeRange` 位置，允许 AI 在活动节点范围内插入内容。当禁用 `applyDiff` 工具时，此改动提升编辑精度。
+
+## 3.0.0-alpha.6
+
+### 小改动
+
+- AI 工具包与 Pages 扩展集成实验性实现。引入 `readPage` 工具。
+
+## 3.0.0-alpha.5
+
+### 重大改动
+
+- 优化 `readSelection` 和 `insertContent` 工具定义，修复用户在 AI 读取选区后变更选区导致内容插入错误的缺陷。需 AI 工具包版本不低于 `3.0.0-alpha-17`
+
+## 3.0.0-alpha.4
+
+### 重大改动
+
+- 需要升级至 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.14`
+- 改进文档读取与编辑的工具定义
+
+## 3.0.0-alpha.3
+
+### 小改动
+
+- 优化 `readFirstChunk` 工具描述
+
+## 3.0.0-alpha.2
+
+### 重大改动
+
+- 将 `schema` 重命名为 `inputSchema`
+
+## 3.0.0-alpha.1
+
+### 重大改动
+
+- 初始版本，包含适用于 Tiptap AI 工具包的通用工具定义

@@ -1,0 +1,70 @@
+---
+title: React Router
+meta:
+  title: React Router | Tiptap UI 组件
+  description: 在你的 React Router 项目中安装和配置 Tiptap UI 组件。
+  category: UI 组件
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+使用下面的命令来初始化一个带有 TypeScript 的新 React 项目，然后添加 React Router。
+
+```bash
+npx create-react-router@latest my-app
+```
+
+## 添加 Tiptap 组件
+
+使用 CLI 安装 Tiptap UI 组件。例如，添加 `HeadingButton` 组件：
+
+```bash
+npx @tiptap/cli@latest add heading-button
+```
+
+以上命令会安装 `HeadingButton` 组件及其依赖。之后你就可以在你的 **Tiptap** 项目中导入并使用它：
+
+```tsx
+import React from 'react'
+import { HeadingButton } from '@/components/ui/heading-button'
+
+export default function EditorPage() {
+  // Tiptap 配置...
+
+  return (
+    <div className="editor-page">
+      <div className="toolbar">
+        <HeadingButton level={1}>标题 1</HeadingButton>
+        <HeadingButton level={2}>标题 2</HeadingButton>
+        <HeadingButton level={3}>标题 3</HeadingButton>
+      </div>
+      {/* 你的编辑器组件 */}
+    </div>
+  )
+}
+```
+
+## 添加样式
+
+<Callout title="样式会自动添加" variant="info">
+  当你安装第一个 Tiptap UI 组件时，CLI 会自动将需要的 <code>.scss</code> 导入添加到你的主样式表中。大多数情况下，**无需手动设置**。
+</Callout>
+
+在继续之前，请确保你的项目包含 CSS 重置。如果你使用的是 Tailwind CSS，则已经内置了重置样式。
+
+#### 样式导入位置
+
+CLI 会自动将样式导入注入到你的全局样式表中，例如：
+
+- `src/index.css`（根据你的项目结构）
+
+如果你定制了入口文件，确保包含以下内容：
+
+**文件:** `src/index.css`（视项目而定）
+
+```css
+@import '<path-to-styles>/_variables.scss';
+@import '<path-to-styles>/_keyframe-animations.scss';
+```
+
+了解更多关于样式配置的信息，请参考[样式设置指南](/ui-components/getting-started/style)。

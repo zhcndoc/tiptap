@@ -1,29 +1,23 @@
 ---
 title: 跟踪和审查 AI 生成的更改
 meta:
-  title: AI Changes | Tiptap Content AI
-  description: 在您的 Tiptap 文本编辑器中审查 AI 所做的更改。
+  title: AI 更改 | Tiptap 内容 AI
+  description: 在您的 Tiptap 编辑器中跟踪、审查并接受或拒绝 AI 生成的内容修改，视觉化高亮显示更改。
   category: Content AI
 tags:
-  - type: team
   - type: beta
+  - type: deprecated
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
-import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
-<Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开启[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅团队计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 集成 AI 提供商">
-        在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查看[自定义大型语言模型指南](/content-ai/capabilities/suggestion/custom-llms)。
-    </RequirementItem>
-    <RequirementItem label="3. 从私有注册表安装">
-        若要安装前端扩展，请按照[设置指南](/guides/pro-extensions)进行身份验证，登录 Tiptap 的私有 npm 注册表。
-    </RequirementItem>
-</Requirements>
+<Callout title="已弃用" variant="warning">
+  该扩展正在逐步被 AI Toolkit 取代，后者提供增强功能和现代化的 API。虽然您仍然可以继续使用此扩展，但建议探索 AI Toolkit 以进行新的实现。
+</Callout>
+
+<EnterpriseCalloutAuto variant="deprecated" renderMode="sidebar" />
 
 AI 更改扩展使您能够跟踪、审查和管理编辑器中 AI 所做的内容修改。它清晰地突出显示更改，方便查看新增或删除的内容。
 
@@ -32,7 +26,7 @@ AI 更改扩展使您能够跟踪、审查和管理编辑器中 AI 所做的内�
 <CodeDemo
   isPro
   path="/Extensions/AiChanges"
-  src="https://develop--tiptap-pro.netlify.app/preview/Extensions/AiChanges"
+  src="https://feature-beta-ai-extensions--tiptap-pro.netlify.app/preview/Extensions/AiChanges"
 />
 
 ## AI Changes 功能
@@ -41,6 +35,10 @@ AI 更改扩展使您能够跟踪、审查和管理编辑器中 AI 所做的内�
 - 支持富文本格式，包括图片、链接和提及
 - 允许用户[接受和拒绝单个更改](/content-ai/capabilities/changes/features/review-changes)，或者调整生成的内容
 - 提供一个[完全可定制的 UI](/content-ai/capabilities/changes/features/display-changes)来显示更改
+
+<Callout title="何时使用 AI Changes?" variant="warning">
+  AI Changes 扩展在更改应用到文档后显示更改。若要在应用更改之前预览，更推荐使用[AI 建议](/content-ai/capabilities/suggestion/overview)扩展。请参阅[差异视图](/content-ai/capabilities/suggestion/features/diff-view)指南。
+</Callout>
 
 ## 工作原理
 

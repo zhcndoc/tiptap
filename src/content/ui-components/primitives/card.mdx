@@ -1,0 +1,93 @@
+---
+title: 集成 Card UI 组件
+meta:
+  title: Card | Tiptap UI 组件
+  description: 集成一个灵活的容器组件，用于将相关内容和操作组合在一起。更多内容请参阅文档。
+  category: UI 组件
+component:
+  name: Card
+  description: 一个灵活的容器，以统一的方式组合相关内容和操作。
+  type: primitive
+  isFree: true
+  isCloud: false
+  isOpen: true
+  isNew: false
+  icon: LayoutIcon
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个灵活的容器组件，以视觉上明显的方式组合相关内容和操作，常用于卡片、对话框和面板中展示信息。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui-primitive/card" />
+
+## 安装
+
+你可以通过 Tiptap CLI 添加该原语组件
+
+```bash
+npx @tiptap/cli@latest add card
+```
+
+## 用法
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  CardItemGroup,
+  CardGroupLabel,
+} from '@/components/tiptap-ui-primitive/card'
+
+export default function MyComponent() {
+  return (
+    <Card>
+      <CardHeader>
+        <h3>设置</h3>
+      </CardHeader>
+      <CardBody>
+        <CardGroupLabel>外观</CardGroupLabel>
+        <CardItemGroup orientation="vertical">
+          <div>主题偏好</div>
+          <div>语言</div>
+        </CardItemGroup>
+
+        <CardGroupLabel>账户</CardGroupLabel>
+        <CardItemGroup orientation="horizontal">
+          <div>个人资料</div>
+          <div>安全</div>
+        </CardItemGroup>
+      </CardBody>
+    </Card>
+  )
+}
+```
+
+## 属性
+
+### CardItemGroup
+
+| 名称         | 类型                            | 默认值     | 说明                               |
+| ------------ | ------------------------------- | ---------- | ---------------------------------- |
+| orientation  | `'horizontal' \| 'vertical'`    | 'vertical' | 组内项目的布局方向                 |
+
+## 样式
+
+Card 组件使用 CSS 自定义属性来实现主题：
+
+```scss
+:root {
+  --tiptap-card-bg-color: var(--white);
+  --tiptap-card-border-color: var(--tt-gray-light-a-100);
+  --tiptap-card-group-label-color: var(--tt-gray-light-a-800);
+}
+
+.dark {
+  --tiptap-card-bg-color: var(--tt-gray-dark-50);
+  --tiptap-card-border-color: var(--tt-gray-dark-a-100);
+  --tiptap-card-group-label-color: var(--tt-gray-dark-a-800);
+}
+```
+
+你可以自定义这些属性以匹配你的设计系统。

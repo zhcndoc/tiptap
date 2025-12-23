@@ -45,6 +45,14 @@ npm install @tiptap/extension-floating-menu @floating-ui/dom@^1.6.0
 
 默认值: `null`
 
+### appendTo
+
+菜单应附加到 DOM 中的元素。可以是一个 `HTMLElement`，也可以是返回 `HTMLElement` 的回调函数。
+
+类型: `HTMLElement | (() => HTMLElement) | undefined`
+
+默认值: `undefined`，菜单将附加到 `document.body`。
+
 ### options
 
 在底层，`FloatingMenu` 使用 [Floating UI](https://floating-ui.com)。您可以使用这些选项控制浮动菜单的中间件和定位。
@@ -55,8 +63,8 @@ npm install @tiptap/extension-floating-menu @floating-ui/dom@^1.6.0
 
 | 选项            | 类型                                | 描述                                                                                                                                                   |
 | --------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `strategy`      | `string`                            | 定位策略。请参见 [这里](https://floating-ui.com/docs/computePosition#strategy)                                                                  |
-| `placement`     | `string`                            | 菜单的位置。请参见 [这里](https://floating-ui.com/docs/computePosition#placement)                                                                |
+| `strategy`      | `string`                            | 定位策略。请参见 [这里](https://floating-ui.com/docs/computePosition#strategy)                                                                       |
+| `placement`     | `string`                            | 菜单的位置。请参见 [这里](https://floating-ui.com/docs/computePosition#placement)                                                                     |
 | `offset`        | `OffsetOptions` 或 `boolean`       | [偏移中间件选项](https://floating-ui.com/docs/offset#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件                                    |
 | `flip`          | `FlipOptions` 或 `boolean`         | [翻转中间件选项](https://floating-ui.com/docs/flip#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件                                  |
 | `shift`         | `ShiftOptions` 或 `boolean`        | [移动中间件选项](https://floating-ui.com/docs/shift#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件                                |
@@ -65,10 +73,10 @@ npm install @tiptap/extension-floating-menu @floating-ui/dom@^1.6.0
 | `autoPlacement` | `AutoPlacementOptions` 或 `boolean` | [自动放置中间件选项](https://floating-ui.com/docs/autoPlacement#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件                   |
 | `hide`          | `HideOptions` 或 `boolean`          | [隐藏中间件选项](https://floating-ui.com/docs/hide#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件                                |
 | `inline`        | `InlineOptions` 或 `boolean`        | [内联中间件选项](https://floating-ui.com/docs/inline#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件                               |
-| `onShow`        | `Function` or `undefined`           | A callback that is called when the menu is shown. This can be used to add custom logic or styles when the menu is displayed.                                   |
-| `onHide`        | `Function` or `undefined`           | A callback that is called when the menu is hidden. This can be used to add custom logic or styles when the menu is hidden.                                     |
-| `onUpdate`      | `Function` or `undefined`           | A callback that is called when the menu is updated. This can be used to add custom logic or styles when the menu is updated.                                   |
-| `onDestroy`     | `Function` or `undefined`           | A callback that is called when the menu is destroyed. This can be used to add custom logic or styles when the menu is removed.                                 |
+| `onShow`        | `Function` 或 `undefined`           | 菜单显示时调用的回调。可用于在菜单显示时添加自定义逻辑或样式。                                                                                    |
+| `onHide`        | `Function` 或 `undefined`           | 菜单隐藏时调用的回调。可用于在菜单隐藏时添加自定义逻辑或样式。                                                                                    |
+| `onUpdate`      | `Function` 或 `undefined`           | 菜单更新时调用的回调。可用于在菜单更新时添加自定义逻辑或样式。                                                                                    |
+| `onDestroy`     | `Function` 或 `undefined`           | 菜单销毁时调用的回调。可用于在菜单被移除时添加自定义逻辑或样式。                                                                                  |
 
 ### pluginKey
 

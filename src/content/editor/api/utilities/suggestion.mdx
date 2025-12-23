@@ -99,10 +99,28 @@ tags:
 
 ### findSuggestionMatch
 
-可选参数，用于替换触发建议的编辑器内容内置正则匹配。
+可选参数，用于替换触发建议的编辑器内容内置正则匹配。  
 有关更多详细信息，请参见 [源代码](https://github.com/ueberdosis/tiptap/blob/main/packages/suggestion/src/findSuggestionMatch.ts#L18)。
 
 默认：`findSuggestionMatch(config: Trigger): SuggestionMatch`
+
+## 关闭打开的建议
+
+有时你希望用户能够在不选择项目的情况下退出打开的建议。  
+为实现这一点，用户可以按下 Escape 键，这将关闭打开的建议。  
+如果你想手动触发关闭建议，可以使用 `exitSuggestion` 工具函数来关闭视图中现有的建议。
+
+```js
+import { exitSuggestion } from '@tiptap/suggestion'
+import { PluginKey } from 'prosemirror-state' // 可选，如果你需要创建自定义的 key
+
+const MySuggestionPluginKey = new PluginKey('my-suggestions') // 或使用默认的 'suggestion'
+
+exitSuggestion(editor.view, MySuggestionPluginKey)
+
+// 或者，使用默认的插件 key：
+// exitSuggestion(editor.view, 'suggestion')
+```
 
 ## 源代码
 

@@ -1,0 +1,325 @@
+---
+title: 图片对齐按钮
+meta:
+  title: 图片对齐按钮 | Tiptap UI 组件
+  description: 在您的 Tiptap 编辑器中通过左、中、右对齐控制、键盘快捷键和无障碍支持对图片进行对齐。
+  category: UI 组件
+component:
+  name: 图片对齐按钮
+  description: 一个内置的 React 组件，用于控制 Tiptap 编辑器中的图片对齐。
+  type: component
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: AlignCenterVerticalIcon
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个完全支持无障碍的 Tiptap 编辑器图片对齐按钮。通过左、中、右对齐选项控制图片定位，支持键盘快捷键和智能图片检测。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/image-align-button" />
+
+## 安装
+
+通过 Tiptap CLI 添加该组件：
+
+```bash
+npx @tiptap/cli@latest add image-align-button
+```
+
+## 组件
+
+### `<ImageAlignButton />`
+
+一个内置的 React 组件，用于控制编辑器中的图片对齐。
+
+#### 用法
+
+```tsx
+export default function MyEditor() {
+  return (
+    <div>
+      <ImageAlignButton
+        editor={editor}
+        align="left"
+        text="左对齐"
+        hideWhenUnavailable={true}
+        showShortcut={true}
+        onAligned={() => console.log('图片已对齐！')}
+      />
+      <ImageAlignButton
+        editor={editor}
+        align="center"
+        text="居中对齐"
+        hideWhenUnavailable={true}
+        showShortcut={true}
+      />
+      <ImageAlignButton
+        editor={editor}
+        align="right"
+        text="右对齐"
+        hideWhenUnavailable={true}
+        showShortcut={true}
+      />
+    </div>
+  )
+}
+```
+
+#### 属性
+
+| 名称                   | 类型                             | 默认值          | 说明                                               |
+| --------------------- | ------------------------------- | -------------- | -------------------------------------------------- |
+| `editor`              | `Editor \| null`                | `undefined`    | Tiptap 编辑器实例                                 |
+| `align`               | `'left' \| 'center' \| 'right'` | `undefined`    | 要应用的对齐方向                                   |
+| `text`                | `string`                        | `undefined`    | 可选的按钮文本标签                                 |
+| `extensionName`       | `string`                        | `'image'`      | 目标图片扩展的名称                                 |
+| `attributeName`       | `string`                        | `'data-align'` | 用于对齐的属性名称                                 |
+| `hideWhenUnavailable` | `boolean`                       | `false`        | 对齐不可用时隐藏按钮                               |
+| `onAligned`           | `() => void`                    | `undefined`    | 对齐成功后触发的回调                               |
+| `showShortcut`        | `boolean`                       | `false`        | 显示键盘快捷键标识                                |
+
+## 钩子
+
+### `useImageAlign()`
+
+一个自定义钩子，允许您构建自己的图片对齐按钮，完全控制渲染和行为。
+
+#### 用法
+
+```tsx
+function MyImageAlignButton({ align }: { align: 'left' | 'center' | 'right' }) {
+  const { isVisible, handleImageAlign, canAlign, isActive, label, shortcutKeys, Icon } =
+    useImageAlign({
+      editor: myEditor,
+      align,
+      hideWhenUnavailable: true,
+      onAligned: () => console.log(`图片已对齐至 ${align}！`),
+    })
+
+  if (!isVisible) return null
+
+  return (
+    <button
+      onClick={handleImageAlign}
+      disabled={!canAlign}
+      data-active={isActive}
+      aria-label={label}
+      aria-pressed={isActive}
+    >
+      <Icon />
+      {label}
+      {shortcutKeys && <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>}
+    </button>
+  )
+}
+```
+
+#### 属性
+
+| 名称                   | 类型                             | 默认值          | 说明                                               |
+| --------------------- | ------------------------------- | -------------- | -------------------------------------------------- |
+| `editor`              | `Editor \| null`                | `undefined`    | Tiptap 编辑器实例                                 |
+| `align`               | `'left' \| 'center' \| 'right'` | `undefined`    | 要应用的对齐方向                                   |
+| `extensionName`       | `string`                        | `'image'`      | 目标图片扩展的名称                                 |
+| `attributeName`       | `string`                        | `'data-align'` | 用于对齐的属性名称                                 |
+| `hideWhenUnavailable` | `boolean`                       | `false`        | 对齐不可用时隐藏按钮                               |
+| `onAligned`           | `() => void`                    | `undefined`    | 对齐成功后触发的回调                               |
+
+#### 返回值
+
+| 名称               | 类型            | 说明                                               |
+| ------------------ | --------------- | -------------------------------------------------- |
+| `isVisible`        | `boolean`       | 是否应渲染该按钮                                   |
+| `canAlign`         | `boolean`       | 当前节点是否可以应用图片对齐                       |
+| `isActive`         | `boolean`       | 当前对齐状态是否激活                               |
+| `handleImageAlign` | `() => boolean` | 应用图片对齐的函数                                 |
+| `label`            | `string`        | 按钮的无障碍标签文本                               |
+| `shortcutKeys`     | `string`        | 该对齐操作的键盘快捷键                             |
+| `Icon`             | `React.FC`      | 对齐按钮的图标组件                                 |
+
+## 工具函数
+
+### `canSetImageAlign(editor, align, extensionName, attributeName)`
+
+检查当前编辑器状态是否允许设置图片对齐。
+
+```tsx
+import { canSetImageAlign } from '@/components/tiptap-ui/image-align-button'
+
+const canAlign = canSetImageAlign(editor, 'center', 'image', 'data-align')
+```
+
+### `isImageAlignActive(editor, align, extensionName, attributeName)`
+
+检查指定的图片对齐状态是否处于激活状态。
+
+```tsx
+import { isImageAlignActive } from '@/components/tiptap-ui/image-align-button'
+
+const isActive = isImageAlignActive(editor, 'left', 'image', 'data-align')
+```
+
+### `setImageAlign(editor, align, extensionName, attributeName)`
+
+以编程方式设置编辑器中的图片对齐。
+
+```tsx
+import { setImageAlign } from '@/components/tiptap-ui/image-align-button'
+
+const success = setImageAlign(editor, 'right', 'image', 'data-align')
+if (success) {
+  console.log('图片对齐成功应用！')
+}
+```
+
+### `shouldShowButton(props)`
+
+确定图片对齐按钮是否应根据编辑器状态和配置显示的实用工具。
+
+```tsx
+import { shouldShowButton } from '@/components/tiptap-ui/image-align-button'
+
+const shouldShow = shouldShowButton({
+  editor,
+  align: 'center',
+  hideWhenUnavailable: true,
+  extensionName: 'image',
+  attributeName: 'data-align',
+})
+```
+
+### `<ImageAlignShortcutBadge />`
+
+用于在自定义按钮中显示键盘快捷键的辅助组件。
+
+```tsx
+import { ImageAlignShortcutBadge } from '@/components/tiptap-ui/image-align-button'
+;<ImageAlignShortcutBadge align="center" />
+```
+
+## 键盘快捷键
+
+图片对齐按钮支持以下键盘快捷键：
+
+- **Alt + Shift + L**：图片左对齐
+- **Alt + Shift + E**：图片居中对齐
+- **Alt + Shift + R**：图片右对齐
+
+当使用 `<ImageAlignButton />` 组件或 `useImageAlign()` 钩子时，这些快捷键会自动注册。选中编辑器中的图片节点时，快捷键生效。
+
+## 对齐选项
+
+### 左对齐
+
+将图片对齐到内容区域的左侧。
+
+```tsx
+<ImageAlignButton editor={editor} align="left" />
+```
+
+### 居中对齐
+
+水平居中图片于内容区域内。
+
+```tsx
+<ImageAlignButton editor={editor} align="center" />
+```
+
+### 右对齐
+
+将图片对齐到内容区域的右侧。
+
+```tsx
+<ImageAlignButton editor={editor} align="right" />
+```
+
+## 实现原理
+
+图片对齐功能通过以下方式实现：
+
+1. **节点检测**：自动检测编辑器中选中的图片节点
+2. **属性管理**：更新图片节点指定的属性（默认：`data-align`）
+3. **状态追踪**：监测当前对齐状态并更新按钮激活状态
+4. **无障碍支持**：为每个对齐选项提供适当的 ARIA 标签和键盘快捷键
+5. **扩展集成**：兼容支持自定义属性的任意 Tiptap 图片扩展
+
+对齐通过更新图片节点的属性实现，随后可使用 CSS 进行样式定义：
+
+```css
+img[data-align='left'] {
+  text-align: left;
+}
+
+img[data-align='center'] {
+  text-align: center;
+}
+
+img[data-align='right'] {
+  text-align: right;
+}
+```
+
+## 自定义扩展支持
+
+该组件支持通过指定扩展名称来使用自定义图片扩展：
+
+```tsx
+<ImageAlignButton
+  editor={editor}
+  align="center"
+  extensionName="myCustomImage"
+  attributeName="alignment"
+/>
+```
+
+此灵活性允许您与以下情况配合使用对齐按钮：
+
+- 自定义图片扩展
+- 拓展了附加功能的图片节点
+- 不同的属性命名规范
+
+## 需求
+
+### 依赖
+
+- `@tiptap/react` - Tiptap React 核心集成
+- `react-hotkeys-hook` - 键盘快捷键管理
+
+### 相关组件
+
+- `use-tiptap-editor` （钩子）
+- `use-mobile` （钩子）
+- `button` （基础组件）
+- `badge` （基础组件）
+- `tiptap-utils` （库）
+- `align-center-vertical-icon` （图标）
+- `align-start-vertical-icon` （图标）
+- `align-end-vertical-icon` （图标）
+
+### 必需扩展
+
+该组件适用于支持自定义属性的任意 Tiptap 图片扩展。最常见的配置使用：
+
+- `@tiptap/extension-image` - 标准 Tiptap 图片扩展
+- 支持属性的自定义图片扩展
+
+扩展应配置以接受对齐属性：
+
+```tsx
+import { Image } from '@tiptap/extension-image'
+
+const editor = useEditor({
+  extensions: [
+    Image.configure({
+      HTMLAttributes: {
+        class: 'editor-image',
+      },
+    }),
+  ],
+})
+```

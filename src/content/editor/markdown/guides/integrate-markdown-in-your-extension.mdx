@@ -1,0 +1,285 @@
+---
+title: 自定义扩展中的 Markdown 集成
+tags:
+  - type: beta
+meta:
+  title: Markdown 扩展集成 | Tiptap 编辑器文档
+  description: 了解如何将 Markdown 支持集成到您的自定义 Tiptap 扩展中。本指南涵盖自定义节点和标记的解析和序列化扩展。
+  category: Editor
+---
+
+本指南将向您展示如何为您的 Tiptap 扩展添加 Markdown 支持。
+
+> **提示**：对于 Pandoc 块（`:::name`）或短代码（`[name]`）等标准模式，请查看 [实用函数](../api/utilities)，通过最少的代码生成 Markdown 规范。
+
+## 基本扩展集成
+
+要为扩展添加 Markdown 支持，请在扩展配置中定义一个 Markdown 配置：
+
+```typescript
+import { Node } from '@tiptap/core'
+
+const MyNode = Node.create({
+  name: 'myNode',
+
+  // ... 其他配置（parseHTML、renderHTML 等）
+
+  parseMarkdown: (token, helpers) => {
+    /* ... */
+  },
+
+  renderMarkdown: (node, helpers) => {
+    /* ... */
+  },
+})
+```
+
+## Markdown 配置详解
+
+扩展规范支持以下选项：
+
+- `markdownTokenName` - 需要处理的 token 名称。如果 token 名称与扩展名称不同，则必需。
+- `parseMarkdown` - 将 token 转换为 Tiptap JSON 的函数。
+- `renderMarkdown` - 将 Tiptap JSON 转换为 Markdown 字符串的函数。
+- `markdownTokenizer` - 用于识别新的 Markdown 语法的自定义分词器。
+- `markdownOptions` - 配置分词器的一组选项。
+  - `indentsContent` - 控制此节点是否增加嵌套内容的缩进级别（例如列表）。
+
+### 使用 `markdownTokenName`
+
+```typescript
+markdownTokenName: 'strong' // 针对 Markdown token 命名为 "strong" 的加粗标记扩展
+```
+
+## 节点扩展
+
+为节点创建 Markdown 支持非常简单。以下是一些常见模式。
+
+根据您期望的内容类型，您可能需要在 `parseMarkdown` 和 `renderMarkdown` 方法中使用不同的辅助函数。
+
+- 如果您的扩展是带有块级内容的节点，使用 `helpers.parseChildren` 和 `helpers.renderChildren`。
+- 如果您的扩展是带有行内级内容的节点，使用 `helpers.parseInline` 和 `helpers.renderChildren`。
+
+```typescript
+import { Node } from '@tiptap/core'
+
+const Heading = Node.create({
+  name: 'heading',
+
+  group: 'block',
+  content: 'inline*',
+
+  parseHTML() {
+    return [{ tag: 'p' }]
+  },
+
+  renderHTML() {
+    return ['p', 0]
+  },
+
+  parseMarkdown: (token, helpers) => {
+    const level = token.depth || 1
+
+    const content = helpers.parseInline(token.tokens || []) // 我们这里解析行内内容，因为标题包含行内内容
+    return {
+      type: 'heading',
+      attrs: { level },
+      content,
+    }
+  },
+
+  renderMarkdown: (node, helpers) => {
+    const level = node.attrs?.level || 1
+    const prefix = '#'.repeat(level)
+
+    const content = helpers.renderChildren(node.content || [])
+    return `${prefix} ${content}`
+  },
+})
+```
+
+## 标记扩展
+
+标记的工作方式不同，因为它们包裹行内内容。要为您的标记扩展添加 Markdown 支持，使用 `applyMark` 和 `renderChildren` 辅助函数。
+
+```typescript
+import { Mark } from '@tiptap/core'
+
+const Bold = Mark.create({
+  name: 'bold',
+
+  parseHTML() {
+    return [{ tag: 'strong' }, { tag: 'b' }]
+  },
+
+  renderHTML() {
+    return ['strong', 0]
+  },
+
+  markdownTokenName: 'strong',
+
+  parseMarkdown: (token, helpers) => {
+    // 解析内容并应用加粗标记
+    const content = helpers.parseInline(token.tokens || [])
+    return helpers.applyMark('bold', content)
+  },
+
+  renderMarkdown: (node, helpers) => {
+    const content = helpers.renderChildren(node.content || [])
+    return `**${content}**`
+  },
+})
+```
+
+如果您想给标记添加属性，请使用带属性对象的 `applyMark` 辅助函数。
+
+```typescript
+const content = helpers.applyMark('link', helpers.parseInline(token.tokens || []), {
+  href: token.href || '',
+  title: token.title || null,
+})
+```
+
+## 测试您的扩展
+
+### 单元测试解析处理函数
+
+```typescript
+import { describe, it, expect } from 'vitest'
+
+describe('Heading Markdown', () => {
+  it('应该解析标题 token', () => {
+    const token = {
+      type: 'heading',
+      depth: 2,
+      tokens: [{ type: 'text', text: 'Hello' }],
+    }
+
+    const helpers = {
+      parseInline: tokens => [{ type: 'text', text: 'Hello' }],
+    }
+
+    const result = Heading.configuration.parseMarkdown(token, helpers)
+
+    expect(result).toEqual({
+      type: 'heading',
+      attrs: { level: 2 },
+      content: [{ type: 'text', text: 'Hello' }],
+    })
+  })
+})
+```
+
+### 单元测试渲染处理函数
+
+```typescript
+import { describe, it, expect } from 'vitest'
+
+describe('Heading Markdown', () => {
+  it('应该渲染标题节点', () => {
+    const node = {
+      type: 'heading',
+      attrs: { level: 2 },
+      content: [{ type: 'text', text: 'Hello' }],
+    }
+
+    const helpers = {
+      renderChildren: () => 'Hello',
+    }
+
+    const result = Heading.configuration.renderMarkdown(node, helpers, {})
+
+    expect(result).toBe('## Hello\n\n')
+  })
+})
+```
+
+### 集成测试
+
+```typescript
+import { describe, it, expect } from 'vitest'
+
+import { Editor } from '@tiptap/core'
+import { Markdown } from '@tiptap/markdown'
+import MyExtension from './MyExtension'
+
+describe('MyExtension 集成', () => {
+  it('应该正确解析和序列化', () => {
+    const editor = new Editor({
+      extensions: [Document, Paragraph, Text, MyExtension, Markdown],
+    })
+
+    const markdown = '# Hello World'
+    editor.commands.setContent(markdown, { contentType: 'markdown' })
+
+    const json = editor.getJSON()
+    expect(json.content[0].type).toBe('heading')
+
+    const result = editor.getMarkdown()
+    expect(result).toBe('# Hello World\n\n')
+
+    editor.destroy()
+  })
+})
+```
+
+## 常用模式
+
+### 处理可选的 Token 属性
+
+```typescript
+parse: (token, helpers) => {
+  return {
+    type: 'myNode',
+    attrs: {
+      level: token.depth || 1, // 缺失时的默认值
+      id: token.id ?? null, // 空值合并
+      text: token.text?.trim() || '', // 可选链
+    },
+    content: helpers.parseInline(token.tokens || []),
+  }
+}
+```
+
+### 条件解析
+
+```typescript
+parse: (token, helpers) => {
+  // 只处理特定类型
+  if (token.ordered) {
+    return null // 让其他处理器处理
+  }
+
+  // 或根据 token 属性使用不同逻辑
+  if (token.depth > 6) {
+    // 改为作为段落处理
+    return {
+      type: 'paragraph',
+      content: helpers.parseInline(token.tokens || []),
+    }
+  }
+
+  return {
+    type: 'heading',
+    attrs: { level: token.depth },
+    content: helpers.parseInline(token.tokens || []),
+  }
+}
+```
+
+### 上下文感知渲染
+
+```typescript
+render: (node, helpers, context) => {
+  const content = helpers.renderChildren(node.content || [])
+
+  // 根据上下文调整渲染
+  if (context.level > 0) {
+    // 嵌套 - 添加额外缩进
+    return helpers.indent(`- ${content}`) + '\n'
+  }
+
+  // 顶层
+  return `- ${content}\n`
+}
+```

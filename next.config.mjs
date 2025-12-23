@@ -63,6 +63,31 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/editor/markdown/getting-started',
+        destination: '/editor/markdown/getting-started/installation',
+        permanent: true,
+      },
+      {
+        source: '/editor/markdown/advanced-usage',
+        destination: '/editor/markdown/advanced-usage/custom-tokenizer',
+        permanent: true,
+      },
+      {
+        source: '/editor/markdown/guides',
+        destination: '/editor/markdown/guides/integrate-markdown-in-your-extension',
+        permanent: true,
+      },
+      {
+        source: '/editor/markdown/api',
+        destination: '/editor/markdown/api/editor',
+        permanent: true,
+      },
+      {
+        source: '/editor/extensions/functionality/mathematics',
+        destination: '/editor/extensions/nodes/mathematics',
+        permanent: true,
+      },
+      {
         source: '/content-ai/capabilities/agent/tiptap-cloud',
         destination: '/content-ai/capabilities/agent/use-with-content-ai-cloud',
         permanent: true,
@@ -153,13 +178,23 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/collaboration/documents/history',
+        destination: '/collaboration/documents/snapshot',
+        permanent: true,
+      },
+      {
         source: '/ui-components/node-components',
-        destination: '/ui-components/node-components/code-block-node',
+        destination: '/ui-components/node-components/blockquote-node',
+        permanent: true,
+      },
+      {
+        source: '/ui-components/utils-components',
+        destination: '/ui-components/utils-components/floating-element',
         permanent: true,
       },
       {
         source: '/ui-components/components',
-        destination: '/ui-components/components/blockquote-button',
+        destination: '/ui-components/components/ai-ask-button',
         permanent: true,
       },
       {
@@ -202,6 +237,71 @@ const nextConfig = {
       {
         source: '/content-ai/capabilities/agent/features/add-context',
         destination: '/content-ai/capabilities/agent/features/context',
+        permanent: true,
+      },
+      {
+        source: '/content-ai/capabilities/agent/features/review',
+        destination: '/content-ai/capabilities/agent/review',
+        permanent: true,
+      },
+      {
+        source: '/editor/api/extensions/collaboration-caret',
+        destination: '/editor/extensions/functionality/collaboration-caret',
+        permanent: true,
+      },
+      {
+        source: '/content-ai/capabilities/ai-toolkit',
+        destination: '/content-ai/capabilities/ai-toolkit/overview',
+        permanent: true,
+      },
+      {
+        source: '/content-ai/capabilities/ai-toolkit/guides',
+        destination: '/content-ai/capabilities/ai-toolkit/guides/ai-agent-chatbot',
+        permanent: true,
+      },
+      {
+        source: '/content-ai/capabilities/ai-toolkit/primitives',
+        destination: '/content-ai/capabilities/ai-toolkit/primitives/execute-tool',
+        permanent: true,
+      },
+      {
+        source: '/content-ai/capabilities/ai-toolkit/tools',
+        destination: '/content-ai/capabilities/ai-toolkit/tools/available-tools',
+        permanent: true,
+      },
+      {
+        source: '/content-ai/capabilities/ai-toolkit/changelog',
+        destination: '/content-ai/capabilities/ai-toolkit/changelog/ai-toolkit',
+        permanent: true,
+      },
+      {
+        source: '/content-ai/capabilities/ai-toolkit/advanced-guides',
+        destination: '/content-ai/capabilities/ai-toolkit/advanced-guides/ai-engineering',
+        permanent: true,
+      },
+      {
+        source: '/content-ai/capabilities/ai-toolkit/guides/multi-document',
+        destination: '/content-ai/capabilities/ai-toolkit/advanced-guides/multi-document',
+        permanent: true,
+      },
+      {
+        source: '/content-ai/capabilities/ai-toolkit/guides/ai-engineering',
+        destination: '/content-ai/capabilities/ai-toolkit/advanced-guides/ai-engineering',
+        permanent: true,
+      },
+      {
+        source: '/content-ai/capabilities/server-ai-toolkit',
+        destination: '/content-ai/capabilities/server-ai-toolkit/overview',
+        permanent: true,
+      },
+      {
+        source: '/hocuspocus/introduction',
+        destination: '/hocuspocus/getting-started/overview',
+        permanent: true,
+      },
+      {
+        source: '/editor/ai/advanced-usage/custom-llm',
+        destination: '/content-ai/capabilities/generation/overview',
         permanent: true,
       },
     ]

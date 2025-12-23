@@ -1,0 +1,169 @@
+---
+title: 删除节点按钮
+meta:
+  title: 删除节点按钮 | Tiptap UI 组件
+  description: 通过键盘快捷键、智能选择处理和无障碍支持，在 Tiptap 编辑器中删除选中的节点和块。
+  category: UI 组件
+component:
+  name: 删除节点按钮
+  description: 一个预构建的 React 组件，用于从编辑器中删除节点。
+  type: component
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: TrashIcon
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个完全支持无障碍的 Tiptap 编辑器删除节点按钮。支持通过键盘快捷键和智能选择处理，从编辑器中移除选中的节点或块。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/delete-node-button" />
+
+## 安装
+
+通过 Tiptap CLI 添加该组件：
+
+```bash
+npx @tiptap/cli@latest add delete-node-button
+```
+
+## 组件
+
+### `<DeleteNodeButton />`
+
+一个预构建的 React 组件，用于从编辑器中删除节点。
+
+#### 使用示例
+
+```tsx
+export default function MyEditor() {
+  return (
+    <DeleteNodeButton
+      editor={editor}
+      text="删除"
+      hideWhenUnavailable={true}
+      showShortcut={true}
+      onDeleted={() => console.log('节点已删除！')}
+    />
+  )
+}
+```
+
+#### 属性
+
+| 名称                   | 类型               | 默认值       | 说明                                            |
+| ---------------------- | ------------------ | ------------ | ----------------------------------------------- |
+| `editor`               | `Editor \| null`   | `undefined`  | Tiptap 编辑器实例                               |
+| `text`                 | `string`           | `undefined`  | 按钮的可选文字标签                              |
+| `hideWhenUnavailable`  | `boolean`          | `false`      | 当无法删除时隐藏按钮                            |
+| `onDeleted`            | `() => void`       | `undefined`  | 成功删除后触发的回调                            |
+| `showShortcut`         | `boolean`          | `false`      | 显示键盘快捷键标识（如果可用）                  |
+
+## Hooks
+
+### `useDeleteNode()`
+
+一个自定义钩子，用于构建拥有完全控制权的删除节点按钮，涵盖渲染和行为。
+
+#### 使用示例
+
+```tsx
+function MyDeleteNodeButton() {
+  const { isVisible, handleDeleteNode, canDeleteNode, label, shortcutKeys, Icon } = useDeleteNode({
+    editor: myEditor,
+    hideWhenUnavailable: true,
+    onDeleted: () => console.log('节点已删除！'),
+  })
+
+  if (!isVisible) return null
+
+  return (
+    <button onClick={handleDeleteNode} disabled={!canDeleteNode} aria-label={label}>
+      <Icon />
+      {label}
+      {shortcutKeys && <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>}
+    </button>
+  )
+}
+```
+
+#### 属性
+
+| 名称                   | 类型               | 默认值       | 说明                                            |
+| ---------------------- | ------------------ | ------------ | ----------------------------------------------- |
+| `editor`               | `Editor \| null`   | `undefined`  | Tiptap 编辑器实例                               |
+| `hideWhenUnavailable`  | `boolean`          | `false`      | 无法删除时隐藏按钮                              |
+| `onDeleted`            | `() => void`       | `undefined`  | 成功删除后触发的回调                            |
+
+#### 返回值
+
+| 名称                | 类型             | 说明                                             |
+| ------------------- | ---------------- | ------------------------------------------------ |
+| `isVisible`         | `boolean`        | 按钮是否应该渲染                                 |
+| `canDeleteNode`     | `boolean`        | 是否可以删除节点                                 |
+| `handleDeleteNode`  | `() => boolean`  | 删除所选节点的函数                               |
+| `label`             | `string`         | 按钮的无障碍标签文本                             |
+| `shortcutKeys`      | `string`         | 键盘快捷键（Backspace）                          |
+| `Icon`              | `React.FC`       | 删除按钮的图标组件（TrashIcon）                  |
+
+## 工具函数
+
+### `canDeleteNode(editor)`
+
+检查当前编辑器状态下是否可删除节点。
+
+```tsx
+import { canDeleteNode } from '@/components/tiptap-ui/delete-node-button'
+
+const canDelete = canDeleteNode(editor)
+```
+
+### `deleteNode(editor)`
+
+以编程方式删除选中的节点或块。
+
+```tsx
+import { deleteNode } from '@/components/tiptap-ui/delete-node-button'
+
+const success = deleteNode(editor)
+if (success) {
+  console.log('节点删除成功！')
+}
+```
+
+### `deleteNodeAtPosition(editor, pos, nodeSize)`
+
+低级工具函数，删除指定位置的节点。
+
+```tsx
+import { deleteNodeAtPosition } from '@/components/tiptap-ui/delete-node-button'
+
+const success = deleteNodeAtPosition(editor, position, nodeSize)
+```
+
+## 键盘快捷键
+
+删除节点按钮支持以下键盘快捷键：
+
+- **Backspace（退格键）**：删除选中的节点或块
+
+使用 `<DeleteNodeButton />` 组件或 `useDeleteNode()` 钩子时，该快捷键会自动注册。请注意，这增强了默认退格键的行为，使其适用于节点选择。
+
+## 需求
+
+### 依赖
+
+- `@tiptap/react` - Tiptap React 核心集成
+- `react-hotkeys-hook` - 键盘快捷键管理
+
+### 引用组件
+
+- `use-tiptap-editor`（钩子）
+- `button`（基础组件）
+- `badge`（基础组件）
+- `tiptap-utils`（库）
+- `trash-icon`（图标）

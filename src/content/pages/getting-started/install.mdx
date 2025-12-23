@@ -1,0 +1,52 @@
+---
+title: 安装 Pages 扩展
+tags:
+  - type: team
+  - type: alpha
+meta:
+  title: 安装 Pages | Tiptap Pages 文档
+  description: 在 Tiptap 中安装 Pages 扩展，为您的编辑器和应用添加协作页面管理功能。更多内容请参阅文档！
+  category: Pages
+---
+
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { Link } from '@/components/Link'
+
+按照本指南安装并配置 Pages 扩展。
+
+<Requirements>
+  <RequirementItem label="1. 申请访问权限">
+    开始在您的[账户中免费试用](https://cloud.tiptap.dev/v2/billing)，或订阅
+    [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
+  </RequirementItem>
+  <RequirementItem label="2. 访问私有注册表">
+    Pages 扩展发布在 Tiptap 的私有 npm 注册表中。请按照[设置指南](/guides/pro-extensions)认证以访问 Tiptap 的私有 npm 注册表。
+  </RequirementItem>
+  <RequirementItem label="3. 安装扩展">
+    使用 npm 或您偏好的包管理工具从私有注册表安装该扩展。
+  </RequirementItem>
+</Requirements>
+
+## 安装 Pages 扩展
+
+```bash
+npm install @tiptap-pro/extension-pages@alpha
+```
+
+## 集成 Pages 扩展
+
+安装 `pages` 扩展后，通过将 `Pages` 扩展添加到编辑器的 `extensions` 数组中，在编辑器中注册该扩展。
+
+```js
+import { Pages } from '@tiptap-pro/extension-pages'
+
+const editor = new Editor({
+  ...
+  extensions: [
+    ...,
+    Pages,
+  ]
+})
+```
+
+根据您的使用场景，您可能需要配置协作提供者或其他选项。请参考完整文档以获取高级配置说明。

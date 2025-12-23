@@ -114,7 +114,7 @@ return ReactNodeViewRenderer(Component, { contentDOMElementTag: 'header' })
 
 ## 更改包裹的 DOM 元素
 
-要更改包裹 DOM 元素的标签，您可以在 `ReactNodeViewRenderer` 函数上使用 `contentDOMElementTag` 选项来更改默认标签名称。
+要更改包裹 DOM 元素的标签，您可以在 `ReactNodeViewRenderer` 函数上使用 `as` 选项来更改默认标签名称。
 
 ```js
 import { Node } from '@tiptap/core'
@@ -125,7 +125,7 @@ export default Node.create({
   // 配置 …
 
   addNodeView() {
-    return ReactNodeViewRenderer(Component, { contentDOMElementTag: 'main' })
+    return ReactNodeViewRenderer(Component, { as: 'main' })
   },
 })
 ```
@@ -134,16 +134,16 @@ export default Node.create({
 
 以下是您可以期待的 props 完整列表：
 
-| Prop               | 描述                                                     |
-| ------------------ | --------------------------------------------------------- |
-| editor             | 编辑器实例                                             |
-| node               | 当前节点                                                |
-| decorations        | 装饰数组                                               |
-| selected           | 当当前节点视图有 `NodeSelection` 时为 `true`             |
-| extension          | 访问节点扩展，例如获取选项                                |
-| getPos()           | 获取当前节点的文档位置                                   |
-| updateAttributes() | 更新当前节点的属性                                     |
-| deleteNode()       | 删除当前节点                                          |
+| Prop               | 描述                                               |
+| ------------------ | -------------------------------------------------- |
+| editor             | 编辑器实例                                         |
+| node               | 当前节点                                           |
+| decorations        | 装饰数组                                           |
+| selected           | 当当前节点视图有 `NodeSelection` 时为 `true`     |
+| extension          | 访问节点扩展，例如获取选项                         |
+| getPos()           | 获取当前节点的文档位置                             |
+| updateAttributes() | 更新当前节点的属性                                 |
+| deleteNode()       | 删除当前节点                                       |
 
 ## 拖动
 

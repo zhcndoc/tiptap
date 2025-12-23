@@ -73,6 +73,10 @@ editor.chain().focus().toggleBold().run()
 
 编辑器提供了一个 `isActive()` 方法来检查某些内容是否已应用于所选文本。在 Vue.js 中，您可以利用该函数切换 CSS 类：
 
+**Important**: If you are using React, values from the editor state are not automatically reactive to avoid performance issues,
+that means the `isActive()` value will always return the value of the initial editor state.
+To subscribe to the editor state you can use the `useEditorState` hook as described [here](/editor/getting-started/install/react#reacting-to-editor-state-changes).
+
 ```html
 <button
   :class="{ 'is-active': editor.isActive('bold') }"

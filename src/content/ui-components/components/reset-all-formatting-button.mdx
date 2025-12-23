@@ -1,0 +1,199 @@
+---
+title: 重置所有格式按钮
+meta:
+  title: 重置所有格式按钮 | Tiptap UI 组件
+  description: 在 Tiptap 编辑器中移除所选内容的所有文本格式和标记，同时支持选择性保留标记、键盘快捷键和辅助功能。
+  category: UI 组件
+component:
+  name: 重置所有格式按钮
+  description: 一个预构建的 React 组件，用于移除当前选区中的所有格式标记。
+  type: component
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: false
+  icon: RotateCcwIcon
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个完全可访问的 Tiptap 编辑器重置所有格式按钮。轻松移除所有文本格式标记，同时支持保留指定的标记、键盘快捷键以及灵活的自定义选项。
+
+<CodeDemo
+  isScrollable
+  src="https://template.tiptap.dev/preview/tiptap-ui/reset-all-formatting-button"
+/>
+
+## 安装
+
+通过 Tiptap CLI 添加该组件：
+
+```bash
+npx @tiptap/cli@latest add reset-all-formatting-button
+```
+
+## 组件
+
+### `<ResetAllFormattingButton />`
+
+一个预构建的 React 组件，用于移除当前选区中的所有格式标记。
+
+#### 用法
+
+```tsx
+function MyMentionTriggerButton() {
+  return (
+    <ResetAllFormattingButton
+      editor={editor}
+      text="重置"
+      preserveMarks={['inlineThread', 'link']}
+      hideWhenUnavailable={true}
+      showShortcut={true}
+      onResetAllFormatting={() => console.log('格式已重置！')}
+    />
+  )
+}
+```
+
+#### 属性
+
+| 名称                   | 类型             | 默认值              | 描述                                           |
+| ---------------------- | ---------------- | ------------------ | ---------------------------------------------- |
+| `editor`               | `Editor \| null` | `undefined`        | Tiptap 编辑器实例                              |
+| `text`                 | `string`         | `undefined`        | 按钮的可选文本标签                            |
+| `preserveMarks`        | `string[]`       | `["inlineThread"]` | 重置格式时要保留的标记类型                    |
+| `hideWhenUnavailable`  | `boolean`        | `false`            | 当无法重置格式时隐藏按钮                      |
+| `onResetAllFormatting` | `() => void`     | `undefined`        | 格式成功重置后触发的回调函数                  |
+| `showShortcut`         | `boolean`        | `false`            | 显示键盘快捷键徽章（如果可用）                |
+
+## Hooks
+
+### `useResetAllFormatting()`
+
+一个自定义 Hook，允许你完全控制渲染和行为，自行构建重置格式按钮。
+
+#### 用法
+
+```tsx
+function MyResetFormattingButton() {
+  const { isVisible, canReset, handleResetFormatting, label, shortcutKeys, Icon } =
+    useResetAllFormatting({
+      editor: myEditor,
+      preserveMarks: ['link', 'mention'],
+      hideWhenUnavailable: true,
+      onResetAllFormatting: () => console.log('格式已重置！'),
+    })
+
+  if (!isVisible) return null
+
+  return (
+    <button onClick={handleResetFormatting} disabled={!canReset} aria-label={label}>
+      <Icon />
+      {label}
+      {shortcutKeys && <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>}
+    </button>
+  )
+}
+```
+
+#### 属性
+
+| 名称                   | 类型             | 默认值       | 描述                                           |
+| ---------------------- | ---------------- | ----------- | ---------------------------------------------- |
+| `editor`               | `Editor \| null` | `undefined` | Tiptap 编辑器实例                              |
+| `preserveMarks`        | `string[]`       | `undefined` | 重置格式时要保留的标记类型                    |
+| `hideWhenUnavailable`  | `boolean`        | `false`     | 无法重置格式时隐藏按钮                        |
+| `onResetAllFormatting` | `() => void`     | `undefined` | 格式成功重置后触发的回调函数                  |
+
+#### 返回值
+
+| 名称                    | 类型            | 描述                                          |
+| ----------------------- | --------------- | --------------------------------------------- |
+| `isVisible`             | `boolean`       | 是否应渲染按钮                                |
+| `canReset`              | `boolean`       | 当前是否允许重置格式                          |
+| `handleResetFormatting` | `() => boolean` | 重置所有格式的函数                            |
+| `label`                 | `string`        | 按钮的无障碍标签文本                          |
+| `shortcutKeys`          | `string`        | 键盘快捷键（Cmd/Ctrl + R）                    |
+| `Icon`                  | `React.FC`      | 重置格式按钮的图标组件                        |
+
+## 工具函数
+
+### `canResetFormatting(editor, preserveMarks?)`
+
+检查当前编辑器状态是否可以重置格式。
+
+```tsx
+import { canResetFormatting } from '@/components/tiptap-ui/reset-all-formatting-button'
+
+const canReset = canResetFormatting(editor) // 检查是否可以重置任意格式
+const canResetWithPreserve = canResetFormatting(editor, ['link']) // 带保留标记检查
+```
+
+### `resetFormatting(editor, preserveMarks?)`
+
+以编程方式重置当前选区的所有格式。
+
+```tsx
+import { resetFormatting } from '@/components/tiptap-ui/reset-all-formatting-button'
+
+// 重置所有格式
+const success = resetFormatting(editor)
+
+// 重置格式但保留特定标记
+const success2 = resetFormatting(editor, ['link', 'mention'])
+
+if (success) {
+  console.log('格式重置成功！')
+}
+```
+
+### `canResetMarks(transaction, skip?)`
+
+检查给定事务中是否可以重置标记。
+
+```tsx
+import { canResetMarks } from '@/components/tiptap-ui/reset-all-formatting-button'
+
+const tr = editor.state.tr
+const canReset = canResetMarks(tr) // 检查是否有标记可以重置
+const canResetWithSkip = canResetMarks(tr, ['link']) // 跳过特定标记检查
+```
+
+### `removeAllMarksExcept(transaction, skip?)`
+
+移除事务中的所有标记，除了 skip 数组中指定的标记。
+
+```tsx
+import { removeAllMarksExcept } from '@/components/tiptap-ui/reset-all-formatting-button'
+
+const tr = editor.state.tr
+const modifiedTr = removeAllMarksExcept(tr, ['link', 'mention'])
+editor.view.dispatch(modifiedTr)
+```
+
+## 键盘快捷键
+
+重置所有格式按钮支持以下键盘快捷键：
+
+- **Cmd/Ctrl + R**：重置当前选区中的所有格式
+
+当使用 `<ResetAllFormattingButton />` 组件或 `useResetAllFormatting()` Hook 时，快捷键会自动注册。
+
+**注意**：该快捷键在编辑器聚焦时会覆盖浏览器默认的刷新行为。
+
+## 依赖项
+
+### 依赖包
+
+- `@tiptap/react` - Tiptap React 核心集成
+- `react-hotkeys-hook` - 键盘快捷键管理
+
+### 引用组件
+
+- `use-tiptap-editor`（Hook）
+- `button`（基础组件）
+- `badge`（基础组件）
+- `tiptap-utils`（库）
+- `rotate-ccw-icon`（图标）

@@ -1,0 +1,86 @@
+---
+title: 使用 Tiptap 入门 Markdown
+tags:
+  - type: beta
+meta:
+  title: Markdown 入门 | Tiptap 编辑器文档
+  description: 通过我们的全面指南，开始在 Tiptap 中使用 Markdown。学习如何解析和渲染 Markdown 内容至您的 Tiptap 编辑器。
+  category: 编辑器
+---
+
+> **重要提示**：markdown 扩展处于早期发布阶段，可能会发生变更或存在尚未支持的边缘案例。如果您遇到 bug 或有功能请求，请在 GitHub 上打开 issue。
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+Markdown 扩展为您的 Tiptap 编辑器提供双向 Markdown 支持——将 Markdown 字符串解析为 Tiptap 的 JSON 格式，并将编辑器内容序列化回 Markdown。
+
+<CodeDemo src="https://embed.tiptap.dev/preview/Markdown/Full" />
+
+## 核心功能
+
+- **Markdown 解析**：将 Markdown 字符串转换为 Tiptap JSON
+- **Markdown 序列化**：将编辑器内容导出为 Markdown
+- **自定义词法分析器**：添加对自定义 Markdown 语法的支持
+- **可扩展架构**：每个扩展都可以定义自己的解析和渲染逻辑
+- **简化自定义语法创建的工具**：`createBlockMarkdownSpec`、`createInlineMarkdownSpec` 等
+- **HTML 支持**：使用 Tiptap 现有的 HTML 解析能力解析 Markdown 中嵌入的 HTML
+
+## 原理解析
+
+Markdown 扩展作为 Markdown 文本与 Tiptap JSON 文档结构之间的桥梁。
+
+它通过重写现有方法和属性为 Markdown 优化实现来扩展基础编辑器功能，实现 Markdown 与 Tiptap 富文本编辑器的无缝集成。
+
+```js
+// 设置初始内容
+const editor = new Editor({
+  extensions: [StarterKit, Markdown],
+  content: '# Hello World\n\nThis is **Markdown**!',
+  contentType: 'markdown',
+})
+
+// 插入内容
+editor.commands.insertContent('# Hello World\n\nThis is **Markdown**!')
+```
+
+### 架构
+
+```
+Markdown 字符串
+      ↓
+   MarkedJS 词法分析器（词法分析）
+      ↓
+   Markdown 词元
+      ↓
+   扩展解析处理器
+      ↓
+   Tiptap JSON
+```
+
+反向过程：
+
+```
+Tiptap JSON
+      ↓
+   扩展渲染处理器
+      ↓
+   Markdown 字符串
+```
+
+## 限制
+
+当前 Markdown 扩展的实现存在一些限制：
+
+- **暂不支持注释**：一些高级功能如注释在 Markdown 中尚不支持。将 Markdown 内容解析到带有注释的文档时请**谨慎**，因为如果被 Markdown 内容替换，注释可能会丢失。
+- **表格中只能有一个子节点**：支持 Markdown 表格，但每个单元格只能包含一个子节点，因为 Markdown 语法无法表示多个子节点。
+
+## 为什么选择 MarkedJS？
+
+该扩展集成了 [MarkedJS](https://marked.js.org) 作为解析器：
+
+- **快速轻量**：市面上最快的 Markdown 解析器之一
+- **可扩展**：自定义词法分析器支持非标准 Markdown 语法
+- **符合 CommonMark 规范**：遵循 CommonMark 标准
+- **经过实践检验**：广泛应用于生产环境且持续活跃开发
+
+Lexer API 将 Markdown 拆解为自然映射到 Tiptap 节点结构的词元，使集成简洁且易于维护。该扩展在浏览器和服务器环境中表现一致。

@@ -36,10 +36,10 @@ const editor = new Editor({
       // 注意：仅用于演示目的
       endpoint: 'https://your-endpoint.com',
       imageUploadCallbackUrl: 'https://your-endpoint.com/image-upload',
-      // Promisemirror 自定义标记映射
+      // ProseMirror 自定义标记映射
       prosemirrorMarks: {
-        bold: 'strong',
-        italic: 'em',
+        strong: 'bold',
+        em: 'italic',
       }
     }),
     // 其他扩展 ...
@@ -50,10 +50,10 @@ const editor = new Editor({
 
 最新版本的 `@tiptap-pro/extension-import-docx` 提供了 `prosemirrorMarks` 配置选项。
 
-此选项允许您将 DOCX 中的自定义节点映射到您的 Tiptap 架构。在上面的示例中，我们将 DOCX 中的 `bold` 和 `italic` 节点映射到 Tiptap 架构中的 `strong` 和 `em` 节点。
+此选项允许您将 DOCX 中的自定义节点映射到您的 Tiptap 架构。在上面的示例中，我们将 DOCX 中的 `strong` 和 `em` 节点映射到 Tiptap 架构中的 `bold` 和 `italic` 节点。
 
-通过这样做，每当 DOCX 包含 `bold` 或 `italic` 节点时，它将在导入时转换为 Tiptap 中的 `strong` 或 `italic` 节点。
+通过这样做，每当 DOCX 包含 `strong` 或 `em` 节点时，它将在导入时转换为 Tiptap 中的 `bold` 或 `italic` 节点。
 
 <Callout title='DOCX、"prosemirrorNodes" 和 "prosemirrorMarks"' variant="info">
-  请注意，`prosemirrorNodes` 和 `prosemirrorMarks` 选项仅在导入 `.docx` 文件时有效。如果您导入其他类型的文件，例如 `.odt` 文件，将使用 `/import` 端点而不是 `/import` 端点，且 `prosemirrorNodes` 和 `prosemirrorMarks` 选项将不可用。
+  请注意，`prosemirrorNodes` 和 `prosemirrorMarks` 选项仅在导入 `.docx` 文件时有效。如果您导入其他类型的文件，例如 `.odt` 文件，将使用 `/import` 端点而不是 `/import-docx` 端点，且 `prosemirrorNodes` 和 `prosemirrorMarks` 选项将不可用。
 </Callout>

@@ -1,0 +1,113 @@
+---
+title: 多子文档
+meta:
+    title: 多子文档 | Hocuspocus 文档
+    category: Hocuspocus
+---
+
+
+## 文档与房间名称
+
+大多数 Yjs 连接提供者（包括 `y-websocket` 提供者）都使用一个称为房间名称（room-names）的概念。客户端会向 Hocuspocus 传递一个房间名称参数，后者会用来识别当前正在编辑的文档。在本教程中，我们将把房间名称称为文档名称。
+
+在真实的应用中，您很可能会使用实体名称和唯一 ID。对于 CMS，示例如下：
+
+```js
+const documentName = "page.140";
+```
+
+现在，您可以轻松拆分它以分别获得所需的信息：
+
+```js
+const [entityType, entityID] = documentName.split(".");
+
+console.log(entityType); // 输出 "page"
+console.log(entityID); // 输出 "140"
+```
+
+这只是建议，当然您可以随意命名您的文档！
+
+## 嵌套文档
+
+### 介绍
+
+我们目前正在评估子文档的反馈，但尚未实现支持。
+
+在很多情况下，您可以使用 Yjs 的不同 `fragments` 代替子文档。因此，如果您想为一篇博客文章使用 `title`/`content`，您可以创建一个 yDoc，并使用不同的编辑器（或其他任何东西）分别绑定到不同的 fragment，如下所示：
+
+```js
+const ydoc = new Y.Doc();
+
+const titleEditor = new Editor({
+  extensions: [
+    Collaboration.configure({
+      document: this.ydoc,
+      field: "title",
+    }),
+  ],
+})
+
+const bodyEditor = new Editor({
+  extensions: [
+    Collaboration.configure({
+      document: this.ydoc,
+      field: "body",
+    }),
+  ],
+})
+```
+
+当使用多个字段时，您可以简单地将不同的文档合并到给定的文档中：
+
+```ts
+import { readFileSync } from "fs";
+import { Server } from "@hocuspocus/server";
+import { TiptapTransformer } from "@hocuspocus/transformer";
+import Document from "@tiptap/extension-document";
+import Paragraph from "@tiptap/extension-paragraph";
+import Text from "@tiptap/extension-text";
+
+const generateSampleProsemirrorJson = (text: string) => {
+  return {
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text,
+          },
+        ],
+      },
+    ],
+  };
+};
+
+const server = new Server({
+  async onLoadDocument(data) {
+    // 仅当主存储中没有设置时才导入
+    if (data.document.isEmpty("default")) {
+      // 获取 'default' 字段的 Y-Doc …
+      const defaultField = TiptapTransformer.toYdoc(
+        generateSampleProsemirrorJson("What is love?"),
+        "default",
+        [(Document, Paragraph, Text)]
+      );
+      // … 并将它合并到给定的文档中
+      data.document.merge(defaultField);
+    }
+    if (data.document.isEmpty("secondary")) {
+      // 获取 'secondary' 字段的 Y-Doc …
+      const secondaryField = TiptapTransformer.toYdoc(
+        generateSampleProsemirrorJson("Baby don't hurt me…"),
+        "secondary",
+        [(Document, Paragraph, Text)]
+      );
+      // … 并将它合并到给定的文档中
+      data.document.merge(secondaryField);
+    }
+  },
+});
+server.listen();
+```

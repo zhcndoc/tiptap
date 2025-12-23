@@ -6,10 +6,11 @@ meta:
   category: 编辑器
 ---
 
-要配置 Tiptap，请指定三个关键元素：
-+ 应该渲染到哪里 (`element`) 
-+ 需要启用哪些功能 (`extensions`) 
-+ 初始文档应该包含什么 (`content`)
+要配置 Tiptap，请指定三个关键元素：  
+- 应该渲染到哪里 (`element`)  
+  - **注意**：如果您使用 React 或 Vue 集成，则无需指定此项。  
+- 需要启用哪些功能 (`extensions`)  
+- 初始文档应该包含什么 (`content`)  
 
 虽然此设置适用于大多数情况，但您可以配置其他选项。
 
@@ -34,7 +35,8 @@ new Editor({
   autofocus: true,
   // 使文本可编辑（默认是 true）
   editable: true,
-  // 防止加载默认 CSS（实际上不多）
+  // 防止加载 Tiptap 自带的默认 ProseMirror CSS
+  // 大多数情况下应保持为 true，因为这些样式对 Tiptap 正确运行非常重要
   injectCSS: false,
 })
 ```
@@ -143,3 +145,10 @@ new Editor({
   extensions: [StarterKit, Strike],
 })
 ```
+
+## 下一步
+
+- [为您的编辑器添加样式](/editor/getting-started/style-editor)
+- [了解更多关于 Tiptap 的概念](/editor/core-concepts/introduction)
+- [学习如何持久化编辑器状态](/editor/core-concepts/persistence)
+- [开始构建您自己的扩展](/editor/extensions/custom-extensions)

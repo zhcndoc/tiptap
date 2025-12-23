@@ -1,0 +1,72 @@
+---
+title: Laravel
+meta:
+  title: Laravel | Tiptap UI 组件
+  description: 在你的 Laravel 项目中安装和配置 Tiptap UI 组件。
+  category: UI 组件
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+使用以下命令创建一个支持 React 的新 Laravel 项目：
+
+```bash
+laravel new my-app --react
+```
+
+## 添加 Tiptap 组件
+
+使用 CLI 安装 Tiptap UI 组件。例如，添加 `HeadingButton` 组件：
+
+```bash
+npx @tiptap/cli@latest add heading-button
+```
+
+上述命令会安装 `HeadingButton` 组件及其依赖。然后你就可以在你的 **Tiptap** 项目中导入并使用它：
+
+```tsx
+import React from 'react'
+import { HeadingButton } from '@/components/ui/heading-button'
+
+export default function EditorPage() {
+  // Tiptap 配置...
+
+  return (
+    <div className="editor-page">
+      <div className="toolbar">
+        <HeadingButton level={1}>标题 1</HeadingButton>
+        <HeadingButton level={2}>标题 2</HeadingButton>
+        <HeadingButton level={3}>标题 3</HeadingButton>
+      </div>
+      {/* 你的编辑器组件 */}
+    </div>
+  )
+}
+```
+
+## 添加样式
+
+<Callout title="样式会自动添加" variant="info">
+  当你安装第一个 Tiptap UI 组件时，CLI 会自动将所需的{' '}
+  <code>.scss</code> 导入添加到你的主样式表中。大多数情况下，**无需手动配置**。
+</Callout>
+
+继续操作之前，请确保你的项目已包含 CSS 重置样式。
+如果你使用的是 Tailwind CSS，则已经包含了重置样式。
+
+#### 样式导入位置
+
+CLI 会自动将样式导入注入到你的全局样式表中，例如：
+
+- `resources/css/app.css`
+
+如果你自定义了入口文件，请确保包含如下内容：
+
+**文件：** `resources/css/app.css` （根据你的项目情况而定）
+
+```css
+@import '<path-to-styles>/_variables.scss';
+@import '<path-to-styles>/_keyframe-animations.scss';
+```
+
+了解更多样式配置，请查看 [样式设置指南](/ui-components/getting-started/style)。

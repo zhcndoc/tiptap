@@ -1,0 +1,27 @@
+---
+title: inchToPixels 工具
+meta:
+  title: inchToPixels 工具 | Tiptap Pages 文档
+  description: 在 Tiptap Pages 中将英寸转换为像素，以便页面格式设置。
+  category: Pages
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+`inchToPixels` 辅助函数让你可以轻松地将英寸转换为像素，这在你想用英寸定义页面或边距尺寸，并需要将它们转换为像素以用于 Tiptap Pages 扩展中的 `pageFormat` 选项或自定义布局时非常有用。
+
+## 导入
+
+```js
+import { inchToPixels } from '@tiptap-pro/extension-pages'
+```
+
+## API
+
+```ts
+inchToPixels(inches: number, dpi?: number): number
+```
+
+- `inches`：要转换的英寸值。
+- `dpi`（可选）：每英寸点数。如果未提供，该工具将自动检测当前环境的 DPI。
+- **返回值：** 等同的像素值（四舍五入）。
