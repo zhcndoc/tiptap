@@ -1,0 +1,487 @@
+---
+title: 审核更改
+meta:
+  title: 审核 AI 更改 | Tiptap 内容 AI
+  description: 使用可定制渲染的建议预览并批准 AI 插入的更改。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+<Callout title="接续 AI 代理聊天机器人指南" variant="info">
+  本指南是接续[AI 代理聊天机器人指南](/content-ai/capabilities/ai-toolkit/guides/ai-agent-chatbot)。
+  请先阅读该指南。
+</Callout>
+
+AI 工具包让你可以在漂亮的差异 UI 中展示 AI 生成的更改，方便用户预览并接受或拒绝这些更改。
+
+<CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/review-changes" />
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+首先，配置 `reviewOptions` 参数。将模式设置为 `'preview'`，以在更改应用之前显示预览。
+
+```ts
+// 在 useChat 钩子内部
+const result = toolkit.executeTool({
+  toolName,
+  input,
+  reviewOptions: { mode: 'preview' },
+})
+```
+
+执行工具后，编辑器内会显示多个 **建议**。每条建议表示 AI 模型希望对文档进行的更改。
+
+在继续对话之前，AI 代理必须等待用户审核更改。所以如果工具调用修改了文档，`addtoolOutput` 不应立即调用，而是应显示审核 UI。
+
+编辑代码使聊天机器人暂停，等待用户审核更改：
+
+```tsx
+const [reviewState, setReviewState] = useState({
+  // 是否显示审核 UI
+  isReviewing: false,
+  // 工具调用结果数据
+  tool: '',
+  toolCallId: '',
+  output: '',
+  // 从用户操作收集的反馈事件
+  userFeedback: [] as SuggestionFeedbackEvent[],
+})
+
+const { messages, sendMessage, addtoolOutput } = useChat({
+  transport: new DefaultChatTransport({ api: '/api/chat' }),
+  sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+  async onToolCall({ toolCall }) {
+    if (!editor) return
+
+    const { toolName, input, toolCallId } = toolCall
+
+    // 使用 AI 工具包执行工具
+    const toolkit = getAiToolkit(editor)
+    const result = toolkit.executeTool({
+      toolName,
+      input,
+      reviewOptions: {
+        mode: 'preview',
+      },
+    })
+
+    // 如果工具调用修改了文档，暂停并显示审核 UI
+    if (result.docChanged) {
+      // 显示审核 UI
+      setReviewState({
+        isReviewing: true,
+        tool: toolName,
+        toolCallId,
+        output: result.output,
+        userFeedback: [],
+      })
+    } else {
+      // 继续对话
+      addtoolOutput({ tool: toolName, toolCallId, output: result.output })
+    }
+  },
+})
+```
+
+## 样式建议
+
+创建一个 CSS 文件（`app/suggestions.css`）来将建议样式化为红色/绿色。
+
+```css
+/* 将删除的文本突出显示为红色 */
+.tiptap-ai-suggestion,
+.tiptap-ai-suggestion > * {
+  background-color: oklch(80.8% 0.114 19.571);
+}
+.tiptap-ai-suggestion--selected,
+.tiptap-ai-suggestion--selected > * {
+  background-color: oklch(70.4% 0.191 22.216);
+}
+/* 将插入的文本突出显示为绿色 */
+.tiptap-ai-suggestion-diff,
+.tiptap-ai-suggestion-diff > * {
+  background-color: oklch(87.1% 0.15 154.449);
+}
+.tiptap-ai-suggestion-diff--selected,
+.tiptap-ai-suggestion-diff--selected > * {
+  background-color: oklch(79.2% 0.209 151.711);
+}
+```
+
+在你的应用中导入样式表：
+
+```ts
+// app/page.tsx
+import './suggestions.css'
+```
+
+## 接受/拒绝所有建议
+
+然后，在 React 组件中显示按钮来拒绝/接受这些更改：
+
+```tsx
+{
+  reviewState.isReviewing && (
+    <div>
+      <h2>审核更改</h2>
+      <button
+        onClick={() => {
+          const toolkit = getAiToolkit(editor)
+          const result = toolkit.acceptAllSuggestions()
+          // 合并所有反馈事件（之前的 + 新的）
+          const userFeedback = [...reviewState.userFeedback, ...result.aiFeedback.events]
+          let output = reviewState.output
+
+          // 如果有未接受的更改，附加反馈到工具输出
+          if (userFeedback.length > 0 && userFeedback.some((event) => !event.accepted)) {
+            output += `\n\n<user_feedback>\n${JSON.stringify(userFeedback)}\n</user_feedback>`
+          }
+
+          addtoolOutput({
+            tool: reviewState.tool,
+            toolCallId: reviewState.toolCallId,
+            output,
+          })
+          // 重置反馈事件并关闭审核 UI
+          setReviewState({
+            ...reviewState,
+            isReviewing: false,
+            userFeedback: [],
+          })
+        }}
+      >
+        全部接受
+      </button>
+      <button
+        onClick={() => {
+          const toolkit = getAiToolkit(editor)
+          const result = toolkit.rejectAllSuggestions()
+          // 合并所有反馈事件（之前的 + 新的）
+          const userFeedback = [...reviewState.userFeedback, ...result.aiFeedback.events]
+          // 将拒绝信息和反馈放进 XML 标签中
+          const rejectionMessage =
+            'Some changes you made were rejected by the user. Ask the user why, and what you can do to improve them.'
+          const outputWithFeedback = `${rejectionMessage}\n\n<user_feedback>\n${JSON.stringify(userFeedback)}\n</user_feedback>`
+          addtoolOutput({
+            tool: reviewState.tool,
+            toolCallId: reviewState.toolCallId,
+            output: outputWithFeedback,
+          })
+          // 重置反馈事件并关闭审核 UI
+          setReviewState({
+            ...reviewState,
+            isReviewing: false,
+            userFeedback: [],
+          })
+        }}
+      >
+        全部拒绝
+      </button>
+    </div>
+  )
+}
+```
+
+## 收集 AI 反馈
+
+当用户接受或拒绝建议时，AI 工具包会提供反馈，你可以将其发送回 AI，帮助它从用户偏好中学习。`acceptSuggestion`、`acceptAllSuggestions`、`rejectSuggestion` 和 `rejectAllSuggestions` 等方法都会返回包含更改信息的 `aiFeedback` 属性。
+
+```ts
+const result = toolkit.acceptSuggestion('suggestion-1')
+console.log(result.aiFeedback.events)
+```
+
+如上例所示，反馈事件被收集在 `reviewState.userFeedback` 数组中，然后在用户接受或拒绝所有更改时以 XML 标签包裹的形式发送给 AI。这使得 AI 能够理解哪些更改被接受或拒绝，从而改进未来的建议。
+
+## 接受/拒绝单条建议
+
+你还可以在建议上显示按钮或弹出框，添加接受或拒绝操作。
+
+要在 UI 中渲染自定义元素，设置 `reviewOptions.displayOptions` 参数。在这里你可以设置 `renderDecorations` 选项。它是一个返回 [ProseMirror decorations](https://prosemirror.net/docs/ref/#view.Decorations) 列表的函数。
+
+```tsx
+const result = toolkit.executeTool({
+  toolName,
+  input,
+  reviewOptions: {
+    mode: 'preview',
+    displayOptions: {
+      renderDecorations(options) {
+        return [
+          ...options.defaultRenderDecorations(),
+
+          // 接受按钮
+          Decoration.widget(options.range.to, () => {
+            const element = document.createElement('button')
+            element.textContent = '接受'
+            element.addEventListener('click', () => {
+              const result = toolkit.acceptSuggestion(options.suggestion.id)
+              // 使用函数式更新收集反馈事件
+              setReviewState((prev) => ({
+                ...prev,
+                userFeedback: [...prev.userFeedback, ...result.aiFeedback.events],
+              }))
+            })
+            return element
+          }),
+
+          // 拒绝按钮
+          Decoration.widget(options.range.to, () => {
+            const element = document.createElement('button')
+            element.textContent = '拒绝'
+            element.addEventListener('click', () => {
+              const result = toolkit.rejectSuggestion(options.suggestion.id)
+              // 使用函数式更新收集反馈事件
+              setReviewState((prev) => ({
+                ...prev,
+                userFeedback: [...prev.userFeedback, ...result.aiFeedback.events],
+              }))
+            })
+            return element
+          }),
+        ]
+      },
+    },
+  },
+})
+```
+
+## 完整演示代码
+
+```tsx
+// app/page.tsx
+'use client'
+
+import { useChat } from '@ai-sdk/react'
+import { Decoration } from '@tiptap/pm/view'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { AiToolkit, getAiToolkit, type SuggestionFeedbackEvent } from '@tiptap-pro/ai-toolkit'
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from 'ai'
+import { useRef, useState } from 'react'
+import './suggestions.css'
+
+export default function Page() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit, AiToolkit],
+    content: `<h1>AI 代理演示</h1><p>请 AI 优化这段内容。</p>`,
+  })
+
+  const [reviewState, setReviewState] = useState({
+    // 是否显示审核 UI
+    isReviewing: false,
+    // 工具调用结果数据
+    tool: '',
+    toolCallId: '',
+    output: '',
+    // 从用户操作收集的反馈事件
+    userFeedback: [] as SuggestionFeedbackEvent[],
+  })
+
+  const acceptButtonRef = useRef<HTMLButtonElement>(null)
+  const rejectButtonRef = useRef<HTMLButtonElement>(null)
+
+  const { messages, sendMessage, addToolOutput } = useChat({
+    transport: new DefaultChatTransport({ api: '/api/chat' }),
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    async onToolCall({ toolCall }) {
+      if (!editor) return
+
+      const { toolName, input, toolCallId } = toolCall
+
+      // 使用 AI 工具包执行工具
+      const toolkit = getAiToolkit(editor)
+      const result = toolkit.executeTool({
+        toolName,
+        input,
+        reviewOptions: {
+          mode: 'preview',
+          displayOptions: {
+            renderDecorations(options) {
+              return [
+                ...options.defaultRenderDecorations(),
+
+                // 接受按钮
+                Decoration.widget(options.range.to, () => {
+                  const element = document.createElement('button')
+                  element.textContent = '接受'
+                  element.addEventListener('click', () => {
+                    const result = toolkit.acceptSuggestion(options.suggestion.id)
+                    // 使用函数式更新收集反馈事件
+                    setReviewState((prev) => ({
+                      ...prev,
+                      userFeedback: [...prev.userFeedback, ...result.aiFeedback.events],
+                    }))
+                    if (toolkit.getSuggestions().length === 0) {
+                      acceptButtonRef.current?.click()
+                    }
+                  })
+                  return element
+                }),
+
+                // 拒绝按钮
+                Decoration.widget(options.range.to, () => {
+                  const element = document.createElement('button')
+                  element.textContent = '拒绝'
+                  element.addEventListener('click', () => {
+                    const result = toolkit.rejectSuggestion(options.suggestion.id)
+                    // 使用函数式更新收集反馈事件
+                    setReviewState((prev) => ({
+                      ...prev,
+                      userFeedback: [...prev.userFeedback, ...result.aiFeedback.events],
+                    }))
+                    if (toolkit.getSuggestions().length === 0) {
+                      rejectButtonRef.current?.click()
+                    }
+                  })
+                  return element
+                }),
+              ]
+            },
+          },
+        },
+      })
+
+      // 如果工具调用修改了文档，暂停对话并显示审核 UI
+      if (result.docChanged) {
+        // 显示审核 UI
+        setReviewState({
+          isReviewing: true,
+          tool: toolName,
+          toolCallId,
+          output: result.output,
+          userFeedback: [],
+        })
+      } else {
+        // 继续对话
+        addToolOutput({ tool: toolName, toolCallId, output: result.output })
+      }
+    },
+  })
+
+  const [input, setInput] = useState('用一个关于 Tiptap 的短故事替换最后一段')
+
+  if (!editor) return null
+
+  return (
+    <div>
+      <EditorContent editor={editor} />
+      {messages?.map((message) => (
+        <div key={message.id} style={{ whiteSpace: 'pre-wrap' }}>
+          <strong>{message.role}</strong>
+          <br />
+          {message.parts
+            .filter((p) => p.type === 'text')
+            .map((p) => p.text)
+            .join('\n')}
+        </div>
+      ))}
+      {!reviewState.isReviewing && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (input.trim()) {
+              sendMessage({ text: input })
+              setInput('')
+            }
+          }}
+        >
+          <input value={input} onChange={(e) => setInput(e.target.value)} />
+        </form>
+      )}
+      {reviewState.isReviewing && (
+        <div>
+          <h2>审核更改</h2>
+          <button
+            ref={acceptButtonRef}
+            onClick={() => {
+              const toolkit = getAiToolkit(editor)
+              const result = toolkit.acceptAllSuggestions()
+              // 合并所有反馈事件（之前的 + 新的）
+              const userFeedback = [...reviewState.userFeedback, ...result.aiFeedback.events]
+              let output = reviewState.output
+
+              // 如果有未接受的更改，附加反馈到工具输出
+              if (userFeedback.length > 0 && userFeedback.some((event) => !event.accepted)) {
+                output += `\n\n<user_feedback>\n${JSON.stringify(userFeedback)}\n</user_feedback>`
+              }
+
+              addToolOutput({
+                tool: reviewState.tool,
+                toolCallId: reviewState.toolCallId,
+                output,
+              })
+              // 重置反馈事件并关闭审核 UI
+              setReviewState({
+                ...reviewState,
+                isReviewing: false,
+                userFeedback: [],
+              })
+            }}
+          >
+            全部接受
+          </button>
+          <button
+            ref={rejectButtonRef}
+            onClick={() => {
+              const toolkit = getAiToolkit(editor)
+              const result = toolkit.rejectAllSuggestions()
+              // 合并所有反馈事件（之前的 + 新的）
+              const userFeedback = [...reviewState.userFeedback, ...result.aiFeedback.events]
+              // 将拒绝信息和反馈放进 XML 标签中
+              const rejectionMessage =
+                'Some changes you made were rejected by the user. Ask the user why, and what you can do to improve them.'
+              const outputWithFeedback = `${rejectionMessage}\n\n<user_feedback>\n${JSON.stringify(userFeedback)}\n</user_feedback>`
+              addToolOutput({
+                tool: reviewState.tool,
+                toolCallId: reviewState.toolCallId,
+                output: outputWithFeedback,
+              })
+              // 重置反馈事件并关闭审核 UI
+              setReviewState({
+                ...reviewState,
+                isReviewing: false,
+                userFeedback: [],
+              })
+            }}
+          >
+            全部拒绝
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+## 最终效果
+
+通过额外的 CSS 样式，结果是一个简单但精致的 AI 聊天机器人应用，用户可以审核 AI 生成的更改：
+
+<CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/review-changes" />
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 接下来的步骤
+
+### 高级审核选项
+
+`reviewOptions` 参数让你可以完全控制审核流程和 UI。
+
+使用 `reviewOptions.mode` 参数，你可以控制何时将更改应用到文档。
+
+- `preview`：在更改被应用前显示预览。用户接受之前，更改不会应用到文档。
+- `review`：立即应用更改，然后再进行审核。
+
+完整的 `reviewOptions` 参数参考，请见 [executeTool 方法的 API 参考](/content-ai/capabilities/ai-toolkit/primitives/execute-tool)。
+
+像 [Cursor](https://www.cursor.com/) 这样的热门 AI 代理聊天机器人，会连续调用多个工具，并在 AI 代理完成所有工作后展示所有更改的汇总。要实现此类工作流程，请参阅 [将更改作为汇总进行审核](/content-ai/capabilities/ai-toolkit/guides/review-changes-as-summary) 指南。
+
+### 自定义建议的显示方式
+
+在审核更改时，AI 工具包会将更改预览显示为 [建议](/content-ai/capabilities/ai-toolkit/primitives/display-suggestions)。
+
+你可以通过设置 `reviewOptions.displayOptions` 参数来自定义这些建议的显示方式。你甚至可以在其中 [渲染 React 组件](/content-ai/capabilities/ai-toolkit/advanced-guides/style-suggestions)。

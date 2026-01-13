@@ -1,0 +1,200 @@
+---
+title: 模式感知
+meta:
+  title: 模式感知 | Tiptap 内容 AI
+  description: 为 AI 模型提供模式感知，使其理解节点、标记和属性。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+一个 Tiptap [schema](/editor/core-concepts/schema) 描述了文档可以（或不可以）包含的元素。Tiptap 的**模式感知**功能使 AI 模型能够更好地理解文档。
+
+<Callout title="为什么需要模式感知？" variant="default">
+  如果没有模式感知，AI 模型可能会生成 Tiptap 编辑器不支持的内容。比如，它可能会在不支持表格的文档中生成表格。
+  开启模式感知后，AI 模型会知道表格节点不被支持，从而拒绝生成它们。
+</Callout>
+
+## 指南：为你的 AI 模型提供模式感知
+
+### 步骤 1：获取模式感知字符串
+
+从 AI 工具包获取模式感知字符串。此字符串包含描述文档模式的消息，已针对 AI 模型优化。
+
+```ts
+const toolkit = getAiToolkit(editor)
+// 获取模式感知字符串
+const schemaAwareness = toolkit.getHtmlSchemaAwareness()
+```
+
+### 步骤 2（可选）：配置自定义节点
+
+如果你的文档包含[自定义节点和标记](/editor/extensions/custom-extensions)，请在扩展配置中添加 `addHtmlSchemaAwareness` 选项。这样，AI 模型将能够准确生成该自定义节点或标记。例如，如果你有一个名为 `'alert'` 的自定义节点，可以通过如下配置允许 AI 生成它：
+
+```ts
+import { Node } from '@tiptap/core'
+
+const CustomExtension = Node.configure({
+  name: 'alert',
+
+  addHtmlSchemaAwareness() {
+    return {
+      tag: 'div',
+      name: '警告框',
+      description: `一个高亮框，用于向用户展示重要信息、警告或提示。
+它可以包含如文本和格式化标签的内联内容。`,
+      attributes: [
+        {
+          attr: 'data-alert',
+          value: '',
+          description: '表示这是一个警告框',
+        },
+        {
+          attr: 'data-type',
+          description:
+            '警告类型。可以是以下 4 个值之一：info、warning、error 或 success',
+        },
+      ],
+    }
+  },
+
+  // ... 其他扩展配置选项
+})
+```
+
+或者，你也可以配置 `getHtmlSchemaAwareness` 方法的 `customNodes` 选项。了解更多配置选项，请参考[API 参考](/content-ai/capabilities/ai-toolkit/api-reference/schema-awareness#gethtmlschemaawareness)。
+
+<Callout title="官方 Tiptap 扩展怎么办？" variant="info">
+  AI 工具包自动支持官方 Tiptap 扩展的模式感知。它们不需要额外配置。
+  你仍然可以通过扩展官方 Tiptap 扩展并添加 `addHtmlSchemaAwareness` 选项来自定义默认的模式感知信息。
+</Callout>
+
+### 步骤 3：将模式感知字符串添加到系统提示
+
+调用 AI 模型时，将模式感知字符串作为参数发送给返回 AI 模型响应的 API 端点。
+
+下面的代码展示了一个使用 Next.js 和 Vercel AI SDK 构建的 API 端点，类似于[AI 代理聊天机器人指南](/content-ai/capabilities/ai-toolkit/guides/ai-agent-chatbot)中的示例。
+
+```ts
+// app/page.tsx
+import { useEditor } from '@tiptap/react'
+import { getAiToolkit } from '@tiptap-pro/ai-toolkit'
+import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
+
+// React 组件内部
+
+const editor = useEditor()
+const toolkit = getAiToolkit(editor)
+
+// 获取模式感知字符串
+const schemaAwareness = toolkit.getHtmlSchemaAwareness()
+
+const { messages } = useChat({
+  transport: new DefaultChatTransport({
+    api: '/api/chat',
+    // 将模式感知字符串作为参数发送到 API 端点
+    body: { schemaAwareness },
+  }),
+  // ...
+})
+```
+
+然后，在 API 端点处理函数内，将模式感知字符串添加到系统提示的末尾。
+
+```ts
+// app/api/chat/route.ts
+import { openai } from '@ai-sdk/openai'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
+
+export async function POST(req: Request) {
+  // 从请求体获取模式感知字符串
+  const { messages, schemaAwareness }: { messages: UIMessage[]; schemaAwareness: string } =
+    await req.json()
+
+  const agent = new ToolLoopAgent({
+    model: openai('gpt-5-mini'),
+    // 在系统提示末尾添加模式感知字符串
+    instructions: `你是一名可以编辑富文本文档的助手。
+${schemaAwareness}`,
+    tools: toolDefinitions(),
+    // 设置推理复杂度为“minimal”，以加快响应速度
+    providerOptions: {
+      openai: {
+        reasoningEffort: 'minimal',
+      },
+    },
+  })
+
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
+  })
+}
+```
+
+你现在已经为你的 AI 模型配置了模式感知。
+
+### 最终效果
+
+下面的应用是[AI 代理聊天机器人演示](/content-ai/capabilities/ai-toolkit/guides/ai-agent-chatbot)的一个带有模式感知配置的变体。尝试让 AI 创建一个警告框：AI 会识别该自定义元素并将其插入文档中。
+
+<CodeDemo isLarge isScrollable path="" src="https://ai-toolkit-demos.vercel.app/schema-awareness" />
+
+查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## API 参考
+
+## `getHtmlSchemaAwareness`
+
+返回描述文档模式的字符串。该字符串应添加到发送给 AI 模型的系统提示末尾。
+
+目前，`getHtmlSchemaAwareness` 方法仅支持生成 HTML 内容的 AI 模型。我们计划未来支持更多格式。
+
+### 参数（`GetHtmlSchemaAwarenessOptions`）
+
+- `customNodes?` (`HtmlItem[]`): 除默认项之外要包含的自定义模式感知项目。此选项中定义的值将覆盖自定义扩展配置中 `addHtmlSchemaAwareness` 的模式感知数据，也将覆盖官方 Tiptap 扩展的模式感知数据。默认值：`[]`。
+
+每个 `HtmlItem` 对象包含以下属性：
+
+- `extensionName` (`string`): 提供此元素的[扩展名称](/editor/extensions/custom-extensions/create-new/extension#name)
+- `tag` (`string`): 元素的 HTML 标签名
+- `name` (`string`): 元素的英文人类可读名称
+- `description?` (`string | null`): 元素的解释及其呈现方式
+- `attributes?` (`HtmlAttribute[]`): HTML 标签可能的属性。如未定义则无属性。每个 `HtmlAttribute` 对象包含：
+  - `attr` (`string`): HTML 代码中的属性名
+  - `value?` (`string`): 若不为 `undefined`，该属性在此元素中始终为该值。用于固定值属性。
+  - `description?` (`string | null`): 对属性的英文解释，供 AI 模型理解
+
+### 返回值
+
+`string`：适合系统提示的人类可读模式感知文本
+
+### 示例
+
+```ts
+// 获取模式感知字符串
+const schemaAwareness = toolkit.getHtmlSchemaAwareness()
+```
+
+## `addHtmlSchemaAwareness`（扩展配置选项）
+
+为自定义节点或标记添加模式感知信息。该选项用于配置自定义节点和标记，使 AI 模型能了解它们。
+
+此配置选项适用于[自定义节点和标记扩展](/editor/extensions/custom-extensions/create-new/node)。
+
+### 参数（`HtmlItem`）
+
+- `tag` (`string`): 元素的 HTML 标签名
+- `name` (`string`): 元素的英文人类可读名称
+- `description?` (`string | null`): 元素的解释及其呈现方式
+- `attributes?` (`HtmlAttribute[]`): HTML 标签可能的属性。如未定义则无属性。每个 `HtmlAttribute` 对象包含：
+  - `attr` (`string`): HTML 代码中的属性名
+  - `value?` (`string`): 若不为 `undefined`，该属性在此元素中始终为该值。用于固定值属性。
+  - `description?` (`string | null`): 对属性的英文解释，供 AI 模型理解
+
+## 下一步
+
+- [模式感知 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/schema-awareness)

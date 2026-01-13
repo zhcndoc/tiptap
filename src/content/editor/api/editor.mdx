@@ -233,6 +233,18 @@ new Editor({
 })
 ```
 
+### enableExtensionDispatchTransaction
+
+Whether to enable extension-level dispatching of transactions. If `false`, extensions cannot define their own `dispatchTransaction` hook.
+
+- **Default**: `true`
+
+```js
+new Editor({
+  enableExtensionDispatchTransaction: false,
+})
+```
+
 ### editorProps
 
 对于高级用例，您可以传递 `editorProps`，这些将由 [ProseMirror](https://prosemirror.net/docs/ref/#view.EditorProps) 处理。您可以使用它来重写各种编辑器事件或更改编辑器 DOM 元素属性，例如添加一些 Tailwind 类。以下是一个示例：

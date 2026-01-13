@@ -136,6 +136,27 @@ Mention.configure({
 
 <CodeDemo path="/Examples/MultiMention" />
 
+## 协作
+
+使用 Tiptap 协作功能时，当有人输入提及时，有时建议弹窗会“弹出”给远程用户。为了防止这种情况，您可以配置 `shouldShow` 选项：
+
+```js
+import { Mention } from '@tiptap/extension-mention'
+import { isChangeOrigin } from '@tiptap/extension-collaboration'
+
+const Editor = new Editor({
+  extensions: [
+    Mention.configure({
+      suggestion: {
+        shouldShow: ({ transaction }) => isChangeOrigin(transaction),
+      },
+    }),
+  ],
+})
+```
+
+这样可以确保建议菜单只对实际输入触发字符的用户打开。
+
 ## 源代码
 
 [packages/extension-mention/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-mention/)

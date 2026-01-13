@@ -1,0 +1,242 @@
+---
+title: 评论工作流
+meta:
+  title: 评论工作流 | Tiptap 内容 AI
+  description: 使用 Tiptap AI 工具包构建一个管理文档中评论和线程的工作流。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+构建一个允许 AI 管理你 Tiptap 文档中评论和线程的工作流。
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/comments-workflow"
+/>
+
+查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 技术栈
+
+- [React](https://react.dev/) + [Next.js](https://nextjs.org/)
+- [Vercel 的 AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
+- Tiptap AI 工具包
+- Tiptap 评论扩展
+
+## 项目概览
+
+此示例使用 AI 工具包的评论工作流来管理文档中的线程和评论。AI 可以创建新线程、添加评论、更新评论、删除评论并管理线程状态。
+
+## 安装
+
+创建一个 [Next.js](https://nextjs.org/) 项目：
+
+```bash
+npx create-next-app@latest comments-workflow
+```
+
+安装核心 Tiptap 包和用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
+
+```bash
+npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/react @ai-sdk/openai zod uuid
+```
+
+安装 Tiptap AI 工具包和评论扩展：
+
+<Callout title="专业版包" variant="hint">
+  AI 工具包是一个专业版包。安装前，请通过
+  阅读[私有注册表指南](/guides/pro-extensions)
+  设置对私有 NPM 注册表的访问权限。
+</Callout>
+
+```bash
+npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions @tiptap-pro/extension-comments
+```
+
+## 服务器配置
+
+创建一个使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型的 API 端点。
+
+在 API 端点中，使用 `createEditThreadsWorkflow` 函数创建并配置评论工作流。该工作流包含一个可直接使用的系统提示，用于指示 AI 模型如何管理评论。
+
+用户消息应包含：
+
+- `nodes`：文档的节点（由 `tiptapRead` 获得）
+- `threads`：文档中已有的线程（由 `getThreads` 获得）
+- `task`：AI 需要执行的任务。例如，`添加一个改进引言的建议性评论`。
+
+```ts
+// app/api/comments-workflow/route.ts
+import { openai } from '@ai-sdk/openai'
+import { createEditThreadsWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { Output, streamText } from 'ai'
+
+export async function POST(req: Request) {
+  const { nodes, threads, task } = await req.json()
+
+  // 创建并配置评论工作流（使用默认设置）。
+  // 包含可直接使用的系统提示和输出模式。
+  const workflow = createEditThreadsWorkflow()
+
+  const result = streamText({
+    model: openai('gpt-5-mini'),
+    // 系统提示
+    system: workflow.systemPrompt,
+    // 用户消息
+    prompt: JSON.stringify({
+      nodes,
+      threads,
+      task,
+    }),
+    output: Output.object({ schema: workflow.zodOutputSchema }),
+    // 如果使用 gpt-5-mini，设置推理强度为最低以提升响应速度。
+    providerOptions: {
+      openai: {
+        reasoningEffort: 'minimal',
+      },
+    },
+  })
+
+  return result.toTextStreamResponse()
+}
+```
+
+## 客户端配置
+
+创建一个 React 组件，渲染集成了评论扩展的编辑器并应用评论操作。
+
+首先，工作流开始时调用 `tiptapRead` 方法获取文档内容，调用 `getThreads` 方法获取现有线程。
+
+然后，调用 API 端点来启动工作流。使用 `editThreadsWorkflow` 方法应用评论操作。
+
+```tsx
+// app/comments-workflow/page.tsx
+'use client'
+
+import { experimental_useObject as useObject } from '@ai-sdk/react'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { AiToolkit, getAiToolkit, editThreadsWorkflowOutputSchema } from '@tiptap-pro/ai-toolkit'
+import { Comments } from '@tiptap-pro/extension-comments'
+import { useEffect, useState } from 'react'
+
+// 创建一个简单的评论提供者
+const commentsProvider = {
+  threads: [],
+  getThreads: () => commentsProvider.threads,
+  createThread: (thread) => {
+    commentsProvider.threads.push(thread)
+    return thread
+  },
+  updateThread: (id, data) => {
+    const index = commentsProvider.threads.findIndex((t) => t.id === id)
+    if (index !== -1) {
+      commentsProvider.threads[index] = { ...commentsProvider.threads[index], ...data }
+    }
+  },
+  deleteThread: (id) => {
+    commentsProvider.threads = commentsProvider.threads.filter((t) => t.id !== id)
+  },
+}
+
+export default function Page() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit,
+      AiToolkit,
+      Comments.configure({
+        provider: commentsProvider,
+      }),
+    ],
+    content: `<h1>含评论的文档</h1><p>这是一个示例文档，AI 可以在其中添加和管理评论。</p>`,
+  })
+
+  const [task, setTask] = useState('添加一个建议改进此文档的评论')
+
+  const { submit, isLoading, object } = useObject({
+    api: '/api/comments-workflow',
+    schema: editThreadsWorkflowOutputSchema,
+  })
+
+  const operations = object?.operations ?? []
+
+  // 实时应用传入的操作
+  useEffect(() => {
+    if (!editor || operations.length === 0) return
+
+    const toolkit = getAiToolkit(editor)
+    toolkit.editThreadsWorkflow({
+      operations,
+    })
+  }, [operations, editor])
+
+  if (!editor) return null
+
+  const manageComments = () => {
+    const toolkit = getAiToolkit(editor)
+
+    // 获取文档内容和现有线程
+    const { nodes } = toolkit.tiptapRead()
+    const { threads } = toolkit.getThreads()
+
+    // 调用 API 端点启动工作流
+    submit({ nodes, threads, task })
+  }
+
+  return (
+    <div>
+      <EditorContent editor={editor} />
+
+      <input
+        type="text"
+        value={task}
+        onChange={(e) => setTask(e.target.value)}
+        placeholder="请输入评论任务..."
+      />
+
+      <button onClick={manageComments} disabled={isLoading}>
+        {isLoading ? '处理中...' : '使用 AI 管理评论'}
+      </button>
+    </div>
+  )
+}
+```
+
+## 可用操作
+
+评论工作流支持以下操作：
+
+| 操作              | 格式                                               | 描述                           |
+| ----------------- | -------------------------------------------------- | ------------------------------ |
+| 创建线程          | `['createThread', nodeHash, htmlContent]`          | 在指定位置创建新线程           |
+| 创建评论          | `['createComment', threadId, content]`             | 向现有线程添加评论             |
+| 更新评论          | `['updateComment', threadId, commentId, content]`  | 更新现有评论                   |
+| 删除评论          | `['removeComment', threadId, commentId]`           | 从线程中删除评论               |
+| 删除线程          | `['removeThread', threadId]`                        | 删除整个线程                   |
+| 解决线程          | `['resolveThread', threadId]`                       | 标记线程为已解决               |
+| 解除解决线程      | `['unresolveThread', threadId]`                     | 标记线程为未解决               |
+
+## 最终效果
+
+通过额外的 CSS 样式，效果是一个精致的评论管理应用：
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/comments-workflow"
+/>
+
+查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 相关指南
+
+- [`tiptapRead` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapread)
+- [`getThreads` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#getthreads)
+- [`editThreadsWorkflow` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#editthreadsworkflow)
+- [评论扩展](/collaboration/comments/overview)：了解更多关于评论扩展的信息。

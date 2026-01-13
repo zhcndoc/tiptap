@@ -1,0 +1,101 @@
+---
+title: 比较文档
+meta:
+  title: 比较文档 | Tiptap 内容 AI
+  description: 实时比较文档并可视化差异。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+实时比较两个文档，并在编辑器中显示差异。
+
+<Callout title="适用于非 AI 使用场景">
+  此功能不依赖 AI 即可使用。它可以比较任意两个文档，无论它们是否由 AI 生成。一个常见用例是比较 AI 编辑前后的文档。详见 [审阅更改指南](/content-ai/capabilities/ai-toolkit/agents/review-changes-as-summary)。
+</Callout>
+
+关于逐步比较文档的指南，请参阅 [比较文档指南](/content-ai/capabilities/ai-toolkit/advanced-guides/compare-documents)。
+
+## API 参考
+
+## `startComparingDocuments`
+
+开始与另一个文档的实时比较。差异作为建议显示在内联差异视图中，编辑器同时展示旧内容和新内容。
+
+### 参数 (`StartComparingDocumentsOptions`)
+
+- `otherDoc?` (`Node`): 用于比较的文档。它是一个 [ProseMirror Node 对象](https://prosemirror.net/docs/ref/#model.Node)。如果省略，则默认为当前文档的快照。
+- `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 控制如何将差异渲染为建议
+  - `showAsDiff?` (`boolean`): 是否将替代内容显示为差异小部件。默认：比较流程中为 `true`
+  - `diffPosition?` (`'before' | 'after'`): 差异相对于建议的位置。默认：`'before'`
+  - `attributes?` (`Record<string, any>`): 添加到渲染元素的属性
+  - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 自定义渲染函数
+- `debounceTimeout?` (`number`): 重新计算差异前等待的毫秒数。较低的值会让应用看起来更响应，但可能会在大型文档中引发性能问题。默认：`500`
+- `diffUtilityConfig?` (`DiffUtilityConfig`): 使用差异工具比较文档的选项
+  - `simplifyChanges?` (`boolean`): 是否简化变更。若为 `true`，例如同一单词内的两个变更将合并成一个。仅在模式为 'detailed' 时生效。默认：`true`
+  - `ignoreAttributes?` (`string[]`): 忽略的属性。默认：`['id', 'data-thread-id']`
+  - `ignoreMarks?` (`string[]`): 忽略的标记。默认：`['inlineThread']`
+  - `changeMergeDistance?` (`number | null`): 合并变更的最大距离（文档位置）。如果两个相邻变更在 rangeA 或 rangeB 中的距离小于或等于该值，则合并成一个变更。设置为 `null` 或 `undefined` 禁用合并。仅在模式为 'detailed' 时生效。默认：`null`
+  - `mode?` (`'detailed' | 'block'`): 比较时使用的差异模式。'detailed' 执行字符级差异，精确定位文本内变化（默认）。'block' 执行块级差异，将每个顶级节点视为单元。块模式适合只需知道哪些段落、标题或其他块级元素变更，而无需字符级细节。块模式下忽略 `simplifyChanges` 和 `changeMergeDistance` 选项。默认：`'detailed'`
+
+### 返回
+
+`void`
+
+### 示例
+
+```ts
+// 开始与另一个文档比较更改
+toolkit.startComparingDocuments({
+  otherDoc,
+})
+```
+
+## `stopComparingDocuments`
+
+停止实时比较并清除所有建议，差异视图不再可见。
+
+### 返回
+
+`void`
+
+### 示例
+
+```ts
+// 停止比较并清除装饰
+toolkit.stopComparingDocuments()
+```
+
+## 接受与拒绝更改
+
+比较文档时，变更以建议的形式展示。要接受或拒绝单个更改或所有更改，请使用以下建议方法：
+
+- [`acceptSuggestion`](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#acceptsuggestion)：接受指定更改
+- [`rejectSuggestion`](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#rejectsuggestion)：拒绝指定更改
+- [`acceptAllSuggestions`](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#acceptallsuggestions)：接受所有更改
+- [`rejectAllSuggestions`](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#rejectallsuggestions)：拒绝所有更改
+
+这些方法适用于普通建议及比较文档功能产生的变更。
+
+### 示例
+
+```ts
+// 开始比较文档
+toolkit.startComparingDocuments({
+  otherDoc: otherDoc,
+})
+
+// 获取所有变更（作为建议）
+const suggestions = toolkit.getSuggestions()
+
+// 接受第一个变更并获取反馈
+if (suggestions.length > 0) {
+  const result = toolkit.acceptSuggestion(suggestions[0].id)
+  console.log(result.aiFeedback.events)
+}
+
+// 或一次性拒绝所有更改
+const result = toolkit.rejectAllSuggestions()
+console.log(result.aiFeedback.events)
+toolkit.stopComparingDocuments()
+```

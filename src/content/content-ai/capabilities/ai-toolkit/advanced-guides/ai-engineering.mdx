@@ -21,14 +21,13 @@ AI 工具包的工具设计为可与任何支持函数调用的 AI 模型配合�
 
 对于复杂的智能体 AI 助手（如[AI 智能体聊天机器人](/content-ai/capabilities/ai-toolkit/guides/ai-agent-chatbot)指南中的示例），推荐使用具有先进工具调用能力的前沿模型。特别地，以下模型表现优异：
 
-- Claude Sonnet 4.5（Anthropic）：这是我们获得最佳效果的模型，擅长对文档进行精确且高效的小幅编辑。
-- Claude Haiku 4.5（Anthropic）
-- Gemini 3 Pro（Google）
-- GPT-5.1（OpenAI）
-- Kimi-K2（Moonshot）
-- Grok 4.1 Fast（xAI）
-- GLM-4.6（Z.ai）
-- Mistral Large 3（Mistral）
+- OpenAI 模型：GPT-5、GPT-5 mini、GPT-5.1、GPT-5.2
+- Anthropic 模型：Claude Opus 4.5、Claude Sonnet 4.5、Claude Haiku 4.5
+- Google 模型：Gemini 3 Pro、Gemini 3 Flash
+- Moonshot 模型：Kimi-K2
+- xAI 模型：Grok 4.1 Fast
+- Z.ai 模型：GLM-4.7
+- Mistral 模型：Mistral Large、Mistral Medium
 
 ### 适合智能体任务的经济型模型
 
@@ -36,23 +35,20 @@ AI 工具包的工具设计为可与任何支持函数调用的 AI 模型配合�
 
 - Claude Haiku 4.5（Anthropic）
 - GPT-5 mini（OpenAI）
-- Gemini 2.5 Flash（Google）
+- Gemini 3 Flash（Google）
 - Mistral Medium 3.1（Mistral）
 
 ### 非智能体工作流的模型选择
 
-并非所有文档编辑的 AI 用例都是智能体类型，有时你只是需要 AI 生成内容并插入文档。大量经济型模型适合此用途。比如：
-
-- Claude Haiku 4.5（Anthropic）
-- GPT-5 mini（OpenAI）
-- Gemini 2.5 Flash（Google）
-- Mistral Medium 3.1（Mistral）
+并非所有文档编辑的 AI 用例都是智能体类型，有时你只是需要 AI 生成内容并插入文档。大量经济型模型适合此用途。比如前文提到的那些。
 
 ### 是否应启用推理能力？
 
 根据我们的内部测试，开启推理对文档编辑任务的准确度和性能没有明显提升。由于推理增加了 token 消耗和延迟，**建议关闭推理或保持最低配置**，除非你的 AI 智能体需要推理用于其他目的（例如任务规划或复杂数学问题求解）。
 
 例如，对于 AI 工具包推荐的 GPT-5 配置是将 `reasoning` 参数设置为 `'minimal'`。
+
+关于 Gemini 3 Pro 和 Gemini 3 Flash，我们发现将推理设置为 minimal 后，响应更快且准确度相当。
 
 ## 设计合适的提示语
 
@@ -62,17 +58,16 @@ AI 工具包的工具设计为可与任何支持函数调用的 AI 模型配合�
 // app/api/chat/route.ts
 import { openai } from '@ai-sdk/openai'
 import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
-import { convertToModelMessages, streamText, UIMessage } from 'ai'
+import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
-  const result = streamText({
+  const agent = new ToolLoopAgent({
     model: openai('gpt-5-mini'),
-    system: `你是一个以莎士比亚风格编辑富文本文件的助手。
-    你应以莎士比亚风格回复，并且在编辑文档时，
-    你生成并添加到文档中的内容都应写成莎士比亚戏剧的风格。`,
-    messages: convertToModelMessages(messages),
+    instructions: `你是一个以莎士比亚风格编辑富文本文件的助手。
+你应以莎士比亚风格回复，并且在编辑文档时，
+你生成并添加到文档中的内容都应写成莎士比亚戏剧的风格。`,
     tools: toolDefinitions(),
     providerOptions: {
       openai: {
@@ -81,31 +76,33 @@ export async function POST(req: Request) {
     },
   })
 
-  return result.toUIMessageStreamResponse()
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
+  })
 }
 ```
 
 在系统提示中不需要提及 AI 模型有哪些工具可用。因为它们已经包含在工具定义中，AI 模型会自动识别。
 
-不过，在系统提示里你可以按名称引用[可用工具](/content-ai/capabilities/ai-toolkit/tools/available-tools)，这样你可以指导 AI 模型如何以及何时使用工具，并引导它变得更健谈、有创造力或更细致。
+不过，在系统提示里你可以按名称引用[可用工具](/content-ai/capabilities/ai-toolkit/agents/tools/available-tools)，这样你可以指导 AI 模型如何以及何时使用工具，并引导它变得更健谈、有创造力或更细致。
 
 ```ts
 // app/api/chat/route.ts
 import { openai } from '@ai-sdk/openai'
 import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
-import { convertToModelMessages, streamText, UIMessage } from 'ai'
+import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
-  const result = streamText({
+  const agent = new ToolLoopAgent({
     model: openai('gpt-5-mini'),
-    system: `你是一个可以编辑富文本文档的助手。
-    在调用类似 tiptapEdit 这样的文档编辑工具之前，
-    应该先阅读文档，了解内容和上下文。
-    接着，应通过非常详细的逐步描述，告知用户你将采取的文档编辑方案。
-    只有在详细规划后，才调用文档编辑工具。`,
-    messages: convertToModelMessages(messages),
+    instructions: `你是一个可以编辑富文本文档的助手。
+在调用类似 tiptapEdit 这样的文档编辑工具之前，
+应该先阅读文档，了解内容和上下文。
+接着，应通过非常详细的逐步描述，告知用户你将采取的文档编辑方案。
+只有在详细规划后，才调用文档编辑工具。`,
     tools: toolDefinitions(),
     providerOptions: {
       openai: {
@@ -114,7 +111,10 @@ export async function POST(req: Request) {
     },
   })
 
-  return result.toUIMessageStreamResponse()
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
+  })
 }
 ```
 
@@ -147,15 +147,14 @@ export async function POST(req: Request) {
 // app/api/chat/route.ts
 import { openai } from '@ai-sdk/openai'
 import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
-import { convertToModelMessages, streamText, UIMessage } from 'ai'
+import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
-  const result = streamText({
+  const agent = new ToolLoopAgent({
     model: openai('gpt-5-mini'),
-    system: `你是一个可以编辑富文本文档的助手。`,
-    messages: convertToModelMessages(messages),
+    instructions: `你是一个可以编辑富文本文档的助手。`,
     tools: toolDefinitions(),
     // 将推理努力设置为 'minimal'
     providerOptions: {
@@ -165,7 +164,10 @@ export async function POST(req: Request) {
     },
   })
 
-  return result.toUIMessageStreamResponse()
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
+  })
 }
 ```
 
@@ -199,3 +201,9 @@ ${output}`
 ```
 
 这样，AI 模型无需再次调用 `tiptapRead` 工具读取文档，而可直接进入编辑阶段。
+
+### 优先使用工作流而非智能体
+
+[工作流](/content-ai/capabilities/ai-toolkit/workflows)比 AI 智能体更易实现。它们通常需要 AI 生成更少的 token，因此执行更快。此外，工作流通常可以配合更快、更小的模型使用。
+
+AI 工具包内置了多种[内置工作流](/content-ai/capabilities/ai-toolkit/workflows)，可用于执行简单的文档编辑任务。

@@ -1,0 +1,102 @@
+---
+title: AI SDK - AI 代理工具
+meta:
+  title: AI SDK - AI 代理工具 | Tiptap 内容 AI
+  description: 使用 Vercel 的 AI SDK 的工具定义，让 AI 代理读取和编辑 Tiptap 文档。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+`@tiptap-pro/ai-toolkit-ai-sdk` 包提供了可以添加到你基于 [Vercel 的 AI SDK](https://ai-sdk.dev/) 构建的 AI 代理中的工具定义。
+
+模型生成的工具调用可以通过 [`executeTool` 方法](/content-ai/capabilities/ai-toolkit/primitives/execute-tool) 执行。
+
+## 示例用法
+
+安装该包。
+
+```bash
+npm install @tiptap-pro/ai-toolkit-ai-sdk
+```
+
+将工具定义传递给 `generateText` 或 `streamText` 函数的 `tools` 参数。
+
+```ts
+import { openai } from '@ai-sdk/openai'
+import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+
+export async function POST(req: Request) {
+  const { messages }: { messages: UIMessage[] } = await req.json()
+
+  const agent = new ToolLoopAgent({
+    model: openai('gpt-5-mini'),
+    tools: toolDefinitions(),
+  })
+
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
+  })
+}
+```
+
+将工具定义与你的自定义工具结合。
+
+```ts
+import { openai } from '@ai-sdk/openai'
+import { createAgentUIStreamResponse, ToolLoopAgent, tool, UIMessage } from 'ai'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { z } from 'zod'
+
+export async function POST(req: Request) {
+  const { messages }: { messages: UIMessage[] } = await req.json()
+
+  const agent = new ToolLoopAgent({
+    model: openai('gpt-5-mini'),
+    tools: {
+      // AI 工具包中的工具定义
+      ...toolDefinitions(),
+      // 自定义天气工具
+      weather: tool({
+        description: '获取某地的天气',
+        inputSchema: z.object({
+          location: z.string(),
+        }),
+        execute: async () => ({
+          temperature: 72,
+        }),
+      }),
+    },
+  })
+
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
+  })
+}
+```
+
+<Callout title="Zod 3 版本的类型错误" variant="warning">
+  如果你的应用使用了 [Zod 验证库](https://zod.dev/) 的第 3 版，可能在将工具定义传给 `generateText` 或 `streamText` 函数的 `tools` 参数时报类型错误。你可以通过升级到 Zod 4 或将工具定义类型转换为 AI SDK 的 `ToolSet` 类型来修复此问题。
+</Callout>
+
+## API 参考
+
+### `toolDefinitions`
+
+为兼容 [Vercel AI SDK](https://ai-sdk.dev/) 的 Tiptap AI 工具包创建工具定义。
+
+#### 参数（`ToolDefinitionsOptions`）
+
+- `tools?`: `EnabledTools` - 通过将值设为 `true`（启用）或 `false`（禁用）来启用/禁用特定工具。
+  - `tiptapRead?`: `boolean` - 启用/禁用 `tiptapRead` 工具（默认：`true`）
+  - `tiptapEdit?`: `boolean` - 启用/禁用 `tiptapEdit` 工具（默认：`true`）
+  - `tiptapReadSelection?`: `boolean` - 启用/禁用 `tiptapReadSelection` 工具（默认：`true`）
+  - `getThreads?`: `boolean` - 启用/禁用 `getThreads` 工具（默认：`false`）
+  - `editThreads?`: `boolean` - 启用/禁用 `editThreads` 工具（默认：`false`）
+
+#### 返回值
+
+包含已启用工具定义的对象，可用于 [Vercel AI SDK](https://ai-sdk.dev/) 的工具调用系统。完整工具列表请参阅[可用工具](/content-ai/capabilities/ai-toolkit/tools/available-tools)页面。

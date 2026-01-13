@@ -88,17 +88,18 @@ export const FloatingElementExample = () => {
 
 #### 属性说明
 
-| 名称                    | 类型                                  | 默认值                    | 说明                                                                                                                        |
-| ----------------------- | ------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `editor`                | `Editor \| null`                      | `undefined`                | 需绑定的 Tiptap 编辑器实例                                                                                                 |
-| `shouldShow`            | `boolean`                             | `undefined`                | 是否显示浮动元素的控制开关                                                                                                 |
-| `floatingOptions`       | `Partial<UseFloatingOptions>`         | `undefined`                | 传递给浮动 UI 的额外配置项                                                                                                |
-| `zIndex`                | `number`                              | `50`                       | 浮动元素的 z-index                                                                                                         |
-| `onOpenChange`          | `(open: boolean) => void`             | `undefined`                | 显示状态变化时触发的回调                                                                                                  |
-| `referenceElement`      | `HTMLElement \| null`                 | `undefined`                | 定位用的参考元素，若提供则优先于 getBoundingClientRect                                                                     |
-| `getBoundingClientRect` | `(editor: Editor) => DOMRect \| null` | `getSelectionBoundingRect` | 自定义获取浮动元素定位的函数，仅在未提供 referenceElement 时生效                                                        |
-| `closeOnEscape`         | `boolean`                             | `true`                     | 是否在按下 Esc 键时关闭浮动元素                                                                                          |
-| `children`              | `React.ReactNode`                     | `undefined`                | 浮动元素内部显示的内容                                                                                                    |
+| 名称                     | 类型                                   | 默认值                    | 说明                                                                                                                       |
+| ------------------------ | ------------------------------------ | ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `editor`                 | `Editor \| null`                     | `undefined`               | 需绑定的 Tiptap 编辑器实例                                                                                                |
+| `shouldShow`             | `boolean`                            | `undefined`               | 是否显示浮动元素的控制开关                                                                                                |
+| `floatingOptions`        | `Partial<UseFloatingOptions>`        | `undefined`               | 传递给浮动 UI 的额外配置项                                                                                               |
+| `zIndex`                 | `number`                             | `50`                      | 浮动元素的 z-index                                                                                                        |
+| `onOpenChange`           | `(open: boolean) => void`            | `undefined`               | 显示状态变化时触发的回调                                                                                                 |
+| `referenceElement`       | `HTMLElement \| null`                | `undefined`               | 定位用的参考元素，若提供则优先于 getBoundingClientRect                                                                    |
+| `getBoundingClientRect`  | `(editor: Editor) => DOMRect \| null` | `getSelectionBoundingRect`| 自定义获取浮动元素定位的函数，仅在未提供 referenceElement 时生效                                                       |
+| `closeOnEscape`          | `boolean`                            | `true`                    | 是否在按下 Esc 键时关闭浮动元素                                                                                         |
+| `resetTextSelectionOnClose` | `boolean`                        | `true`                    | 当为 `true`（默认）时，浮动元素关闭后会重置/清除编辑器的文本选区；为 `false` 则保留选区                                 |
+| `children`               | `React.ReactNode`                    | `undefined`               | 浮动元素内部显示的内容                                                                                                   |
 
 ## 高级使用示例
 

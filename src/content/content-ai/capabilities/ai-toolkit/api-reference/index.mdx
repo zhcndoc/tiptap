@@ -1,0 +1,124 @@
+---
+title: API 参考
+meta:
+  title: API 参考 | Tiptap AI 工具包
+  description: AI 工具包方法的完整 API 参考。
+  category: 内容 AI
+---
+
+import { Link } from '@/components/Link'
+
+AI 工具包提供了一组方法，它们是您的 AI 集成的构建模块。您可以从 AI 工具包实例调用这些方法：
+
+```ts
+import { Editor } from '@tiptap/core'
+import { AiToolkit, getAiToolkit } from '@tiptap-pro/ai-toolkit'
+
+// 获取 AI 工具包实例
+const editor = new Editor({ extensions: [AiToolkit] })
+const toolkit = getAiToolkit(editor)
+
+// 调用 AI 工具包方法
+const text = toolkit.getText()
+```
+
+以下是可用方法列表：
+
+<div className="grid md:grid-cols-2 gap-4 mt-6 md:items-start">
+  <Link
+    href="/content-ai/capabilities/ai-toolkit/api-reference/read-the-document"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">读取文档</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">了解更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      提取文档内容，支持 JSON、HTML 或文本格式，并支持选择、范围和分块读取。
+    </div>
+  </Link>
+  <Link
+    href="/content-ai/capabilities/ai-toolkit/api-reference/edit-the-document"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">编辑文档</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">了解更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      插入、流式传输和修补 AI 生成的内容，支持文本、HTML 或 JSON 格式，并具备审查选项。
+    </div>
+  </Link>
+  <Link
+    href="/content-ai/capabilities/ai-toolkit/api-reference/execute-tool"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">执行工具</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">了解更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      使用 AI 工具包对 Tiptap 编辑器执行 AI 代理工具调用。
+    </div>
+  </Link>
+  <Link
+    href="/content-ai/capabilities/ai-toolkit/api-reference/workflows"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">工作流</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">了解更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      AI 工具包内置工作流的 API 参考。
+    </div>
+  </Link>
+  <Link
+    href="/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">显示建议</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">了解更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      管理和渲染 AI 建议，支持预览和审核模式。
+    </div>
+  </Link>
+  <Link
+    href="/content-ai/capabilities/ai-toolkit/api-reference/compare-documents"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">比较文档</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">了解更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      实时比较文档并可视化差异。
+    </div>
+  </Link>
+  <Link
+    href="/content-ai/capabilities/ai-toolkit/api-reference/schema-awareness"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">架构感知</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">了解更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      为 AI 模型提供架构感知，使其理解节点、标记和属性。
+    </div>
+  </Link>
+  <Link
+    href="/content-ai/capabilities/ai-toolkit/api-reference/diff-utility"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">差异工具</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">了解更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      编程方式计算两个文档之间的变更。
+    </div>
+  </Link>
+</div>

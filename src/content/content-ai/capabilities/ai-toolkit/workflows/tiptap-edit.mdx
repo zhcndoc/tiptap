@@ -1,0 +1,204 @@
+---
+title: Tiptap 编辑工作流
+meta:
+  title: Tiptap 编辑工作流 | Tiptap 内容 AI
+  description: 使用 Tiptap AI 工具包构建一个通过 AI 生成内容来编辑文档的工作流。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+构建一个工作流，让 AI 以精准、高效的操作编辑你的 Tiptap 文档。
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/tiptap-edit-workflow"
+/>
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 技术栈
+
+- [React](https://react.dev/) + [Next.js](https://nextjs.org/)
+- [Vercel AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
+- Tiptap AI 工具包
+
+## 项目概览
+
+本演示使用 AI 工具包中的 Tiptap 编辑工作流，实时对文档应用编辑操作。该工作流支持替换节点、在节点前插入以及在节点后插入。
+
+## 安装
+
+创建一个 [Next.js](https://nextjs.org/) 项目：
+
+```bash
+npx create-next-app@latest tiptap-edit-workflow
+```
+
+安装核心 Tiptap 包和用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
+
+```bash
+npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/react @ai-sdk/openai zod uuid
+```
+
+安装 Tiptap AI 工具包：
+
+<Callout title="Pro 软件包" variant="hint">
+  AI 工具包是一个专业版软件包。安装前，请按照 [私有注册表指南](/guides/pro-extensions) 配置对私有 NPM 注册表的访问权限。
+</Callout>
+
+```bash
+npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
+```
+
+## 服务器设置
+
+创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型。
+
+在该 API 端点中，使用 `createTiptapEditWorkflow` 函数创建并配置 Tiptap 编辑工作流。该工作流包含了一个可直接使用的系统提示，指导 AI 模型如何生成编辑操作。
+
+此外，用户消息中需包含以下两个属性：
+
+- `nodes`：要编辑的文档节点（从 `tiptapRead` 获取）
+- `task`：由 AI 执行的任务，例如“使文本更正式”。
+
+当 AI 模型生成响应时，API 端点会将操作流式传输给客户端。
+
+```ts
+// app/api/tiptap-edit-workflow/route.ts
+import { openai } from '@ai-sdk/openai'
+import { createTiptapEditWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { Output, streamText } from 'ai'
+
+export async function POST(req: Request) {
+  const { nodes, task } = await req.json()
+
+  // 创建并配置 Tiptap 编辑工作流（默认设置）。
+  // 包含可直接使用的系统提示和输出模式。
+  const workflow = createTiptapEditWorkflow()
+
+  const result = streamText({
+    model: openai('gpt-5-mini'),
+    // 系统提示
+    system: workflow.systemPrompt,
+    // 用户消息
+    prompt: JSON.stringify({
+      nodes,
+      task,
+    }),
+    output: Output.object({ schema: workflow.zodOutputSchema }),
+    // 如果使用 gpt-5-mini，请将推理强度设置为最低以提升响应速度。
+    providerOptions: {
+      openai: {
+        reasoningEffort: 'minimal',
+      },
+    },
+  })
+
+  return result.toTextStreamResponse()
+}
+```
+
+## 客户端设置
+
+创建一个 React 组件，渲染编辑器并实时应用编辑。
+
+首先，启动编辑过程时，调用 AI 工具包的 `tiptapRead` 方法读取文档。该方法返回针对快速、精准编辑优化的内容格式。
+
+接着，调用 API 端点启动工作流。组件通过 Vercel AI SDK 的 `useObject` hook 处理流式响应，逐步接收结果并实时应用编辑。
+
+每当响应内容更新时，调用 AI 工具包的 `tiptapEditWorkflow` 方法，将编辑实时应用到文档中。编辑随接收立即生效。
+
+```tsx
+// app/tiptap-edit-workflow/page.tsx
+'use client'
+
+import { experimental_useObject as useObject } from '@ai-sdk/react'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { AiToolkit, getAiToolkit, tiptapEditWorkflowOutputSchema } from '@tiptap-pro/ai-toolkit'
+import { useEffect, useState } from 'react'
+import { v4 as uuid } from 'uuid'
+
+export default function Page() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit, AiToolkit],
+    content: `<h1>Document Editor</h1><p>This is a sample document that can be edited by AI.</p>`,
+  })
+
+  const [workflowId, setWorkflowId] = useState('')
+  const [task, setTask] = useState('使文本更正式和专业')
+
+  const { submit, isLoading, object } = useObject({
+    api: '/api/tiptap-edit-workflow',
+    schema: tiptapEditWorkflowOutputSchema,
+  })
+
+  const operations = object?.operations ?? []
+
+  // 随着分段结果到达实时流式处理
+  useEffect(() => {
+    if (!editor || operations.length === 0) return
+
+    const toolkit = getAiToolkit(editor)
+    toolkit.tiptapEditWorkflow({
+      operations,
+      workflowId,
+    })
+  }, [operations, workflowId, editor])
+
+  if (!editor) return null
+
+  const editDocument = () => {
+    const toolkit = getAiToolkit(editor)
+
+    // 获取待编辑文档的节点
+    const { nodes } = toolkit.tiptapRead()
+
+    // 每个工作流必须有唯一 ID
+    setWorkflowId(uuid())
+
+    // 调用 API 端点启动工作流
+    submit({ nodes, task })
+  }
+
+  return (
+    <div>
+      <EditorContent editor={editor} />
+
+      <input
+        type="text"
+        value={task}
+        onChange={(e) => setTask(e.target.value)}
+        placeholder="输入编辑任务..."
+      />
+
+      <button onClick={editDocument} disabled={isLoading}>
+        {isLoading ? '正在编辑...' : '编辑文档'}
+      </button>
+    </div>
+  )
+}
+```
+
+## 最终效果
+
+结合额外的 CSS 样式，结果是一个实时 AI 编辑的精致文档编辑应用：
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/tiptap-edit-workflow"
+/>
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 相关指南
+
+- [`tiptapRead` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapread)
+- [`tiptapEditWorkflow` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#tiptapeditworkflow)

@@ -1,0 +1,359 @@
+---
+title: 工作流程
+meta:
+  title: 工作流程 | Tiptap 内容 AI
+  description: AI 工具包内置工作流程的 API 参考。
+  category: 内容 AI
+---
+
+工作流程是 AI 模型执行单一且明确定义任务的场景。AI 工具包包含以下内置工作流程：
+
+- [插入内容](/content-ai/capabilities/ai-toolkit/workflows/insert-content)。
+- [校对器](/content-ai/capabilities/ai-toolkit/workflows/proofreader)。
+- [Tiptap 编辑](/content-ai/capabilities/ai-toolkit/workflows/tiptap-edit)。
+- [评论](/content-ai/capabilities/ai-toolkit/workflows/comments)。
+
+以下是支持这些内置工作流程的方法的 API 参考。
+
+## `createProofreaderWorkflow`（服务器端工具）
+
+创建一个预设的校对工作流程配置。返回一个系统提示和用于验证 AI 输出的模式。
+
+该工作流程期望用户的输入是一个 JSON 对象，包含：
+
+- `nodes`：需要校对的文档节点（详情见客户端设置章节如何获取）
+- `task`：描述待完成任务的字符串
+
+### 返回值
+
+- `systemPrompt`（`string`）：可直接使用的系统提示，指导 AI 模型如何生成校对操作
+- `zodOutputSchema`（`ZodObject`）：用于验证 AI 输出的 Zod 模式
+- `jsonOutputSchema`（`object`）：用于验证 AI 输出的 JSON 模式
+
+`systemPrompt` 字段包含一个带有合理默认值的示例提示，建议您阅读并根据需求修改。
+
+### 示例
+
+```ts
+import { createProofreaderWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { Output, streamText } from 'ai'
+import { openai } from '@ai-sdk/openai'
+
+// 从 API 端点请求中获取文档节点
+const { nodes } = apiEndpointRequest
+
+// 创建并配置工作流程
+const workflow = createProofreaderWorkflow()
+
+const result = streamText({
+  model: openai('gpt-5-mini'),
+  // 系统提示
+  system: workflow.systemPrompt,
+  // 用户消息，包含节点和任务
+  prompt: JSON.stringify({
+    nodes,
+    task: '纠正所有语法和拼写错误',
+  }),
+  output: Output.object({ schema: workflow.zodOutputSchema }),
+  // 若使用 gpt-5-mini，设置推理努力度为最小以提升响应速度
+  providerOptions: {
+    openai: {
+      reasoningEffort: 'minimal',
+    },
+  },
+})
+```
+
+## `createInsertContentWorkflow`（服务器端工具）
+
+创建一个预设的插入或替换内容工作流程配置。返回用于 AI 模型的系统提示。
+
+该工作流程期望用户的输入为包含以下属性的 JSON 对象：
+
+- `task`：待完成的任务
+- `replace`：待替换的 HTML 内容（可选）
+- `before`：插入在之前的 HTML 内容（可选）
+- `after`：插入在之后的 HTML 内容（可选）
+
+### 返回值
+
+- `systemPrompt`（`string`）：可直接使用的系统提示，指导 AI 模型如何生成 HTML 内容
+
+`systemPrompt` 字段包含一个带有合理默认值的示例提示，建议您阅读并根据需求修改。
+
+### 示例
+
+```ts
+import { createInsertContentWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { streamText } from 'ai'
+import { openai } from '@ai-sdk/openai'
+
+// 从 API 端点请求中获取任务和选区信息
+const { task, replace } = apiEndpointRequest
+
+// 创建并配置工作流程
+const workflow = createInsertContentWorkflow()
+
+const result = streamText({
+  model: openai('gpt-5-mini'),
+  // 系统提示
+  system: workflow.systemPrompt,
+  // 用户消息，包含任务和内容对象
+  prompt: JSON.stringify({
+    task,
+    replace,
+  }),
+  // 如使用 gpt-5-mini，设置推理努力度为最小提升响应速度
+  providerOptions: {
+    openai: {
+      reasoningEffort: 'minimal',
+    },
+  },
+})
+
+return result.toTextStreamResponse()
+```
+
+## `proofreaderWorkflow`
+
+将一组校对操作应用于文档。
+
+### 参数
+
+- `options`（`ProofreaderWorkflowOptions`）：配置选项
+  - `operations`（`PartialProofreaderOperation[]`）：校对操作数组。
+  - `workflowId`（`unknown`）：本次工作流程的唯一 ID。
+  - `reviewOptions?`（`ReviewOptions`）：控制预览/复核行为
+    - `mode?`（`'disabled' | 'review' | 'preview'`）：是否在应用更改前后进行复核。`'disabled'` 表示不复核，`'review'` 表示应用后复核，`'preview'` 表示应用前预览。默认：`'disabled'`
+    - `diffMode?`（`'detailed' | 'full'`）：在启用复核模式时，如何显示原始与修改内容的差异。`'detailed'` 会展示删除和新增内容的丰富细节对比，`'full'` 以整块显示删除与新增内容，视为一次整体变更。默认：`'detailed'`
+    - `displayOptions?`（`DisplayOptions<{ suggestion: Suggestion }>`）：自定义建议的展示方式
+      - `showAsDiff?`（`boolean`）：是否以差异视觉展示建议，插入内容与原内容并排显示。默认：`true`
+      - `diffPosition?`（`'before' | 'after'`）：差异展示相对于建议的位置。默认：`'before'`
+      - `attributes?`（`Record<string, any>`）：添加至建议的额外 HTML 属性
+      - `renderDecorations?`（`RenderDecorations<{ suggestion: Suggestion }>`）：将建议渲染为 ProseMirror 装饰的函数
+    - `metadata?`（`Record<string, any>`）：建议的额外元数据，用于存储额外信息（如来源或分类）。此字段由扩展内部不使用，但有助于开发者定制 UI 显示效果。
+    - `diffUtilityConfig?`（`DiffUtilityConfig`）：差异工具比较文档的选项
+      - `simplifyChanges?`（`boolean`）：是否简化更改，如将同一单词内的多个更改合并为一个。仅对 `'detailed'` 模式生效。默认：`true`
+      - `ignoreAttributes?`（`string[]`）：忽略比较的属性。默认：`['id', 'data-thread-id']`
+      - `ignoreMarks?`（`string[]`）：忽略比较的标记。默认：`['inlineThread']`
+      - `changeMergeDistance?`（`number | null`）：允许合并的相邻更改最大文档位置距离。如果两个更改的距离小于等于此值（在 rangeA 或 rangeB 中），它们将被合并。同样仅对 `'detailed'` 模式生效。设置为 `null` 或 `undefined` 禁用合并。默认：`null`
+      - `mode?`（`'detailed' | 'block'`）：差异模式。`'detailed'` 为字符级别差异（默认），`'block'` 为块级差异，将顶级节点视为单元。块模式适用于只需知晓哪些段落、标题等块级元素发生变化且不需要字符细节时。块模式下忽略 `simplifyChanges` 和 `changeMergeDistance`。默认：`'detailed'`
+  - `range?`（`Range`）：应用校对操作的范围
+    - `from`（`number`）：开始位置
+    - `to`（`number`）：结束位置
+
+### 返回值（`ProofreaderWorkflowResult`）
+
+- `doc`（`Node`）：应用操作后的修改文档
+- `operations`（`ProofreaderOperationResult[]`）：与输入操作顺序对应的操作结果数组。每项内容包括：
+  - `delete`（`string`）：被删除（或待删除）的文本
+  - `insert`（`string`）：被插入（或待插入）的文本
+  - `success`（`boolean`）：操作是否成功
+  - `error?`（`string`）：失败时的错误信息
+
+### 示例
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 获取适合 AI 快速且高效编辑的文档格式
+const { nodes } = toolkit.tiptapRead()
+
+const operations = await callApiEndpoint({ nodes })
+
+// 应用校对更正
+const result = toolkit.proofreaderWorkflow({
+  operations,
+  workflowId: 'proofread-123',
+  reviewOptions: {
+    mode: 'preview',
+  },
+})
+```
+
+## `createTiptapEditWorkflow`（服务器端工具）
+
+创建一个预设的文档编辑工作流程配置。返回系统提示和用于验证 AI 输出的模式。
+
+该工作流程期望用户的输入为 JSON 对象，包含：
+
+- `nodes`：待编辑文档的节点（来自 `tiptapRead`）
+- `task`：描述待完成编辑任务的字符串
+
+### 返回值
+
+- `systemPrompt`（`string`）：可直接使用的系统提示，指导 AI 模型如何生成编辑操作
+- `zodOutputSchema`（`ZodObject`）：用于验证 AI 输出的 Zod 模式
+- `jsonOutputSchema`（`object`）：用于验证 AI 输出的 JSON 模式
+
+### 示例
+
+```ts
+import { createTiptapEditWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { Output, streamText } from 'ai'
+import { openai } from '@ai-sdk/openai'
+
+// 从 API 端点请求中获取文档节点和任务
+const { nodes, task } = apiEndpointRequest
+
+// 创建并配置工作流程
+const workflow = createTiptapEditWorkflow()
+
+const result = streamText({
+  model: openai('gpt-5-mini'),
+  system: workflow.systemPrompt,
+  prompt: JSON.stringify({ nodes, task }),
+  output: Output.object({ schema: workflow.zodOutputSchema }),
+})
+```
+
+## `tiptapEditWorkflow`
+
+将一组编辑操作应用于文档。
+
+### 参数
+
+- `options`（`TiptapEditWorkflowOptions`）：配置选项
+  - `operations`（`PartialTiptapEditOperation[]`）：编辑操作数组。每项是元组 `[type, target, content]`：
+    - `type`：`'replace'` | `'insertBefore'` | `'insertAfter'`
+    - `target`：节点的 6 字符哈希（来自 `tiptapRead`），或 `'doc'` 表示整个文档
+    - `content`：插入的 HTML 字符串
+  - `workflowId`（`unknown`）：本次工作流程的唯一 ID
+  - `reviewOptions?`（`ReviewOptions`）：控制预览/复核行为（与 `proofreaderWorkflow` 相同选项）
+
+### 返回值（`TiptapEditWorkflowResult`）
+
+- `doc`（`Node`）：应用操作后的修改文档
+- `successful`（`string[]`）：成功处理的目标哈希数组
+- `failed`（`{ target: string; error?: string }[]`）：失败操作数组，含错误信息
+
+### 示例
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 获取带哈希的文档
+const { nodes } = toolkit.tiptapRead()
+
+const operations = await callApiEndpoint({ nodes, task: '使文本更正式' })
+
+// 应用编辑操作
+const result = toolkit.tiptapEditWorkflow({
+  operations,
+  workflowId: 'edit-123',
+  reviewOptions: {
+    mode: 'preview',
+  },
+})
+```
+
+## `createEditThreadsWorkflow`（服务器端工具）
+
+创建一个预设的评论和线程管理工作流程配置。返回系统提示和用于验证 AI 输出的模式。
+
+该工作流程期望用户的输入为 JSON 对象，包含：
+
+- `nodes`：文档节点（来自 `tiptapRead`）
+- `threads`：文档中的现有线程（来自 `getThreads`）
+- `task`：描述评论管理任务的字符串
+
+### 返回值
+
+- `systemPrompt`（`string`）：可直接使用的系统提示，指导 AI 模型如何管理评论
+- `zodOutputSchema`（`ZodObject`）：用于验证 AI 输出的 Zod 模式
+- `jsonOutputSchema`（`object`）：用于验证 AI 输出的 JSON 模式
+
+### 示例
+
+```ts
+import { createEditThreadsWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { Output, streamText } from 'ai'
+import { openai } from '@ai-sdk/openai'
+
+// 从 API 端点请求中获取节点、线程和任务
+const { nodes, threads, task } = apiEndpointRequest
+
+// 创建并配置工作流程
+const workflow = createEditThreadsWorkflow()
+
+const result = streamText({
+  model: openai('gpt-5-mini'),
+  system: workflow.systemPrompt,
+  prompt: JSON.stringify({ nodes, threads, task }),
+  output: Output.object({ schema: workflow.zodOutputSchema }),
+})
+```
+
+## `getThreads`
+
+获取文档中所有线程及其评论和位置信息。
+
+### 返回值（`GetThreadsResult`）
+
+- `threadCount`（`number`）：文档中线程数量
+- `threads`（`ThreadInfo[]`）：线程信息数组，每项包含：
+  - `id`（`string`）：线程唯一标识
+  - `comments`（`{ id: string; content: string }[]`）：线程中的评论数组
+  - `nodeRange?`（`string`）：线程所在节点范围
+  - `documentContent?`（`string`）：线程应用的 HTML 内容
+
+### 示例
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 获取文档中所有线程
+const result = toolkit.getThreads()
+
+console.log(`共找到 ${result.threadCount} 个线程`)
+
+result.threads.forEach(thread => {
+  console.log(`线程 ${thread.id}：${thread.comments.length} 条评论`)
+})
+```
+
+## `editThreadsWorkflow`
+
+将评论和线程操作应用于文档。
+
+### 参数
+
+- `options`（`EditThreadsWorkflowOptions`）：配置选项
+  - `operations`（`string[][]`）：评论操作数组，每项是元组。支持操作包括：
+    - `['createThread', nodeHash, htmlContent]`：创建线程
+    - `['createComment', threadId, content]`：向线程添加评论
+    - `['updateComment', threadId, commentId, content]`：更新评论
+    - `['removeComment', threadId, commentId]`：删除评论
+    - `['removeThread', threadId]`：删除线程
+    - `['resolveThread', threadId]`：解决线程
+    - `['unresolveThread', threadId]`：取消解决线程
+  - `commentsOptions?`（`CommentsOptions`）：评论操作的选项
+    - `threadData?`（`Record<string, any>`）：为创建的线程添加的额外元数据
+    - `commentData?`（`Record<string, any>`）：为创建的评论添加的额外元数据
+
+### 返回值（`EditThreadsWorkflowResult`）
+
+- `operations`（`EditThreadsOperationResult[]`）：操作结果数组
+- `docChanged`（`boolean`）：文档是否因操作发生变化
+- `success`（`boolean`）：所有操作是否均成功
+
+### 示例
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 获取文档和线程
+const { nodes } = toolkit.tiptapRead()
+const { threads } = toolkit.getThreads()
+
+const operations = await callApiEndpoint({ nodes, threads, task: '添加复审评论' })
+
+// 应用评论操作
+const result = toolkit.editThreadsWorkflow({
+  operations,
+})
+
+if (result.success) {
+  console.log('所有评论操作均成功完成')
+}
+```

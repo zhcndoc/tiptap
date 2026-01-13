@@ -1,0 +1,96 @@
+---
+title: 比较文档
+meta:
+  title: 比较文档 | Tiptap 内容 AI
+  description: 实时比较两个文档并可视化显示差异。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+实时比较两个文档，并在编辑器中显示差异。
+
+<CodeDemo
+  isPro
+  isLarge
+  path="/Extensions/AiToolkitCompareDocuments"
+  src="https://deploy-preview-405--tiptap-pro.netlify.app/src/Extensions/AiToolkitCompareDocuments/React/"
+/>
+
+<Callout title="适用于非 AI 场景">
+  此功能无需 AI 即可使用。它可以比较任何两个文档，无论它们是否由 AI 生成。常见用例是在 AI 编辑文档前后进行比较。详见[变更审核指南](/content-ai/capabilities/ai-toolkit/agents/review-changes-as-summary)。
+</Callout>
+
+## 指南：比较两个文档
+
+首先调用 `startComparingDocuments` 方法。它会比较编辑器当前文档与您选择的另一个文档。该方法接收一个参数：`otherDoc`，即要比较的文档。
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 开始与另一个文档比较变更
+toolkit.startComparingDocuments({
+  otherDoc,
+})
+```
+
+如果未提供 `otherDoc`，AI 工具包将从调用 `startComparingDocuments` 之时起，开始跟踪当前文档的变更，并显示变更前后的文档差异。
+
+差异会作为[建议](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions)显示在编辑器中。将以下 CSS 文件添加到您的应用中，可将建议格式化为红绿差异：
+
+```css
+/* 插入文本高亮为绿色 */
+.tiptap-ai-suggestion,
+.tiptap-ai-suggestion > * {
+  background-color: oklch(87.1% 0.15 154.449);
+}
+
+/* 删除文本高亮为红色 */
+.tiptap-ai-suggestion-diff,
+.tiptap-ai-suggestion-diff > * {
+  background-color: oklch(80.8% 0.114 19.571);
+}
+```
+
+调用 `getSuggestions` 获取文档间每个具体变更的列表，作为[建议](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions)存储。然后，可以调用 `acceptSuggestion` 或 `rejectSuggestion` 来单独接受或拒绝这些变更。
+
+```ts
+// 获取所有变更（作为建议）
+const suggestions = toolkit.getSuggestions()
+
+// 接受第一个变更
+toolkit.acceptSuggestion(suggestions[0].id)
+
+// 拒绝第一个变更
+toolkit.rejectSuggestion(suggestions[0].id)
+
+// 接受所有变更
+toolkit.acceptAllSuggestions()
+
+// 拒绝所有变更
+toolkit.rejectAllSuggestions()
+```
+
+若要停止比较文档，使用 `stopComparingDocuments` 方法。它会隐藏差异视图并清除建议。
+
+```ts
+toolkit.stopComparingDocuments()
+```
+
+## 示例演示
+
+下面是一个实时比较两个文档的演示。
+
+<CodeDemo
+  isPro
+  isLarge
+  path="/Extensions/AiToolkitCompareDocuments"
+  src="https://deploy-preview-405--tiptap-pro.netlify.app/preview/Extensions/AiToolkitCompareDocuments"
+/>
+
+尝试点击“开始比较文档”按钮，差异即会显示。然后尝试编辑文档，观察差异的变化。
+
+## 下一步
+
+- [比较文档 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/compare-documents)

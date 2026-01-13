@@ -1,0 +1,67 @@
+---
+title: 模式感知
+meta:
+  title: 模式感知 | Tiptap 内容 AI
+  description: 为 AI 模型提供模式感知，使其理解节点、标记和属性。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+Tiptap 的 [schema](/editor/core-concepts/schema) 描述了文档中可以（和不可以）包含的元素。Tiptap 的 **模式感知** 功能使 AI 模型能够更好地理解文档。
+
+<Callout title="为什么需要模式感知？" variant="default">
+  若没有模式感知，AI 模型可能生成 Tiptap 编辑器不支持的内容。例如，它可能在不支持表格的文档中生成表格。启用模式感知后，AI 模型将知道表格节点不被支持，因此不会生成它们。
+</Callout>
+
+有关集成模式感知的分步指南，请参阅 [模式感知指南](/content-ai/capabilities/ai-toolkit/advanced-guides/schema-awareness)。
+
+## API 参考
+
+## `getHtmlSchemaAwareness`
+
+返回描述文档模式的字符串。该字符串应添加到发送给 AI 模型的系统提示末尾。
+
+目前，`getHtmlSchemaAwareness` 方法仅支持生成 HTML 内容的 AI 模型。我们计划未来支持其他格式。
+
+### 参数 (`GetHtmlSchemaAwarenessOptions`)
+
+- `customNodes?` (`HtmlItem[]`): 除默认项外，还要包含的自定义模式感知项。此选项中定义的值将覆盖自定义扩展中 `addHtmlSchemaAwareness` 配置选项定义的模式感知数据，也会覆盖官方 Tiptap 扩展的模式感知数据。默认值：`[]`。
+
+每个 `HtmlItem` 对象包含以下属性：
+
+- `extensionName` (`string`): 提供该元素的[扩展名称](/editor/extensions/custom-extensions/create-new/extension#name)
+- `tag` (`string`): 此元素对应的 HTML 标签名
+- `name` (`string`): 元素的英文人类可读名称
+- `description?` (`string | null`): 对元素的解释以及它的显示方式
+- `attributes?` (`HtmlAttribute[]`): HTML 标签的可能属性。如果为 `undefined`，表示没有属性。每个 `HtmlAttribute` 对象包含以下属性：
+  - `attr` (`string`): HTML 代码中属性的名称
+  - `value?` (`string`): 若不为 `undefined`，该属性对于此元素总是该值。用于具有固定值的属性
+  - `description?` (`string | null`): 用英文对 AI 模型解释该属性
+
+### 返回值
+
+`string`：适合系统提示的人类可读的模式感知文本
+
+### 示例
+
+```ts
+// 获取模式感知字符串
+const schemaAwareness = toolkit.getHtmlSchemaAwareness()
+```
+
+## `addHtmlSchemaAwareness`（扩展配置选项）
+
+为自定义节点或标记添加模式感知信息。此选项用于配置自定义节点和标记，使 AI 模型了解它们。
+
+此配置选项适用于[自定义节点和标记扩展](/editor/extensions/custom-extensions/create-new/node)。
+
+### 参数 (`HtmlItem`)
+
+- `tag` (`string`): 此元素对应的 HTML 标签名
+- `name` (`string`): 元素的英文人类可读名称
+- `description?` (`string | null`): 对元素的解释以及它的显示方式
+- `attributes?` (`HtmlAttribute[]`): HTML 标签的可能属性。如果为 `undefined`，表示没有属性。每个 `HtmlAttribute` 对象包含以下属性：
+  - `attr` (`string`): HTML 代码中属性的名称
+  - `value?` (`string`): 若不为 `undefined`，该属性对于此元素总是该值。用于具有固定值的属性
+  - `description?` (`string | null`): 用英文对 AI 模型解释该属性

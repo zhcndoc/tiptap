@@ -8,6 +8,7 @@ meta:
 
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import Link from '@/components/Link'
 
 <Requirements>
   <RequirementItem label="1. 获取访问权限">
@@ -40,7 +41,8 @@ import StarterKit from '@tiptap/starter-kit'
 import { AiToolkit, getAiToolkit } from '@tiptap-pro/ai-toolkit'
 
 const editor = new Editor({
-  extensions: [StarterKit, AiToolkit],
+  // 添加 AI 工具包扩展
+  extensions: [AiToolkit],
 })
 
 // 获取 AI 工具包实例
@@ -49,3 +51,36 @@ const toolkit = getAiToolkit(editor)
 // 调用 AI 工具包方法
 toolkit.insertText('AI 生成的内容')
 ```
+
+恭喜！你已成功设置 AI 工具包。现在你可以开始构建你的 AI 集成了。
+
+## 下一步
+
+选择一个指南开始：
+
+<div className="grid md:grid-cols-2 gap-6 mt-6 md:items-start">
+  <Link
+    href="/content-ai/capabilities/ai-toolkit/agents/ai-agent-chatbot"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">AI 代理聊天机器人</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      构建能够编辑文档并通过聊天进行交互的对话式 AI。
+    </div>
+  </Link>
+  <Link
+    href="/content-ai/capabilities/ai-toolkit/workflows"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">工作流</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      执行简单的文档编辑任务，如插入内容、校对等。
+    </div>
+  </Link>
+</div>

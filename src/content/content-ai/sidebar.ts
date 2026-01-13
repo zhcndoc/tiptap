@@ -15,7 +15,7 @@ export const sidebarConfig: SidebarConfig = {
           href: '/content-ai/getting-started/overview',
         },
         {
-          title: 'Use cases',
+          title: '使用场景',
           href: '/content-ai/capabilities/use-cases',
         },
       ],
@@ -40,32 +40,92 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/ai-toolkit/install',
             },
             {
-              title: '实时演示',
-              href: '/content-ai/capabilities/ai-toolkit/live-demo',
-            },
-            {
-              title: '快速入门指南',
-              href: '/content-ai/capabilities/ai-toolkit/guides',
+              title: '智能代理',
+              href: '/content-ai/capabilities/ai-toolkit/agents',
               children: [
                 {
                   title: 'AI 代理聊天机器人',
-                  href: '/content-ai/capabilities/ai-toolkit/guides/ai-agent-chatbot',
+                  href: '/content-ai/capabilities/ai-toolkit/agents/ai-agent-chatbot',
                 },
                 {
-                  title: '审查更改',
-                  href: '/content-ai/capabilities/ai-toolkit/guides/review-changes',
+                  title: '审核变更',
+                  href: '/content-ai/capabilities/ai-toolkit/agents/review-changes',
                 },
                 {
-                  title: '作为摘要审查',
-                  href: '/content-ai/capabilities/ai-toolkit/guides/review-changes-as-summary',
+                  title: '变更摘要审核',
+                  href: '/content-ai/capabilities/ai-toolkit/agents/review-changes-as-summary',
                 },
                 {
-                  title: '工具流',
-                  href: '/content-ai/capabilities/ai-toolkit/guides/tool-streaming',
+                  title: '工具流式处理',
+                  href: '/content-ai/capabilities/ai-toolkit/agents/tool-streaming',
                 },
                 {
-                  title: '内联编辑',
-                  href: '/content-ai/capabilities/ai-toolkit/guides/inline-edits',
+                  title: '添加评论',
+                  href: '/content-ai/capabilities/ai-toolkit/agents/comments',
+                },
+                {
+                  title: '多文档处理',
+                  href: '/content-ai/capabilities/ai-toolkit/agents/multi-document',
+                },
+                {
+                  title: '选区感知',
+                  href: '/content-ai/capabilities/ai-toolkit/agents/selection-awareness',
+                },
+                {
+                  title: '模式感知',
+                  href: '/content-ai/capabilities/ai-toolkit/agents/schema-awareness',
+                },
+                {
+                  title: '工具定义',
+                  href: '/content-ai/capabilities/ai-toolkit/agents/tools',
+                  children: [
+                    {
+                      title: 'Vercel AI 开发工具包',
+                      href: '/content-ai/capabilities/ai-toolkit/agents/tools/ai-sdk',
+                    },
+                    {
+                      title: 'LangChain.js 框架',
+                      href: '/content-ai/capabilities/ai-toolkit/agents/tools/langchain-js',
+                    },
+                    {
+                      title: 'OpenAI 服务',
+                      href: '/content-ai/capabilities/ai-toolkit/agents/tools/openai',
+                    },
+                    {
+                      title: 'Anthropic 服务',
+                      href: '/content-ai/capabilities/ai-toolkit/agents/tools/anthropic',
+                    },
+                    {
+                      title: 'Mastra 服务',
+                      href: '/content-ai/capabilities/ai-toolkit/agents/tools/mastra',
+                    },
+                    {
+                      title: '其他服务商',
+                      href: '/content-ai/capabilities/ai-toolkit/agents/tools/other-providers',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              title: '工作流',
+              href: '/content-ai/capabilities/ai-toolkit/workflows',
+              children: [
+                {
+                  title: '插入内容',
+                  href: '/content-ai/capabilities/ai-toolkit/workflows/insert-content',
+                },
+                {
+                  title: '校对工具',
+                  href: '/content-ai/capabilities/ai-toolkit/workflows/proofreader',
+                },
+                {
+                  title: 'Tiptap 编辑',
+                  href: '/content-ai/capabilities/ai-toolkit/workflows/tiptap-edit',
+                },
+                {
+                  title: '评论功能',
+                  href: '/content-ai/capabilities/ai-toolkit/workflows/comments',
                 },
               ],
             },
@@ -74,96 +134,80 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/ai-toolkit/advanced-guides',
               children: [
                 {
+                  title: '在线演示',
+                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/live-demo',
+                },
+                {
                   title: 'AI 工程指南',
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/ai-engineering',
                 },
                 {
-                  title: '添加评论',
-                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/comments',
-                },
-                {
-                  title: '多文档 AI 代理',
-                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/multi-document',
-                },
-                {
-                  title: '校对员',
-                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/proofreader',
-                },
-                {
-                  title: '选择感知',
-                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/selection-awareness',
-                },
-                {
-                  title: '风格建议',
+                  title: '样式建议',
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/style-suggestions',
+                },
+                {
+                  title: '文档对比',
+                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/compare-documents',
+                },
+                {
+                  title: '迁移指南',
+                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/migration-guides',
+                  children: [
+                    {
+                      title: 'AI 生成功能',
+                      href: '/content-ai/capabilities/ai-toolkit/advanced-guides/migration-guides/ai-generation',
+                    },
+                    {
+                      title: 'AI 建议功能',
+                      href: '/content-ai/capabilities/ai-toolkit/advanced-guides/migration-guides/ai-suggestion',
+                    },
+                    {
+                      title: 'AI 变更功能',
+                      href: '/content-ai/capabilities/ai-toolkit/advanced-guides/migration-guides/ai-changes',
+                    },
+                    {
+                      title: 'AI 助手功能',
+                      href: '/content-ai/capabilities/ai-toolkit/advanced-guides/migration-guides/ai-assistant',
+                    },
+                  ],
                 },
               ],
             },
             {
-              title: '原语',
-              href: '/content-ai/capabilities/ai-toolkit/primitives',
+              title: 'API 参考文档',
+              href: '/content-ai/capabilities/ai-toolkit/api-reference',
               children: [
                 {
-                  title: '执行工具（AI 代理）',
-                  href: '/content-ai/capabilities/ai-toolkit/primitives/execute-tool',
-                },
-                {
-                  title: '阅读文档',
-                  href: '/content-ai/capabilities/ai-toolkit/primitives/read-the-document',
+                  title: '读取文档',
+                  href: '/content-ai/capabilities/ai-toolkit/api-reference/read-the-document',
                 },
                 {
                   title: '编辑文档',
-                  href: '/content-ai/capabilities/ai-toolkit/primitives/edit-the-document',
+                  href: '/content-ai/capabilities/ai-toolkit/api-reference/edit-the-document',
+                },
+                {
+                  title: '工具执行',
+                  href: '/content-ai/capabilities/ai-toolkit/api-reference/execute-tool',
+                },
+                {
+                  title: '工作流',
+                  href: '/content-ai/capabilities/ai-toolkit/api-reference/workflows',
                 },
                 {
                   title: '模式感知',
-                  href: '/content-ai/capabilities/ai-toolkit/primitives/schema-awareness',
+                  href: '/content-ai/capabilities/ai-toolkit/api-reference/schema-awareness',
                 },
                 {
                   title: '显示建议',
-                  href: '/content-ai/capabilities/ai-toolkit/primitives/display-suggestions',
+                  href: '/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions',
                 },
                 {
-                  title: '比较文档',
-                  href: '/content-ai/capabilities/ai-toolkit/primitives/compare-documents',
+                  title: '文档对比',
+                  href: '/content-ai/capabilities/ai-toolkit/api-reference/compare-documents',
                 },
                 {
-                  title: 'Diff 工具',
-                  href: '/content-ai/capabilities/ai-toolkit/primitives/diff-utility',
-                },
-              ],
-            },
-            {
-              title: 'AI 代理工具',
-              href: '/content-ai/capabilities/ai-toolkit/tools',
-              children: [
-                {
-                  title: '可用工具',
-                  href: '/content-ai/capabilities/ai-toolkit/tools/available-tools',
-                },
-                {
-                  title: 'Vercel AI SDK',
-                  href: '/content-ai/capabilities/ai-toolkit/tools/ai-sdk',
-                },
-                {
-                  title: 'LangChain.js',
-                  href: '/content-ai/capabilities/ai-toolkit/tools/langchain-js',
-                },
-                {
-                  title: 'OpenAI',
-                  href: '/content-ai/capabilities/ai-toolkit/tools/openai',
-                },
-                {
-                  title: 'Anthropic',
-                  href: '/content-ai/capabilities/ai-toolkit/tools/anthropic',
-                },
-                {
-                  title: 'Mastra',
-                  href: '/content-ai/capabilities/ai-toolkit/tools/mastra',
-                },
-                {
-                  title: 'Other providers',
-                  href: '/content-ai/capabilities/ai-toolkit/tools/other-providers',
+                  title: '差异对比工具',
+                  href: '/content-ai/capabilities/ai-toolkit/api-reference/diff-utility',
                 },
               ],
             },
@@ -172,57 +216,35 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/ai-toolkit/changelog',
               children: [
                 {
-                  title: 'AI Toolkit',
+                  title: 'AI 工具包',
                   href: '/content-ai/capabilities/ai-toolkit/changelog/ai-toolkit',
                 },
                 {
-                  title: 'AI SDK tools',
+                  title: 'AI SDK 工具',
                   href: '/content-ai/capabilities/ai-toolkit/changelog/ai-toolkit-ai-sdk',
                 },
                 {
-                  title: 'LangChain.js tools',
+                  title: 'LangChain.js 工具',
                   href: '/content-ai/capabilities/ai-toolkit/changelog/ai-toolkit-langchain',
                 },
                 {
-                  title: 'OpenAI tools',
+                  title: 'OpenAI 工具',
                   href: '/content-ai/capabilities/ai-toolkit/changelog/ai-toolkit-openai',
                 },
                 {
-                  title: 'Anthropic tools',
+                  title: 'Anthropic 工具',
                   href: '/content-ai/capabilities/ai-toolkit/changelog/ai-toolkit-anthropic',
                 },
                 {
-                  title: 'Tool definitions',
+                  title: '工具定义',
                   href: '/content-ai/capabilities/ai-toolkit/changelog/ai-toolkit-tool-definitions',
-                },
-              ],
-            },
-            {
-              title: '迁移指南',
-              href: '/content-ai/capabilities/ai-toolkit/migration-guides',
-              children: [
-                {
-                  title: 'AI Generation',
-                  href: '/content-ai/capabilities/ai-toolkit/migration-guides/ai-generation',
-                },
-                {
-                  title: 'AI Suggestion',
-                  href: '/content-ai/capabilities/ai-toolkit/migration-guides/ai-suggestion',
-                },
-                {
-                  title: 'AI Changes',
-                  href: '/content-ai/capabilities/ai-toolkit/migration-guides/ai-changes',
-                },
-                {
-                  title: 'AI Assistant',
-                  href: '/content-ai/capabilities/ai-toolkit/migration-guides/ai-assistant',
                 },
               ],
             },
           ],
         },
         {
-          title: 'Server AI Toolkit',
+          title: '服务端 AI 工具包',
           href: '/content-ai/capabilities/server-ai-toolkit/overview',
           tags: ['Alpha'],
         },
@@ -278,7 +300,7 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/generation/image-generation',
             },
             {
-              title: '集成你的 LLM',
+              title: '集成你的大语言模型',
               href: '/content-ai/capabilities/generation/custom-llms',
             },
             {

@@ -1,0 +1,55 @@
+---
+title: 其他提供商
+meta:
+  title: AI 代理工具 — 其他提供商 | Tiptap 内容 AI
+  description: 使用工具定义输出构建适配其他 AI 提供商或语言的适配器。
+  category: 内容 AI
+---
+
+Tiptap AI 工具包提供了最流行的 AI 提供商库的工具定义，例如 [Vercel 的 AI SDK](https://ai-sdk.dev/)。如果您的 AI 提供商尚未支持，[请联系 Tiptap 团队](mailto:humans@tiptap.dev) 提出您的需求。
+
+另一种选择是获取所有工具定义作为 JSON 对象，并将其转换为您 AI 提供商的格式。如果您是用其他语言（例如 Python）构建的 AI 代理，想要使用 Tiptap AI 工具包的工具定义，这种方法非常有用。
+
+## 获取工具定义
+
+首先，为 Tiptap 的私有 npm 注册表配置身份验证。请按照[私有注册表指南](/guides/pro-extensions)设置 `.npmrc` 文件并添加您的访问令牌。
+
+认证完成后，在包含 `.npmrc` 的目录下运行此 shell 脚本：
+
+```bash
+ORIG_DIR=$(pwd) && cd $(mktemp -d) && cp $ORIG_DIR/.npmrc . && \
+  npm init -y && \
+  npm install @tiptap-pro/ai-toolkit-tool-definitions && \
+  node --input-type=module -e \
+    "import {toolDefinitions} from '@tiptap-pro/ai-toolkit-tool-definitions'; \
+    console.log(JSON.stringify(toolDefinitions(), null, 2))" \
+  > "$ORIG_DIR/tool-definitions.json" && \
+  cd $ORIG_DIR
+```
+
+该脚本会创建一个包含工具定义的 `tool-definitions.json` 文件。每个工具定义是一个包含以下属性的对象：
+
+- `name`：工具名称。它是该工具的唯一标识符。
+- `description`：工具描述。供 AI 模型读取。
+- `inputSchema`：一个描述工具输入参数的 [JSON schema](https://json-schema.org/)。
+
+使用此数据以您的 AI 提供商格式构建工具定义。
+
+## API 参考
+
+### `toolDefinitions`
+
+以通用格式创建 Tiptap AI 工具包的工具定义，可转换为任何 AI 提供商的格式。
+
+#### 参数 (`ToolDefinitionsOptions`)
+
+- `tools?`: `EnabledTools` - 通过将值设置为 `true`（启用）或 `false`（禁用）来启用或禁用特定工具。
+  - `tiptapRead?`: `boolean` - 启用/禁用 `tiptapRead` 工具（默认：`true`）
+  - `tiptapEdit?`: `boolean` - 启用/禁用 `tiptapEdit` 工具（默认：`true`）
+  - `tiptapReadSelection?`: `boolean` - 启用/禁用 `tiptapReadSelection` 工具（默认：`true`）
+  - `getThreads?`: `boolean` - 启用/禁用 `getThreads` 工具（默认：`false`）
+  - `editThreads?`: `boolean` - 启用/禁用 `editThreads` 工具（默认：`false`）
+
+#### 返回值
+
+返回包含启用工具定义的数组，格式为通用格式。每个工具定义都是包含 `name`、`description` 和 `inputSchema` 属性的对象。要查看完整工具列表，请参见 [可用工具](/content-ai/capabilities/ai-toolkit/agents/tools/available-tools) 页面。

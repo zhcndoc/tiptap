@@ -37,6 +37,18 @@ tags:
 
 默认：`(props: { editor: Editor; state: EditorState; range: Range, isActive?: boolean }) => true`
 
+### shouldShow
+
+一个返回布尔值的函数，用于指示建议是否应处于激活状态。这对于防止在协作环境中远程用户触发建议弹窗非常有用。
+
+```js
+shouldShow: ({ editor, range, query, text, transaction }) => {
+  return isChangeOrigin(transaction)
+}
+```
+
+默认：`null`
+
 ### allowSpaces
 
 允许或不允许建议项目中出现空格。
@@ -121,6 +133,25 @@ exitSuggestion(editor.view, MySuggestionPluginKey)
 // 或者，使用默认的插件 key：
 // exitSuggestion(editor.view, 'suggestion')
 ```
+
+## Collaboration
+
+当在协作环境中使用 Tiptap 时，你可能会注意到当某个用户触发建议（如提及）时，建议会对所有用户弹出。这是因为文档更改被同步到所有客户端，每个客户端的建议插件都会对该更改作出反应。
+
+为防止这种情况，可以使用 `shouldShow` 选项结合来自 `@tiptap/extension-collaboration` 的 `isChangeOrigin` 辅助函数。
+
+```js
+import { isChangeOrigin } from '@tiptap/extension-collaboration'
+
+Suggestion({
+  // …
+  shouldShow: ({ transaction }) => {
+    return isChangeOrigin(transaction)
+  },
+})
+```
+
+通过返回 `isChangeOrigin(props.transaction)`，建议仅在当前用户发起更改时激活。
 
 ## 源代码
 

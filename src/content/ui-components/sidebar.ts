@@ -22,6 +22,10 @@ export const sidebarConfig: SidebarConfig = {
           title: 'CLI',
           href: '/ui-components/getting-started/cli',
         },
+        {
+          href: '/ui-components/getting-started/changelog',
+          title: 'Changelog',
+        },
       ],
     },
     {
@@ -284,6 +288,10 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: 'Table node',
               href: '/ui-components/node-components/table-node',
+            },
+            {
+              title: 'Table of contents node',
+              href: '/ui-components/node-components/table-of-contents-node',
             },
           ],
         },

@@ -1,0 +1,222 @@
+---
+title: 校对工作流程
+meta:
+  title: 使用 AI Toolkit 构建校对工具 | Tiptap Content AI
+  description: 使用 Tiptap AI Toolkit 构建一个能够检测并纠正文档拼写错误的校对工具。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+构建一个能够检测并纠正文档中拼写错误的校对工具。
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/proofreader" />
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 技术栈
+
+- [React](https://react.dev/) + [Next.js](https://nextjs.org/)
+- [Vercel 提供的 AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
+- Tiptap AI Toolkit
+
+## 项目概述
+
+此演示使用 AI Toolkit 的校对工作流程，实时对文档进行一系列小幅度的编辑。
+
+## 安装
+
+创建一个 [Next.js](https://nextjs.org/) 项目：
+
+```bash
+npx create-next-app@latest proofreader
+```
+
+安装核心 Tiptap 包和适用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
+
+```bash
+npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/react @ai-sdk/openai zod uuid
+```
+
+安装 Tiptap AI Toolkit：
+
+<Callout title="专业版包" variant="hint">
+  AI Toolkit 是一个专业版包。安装前，请按照[私有注册表指南](/guides/pro-extensions)配置私有 NPM 注册表的访问权限。
+</Callout>
+
+```bash
+npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
+```
+
+## 服务器设置
+
+创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型。
+
+在 API 端点内，使用 `createProofreaderWorkflow` 函数创建并配置校对工作流程。该工作流程包含一个可直接使用的系统提示，指导 AI 模型如何生成内容。
+
+此外，需要在用户消息中包含以下两个属性：
+
+- `nodes`：待校对文档的节点（详见客户端设置部分，如何获取这些节点）
+- `task`：AI 要执行的任务，例如 `Correct all grammar and spelling mistakes`（纠正所有语法和拼写错误）。
+
+当 AI 模型生成响应时，API 端点会将建议流式传输给客户端。
+
+```ts
+// app/api/proofreader/route.ts
+import { openai } from '@ai-sdk/openai'
+import { createProofreaderWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { Output, streamText } from 'ai'
+
+export async function POST(req: Request) {
+  const { nodes } = await req.json()
+
+  // 创建并配置校对工作流程（使用默认设置）。
+  // 其中包含可直接使用的系统提示和输出模式。
+  const workflow = createProofreaderWorkflow()
+
+  const result = streamText({
+    model: openai('gpt-5-mini'),
+    // 系统提示
+    system: workflow.systemPrompt,
+    // 用户消息
+    prompt: JSON.stringify({
+      nodes,
+      task: 'Correct all grammar and spelling mistakes',
+    }),
+    output: Output.object({ schema: workflow.zodOutputSchema }),
+    // 如果使用 gpt-5-mini，设置 reasoningEffort 为 minimal 以提升响应速度。
+    providerOptions: {
+      openai: {
+        reasoningEffort: 'minimal',
+      },
+    },
+  })
+
+  return result.toTextStreamResponse()
+}
+```
+
+## 客户端设置
+
+创建一个 React 组件，渲染编辑器并实时应用编辑。
+
+首先，在开始校对流程时，调用 AI Toolkit 的 `tiptapRead` 方法读取文档。该方法返回一种针对快速、精准编辑优化的内容格式。
+
+接着，调用 API 端点开始工作流程。组件利用 Vercel AI SDK 的 `useObject` hook 处理流式响应，从而边接收响应边实时应用编辑。
+
+每当响应发生变化时，调用 AI Toolkit 的 `proofreaderWorkflow` 方法实时将编辑应用到文档。
+
+选项 `mode: 'preview'` 允许在编辑实际应用到文档前预览编辑内容。否则，所有编辑会立即应用，不显示预览。
+
+```tsx
+// app/proofreader/page.tsx
+'use client'
+
+import { experimental_useObject as useObject } from '@ai-sdk/react'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { AiToolkit, getAiToolkit, proofreaderWorkflowOutputSchema } from '@tiptap-pro/ai-toolkit'
+import { useEffect, useRef, useState } from 'react'
+import { v4 as uuid } from 'uuid'
+
+export default function Page() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit, AiToolkit],
+    content: `<h1>语法检查演示</h1><p>This is a excelent editor for writng documents. It have many feature's that makes it very powerfull.</p>`,
+  })
+
+  const [isReviewing, setIsReviewing] = useState(false)
+  const [workflowId, setWorkflowId] = useState('')
+
+  const { submit, isLoading, object } = useObject({
+    api: '/api/proofreader',
+    schema: proofreaderWorkflowOutputSchema,
+    onFinish: () => {
+      setIsReviewing(true)
+    },
+  })
+
+  const operations = object?.operations ?? []
+
+  // 实时处理流式到达的部分结果
+  useEffect(() => {
+    if (!editor || !operations) return
+
+    const toolkit = getAiToolkit(editor)
+    toolkit.proofreaderWorkflow({
+      operations,
+      workflowId,
+      reviewOptions: {
+        mode: 'preview',
+      },
+    })
+  }, [operations, workflowId, editor])
+
+  if (!editor) return null
+
+  const checkGrammar = () => {
+    const toolkit = getAiToolkit(editor)
+
+    // 获取待校对文档的节点
+    const { nodes } = toolkit.tiptapRead()
+
+    // 每个工作流程必须有唯一 ID
+    setWorkflowId(uuid())
+
+    // 调用 API 端点开始工作流程
+    submit({ nodes })
+  }
+
+  return (
+    <div>
+      <EditorContent editor={editor} />
+
+      {!isReviewing && (
+        <button onClick={checkGrammar} disabled={isLoading}>
+          {isLoading ? '检测中...' : '检查语法'}
+        </button>
+      )}
+
+      {isReviewing && (
+        <div>
+          <p>文档中的更正已高亮显示。</p>
+          <button
+            onClick={() => {
+              const toolkit = getAiToolkit(editor)
+              toolkit.acceptAllSuggestions()
+              setIsReviewing(false)
+            }}
+          >
+            全部接受
+          </button>
+          <button
+            onClick={() => {
+              const toolkit = getAiToolkit(editor)
+              toolkit.rejectAllSuggestions()
+              setIsReviewing(false)
+            }}
+          >
+            全部拒绝
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+## 最终效果
+
+通过额外的 CSS 样式，最终呈现的是一个具备实时语法检查功能的精美校对应用：
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/proofreader" />
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 相关指南
+
+- [`tiptapRead` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapread)
+- [`proofreaderWorkflow` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#proofreaderworkflow)
+- [显示建议](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions)：了解如何审阅文档并在编辑器中显示建议。

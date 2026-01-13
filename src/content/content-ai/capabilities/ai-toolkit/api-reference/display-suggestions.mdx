@@ -1,0 +1,494 @@
+---
+title: 显示建议
+meta:
+  title: 显示建议 | Tiptap 内容 AI
+  description: 管理和呈现具有预览和审核模式的 AI 建议。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+建议用于显示 AI 代理对文档所做的更改。每个建议包含以下数据：
+
+- 已更改文档的范围
+- 应该在该范围内插入的新内容。此内容可以采用不同格式，如 HTML、JSON 或纯文本。对于同一范围也可以有多个替换选项，用户可以选择使用哪一个。
+
+## `Suggestion` 对象
+
+`Suggestion` 代表对编辑器中内容范围的提议更改，通常由 AI 代理生成。它允许预览、审核和应用更改，并且可以包含多个替换选项。
+
+### 属性
+
+- `id` (`string`): 建议的唯一标识符。
+- `range` (`Range`): 建议应用于编辑器中文本的范围。
+- `rangeInOtherDoc?` (`Range`): 如果此 `Suggestion` 是通过比较当前文档与另一个文档生成的，则此属性包含另一个文档中变更（`Change`）的范围。
+- `replacementOptions` (`ReplacementOption[]`): 针对选中范围的一个或多个可能替换方案。用户可以选择应用哪个方案。每个 `ReplacementOption` 可以是以下类型之一：
+  - **SliceReplacementOption** (`type: 'slice'`):
+    - `id` (`string`): 此替换选项的唯一标识符。
+    - `type` (`'slice'`): 表示这是一个 Slice 替换。
+    - `addSlice` (`Slice`): 作为替换内容插入的 ProseMirror `Slice` 对象。
+    - `metadata?` (`Record<string, any>`): 该替换选项的可选额外元数据（例如，来源，类别）。
+  - **TextReplacementOption** (`type: 'text'`):
+    - `id` (`string`): 此替换选项的唯一标识符。
+    - `type` (`'text'`): 表示这是一个文本替换。
+    - `addText` (`string`): 作为替换内容插入的纯文本。
+    - `metadata?` (`Record<string, any>`): 该替换选项的可选额外元数据（例如，来源，类别）。
+- `displayOptions?` (`DisplayOptions`): 可选的显示设置，用于控制建议如何在编辑器 UI 中呈现。
+  - `showAsDiff?` (`boolean`): 是否以差异小部件形式显示替代内容。默认：`true`。
+  - `diffPosition?` (`'before' | 'after'`): 如何相对于建议显示差异。默认：`'before'`。
+  - `attributes?` (`Record<string, any>`): 添加到呈现元素的属性
+  - `diffAttributes?` (`Record<string, any>`): 额外添加到建议差异装饰的 HTML 属性
+  - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 自定义渲染函数。默认渲染为差异显示。
+- `reviewMode?` (`'preview' | 'review'`): 建议的审核模式。`'preview'` 表示建议是应用更改前的预览（默认）；`'review'` 表示建议是已经做出的更改的审核，用户可以通过应用该建议撤销更改。此字段在创建建议时根据 `reviewOptions.mode` 自动设置。
+- `metadata?` (`Record<string, any>`): 建议的可选额外元数据。可用来存储附加信息，如来源、类别或任何自定义数据。该属性不被扩展内部使用，但可用于自定义 UI 渲染。
+
+## 样式建议
+
+了解更多关于如何自定义建议外观的内容，请查阅 [样式建议指南](/content-ai/capabilities/ai-toolkit/advanced-guides/style-suggestions)。
+
+## `getSuggestions`
+
+返回当前所有建议。
+
+### 返回类型 (`Suggestion[]`)
+
+- `Suggestion[]`: 活跃的建议列表。
+
+### 示例
+
+```ts
+// 获取所有活跃建议
+const suggestions = toolkit.getSuggestions()
+```
+
+## `getSelectedSuggestion`
+
+返回当前选中的建议。
+
+当光标（`editor.state.selection.head`）位于建议范围内时，该建议被视为“已选中”。
+
+### 返回类型 (`Suggestion | null`)
+
+- `Suggestion | null`: 当前选中的建议，若无选中则返回 `null`。
+
+### 示例
+
+```ts
+// 获取当前选中的建议
+const selectedSuggestion = toolkit.getSelectedSuggestion()
+```
+
+## `setSuggestions` / `addSuggestions`
+
+替换或追加建议。
+
+### 参数
+
+- `inputs` (`SuggestionsFormat[]`): 一组建议，格式可以是以下之一：
+  - `suggestions`: 直接的建议列表
+  - `compareDocuments`: 通过比较当前文档和另一个文档生成的建议列表
+
+如果生成的两个建议范围重叠，则只显示列表中的第一个建议，第二个将被忽略。由于 ProseMirror 装饰渲染引擎的限制，建议不允许范围重叠。
+
+#### `suggestions` 格式
+
+- `type` (`string`): `'suggestions'`
+- `suggestions` (`Suggestion[]`): 直接建议数组
+
+#### `compareDocuments` 格式
+
+- `type` (`string`): `'compareDocuments'`
+- `doc` (`Node`): 用于比较的文档
+- `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义渲染选项
+  - `showAsDiff?` (`boolean`): 是否以差异小部件显示替代内容，默认：`true`。
+  - `diffPosition?` (`'before' | 'after'`): 相对于建议显示差异的位置，默认：`'before'`。
+  - `attributes?` (`Record<string, any>`): 添加到渲染元素的属性
+  - `diffAttributes?` (`Record<string, any>`): 额外添加到建议差异装饰的 HTML 属性
+  - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 自定义渲染函数，默认呈现为差异。
+- `metadata?` (`Record<string, any>`): 建议的额外元数据，用以存储附加信息（如来源、类别）。该属性不被 AI Toolkit 扩展内部使用，但有助于开发者自定义 UI 中建议的展示方式。
+- `diffUtilityConfig?` (`DiffUtilityConfig`): 差异工具的对比参数
+  - `simplifyChanges?` (`boolean`): 是否简化变更。如果为 `true`，相邻两处对同一词的变更会合并成一个。仅对 `detailed` 模式有效。默认：`true`
+  - `ignoreAttributes?` (`string[]`): 要忽略的属性。默认：`['id', 'data-thread-id']`
+  - `ignoreMarks?` (`string[]`): 要忽略的标记。默认：`['inlineThread']`
+  - `changeMergeDistance?` (`number | null`): 两个变更合并的最大文档位置距离。如果相邻的两个变更在范围 A 或 B 中距离小于或等于该值，则合并为单个变更。设置为 `null` 或 `undefined` 禁用合并。仅对 `detailed` 模式有效。默认：`null`
+  - `mode?` (`'detailed' | 'block'`): 对比模式。`'detailed'` 执行字符级差异（默认），`'block'` 按顶级节点块级别比较。块级模式忽略 `simplifyChanges` 和 `changeMergeDistance`。默认：`'detailed'`
+
+<Callout title="模式问题" variant="warning">
+  参数 `doc` 必须与当前文档具有相同的 schema。如果 `doc` 来源于另一个编辑器，请先将其转换为目标编辑器的 schema：`doc: Node.fromJSON(editor.state.schema, otherEditor.getJSON())`
+</Callout>
+
+### 返回值
+
+`void`
+
+### 示例
+
+```ts
+// 设置直接建议
+toolkit.setSuggestions([{ type: 'suggestions', suggestions: [] }])
+```
+
+## `acceptSuggestion`
+
+应用特定建议。
+
+该方法适用于常规建议以及来自 [比较文档](/content-ai/capabilities/ai-toolkit/api-reference/compare-documents) 功能的变更。
+
+### 参数
+
+- `suggestionId` (`string`): 要应用的建议 ID
+- `options?` (`AcceptSuggestionOptions`): `acceptSuggestion` 方法的选项
+  - `replacementOptionId?` (`string`): 要应用的替换选项 ID。如果不指定，默认应用第一个替换选项。
+
+### 返回值
+
+`AcceptSuggestionResult`
+
+返回一个对象，包含：
+
+- `aiFeedback` (`{ events: SuggestionFeedbackEvent[] }`): AI 反馈，包含所接受建议的事件。每个事件包括：
+  - `delete` (`string`): 被删除（或将被删除）的 HTML 内容
+  - `insert` (`string`): 被插入（或将被插入）的 HTML 内容或文本
+  - `accepted` (`boolean`): 用户是否接受该建议（`true`）或拒绝（`false`）
+
+该反馈可用于告知 AI 用户接受或拒绝了哪些更改。
+
+### 示例
+
+```ts
+// 按 ID 应用建议并获取反馈
+const result = toolkit.acceptSuggestion('suggestion-1')
+result.aiFeedback.events
+```
+
+## `acceptAllSuggestions`
+
+一次性应用所有活跃建议。
+
+此方法将所有建议的范围内容替换为其第一个替换选项，应用后清空活跃建议列表。
+
+该方法适用于常规建议以及来自 [比较文档](/content-ai/capabilities/ai-toolkit/api-reference/compare-documents) 功能的变更。
+
+### 参数
+
+无
+
+### 返回值
+
+`AcceptAllSuggestionsResult`
+
+返回一个对象，包含：
+
+- `aiFeedback` (`{ events: SuggestionFeedbackEvent[] }`): AI 反馈，包含所有被接受建议的事件。每个事件包括：
+  - `delete` (`string`): 被删除（或将被删除）的 HTML 内容
+  - `insert` (`string`): 被插入（或将被插入）的 HTML 内容或文本
+  - `accepted` (`boolean`): 用户是否接受该建议（`true`）或拒绝（`false`）
+
+该反馈可用于告知 AI 用户接受了哪些更改。
+
+### 示例
+
+```ts
+// 一次性应用所有建议并获取反馈
+const result = toolkit.acceptAllSuggestions()
+result.aiFeedback.events
+```
+
+## `rejectSuggestion`
+
+拒绝特定建议，且不应用该建议。
+
+该方法从活跃建议列表中移除建议，不会对文档做出修改。它会返回关于拒绝内容的反馈。
+
+该方法适用于常规建议以及来自 [比较文档](/content-ai/capabilities/ai-toolkit/api-reference/compare-documents) 功能的变更。
+
+### 参数
+
+- `suggestionId` (`string`): 要拒绝的建议
+
+### 返回值
+
+`RejectSuggestionResult`
+
+返回一个对象，包含：
+
+- `aiFeedback` (`{ events: SuggestionFeedbackEvent[] }`): AI 反馈，包含被拒绝建议的事件。每个事件包括：
+  - `delete` (`string`): 被删除（或将被删除）的 HTML 内容
+  - `insert` (`string`): 被插入（或将被插入）的 HTML 内容或文本
+  - `accepted` (`boolean`): 用户是否接受该建议（`true`）或拒绝（`false`）
+
+该反馈可用于告知 AI 用户拒绝了哪些更改。
+
+### 示例
+
+```ts
+// 按 ID 拒绝建议并获取反馈
+const result = toolkit.rejectSuggestion('suggestion-1')
+result.aiFeedback.events
+```
+
+## `rejectAllSuggestions`
+
+拒绝所有活跃建议，且不应用它们。
+
+该方法从活跃建议列表中移除所有建议，不会对文档做出修改。它会返回关于拒绝内容的反馈。
+
+该方法适用于常规建议以及来自 [比较文档](/content-ai/capabilities/ai-toolkit/api-reference/compare-documents) 功能的变更。
+
+### 参数
+
+无
+
+### 返回值
+
+`RejectAllSuggestionsResult`
+
+返回一个对象，包含：
+
+- `aiFeedback` (`{ events: SuggestionFeedbackEvent[] }`): AI 反馈，包含所有被拒绝建议的事件。每个事件包括：
+  - `delete` (`string`): 被删除（或将被删除）的 HTML 内容
+  - `insert` (`string`): 被插入（或将被插入）的 HTML 内容或文本
+  - `accepted` (`boolean`): 用户是否接受该建议（`true`）或拒绝（`false`）
+
+该反馈可用于告知 AI 用户拒绝了哪些更改。
+
+### 示例
+
+```ts
+// 拒绝所有建议并获取反馈
+const result = toolkit.rejectAllSuggestions()
+result.aiFeedback.events
+```
+
+## `removeSuggestion`
+
+移除特定建议。
+
+### 参数
+
+- `suggestionId` (`string`)
+
+### 返回值
+
+`void`
+
+### 示例
+
+```ts
+// 按 ID 移除建议
+toolkit.removeSuggestion('suggestion-1')
+```
+
+## `setHtmlSuggestions`
+
+通过比较纠正后的 HTML 与当前文档内容，加载 AI 驱动的建议。此方法适合集成返回纠正文本文本或 HTML 的 AI 接口。
+
+支持两种输入格式：
+
+1. **完整文档格式**：提供纠正后的文档，toolkit 自动计算差异
+2. **变更格式**：提供一组具体的文本替换（删除/插入对）
+
+该方法基于 diff 识别更改并在适当文档位置生成建议。
+
+### 参数
+
+- `options` (`SetHtmlSuggestionsOptions`): 配置项
+  - `content?` (`string`): AI 提供的纠正内容（例如 HTML 字符串），适用于完整文档格式，不能与 `changes` 同时使用。
+  - `changes?` (`TextChange[]`): 文本变更数组，格式为 `{ delete: string, insert: string }`，表示删除文本及替换文本，不能与 `content` 同时使用。
+  - `range?` (`Range`): 可选，限制建议生成的文档范围。`from` 包含，`to` 不包含，均为绝对文档位置（从 0 开始计数，基于字符偏移而非节点位置）。未指定则处理整篇文档。
+  - `diffUtilityConfig?` (`DiffUtilityConfig`): 差异对比工具配置
+    - `simplifyChanges?` (`boolean`): 是否简化变更。为 `true` 时，相近修改会合并。默认：`true`
+    - `ignoreAttributes?` (`string[]`): 忽略的属性。默认：`['id', 'data-thread-id']`
+    - `ignoreMarks?` (`string[]`): 忽略的标记。默认：`['inlineThread']`
+    - `changeMergeDistance?` (`number | null`): 允许合并变更的最大距离。默认：`null`
+  - `reviewOptions?` (`ReviewOptions`): 控制预览和审核行为
+  - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议展示
+    - `showAsDiff?` (`boolean`): 是否以并列差异方式显示建议。默认：`true`
+    - `diffPosition?` (`'before' | 'after'`): 差异相对建议的位置。默认：`'after'`
+    - `attributes?` (`Record<string, any>`): 附加到建议元素的 HTML 属性
+    - `diffAttributes?` (`Record<string, any>`): 附加到差异装饰的 HTML 属性
+    - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 渲染建议为 ProseMirror 装饰的函数
+  - `metadata?` (`Record<string, any>`): 额外的建议元数据，用于存储其来源或分类等信息，不被扩展内部使用，但可辅助开发者自定义 UI 呈现。
+
+<Callout title="变更格式行为" variant="info">
+  使用 `changes` 格式时，所有指定范围内每个 `delete` 文本的所有出现都会被替换为对应的 `insert` 文本。如需基于位置的特定替换，请使用完整文档格式。
+</Callout>
+
+### 返回值
+
+`SetHtmlSuggestionsResult`
+
+返回对象包括：
+
+- `suggestions` (`Suggestion[]`): 生成的建议数组
+
+### 示例
+
+#### 通过 API 集成的完整文档格式
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 从 AI API 获取纠正后的 HTML
+const response = await fetch('/api/grammar-check', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ html: editor.getHTML() }),
+})
+const { correctedHtml } = await response.json()
+
+// 使用纠正后的 HTML 设置建议
+const result = toolkit.setHtmlSuggestions({
+  content: correctedHtml,
+})
+
+console.log(`生成了 ${result.suggestions.length} 条建议`)
+```
+
+#### 带范围参数的完整文档格式
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 仅处理文档的特定范围
+toolkit.setHtmlSuggestions({
+  content: '<p>已纠正的段落内容</p>',
+  range: { from: 0, to: 100 },
+})
+```
+
+#### 单一变更格式示例
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 将所有出现的 "api" 大写为 "API"
+toolkit.setHtmlSuggestions({
+  changes: [{ delete: 'api', insert: 'API' }],
+})
+```
+
+#### 多个变更格式示例
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 一次应用多条文本纠正
+toolkit.setHtmlSuggestions({
+  changes: [
+    { delete: 'javascript', insert: 'JavaScript' },
+    { delete: 'typescript', insert: 'TypeScript' },
+    { delete: 'api', insert: 'API' },
+  ],
+  range: { from: 0, to: 500 },
+})
+```
+
+## `setMarkdownSuggestions`
+
+通过比较纠正后的 Markdown 与当前文档内容，加载 AI 驱动的建议。此方法工作原理类似于 `setHtmlSuggestions`，但输入增加支持 Markdown。
+
+<Callout title="需要安装 Markdown 扩展" variant="warning">
+  此方法要求安装并配置 [Tiptap Markdown 扩展](https://tiptap.dev/docs/editor/markdown/api/editor)。
+</Callout>
+
+支持两种输入格式：
+
+1. **完整文档格式**：提供纠正后的 Markdown，toolkit 自动计算差异
+2. **变更格式**：提供一组具体的文本替换（删除/插入对）
+
+方法利用 diff 识别更改，在文档相应位置生成建议。
+
+### 参数
+
+- `options` (`SetMarkdownSuggestionsOptions`): 配置项
+  - `content?` (`string`): AI 提供的纠正 Markdown 内容，用于完整文档格式。不可与 `changes` 同时使用。
+  - `changes?` (`TextChange[]`): 文本变更数组，格式为 `{ delete: string, insert: string }`。不可与 `content` 同时使用。
+  - `range?` (`Range`): 限定建议生成的文档范围，含头不含尾，基于绝对字符偏移位置。默认处理整篇文档。
+  - `diffUtilityConfig?` (`DiffUtilityConfig`): 传入差异工具的配置
+    - `simplifyChanges?` (`boolean`): 是否简化变更，默认 `true`。
+    - `ignoreAttributes?` (`string[]`): 要忽略的属性，默认 `['id', 'data-thread-id']`。
+    - `ignoreMarks?` (`string[]`): 要忽略的标记，默认 `['inlineThread']`。
+    - `changeMergeDistance?` (`number | null`): 最大允许合并距离，默认 `null`。
+  - `reviewOptions?` (`ReviewOptions`): 控制预览和审核行为
+  - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议显示方式
+    - `showAsDiff?` (`boolean`): 是否并列显示变更差异，默认 `true`。
+    - `diffPosition?` (`'before' | 'after'`): 差异位置，默认 `'after'`。
+    - `attributes?` (`Record<string, any>`): 附加至建议元素的 HTML 属性。
+    - `diffAttributes?` (`Record<string, any>`): 附加至差异装饰的 HTML 属性。
+    - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 渲染建议为 ProseMirror 装饰的函数。
+  - `metadata?` (`Record<string, any>`): 额外的建议元数据，用于存储来源、类别等，不被扩展内部使用，但帮助定制 UI。
+
+<Callout title="变更格式行为" variant="info">
+  使用 `changes` 格式时，所有指定范围内每个 `delete` 文本的所有出现都会被替换为对应的 `insert` 文本。如果需基于位置的替换，请使用完整文档格式。
+</Callout>
+
+### 返回值
+
+`SetMarkdownSuggestionsResult`
+
+返回对象包括：
+
+- `suggestions` (`Suggestion[]`): 生成的建议数组
+
+### 示例
+
+#### 通过 API 集成的完整文档格式
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 从 AI API 获取纠正后的 Markdown
+const response = await fetch('/api/grammar-check', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ markdown: editor.getMarkdown() }),
+})
+const { correctedMarkdown } = await response.json()
+
+// 使用纠正的 Markdown 设置建议
+const result = toolkit.setMarkdownSuggestions({
+  content: correctedMarkdown,
+})
+
+console.log(`生成了 ${result.suggestions.length} 条建议`)
+```
+
+#### 带范围参数的完整文档格式
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 仅处理文档特定范围
+toolkit.setMarkdownSuggestions({
+  content: '# 已纠正的标题\n\n已纠正的段落内容',
+  range: { from: 0, to: 100 },
+})
+```
+
+#### 单一变更格式示例
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 将所有出现的 "api" 大写为 "API"
+toolkit.setMarkdownSuggestions({
+  changes: [{ delete: 'api', insert: 'API' }],
+})
+```
+
+#### 多个变更格式示例
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 一次性应用多条文本修正
+toolkit.setMarkdownSuggestions({
+  changes: [
+    { delete: 'javascript', insert: 'JavaScript' },
+    { delete: 'typescript', insert: 'TypeScript' },
+    { delete: 'api', insert: 'API' },
+  ],
+  range: { from: 0, to: 500 },
+})
+```
