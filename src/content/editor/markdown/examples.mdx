@@ -51,6 +51,7 @@ const PasteMarkdown = Extension.create({
   name: 'pasteMarkdown',
 
   addProseMirrorPlugins() {
+    const { editor } = this;
     return [
       new Plugin({
         props: {
@@ -62,7 +63,7 @@ const PasteMarkdown = Extension.create({
             }
 
             // 检查文本是否看起来像 Markdown
-            if (looksLikeMarkdown(text)) {
+            if (editor.markdown && looksLikeMarkdown(text)) {
               const { state, dispatch } = view
               // 使用 Markdown 管理器将 Markdown 文本解析为 Tiptap JSON
               const json = editor.markdown.parse(text)

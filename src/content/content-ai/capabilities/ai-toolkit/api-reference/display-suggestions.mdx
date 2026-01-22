@@ -111,7 +111,7 @@ const selectedSuggestion = toolkit.getSelectedSuggestion()
   - `ignoreAttributes?` (`string[]`): 要忽略的属性。默认：`['id', 'data-thread-id']`
   - `ignoreMarks?` (`string[]`): 要忽略的标记。默认：`['inlineThread']`
   - `changeMergeDistance?` (`number | null`): 两个变更合并的最大文档位置距离。如果相邻的两个变更在范围 A 或 B 中距离小于或等于该值，则合并为单个变更。设置为 `null` 或 `undefined` 禁用合并。仅对 `detailed` 模式有效。默认：`null`
-  - `mode?` (`'detailed' | 'block'`): 对比模式。`'detailed'` 执行字符级差异（默认），`'block'` 按顶级节点块级别比较。块级模式忽略 `simplifyChanges` 和 `changeMergeDistance`。默认：`'detailed'`
+  - `mode?` (`'detailed' | 'block' | 'smartInline'`): 对比模式。`'detailed'` 执行字符级差异（默认），`'block'` 按顶级节点块级别比较。块级模式忽略 `simplifyChanges` 和 `changeMergeDistance`。`'smartInline'` 结合两者：先识别变更块，再在这些块中进行字符级差异。默认：`'detailed'`
 
 <Callout title="模式问题" variant="warning">
   参数 `doc` 必须与当前文档具有相同的 schema。如果 `doc` 来源于另一个编辑器，请先将其转换为目标编辑器的 schema：`doc: Node.fromJSON(editor.state.schema, otherEditor.getJSON())`
@@ -301,6 +301,7 @@ toolkit.removeSuggestion('suggestion-1')
     - `ignoreAttributes?` (`string[]`): 忽略的属性。默认：`['id', 'data-thread-id']`
     - `ignoreMarks?` (`string[]`): 忽略的标记。默认：`['inlineThread']`
     - `changeMergeDistance?` (`number | null`): 允许合并变更的最大距离。默认：`null`
+    - `mode?` (`'detailed' | 'block' | 'smartInline'`): 对比模式，默认为 `'detailed'`（字符级差异）
   - `reviewOptions?` (`ReviewOptions`): 控制预览和审核行为
   - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议展示
     - `showAsDiff?` (`boolean`): 是否以并列差异方式显示建议。默认：`true`
@@ -410,6 +411,7 @@ toolkit.setHtmlSuggestions({
     - `ignoreAttributes?` (`string[]`): 要忽略的属性，默认 `['id', 'data-thread-id']`。
     - `ignoreMarks?` (`string[]`): 要忽略的标记，默认 `['inlineThread']`。
     - `changeMergeDistance?` (`number | null`): 最大允许合并距离，默认 `null`。
+    - `mode?` (`'detailed' | 'block' | 'smartInline'`): 对比模式，默认为 `'detailed'`（字符级差异）
   - `reviewOptions?` (`ReviewOptions`): 控制预览和审核行为
   - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议显示方式
     - `showAsDiff?` (`boolean`): 是否并列显示变更差异，默认 `true`。

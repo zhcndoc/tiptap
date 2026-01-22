@@ -201,8 +201,8 @@ export const LayoutContent = forwardRef<HTMLDivElement, LayoutContentProps>(
         )}
         ref={ref}
       >
-        <div className="pt-6 pb-16 sm:pb-24 sm:pt-8 lg:pb-32 lg:pt-10">{children}</div>
-
+        <div className="pt-6 pb-8 sm:pb-24 sm:pt-8 lg:pb-16 lg:pt-10">{children}</div>
+        <div className="wwads-cn wwads-horizontal w-full my-4" data-id="354"></div>
         <footer className="border-t border-grayAlpha-300 pt-8 pb-[3.125rem]">
           <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:relative lg:min-h-[200px]">
             <div className="z-10 flex flex-col items-start flex-none">
@@ -247,11 +247,11 @@ export const LayoutContent = forwardRef<HTMLDivElement, LayoutContentProps>(
             </div>
             <div className="flex-none">Copyright © 2025 Tiptap</div> */}
             <div className="text-balance text-center text-sm leading-loose text-muted-foreground md:text-left">
-              <a href="https://www.zhcndoc.com/" target="_blank">
+              <a href="https://www.zhcndoc.com" target="_blank">
                 简中文档
               </a>
               ｜
-              <a href="https://beian.miit.gov.cn/" target="_blank">
+              <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer">
                 沪ICP备2024070610号-3
               </a>
             </div>

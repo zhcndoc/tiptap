@@ -90,6 +90,10 @@ export const sidebarConfig: SidebarConfig = {
           title: '节点',
           children: [
             {
+              href: '/editor/extensions/nodes/audio',
+              title: 'Audio',
+            },
+            {
               href: '/editor/extensions/nodes/blockquote',
               title: '引用',
             },

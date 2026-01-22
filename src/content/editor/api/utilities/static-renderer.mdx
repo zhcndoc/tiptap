@@ -36,7 +36,7 @@ import { Callout } from '@/components/ui/Callout'
 
 ```js
 import StarterKit from '@tiptap/starter-kit'
-import { renderToHTMLString } from '@tiptap/static-renderer/pm/html'
+import { renderToHTMLString } from '@tiptap/static-renderer/pm/html-string'
 
 renderToHTMLString({
   extensions: [StarterKit], // 使用您的扩展
@@ -307,7 +307,7 @@ renderToReactElement({
 
 ```js
 import StarterKit from '@tiptap/starter-kit'
-import { renderToHTMLString, serializeChildrenToHTMLString } from '@tiptap/static-renderer/pm/html'
+import { renderToHTMLString, serializeChildrenToHTMLString } from '@tiptap/static-renderer/pm/html-string'
 
 renderToHTMLString({
   extensions: [StarterKit], // 使用您的扩展
@@ -354,11 +354,11 @@ renderToHTMLString({
 
 ### 命名空间导入
 
-为了减少应用程序中的捆绑大小，静态渲染器被拆分为三个独立的包：`@tiptap/static-renderer/pm/html`、`@tiptap/static-renderer/pm/markdown` 和 `@tiptap/static-renderer/pm/react`。这样，您只需导入所需的静态渲染器部分。如果您希望获得更大的灵活性，可以使用 `@tiptap/static-renderer` 导入整个静态渲染器包。
+为了减少应用程序中的捆绑大小，静态渲染器被拆分为三个独立的包：`@tiptap/static-renderer/pm/html-string`、`@tiptap/static-renderer/pm/markdown` 和 `@tiptap/static-renderer/pm/react`。这样，您只需导入所需的静态渲染器部分。如果您希望获得更大的灵活性，可以使用 `@tiptap/static-renderer` 导入整个静态渲染器包。
 
 ```ts
 // 仅 HTML 渲染器
-import { renderToHTMLString } from '@tiptap/static-renderer/pm/html'
+import { renderToHTMLString } from '@tiptap/static-renderer/pm/html-string'
 
 // 仅 markdown 渲染器
 import { renderToMarkdown } from '@tiptap/static-renderer/pm/markdown'
@@ -370,7 +370,7 @@ import { renderToReactElement } from '@tiptap/static-renderer/pm/react'
 import { renderToHTMLString, renderToMarkdown, renderToReactElement } from '@tiptap/static-renderer'
 ```
 
-Packages in the `json` namespace are also available for statically rendering without a runtime dependency on any ProseMirror packages. But, these packages cannot automatically map Prosemirror nodes and marks to the target format. You will need to provide custom mappings for every node and mark in these packages.
+`json` 命名空间下的包也可以用于静态渲染，无需依赖任何 ProseMirror 运行时。但这些包无法自动将 Prosemirror 节点和标记映射到目标格式。您需要为这些包中的每个节点和标记提供自定义映射。
 
 ```ts
 // 仅 HTML 渲染器

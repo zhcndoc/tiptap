@@ -38,9 +38,8 @@ export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
   const agent = new ToolLoopAgent({
-    model: anthropic('claude-haiku-4-5-20251001'),
-    system: '您是一名能够在富文本文档中添加评论的助手。',
-    messages: convertToModelMessages(messages),
+    model: anthropic('claude-haiku-4-5'),
+    instructions: 'You are an assistant that can add comments to a rich text document.',
     tools: toolDefinitions({
       tools: {
         // 启用读取和编辑评论的工具
@@ -74,7 +73,7 @@ export async function POST(req: Request) {
 import { useChat } from '@ai-sdk/react'
 import { getAiToolkit } from '@tiptap-pro/ai-toolkit'
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from 'ai'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 export function CommentsAiChatbot({ editor }) {
   const [input, setInput] = useState(
@@ -147,7 +146,7 @@ export function CommentsAiChatbot({ editor }) {
 您是一名能够在富文本文档中添加评论的助手。评论内容应始终采用 Markdown 格式。
 ```
 
-AI 也可以被指示执行特定操作。借助[工具定义](/content-ai/capabilities/ai-toolkit/tools/available-tools)，AI 理解线程、评论、已解决线程和回复的概念。
+AI 也可以被指示执行特定操作。借助[工具定义](/content-ai/capabilities/ai-toolkit/agents/tools)，AI 理解线程、评论、已解决线程和回复的概念。
 
 ```
 无论用户是否要求，永远不要解决线程。只有用户可以通过点击“解决”按钮来解决线程。

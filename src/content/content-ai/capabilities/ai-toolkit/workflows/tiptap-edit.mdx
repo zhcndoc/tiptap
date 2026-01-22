@@ -62,8 +62,8 @@ npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
 
 此外，用户消息中需包含以下两个属性：
 
-- `nodes`：要编辑的文档节点（从 `tiptapRead` 获取）
-- `task`：由 AI 执行的任务，例如“使文本更正式”。
+- `content`: 要编辑的文档内容（从 `tiptapRead` 获取）
+- `task`: 由 AI 执行的任务，例如“使文本更正式”。
 
 当 AI 模型生成响应时，API 端点会将操作流式传输给客户端。
 
@@ -74,7 +74,7 @@ import { createTiptapEditWorkflow } from '@tiptap-pro/ai-toolkit-tool-definition
 import { Output, streamText } from 'ai'
 
 export async function POST(req: Request) {
-  const { nodes, task } = await req.json()
+  const { content, task } = await req.json()
 
   // 创建并配置 Tiptap 编辑工作流（默认设置）。
   // 包含可直接使用的系统提示和输出模式。
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
     system: workflow.systemPrompt,
     // 用户消息
     prompt: JSON.stringify({
-      nodes,
+      content,
       task,
     }),
     output: Output.object({ schema: workflow.zodOutputSchema }),
@@ -156,14 +156,14 @@ export default function Page() {
   const editDocument = () => {
     const toolkit = getAiToolkit(editor)
 
-    // 获取待编辑文档的节点
-    const { nodes } = toolkit.tiptapRead()
+    // 获取待编辑文档的内容
+    const { content } = toolkit.tiptapRead()
 
     // 每个工作流必须有唯一 ID
     setWorkflowId(uuid())
 
     // 调用 API 端点启动工作流
-    submit({ nodes, task })
+    submit({ content, task })
   }
 
   return (

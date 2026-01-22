@@ -57,8 +57,8 @@ npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
 
 此外，需要在用户消息中包含以下两个属性：
 
-- `nodes`：待校对文档的节点（详见客户端设置部分，如何获取这些节点）
-- `task`：AI 要执行的任务，例如 `Correct all grammar and spelling mistakes`（纠正所有语法和拼写错误）。
+- `content`: 待校对文档的内容（详见客户端设置部分，如何获取内容）
+- `task`: AI 要执行的任务，例如 `Correct all grammar and spelling mistakes`（纠正所有语法和拼写错误）。
 
 当 AI 模型生成响应时，API 端点会将建议流式传输给客户端。
 
@@ -69,7 +69,7 @@ import { createProofreaderWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitio
 import { Output, streamText } from 'ai'
 
 export async function POST(req: Request) {
-  const { nodes } = await req.json()
+  const { content } = await req.json()
 
   // 创建并配置校对工作流程（使用默认设置）。
   // 其中包含可直接使用的系统提示和输出模式。
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
     system: workflow.systemPrompt,
     // 用户消息
     prompt: JSON.stringify({
-      nodes,
+      content,
       task: 'Correct all grammar and spelling mistakes',
     }),
     output: Output.object({ schema: workflow.zodOutputSchema }),
@@ -159,14 +159,14 @@ export default function Page() {
   const checkGrammar = () => {
     const toolkit = getAiToolkit(editor)
 
-    // 获取待校对文档的节点
-    const { nodes } = toolkit.tiptapRead()
+    // 获取待校对文档的内容
+    const { content } = toolkit.tiptapRead()
 
     // 每个工作流程必须有唯一 ID
     setWorkflowId(uuid())
 
     // 调用 API 端点开始工作流程
-    submit({ nodes })
+    submit({ content })
   }
 
   return (

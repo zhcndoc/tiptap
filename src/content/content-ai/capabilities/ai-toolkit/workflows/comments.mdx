@@ -42,7 +42,7 @@ npx create-next-app@latest comments-workflow
 安装核心 Tiptap 包和用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
 
 ```bash
-npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/react @ai-sdk/openai zod uuid
+npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/react @ai-sdk/anthropic zod uuid
 ```
 
 安装 Tiptap AI 工具包和评论扩展：
@@ -71,34 +71,28 @@ npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions @tipt
 
 ```ts
 // app/api/comments-workflow/route.ts
-import { openai } from '@ai-sdk/openai'
+import { anthropic } from '@ai-sdk/anthropic'
 import { createEditThreadsWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
 import { Output, streamText } from 'ai'
 
 export async function POST(req: Request) {
-  const { nodes, threads, task } = await req.json()
+  const { content, threads, task } = await req.json()
 
   // 创建并配置评论工作流（使用默认设置）。
   // 包含可直接使用的系统提示和输出模式。
   const workflow = createEditThreadsWorkflow()
 
   const result = streamText({
-    model: openai('gpt-5-mini'),
+    model: anthropic('claude-haiku-4-5'),
     // 系统提示
     system: workflow.systemPrompt,
     // 用户消息
     prompt: JSON.stringify({
-      nodes,
+      content,
       threads,
       task,
     }),
     output: Output.object({ schema: workflow.zodOutputSchema }),
-    // 如果使用 gpt-5-mini，设置推理强度为最低以提升响应速度。
-    providerOptions: {
-      openai: {
-        reasoningEffort: 'minimal',
-      },
-    },
   })
 
   return result.toTextStreamResponse()
@@ -123,6 +117,7 @@ import StarterKit from '@tiptap/starter-kit'
 import { AiToolkit, getAiToolkit, editThreadsWorkflowOutputSchema } from '@tiptap-pro/ai-toolkit'
 import { Comments } from '@tiptap-pro/extension-comments'
 import { useEffect, useState } from 'react'
+import { v4 as uuid } from 'uuid'
 
 // 创建一个简单的评论提供者
 const commentsProvider = {
@@ -167,17 +162,21 @@ export default function Page() {
 
   // 实时应用传入的操作
   useEffect(() => {
-    if (!editor || operations.length === 0) return
+    if (!editor || !object?.operations) return
 
     const toolkit = getAiToolkit(editor)
     toolkit.editThreadsWorkflow({
-      operations,
+      operations: object.operations,
+      workflowId,
+      isStreaming: isLoading,
     })
-  }, [operations, editor])
+  }, [editor, object, workflowId, isLoading])
 
   if (!editor) return null
 
   const manageComments = () => {
+    setWorkflowId(uuid())
+
     const toolkit = getAiToolkit(editor)
 
     // 获取文档内容和现有线程

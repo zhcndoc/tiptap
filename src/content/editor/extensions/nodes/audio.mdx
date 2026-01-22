@@ -1,0 +1,213 @@
+---
+title: 音频扩展
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@tiptap/extension-audio?label=version
+    url: https://www.npmjs.com/package/@tiptap/extension-audio
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@tiptap/extension-audio.svg
+    url: https://npmcharts.com/compare/@tiptap/extension-audio?minimal=true
+    label: 下载量
+extension:
+  name: 音频
+  link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-audio
+  description: 直接在文档中嵌入音频文件。
+  type: node
+  icon: AudioLines
+meta:
+  title: 音频扩展 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用音频扩展将音频文件嵌入到你的文档中。更多信息请查看我们的文档！
+  category: 编辑器
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+此扩展支持编辑器中使用原生 `<audio>` 元素，让你可以直接在文档中嵌入音频文件。
+
+<CodeDemo path="/Nodes/Audio" />
+
+## 安装
+
+```bash
+npm install @tiptap/extension-audio
+```
+
+## 设置
+
+### addPasteHandler
+
+控制是否添加音频源的粘贴处理器。
+
+默认值：`true`
+
+```js
+Audio.configure({
+  addPasteHandler: false,
+})
+```
+
+### autoplay
+
+控制音频是否自动播放。
+
+默认值：`false`
+
+```js
+Audio.configure({
+  autoplay: true,
+})
+```
+
+### controls
+
+控制音频元素是否显示原生控件。
+
+默认值：`true`
+
+```js
+Audio.configure({
+  controls: false,
+})
+```
+
+### loop
+
+控制音频是否循环播放。
+
+默认值：`false`
+
+```js
+Audio.configure({
+  loop: true,
+})
+```
+
+### muted
+
+控制音频是否静音。
+
+默认值：`false`
+
+```js
+Audio.configure({
+  muted: true,
+})
+```
+
+### preload
+
+音频元素的预加载行为。
+
+默认值：`'metadata'`
+
+```js
+Audio.configure({
+  preload: 'none',
+})
+```
+
+### controlslist
+
+为音频元素提供 controlslist 属性。
+
+默认值：`undefined`
+
+```js
+Audio.configure({
+  controlslist: 'nodownload',
+})
+```
+
+### crossorigin
+
+设置音频元素的 crossorigin 属性。
+
+默认值：`undefined`
+
+```js
+Audio.configure({
+  crossorigin: 'anonymous',
+})
+```
+
+### disableRemotePlayback
+
+控制是否禁用音频元素的远程播放功能。
+
+默认值：`false`
+
+```js
+Audio.configure({
+  disableRemotePlayback: true,
+})
+```
+
+### allowBase64
+
+允许使用 data: URL 作为音频源。
+
+默认值：`false`
+
+```js
+Audio.configure({
+  allowBase64: true,
+})
+```
+
+### HTMLAttributes
+
+自定义添加到渲染的 HTML 标签中的 HTML 属性。
+
+```js
+Audio.configure({
+  HTMLAttributes: {
+    class: 'my-custom-class',
+  },
+})
+```
+
+### inline
+
+控制音频节点是否为内联元素。
+
+默认值：`false`
+
+```js
+Audio.configure({
+  inline: true,
+})
+```
+
+## 命令
+
+### setAudio(options)
+
+在当前位置插入一个音频元素，使用指定的选项。音频元素默认作为块级节点嵌入，也可配置为内联元素。
+
+```js
+editor.commands.setAudio({
+  src: 'https://example.com/audio.mp3',
+  controls: true,
+  autoplay: false,
+})
+```
+
+#### 选项说明
+
+| 选项                   | 描述                                                                       | 必选   | 默认值      |
+| ---------------------- | -------------------------------------------------------------------------- | ------ | ----------- |
+| src                    | 要嵌入的音频文件 URL                                                      | ❌     | -           |
+| controls               | 是否显示原生音频控件（播放、暂停、音量等）                                | ✅     | true        |
+| autoplay               | 页面加载时是否自动播放音频                                                | ✅     | false       |
+| loop                   | 是否循环播放音频                                                          | ✅     | false       |
+| muted                  | 是否静音开始播放音频                                                      | ✅     | false       |
+| preload                | 音频的预加载方式（'auto'、'metadata'、'none' 或 null）                   | ✅     | 'metadata'  |
+| controlslist           | 以逗号分隔的需要隐藏的控件列表（例如 'nodownload'）                      | ✅     | undefined   |
+| crossorigin            | 音频元素的跨域资源共享设置（'anonymous'、'use-credentials' 或空字符串） | ✅     | undefined   |
+| disableRemotePlayback  | 是否禁用支持设备上的远程播放功能                                         | ✅     | false       |
+| HTMLAttributes         | 应用于音频元素的额外 HTML 属性                                           | ✅     | {}          |
+
+## 源码
+
+[packages/extension-audio/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-audio/)

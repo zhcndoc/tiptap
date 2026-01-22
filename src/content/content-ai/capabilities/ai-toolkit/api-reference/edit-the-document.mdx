@@ -27,11 +27,11 @@ AI 工具包提供了以不同格式编辑文档的方法。
       - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 用于将建议渲染为 ProseMirror 装饰的函数
     - `metadata?` (`Record<string, any>`): 用于存储建议额外信息的元数据（如来源或类别）。此字段不会被扩展本身内部使用，但有助于开发者自定义 UI 中建议的显示。
     - `diffUtilityConfig?` (`DiffUtilityConfig`): 用于差异比较工具的选项
-      - `simplifyChanges?` (`boolean`): 是否简化变更，若为 `true`，例如同一词中的两处变更会合并为单一变更。仅适用于 `'detailed'` 模式。默认值：`true`
+      - `simplifyChanges?` (`boolean`): 是否简化变更，若为 `true`，例如同一词中的两处变更会合并为单一变更。仅适用于 `'detailed'` 或 `'smartInline'` 模式。默认值：`true`
       - `ignoreAttributes?` (`string[]`): 忽略的属性。默认值：`['id', 'data-thread-id']`
       - `ignoreMarks?` (`string[]`): 忽略的标记。默认值：`['inlineThread']`
       - `changeMergeDistance?` (`number | null`): 允许合并的变更最大距离（文档位置）。若两个相邻变更在 rangeA 或 rangeB 中的距离小于或等于此值，则会合并为单一变更。设置为 `null` 或 `undefined` 禁用合并。仅适用于 `'detailed'` 模式。默认值：`null`
-      - `mode?` (`'detailed' | 'block'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，识别文本内精确变更（默认）。`'block'` 执行块级差异，将每个顶级节点视为单元。块模式适用于只需了解段落、标题等块级元素是否变更，不关注字符级细节。块模式下，忽略 `simplifyChanges` 和 `changeMergeDistance`。默认值：`'detailed'`
+      - `mode?` (`'detailed' | 'block' | 'smartInline'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，识别文本内精确变更（默认）。`'block'` 执行块级差异，将每个顶级节点视为单元。块模式适用于只需了解段落、标题等块级元素是否变更，不关注字符级细节。块模式下，忽略 `simplifyChanges` 和 `changeMergeDistance`。`'smartInline'` 结合两者：先识别变更的块，再在块内执行字符级差异。适合仅部分内容变更的文档，同时保持字符级精确度。默认值：`'detailed'`
 
 ### 返回
 
@@ -155,9 +155,18 @@ toolkit.streamHtml(stream)
   - `chunkSize?` (`number`): AI 模型可接受的输入字符串最大长度，防止 AI 一次读取过多内容导致上下文窗口超出限制。默认值：`32000`
   - `reviewOptions?` (`Omit<ReviewOptions, 'diffMode'>`): 控制预览/审查行为。
     - `mode?` (`'disabled' | 'review' | 'preview'`): 是否在应用更改之前或之后审查更改。`'disabled'` 表示不审查，`'review'` 表示应用后审查，`'preview'` 表示应用前预览。默认值：`'disabled'`
-    - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议的显示方式（同前）
-    - `metadata?` (`Record<string, any>`): 建议元数据（同前）
-    - `diffUtilityConfig?` (`DiffUtilityConfig`): 差异比较工具选项（同前）
+    - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议的显示方式
+      - `showAsDiff?` (`boolean`): 是否将建议显示为差异，插入内容和原始内容并列显示。默认值：`true`
+      - `diffPosition?` (`'before' | 'after'`): 差异相对于建议的位置。默认值：`'before'`
+      - `attributes?` (`Record<string, any>`): 额外添加到建议的 HTML 属性
+      - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 用于将建议渲染为 ProseMirror 装饰的函数
+    - `metadata?` (`Record<string, any>`): 建议元数据（如来源或类别）。该字段不被扩展内部使用，但有助于开发者自定义 UI 显示。
+    - `diffUtilityConfig?` (`DiffUtilityConfig`): 差异比较工具选项
+      - `simplifyChanges?` (`boolean`): 是否简化变更，若为 `true`，例如同一词中的两处变更会合并为单一变更。仅适用于 `'detailed'` 或 `'smartInline'` 模式。默认值：`true`
+      - `ignoreAttributes?` (`string[]`): 忽略的属性。默认值：`['id', 'data-thread-id']`
+      - `ignoreMarks?` (`string[]`): 忽略的标记。默认值：`['inlineThread']`
+      - `changeMergeDistance?` (`number | null`): 允许合并的变更最大距离（文档位置）。若两个相邻变更在 rangeA 或 rangeB 中的距离小于或等于此值，则会合并为单一变更。设置为 `null` 或 `undefined` 禁用合并。仅适用于 `'detailed'` 模式。默认值：`null`
+      - `mode?` (`'detailed' | 'block' | 'smartInline'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，识别文本内精确变更（默认）。`'block'` 执行块级差异，将每个顶级节点视为单元。块模式适用于只需了解段落、标题等块级元素是否变更，不关注字符级细节。块模式下，忽略 `simplifyChanges` 和 `changeMergeDistance`。`'smartInline'` 结合两者：先识别变化块，再在块内执行字符级差异。默认值：`'detailed'`
 
 #### `PatchOperation`（类型）
 
@@ -185,7 +194,7 @@ toolkit.streamHtml(stream)
 
 #### `ApplyPatchError`（类型）
 
-应用通用补丁格式操作失败时抛出的错误。此错误包含丰富的故障上下文，包括失败的操作索引、之前成功应用的操作及当前内容状态。
+应用通用补丁格式操作失败时抛出的错误。此错误包含详细故障上下文，包括失败的操作索引、之前成功应用的操作及当前内容状态。
 
 - `operationIndex` (`number`): 失败操作的零基索引
 - `previousOperations` (`PatchOperation[]`): 失败前成功应用的操作数组

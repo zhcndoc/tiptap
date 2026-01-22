@@ -45,6 +45,23 @@ npm install @tiptap/extension-floating-menu @floating-ui/dom@^1.6.0
 
 默认值: `null`
 
+### updateDelay
+
+`FloatingMenu` 对 `update` 方法进行防抖，以避免在每次选择更新时都更新浮动菜单。该延迟以毫秒为单位控制。  
+`FloatingMenuPlugin` 默认延迟为 250 毫秒。将延迟设置为 `0` 可以禁用防抖。
+
+类型: `Number`
+
+默认值: `250`
+
+### resizeDelay
+
+`FloatingMenu` 对 resize 和 scroll 事件处理程序进行防抖，以避免在每次大小调整或滚动时都更新浮动菜单。该延迟以毫秒为单位控制。
+
+类型: `Number`
+
+默认值: `60`
+
 ### appendTo
 
 菜单应附加到 DOM 中的元素。可以是一个 `HTMLElement`，也可以是返回 `HTMLElement` 的回调函数。
@@ -164,9 +181,23 @@ new Editor({
       element: document.querySelector('.menu-one'),
     }),
     FloatingMenu.configure({
-      pluginKey: new PluginKey('floatingMenuOne'),
+      pluginKey: new PluginKey('floatingMenuTwo'),
       element: document.querySelector('.menu-two'),
     }),
   ],
 })
+```
+
+### 强制更新浮动菜单位置
+
+如果浮动菜单在初始渲染后尺寸发生变化，其位置不会自动调整。您可以使用 `updateFloatingMenuPosition` 命令强制更新浮动菜单的位置：
+
+```ts
+editor.commands.updateFloatingMenuPosition()
+```
+
+或者，您可以通过事务元数据发送 `'updatePosition'` 事件：
+
+```ts
+editor.commands.setMeta('floatingMenu', 'updatePosition')
 ```

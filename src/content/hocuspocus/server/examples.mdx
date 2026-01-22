@@ -23,19 +23,19 @@ npx @hocuspocus/cli --s3 --s3-bucket my-documents
 
 ### Express
 
-Hocuspocus 可以与任何底层使用 `ws` 的 WebSocket 实现一起使用。当你不调用 Hocuspocus 的 `listen()` 方法时，它不会自己启动 WebSocket 服务器，而是依赖你手动调用其 [`handleConnection()` 方法](/hocuspocus/server/methods)。
+Hocuspocus 可以与任何底层使用 `ws` 的 WebSocket 实现一起使用。当你不调用 Hocuspocus 的 `listen()` 方法时，它不会自己启动 WebSocket 服务器，而是依赖你手动调用其 [`handleConnection()` 方法](/hocuspocus/server/usage)。
 
 要在 [Express](https://expressjs.com) 中使用 Hocuspocus，你需要使用 `express-ws` 包给 Express 应用添加 WebSocket 端点。然后添加新的 WebSocket 路由，并使用 Hocuspocus 的 `handleConnection()` 方法完成剩余工作。
 
 ```js
-import express from "express";
-import expressWebsockets from "express-ws";
-import { Hocuspocus } from "@hocuspocus/server";
+import express from 'express'
+import expressWebsockets from 'express-ws'
+import { Hocuspocus } from '@hocuspocus/server'
 
 // 配置 Hocuspocus
 const hocuspocus = new Hocuspocus({
   // ...
-});
+})
 
 // 使用 express-ws 扩展设置你的 express 实例
 const { app } = expressWebsockets(express());
@@ -52,12 +52,12 @@ app.ws("/collaboration", (websocket, request) => {
   const context = {
     user: {
       id: 1234,
-      name: "Jane",
+      name: 'Jane',
     },
-  };
+  }
 
-  hocuspocus.handleConnection(websocket, request, context);
-});
+  hocuspocus.handleConnection(websocket, request, context)
+})
 
 // 启动服务器
 app.listen(1234, () => console.log("Listening on http://127.0.0.1:1234"));
@@ -70,8 +70,8 @@ app.listen(1234, () => console.log("Listening on http://127.0.0.1:1234"));
 Hono 是一个支持多运行时的现代 Web 框架。它支持原生 WebSocket 协议，非常适合用于 Hocuspocus。只有在 Node.js 环境下，Hono 的实现才需要额外代码来支持 WebSocket 协议。
 
 ```ts
-import { Hono } from "hono";
-import { Hocuspocus } from "@hocuspocus/server";
+import { Hono } from 'hono'
+import { Hocuspocus } from '@hocuspocus/server'
 
 // Node.js 专用
 import { serve } from "@hono/node-server";
@@ -80,7 +80,7 @@ import { createNodeWebSocket } from "@hono/node-ws";
 // 配置 Hocuspocus
 const hocuspocus = new Hocuspocus({
   // …
-});
+})
 
 // 设置 Hono 服务器
 const app = new Hono();
@@ -90,13 +90,13 @@ const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
 
 // 在 Hono 服务器中挂载 Hocuspocus
 app.get(
-  "/hocuspocus",
+  '/hocuspocus',
   upgradeWebSocket((c) => ({
     onOpen(_evt, ws) {
-      hocuspocus.handleConnection(ws.raw, c.req.raw as any);
+      hocuspocus.handleConnection(ws.raw, c.req.raw as any)
     },
-  }))
-);
+  })),
+)
 
 // 启动服务器
 const server = serve({
@@ -119,17 +119,17 @@ injectWebSocket(server);
 ### Koa
 
 ```js
-import Koa from "koa";
-import websocket from "koa-easy-ws";
-import { Hocuspocus } from "@hocuspocus/server";
-import { Logger } from "@hocuspocus/extension-logger";
+import Koa from 'koa'
+import websocket from 'koa-easy-ws'
+import { Hocuspocus } from '@hocuspocus/server'
+import { Logger } from '@hocuspocus/extension-logger'
 
 // 配置 Hocuspocus
 const hocuspocus = new Hocuspocus({
   // …
-});
+})
 
-const app = new Koa();
+const app = new Koa()
 
 // 使用 koa-easy-ws 扩展设置你的 koa 实例
 app.use(websocket());
@@ -138,7 +138,7 @@ app.use(websocket());
 // 你可以像在 onConnect 钩子中一样设置上下文数据
 // 并传递给 handleConnection 方法。
 app.use(async (ctx, next) => {
-  const ws = await ctx.ws();
+  const ws = await ctx.ws()
 
   hocuspocus.handleConnection(
     ws,
@@ -146,9 +146,9 @@ app.use(async (ctx, next) => {
     // 额外数据（可选）
     {
       user_id: 1234,
-    }
-  );
-});
+    },
+  )
+})
 
 // 启动服务器
 app.listen(1234);
@@ -272,13 +272,13 @@ Route::middleware(['web', 'auth'])->get('/hocus', function (Request $request) {
 如果你想直接在服务器上编辑文档（同时保持钩子和同步运行），最简单的方式是使用 Hocuspocus 的 `getDirectConnection` 方法。
 
 ```typescript
-const hocuspocus = new Hocuspocus();
+const hocuspocus = new Hocuspocus()
 
 const docConnection = await hocuspocus.openDirectConnection('my-document', {})
 
 await docConnection.transact((doc) => {
-  doc.getMap('test').set('a', 'b');
-});
+  doc.getMap('test').set('a', 'b')
+})
 
 await docConnection.disconnect()
 ```
