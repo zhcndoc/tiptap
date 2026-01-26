@@ -63,6 +63,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/editor/getting-started/install/cdn',
+        destination: '/editor/getting-started/install/vanilla-javascript',
+        permanent: true,
+      },
+      {
         source: '/editor/markdown/getting-started',
         destination: '/editor/markdown/getting-started/installation',
         permanent: true,
@@ -109,7 +114,7 @@ const nextConfig = {
       },
       {
         source: '/content-ai/custom-llms/integrate',
-        destination: '/content-ai/content-ai/custom-llms',
+        destination: '/content-ai/custom-llms',
         permanent: true,
       },
       {
@@ -452,7 +457,12 @@ const nextConfig = {
       },
       {
         source: '/editor/ai/advanced-usage/custom-llm',
-        destination: '/content-ai/capabilities/generation/overview',
+        destination: 'content-ai/custom-llms',
+        permanent: true,
+      },
+      {
+        source: '/content-ai/content-ai/custom-llms',
+        destination: '/content-ai/custom-llms',
         permanent: true,
       },
       {

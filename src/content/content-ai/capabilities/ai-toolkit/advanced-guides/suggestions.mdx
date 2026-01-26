@@ -1,0 +1,121 @@
+---
+title: 建议
+meta:
+  title: 建议 | Tiptap 内容 AI
+  description: 使用 AI 工具包生成建议。
+  category: 内容 AI
+---
+
+当 AI 对文档进行更改时，您可以将其显示为[建议](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions)。这样，用户可以审阅更改并选择接受或拒绝。
+
+## 什么是建议？
+
+建议是对文档提出的变更。每个 `Suggestion` 对象具有以下属性：
+
+- `id`（`string`）：建议的唯一标识符。
+- `range`（`Range`）：建议的位置。它包含一个 `from` 属性（建议开始的位置）和一个 `to` 属性（建议结束的位置）。了解更多关于范围的信息，请参阅[概念指南](/content-ai/capabilities/ai-toolkit/advanced-guides/concepts)。
+- AI 建议插入该 `range` 中的内容。此内容存储在 `replacementOptions` 属性中。
+
+查看 `Suggestion` 对象的所有属性，请参阅[API 参考](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions)。
+
+## 两种类型的建议
+
+建议有两种类型：
+
+- **预览模式**：在应用更改之前预览更改。文档不会被修改，直到用户接受建议。
+- **审阅模式**：应用更改后进行审阅。文档已经被修改，建议允许用户撤销该变更。
+
+## 如何生成建议？
+
+当您调用 AI 工具包中编辑文档的方法时，会生成建议（请参阅[API 参考](/content-ai/capabilities/ai-toolkit/api-reference)）。
+
+这些方法可以通过三种不同的方式进行配置：
+
+### 选项一：直接更新文档
+
+AI 工具包方法的默认行为是直接编辑文档，不生成任何建议。
+
+```ts
+toolkit.executeTool({
+  toolName: 'tiptapEdit',
+  input: {},
+  // 无 reviewOptions 属性
+})
+```
+
+### 选项二：编辑文档前生成建议
+
+此方法不会修改文档，生成**预览模式**的建议。
+
+只有当用户接受建议时，文档才会被编辑。
+
+```ts
+toolkit.executeTool({
+  toolName: 'tiptapEdit',
+  input: {},
+  reviewOptions: { mode: 'preview' },
+})
+```
+
+### 选项三：编辑文档后生成建议
+
+此方法直接修改文档，并生成**审阅模式**的建议。建议允许用户通过应用建议来撤销更改。
+
+```ts
+toolkit.executeTool({
+  toolName: 'tiptapEdit',
+  input: {},
+  reviewOptions: { mode: 'review' },
+})
+```
+
+## 差异模式
+
+建议是通过比较更改前后的文档生成的。
+
+您可以通过 `reviewOptions` 对象的 `diffUtilityConfig` 属性配置比较方式。
+
+这使您可以逐字符或逐块比较更改。
+
+```ts
+toolkit.executeTool({
+  toolName: 'tiptapEdit',
+  input: {},
+  reviewOptions: {
+    mode: 'review',
+    diffUtilityConfig: { mode: 'block' },
+  },
+})
+```
+
+有三种差异模式：
+
+- `detailed`（默认）：显示文本中精确的字符级更改。
+- `block`：按段落和标题分组更改，而非单个字符。
+- `smartInline`：实验性模式，表现类似 `detailed`，但结果更准确。
+
+差异工具还有其他选项，详细信息请参阅[API 参考](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility)。
+
+## 接受和拒绝建议
+
+您可以通过调用 `acceptSuggestion` 和 `rejectSuggestion` 方法接受或拒绝建议。
+
+```ts
+toolkit.acceptSuggestion('suggestion-1')
+toolkit.rejectSuggestion('suggestion-1')
+```
+
+这些方法返回 AI 反馈，您可以收集并发送给 AI 以改进未来的建议。
+
+```ts
+const result = toolkit.acceptSuggestion('suggestion-1')
+// result.aiFeedback.events
+```
+
+您也可以一次接受或拒绝所有建议，通过调用 `acceptAllSuggestions` 和 `rejectAllSuggestions` 方法。
+
+建议还可以通过编程方式读取和更新。有关所有可用方法，请参阅[API 参考](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions)。
+
+## 后续步骤
+
+- 学习如何使用 AI 工具包[样式化建议](/content-ai/capabilities/ai-toolkit/advanced-guides/style-suggestions)。

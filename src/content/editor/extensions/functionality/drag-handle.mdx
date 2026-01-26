@@ -22,6 +22,7 @@ meta:
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
 
 你是否曾经想在你的编辑器中拖拽节点？我们也是——因此这里有一个扩展来实现它。
 
@@ -115,6 +116,32 @@ DragHandle.configure({
 })
 ```
 
+### nested
+
+启用嵌套内容的拖拽手柄，如列表项、引用段落和其他嵌套结构。
+
+启用后，拖拽手柄不仅仅出现在顶层块，还会出现在嵌套块。通过基于规则的评分系统，结合光标位置和配置规则，确定目标节点。
+
+默认值：`false`
+
+```js
+// 启用默认设置
+DragHandle.configure({
+  nested: true,
+})
+
+// 使用自定义边缘检测配置启用
+DragHandle.configure({
+  nested: {
+    edgeDetection: {
+      threshold: 20,
+    },
+  },
+})
+```
+
+详见下文 [Nested Drag Handle](#nested-drag-handle) 部分的详细配置。
+
 ## 命令
 
 ### lockDragHandle()
@@ -142,3 +169,392 @@ editor.commands.unlockDragHandle()
 ```js
 editor.commands.toggleDragHandle()
 ```
+
+## 嵌套拖拽手柄
+
+默认情况下，拖拽手柄仅对顶层块显示。启用 `nested` 后，它也会对嵌套内容如列表项、引用段落和其他结构生效。
+
+### 基本用法
+
+```js
+// 按默认全部启用
+DragHandle.configure({
+  nested: true,
+})
+```
+
+### 配置选项
+
+需要更多控制时，可以传入配置对象：
+
+```js
+DragHandle.configure({
+  nested: {
+    // 边缘检测配置
+    edgeDetection: 'left', // 可选 'right'、'both'、'none' 或自定义配置
+
+    // 自定义节点选择规则
+    rules: [],
+
+    // 是否使用默认规则
+    defaultRules: true,
+
+    // 限制允许的容器类型
+    allowedContainers: ['bulletList', 'orderedList'],
+  },
+})
+```
+
+### 边缘检测
+
+边缘检测控制何时在光标靠近内容区边缘时优先选择父节点，而非嵌套节点。
+
+#### 预设选项
+
+```js
+DragHandle.configure({
+  nested: {
+    // 'left'（默认）- 靠近左/上边缘时优先父节点
+    edgeDetection: 'left',
+
+    // 'right' - 靠近右/上边缘时优先父节点（适用于 RTL 布局）
+    edgeDetection: 'right',
+
+    // 'both' - 边缘任一侧横向边缘均优先父节点
+    edgeDetection: 'both',
+
+    // 'none' - 完全关闭边缘检测
+    edgeDetection: 'none',
+  },
+})
+```
+
+#### 自定义配置
+
+精细控制时传入配置对象：
+
+```js
+DragHandle.configure({
+  nested: {
+    edgeDetection: {
+      // 哪些边触发父节点优先
+      edges: ['left', 'top'],
+
+      // 触发边缘检测的距离阈值（像素，默认12）
+      threshold: 20,
+
+      // 优先父节点的强度（默认500）
+      strength: 500,
+    },
+  },
+})
+```
+
+你也可以传递部分配置以覆盖默认值：
+
+```js
+DragHandle.configure({
+  nested: {
+    // 仅覆盖 threshold，保持 edges 和 strength 默认
+    edgeDetection: { threshold: -16 },
+  },
+})
+```
+
+#### 强度说明
+
+`strength` 决定光标靠近边缘时系统优先父节点的强度，结合评分系统生效：
+
+1. 每个候选节点初始基础分为 **1000**
+2. 光标靠近已配置边缘时，扣分为：`strength × depth`
+3. 最终得分最高的节点被选中
+
+以默认强度 **500** 为例：
+
+| 节点深度 | 扣分  | 剩余得分 | 效果                |
+|----------|-------|----------|---------------------|
+| 1（浅层） | 500   | 500      | 可选，但优先级降低  |
+| 2        | 1000  | 0        | 较难选中，比 非边缘节点更低 |
+| 3+（深层）| 1500+ | 负分     | 基本排除             |
+
+这意味着深层嵌套的节点在边缘附近优先级更低，更容易选中它们的父容器。
+
+**举例：**
+
+- `strength: 250` —— 优先级更温和；深度3节点在边缘附近仍有一定被选中可能
+- `strength: 500` —— 默认；深度2及以上节点在边缘受到强烈优先级压制
+- `strength: 1000` —— 激进；任何嵌套节点在边缘附近几乎被排除 
+
+<Callout title="负阈值" variant="info">
+  使用负阈值（例如 `-16`）有效减少边缘检测触发区域，使得即使光标靠近边缘，嵌套项也更容易被选中。此时光标必须更靠近元素内部时边缘检测才生效。
+</Callout>
+
+### 允许的容器
+
+限制拖拽手柄只对特定容器类型生效：
+
+```js
+DragHandle.configure({
+  nested: {
+    // 仅允许在列表里启用嵌套拖拽
+    allowedContainers: ['bulletList', 'orderedList'],
+  },
+})
+```
+
+配置后，拖拽手柄只会出现在指定容器内的嵌套内容。顶层块拖拽始终有效。
+
+### 自定义规则
+
+拖拽手柄通过评分系统选中节点。每个候选节点初始得分 1000，规则对分数进行增减调整。最终最高分节点被选中。
+
+#### 创建自定义规则
+
+```js
+DragHandle.configure({
+  nested: {
+    rules: [
+      {
+        id: 'preferParagraphs',
+        evaluate: ({ node, parent, depth }) => {
+          // 返回得分调整：
+          // - 负数：增加节点概率（得分增加）
+          // - 0：无变化
+          // - 1-999：扣分，降低优先级
+          // - >= 1000：完全排除
+
+          if (node.type.name === 'paragraph') {
+            return -200 // 优先段落节点，增加200分
+          }
+          return 100 // 轻微扣分其他节点
+        },
+      },
+    ],
+  },
+})
+```
+
+#### 评分说明
+
+| 返回值 | 效果         | 应用示例               |
+|--------|--------------|------------------------|
+| -500   | 分数加500    | 强烈偏向该类型节点      |
+| -100   | 分数加100    | 轻微偏向该节点          |
+| 0      | 无变化       | 中立节点                |
+| 100    | 扣100分      | 轻微降低优先级          |
+| 500    | 扣500分      | 显著降低优先级          |
+| 1000+  | 排除节点       | 永远不选中              |
+
+因为所有节点从 1000 分起算，`-200` 实际得分 1200，高于返回 `100` 的节点的 900 分。
+
+#### 规则上下文
+
+每条规则接收一个上下文对象，属性如下：
+
+| 属性      | 类型                | 描述                             |
+|-----------|---------------------|----------------------------------|
+| `node`    | `Node`              | 正在评估的节点                   |
+| `pos`     | `number`            | 文档中的绝对位置                 |
+| `depth`   | `number`            | 节点深度（0 为根文档）           |
+| `parent`  | `Node \| null`       | 父节点（根节点时为 null）        |
+| `index`   | `number`            | 同级位置索引（0 开始）           |
+| `isFirst` | `boolean`           | 是否为父节点的第一个子节点       |
+| `isLast`  | `boolean`           | 是否为父节点的最后一个子节点     |
+| `$pos`    | `ResolvedPos`        | 用于高级查询的解析位置           |
+| `view`    | `EditorView`         | 编辑器视图，方便访问 DOM 元素    |
+
+#### 示例：自定义问答块
+
+如果你有一个自定义问答块，且仅允许拖拽备选项：
+
+```js
+DragHandle.configure({
+  nested: {
+    rules: [
+      {
+        id: 'onlyAlternatives',
+        evaluate: ({ node, parent }) => {
+          // 只允许在问题内拖拽备选项
+          if (parent?.type.name === 'question') {
+            return node.type.name === 'alternative' ? 0 : 1000
+          }
+          return 0
+        },
+      },
+    ],
+  },
+})
+```
+
+#### 构建自定义列表样式节点
+
+如果你创建了类似列表的自定义节点（容纳可拖拽子项的容器），则拖拽手柄需要指示系统降低容器优先级，提升子项优先级，否则用户难以选中子项。
+
+默认规则会自动降低首个子节点为 `listItem` 或 `taskItem` 的节点优先级。对于自定义名称，需手动添加规则：
+
+**方案 1：** 将子项节点命名为 `listItem` 或 `taskItem`
+
+这样默认规则自动生效。
+
+**方案 2：** 添加自定义规则降低容器优先级
+
+```js
+DragHandle.configure({
+  nested: {
+    rules: [
+      {
+        id: 'deprioritizeCustomListWrapper',
+        evaluate: ({ node }) => {
+          // 降低容器优先级让子项更易选中
+          if (node.type.name === 'myCustomList') {
+            return 900
+          }
+          return 0
+        },
+      },
+    ],
+  },
+})
+```
+
+**自定义列表节点样式建议：**
+
+自定义列表容器须有足够的 padding 或 margin，给予边缘检测空间，从而让用户能在边缘选中容器而在中间方便选中子项。
+
+```css
+.my-custom-list {
+  /* 提供边缘检测空间 */
+  padding: 0.5rem;
+}
+
+.my-custom-list-item {
+  /* 子项间距，易于选中 */
+  margin: 0.25rem 0;
+  padding-left: 0.5rem;
+}
+```
+
+#### 禁用默认规则
+
+若想完全自定义规则，可关闭默认规则：
+
+```js
+DragHandle.configure({
+  nested: {
+    defaultRules: false,
+    rules: [
+      // 你的自定义规则
+    ],
+  },
+})
+```
+
+<Callout title="默认规则" variant="warning">
+  默认规则处理了常见情况，如排除内联内容和正确处理列表项。只有在有明确需求且理解影响时才建议禁用。
+</Callout>
+
+### 样式建议
+
+嵌套拖拽手柄需要合适的编辑器样式支持。手柄需物理空间展示，边缘检测也需空间发挥。
+
+#### 左间距或内边距
+
+拖拽手柄默认位于内容左侧。若无足够间距，将遮挡文本或显示在可视区域外。
+
+```css
+.ProseMirror {
+  /* 为拖拽手柄留出左侧空间 */
+  padding-left: 2rem;
+}
+
+/* 或对子元素添加左边距 */
+.ProseMirror > * {
+  margin-left: 2rem;
+}
+```
+
+#### 嵌套内容缩进
+
+确保嵌套元素如列表项有足够缩进，使每层嵌套均能显示拖拽手柄。
+
+```css
+.ProseMirror ul,
+.ProseMirror ol {
+  /* 列表缩进预留 */
+  padding-left: 1.5rem;
+}
+
+.ProseMirror li {
+  /* 额外间距 */
+  margin-left: 0.5rem;
+}
+```
+
+#### 边缘检测与阈值
+
+边缘检测阈值以像素计，表示光标距区域边缘的距离。内容无 padding 时，12px 阈值意味着光标需在文本 12px 范围内。增加 padding 能令边缘检测更自然。
+
+```css
+.ProseMirror blockquote {
+  /* padding 提供足够边缘检测空间 */
+  padding: 0.5rem 1rem;
+}
+
+.ProseMirror li > p {
+  /* 小额 padding 仍有帮助 */
+  padding-left: 0.25rem;
+}
+```
+
+#### 完整示例：嵌套拖拽手柄样式
+
+```css
+.ProseMirror {
+  /* 基础内边距给拖拽手柄空间 */
+  padding: 1rem 1rem 1rem 3rem;
+}
+
+.ProseMirror > * {
+  /* 顶层块无额外左边距 */
+  margin-left: 0;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  /* 列表缩进 */
+  padding-left: 1.5rem;
+}
+
+.ProseMirror li {
+  /* 列标与内容间距 */
+  padding-left: 0.25rem;
+}
+
+.ProseMirror blockquote {
+  /* 引用块内边距，适合拖拽 */
+  padding: 0.5rem 1rem;
+  margin-left: 0;
+  border-left: 3px solid #ccc;
+}
+
+/* 拖拽节点选中高亮 */
+.ProseMirror-selectednode,
+.ProseMirror-selectednoderange {
+  position: relative;
+}
+
+.ProseMirror-selectednode::before,
+.ProseMirror-selectednoderange::before {
+  content: '';
+  position: absolute;
+  inset: -0.25rem;
+  background-color: rgba(112, 207, 248, 0.3);
+  border-radius: 0.2rem;
+  pointer-events: none;
+  z-index: -1;
+}
+```
+
+<Callout title="负阈值" variant="info">
+  如果无法增加 padding，可以使用负阈值（如 `-16`）缩小边缘检测范围，使系统减少对父节点的优先选择，即使光标靠近边缘也能方便选中嵌套项。
+</Callout>

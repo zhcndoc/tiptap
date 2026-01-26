@@ -1,0 +1,85 @@
+---
+title: AI 工具包概念
+meta:
+  title: AI 工具包概念 | Tiptap 内容 AI
+  description: 了解并使用 AI 工具包的基本概念。
+  category: 内容 AI
+---
+
+了解帮助你使用 AI 工具包的基本概念。
+
+## 位置
+
+AI 工具包方法允许你在文档的特定位置[读取](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document)和[编辑](/content-ai/capabilities/ai-toolkit/api-reference/edit-the-document)文档。
+
+位置允许你定位文档中的元素。它们以整数表示。
+
+文档中的第一个位置是 0。文档中的最后一个位置等于文档内容的大小。
+
+```ts
+const position = 0
+const lastPosition = editor.state.doc.content.size
+```
+
+光标的位置可以通过编辑器状态的 `selection` 属性获取。
+
+```ts
+const position = editor.state.selection.head
+```
+
+## 范围
+
+范围是一对位置。它表示文档中的一个连续内容范围。
+
+```ts
+import { Range } from '@tiptap/core'
+
+const range: Range = { from: 0, to: 100 }
+```
+
+整个文档的范围是：
+
+```ts
+const range = { from: 0, to: editor.doc.content.size }
+```
+
+你可以使用编辑器状态的 `selection` 属性获取选区范围。
+
+```ts
+const range = { from: editor.state.selection.from, to: editor.state.selection.to }
+```
+
+你可以在特定的位置或范围插入或者读取内容。
+
+```ts
+const range: Range = { from: 0, to: 100 }
+
+// 读取文档
+editor.commands.tiptapRead({ range })
+
+editor.commands.insertHtml(
+  '<p>AI 生成的内容</p>',
+  {
+    position: range,
+  }
+})
+```
+
+范围用于确定[建议](#suggestion)的位置。
+
+## 建议
+
+建议代表对文档的一个拟议更改。当 AI 对文档进行更改时，你可以将其显示为建议，以便用户审阅并接受或拒绝。详见[建议指南](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions)。
+
+## Tiptap 读取和 Tiptap 编辑
+
+Tiptap 编辑是由 Tiptap 开发的一种格式，允许 AI 高效且准确地编辑文档。使用它，AI 可以快速进行细微、精确的编辑，而无需替换整个文档。它能将令牌使用量减少高达 95%。
+
+Tiptap 编辑作为 AI 代理可使用的[工具](/content-ai/capabilities/ai-toolkit/agents/tools)提供，也作为一个[工作流程](/content-ai/capabilities/ai-toolkit/workflows/tiptap-edit)提供。
+
+为了使 Tiptap 编辑生效，你需要先用 Tiptap 读取读取文档。Tiptap 读取作为 AI 代理可使用的[工具](/content-ai/capabilities/ai-toolkit/agents/tools)提供，也作为一个[工作流程](/content-ai/capabilities/ai-toolkit/workflows/tiptap-edit)提供。
+
+```ts
+const { content } = toolkit.tiptapRead()
+toolkit.tiptapEdit({ content })
+```

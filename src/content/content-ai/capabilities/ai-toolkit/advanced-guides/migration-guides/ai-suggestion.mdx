@@ -16,13 +16,13 @@ AI Suggestion 扩展允许您让 AI 审核文档并展示用户可以接受或�
 
 ## 审核文档
 
-在[校对器指南](/content-ai/capabilities/ai-toolkit/advanced-guides/proofreader)中，`setHtmlSuggestions` 方法被用来展示一个建议列表，用户可以接受或拒绝，这些建议来源于 AI 模型生成的 HTML 内容。
+在[校对器指南](/content-ai/capabilities/ai-toolkit/workflows/proofreader)中，`proofreaderWorkflow` 方法被用来展示一个建议列表，用户可以接受或拒绝，这些建议来源于 AI 模型生成的 HTML 内容。
 
-建议查看 `setHtmlSuggestions` 方法的[API 参考](/content-ai/capabilities/ai-toolkit/primitives/display-suggestions#sethtmlsuggestions)，以了解其参数和定制选项。
+建议查看 `proofreaderWorkflow` 方法的[API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows)，以了解其参数和定制选项。
 
 ## 接受和拒绝建议
 
-想了解更多关于建议的存储和管理，请查看建议工具的[API 参考](/content-ai/capabilities/ai-toolkit/primitives/display-suggestions)。
+想了解更多关于建议的存储和管理，请查看建议工具的[高级指南](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions)。
 
 特别地，使用 `applySuggestion` 方法来接受一个建议。
 
@@ -39,7 +39,7 @@ AI Toolkit 的建议工具比 AI Suggestion 扩展快得多，因为它支持流
 AI Toolkit 还提供了将文档拆分成多个块的方法，每个块可以单独发送到 AI 并独立处理。对块的并行处理可以显著提升响应速度。
 
 ```ts
-import { getChanges } from './api'
+import { proofreaderApi } from './api'
 
 // 获取 AI Toolkit
 const toolkit = getAiToolkit(editor)
@@ -50,13 +50,13 @@ const chunks = toolkit.getHtmlChunks()
 // 遍历每个块
 for (const chunk of chunks) {
   // 读取该块内容
-  const { nodes } = toolkit.tiptapRead({ range: chunk.range })
+  const { content } = toolkit.tiptapRead({ range: chunk.range })
   // 调用 AI 生成应应用于该块的更改
-  const changes = await getChanges({ nodes })
-  // 使用 `setHtmlSuggestions` 方法仅在该块的范围内设置建议
-  toolkit.setHtmlSuggestions({
+  const operations = await proofreaderApi({ content })
+  // 使用 `proofreaderWorkflow` 方法仅在该块的范围内设置建议
+  toolkit.proofreaderWorkflow({
     range: chunk.range,
-    changes,
+    operations,
   })
 }
 ```

@@ -1,8 +1,8 @@
 ---
-title: Vanilla JavaScript
+title: 纯 JavaScript
 meta:
-  title: Vanilla JavaScript | Tiptap 编辑器文档
-  description: 学习如何在文档中使用 Vanilla JavaScript 设置 Tiptap 编辑器、安装依赖并初始化编辑器！
+  title: 纯 JavaScript | Tiptap 编辑器文档
+  description: 学习如何在文档中使用纯 JavaScript 设置 Tiptap 编辑器、安装依赖并初始化编辑器！
 category: 编辑器
 ---
 
@@ -46,6 +46,32 @@ new Editor({
 ```
 
 在浏览器中打开你的项目，看看 Tiptap 的效果吧。干得漂亮！
+
+## 样式简述
+
+Tiptap 默认不包含视觉样式。编辑器仅输出语义化的 HTML。你可以使用自己的 CSS 或诸如 Tailwind、Bootstrap 等框架来进行样式设计。
+
+如果你使用了 StarterKit，它会包含最小的默认样式，使文本呈现得像一个基础文档。
+更多内容请见[样式指南](/editor/getting-started/style-editor)。
+
+## 使用 CDN（无需构建步骤）
+
+如果你想跳过构建工具，下面是一个使用 CDN 导入的可用示例：
+
+```html
+<script type="module">
+  import { Editor } from 'https://esm.sh/@tiptap/core'
+  import StarterKit from 'https://esm.sh/@tiptap/starter-kit'
+
+  new Editor({
+    element: document.querySelector('.element'),
+    extensions: [StarterKit],
+    content: '<p>Hello from CDN!</p>',
+  })
+</script>
+
+<div class="element"></div>
+```
 
 ## 后续步骤
 

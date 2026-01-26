@@ -13,7 +13,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 ### 系统要求
 
 - [Node](https://nodejs.org/en/download/) 已安装在你的机器上
-- 有 [Vue](https://vuejs.org/v2/guide/#Getting-Started) 使用经验
+- 有 [Vue](https://vuejs.org/guide/introduction.html) 使用经验
 
 ## 创建项目（可选）
 
@@ -23,7 +23,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ```bash
 # 创建一个项目
-npm init nuxt-app my-tiptap-project
+npx nuxi@latest init my-tiptap-project
 
 # 更改目录
 cd my-tiptap-project
@@ -37,7 +37,7 @@ cd my-tiptap-project
 npm install @tiptap/vue-3 @tiptap/pm @tiptap/starter-kit
 ```
 
-如果你按照步骤 1 和 2 使用，现在可以通过 `npm run dev` 启动项目，并在你喜欢的浏览器中打开 [http://localhost:8080/](http://localhost:8080/)。如果你在处理一个已有项目，可能会有所不同。
+如果你按照步骤 1 和 2 使用，现在可以通过 `npm run dev` 启动项目，并在你喜欢的浏览器中打开 [http://localhost:3000/](http://localhost:3000/)。如果你在处理一个已有项目，可能会有所不同。
 
 ## 集成 Tiptap
 
@@ -45,63 +45,39 @@ npm install @tiptap/vue-3 @tiptap/pm @tiptap/starter-kit
 
 这是让 Tiptap 与 Vue 一起快速启动的最简单方法。它将为你提供一个非常基本的 Tiptap 版本，没有任何按钮。别担心，你将很快能够添加更多功能。
 
+由于 Nuxt 使用服务端渲染（SSR），我们设置了 `immediatelyRender: false`，以防止编辑器在服务器上渲染。编辑器需要浏览器 API，而这些在 SSR 期间不可用，所以这个选项确保它只在客户端水合后渲染。
+
 ```html
 <template>
-  <editor-content :editor="editor" />
+  <EditorContent :editor="editor" />
 </template>
 
-<script>
-  import { Editor, EditorContent } from '@tiptap/vue-3'
+<script setup>
+  import { useEditor, EditorContent } from '@tiptap/vue-3'
   import StarterKit from '@tiptap/starter-kit'
 
-  export default {
-    components: {
-      EditorContent,
-    },
-
-    data() {
-      return {
-        editor: null,
-      }
-    },
-
-    mounted() {
-      this.editor = new Editor({
-        content: '<p>我正在使用 Vue.js 运行 Tiptap。🎉</p>',
-        extensions: [StarterKit],
-      })
-    },
-
-    beforeUnmount() {
-      this.editor.destroy()
-    },
-  }
+  const editor = useEditor({
+    content: `<p>我正在使用 Vue.js 运行 Tiptap。🎉</p>`,
+    extensions: [StarterKit],
+    // 不在服务器端渲染，仅在客户端水合后渲染
+    immediatelyRender: false,
+  })
 </script>
 ```
 
 ### 将其添加到你的应用中
 
-现在，让我们用以下示例代码替换 `pages/index.vue` 的内容，以便在我们的应用中使用新的 `TiptapEditor` 组件。
+现在，让我们用以下示例代码替换 `app/app.vue` 的内容，以便在我们的应用中使用新的 `TiptapEditor` 组件：
 
 ```html
 <template>
-  <div>
-    <client-only>
-      <tiptap-editor />
-    </client-only>
-  </div>
+  <TiptapEditor />
 </template>
-<script>
-  import TiptapEditor from '~/components/TiptapEditor.vue'
-  export default {
-    components: {
-      TiptapEditor,
-    },
-  }
-</script>
 ```
 
 请注意，Tiptap 需要在客户端运行，而不是在服务器上。必须将编辑器包装在 `<client-only>` 标签中。[了解更多关于客户端组件的信息。](https://nuxtjs.org/api/components-client-only)
+
+在 Nuxt 4 中，组件和 Vue 组合函数（如 `ref` 和 `watch`）会自动导入，因此你无需手动导入或注册它们。
 
 现在你应该能在浏览器中看到 Tiptap。给自己一个赞吧！:)
 
@@ -113,65 +89,51 @@ npm install @tiptap/vue-3 @tiptap/pm @tiptap/starter-kit
 
 ```html
 <template>
-  <editor-content :editor="editor" />
+  <EditorContent :editor="editor" />
 </template>
 
-<script>
-  import { Editor, EditorContent } from '@tiptap/vue-3'
+<script setup>
+  import { useEditor, EditorContent } from '@tiptap/vue-3'
   import StarterKit from '@tiptap/starter-kit'
 
-  export default {
-    components: {
-      EditorContent,
+  const emit = defineEmits(['update:modelValue'])
+  const props = defineProps({
+    modelValue: {
+      type: String,
+      default: '',
     },
+  })
 
-    props: {
-      value: {
-        type: String,
-        default: '',
-      },
+  const editor = useEditor({
+    content: props.modelValue,
+    extensions: [StarterKit],
+    // 不在服务器端渲染，仅在客户端水合后渲染
+    immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      // HTML
+      emit('update:modelValue', editor.getHTML())
+
+      // JSON
+      // emit('update:modelValue', editor.getJSON())
     },
+  })
 
-    data() {
-      return {
-        editor: null,
+  watch(
+    () => props.modelValue,
+    (value) => {
+      // HTML
+      const isSame = editor.value?.getHTML() === value
+
+      // JSON
+      // const isSame = JSON.stringify(editor.value?.getJSON()) === JSON.stringify(value)
+
+      if (isSame) {
+        return
       }
-    },
 
-    watch: {
-      value(value) {
-        // HTML
-        const isSame = this.editor.getHTML() === value
-
-        // JSON
-        // const isSame = JSON.stringify(this.editor.getJSON()) === JSON.stringify(value)
-
-        if (isSame) {
-          return
-        }
-
-        this.editor.commands.setContent(value, false)
-      },
-    },
-
-    mounted() {
-      this.editor = new Editor({
-        content: this.value,
-        extensions: [StarterKit],
-        onUpdate: () => {
-          // HTML
-          this.$emit('input', this.editor.getHTML())
-
-          // JSON
-          // this.$emit('input', this.editor.getJSON())
-        },
-      })
-    },
-
-    beforeUnmount() {
-      this.editor.destroy()
-    },
-  }
+      editor.value?.commands.setContent(value, false)
+    }
+  )
 </script>
 ```
 

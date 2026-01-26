@@ -22,6 +22,7 @@ meta:
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
 
 你是否曾想过在基于 React 的编辑器中拖动节点？我们也有同样的需求——所以这里有一个扩展实现它。
 
@@ -158,6 +159,64 @@ function Component() {
   <div>拖动我！</div>
 </DragHandle>
 ```
+
+### nested
+
+启用针对嵌套内容（如列表项、引用块及其他嵌套结构）的拖动手柄。
+
+启用后，拖动手柄不仅会出现在顶级块，还会出现在嵌套块。基于规则的评分系统会根据光标位置和配置规则确定目标节点。
+
+默认值：`false`
+
+```jsx
+// 使用默认值启用
+<DragHandle nested={true}>
+  <div>拖动我！</div>
+</DragHandle>
+
+// 使用自定义边缘检测启用
+<DragHandle nested={{ edgeDetection: { threshold: -16 } }}>
+  <div>拖动我！</div>
+</DragHandle>
+```
+
+#### 带嵌套支持的完整示例
+
+```jsx
+import DragHandle from '@tiptap/extension-drag-handle-react'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { useState } from 'react'
+
+const NESTED_CONFIG = { edgeDetection: { threshold: -16 } }
+
+export default function Editor() {
+  const [nested, setNested] = useState(true)
+
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: '<ul><li>Item 1</li><li>Item 2</li></ul>',
+  })
+
+  return (
+    <>
+      <button onClick={() => setNested(!nested)}>
+        切换嵌套
+      </button>
+      <DragHandle editor={editor} nested={nested ? NESTED_CONFIG : false}>
+        <div className="drag-handle" />
+      </DragHandle>
+      <EditorContent editor={editor} />
+    </>
+  )
+}
+```
+
+<Callout title="性能提示" variant="info">
+  当使用 React 状态切换 `nested` 属性时，请将配置对象定义为组件外部的常量，避免不必要的重新渲染。
+</Callout>
+
+请参见 [DragHandle 嵌套文档](/editor/extensions/functionality/drag-handle#nested-drag-handle) 获取包括边缘检测、自定义规则及允许容器等详细配置选项。
 
 ### 命令
 

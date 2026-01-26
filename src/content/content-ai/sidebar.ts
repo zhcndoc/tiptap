@@ -138,15 +138,23 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/live-demo',
                 },
                 {
-                  title: 'AI 工程指南',
-                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/ai-engineering',
+                  title: '概念',
+                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/concepts',
+                },
+                {
+                  title: '建议',
+                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions',
                 },
                 {
                   title: '样式建议',
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/style-suggestions',
                 },
                 {
-                  title: '文档对比',
+                  title: 'AI engineering',
+                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/ai-engineering',
+                },
+                {
+                  title: 'Compare documents',
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/compare-documents',
                 },
                 {

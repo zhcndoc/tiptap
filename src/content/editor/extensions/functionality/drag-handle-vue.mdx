@@ -159,6 +159,104 @@ export default {
 </drag-handle>
 ```
 
+### nested
+
+启用嵌套内容（如列表项、引用块和其他嵌套结构）的拖拽句柄功能。
+
+启用后，拖拽句柄会出现在嵌套块，而不仅是顶级块。根据光标位置和配置的规则，基于规则的评分系统决定要定位哪个节点。
+
+默认值： `false`
+
+<Callout title="避免重新渲染" variant="warning">
+  当向 `nested` 属性传递对象时，请始终在组件外定义它为常量。内联对象或计算属性中创建的对象会导致插件在每个渲染周期重新初始化，进而影响性能。
+</Callout>
+
+```vue
+<template>
+  <drag-handle :editor="editor" :nested="NESTED_CONFIG">
+    <div>拖拽我！</div>
+  </drag-handle>
+</template>
+
+<script>
+import { DragHandle } from '@tiptap/extension-drag-handle-vue-3'
+
+// 在组件外定义常量配置
+const NESTED_CONFIG = { edgeDetection: { threshold: -16 } }
+
+export default {
+  components: { DragHandle },
+  data() {
+    return {
+      // 将常量暴露给模板使用
+      NESTED_CONFIG,
+    }
+  },
+}
+</script>
+```
+
+如果仅需简单启用，无需自定义配置：
+
+```vue
+<drag-handle :nested="true">
+  <div>拖拽我！</div>
+</drag-handle>
+```
+
+#### 支持切换的完整示例
+
+```vue
+<template>
+  <div v-if="editor">
+    <button @click="nested = !nested">切换嵌套模式</button>
+    <drag-handle :editor="editor" :nested="nestedOptions">
+      <div class="drag-handle" />
+    </drag-handle>
+  </div>
+  <editor-content :editor="editor" />
+</template>
+
+<script>
+import { DragHandle } from '@tiptap/extension-drag-handle-vue-3'
+import StarterKit from '@tiptap/starter-kit'
+import { Editor, EditorContent } from '@tiptap/vue-3'
+
+// 在组件外定义常量配置以防止重新渲染
+const NESTED_CONFIG = { edgeDetection: { threshold: -16 } }
+
+export default {
+  components: {
+    EditorContent,
+    DragHandle,
+  },
+  data() {
+    return {
+      editor: null,
+      nested: true,
+    }
+  },
+  computed: {
+    nestedOptions() {
+      // 返回常量引用，而非新对象
+      return this.nested ? NESTED_CONFIG : false
+    },
+  },
+  mounted() {
+    this.editor = new Editor({
+      extensions: [StarterKit],
+      content: '<ul><li>项目 1</li><li>项目 2</li></ul>',
+    })
+  },
+  beforeUnmount() {
+    this.editor?.destroy()
+  },
+}
+</script>
+```
+
+有关详细的配置选项，包括边缘检测、自定义规则和允许的容器，请参阅 [DragHandle 嵌套文档](/editor/extensions/functionality/drag-handle#nested-drag-handle)。
+
 ### 命令
 
 请参阅 [DragHandle](/editor/extensions/functionality/drag-handle) 扩展以获取可用的编辑器命令。
