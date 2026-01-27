@@ -1,0 +1,77 @@
+---
+title: 架构感知
+meta:
+  title: 架构感知 | Tiptap 服务器 AI 工具包
+  description: 从您的 Tiptap 编辑器获取架构感知数据，以用于服务器 AI 工具包 API。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+在使用服务器 AI 工具包 API 之前，您需要从您的 Tiptap 编辑器获取架构感知数据。
+
+`getSchemaAwarenessData` 函数从您的 Tiptap 编辑器中检索架构信息，并将其转换为适用于服务器 AI 工具包 API 的格式。该数据描述了文档结构，帮助 AI 了解哪些内容是有效的。
+
+## `getSchemaAwarenessData`
+
+返回描述文档结构的架构感知数据，用于服务器 AI 工具包 API。
+
+该函数收集扩展中的架构信息，并将其转换为适合 AI 模型使用的格式。返回的数据被服务器 AI 工具包 API 用来理解文档中哪些内容是有效的。
+
+<Callout title="存储架构感知数据" variant="info">
+  `getSchemaAwarenessData` 返回的架构感知数据是一个可被 JSON 序列化的对象，
+  您可以将其存储在数据库中。您无需每次都生成，只需在编辑器扩展或架构变更时更新即可。
+</Callout>
+
+查看在 [架构感知指南](/content-ai/capabilities/server-ai-toolkit/agents/schema-awareness) 中的使用示例。
+
+### 参数
+
+#### `editor` (`Editor`)
+
+用于提取架构感知数据的 Tiptap 编辑器实例。
+
+#### `options?` (`GetSchemaAwarenessDataOptions`)
+
+架构感知的配置选项：
+
+- `customNodes?` (`JsonItem[]`): 除默认项外要包含的自定义架构感知条目。允许通过自定义节点类型或修改现有节点定义来扩展架构信息，以供 AI 模型使用。默认值：`[]`。
+
+每个 `JsonItem` 对象包含以下属性：
+
+- `extensionName` (`string`): 提供此元素的扩展名称
+- `name` (`string`): 元素的英文人类可读名称
+- `description?` (`string`): 解释该元素是什么以及如何显示
+- `isMark?` (`boolean`): 此项是否是标记（相较于节点）
+- `attributes?` (`Record<string, unknown>`): 元素可能包含的属性，定义为 Zod 模式，将被转换为 JSON 模式
+
+### 返回值
+
+`SchemaAwarenessData`：描述文档结构的架构感知数据。此数据会传递给服务器 AI 工具包 API 端点。
+
+### 示例
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { getSchemaAwarenessData } from '@tiptap-pro/server-ai-toolkit'
+
+const editor = new Editor({
+  extensions: [StarterKit],
+})
+
+// 获取架构感知数据
+const schemaAwarenessData = getSchemaAwarenessData(editor)
+
+// 用于服务器 AI 工具包 API
+const response = await fetch('https://api.tiptap.dev/v3/ai/toolkit/tools', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${API_TOKEN}`,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+  }),
+})
+```

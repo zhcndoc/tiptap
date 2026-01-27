@@ -1,0 +1,202 @@
+---
+title: REST API
+meta:
+  title: REST API | Tiptap 服务器 AI 工具包
+  description: 服务器 AI 工具包 REST API 端点的完整参考。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+服务器 AI 工具包提供 REST API 端点，用于获取工具定义并在 Tiptap 文档上执行工具。
+
+{/* eslint-disable-next-line prettier/prettier */}
+<Callout title="Postman 集合" variant="info">查看 <a href="https://www.postman.com/tiptap-platform/tiptap-workspace/collection/42722929-6a366c4c-10e4-4674-93c3-da35b70357a7?action=share&source=copy-link&creator=42722929" target="_blank" rel="noopener noreferrer">服务器 AI 工具包 REST API 的 Postman 集合</a>。</Callout>
+
+## 认证
+
+所有 API 请求都需要认证。使用您 Tiptap Cloud 账户的 `secret key` 生成 JWT（JSON Web Token）。在请求头中，将此 JWT 以 Bearer 令牌形式包含在 `Authorization` 头中，并将您的应用 ID 包含在 `X-App-Id` 头中。
+
+您可以在 [服务器 AI 工具包设置](https://cloud.tiptap.dev/v2/cloud/ai) 页面获取您的应用 ID 和 secret key。
+
+生产环境中，请务必在 **服务器端** 创建 JWT 以保障您的 secret 安全。
+
+```curl
+--header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+--header 'X-App-Id: YOUR_APP_ID'
+```
+
+## 基础 URL
+
+示例中，`BASE_URL` 是 Tiptap Cloud AI 服务的基础 URL。Tiptap Cloud AI 服务的基础 URL 为 `https://api.tiptap.dev`。若为本地部署，该 URL 会有所不同。
+
+## 获取工具定义
+
+调用此端点以获取服务器 AI 工具包可用的工具定义。
+
+### 端点
+
+```
+POST /v3/ai/toolkit/tools
+```
+
+### 请求
+
+```curl
+curl --location 'BASE_URL/v3/ai/toolkit/tools' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+--header 'X-App-Id: YOUR_APP_ID' \
+--data '{
+    "schemaAwarenessData": { /* 从 getSchemaAwarenessData 获取的 schema 认知数据 */ },
+    "tools": {
+      "tiptapRead": true,
+      "tiptapEdit": true
+    },
+    "format": "json"
+}'
+```
+
+### 请求体
+
+- `schemaAwarenessData`（`SchemaAwarenessData`，必填）：从 `getSchemaAwarenessData` 获取的 schema 认知数据。此数据描述了服务器 AI 工具包 API 的文档结构。
+- `tools?`（`EnabledTools`，可选）：启用/禁用特定工具的配置。每个属性可设为 `true`（启用）或 `false`（禁用）。若未提供，默认启用所有工具。
+  - `tiptapRead?`（`boolean`，可选）：启用/禁用 `tiptapRead` 工具（默认：`true`）
+  - `tiptapEdit?`（`boolean`，可选）：启用/禁用 `tiptapEdit` 工具（默认：`true`）
+- `format?`（`string`，可选）：AI 读取和编辑文档所使用的格式。必须为以下之一：
+  - `"json"`（默认）：标准 JSON 格式
+  - `"shorthand"`：Tiptap 简写格式，相较标准 JSON 可将 AI 令牌消耗降低最多 80%
+
+### 响应
+
+返回包含工具定义数组的对象：
+
+- `tools`（`array`）：工具定义数组。每个工具定义包含：
+  - `name`（`string`）：工具名（例如 `"tiptapRead"`、`"tiptapEdit"`）
+  - `description`（`string`）：工具功能描述
+  - `inputSchema`（`object`）：工具输入参数的 JSON schema
+
+### 示例响应
+
+```json
+{
+  "tools": [
+    {
+      "name": "tiptapRead",
+      "description": "工具描述",
+      "inputSchema": {
+        /* 工具输入的 JSON schema */
+      }
+    },
+    {
+      "name": "tiptapEdit",
+      "description": "工具描述",
+      "inputSchema": {
+        /* 工具输入的 JSON schema */
+      }
+    }
+  ]
+}
+```
+
+## 执行工具
+
+调用此端点，在 Tiptap 文档上执行工具。
+
+### 端点
+
+```
+POST /v3/ai/toolkit/execute-tool
+```
+
+### 请求
+
+```curl
+curl --location 'BASE_URL/v3/ai/toolkit/execute-tool' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+--header 'X-App-Id: YOUR_APP_ID' \
+--data '{
+    "toolName": "tiptapRead",
+    "input": { /* 工具输入 */ },
+    "document": { /* Tiptap JSON 文档 */ },
+    "schemaAwarenessData": { /* 从 getSchemaAwarenessData 获取的 schema 认知数据 */ },
+    "chunkSize": 1000,
+    "format": "json"
+}'
+```
+
+### 请求体
+
+- `toolName`（`string`，必填）：要执行的工具名称。必须是：
+  - `"tiptapRead"`：用高效格式读取文档部分内容
+  - `"tiptapEdit"`：用高效格式编辑文档
+- `input`（`any`，必填）：工具的输入参数，遵循工具输入 schema。输入格式针对高效读取和编辑操作进行了优化。
+- `document`（`object`，必填）：要操作的 Tiptap JSON 文档
+- `schemaAwarenessData`（`SchemaAwarenessData`，必填）：从 `getSchemaAwarenessData` 获取的 schema 认知数据
+- `chunkSize?`（`number`，可选）：读取操作的分块大小。默认值：`1000`
+- `format?`（`string`，可选）：AI 读取和编辑文档所使用的格式。必须为以下之一：
+  - `"json"`（默认）：标准 JSON 格式
+  - `"shorthand"`：Tiptap 简写格式，相较标准 JSON 可将 AI 令牌消耗降低最多 80%
+
+### 响应
+
+返回工具执行结果：
+
+- `output`（`any`）：工具执行的输出，输出格式针对高效读取和编辑操作进行了优化。
+- `hasError`（`boolean`）：执行过程中是否发生错误
+- `docChanged`（`boolean`）：文档是否被修改
+- `document`（`object | null`）：更新后的 Tiptap JSON 文档。若文档未被修改，返回 `null`；若 `docChanged` 为 `true`，则返回更新后的文档
+
+## 获取 schema 认知提示
+
+调用此端点，获取描述文档 schema 的提示字符串，供 AI 模型使用。
+
+### 端点
+
+```
+POST /v3/ai/toolkit/schema-awareness-prompt
+```
+
+### 请求
+
+```curl
+curl --location 'BASE_URL/v3/ai/toolkit/schema-awareness-prompt' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+--header 'X-App-Id: YOUR_APP_ID' \
+--data '{
+    "schemaAwarenessData": { /* 从 getSchemaAwarenessData 获取的 schema 认知数据 */ },
+    "format": "json"
+}'
+```
+
+### 请求体
+
+- `schemaAwarenessData`（`SchemaAwarenessData`，必填）：从 `getSchemaAwarenessData` 获取的 schema 认知数据。此数据描述服务器 AI 工具包 API 的文档结构。
+- `format?`（`string`，可选）：AI 读取和编辑文档所使用的格式。必须为以下之一：
+  - `"json"`（默认）：标准 JSON 格式
+  - `"shorthand"`：Tiptap 简写格式，相较标准 JSON 可将 AI 令牌消耗降低最多 80%
+
+### 响应
+
+返回描述文档 schema 的提示字符串：
+
+- `prompt`（`string`）：描述文档 schema 结构的文本提示，适合用于 AI 模型提示中
+
+### 示例响应
+
+```json
+{
+  "prompt": "Schema Awareness prompt"
+}
+```
+
+## 错误处理
+
+当出现错误时，API 会返回带有相应 HTTP 状态码的错误响应：
+
+- `400 Bad Request`：请求体或参数无效
+- `401 Unauthorized`：缺失或无效的 JWT 令牌或 App ID
+- `404 Not Found`：未找到指定工具
+- `500 Internal Server Error`：工具执行时发生服务器错误

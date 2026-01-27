@@ -1,0 +1,126 @@
+---
+title: 安装
+meta:
+  title: 安装 Server AI 工具包 | Tiptap 内容 AI
+  description: Server AI 工具包的安装指南。了解如何安装、配置认证，并开始使用 Server AI 工具包云服务。
+  category: 内容 AI
+---
+
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import { Callout } from '@/components/ui/Callout'
+import Link from '@/components/Link'
+
+<Requirements>
+  <RequirementItem label="1. 请求访问权限">
+    通过{' '}
+    <a href="https://tiptap.dev/contact-sales?form=server-ai-toolkit">联系我们的团队</a>
+    来请求访问 Server AI 工具包。
+  </RequirementItem>
+  <RequirementItem label="2. 访问私有注册表">
+    Server AI 工具包发布在 Tiptap 的私有 npm 注册表中。请按照[设置指南](/guides/pro-extensions)进行身份验证，访问 Tiptap 的私有 npm 注册表。
+  </RequirementItem>
+  <RequirementItem label="3. 安装包">
+    使用 npm 或您偏好的包管理器从私有注册表安装该包。
+  </RequirementItem>
+</Requirements>
+
+<EnterpriseCalloutAuto variant="server-ai-toolkit" renderMode="sidebar" />
+
+首先，<a href="https://tiptap.dev/contact-sales?form=server-ai-toolkit">联系我们的团队</a>以获取 Server AI 工具包的访问权限。
+
+获取访问权限后，按照[私有注册表指南](/guides/pro-extensions)配置您的包管理器。
+
+然后，安装该包：
+
+```bash
+npm install @tiptap-pro/server-ai-toolkit
+```
+
+## 获取模式感知数据
+
+要使用 Server AI 工具包 API，您需要从 Tiptap 编辑器获取模式感知数据。此数据描述文档结构，帮助 AI 理解哪些内容是有效的。
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { getSchemaAwarenessData } from '@tiptap-pro/server-ai-toolkit'
+
+const editor = new Editor({
+  extensions: [StarterKit],
+})
+
+// 从编辑器获取模式感知数据
+const schemaAwarenessData = getSchemaAwarenessData(editor)
+```
+
+`getSchemaAwarenessData` 函数返回描述文档结构的模式感知数据，用于 Server AI 工具包 API。
+
+<Callout title="保存模式感知数据" variant="info">
+  `getSchemaAwarenessData` 返回的模式感知数据是一个可序列化为 JSON 的对象，您可以将其存储在数据库中。无需每次都重新生成，仅在编辑器扩展或模式发生变化时更新即可。
+</Callout>
+
+更多细节请参阅[模式感知 API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/schema-awareness)。
+
+## 配置授权
+
+Server AI 工具包是一个云端或本地服务。需认证后方可访问其 REST API。
+
+1. 在[Tiptap 云 AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 页面，获取您的 App ID 和密钥。
+2. 使用如 `jsonwebtoken` 库生成 JWT。生产环境中，请务必**在服务器端**创建 JWT，以保持密钥安全。
+3. 在 API 请求中使用 JWT。将其作为 Bearer token 放入 `Authorization` 头部，并在 `X-App-Id` 中传递 App ID。
+
+```ts
+import jwt from 'jsonwebtoken'
+
+const TIPTAP_CLOUD_AI_API_URL = 'https://api.tiptap.dev'
+const TIPTAP_CLOUD_AI_SECRET = 'your-secret-key'
+const TIPTAP_CLOUD_AI_APP_ID = 'your-app-id'
+
+// 从密钥生成 JWT 令牌
+const JWT_TOKEN = jwt.sign({}, TIPTAP_CLOUD_AI_SECRET, { expiresIn: '1h' })
+
+// Server AI 工具包 API 请求头
+const headers = {
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${JWT_TOKEN}`,
+  'X-App-Id': TIPTAP_CLOUD_AI_APP_ID,
+}
+```
+
+## 调用 API 端点
+
+认证完成后，调用 Server AI 工具包 API 端点：
+
+```ts
+const response = await fetch(`${TIPTAP_CLOUD_AI_API_URL}/v3/ai/toolkit/tools`, {
+  method: 'POST',
+  headers,
+  body: JSON.stringify({
+    schemaAwarenessData,
+  }),
+})
+
+const tools = await response.json()
+```
+
+完整的 API 文档请参见[REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)。
+
+## 后续步骤
+
+现在您已配置好 Server AI 工具包，开始构建您的 AI 集成：
+
+<div className="grid md:grid-cols-2 gap-6 mt-6 md:items-start">
+  <Link
+    href="/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">AI 代理聊天机器人</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">了解更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      构建一个能够通过聊天交互并编辑文档的对话式 AI。
+    </div>
+  </Link>
+</div>

@@ -1,0 +1,53 @@
+---
+title: AI 代理
+meta:
+  title: AI 代理 | Tiptap 服务器 AI 工具包
+  description: 学习如何使用服务器 AI 工具包构建 AI 代理。
+  category: 内容 AI
+---
+
+import { Link } from '@/components/Link'
+import { Callout } from '@/components/ui/Callout'
+
+AI 代理可以在服务器端与 Tiptap 文档交互，以完成复杂的任务。服务器 AI 工具包包含[内置工具](/content-ai/capabilities/server-ai-toolkit/agents/tools)，允许您的 AI 在服务器端读取和编辑文档。
+
+通过服务器 AI 工具包，您可以构建具备服务器端文档编辑能力的代理：
+
+<div className="grid md:grid-cols-2 gap-4 mt-6 md:items-start">
+  <Link
+    href="/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">AI 代理聊天机器人</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">查看更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      使用服务器 AI 工具包 API 构建一个可以通过聊天读取和编辑文档的对话式 AI 代理。
+    </div>
+  </Link>
+  <Link
+    href="/content-ai/capabilities/server-ai-toolkit/agents/schema-awareness"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">模式感知</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">查看更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      让您的 AI 模型理解 Tiptap 文档中的自定义节点、标记和属性。
+    </div>
+  </Link>
+</div>
+
+## 可用工具
+
+服务器 AI 工具包提供了[工具定义](/content-ai/capabilities/server-ai-toolkit/agents/tools)，您的 AI 代理可以调用这些工具以在服务器上与文档交互。这些工具支持高效地读取内容和进行编辑。
+
+当您调用服务器 AI 工具包的 API 端点时，AI 模型可以生成工具调用，然后通过`/v3/ai/toolkit/execute-tool`端点执行。这允许 AI 根据用户请求读取、编辑和操作文档。
+
+## AI 代理 vs. 工作流
+
+在 AI 代理中，AI 模型可以从一组工具中选择执行任务。相比之下，[工作流](/content-ai/capabilities/server-ai-toolkit/workflows)只允许 AI 模型执行单一动作，比如生成编辑或重写文档。
+
+总体而言，工作流比 AI 代理工具更简单、更快速实现。然而，AI 代理更灵活，能够用来执行更复杂的任务。

@@ -1,0 +1,641 @@
+---
+title: AI 代理聊天机器人
+meta:
+  title: AI 代理聊天机器人 | Tiptap 内容 AI
+  description: 使用 Server AI Toolkit API 构建可以读取和编辑 Tiptap 文档的 AI 代理。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+
+<Requirements>
+  <RequirementItem label="1. 获取访问权限">
+    通过购买付费的 Server AI Toolkit 附加组件获取 Server AI Toolkit 的访问权限。{' '}
+    <a href="https://tiptap.dev/contact-sales?form=server-ai-toolkit">联系我们的团队</a>。
+  </RequirementItem>
+  <RequirementItem label="2. 访问私有注册表">
+    Server AI Toolkit 包发布在 Tiptap 的私有 npm 注册表中。请按照[设置指南](/guides/pro-extensions)认证登录 Tiptap 私有 npm 注册表。
+  </RequirementItem>
+  <RequirementItem label="3. 安装包">
+    使用 npm 或您喜欢的包管理器从私有注册表安装该包。
+  </RequirementItem>
+</Requirements>
+
+构建一个简单的 AI 代理聊天机器人，可以读取和编辑 Tiptap 文档。
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-ai-agent-chatbot"
+/>
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 技术栈
+
+- [React](https://react.dev/) + [Next.js](https://nextjs.org/)
+- [Vercel 的 AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
+- Server AI Toolkit API
+
+## 安装
+
+创建一个 [Next.js](https://nextjs.org/) 项目：
+
+```bash
+npx create-next-app@latest server-ai-agent-chatbot
+```
+
+安装核心 Tiptap 包、协作扩展和用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
+
+```bash
+npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-collaboration @tiptap-pro/provider ai @ai-sdk/react @ai-sdk/openai zod uuid yjs jsonwebtoken
+```
+
+安装 Server AI Toolkit 包。
+
+<Callout title="专业版包" variant="hint">
+  Server AI Toolkit 是一个专业版包。安装前，请按照[私有注册表指南](/guides/pro-extensions)设置访问私有 NPM 注册表。
+</Callout>
+
+```bash
+npm install @tiptap-pro/server-ai-toolkit
+```
+
+安装 jsonwebtoken 和 uuid 的 TypeScript 类型：
+
+```bash
+npm install --save-dev @types/jsonwebtoken @types/uuid
+```
+
+## 获取 schema 识别数据
+
+首先，从你的 Tiptap 编辑器获取 schema 识别数据。该数据描述文档结构，所有 API 调用都需要它。
+
+```ts
+// lib/get-schema-awareness.ts
+import { Editor } from '@tiptap/core'
+import { getSchemaAwarenessData } from '@tiptap-pro/server-ai-toolkit'
+
+export function getSchemaAwareness(editor: Editor) {
+  return getSchemaAwarenessData(editor)
+}
+```
+
+## API 端点
+
+创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型。从 Server AI Toolkit API 获取工具定义，并通过 API 执行工具。
+
+### 环境变量
+
+在创建辅助函数之前，配置以下环境变量：
+
+- **TIPTAP_CLOUD_AI_API_URL**：Server AI Toolkit API 的基础 URL。
+- **TIPTAP_CLOUD_AI_SECRET**：用于认证 Server AI Toolkit API 的密钥。用于生成 JWT 令牌。
+- **TIPTAP_CLOUD_AI_APP_ID**：Server AI Toolkit API 的应用 ID。
+- **TIPTAP_CLOUD_APP_ID**：用于协作和文档管理的 Tiptap Cloud 应用 ID。
+- **TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET**：用于访问 Tiptap Cloud 文档管理 API 的 REST API 密钥。
+
+在项目根目录创建 `.env` 文件，添加这些变量：
+
+```sh
+# .env
+TIPTAP_CLOUD_AI_API_URL=https://api.tiptap.dev/v3/ai
+TIPTAP_CLOUD_AI_SECRET=your-secret-key
+TIPTAP_CLOUD_AI_APP_ID=your-app-id
+TIPTAP_CLOUD_APP_ID=your-tiptap-cloud-app-id
+TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET=your-document-management-api-secret
+```
+
+你可以在 [Server AI Toolkit 设置](https://cloud.tiptap.dev/v2/cloud/ai) 页面获取你的 App ID 和密钥。密钥用于生成 JWT 令牌以进行认证。
+
+<Callout title="Tiptap Cloud 集成" variant="info">
+  本实现使用 Tiptap Cloud 的 REST API 管理文档状态。你需要拥有 Tiptap Cloud 账号及 REST API 密钥来存储和检索文档。使用文档 ID 来跟踪跨工具执行的文档状态。
+</Callout>
+
+### 辅助函数
+
+创建用于与 Server AI Toolkit API 交互的辅助函数：
+
+### 获取 JWT 令牌
+
+此函数使用密钥生成 JWT 令牌，用于认证 AI Toolkit API。
+
+```ts
+// lib/server-ai-toolkit/get-tiptap-cloud-ai-jwt-token.ts
+import jwt from 'jsonwebtoken'
+
+/**
+ * 从 TIPTAP_CLOUD_AI_SECRET 生成 JWT 令牌，用于认证 AI Toolkit API
+ */
+export function getTiptapCloudAiJwtToken(): string {
+  const secret = process.env.TIPTAP_CLOUD_AI_SECRET
+  if (!secret) {
+    throw new Error('TIPTAP_CLOUD_AI_SECRET 环境变量未设置')
+  }
+
+  const payload = {}
+
+  return jwt.sign(payload, secret, { expiresIn: '1h' })
+}
+```
+
+### 获取工具定义
+
+此函数从 Server AI Toolkit API 获取可用工具定义。
+
+```ts
+// lib/server-ai-toolkit/get-tool-definitions.ts
+import type z from 'zod'
+import { getTiptapCloudAiJwtToken } from './get-tiptap-cloud-ai-jwt-token'
+
+/**
+ * 从 Server AI Toolkit API 获取工具定义
+ */
+export async function getToolDefinitions(schemaAwarenessData: unknown): Promise<
+  {
+    name: string
+    description: string
+    inputSchema: z.core.JSONSchema.JSONSchema
+  }[]
+> {
+  const apiBaseUrl = process.env.TIPTAP_CLOUD_AI_API_URL || 'https://api.tiptap.dev/v3/ai'
+  const appId = process.env.TIPTAP_CLOUD_AI_APP_ID
+
+  if (!appId) {
+    throw new Error('缺少 TIPTAP_CLOUD_AI_APP_ID')
+  }
+
+  const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getTiptapCloudAiJwtToken()}`,
+      'X-App-Id': appId,
+    },
+    body: JSON.stringify({
+      schemaAwarenessData,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`获取工具失败: ${response.statusText}`)
+  }
+  const responseData = await response.json()
+
+  return responseData.tools
+}
+```
+
+### 获取 schema 识别提示
+
+此函数从 Server AI Toolkit API 获取格式化的提示字符串，该字符串向 AI 模型描述文档的 schema。该提示将包含在代理的指令中，帮助 AI 理解文档中可用的节点、标记和属性。
+
+```ts
+// lib/server-ai-toolkit/get-schema-awareness-prompt.ts
+import { getTiptapCloudAiJwtToken } from './get-tiptap-cloud-ai-jwt-token'
+
+/**
+ * 从 Server AI Toolkit API 获取 schema 识别提示
+ */
+export async function getSchemaAwarenessPrompt(schemaAwarenessData: unknown): Promise<string> {
+  const apiBaseUrl = process.env.TIPTAP_CLOUD_AI_API_URL || 'https://api.tiptap.dev/v3/ai'
+  const appId = process.env.TIPTAP_CLOUD_AI_APP_ID
+
+  if (!appId) {
+    throw new Error('缺少 TIPTAP_CLOUD_AI_APP_ID')
+  }
+
+  const response = await fetch(`${apiBaseUrl}/toolkit/schema-awareness-prompt`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getTiptapCloudAiJwtToken()}`,
+      'X-App-Id': appId,
+    },
+    body: JSON.stringify({
+      schemaAwarenessData,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`获取 schema 识别提示失败: ${response.statusText}`)
+  }
+
+  const result: { prompt: string } = await response.json()
+  return result.prompt
+}
+```
+
+### 执行工具
+
+此函数通过 Server AI Toolkit API 执行指定工具。它将工具名称、输入参数、当前文档状态和 schema 识别数据发送给 API，API 处理工具执行并返回结果，以及如果工具修改了文档，返回更新后的文档。
+
+```ts
+// lib/server-ai-toolkit/execute-tool.ts
+import { getTiptapCloudAiJwtToken } from './get-tiptap-cloud-ai-jwt-token'
+
+/**
+ * 通过 Server AI Toolkit API 执行工具
+ */
+export async function executeTool(
+  toolName: string,
+  input: unknown,
+  document: unknown,
+  schemaAwarenessData: unknown,
+): Promise<{ output: unknown; docChanged: boolean; document?: unknown }> {
+  const apiBaseUrl = process.env.TIPTAP_CLOUD_AI_API_URL || 'https://api.tiptap.dev/v3/ai'
+  const appId = process.env.TIPTAP_CLOUD_AI_APP_ID
+
+  if (!appId) {
+    throw new Error('缺少 TIPTAP_CLOUD_AI_APP_ID')
+  }
+
+  const response = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getTiptapCloudAiJwtToken()}`,
+      'X-App-Id': appId,
+    },
+    body: JSON.stringify({
+      toolName,
+      input,
+      document,
+      schemaAwarenessData,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`工具执行失败: ${response.statusText}`)
+  }
+
+  return response.json()
+}
+```
+
+### 获取文档
+
+此函数通过文档 ID，从 Tiptap Cloud 的 REST API 获取当前文档状态。它在每次工具执行前被调用，确保工具在最新版本文档上执行，避免并发编辑冲突。
+
+```ts
+// lib/server-ai-toolkit/get-document.ts
+/**
+ * 从 Tiptap Collaboration REST API 获取文档
+ */
+export async function getDocument(documentId: string): Promise<unknown> {
+  const tiptapCloudAppId = process.env.TIPTAP_CLOUD_APP_ID
+  const documentManagementApiSecret = process.env.TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET
+
+  if (!tiptapCloudAppId) {
+    throw new Error('缺少 TIPTAP_CLOUD_APP_ID')
+  }
+
+  if (!documentManagementApiSecret) {
+    throw new Error('缺少 TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET')
+  }
+
+  const collabUrl = `https://${tiptapCloudAppId}.collab.tiptap.cloud/api/documents/${encodeURIComponent(
+    documentId,
+  )}?format=json`
+
+  const response = await fetch(collabUrl, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: documentManagementApiSecret,
+    },
+  })
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error(`文档 ${documentId} 未找到`)
+    }
+    throw new Error(`检索文档失败: ${response.status} ${response.statusText}`)
+  }
+
+  return response.json()
+}
+```
+
+### 更新文档
+
+此函数在工具执行修改文档后，更新 Tiptap Cloud 的文档状态。它尝试 PATCH 更新已有文档，若文档不存在 (404)，则创建新文档，确保文档状态持久化且在所有客户端同步。
+
+```ts
+// lib/server-ai-toolkit/update-document.ts
+/**
+ * 更新 Tiptap Collaboration REST API 中的文档
+ */
+export async function updateDocument(documentId: string, document: unknown): Promise<void> {
+  const tiptapCloudAppId = process.env.TIPTAP_CLOUD_APP_ID
+  const documentManagementApiSecret = process.env.TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET
+
+  if (!tiptapCloudAppId) {
+    console.warn('缺少 TIPTAP_CLOUD_APP_ID，跳过更新')
+    return
+  }
+
+  if (!documentManagementApiSecret) {
+    console.warn('缺少 TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET，跳过更新')
+    return
+  }
+
+  const collabUrl = `https://${tiptapCloudAppId}.collab.tiptap.cloud/api/documents/${encodeURIComponent(
+    documentId,
+  )}?format=json`
+
+  try {
+    const response = await fetch(collabUrl, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: documentManagementApiSecret,
+      },
+      body: JSON.stringify(document),
+    })
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        // 文档不存在，尝试创建
+        const createResponse = await fetch(collabUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: documentManagementApiSecret,
+          },
+          body: JSON.stringify(document),
+        })
+
+        if (!createResponse.ok) {
+          console.error(
+            `创建文档失败: ${createResponse.status} ${createResponse.statusText}`,
+          )
+        }
+      } else {
+        console.error(`更新文档失败: ${response.status} ${response.statusText}`)
+      }
+    }
+  } catch (error) {
+    console.error('更新文档时出错:', error)
+  }
+}
+```
+
+现在创建主 API 路由：
+
+```ts
+// app/api/server-ai-agent-chatbot/route.ts
+import { openai } from '@ai-sdk/openai'
+import { createAgentUIStreamResponse, ToolLoopAgent, tool, type UIMessage } from 'ai'
+import z from 'zod'
+import { executeTool } from '@/lib/server-ai-toolkit/execute-tool'
+import { getDocument } from '@/lib/server-ai-toolkit/get-document'
+import { getSchemaAwarenessPrompt } from '@/lib/server-ai-toolkit/get-schema-awareness-prompt'
+import { getToolDefinitions } from '@/lib/server-ai-toolkit/get-tool-definitions'
+import { updateDocument } from '@/lib/server-ai-toolkit/update-document'
+
+export async function POST(req: Request) {
+  const {
+    messages,
+    schemaAwarenessData,
+    documentId,
+  }: {
+    messages: UIMessage[]
+    schemaAwarenessData: unknown
+    documentId: string
+  } = await req.json()
+
+  // 从 Server AI Toolkit API 获取工具定义
+  const toolDefinitions = await getToolDefinitions(schemaAwarenessData)
+
+  // 从 Server AI Toolkit API 获取 schema 识别提示
+  const schemaAwarenessPrompt = await getSchemaAwarenessPrompt(schemaAwarenessData)
+
+  // 将 API 工具定义转换为 AI SDK 工具格式
+  const tools = Object.fromEntries(
+    toolDefinitions.map((toolDef) => [
+      toolDef.name,
+      tool({
+        description: toolDef.description,
+        inputSchema: z.fromJSONSchema(toolDef.inputSchema),
+        execute: async (input) => {
+          try {
+            // 执行工具前获取最新版本的文档
+            const document = await getDocument(documentId)
+
+            const result = await executeTool(toolDef.name, input, document, schemaAwarenessData)
+
+            // 工具执行后，如果文档有修改则更新
+            if (result.docChanged && result.document && documentId) {
+              await updateDocument(documentId, result.document)
+            }
+
+            return result.output
+          } catch (error) {
+            console.error(`执行工具 ${toolDef.name} 失败:`, error)
+            return {
+              error: error instanceof Error ? error.message : '未知错误',
+            }
+          }
+        },
+      }),
+    ]),
+  )
+
+  const agent = new ToolLoopAgent({
+    model: openai('gpt-5-mini'),
+    instructions: `你是一名能编辑富文本文档的助手。
+回答时请简洁明了。但你生成的文档内容无需简洁直白，应尽可能贴合用户请求。
+在调用任何工具前，用一句话或更短总结你将要做的高层任务，就像人类作者描述任务一样。
+规则：回答中不要透露工具调用的细节
+规则：回答中不要包含文档 HTML 内容的细节
+
+${schemaAwarenessPrompt}`,
+    tools,
+    providerOptions: {
+      openai: {
+        reasoningEffort: 'minimal',
+      },
+    },
+  })
+
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
+  })
+}
+```
+
+## 客户端设置
+
+创建一个客户端 React 组件渲染带协作支持的 Tiptap 编辑器和简单聊天界面。该组件使用 Vercel AI SDK 的[useChat hook](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat)调用 API 端点并管理聊天对话。
+
+首先创建一个服务器动作用于生成 Tiptap Cloud 协作的 JWT 令牌。此函数生成安全的 JWT，用于授权客户端访问 Tiptap Cloud 协作服务的特定文档。
+
+```ts
+// app/server-ai-agent-chatbot/actions.ts
+'use server'
+
+import jwt from 'jsonwebtoken'
+
+const TIPTAP_CLOUD_SECRET = process.env.TIPTAP_CLOUD_SECRET
+const TIPTAP_CLOUD_APP_ID = process.env.TIPTAP_CLOUD_APP_ID
+
+export async function getCollabConfig(
+  userId: string,
+  documentName: string,
+): Promise<{ token: string; appId: string }> {
+  if (!TIPTAP_CLOUD_SECRET) {
+    throw new Error('TIPTAP_CLOUD_SECRET 环境变量未设置')
+  }
+
+  if (!TIPTAP_CLOUD_APP_ID) {
+    throw new Error('TIPTAP_CLOUD_APP_ID 环境变量未设置')
+  }
+
+  const payload = {
+    sub: userId,
+    allowedDocumentNames: [documentName],
+  }
+
+  const token = jwt.sign(payload, TIPTAP_CLOUD_SECRET, { expiresIn: '1h' })
+
+  return { token, appId: TIPTAP_CLOUD_APP_ID }
+}
+```
+
+现在创建主页面组件：
+
+```tsx
+// app/server-ai-agent-chatbot/page.tsx
+'use client'
+
+import { useChat } from '@ai-sdk/react'
+import { Collaboration } from '@tiptap/extension-collaboration'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { TiptapCollabProvider } from '@tiptap-pro/provider'
+import { getSchemaAwarenessData } from '@tiptap-pro/server-ai-toolkit'
+import { DefaultChatTransport } from 'ai'
+import { useEffect, useRef, useState } from 'react'
+import { v4 as uuid } from 'uuid'
+import * as Y from 'yjs'
+import { getCollabConfig } from './actions'
+
+export default function Page() {
+  const [doc] = useState(() => new Y.Doc())
+  const [documentId] = useState(() => `server-ai-agent-chatbot/${uuid()}`)
+  const providerRef = useRef<TiptapCollabProvider | null>(null)
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit, Collaboration.configure({ document: doc })],
+  })
+
+  // 从服务器动作获取 JWT 令牌和 appId
+  useEffect(() => {
+    const setupProvider = async () => {
+      try {
+        const { token, appId } = await getCollabConfig('user-1', documentId)
+
+        const collabProvider = new TiptapCollabProvider({
+          appId,
+          name: documentId,
+          token,
+          document: doc,
+          user: 'user-1',
+          onOpen() {
+            console.log('WebSocket 连接已打开。')
+          },
+          onConnect() {
+            editor?.commands.setContent(initialContent)
+          },
+        })
+
+        providerRef.current = collabProvider
+      } catch (error) {
+        console.error('设置协作失败:', error)
+      }
+    }
+
+    setupProvider()
+
+    return () => {
+      if (providerRef.current) {
+        providerRef.current.destroy()
+        providerRef.current = null
+      }
+    }
+  }, [documentId, doc, editor])
+
+  // 修复问题：https://github.com/vercel/ai/issues/7819
+  const schemaAwarenessData = editor ? getSchemaAwarenessData(editor) : null
+  const schemaAwarenessDataRef = useRef(schemaAwarenessData)
+  schemaAwarenessDataRef.current = schemaAwarenessData
+
+  const { messages, sendMessage } = useChat({
+    transport: new DefaultChatTransport({
+      api: '/api/server-ai-agent-chatbot',
+      body: () => ({
+        schemaAwarenessData: schemaAwarenessDataRef.current,
+        documentId,
+      }),
+    }),
+  })
+
+  const [input, setInput] = useState('替换最后一段为关于 Tiptap 的短篇故事')
+
+  if (!editor) return null
+
+  return (
+    <div>
+      <EditorContent editor={editor} />
+      {messages?.map((message) => (
+        <div key={message.id} style={{ whiteSpace: 'pre-wrap' }}>
+          <strong>{message.role}</strong>
+          <br />
+          <div className="mt-2 whitespace-pre-wrap">
+            {message.parts
+              .filter((p) => p.type === 'text')
+              .map((p) => p.text)
+              .join('\n') || '加载中...'}
+          </div>
+        </div>
+      ))}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (input.trim()) {
+            sendMessage({ text: input })
+            setInput('')
+          }
+        }}
+      >
+        <input value={input} onChange={(e) => setInput(e.target.value)} />
+        <button type="submit">发送</button>
+      </form>
+    </div>
+  )
+}
+```
+
+<Callout title="文档状态管理" variant="info">
+  此实现使用 `documentId` 代替直接传递文档。文档状态通过 Tiptap Cloud 的 REST API 在服务器端管理，确保工具多次执行时状态一致。客户端则使用 Tiptap Collaboration 进行实时同步。
+</Callout>
+
+## 最终效果
+
+配合额外的 CSS 样式，效果是一个简单但精致的 AI 聊天机器人应用，使用 Server AI Toolkit 进行文档编辑：
+
+<CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/server-ai-agent-chatbot" />
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 后续步骤
+
+- 允许你的 AI 使用[Schema 识别指南](/content-ai/capabilities/server-ai-toolkit/agents/schema-awareness)生成自定义元素
+- 了解更多可用工具，参见[代理部分](/content-ai/capabilities/server-ai-toolkit/agents)
+- 浏览[REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)获取完整端点文档

@@ -1,0 +1,122 @@
+---
+title: Schema 识别
+meta:
+  title: Schema 识别 | Tiptap 内容 AI
+  description: 为您的 AI 模型赋予 schema 识别能力，使其了解 Server AI Toolkit 中的节点、标记和属性。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+<Callout title="继续 AI 代理聊天机器人指南" variant="info">
+  本指南是对[AI 代理聊天机器人指南](/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot)的延续。请先阅读该指南。
+</Callout>
+
+Tiptap 的 [schema](/editor/core-concepts/schema) 描述了文档可以（以及不可以）包含的元素。Tiptap 的 **schema 识别** 功能使 AI 模型能够更好地理解文档并生成自定义元素。
+
+<Callout title="为什么需要 schema 识别？" variant="default">
+  如果没有 schema 识别，AI 模型可能会生成 Tiptap 编辑器不支持的内容。例如，它可能在不支持表格的文档中生成表格。启用 schema 识别后，AI 模型将知道表格节点不被支持，并会拒绝生成它们。
+</Callout>
+
+## 指南：为您的 AI 模型赋予 schema 识别能力
+
+将 schema 识别功能集成到 AI 代理中，例如在[AI 代理聊天机器人指南](/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot)中构建的代理。
+
+### 第 1 步：获取 schema 识别数据
+
+从 Server AI Toolkit 包中获取 schema 识别数据。该数据包含文档 schema 的信息，格式经过优化，适用于 AI 模型。
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { getSchemaAwarenessData } from '@tiptap-pro/server-ai-toolkit'
+
+const editor = new Editor({
+  extensions: [StarterKit],
+})
+
+// 获取 schema 识别数据
+const schemaAwarenessData = getSchemaAwarenessData(editor)
+```
+
+`getSchemaAwarenessData` 函数返回描述文档结构的 schema 识别数据，供 Server AI Toolkit API 使用。
+
+<Callout title="存储 schema 识别数据" variant="info">
+  `getSchemaAwarenessData` 返回的 schema 识别数据是可 JSON 序列化的对象，可以存储在数据库中。您无需每次都生成它——只需在您的 Editor 扩展或 schema 发生变化时更新即可。
+</Callout>
+
+### 第 2 步：配置自定义节点
+
+如果文档中包含[自定义节点和标记](/editor/extensions/custom-extensions)，请在扩展配置中添加 `addJsonSchemaAwareness` 选项。这样，AI 模型才能准确生成此自定义节点或标记。
+
+例如，如果您有一个名为 `'alert'` 的自定义节点，可以通过如下配置允许 AI 模型生成它：
+
+```ts
+import { Node } from '@tiptap/core'
+import { z } from 'zod'
+
+const CustomExtension = Node.create({
+  name: 'alert',
+
+  addAttributes() {
+    return {
+      type: {
+        default: 'info',
+        parseHTML: (element) => element.getAttribute('data-type'),
+        renderHTML: (attributes) => {
+          if (!attributes.type) {
+            return {}
+          }
+          return {
+            'data-type': attributes.type,
+          }
+        },
+      },
+    }
+  },
+
+  addJsonSchemaAwareness() {
+    return {
+      name: '警告框',
+      description: `用于显示重要信息、警告或提示的高亮框。
+它可以包含行内内容，如文本和格式标记。`,
+      attributes: {
+        type: z
+          .enum(['info', 'warning', 'error', 'success'])
+          .describe(
+            '警告类型。可为以下 4 种值之一：info、warning、error 或 success',
+          ),
+      },
+    }
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'div[data-alert]',
+      },
+    ]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['div', { ...HTMLAttributes, 'data-alert': '' }, 0]
+  },
+
+  // ... 其他扩展配置选项
+})
+```
+
+`addJsonSchemaAwareness` 函数应返回一个对象，包含：
+
+- `name`（`string`）：元素的英文人类可读名称
+- `description?`（`string`）：元素的英文解释，供 AI 模型使用
+- `attributes?`（`Record<string, z.ZodTypeAny>`）：元素可能拥有的属性，定义为 Zod 模式，将被转换成 JSON 模式
+
+<Callout title="官方 Tiptap 扩展的情况？" variant="info">
+  Server AI Toolkit 自动支持官方 Tiptap 扩展的 schema 识别，无需额外配置。您仍然可以通过扩展官方扩展并添加 `addJsonSchemaAwareness` 选项来重写默认的 schema 识别信息。
+</Callout>
+
+## 后续步骤
+
+- [Schema 识别 API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/schema-awareness)
+- [REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)

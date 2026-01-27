@@ -9,10 +9,40 @@ meta:
 ---
 
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { Callout } from '@/components/ui/Callout'
+import { Link } from '@/components/Link'
+import { CodeDemo } from '@/components/CodeDemo'
+
+<Requirements>
+  <RequirementItem label="1. 获得访问权限">
+    通过购买付费的服务器 AI 工具包附加组件来访问服务器 AI 工具包。{' '}
+    <a href="https://tiptap.dev/contact-sales?form=ai-toolkit">联系我们的团队</a>。
+  </RequirementItem>
+  <RequirementItem label="2. 访问私有仓库">
+    服务器 AI 工具包包发布在 Tiptap 的私有 npm 仓库中。请按照[私有 npm 仓库指南](/guides/pro-extensions)进行认证以访问 Tiptap 私有 npm 仓库。
+  </RequirementItem>
+  <RequirementItem label="3. 安装包">
+    使用 npm 或您偏好的包管理器从私有仓库安装该包。
+  </RequirementItem>
+</Requirements>
 
 <EnterpriseCalloutAuto variant="server-ai-toolkit" renderMode="sidebar" />
 
 在服务器端处理 Tiptap 文档。服务器 AI 工具包包含 AI 需要的工具，可在后台编辑文档，无需浏览器环境。
+
+<CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/server-ai-agent-chatbot" />
+
+## 核心功能
+
+服务器 AI 工具包包括构建任何自定义 AI 功能的基础组件：
+
+- 用于构建能够执行复杂任务的 [AI 代理](/content-ai/capabilities/server-ai-toolkit/agents) 的**工具**。
+- AI 拥有单一明确定义任务的[**工作流**](/content-ai/capabilities/ai-toolkit/workflows)：插入内容、校对文档等。
+
+<Callout title="兼容任何 AI 模型" variant="info">
+  服务器 AI 工具包可与任何能够生成文本的 AI 模型配合使用，包括开源和自托管模型。
+</Callout>
 
 ## 核心功能
 
@@ -21,6 +51,35 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 ### AI 代理工具
 
 预构建的工具定义，供 AI 代理调用以在服务器端与文档交互。这些工具兼容 Vercel AI SDK 等流行框架，并为其他提供商提供通用格式。
+
+构建能够通过处理 Tiptap 文档执行复杂任务的 [AI 代理](/content-ai/capabilities/server-ai-toolkit/agents)。
+
+<div className="grid md:grid-cols-2 gap-6 mt-6 md:items-start">
+  <Link
+    href="/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">AI 代理聊天机器人</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      构建能够编辑文档并通过聊天互动的对话式 AI。
+    </div>
+  </Link>
+  <Link
+    href="/content-ai/capabilities/server-ai-toolkit/agents/schema-awareness"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">模式感知</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      让您的 AI 模型理解 Tiptap 文档中的自定义节点、标记和属性。
+    </div>
+  </Link>
+</div>
 
 ### 工作流
 
@@ -41,13 +100,13 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 它利用专门的编辑格式 Tiptap Edit，让 AI 进行小而精准的编辑，无需替换整个文档。
 
-Tiptap Shorthand 是一种高效编码文档结构的格式，帮助您在不牺牲准确度的前提下，将 AI 令牌成本降低多达 80%。
+[Tiptap Shorthand](/content-ai/capabilities/server-ai-toolkit/advanced-guides/tiptap-shorthand) 是一种高效编码文档结构的格式，帮助您在不牺牲准确度的前提下，将 AI 令牌成本降低多达 80%。
 
 通过结合 Tiptap Edit 和 Tiptap Shorthand，您可以以快速且具成本效益的方式处理文档。
 
 ## 部署选项
 
-服务器 AI 工具包可以作为云服务访问，也可以部署到您自有的 AI 基础设施。
+服务器 AI 工具包既可以作为云服务访问，也可以部署到您自有的 AI 基础设施。
 
 此外，将提供支持 TypeScript、Python 和 Ruby 等编程语言的 SDK。这些 SDK 将与 Vercel AI SDK、OpenAI SDK 和 LangChain 等 AI 框架集成。
 

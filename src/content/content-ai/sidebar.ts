@@ -253,8 +253,74 @@ export const sidebarConfig: SidebarConfig = {
         },
         {
           title: '服务端 AI 工具包',
-          href: '/content-ai/capabilities/server-ai-toolkit/overview',
+          href: '/content-ai/capabilities/server-ai-toolkit',
           tags: ['Alpha'],
+          children: [
+            {
+              title: '概述',
+              href: '/content-ai/capabilities/server-ai-toolkit/overview',
+            },
+            {
+              title: '安装',
+              href: '/content-ai/capabilities/server-ai-toolkit/install',
+            },
+            {
+              title: '智能体',
+              href: '/content-ai/capabilities/server-ai-toolkit/agents',
+              children: [
+                {
+                  title: 'AI 智能体聊天机器人',
+                  href: '/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot',
+                },
+                {
+                  title: '模式感知',
+                  href: '/content-ai/capabilities/server-ai-toolkit/agents/schema-awareness',
+                },
+                {
+                  title: '工具定义',
+                  href: '/content-ai/capabilities/server-ai-toolkit/agents/tools',
+                },
+              ],
+            },
+            {
+              title: '工作流',
+              href: '/content-ai/capabilities/server-ai-toolkit/workflows',
+            },
+            {
+              title: 'API 参考',
+              href: '/content-ai/capabilities/server-ai-toolkit/api-reference',
+              children: [
+                {
+                  title: '模式感知',
+                  href: '/content-ai/capabilities/server-ai-toolkit/api-reference/schema-awareness',
+                },
+                {
+                  title: 'REST API',
+                  href: '/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api',
+                },
+              ],
+            },
+            {
+              title: '高级指南',
+              href: '/content-ai/capabilities/server-ai-toolkit/advanced-guides',
+              children: [
+                {
+                  title: 'Tiptap 速记',
+                  href: '/content-ai/capabilities/server-ai-toolkit/advanced-guides/tiptap-shorthand',
+                },
+              ],
+            },
+            {
+              title: '更新日志',
+              href: '/content-ai/capabilities/server-ai-toolkit/changelog',
+              children: [
+                {
+                  title: '服务器 AI 工具包',
+                  href: '/content-ai/capabilities/server-ai-toolkit/changelog/server-ai-toolkit',
+                },
+              ],
+            },
+          ],
         },
         {
           title: 'AI 生成',

@@ -1,0 +1,31 @@
+---
+title: 工具定义
+meta:
+  title: 工具定义 | Tiptap 服务器 AI 工具包
+  description: 允许 AI 代理在服务器上读取和编辑 Tiptap 文档的完整工具定义列表。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+服务器 AI 工具包提供了一整套用于在服务器上与 Tiptap 文档交互的工具。
+
+当你将这些工具提供给你的 AI 代理时，它将生成通过 `/v3/ai/toolkit/execute-tool` 端点执行的工具调用。这允许 AI 读取和编辑文档。
+
+有关检索和执行工具的端点的更多信息，请参阅 [API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api) 。
+
+<Callout title="注意" variant="info">
+  即将发布的版本将包含特定提供者的工具定义（针对 Vercel AI SDK、LangChain.js、OpenAI、Anthropic 等）。目前，你需要从服务器 AI 工具包 API 获取以通用格式提供的工具定义，并将其转换为你的提供者格式。
+</Callout>
+
+## `tiptapRead`
+
+使用针对读取操作优化的高效格式读取文档的部分内容。
+
+该工具使用一种适合于读取大型文档的高效格式。
+
+## `tiptapEdit`
+
+使用针对编辑操作优化的高效格式编辑文档。
+
+该工具使用一种高效格式，允许对文档进行精确编辑，而无需替换整个内容，从而减少令牌使用并提升性能。
