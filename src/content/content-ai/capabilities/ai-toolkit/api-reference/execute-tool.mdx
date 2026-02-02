@@ -17,22 +17,30 @@ meta:
 
 ### 参数
 
-- `options` (`ExecuteToolOptions`): 工具执行配置
-  - `toolName` (`string`): 要执行的工具。可以是 [可用工具](/content-ai/capabilities/ai-toolkit/tools/available-tools) 之一。
-  - `input` (`unknown`): 与工具参数输入模式匹配的 JSON 对象。如果该工具不需要参数，传递空对象 (`{}`)。
-  - `chunkSize?` (`number`): 可作为输入传递给 AI 模型的字符串最大大小。防止 AI 一次读取过多内容，以免超过 AI 模型的上下文窗口。默认值：`32000`。该参数由读取工具使用，用于控制文档如何拆分为块。
-  - `reviewOptions?` (`ReviewOptions`): 控制预览/审核行为
-    - `mode?` (`'disabled' | 'review' | 'preview'`): 是否在应用更改前或后进行审核。`'disabled'` 表示不审核，`'review'` 表示应用后审核，`'preview'` 表示应用前预览。默认值：`'disabled'`
-    - `diffMode?` (`'detailed' | 'full'`): 启用审核模式时，如何展示原始内容与修改内容的差异。`'detailed'` 对比更改前后的文档，显示删除内容和新增内容的丰富差异；`'full'` 将删除内容和新增内容作为整块显示，作为包含删除和新增内容的单一变更。默认值：`'detailed'`
-    - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议的显示方式
-      - `showAsDiff?` (`boolean`): 是否将建议显示为差异，对比插入内容和原始内容并列显示。默认值：`true`
-      - `diffPosition?` (`'before' | 'after'`): 差异相对于建议的位置。默认值：`'before'`
-      - `attributes?` (`Record<string, any>`): 额外的 HTML 属性，添加到建议上
-      - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 以 ProseMirror 装饰形式渲染建议的函数
-    - `metadata?` (`Record<string, any>`): 额外元数据，可用于存储有关建议的附加信息（例如来源或类别）。该元数据不会被本扩展内部使用，但可帮助开发者定制建议在 UI 中的展示方式。
-  - `commentsOptions?` (`CommentsOptions`): 评论和线程操作的选项。允许为评论和线程的创建/更新操作传递自定义数据。`data` 属性用于线程数据，`commentData` 用于评论数据。
-    - `threadData?` (`Record<string, any>`): 用于通过 `editThreads` 工具创建的 AI 生成线程的额外元数据
-    - `commentData?` (`Record<string, any>`): 用于通过 `editThreads` 工具创建的 AI 生成评论的额外元数据
+- `toolName` (`string`): 要执行的工具。可以是[可用工具](/content-ai/capabilities/ai-toolkit/agents/tools)之一。
+- `input` (`unknown`): 符合工具参数输入 schema 的 JSON 对象。如果该工具不需要参数，请传递一个空对象（`{}`）。
+- `chunkSize?` (`number`): 传递给 AI 模型的输入字符串的最大长度。防止 AI 一次性读取过多内容，超过模型的上下文窗口。默认值：`32000`。该参数由读取工具使用，用于控制文档如何拆分成块。
+- `tiptapEditSelectableNodes?` (`string[]`): 应始终带有哈希的节点类型名称数组，即使它们不是顶层节点。默认情况下，所有块节点类型都可以有哈希。如果设置为 `[]`，则只有顶层节点会有哈希。
+- `reviewOptions?` (`ReviewOptions`): 控制预览/审核行为
+  - `mode?` (`'disabled' | 'review' | 'preview'`): 是否在应用更改之前或之后进行审核。`'disabled'` 表示不审核，`'review'` 表示在应用后审核，`'preview'` 表示在应用前预览。默认值：`'disabled'`
+  - `diffMode?` (`'detailed' | 'full'`): 启用审核模式时如何显示原始内容和修改内容之间的差异。`'detailed'` 比较变更前后的文档，并以丰富差异方式显示删除和新增内容。`'full'` 以整块形式显示删除和新增内容，作为包含删除及新增内容的单个变更。默认值：`'detailed'`
+  - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议的显示方式
+    - `showAsDiff?` (`boolean`): 是否以差异形式显示建议，插入内容和原始内容并列显示。默认值：`true`
+    - `diffPosition?` (`'before' | 'after'`): 差异相对于建议的位置。默认值：`'before'`
+    - `attributes?` (`Record<string, any>`): 额外的 HTML 属性，将添加到建议上
+    - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 用于将建议渲染为 ProseMirror 装饰的函数
+  - `metadata?` (`Record<string, any>`): 用于存储建议额外信息的元数据（如来源或类别）。该数据不会被扩展内部使用，但有助于开发者自定义 UI 中建议的显示。
+  - `diffUtilityConfig?` (`DiffUtilityConfig`): 使用差异工具比较文档的选项
+    - `simplifyChanges?` (`boolean`): 是否简化变更。如果为 `true`，例如同一单词内的两个变更会合并为单个变更。仅在模式为 'detailed' 或 'smartInline' 时有效。默认值：`true`
+    - `ignoreAttributes?` (`string[]`): 忽略的属性。默认值：`['id', 'data-thread-id']`
+    - `ignoreMarks?` (`string[]`): 忽略的标记。默认值：`['inlineThread']`
+    - `changeMergeDistance?` (`number | null`): 合并变更的最大距离（以文档位置计）。如果两个相邻变更在 rangeA 或 rangeB 的距离小于等于该值，则合并为单个变更。设置为 `null` 或 `undefined` 以禁用合并。仅在模式为 'detailed' 时有效。默认值：`null`
+    - `mode?` (`'detailed' | 'block' | 'smartInline'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，精确识别文本变化（默认）。`'block'` 执行块级差异，将每个顶层节点视为单元。块模式适合仅需知道段落、标题或其他块级元素是否变化，不关心字符变化。块模式下忽略 `simplifyChanges` 和 `changeMergeDistance` 设置。`'smartInline'` 结合两者：先识别变更块，再对这些块内进行内联差异。适合部分内容发生变化的文档，且同时提供字符级精度。默认值：`'detailed'`
+- `commentsOptions?` (`CommentsOptions`): 评论和线程操作的选项。允许传递自定义数据给评论和线程的创建/更新操作。`data` 属性用于线程数据，`commentData` 用于评论数据。
+  - `threadData?` (`Record<string, any>`): AI 生成的线程（通过 `editThreads` 工具创建）的额外元数据
+  - `commentData?` (`Record<string, any>`): AI 生成的评论（通过 `editThreads` 工具创建）的额外元数据
+- `tiptapEditHooks?` (`TiptapEditHooks`): 拦截和修改 Tiptap 编辑操作的钩子。详情参见 [Tiptap 编辑钩子指南](/content-ai/capabilities/ai-toolkit/advanced-guides/tiptap-edit-hooks)。
+  - `beforeOperation?` (`(context: BeforeOperationContext) => BeforeOperationResult`): 在每次操作应用前调用。返回 `{ action: 'accept' }` 以应用该操作（可选传入 `fragment` 或 `operationType` 覆盖），或 `{ action: 'reject', error }` 跳过该操作。
 
 ### 返回值 (`ExecuteToolResult`)
 
@@ -63,24 +71,32 @@ const result = toolkit.executeTool({
 
 ### 参数
 
-- `options` (`StreamToolOptions`): 工具流式传输的配置
-  - `toolCallId` (`unknown`): 工具调用 ID
-  - `toolName` (`string`): 要执行的工具。可以是 [可用工具](/content-ai/capabilities/ai-toolkit/tools/available-tools) 之一。
-  - `input` (`unknown`): 与工具参数输入模式匹配的 JSON 对象。如果该工具不需要参数，传空对象 (`{}`)。如果工具尚未完成流式传输，此参数应为部分参数的对象，但仍应是有效的 JSON 对象。
-  - `hasFinished?` (`boolean`): 工具是否已完成流式传输。默认值：`false`
-  - `chunkSize?` (`number`): 可作为输入传递给 AI 模型的字符串最大大小。防止 AI 一次读取过多内容，以免超过 AI 模型的上下文窗口。默认值：`32000`。该参数由读取工具使用，用于控制文档如何拆分为块。
-  - `reviewOptions?` (`ReviewOptions`): 控制预览/审核行为
-    - `mode?` (`'disabled' | 'review' | 'preview'`): 是否在应用更改前或后进行审核。`'disabled'` 表示不审核，`'review'` 表示应用后审核，`'preview'` 表示应用前预览。默认值：`'disabled'`
-    - `diffMode?` (`'detailed' | 'full'`): 启用审核模式时，如何展示原始内容与修改内容的差异。`'detailed'` 对比更改前后的文档，显示删除内容和新增内容的丰富差异；`'full'` 将删除内容和新增内容作为整块显示，作为包含删除和新增内容的单一变更。默认值：`'detailed'`
-    - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议的显示方式
-      - `showAsDiff?` (`boolean`): 是否将建议显示为差异，对比插入内容和原始内容并列显示。默认值：`true`
-      - `diffPosition?` (`'before' | 'after'`): 差异相对于建议的位置。默认值：`'before'`
-      - `attributes?` (`Record<string, any>`): 额外的 HTML 属性，添加到建议上
-      - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 以 ProseMirror 装饰形式渲染建议的函数
-    - `metadata?` (`Record<string, any>`): 额外元数据，可用于存储有关建议的附加信息（例如来源或类别）。该元数据不会被本扩展内部使用，但可帮助开发者定制建议在 UI 中的展示方式。
-  - `commentsOptions?` (`CommentsOptions`): 评论和线程操作的选项。允许为评论和线程的创建/更新操作传递自定义数据。`data` 属性用于线程数据，`commentData` 用于评论数据。
-    - `threadData?` (`Record<string, any>`): 用于通过 `editThreads` 工具创建的 AI 生成线程的额外元数据
-    - `commentData?` (`Record<string, any>`): 用于通过 `editThreads` 工具创建的 AI 生成评论的额外元数据
+- `toolCallId` (`unknown`): 工具调用的 ID
+- `toolName` (`string`): 要执行的工具。可以是[可用工具](/content-ai/capabilities/ai-toolkit/agents/tools)之一。
+- `input` (`unknown`): 符合工具参数输入 schema 的 JSON 对象。如果该工具不需要参数，请传递一个空对象（`{}`）。如果工具尚未完成流式传输，该参数应是包含部分参数的部分对象，但仍是有效的 JSON 对象。
+- `hasFinished?` (`boolean`): 工具是否已完成流式传输。默认值：`false`
+- `chunkSize?` (`number`): 传递给 AI 模型的输入字符串的最大长度。防止 AI 一次性读取过多内容，超过模型的上下文窗口。默认值：`32000`。该参数由读取工具使用，用于控制文档如何拆分成块。
+- `tiptapEditSelectableNodes?` (`string[]`): 应始终带有哈希的节点类型名称数组，即使它们不是顶层节点。默认情况下，所有块节点类型都可以有哈希。如果设置为 `[]`，则只有顶层节点会有哈希。
+- `reviewOptions?` (`ReviewOptions`): 控制预览/审核行为
+  - `mode?` (`'disabled' | 'review' | 'preview'`): 是否在应用更改之前或之后进行审核。`'disabled'` 表示不审核，`'review'` 表示在应用后审核，`'preview'` 表示在应用前预览。默认值：`'disabled'`
+  - `diffMode?` (`'detailed' | 'full'`): 启用审核模式时如何显示原始内容和修改内容之间的差异。`'detailed'` 比较变更前后的文档，并以丰富差异方式显示删除和新增内容。`'full'` 以整块形式显示删除和新增内容，作为包含删除及新增内容的单个变更。默认值：`'detailed'`
+  - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议的显示方式
+    - `showAsDiff?` (`boolean`): 是否以差异形式显示建议，插入内容和原始内容并列显示。默认值：`true`
+    - `diffPosition?` (`'before' | 'after'`): 差异相对于建议的位置。默认值：`'before'`
+    - `attributes?` (`Record<string, any>`): 额外的 HTML 属性，将添加到建议上
+    - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 用于将建议渲染为 ProseMirror 装饰的函数
+  - `metadata?` (`Record<string, any>`): 用于存储建议额外信息的元数据（如来源或类别）。该数据不会被扩展内部使用，但有助于开发者自定义 UI 中建议的显示。
+  - `diffUtilityConfig?` (`DiffUtilityConfig`): 使用差异工具比较文档的选项
+    - `simplifyChanges?` (`boolean`): 是否简化变更。如果为 `true`，例如同一单词内的两个变更会合并为单个变更。仅在模式为 'detailed' 或 'smartInline' 时有效。默认值：`true`
+    - `ignoreAttributes?` (`string[]`): 忽略的属性。默认值：`['id', 'data-thread-id']`
+    - `ignoreMarks?` (`string[]`): 忽略的标记。默认值：`['inlineThread']`
+    - `changeMergeDistance?` (`number | null`): 合并变更的最大距离（以文档位置计）。如果两个相邻变更在 rangeA 或 rangeB 的距离小于等于该值，则合并为单个变更。设置为 `null` 或 `undefined` 以禁用合并。仅在模式为 'detailed' 时有效。默认值：`null`
+    - `mode?` (`'detailed' | 'block' | 'smartInline'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，精确识别文本变化（默认）。`'block'` 执行块级差异，将每个顶层节点视为单元。块模式适合仅需知道段落、标题或其他块级元素是否变化，不关心字符变化。块模式下忽略 `simplifyChanges` 和 `changeMergeDistance` 设置。`'smartInline'` 结合两者：先识别变更块，再对这些块内进行内联差异。适合部分内容发生变化的文档，且同时提供字符级精度。默认值：`'detailed'`
+- `commentsOptions?` (`CommentsOptions`): 评论和线程操作的选项。允许传递自定义数据给评论和线程的创建/更新操作。`data` 属性用于线程数据，`commentData` 用于评论数据。
+  - `threadData?` (`Record<string, any>`): AI 生成的线程（通过 `editThreads` 工具创建）的额外元数据
+  - `commentData?` (`Record<string, any>`): AI 生成的评论（通过 `editThreads` 工具创建）的额外元数据
+- `tiptapEditHooks?` (`TiptapEditHooks`): 拦截和修改 Tiptap 编辑操作的钩子。详情参见 [Tiptap 编辑钩子指南](/content-ai/capabilities/ai-toolkit/advanced-guides/tiptap-edit-hooks)。
+  - `beforeOperation?` (`(context: BeforeOperationContext) => BeforeOperationResult`): 在每次操作应用前调用。返回 `{ action: 'accept' }` 以应用该操作（可选传入 `fragment` 或 `operationType` 覆盖），或 `{ action: 'reject', error }` 跳过该操作。
 
 ### 返回值 (`StreamToolResult`)
 

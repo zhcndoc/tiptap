@@ -120,27 +120,28 @@ return result.toTextStreamResponse()
 
 ### 参数
 
-- `options`（`ProofreaderWorkflowOptions`）：配置选项
-  - `operations`（`PartialProofreaderOperation[]`）：校对操作数组。
-  - `workflowId`（`unknown`）：本次工作流程的唯一 ID。
-  - `reviewOptions?`（`ReviewOptions`）：控制预览/复核行为
-    - `mode?`（`'disabled' | 'review' | 'preview'`）：是否在应用更改前后进行复核。`'disabled'` 表示不复核，`'review'` 表示应用后复核，`'preview'` 表示应用前预览。默认：`'disabled'`
-    - `diffMode?`（`'detailed' | 'full'`）：在启用复核模式时，如何显示原始与修改内容的差异。`'detailed'` 会展示删除和新增内容的丰富细节对比，`'full'` 以整块显示删除与新增内容，视为一次整体变更。默认：`'detailed'`
-    - `displayOptions?`（`DisplayOptions<{ suggestion: Suggestion }>`）：自定义建议的展示方式
-      - `showAsDiff?`（`boolean`）：是否以差异视觉展示建议，插入内容与原内容并排显示。默认：`true`
-      - `diffPosition?`（`'before' | 'after'`）：差异展示相对于建议的位置。默认：`'before'`
-      - `attributes?`（`Record<string, any>`）：添加至建议的额外 HTML 属性
-      - `renderDecorations?`（`RenderDecorations<{ suggestion: Suggestion }>`）：将建议渲染为 ProseMirror 装饰的函数
-    - `metadata?`（`Record<string, any>`）：建议的额外元数据，用于存储额外信息（如来源或分类）。此字段由扩展内部不使用，但有助于开发者定制 UI 显示效果。
-    - `diffUtilityConfig?`（`DiffUtilityConfig`）：差异工具比较文档的选项
-      - `simplifyChanges?`（`boolean`）：是否简化更改，如将同一单词内的多个更改合并为一个。仅对 `'detailed'` 模式生效。默认：`true`
-      - `ignoreAttributes?`（`string[]`）：忽略比较的属性。默认：`['id', 'data-thread-id']`
-      - `ignoreMarks?`（`string[]`）：忽略比较的标记。默认：`['inlineThread']`
-      - `changeMergeDistance?`（`number | null`）：允许合并的相邻更改最大文档位置距离。如果两个更改的距离小于等于此值（在 rangeA 或 rangeB 中），它们将被合并。同样仅对 `'detailed'` 模式生效。设置为 `null` 或 `undefined` 禁用合并。默认：`null`
-      - `mode?`（`'detailed' | 'block' | 'smartInline'`）：差异模式。`'detailed'` 为字符级别差异（默认），`'block'` 为块级差异，将顶级节点视为单元。块模式适用于只需知晓哪些段落、标题等块级元素发生变化且不需要字符细节时。块模式下忽略 `simplifyChanges` 和 `changeMergeDistance`。`'smartInline'` 结合两者：先识别变化块，再行内差异，适用于局部变化场景，兼顾字符精度。默认：`'detailed'`
-  - `range?`（`Range`）：应用校对操作的范围
-    - `from`（`number`）：开始位置
-    - `to`（`number`）：结束位置
+- `options` (`ProofreaderWorkflowOptions`): 配置选项
+  - `operations` (`PartialProofreaderOperation[]`): 校对操作数组。
+  - `workflowId` (`unknown`): 此工作流运行的唯一 ID
+  - `reviewOptions?` (`ReviewOptions`): 控制预览/审核行为
+    - `mode?` (`'disabled' | 'review' | 'preview'`): 是否在应用更改之前或之后进行审核。`'disabled'` 表示不进行审核，`'review'` 表示在应用后进行审核，`'preview'` 表示在应用前进行预览。默认值：`'disabled'`
+    - `diffMode?` (`'detailed' | 'full'`): 当启用审核模式时，如何显示原始内容和修改内容之间的差异。`'detailed'` 比较更改前后的文档，并以丰富的差异形式显示删除的内容和添加的内容。`'full'` 以整体块的形式显示删除的内容和添加的内容，作为包含删除和添加内容的单个更改。默认值：`'detailed'`
+    - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议的显示方式
+      - `showAsDiff?` (`boolean`): 是否将建议显示为差异，其中插入的内容和原始内容并排显示。默认值：`true`
+      - `diffPosition?` (`'before' | 'after'`): 差异相对于建议的位置。默认值：`'before'`
+      - `attributes?` (`Record<string, any>`): 要添加到建议的额外 HTML 属性
+      - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 用于将建议呈现为 ProseMirror 装饰的函数
+    - `metadata?` (`Record<string, any>`): 建议的额外元数据，可用于存储有关它们的附加信息（例如其来源或类别）。扩展内部不使用此信息，但可能有助于开发人员自定义 UI 中建议的显示方式。
+    - `diffUtilityConfig?` (`DiffUtilityConfig`): 用于比较文档的差异工具的选项
+      - `simplifyChanges?` (`boolean`): 是否简化更改。如果为 `true`，更改将被简化，例如，将同一单词中的两个更改合并为一个更改。仅在模式为 'detailed' 或 'smartInline' 时适用。默认值：`true`
+      - `ignoreAttributes?` (`string[]`): 要忽略的属性。默认值：`['id', 'data-thread-id']`
+      - `ignoreMarks?` (`string[]`): 要忽略的标记。默认值：`['inlineThread']`
+      - `changeMergeDistance?` (`number | null`): 更改合并的最大距离（以文档位置为单位）。如果两个相邻更改在 rangeA 或 rangeB 中的距离小于或等于此值，它们将合并为一个更改。设置为 `null` 或 `undefined` 以禁用合并。仅在模式为 'detailed' 时适用。默认值：`null`
+      - `mode?` (`'detailed' | 'block' | 'smartInline'`): 用于比较的差异模式。`'detailed'` 执行字符级别的差异，识别文本中的精确更改（默认）。`'block'` 执行块级差异，将每个顶层节点视为一个单元。块模式在只需知道哪些段落、标题或其他块级元素发生变化时非常有用，而不需要字符级的细节。在块模式下，`simplifyChanges` 和 `changeMergeDistance` 选项将被忽略。`'smartInline'` 结合了两者：首先识别更改的块，然后在这些块内执行内联差异。适用于只改变部分内容的文档，同时仍提供字符级精度。默认值：`'detailed'`
+  - `range?` (`Range`): 应用校对操作的区间
+    - `from` (`number`): 起始位置
+    - `to` (`number`): 结束位置
+  - `selectableNodeTypes?` (`string[]`): 始终应具有哈希的节点类型名称数组，即使它们不是顶层节点。默认情况下，所有块节点类型都可以有哈希。若设置为 `[]`，则仅顶层节点拥有哈希。
 
 ### 返回值（`ProofreaderWorkflowResult`）
 
@@ -213,13 +214,16 @@ const result = streamText({
 
 ### 参数
 
-- `options`（`TiptapEditWorkflowOptions`）：配置选项
-  - `operations`（`PartialTiptapEditOperation[]`）：编辑操作数组。每项是元组 `[type, target, content]`：
-    - `type`：`'replace'` | `'insertBefore'` | `'insertAfter'`
-    - `target`：节点的 6 字符哈希（来自 `tiptapRead`），或 `'doc'` 表示整个文档
-    - `content`：插入的 HTML 字符串
-  - `workflowId`（`unknown`）：本次工作流程的唯一 ID
-  - `reviewOptions?`（`ReviewOptions`）：控制预览/复核行为（与 `proofreaderWorkflow` 相同选项）
+- `options` (`TiptapEditWorkflowOptions`): 配置选项
+  - `operations` (`PartialTiptapEditOperation[]`): 编辑操作数组。每个操作为三元组 `[type, target, content]`：
+    - `type`: `'replace'` | `'insertBefore'` | `'insertAfter'`
+    - `target`: 节点的 6 位哈希（来自 `tiptapRead`）或 `'doc'` 表示整个文档
+    - `content`: 要插入的 HTML 字符串内容
+  - `workflowId` (`unknown`): 此工作流运行的唯一 ID
+  - `selectableNodeTypes?` (`string[]`): 始终应具有哈希的节点类型名称数组，即使它们不是顶层节点。默认情况下，所有块节点类型都可以有哈希。若设置为 `[]`，则仅顶层节点拥有哈希。
+  - `reviewOptions?` (`ReviewOptions`): 控制预览/审核行为（同 `proofreaderWorkflow` 的选项）
+  - `tiptapEditHooks?` (`TiptapEditHooks`): 拦截和修改操作的钩子。详见 [Tiptap 编辑钩子指南](/content-ai/capabilities/ai-toolkit/advanced-guides/tiptap-edit-hooks)。
+    - `beforeOperation?` (`(context: BeforeOperationContext) => BeforeOperationResult`): 在每个操作应用之前调用。返回 `{ action: 'accept' }` 以应用操作（可选择提供 `fragment` 或 `operationType` 覆盖），或 `{ action: 'reject', error }` 以跳过该操作。
 
 ### 返回值（`TiptapEditWorkflowResult`）
 
@@ -318,18 +322,12 @@ result.threads.forEach((thread) => {
 
 ### 参数
 
-- `options`（`EditThreadsWorkflowOptions`）：配置选项
-  - `operations`（`string[][]`）：评论操作数组，每项是元组。支持操作包括：
-    - `['createThread', nodeHash, htmlContent]`：创建线程
-    - `['createComment', threadId, content]`：向线程添加评论
-    - `['updateComment', threadId, commentId, content]`：更新评论
-    - `['removeComment', threadId, commentId]`：删除评论
-    - `['removeThread', threadId]`：删除线程
-    - `['resolveThread', threadId]`：解决线程
-    - `['unresolveThread', threadId]`：取消解决线程
-  - `commentsOptions?`（`CommentsOptions`）：评论操作的选项
-    - `threadData?`（`Record<string, any>`）：为创建的线程添加的额外元数据
-    - `commentData?`（`Record<string, any>`）：为创建的评论添加的额外元数据
+- `options` (`EditThreadsWorkflowOptions`): 配置选项
+  - `operations` (`string[][]`): 评论操作数组，元素为操作元组。
+  - `selectableNodeTypes?` (`string[]`): 始终应具有哈希的节点类型名称数组，即使它们不是顶层节点。默认情况下，所有块节点类型都可以有哈希。若设置为 `[]`，则仅顶层节点拥有哈希。
+  - `commentsOptions?` (`CommentsOptions`): 评论操作选项
+    - `threadData?` (`Record<string, any>`): 创建的线程的额外元数据
+    - `commentData?` (`Record<string, any>`): 创建的评论的额外元数据
 
 ### 返回值（`EditThreadsWorkflowResult`）
 

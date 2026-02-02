@@ -38,7 +38,7 @@ export const TableOfContent = ({
 
   return (
     <div>
-      <div className="wwads-cn wwads-vertical w-full my-4" data-id="354"></div>
+      <div className="wwads-cn wwads-vertical max-w-[200px] my-4" data-id="354"></div>
       <div className="font-bold text-xs uppercase leading-[110%] mb-2.5 px-2.5">目录</div>
       <TocItem id="page-title" isActive={activeId === null} onClick={onClick}>
         {document.querySelector('h1')?.textContent || '页面标题'}

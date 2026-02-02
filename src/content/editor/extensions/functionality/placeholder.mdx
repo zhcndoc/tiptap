@@ -102,6 +102,18 @@ Placeholder.configure({
 })
 ```
 
+### dataAttribute
+
+用于存储占位符文本的数据属性。当设置为 `'my-placeholder'` 时，占位符文本将存储在 `data-my-placeholder` 属性中，例如。
+
+默认值：`'placeholder'`
+
+```js
+Placeholder.configure({
+  dataAttribute: 'my-placeholder'
+})
+```
+
 ### placeholder
 
 作为 `data-placeholder` 属性添加的占位符文本。
@@ -114,7 +126,7 @@ Placeholder.configure({
 })
 ```
 
-您甚至可以使用一个函数根据节点添加占位符：
+您甚至可以使用一个函数，根据节点添加占位符：
 
 ```js
 Placeholder.configure({

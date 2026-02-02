@@ -7,12 +7,13 @@ meta:
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
 
 本指南描述了如何将 Tiptap 与您的 React 项目集成。我们使用 Vite，但其他设置的工作流程应该类似。
 
 <CodeDemo path="/Examples/Default" />
 
-### 创建一个 React 项目（可选）
+## 创建一个 React 项目（可选）
 
 以一个名为 `my-tiptap-project` 的新 React 项目开始。 [Vite](https://vitejs.dev/guide/) 将设置我们所需的一切。
 
@@ -30,7 +31,7 @@ yarn create vite my-tiptap-project --template react-ts
 cd my-tiptap-project
 ```
 
-### 安装依赖
+## 安装依赖
 
 接下来，安装 `@tiptap/react` 包，`@tiptap/pm`（ProseMirror 库）和 `@tiptap/starter-kit`，它包括启动时常用的扩展。
 
@@ -46,15 +47,154 @@ npm install @tiptap/react @tiptap/pm @tiptap/starter-kit
 
 ## 集成 Tiptap
 
-要实际开始使用 Tiptap，我们需要创建一个新组件。我们称其为 `Tiptap`，并在 `src/Tiptap.tsx` 中添加以下示例代码。
+Tiptap 提供了一个声明式的 `<Tiptap>` 组件，简化了编辑器的设置并为所有子组件提供上下文。这是将 Tiptap 与 React 集成的推荐方法。
 
-```jsx
-// src/Tiptap.tsx
+### 使用 Tiptap 组件
+
+创建一个名为 `Editor` 的新组件，并在 `src/Editor.tsx` 中添加以下代码：
+
+```tsx
+// src/Editor.tsx
+import { Tiptap, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+
+function Editor() {
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: '<p>Hello World!</p>',
+  })
+
+  return (
+    <Tiptap instance={editor}>
+      <Tiptap.Loading>Loading editor...</Tiptap.Loading>
+      <MenuBar />
+      <Tiptap.Content />
+      <Tiptap.BubbleMenu>
+        <button>Bold</button>
+        <button>Italic</button>
+      </Tiptap.BubbleMenu>
+      <Tiptap.FloatingMenu>
+        <button>Add heading</button>
+      </Tiptap.FloatingMenu>
+    </Tiptap>
+  )
+}
+
+export default Editor
+```
+
+`<Tiptap>` 组件提供多个子组件：
+
+| 组件 | 描述 |
+| --- | --- |
+| `Tiptap.Content` | 渲染编辑器内容区域。替代 `<EditorContent editor={editor} />`。 |
+| `Tiptap.Loading` | 仅在编辑器初始化时渲染其子内容。 |
+| `Tiptap.BubbleMenu` | 文字选中时出现的上下文气泡菜单。 |
+| `Tiptap.FloatingMenu` | 空白行时出现的上下文浮动菜单。 |
+
+### 将其添加到您的应用中
+
+用新的 `Editor` 组件替换 `src/App.tsx` 的内容：
+
+```tsx
+import Editor from './Editor'
+
+function App() {
+  return (
+    <div className="card">
+      <Editor />
+    </div>
+  )
+}
+
+export default App
+```
+
+## 在子组件中访问编辑器实例
+
+`<Tiptap>` 组件提供上下文，允许任何子组件通过 `useTiptap` 钩子访问编辑器实例。
+
+### 使用 useTiptap
+
+`useTiptap` 钩子返回编辑器实例和一个 `isReady` 标志，用来指示编辑器是否完成初始化。
+
+```tsx
+import { useTiptap } from '@tiptap/react'
+
+function MenuBar() {
+  const { editor, isReady } = useTiptap()
+
+  if (!isReady || !editor) {
+    return null
+  }
+
+  return (
+    <div className="menu-bar">
+      <button
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        className={editor.isActive('bold') ? 'is-active' : ''}
+      >
+        Bold
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        className={editor.isActive('italic') ? 'is-active' : ''}
+      >
+        Italic
+      </button>
+    </div>
+  )
+}
+```
+
+然后将菜单栏包含进您的编辑器：
+
+```tsx
+<Tiptap instance={editor}>
+  <MenuBar />
+  <Tiptap.Content />
+</Tiptap>
+```
+
+### 使用 useTiptapState 进行响应式状态管理
+
+对于性能敏感的组件，可使用 `useTiptapState` 订阅编辑器状态的特定部分，避免无关状态变化导致组件重新渲染。
+
+```tsx
+import { useTiptap, useTiptapState } from '@tiptap/react'
+
+function WordCount() {
+  const { isReady } = useTiptap()
+
+  const wordCount = useTiptapState((state) => {
+    const text = state.editor.state.doc.textContent
+    return text.split(/\s+/).filter(Boolean).length
+  })
+
+  if (!isReady) {
+    return null
+  }
+
+  return <span>{wordCount} words</span>
+}
+```
+
+选择器函数接收一个 `EditorStateSnapshot`，应只返回组件需要的数据。组件仅在选中值变化时重新渲染。
+
+<Callout title="重要" variant="warning">
+  只有在编辑器已准备好时使用 `useTiptapState`。在渲染使用此钩子的组件前，请检查 `useTiptap()` 的 `isReady`。
+</Callout>
+
+## 另一种方案：使用 EditorContent 手动设置
+
+对于需要更控制力的场景，可以直接使用 `EditorContent`：
+
+```tsx
 import { useEditor, EditorContent } from '@tiptap/react'
 import { FloatingMenu, BubbleMenu } from '@tiptap/react/menus'
 import StarterKit from '@tiptap/starter-kit'
 
-const Tiptap = () => {
+function Editor() {
   const editor = useEditor({
     extensions: [StarterKit], // 定义您的扩展数组
     content: '<p>Hello World!</p>', // 初始内容
@@ -69,36 +209,24 @@ const Tiptap = () => {
   )
 }
 
-export default Tiptap
+export default Editor
 ```
 
-### 将其添加到您的应用中
+此方法要求手动为每个组件传入 `editor` 属性。大多数情况下推荐使用 `<Tiptap>` 组件，它减少了模板代码并自动提供上下文。
 
-最后，用我们的新 `Tiptap` 组件替换 `src/App.tsx` 的内容。
+## 在子组件中消费编辑器上下文
 
-```jsx
-import Tiptap from './Tiptap'
-
-const App = () => {
-  return (
-    <div className="card">
-      <Tiptap />
-    </div>
-  )
-}
-
-export default App
-```
-
-### 在子组件中消费编辑器上下文
-
-如果您使用 `EditorProvider` 来设置您的 Tiptap 编辑器，则现在可以使用 `useCurrentEditor` 钩子从任何子组件访问您的编辑器实例。
+`<Tiptap>` 组件自动提供了 `EditorContext`，因此您也可以在其内部使用 `useCurrentEditor` 钩子，以兼容部分现有代码。
 
 ```tsx
 import { useCurrentEditor } from '@tiptap/react'
 
-const EditorJSONPreview = () => {
+function EditorJSONPreview() {
   const { editor } = useCurrentEditor()
+
+  if (!editor) {
+    return null
+  }
 
   return <pre>{JSON.stringify(editor.getJSON(), null, 2)}</pre>
 }
@@ -137,42 +265,43 @@ const EditorJSONPreview = () => {
 
 要响应编辑器状态变化，您可以使用 `@tiptap/react` 提供的 `useEditorState` 钩子。该钩子可用于从编辑器状态中获取信息，而不会导致编辑器组件或其子组件重新渲染。
 
-```jsx
+```tsx
 import { useEditorState } from '@tiptap/react'
 
-function MyEditorComponent() {
-  // ... 您的编辑器设置代码
-
+function MyEditorComponent({ editor }) {
   const editorState = useEditorState({
     editor,
 
     // selector 函数用于选择您想要响应的状态
     selector: ({ editor }) => {
-      if (!editor) return null;
+      if (!editor) return null
 
       return {
         isEditable: editor.isEditable,
-        currentSelection: editor.state.selection,
-        currentContent: editor.getJSON(),
-        // 您可以在这里添加更多的状态属性，如：
-        // isBold: editor.isActive('bold'),
-        // isItalic: editor.isActive('italic'),
-      };
+        isBold: editor.isActive('bold'),
+        isItalic: editor.isActive('italic'),
+      }
     },
-  });
+  })
+
+  return <div>Bold active: {editorState?.isBold ? 'Yes' : 'No'}</div>
 }
 ```
 
-## 使用 React 与 Tiptap 进行 SSR
+<Callout title="提示" variant="hint">
+  使用 `<Tiptap>` 组件时，优先使用 `useTiptapState`，它会自动使用上下文中的编辑器实例。
+</Callout>
+
+## 在 React 中使用 Tiptap 进行 SSR
 
 Tiptap 可以与 React 应用中的服务端渲染（SSR）一起使用。然而，为确保编辑器仅在客户端初始化，您需要在创建编辑器实例时使用 `immediatelyRender` 选项，防止它在服务器端渲染。
 
 以下是一个设置 React 组件中 Tiptap SSR 的示例：
 
-```jsx
+```tsx
 'use client'
 
-import { useEditor, EditorContent } from '@tiptap/react'
+import { Tiptap, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 
 export function MyEditor() {
@@ -187,13 +316,59 @@ export function MyEditor() {
     return null // 确保编辑器初始化前不渲染
   }
 
-  return <EditorContent editor={editor} />
+  return (
+    <Tiptap instance={editor}>
+      <Tiptap.Loading>
+        <div className="skeleton">Loading editor...</div>
+      </Tiptap.Loading>
+      <Tiptap.Content />
+    </Tiptap>
+  )
 }
 ```
+
+`Tiptap.Loading` 组件在 SSR 中非常有用，它会在编辑器于客户端初始化前显示占位内容。
 
 ## 优化您的性能
 
 我们建议您访问[React 性能指南](/guides/performance)，以高效集成 Tiptap 编辑器。这将帮助您避免应用规模扩大时可能出现的问题。
+
+## API 参考
+
+### Tiptap 组件
+
+根提供者组件，通过 React 上下文使编辑器实例可用。
+
+| 参数 | 类型 | 描述 |
+| --- | --- | --- |
+| `instance` | `Editor \| null` | 来自 `useEditor()` 的编辑器实例 |
+| `children` | `ReactNode` | 子组件 |
+
+### useTiptap 钩子
+
+返回 Tiptap 的上下文值。
+
+```tsx
+const { editor, isReady } = useTiptap()
+```
+
+| 属性 | 类型 | 描述 |
+| --- | --- | --- |
+| `editor` | `Editor \| null` | 编辑器实例 |
+| `isReady` | `boolean` | 编辑器是否完成初始化 |
+
+### useTiptapState 钩子
+
+使用选择器函数订阅编辑器状态的一部分。
+
+```tsx
+const value = useTiptapState(selector, equalityFn?)
+```
+
+| 参数 | 类型 | 描述 |
+| --- | --- | --- |
+| `selector` | `(state: EditorStateSnapshot) => T` | 状态选择函数 |
+| `equalityFn` | `(a: T, b: T) => boolean` | 可选的比较函数，控制重新渲染 |
 
 ## 接下来
 

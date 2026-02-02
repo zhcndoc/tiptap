@@ -158,6 +158,10 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/compare-documents',
                 },
                 {
+                  title: 'Tiptap 编辑钩子',
+                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/tiptap-edit-hooks',
+                },
+                {
                   title: '迁移指南',
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/migration-guides',
                   children: [
@@ -254,7 +258,8 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: '服务端 AI 工具包',
           href: '/content-ai/capabilities/server-ai-toolkit',
-          tags: ['Alpha'],
+          tags: ['Add-on'],
+          beta: true,
           children: [
             {
               title: '概述',
@@ -275,6 +280,10 @@ export const sidebarConfig: SidebarConfig = {
                 {
                   title: '模式感知',
                   href: '/content-ai/capabilities/server-ai-toolkit/agents/schema-awareness',
+                },
+                {
+                  title: '评论',
+                  href: '/content-ai/capabilities/server-ai-toolkit/agents/comments',
                 },
                 {
                   title: '工具定义',

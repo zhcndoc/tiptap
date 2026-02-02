@@ -62,7 +62,7 @@ editor.commands.insertHtml(
   {
     position: range,
   }
-})
+)
 ```
 
 范围用于确定[建议](#suggestion)的位置。
@@ -70,6 +70,28 @@ editor.commands.insertHtml(
 ## 建议
 
 建议代表对文档的一个拟议更改。当 AI 对文档进行更改时，你可以将其显示为建议，以便用户审阅并接受或拒绝。详见[建议指南](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions)。
+
+## NodeRange
+
+节点范围是文档中一系列顶级节点的范围。
+
+顶级节点是 `doc` 节点的直接子节点。
+
+节点范围是一个包含两个属性的对象：
+
+- `from`（数字）：范围内第一个节点的索引（包含）
+- `to`（数字）：范围内最后一个节点之后的索引（上界，不包含）
+
+```ts
+// 从第一个到第 100 个节点的范围
+const nodeRange: NodeRange = { from: 0, to: 100 }
+```
+
+整个文档的节点范围是：
+
+```ts
+const nodeRange = { from: 0, to: editor.state.doc.childCount }
+```
 
 ## Tiptap 读取和 Tiptap 编辑
 
@@ -83,3 +105,19 @@ Tiptap 编辑作为 AI 代理可使用的[工具](/content-ai/capabilities/ai-to
 const { content } = toolkit.tiptapRead()
 toolkit.tiptapEdit({ content })
 ```
+
+### 优化 Tiptap 编辑
+
+借助 Tiptap 编辑，AI 可以高效地选择并替换节点。默认情况下，AI 可以选择并替换文档中的任何[块节点](/editor/extensions/custom-extensions/create-new/node#group)。
+
+如果你希望 AI 能够选择并替换其他类型的节点，可以通过配置 Tiptap 编辑工具的 `selectableNodeTypes` 属性来实现。
+
+这允许你替换内联节点，或限制 AI 可选择和替换的节点类型。
+
+```ts
+const selectableNodeTypes = ['paragraph', 'heading', 'codeBlock']
+const { content } = toolkit.tiptapRead({ selectableNodeTypes })
+toolkit.tiptapEdit({ content, selectableNodeTypes })
+```
+
+除 `selectableNodeTypes` 中的节点外，AI 还可以替换整个文档或文档中的任何顶级节点。如果将 `selectableNodeTypes` 属性设置为空数组，AI 只能选择和替换文档中的顶级节点。

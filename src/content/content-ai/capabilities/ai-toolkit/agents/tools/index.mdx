@@ -1,97 +1,97 @@
 ---
-title: Tool definitions
+title: 工具定义
 meta:
-  title: Tool definitions | Tiptap Content AI
-  description: Complete list of tool definitions that allow AI agents to read, edit, and navigate document content.
-  category: Content AI
+  title: 工具定义 | Tiptap 内容 AI
+  description: 完整的工具定义列表，允许 AI 代理读取、编辑和导航文档内容。
+  category: 内容 AI
 ---
 
-The Tiptap AI Toolkit provides a comprehensive set of tools for interacting with Tiptap documents. These tools enable reading content, making edits, and navigating through large documents efficiently.
+Tiptap AI 工具包提供了一套全面的工具，用于与 Tiptap 文档交互。这些工具支持读取内容、进行编辑以及高效地浏览大型文档。
 
-The tool definitions are available in the format of popular AI provider libraries:
+这些工具定义以流行 AI 提供商库的格式提供：
 
-- [AI SDK by Vercel](/content-ai/capabilities/ai-toolkit/agents/tools/ai-sdk)
+- [Vercel 的 AI SDK](/content-ai/capabilities/ai-toolkit/agents/tools/ai-sdk)
 - [LangChain.js](/content-ai/capabilities/ai-toolkit/agents/tools/langchain-js)
 - [OpenAI](/content-ai/capabilities/ai-toolkit/agents/tools/openai)
 - [Anthropic](/content-ai/capabilities/ai-toolkit/agents/tools/anthropic)
 - [Mastra](/content-ai/capabilities/ai-toolkit/agents/tools/mastra)
-- [Other providers](/content-ai/capabilities/ai-toolkit/agents/tools/other-providers)
+- [其他提供商](/content-ai/capabilities/ai-toolkit/agents/tools/other-providers)
 
-When you add the tool definitions to your AI provider library, your AI agent will generate tool calls. You can then execute the tool calls using the [`executeTool` method](/content-ai/capabilities/ai-toolkit/api-reference/execute-tool).
+当你将工具定义添加到你的 AI 提供商库时，AI 代理将生成工具调用。然后你可以使用 [`executeTool 方法`](/content-ai/capabilities/ai-toolkit/api-reference/execute-tool) 执行这些工具调用。
 
 ```ts
-// Read the document from the beginning
+// 从头开始读取文档
 await agent.executeTool({
   toolName: 'tiptapRead',
-  // Pass here the AI-generated tool input
+  // 传入 AI 生成的工具输入
   input: { from: 0 },
 })
 ```
 
 ## `tiptapRead`
 
-Read the document from a given position.
+从指定位置读取文档内容。
 
-### Parameters
+### 参数
 
-- `from` (`number`): The position to read from.
+- `from`（`number`）：读取起始位置。
 
-### Result
+### 返回结果
 
-The content of the document from the given position. We provide customers with more comprehensive information about the format of this tool.
+从指定位置起的文档内容。我们为客户提供了有关该工具格式的更详细信息。
 
 ## `tiptapEdit`
 
-Edit the document at a given position.
+在指定位置编辑文档。
 
-### Parameters
+### 参数
 
-- `operations` (`array`): A list of operations to perform on the document. We provide customers with more comprehensive information about the format of this tool.
+- `operations`（`array`）：要对文档执行的一系列操作。我们为客户提供了有关该工具格式的更详细信息。
 
-### Result
+### 返回结果
 
-A success or error message with the result of the edit operations.
+编辑操作的成功或错误消息。
 
 ## `tiptapReadSelection`
 
-Read the selection of the document.
+读取文档中的选区。
 
-### Parameters
+### 参数
 
-No parameters required.
+无参数。
 
-### Result
+### 返回结果
 
-The content and location of the selection. We provide customers with more comprehensive information about the format of this tool.
+选区的内容和位置。我们为客户提供了有关该工具格式的更详细信息。
 
 ## `getThreads`
 
-Retrieve all threads and comments in the document. This tool provides comprehensive information about existing discussions and feedback in the document.
+检索文档中的所有讨论串和评论。该工具提供文档中现有讨论和反馈的全面信息。
 
-### Parameters
+### 参数
 
-No parameters required.
+- `from`（`number`）：读取讨论串的起始索引。
 
-### Result
+### 返回结果
 
-The data of all the threads and comments in the document, including their content and location.
+文档中所有讨论串和评论的数据，包括它们的内容和位置。
 
-### Requirements
+### 需求
 
-This tool requires the Comments extension to be configured in the editor with a CommentsProvider. This tool is deactivated by default and needs to be explicitly enabled.
+该工具需要编辑器中配置 Comments 扩展及 CommentsProvider。此工具默认关闭，需要显式启用。
 
 ## `editThreads`
 
-Perform operations on threads and comments in the document. This tool enables comprehensive thread and comment management including creating, updating, and deleting threads and comments.
+对文档中的讨论串和评论执行操作。该工具支持创建、更新和删除讨论串及评论，实现全面的管理功能。
 
-### Parameters
+### 参数
 
-- `operations` (`array`): Array of operations to perform.
+- `operations`（`array`）：要执行的操作数组。
 
-### Result
+### 返回结果
 
-A success message if the operations were successful, or an error message if they were not.
+如果操作成功，返回成功消息；否则返回错误消息。
 
-### Requirements
+### 需求
 
-This tool requires the Comments extension to be configured in the editor with a CommentsProvider. This tool is deactivated by default and needs to be explicitly enabled.
+该工具需要编辑器中配置 Comments 扩展及 CommentsProvider。此工具默认关闭，需要显式启用。

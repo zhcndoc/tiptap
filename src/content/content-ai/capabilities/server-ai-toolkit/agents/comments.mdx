@@ -1,0 +1,103 @@
+---
+title: 服务器评论
+meta:
+  title: 服务器评论 | Tiptap 服务器 AI 工具包
+  description: 使用服务器 AI 工具包，启用服务器端 AI 代理读取和编辑 Tiptap 文档中的评论。
+  category: 内容 AI
+sidebars:
+  hideSecondary: true
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+赋予您的 AI 代理读取、编写和编辑文档中评论的能力，完全在服务器端完成。
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/server-comments" />
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+<Callout title="实验性功能" variant="warning">
+  此功能处于实验阶段，API 未来版本可能会发生变化。
+</Callout>
+
+<Callout title="AI 代理聊天机器人指南的延续" variant="info">
+  本指南是[AI 代理聊天机器人指南](/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot)的延续，请先阅读该指南。
+</Callout>
+
+## 启用评论工具
+
+要启用评论工具，获取服务器 AI 工具包 API 的工具定义时，传递 `getThreads` 和 `editThreads` 选项。
+
+```ts
+const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+    tools: {
+      // 禁用 tiptap 编辑工具，使 AI 不能编辑文档，
+      // 只能添加评论
+      tiptapEdit: false,
+      // 启用评论工具
+      getThreads: true,
+      editThreads: true,
+    },
+  }),
+})
+```
+
+## 执行评论工具
+
+执行评论工具时，在请求体中包含 `experimental__commentsOptions` 对象。该对象包含连接到 Tiptap 协作服务器以及使用新评论更新协作文档的配置。
+
+- `documentId`（`string`）：要创建评论的文档 ID。
+- `apiSecret`（`string`）：服务器 AI 工具包的 API 密钥。
+- `userId`（`string`）：创建评论的用户 ID。
+- `appId`（`string`，可选）：服务器 AI 工具包的应用 ID。
+- `baseUrl`（`string`，可选）：服务器 AI 工具包的基础 URL。
+- `threadData`（`Record<string, any>`，可选）：使用 `editThreads` 工具创建的 AI 生成线程的额外元数据。该元数据将在创建线程时附加。
+- `commentData`（`Record<string, any>`，可选）：使用 `editThreads` 工具创建的 AI 生成评论的额外元数据。该元数据将在创建评论时附加。
+
+必须提供 `appId` 或 `baseUrl` 中的至少一个。如果您使用 Tiptap Cloud，请使用 `appId` 属性连接到您的部署。如果您在自己的基础设施上部署，请使用 `baseUrl` 属性连接到 Tiptap 协作服务。
+
+```ts
+const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    toolName: 'editThreads',
+    input: {},
+    document,
+    schemaAwarenessData,
+    // 评论工具所必需
+    experimental__commentsOptions: {
+      documentId: '123',
+      apiSecret: 'your-api-secret',
+      userId: 'ai-assistant',
+      appId: 'your-app-id',
+    },
+  }),
+})
+```
+
+## 最终效果
+
+结果是一个简单但完善的 AI 聊天机器人应用：
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/server-comments" />
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 下一步
+
+- 了解所有可用的[工具定义](/content-ai/capabilities/server-ai-toolkit/agents/tools)
+- 探索[REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)

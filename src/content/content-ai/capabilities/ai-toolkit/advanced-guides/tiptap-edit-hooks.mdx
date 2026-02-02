@@ -1,0 +1,150 @@
+---
+title: Tiptap 编辑钩子
+meta:
+  title: Tiptap 编辑钩子 | Tiptap 内容 AI
+  description: 在 Tiptap 编辑操作应用之前拦截、修改或拒绝操作。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+Tiptap 编辑钩子允许你在操作应用到文档之前拦截它们。你可以根据自定义逻辑接受或拒绝每个操作，并且在接受时可选择修改内容或操作类型。
+
+<Callout title="实验性功能" variant="info">
+  Tiptap 编辑钩子当前属于实验性功能，其 API 将来可能发生变化。
+</Callout>
+
+## 使用场景
+
+- **内容审核**：在 AI 生成内容进入文档前进行过滤或清理
+- **自定义验证**：确保操作符合业务需求
+- **日志与分析**：跟踪 AI 所做的变更
+- **访问控制**：防止对文档特定部分的修改
+
+## `beforeOperation` 钩子
+
+`beforeOperation` 钩子在每个 Tiptap 编辑操作应用之前被调用。它接收关于该操作的上下文并返回要执行的动作。
+
+### 钩子上下文
+
+钩子接收一个 `BeforeOperationContext` 对象，包含以下属性：
+
+| 属性             | 类型                           | 描述                                                                                   |
+| ---------------- | ------------------------------ | -------------------------------------------------------------------------------------- |
+| `operation`      | `TiptapEditOperation`          | 正在执行的操作，包含 `type`、`target` 和 `content`                                   |
+| `operationIndex` | `number`                       | 此操作在批次中的索引（从 0 开始）                                                    |
+| `doc`            | `Node`                         | 事务中当前时点的文档                                                                   |
+| `deleteContent`  | `Fragment \| null`             | 将被删除的内容（`insertBefore` 或 `insertAfter` 操作为 `null`）                      |
+| `insertContent`  | `Fragment`                     | 将被插入的内容（[ProseMirror 片段](https://prosemirror.net/docs/ref/#model.Fragment)） |
+| `range`          | `{ from: number; to: number }` | 操作将被应用的位置范围                                                                 |
+
+要在钩子内部访问编辑器实例，请在定义钩子时通过闭包捕获它。
+
+### 钩子返回值
+
+钩子必须返回以下动作之一：
+
+```ts
+// 接受操作，不做修改
+{ action: 'accept' }
+
+// 接受操作，使用修改后的片段覆盖待插入内容
+{ action: 'accept', fragment: modifiedFragment }
+
+// 接受操作，修改操作类型
+{ action: 'accept', operationType: 'insertAfter' }
+
+// 接受操作，同时修改片段和操作类型
+{ action: 'accept', fragment: modifiedFragment, operationType: 'replace' }
+
+// 跳过该操作并记录错误
+{ action: 'reject', error: '拒绝原因' }
+```
+
+`fragment` 属性允许你覆盖将被插入的 [ProseMirror 片段](https://prosemirror.net/docs/ref/#model.Fragment)。`operationType` 属性允许你更改操作类型（`'replace'`、`'insertBefore'` 或 `'insertAfter'`）。
+
+当某个操作被拒绝时，批次中剩余的操作依然会继续执行。
+
+## 用法
+
+### 配合 `executeTool`
+
+```ts
+import { getAiToolkit } from '@tiptap-pro/ai-toolkit'
+import { log } from './lib/logger'
+
+const toolkit = getAiToolkit(editor)
+
+const result = toolkit.executeTool({
+  toolName: 'tiptapEdit',
+  input: {
+    operations: [['replace', 'abc123', '<p>新内容</p>']],
+  },
+  tiptapEditHooks: {
+    beforeOperation: (context) => {
+      // 记录每个操作
+      log(`操作类型: ${context.operation.type}`)
+
+      // 示例：拒绝删除内容过多的操作
+      if (context.deleteContent && context.deleteContent.size > 1000) {
+        return {
+          action: 'reject',
+          error: '待删除内容过大',
+        }
+      }
+
+      return { action: 'accept' }
+    },
+  },
+})
+```
+
+### 配合 `streamTool`
+
+```ts
+const result = toolkit.streamTool({
+  toolCallId: 'call_123',
+  toolName: 'tiptapEdit',
+  hasFinished: true,
+  input,
+  tiptapEditHooks: {
+    beforeOperation: (context) => {
+      // 将所有替换操作改为 insertAfter 操作
+      if (context.operation.type === 'replace') {
+        return {
+          action: 'accept',
+          operationType: 'insertAfter',
+        }
+      }
+
+      return { action: 'accept' }
+    },
+  },
+})
+```
+
+### 配合 `tiptapEditWorkflow`
+
+```ts
+const { content } = toolkit.tiptapRead()
+
+const operations = await callApiEndpoint({ content, task: '改进写作' })
+
+const result = toolkit.tiptapEditWorkflow({
+  operations,
+  workflowId: 'edit-123',
+  tiptapEditHooks: {
+    beforeOperation: (context) => {
+      // 仅允许替换操作，不允许插入
+      if (context.operation.type !== 'replace') {
+        return {
+          action: 'reject',
+          error: '仅允许替换操作',
+        }
+      }
+
+      return { action: 'accept' }
+    },
+  },
+})
+```
