@@ -1,7 +1,7 @@
 ---
 title: 校对工作流程
 meta:
-  title: 使用 AI Toolkit 构建校对工具 | Tiptap Content AI
+  title: 使用 AI Toolkit 构建校对工具 | Tiptap 内容 AI
   description: 使用 Tiptap AI Toolkit 构建一个能够检测并纠正文档拼写错误的校对工具。
   category: 内容 AI
 ---
@@ -58,7 +58,7 @@ npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
 此外，需要在用户消息中包含以下两个属性：
 
 - `content`: 待校对文档的内容（详见客户端设置部分，如何获取内容）
-- `task`: AI 要执行的任务，例如 `Correct all grammar and spelling mistakes`（纠正所有语法和拼写错误）。
+- `task`: AI 要执行的任务，例如 `Correct all grammar and spelling mistakes`（纠正所有语法和拼写错误）
 
 当 AI 模型生成响应时，API 端点会将建议流式传输给客户端。
 
@@ -151,8 +151,9 @@ export default function Page() {
       reviewOptions: {
         mode: 'preview',
       },
+      hasFinished: !isLoading,
     })
-  }, [operations, workflowId, editor])
+  }, [operations, workflowId, editor, isLoading])
 
   if (!editor) return null
 

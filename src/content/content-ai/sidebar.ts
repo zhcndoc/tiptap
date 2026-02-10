@@ -150,16 +150,20 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/style-suggestions',
                 },
                 {
-                  title: 'AI engineering',
+                  title: 'AI 工程',
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/ai-engineering',
                 },
                 {
-                  title: 'Compare documents',
+                  title: '比较文档',
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/compare-documents',
                 },
                 {
                   title: 'Tiptap 编辑钩子',
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/tiptap-edit-hooks',
+                },
+                {
+                  title: 'AI Caret',
+                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret',
                 },
                 {
                   title: '迁移指南',

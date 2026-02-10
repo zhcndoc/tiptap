@@ -32,11 +32,11 @@ import { Callout } from '@/components/ui/Callout'
   - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 自定义渲染函数
 - `debounceTimeout?` (`number`): 重新计算差异前等待的毫秒数。较低的值会让应用看起来更响应，但可能会在大型文档中引发性能问题。默认：`500`
 - `diffUtilityConfig?` (`DiffUtilityConfig`): 使用差异工具比较文档的选项
-  - `simplifyChanges?` (`boolean`): 是否简化变更。若为 `true`，例如同一单词内的两个变更将合并成一个。仅在模式为 'detailed' 或 'smartInline' 时生效。默认：`true`
+  - `simplifyChanges?` (`boolean`): 是否简化变更。若为 `true`，例如同一单词内的两个变更将合并成一个。仅在模式为 'detailed'、'smartInline' 或 'smartInlineV2' 时生效。默认：`true`
   - `ignoreAttributes?` (`string[]`): 忽略的属性。默认：`['id', 'data-thread-id']`
   - `ignoreMarks?` (`string[]`): 忽略的标记。默认：`['inlineThread']`
   - `changeMergeDistance?` (`number | null`): 合并变更的最大距离（文档位置）。如果两个相邻变更在 rangeA 或 rangeB 中的距离小于或等于该值，则合并成一个变更。设置为 `null` 或 `undefined` 禁用合并。仅在模式为 'detailed' 时生效。默认：`null`
-  - `mode?` (`'detailed' | 'block' | 'smartInline'`): 比较时使用的差异模式。'detailed' 执行字符级差异，精确定位文本内变化（默认）。'block' 执行块级差异，将每个顶级节点视为单元。块模式适合只需知道哪些段落、标题或其他块级元素变更，而无需字符级细节。块模式下忽略 `simplifyChanges` 和 `changeMergeDistance` 选项。'smartInline' 结合了两者：先识别变更块，再在块内执行内联差异。适合部分内容变更的文档，兼具性能和字符级精度。默认：`'detailed'`
+  - `mode?` (`'detailed' | 'block' | 'smartInline' | 'smartInlineV2'`): 比较时使用的差异模式。'detailed' 执行字符级差异，精确定位文本内变化（默认）。'block' 执行块级差异，将每个顶级节点视为单元。块模式适合只需知道哪些段落、标题或其他块级元素变更，而无需字符级细节。块模式下忽略 `simplifyChanges` 和 `changeMergeDistance` 选项。'smartInline' 结合了两者：先识别变更块，再在块内执行内联差异。适合部分内容变更的文档，兼具性能和字符级精度。'smartInlineV2' 在 'smartInline' 基础上改进，可以正确显示块元素（如表格）内的变更。默认：`'detailed'`
 
 ### 返回
 

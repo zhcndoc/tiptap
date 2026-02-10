@@ -133,11 +133,11 @@ return result.toTextStreamResponse()
       - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 用于将建议呈现为 ProseMirror 装饰的函数
     - `metadata?` (`Record<string, any>`): 建议的额外元数据，可用于存储有关它们的附加信息（例如其来源或类别）。扩展内部不使用此信息，但可能有助于开发人员自定义 UI 中建议的显示方式。
     - `diffUtilityConfig?` (`DiffUtilityConfig`): 用于比较文档的差异工具的选项
-      - `simplifyChanges?` (`boolean`): 是否简化更改。如果为 `true`，更改将被简化，例如，将同一单词中的两个更改合并为一个更改。仅在模式为 'detailed' 或 'smartInline' 时适用。默认值：`true`
+      - `simplifyChanges?` (`boolean`): 是否简化更改。如果为 `true`，更改将被简化，例如，将同一单词中的两个更改合并为一个更改。仅在模式为 'detailed'、'smartInline' 或 'smartInlineV2' 时适用。默认值：`true`
       - `ignoreAttributes?` (`string[]`): 要忽略的属性。默认值：`['id', 'data-thread-id']`
       - `ignoreMarks?` (`string[]`): 要忽略的标记。默认值：`['inlineThread']`
       - `changeMergeDistance?` (`number | null`): 更改合并的最大距离（以文档位置为单位）。如果两个相邻更改在 rangeA 或 rangeB 中的距离小于或等于此值，它们将合并为一个更改。设置为 `null` 或 `undefined` 以禁用合并。仅在模式为 'detailed' 时适用。默认值：`null`
-      - `mode?` (`'detailed' | 'block' | 'smartInline'`): 用于比较的差异模式。`'detailed'` 执行字符级别的差异，识别文本中的精确更改（默认）。`'block'` 执行块级差异，将每个顶层节点视为一个单元。块模式在只需知道哪些段落、标题或其他块级元素发生变化时非常有用，而不需要字符级的细节。在块模式下，`simplifyChanges` 和 `changeMergeDistance` 选项将被忽略。`'smartInline'` 结合了两者：首先识别更改的块，然后在这些块内执行内联差异。适用于只改变部分内容的文档，同时仍提供字符级精度。默认值：`'detailed'`
+      - `mode?` (`'detailed' | 'block' | 'smartInline' | 'smartInlineV2'`): 用于比较的差异模式。`'detailed'` 执行字符级别的差异，识别文本中的精确更改（默认）。`'block'` 执行块级差异，将每个顶层节点视为一个单元。块模式在只需知道哪些段落、标题或其他块级元素发生变化时非常有用，而不需要字符级的细节。在块模式下，`simplifyChanges` 和 `changeMergeDistance` 选项将被忽略。`'smartInline'` 结合了两者：首先识别更改的块，然后在这些块内执行内联差异。适用于只改变部分内容的文档，同时仍提供字符级精度。`'smartInlineV2'` 改进了 `smartInline`，能正确显示块元素（如表格）中的更改。默认值：`'detailed'`
   - `range?` (`Range`): 应用校对操作的区间
     - `from` (`number`): 起始位置
     - `to` (`number`): 结束位置

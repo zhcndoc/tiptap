@@ -25,14 +25,15 @@ Diff 实用工具可用于比较整个文档或其部分内容。
 - `schema` (`Schema`)：编辑器使用的 ProseMirror schema。可从编辑器实例获取：`editor.schema`
 - `docA` (`Node | Fragment | JSONContent | JSONContent[]`)：原始文档。可以是 ProseMirror Node/Fragment 或 Tiptap JSON
 - `docB` (`Node | Fragment | JSONContent | JSONContent[]`)：修改后的文档。可以是 ProseMirror Node/Fragment 或 Tiptap JSON
-- `simplifyChanges?` (`boolean`)：是否简化变更，使得如果同一单词中有多个变更，它们会合并为一个变更。仅在模式为 `'detailed'` 或 `'smartInline'` 时应用。默认值：`true`
+- `simplifyChanges?` (`boolean`)：是否简化变更，使得如果同一单词中有多个变更，它们会合并为一个变更。仅在模式为 `'detailed'`、`'smartInline'` 或 `'smartInlineV2'` 时应用。默认值：`true`
 - `ignoreAttributes?` (`string[]`)：要忽略的属性。默认值：`['id', 'data-thread-id']`
 - `ignoreMarks?` (`string[]`)：要忽略的标记。默认值：`['inlineThread']`
 - `changeMergeDistance?` (`number | null`)：合并变更的最大距离（以文档位置计算）。如果两个相邻变更在 rangeA 或 rangeB 中的距离小于或等于此值，它们将合并为一个变更。设置为 `null` 或 `undefined` 可禁用合并。仅在模式为 `'detailed'` 时应用。默认值：`null`
-- `mode?` (`'detailed' | 'block' | 'smartInline'`)：比较使用的 diff 模式。
+- `mode?` (`'detailed' | 'block' | 'smartInline' | 'smartInlineV2'`)：比较使用的 diff 模式。
   - `'detailed'` 进行字符级别 diff，识别文本中具体的变更（默认）。
   - `'block'` 进行块级 diff，将每个顶级节点视为单个单元。块级模式适用于仅需了解哪些段落、标题或其他块级元素已更改，而不需要字符级细节的情况。在块级模式下，`simplifyChanges` 和 `changeMergeDistance` 选项被忽略。
   - `'smartInline'` 结合两者：首先识别发生变化的块，然后在这些块内执行内联 diff。对于仅部分更改的文档，这种方式更高效同时保持了字符级的精度。
+  - `'smartInlineV2'` 是对 `smartInline` 的改进，能够正确显示块级元素（如表格）中的变更。
 
 <Callout title="Schema 问题" variant="warning">
   两个文档必须使用相同的 schema。如果文档来自不同的编辑器，请将它们转换为共同的编辑器 schema：`Node.fromJSON(editor.state.schema, otherEditor.getJSON())`

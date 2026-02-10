@@ -133,6 +133,7 @@ export default function Page() {
   if (!editor) return null
 
   const editSelection = async (task: string) => {
+    editor.commands.blur()
     setIsLoading(true)
 
     const toolkit = getAiToolkit(editor)
@@ -196,9 +197,24 @@ export default function Page() {
 
 查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
+## 显示 AI 输入光标
+
+您可以添加 `AiCaret` 扩展来显示一个光标，指示 AI 正在插入内容的位置。这为用户在内容流式传输期间提供实时的视觉反馈。
+
+```tsx
+import { AiCaret, AiToolkit, getAiToolkit } from '@tiptap-pro/ai-toolkit'
+
+const editor = useEditor({
+  extensions: [StarterKit, AiToolkit, AiCaret],
+})
+```
+
+请参阅 [AI 光标指南](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret) 了解配置选项和 CSS 样式。
+
 ## 下一步
 
 - [`createInsertContentWorkflow` 函数的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#createinsertcontentworkflow)
 - [`getHtmlSelection` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#gethtmlselection)
 - [`streamHtml` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/edit-the-document#streamhtml)
 - [显示建议](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions)：了解如何审查文档并在编辑器中显示建议。
+- [AI 光标](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret)：显示 AI 正在插入内容的位置光标。

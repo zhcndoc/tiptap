@@ -148,8 +148,9 @@ export default function Page() {
     toolkit.tiptapEditWorkflow({
       operations,
       workflowId,
+      hasFinished: !isLoading,
     })
-  }, [operations, workflowId, editor])
+  }, [operations, workflowId, editor, isLoading])
 
   if (!editor) return null
 
@@ -198,7 +199,22 @@ export default function Page() {
 
 查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
+## 显示 AI 光标
+
+你可以添加 `AiCaret` 扩展来显示一个光标，指示 AI 正在编辑文档的位置。这为用户提供了流式编辑时的实时视觉反馈。
+
+```tsx
+import { AiCaret, AiToolkit, getAiToolkit } from '@tiptap-pro/ai-toolkit'
+
+const editor = useEditor({
+  extensions: [StarterKit, AiToolkit, AiCaret],
+})
+```
+
+有关配置选项和 CSS 样式，请参阅 [AI 光标指南](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret)。
+
 ## 相关指南
 
 - [`tiptapRead` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapread)
 - [`tiptapEditWorkflow` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#tiptapeditworkflow)
+- [AI 光标](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret)：显示 AI 插入内容的位置光标。

@@ -35,7 +35,7 @@ meta:
     - `ignoreAttributes?` (`string[]`): 忽略的属性。默认值：`['id', 'data-thread-id']`
     - `ignoreMarks?` (`string[]`): 忽略的标记。默认值：`['inlineThread']`
     - `changeMergeDistance?` (`number | null`): 合并变更的最大距离（以文档位置计）。如果两个相邻变更在 rangeA 或 rangeB 的距离小于等于该值，则合并为单个变更。设置为 `null` 或 `undefined` 以禁用合并。仅在模式为 'detailed' 时有效。默认值：`null`
-    - `mode?` (`'detailed' | 'block' | 'smartInline'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，精确识别文本变化（默认）。`'block'` 执行块级差异，将每个顶层节点视为单元。块模式适合仅需知道段落、标题或其他块级元素是否变化，不关心字符变化。块模式下忽略 `simplifyChanges` 和 `changeMergeDistance` 设置。`'smartInline'` 结合两者：先识别变更块，再对这些块内进行内联差异。适合部分内容发生变化的文档，且同时提供字符级精度。默认值：`'detailed'`
+    - `mode?` (`'detailed' | 'block' | 'smartInline' | 'smartInlineV2'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，精确识别文本变化（默认）。`'block'` 执行块级差异，将每个顶层节点视为单元。块模式适合仅需知道段落、标题或其他块级元素是否变化，不关心字符变化。块模式下忽略 `simplifyChanges` 和 `changeMergeDistance` 设置。`'smartInline'` 结合两者：先识别变更块，再对这些块内进行内联差异。适合部分内容发生变化的文档，且同时提供字符级精度。`'smartInlineV2'` 改善了 `'smartInline'`，能正确显示表格等块元素内的变更。默认值：`'detailed'`
 - `commentsOptions?` (`CommentsOptions`): 评论和线程操作的选项。允许传递自定义数据给评论和线程的创建/更新操作。`data` 属性用于线程数据，`commentData` 用于评论数据。
   - `threadData?` (`Record<string, any>`): AI 生成的线程（通过 `editThreads` 工具创建）的额外元数据
   - `commentData?` (`Record<string, any>`): AI 生成的评论（通过 `editThreads` 工具创建）的额外元数据
@@ -91,7 +91,7 @@ const result = toolkit.executeTool({
     - `ignoreAttributes?` (`string[]`): 忽略的属性。默认值：`['id', 'data-thread-id']`
     - `ignoreMarks?` (`string[]`): 忽略的标记。默认值：`['inlineThread']`
     - `changeMergeDistance?` (`number | null`): 合并变更的最大距离（以文档位置计）。如果两个相邻变更在 rangeA 或 rangeB 的距离小于等于该值，则合并为单个变更。设置为 `null` 或 `undefined` 以禁用合并。仅在模式为 'detailed' 时有效。默认值：`null`
-    - `mode?` (`'detailed' | 'block' | 'smartInline'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，精确识别文本变化（默认）。`'block'` 执行块级差异，将每个顶层节点视为单元。块模式适合仅需知道段落、标题或其他块级元素是否变化，不关心字符变化。块模式下忽略 `simplifyChanges` 和 `changeMergeDistance` 设置。`'smartInline'` 结合两者：先识别变更块，再对这些块内进行内联差异。适合部分内容发生变化的文档，且同时提供字符级精度。默认值：`'detailed'`
+    - `mode?` (`'detailed' | 'block' | 'smartInline' | 'smartInlineV2'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，精确识别文本变化（默认）。`'block'` 执行块级差异，将每个顶层节点视为单元。块模式适合仅需知道段落、标题或其他块级元素是否变化，不关心字符变化。块模式下忽略 `simplifyChanges` 和 `changeMergeDistance` 设置。`'smartInline'` 结合两者：先识别变更块，再对这些块内进行内联差异。适合部分内容发生变化的文档，且同时提供字符级精度。默认值：`'detailed'`
 - `commentsOptions?` (`CommentsOptions`): 评论和线程操作的选项。允许传递自定义数据给评论和线程的创建/更新操作。`data` 属性用于线程数据，`commentData` 用于评论数据。
   - `threadData?` (`Record<string, any>`): AI 生成的线程（通过 `editThreads` 工具创建）的额外元数据
   - `commentData?` (`Record<string, any>`): AI 生成的评论（通过 `editThreads` 工具创建）的额外元数据

@@ -31,7 +31,7 @@ AI 工具包提供了以不同格式编辑文档的方法。
       - `ignoreAttributes?` (`string[]`): 忽略的属性。默认值：`['id', 'data-thread-id']`
       - `ignoreMarks?` (`string[]`): 忽略的标记。默认值：`['inlineThread']`
       - `changeMergeDistance?` (`number | null`): 允许合并的变更最大距离（文档位置）。若两个相邻变更在 rangeA 或 rangeB 中的距离小于或等于此值，则会合并为单一变更。设置为 `null` 或 `undefined` 禁用合并。仅适用于 `'detailed'` 模式。默认值：`null`
-      - `mode?` (`'detailed' | 'block' | 'smartInline'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，识别文本内精确变更（默认）。`'block'` 执行块级差异，将每个顶级节点视为单元。块模式适用于只需了解段落、标题等块级元素是否变更，不关注字符级细节。块模式下，忽略 `simplifyChanges` 和 `changeMergeDistance`。`'smartInline'` 结合两者：先识别变更的块，再在块内执行字符级差异。适合仅部分内容变更的文档，同时保持字符级精确度。默认值：`'detailed'`
+      - `mode?` (`'detailed' | 'block' | 'smartInline' | 'smartInlineV2'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，识别文本内精确变更（默认）。`'block'` 执行块级差异，将每个顶级节点视为单元。块模式适用于只需了解段落、标题等块级元素是否变更，不关注字符级细节。块模式下，忽略 `simplifyChanges` 和 `changeMergeDistance`。`'smartInline'` 结合两者：先识别变更的块，再在块内执行字符级差异。适合仅部分内容变更的文档，同时保持字符级精确度。`'smartInlineV2'` 则在块元素（如表格）正确显示变更。默认值：`'detailed'`
 
 ### 返回
 
@@ -166,7 +166,7 @@ toolkit.streamHtml(stream)
       - `ignoreAttributes?` (`string[]`): 忽略的属性。默认值：`['id', 'data-thread-id']`
       - `ignoreMarks?` (`string[]`): 忽略的标记。默认值：`['inlineThread']`
       - `changeMergeDistance?` (`number | null`): 允许合并的变更最大距离（文档位置）。若两个相邻变更在 rangeA 或 rangeB 中的距离小于或等于此值，则会合并为单一变更。设置为 `null` 或 `undefined` 禁用合并。仅适用于 `'detailed'` 模式。默认值：`null`
-      - `mode?` (`'detailed' | 'block' | 'smartInline'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，识别文本内精确变更（默认）。`'block'` 执行块级差异，将每个顶级节点视为单元。块模式适用于只需了解段落、标题等块级元素是否变更，不关注字符级细节。块模式下，忽略 `simplifyChanges` 和 `changeMergeDistance`。`'smartInline'` 结合两者：先识别变化块，再在块内执行字符级差异。默认值：`'detailed'`
+      - `mode?` (`'detailed' | 'block' | 'smartInline' | 'smartInlineV2'`): 用于比较的差异模式。`'detailed'` 执行字符级差异，识别文本内精确变更（默认）。`'block'` 执行块级差异，将每个顶级节点视为单元。块模式适用于只需了解段落、标题等块级元素是否变更，不关注字符级细节。块模式下，忽略 `simplifyChanges` 和 `changeMergeDistance`。`'smartInline'` 结合两者：先识别变化块，再在块内执行字符级差异。默认值：`'detailed'`
 
 #### `PatchOperation`（类型）
 

@@ -1,0 +1,102 @@
+---
+title: AI 光标
+meta:
+  title: AI 光标 | Tiptap 内容 AI
+  description: 显示一个光标，指示 AI 在流式操作中插入内容的位置。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+`AiCaret` 扩展在 AI 当前插入内容的位置显示一个光标装饰。它在流式操作过程中提供实时的视觉反馈，类似于 [Collaboration Caret 扩展](/editor/extensions/functionality/collaboration-caret)。
+
+<Callout title="实验性功能" variant="info">
+  AI 光标扩展是一个实验性功能，在未来版本中可能会发生变化。
+</Callout>
+
+## 用法
+
+从 `@tiptap-pro/ai-toolkit` 导入 `AiCaret` 扩展并添加到你的编辑器扩展中。
+
+```tsx
+import { AiCaret, AiToolkit } from '@tiptap-pro/ai-toolkit'
+
+const editor = useEditor({
+  extensions: [StarterKit, AiToolkit, AiCaret],
+})
+```
+
+光标会在流式操作（如 `streamHtml`、`streamTool` 和 `tiptapEditWorkflow`）期间自动显示，流处理完成后光标消失。
+
+## 配置
+
+你可以配置光标的超时时间、用户标签和渲染方式。
+
+```tsx
+AiCaret.configure({
+  // 在最后一次更新后，光标保持可见的时间（毫秒）
+  timeout: 2000,
+  // 光标标签的用户信息
+  user: {
+    name: 'AI',
+    color: '#a5b4fc',
+  },
+})
+```
+
+### 选项
+
+| 选项       | 类型                                 | 默认值                             | 描述                                                      |
+| --------- | ------------------------------------ | ---------------------------------- | --------------------------------------------------------- |
+| `timeout` | `number`                             | `2000`                             | 在最后一次更新后光标保持可见的时间（毫秒）。                |
+| `user`    | `{ name: string, color: string }`    | `{ name: 'AI', color: '#a5b4fc' }` | 光标标签中显示的名称和颜色。                               |
+| `render`  | `(user: AiCaretUser) => HTMLElement` | 内置渲染函数                       | 用于自定义渲染光标 DOM 元素的函数。                        |
+
+## CSS 样式
+
+默认的渲染函数会创建一个带有类名 `tiptap-ai-caret` 的 DOM 元素和一个带有类名 `tiptap-ai-caret__label` 的标签。添加以下 CSS 以美化光标：
+
+```css
+.tiptap .tiptap-ai-caret {
+  border-left: 1px solid #0d0d0d;
+  border-right: 1px solid #0d0d0d;
+  margin-left: -1px;
+  margin-right: -1px;
+  pointer-events: none;
+  position: relative;
+  word-break: normal;
+}
+
+.tiptap .tiptap-ai-caret__label {
+  border-radius: 3px 3px 3px 0;
+  color: #0d0d0d;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  left: -1px;
+  line-height: normal;
+  padding: 0.1rem 0.3rem;
+  position: absolute;
+  top: -1.4em;
+  user-select: none;
+  white-space: nowrap;
+}
+```
+
+光标和标签的 `border-color` 及 `background-color` 会根据 `user.color` 选项内联设置。
+
+## 自定义渲染
+
+你可以提供一个自定义的 `render` 函数，完全控制光标的 DOM 元素。
+
+```tsx
+AiCaret.configure({
+  render: (user) => {
+    const el = document.createElement('span')
+    el.className = 'my-custom-ai-caret'
+    el.style.borderColor = user.color
+    el.textContent = user.name
+    return el
+  },
+})
+```

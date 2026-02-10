@@ -88,11 +88,12 @@ toolkit.executeTool({
 })
 ```
 
-有三种差异模式：
+有四种差异模式：
 
 - `detailed`（默认）：显示文本中精确的字符级更改。
 - `block`：按段落和标题分组更改，而非单个字符。
-- `smartInline`：实验性模式，表现类似 `detailed`，但结果更准确。
+- `smartInline`：结合了块级和内联级比较，通过在内联中比较更改的块来实现。
+- `smartInlineV2`：改进了 `smartInline` 模式，能够正确显示块元素（如表格）中的更改。
 
 差异工具还有其他选项，详细信息请参阅[API 参考](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility)。
 
