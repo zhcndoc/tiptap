@@ -52,7 +52,11 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/agents/review-changes',
                 },
                 {
-                  title: '变更摘要审核',
+                  title: '合理的变更',
+                  href: '/content-ai/capabilities/ai-toolkit/agents/justified-changes',
+                },
+                {
+                  title: '审查作为摘要',
                   href: '/content-ai/capabilities/ai-toolkit/agents/review-changes-as-summary',
                 },
                 {
@@ -126,6 +130,10 @@ export const sidebarConfig: SidebarConfig = {
                 {
                   title: '评论功能',
                   href: '/content-ai/capabilities/ai-toolkit/workflows/comments',
+                },
+                {
+                  title: 'Template',
+                  href: '/content-ai/capabilities/ai-toolkit/workflows/template',
                 },
               ],
             },

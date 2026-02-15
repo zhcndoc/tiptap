@@ -26,6 +26,15 @@ import { Callout } from '@/components/ui/Callout'
 --header 'X-App-Id: YOUR_APP_ID'
 ```
 
+### Document Server 凭据（可选）
+
+若需使用 Tiptap Cloud 文档或评论工具，请在生成令牌时将 Document Server 凭据包含为 JWT 声明：
+
+- `experimental_document_app_id`：您的 Tiptap Cloud Document Server 应用 ID
+- `experimental_document_secret`：您的 Document Server 管理 API 密钥
+
+这些凭据允许 AI 服务器代表您从 Tiptap Document Server 获取和保存文档。
+
 ## 基础 URL
 
 示例中，`BASE_URL` 是 Tiptap Cloud AI 服务的基础 URL。Tiptap Cloud AI 服务的基础 URL 为 `https://api.tiptap.dev`。若为本地部署，该 URL 会有所不同。
@@ -103,6 +112,22 @@ curl --location 'BASE_URL/v3/ai/toolkit/tools' \
 
 调用此端点，在 Tiptap 文档上执行工具。
 
+### 如何提供文档
+
+有两种方式将文档提供给 execute-tool 端点：
+
+**直接传递文档** — 在请求体中包含 `document` 字段，传入您的 Tiptap JSON 文档。服务器处理后在响应中返回修改后的文档。
+
+**引用 Tiptap Cloud 文档** — 在请求体中包含 `experimental_documentOptions` 并带有 `documentId`，而非直接传递 `document`。服务器会自动从 Tiptap Document Server 获取文档，处理后保存修改。此方式要求：
+1. JWT 中包含 `experimental_document_app_id` 和 `experimental_document_secret` 声明
+2. 请求体中 `experimental_documentOptions.documentId` 字段
+
+你必须提供且仅提供一个：`document` 或 `experimental_documentOptions`。同时提供二者或都不提供均会返回验证错误。
+
+<Callout title="线程工具需要 Tiptap Cloud 文档" variant="info">
+  `getThreads` 和 `editThreads` 工具始终要求提供 `experimental_documentOptions`。
+</Callout>
+
 ### 端点
 
 ```
@@ -110,6 +135,8 @@ POST /v3/ai/toolkit/execute-tool
 ```
 
 ### 请求
+
+**直接传递文档示例：**
 
 ```curl
 curl --location 'BASE_URL/v3/ai/toolkit/execute-tool' \
@@ -126,15 +153,43 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-tool' \
 }'
 ```
 
+**使用 Tiptap Cloud 文档示例**（JWT 必须包含 `experimental_document_app_id` 和 `experimental_document_secret` 声明）：
+
+```curl
+curl --location 'BASE_URL/v3/ai/toolkit/execute-tool' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+--header 'X-App-Id: YOUR_APP_ID' \
+--data '{
+    "toolName": "tiptapRead",
+    "input": { /* 工具输入 */ },
+    "experimental_documentOptions": {
+      "documentId": "your-document-id"
+    },
+    "schemaAwarenessData": { /* 从 getSchemaAwarenessData 获取的 schema 认知数据 */ },
+    "chunkSize": 1000,
+    "format": "json"
+}'
+```
+
 ### 请求体
 
-- `toolName`（`string`，必填）：要执行的工具名称。必须是：
+- `toolName`（`string`，必填）：要执行的工具名称。必须是以下之一：
   - `"tiptapRead"`：用高效格式读取文档部分内容
   - `"tiptapEdit"`：用高效格式编辑文档
+  - `"getThreads"`：获取文档中的所有线程和评论
+  - `"editThreads"`：执行线程和评论的相关操作
 - `input`（`any`，必填）：工具的输入参数，遵循工具输入 schema。输入格式针对高效读取和编辑操作进行了优化。
-- `document`（`object`，必填）：要操作的 Tiptap JSON 文档
+- `document`（`object`，条件必填）：要操作的 Tiptap JSON 文档。提供此字段时，不能同时提供 `experimental_documentOptions`。
+- `experimental_documentOptions`（`object`，条件必填）：引用 Tiptap Cloud 文档的信息。服务器会自动获取和保存文档，不能同时提供 `document`。
+  - `documentId`（`string`，必填）：Document Server 上的文档 ID
+  - `userId`（`string`，可选）：用于归属线程或评论作者身份的用户 ID
+- `experimental_commentsOptions`（`object`，可选）：线程或评论操作的元数据
+  - `threadData`（`Record<string, any>`，可选）：附加到新建线程的元数据
+  - `commentData`（`Record<string, any>`，可选）：附加到新建评论的元数据
 - `schemaAwarenessData`（`SchemaAwarenessData`，必填）：从 `getSchemaAwarenessData` 获取的 schema 认知数据
 - `chunkSize?`（`number`，可选）：读取操作的分块大小。默认值：`1000`
+- `tiptapEditSelectableNodes?`（`string[]`，可选）：针对 tiptapEdit 操作的自定义可选节点类型
 - `format?`（`string`，可选）：AI 读取和编辑文档所使用的格式。必须为以下之一：
   - `"json"`（默认）：标准 JSON 格式
   - `"shorthand"`：Tiptap 简写格式，相较标准 JSON 可将 AI 令牌消耗降低最多 80%
@@ -196,7 +251,11 @@ curl --location 'BASE_URL/v3/ai/toolkit/schema-awareness-prompt' \
 
 当出现错误时，API 会返回带有相应 HTTP 状态码的错误响应：
 
-- `400 Bad Request`：请求体或参数无效
+- `400 Bad Request`：请求体或参数无效。包括：
+  - 同时缺失或同时提供了 `document` 和 `experimental_documentOptions`
+  - 使用 `getThreads` 或 `editThreads` 工具时未提供 `experimental_documentOptions`
+  - 提供了 `experimental_documentOptions` 但 JWT 中缺少 Document Server 凭据（`missing_document_credentials`）
 - `401 Unauthorized`：缺失或无效的 JWT 令牌或 App ID
 - `404 Not Found`：未找到指定工具
 - `500 Internal Server Error`：工具执行时发生服务器错误
+- `502 Bad Gateway`：与 Document Server 通信失败（`document_load_failed`，`document_save_failed`）

@@ -1,0 +1,108 @@
+---
+title: 有理有据的修改
+meta:
+  title: 有理有据的修改 | Tiptap 内容 AI
+  description: 使用浮动工具提示显示 AI 生成的每个修改的理由。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+<Callout title="延续审阅修改指南" variant="info">
+  本指南是对[审阅修改指南](/content-ai/capabilities/ai-toolkit/agents/review-changes)的延续。请先阅读该指南。
+</Callout>
+
+AI 工具包可以指示 AI 在对文档所做的每个修改中包含理由。这允许你向用户展示*为什么*要做出某项修改，而不仅仅是*修改了什么*。
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/justified-changes" />
+
+查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 启用有理有据的修改
+
+要启用有理有据的修改，请在服务器端调用 `toolDefinitions()` 时传入 `operationMeta` 选项。你提供的字符串将成为工具 schema 中 `meta` 字段的描述，AI 会以此了解应提供何种类型的理由说明。
+
+```ts
+// api/route.ts
+const agent = new ToolLoopAgent({
+  model,
+  instructions: '...',
+  tools: toolDefinitions({
+    operationMeta: '对为什么该修改能提升文本的简要说明',
+  }),
+})
+```
+
+## 以工具提示显示理由
+
+当选中某个建议时，你可以使用 [Floating UI](https://floating-ui.com/) 库将理由显示为工具提示。
+
+### 安装 Floating UI
+
+```bash
+npm install @floating-ui/dom
+```
+
+### 在 `renderDecorations` 中访问理由
+
+理由可以通过 `suggestion.metadata?.operationMeta` 获取。使用 `isSelected` 选项仅在建议被选中时显示工具提示。
+
+```tsx
+import { computePosition, flip, offset, shift } from '@floating-ui/dom'
+
+const result = toolkit.executeTool({
+  toolName,
+  input,
+  reviewOptions: {
+    mode: 'preview',
+    displayOptions: {
+      renderDecorations(options) {
+        const decorations = [...options.defaultRenderDecorations()]
+
+        // 添加接受和拒绝按钮（与审阅修改指南相同）
+        // ...
+
+        // 选中且存在理由时显示工具提示
+        const justification = options.suggestion.metadata?.operationMeta
+        if (options.isSelected && justification) {
+          decorations.push(
+            Decoration.widget(options.range.to, () => {
+              const container = document.createElement('span')
+              container.style.position = 'relative'
+
+              const tooltip = document.createElement('div')
+              tooltip.textContent = justification as string
+              tooltip.style.cssText =
+                'position:absolute;background:white;color:#1f2937;padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;font-size:13px;max-width:400px;width:max-content;z-index:50;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,0.08),0 1px 3px rgba(0,0,0,0.06);'
+              container.appendChild(tooltip)
+
+              requestAnimationFrame(() => {
+                computePosition(container, tooltip, {
+                  placement: 'top',
+                  middleware: [offset(8), flip(), shift({ padding: 8 })],
+                }).then(({ x, y }) => {
+                  tooltip.style.left = `${x}px`
+                  tooltip.style.top = `${y}px`
+                })
+              })
+
+              return container
+            }),
+          )
+        }
+
+        return decorations
+      },
+    },
+  },
+})
+```
+
+## 最终效果
+
+经过以上修改，AI 生成的建议就会包含浮动工具提示，解释每处修改背后的理由：
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/justified-changes" />
+
+查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。

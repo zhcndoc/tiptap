@@ -20,7 +20,7 @@ import { Callout } from '@/components/ui/Callout'
 
 静态渲染器帮助将 JSON 内容渲染为 HTML、markdown 或 React 组件，而无需编辑器实例。它只需要 JSON 内容和扩展列表。
 
-<CodeDemo src="https://deploy-preview-6012--tiptap-embed.netlify.app/preview/examples/staticrendering" />
+<CodeDemo path="/examples/staticrendering" />
 
 ## 为什么选择静态渲染？
 
@@ -58,7 +58,7 @@ renderToHTMLString({
 // 返回: '<p>你好，世界！</p>'
 ```
 
-<CodeDemo src="https://deploy-preview-6012--tiptap-embed.netlify.app/preview/GuideContent/StaticRenderHTML" />
+<CodeDemo path="/GuideContent/StaticRenderHTML" />
 
 ### generateHTML API
 
@@ -70,13 +70,13 @@ function renderToHTMLString(options: {
 }): string
 ```
 
-- `extensions`: 用于渲染内容的 Tiptap 扩展数组。
-- `content`: 要渲染的内容。可以是 Prosemirror Node 实例或 Prosemirror 文档的 JSON 表示。
-- `options`: 带有附加选项的对象。
-- `options.nodeMapping`: 将 Prosemirror 节点映射到 HTML 字符串的对象。
-- `options.markMapping`: 将 Prosemirror 标记映射到 HTML 字符串的对象。
-- `options.unhandledNode`: 当遇到未处理的节点时调用的函数。
-- `options.unhandledMark`: 当遇到未处理的标记时调用的函数。
+- `extensions`：用于渲染内容的 Tiptap 扩展数组。
+- `content`：要渲染的内容。可以是 Prosemirror Node 实例或 Prosemirror 文档的 JSON 表示。
+- `options`：带有附加选项的对象。
+- `options.nodeMapping`：将 Prosemirror 节点映射到 HTML 字符串的对象。
+- `options.markMapping`：将 Prosemirror 标记映射到 HTML 字符串的对象。
+- `options.unhandledNode`：当遇到未处理的节点时调用的函数。
+- `options.unhandledMark`：当遇到未处理的标记时调用的函数。
 
 ## 从 JSON 生成 Markdown
 
@@ -122,13 +122,13 @@ function renderToMarkdown(options: {
 }): string
 ```
 
-- `extensions`: 用于渲染内容的 Tiptap 扩展数组。
-- `content`: 要渲染的内容。可以是 Prosemirror Node 实例或 Prosemirror 文档的 JSON 表示。
-- `options`: 带有附加选项的对象。
-- `options.nodeMapping`: 将 Prosemirror 节点映射到 markdown 字符串的对象。
-- `options.markMapping`: 将 Prosemirror 标记映射到 markdown 字符串的对象。
-- `options.unhandledNode`: 当遇到未处理的节点时调用的函数。
-- `options.unhandledMark`: 当遇到未处理的标记时调用的函数。
+- `extensions`：用于渲染内容的 Tiptap 扩展数组。
+- `content`：要渲染的内容。可以是 Prosemirror Node 实例或 Prosemirror 文档的 JSON 表示。
+- `options`：带有附加选项的对象。
+- `options.nodeMapping`：将 Prosemirror 节点映射到 markdown 字符串的对象。
+- `options.markMapping`：将 Prosemirror 标记映射到 markdown 字符串的对象。
+- `options.unhandledNode`：当遇到未处理的节点时调用的函数。
+- `options.unhandledMark`：当遇到未处理的标记时调用的函数。
 
 ## 从 JSON 生成 React 组件
 
@@ -158,7 +158,7 @@ renderToReactElement({
 // 返回一个 react 节点，评估后将等同于: '<p>你好，世界！</p>' 而不需要 Tiptap 编辑器实例
 ```
 
-<CodeDemo src="https://deploy-preview-6012--tiptap-embed.netlify.app/preview/GuideContent/StaticRenderReact" />
+<CodeDemo path="/GuideContent/StaticRenderReact" />
 
 ### generateReactElement API
 
@@ -170,13 +170,13 @@ function renderToReactElement(options: {
 }): ReactElement
 ```
 
-- `extensions`: 用于渲染内容的 Tiptap 扩展数组。
-- `content`: 要渲染的内容。可以是 Prosemirror Node 实例或 Prosemirror 文档的 JSON 表示。
-- `options`: 带有附加选项的对象。
-- `options.nodeMapping`: 将 Prosemirror 节点映射到 React 组件的对象。
-- `options.markMapping`: 将 Prosemirror 标记映射到 React 组件的对象。
-- `options.unhandledNode`: 当遇到未处理的节点时调用的函数。
-- `options.unhandledMark`: 当遇到未处理的标记时调用的函数。
+- `extensions`：用于渲染内容的 Tiptap 扩展数组。
+- `content`：要渲染的内容。可以是 Prosemirror Node 实例或 Prosemirror 文档的 JSON 表示。
+- `options`：带有附加选项的对象。
+- `options.nodeMapping`：将 Prosemirror 节点映射到 React 组件的对象。
+- `options.markMapping`：将 Prosemirror 标记映射到 React 组件的对象。
+- `options.unhandledNode`：当遇到未处理的节点时调用的函数。
+- `options.unhandledMark`：当遇到未处理的标记时调用的函数。
 
 ### React 节点视图
 
@@ -299,7 +299,7 @@ renderToReactElement({
 // 注意: NodeViewContent 组件渲染为带有属性 data-node-view-content 的 div，富文本内容渲染在其中
 ```
 
-<CodeDemo src="https://deploy-preview-6012--tiptap-embed.netlify.app/preview/Examples/StaticRenderingAdvanced" />
+<CodeDemo path="/Examples/StaticRenderingAdvanced" />
 
 ## 共享选项
 
@@ -307,7 +307,10 @@ renderToReactElement({
 
 ```js
 import StarterKit from '@tiptap/starter-kit'
-import { renderToHTMLString, serializeChildrenToHTMLString } from '@tiptap/static-renderer/pm/html-string'
+import {
+  renderToHTMLString,
+  serializeChildrenToHTMLString,
+} from '@tiptap/static-renderer/pm/html-string'
 
 renderToHTMLString({
   extensions: [StarterKit], // 使用您的扩展

@@ -53,19 +53,41 @@ const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
 
 ## 执行评论工具
 
-执行评论工具时，在请求体中包含 `experimental__commentsOptions` 对象。该对象包含连接到 Tiptap 协作服务器以及使用新评论更新协作文档的配置。
+评论工具需要一个 **Tiptap Cloud 文档**，因为线程和评论存储在 Tiptap 文档服务器上。使用 `experimental_documentOptions` 时，**不需要传递 `document` 字段** —— AI 服务器会自动从文档服务器获取。
 
-- `documentId`（`string`）：要创建评论的文档 ID。
-- `apiSecret`（`string`）：服务器 AI 工具包的 API 密钥。
-- `userId`（`string`）：创建评论的用户 ID。
-- `appId`（`string`，可选）：服务器 AI 工具包的应用 ID。
-- `baseUrl`（`string`，可选）：服务器 AI 工具包的基础 URL。
-- `threadData`（`Record<string, any>`，可选）：使用 `editThreads` 工具创建的 AI 生成线程的额外元数据。该元数据将在创建线程时附加。
-- `commentData`（`Record<string, any>`，可选）：使用 `editThreads` 工具创建的 AI 生成评论的额外元数据。该元数据将在创建评论时附加。
+### JWT 要求
 
-必须提供 `appId` 或 `baseUrl` 中的至少一个。如果您使用 Tiptap Cloud，请使用 `appId` 属性连接到您的部署。如果您在自己的基础设施上部署，请使用 `baseUrl` 属性连接到 Tiptap 协作服务。
+您的 JWT 必须包含文档服务器的凭证作为声明：
+
+- `experimental_document_app_id`（`string`）：文档服务器的 Tiptap Cloud 应用 ID
+- `experimental_document_secret`（`string`）：文档服务器的管理员 API 密钥
+
+### 请求体
+
+在请求体中包含 `experimental_documentOptions`：
+
+- `documentId`（`string`，必填）：文档 ID
+- `userId`（`string`，可选）：创建评论的用户 ID。如果省略，则评论将不带用户归属创建。
+
+可选包含 `experimental_commentsOptions` 以添加元数据：
+
+- `threadData`（`Record<string, any>`，可选）：使用 `editThreads` 工具创建的新线程附加的元数据。
+- `commentData`（`Record<string, any>`，可选）：使用 `editThreads` 工具创建的新评论附加的元数据。
 
 ```ts
+// JWT 必须包含文档服务器凭证
+import jwt from 'jsonwebtoken'
+
+const jwtToken = jwt.sign(
+  {
+    // 文档服务器凭证（评论工具必需）
+    experimental_document_app_id: 'your-document-app-id',
+    experimental_document_secret: 'your-document-api-secret',
+  },
+  TIPTAP_CLOUD_AI_SECRET,
+  { expiresIn: '1h' },
+)
+
 const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
   method: 'POST',
   headers: {
@@ -76,14 +98,16 @@ const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
   body: JSON.stringify({
     toolName: 'editThreads',
     input: {},
-    document,
     schemaAwarenessData,
-    // 评论工具所必需
-    experimental__commentsOptions: {
+    // 引用 Tiptap Cloud 文档
+    experimental_documentOptions: {
       documentId: '123',
-      apiSecret: 'your-api-secret',
       userId: 'ai-assistant',
-      appId: 'your-app-id',
+    },
+    // 可选元数据
+    experimental_commentsOptions: {
+      threadData: { source: 'ai' },
+      commentData: { source: 'ai' },
     },
   }),
 })

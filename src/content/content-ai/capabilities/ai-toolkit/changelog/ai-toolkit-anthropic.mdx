@@ -1,134 +1,146 @@
 ---
-title: Changelog - Anthropic
+title: 更新日志 - Anthropic
 meta:
-  title: Changelog - Anthropic | Tiptap Content AI
-  description: Changelog for the @tiptap-pro/ai-toolkit-anthropic package
-  category: Content AI
+  title: 更新日志 - Anthropic | Tiptap 内容 AI
+  description: @tiptap-pro/ai-toolkit-anthropic 包的更新日志
+  category: 内容 AI
 ---
 
 # @tiptap-pro/ai-toolkit-anthropic
 
+## 3.0.0-alpha.21
+
+### 修补变更
+
+- 引用正确的 `@tiptap-pro/ai-toolkit-tool-definitions@3.0.0-alpha.30` 依赖版本。
+
+## 3.0.0-alpha.20
+
+### 次要变更
+
+- 为 `toolDefinitions()` 和 `tiptapEditTool()` 添加 `operationMeta` 选项。设置后，AI 会在每个编辑操作中包含一个 `meta` 字段，说明为何进行了该更改。
+
 ## 3.0.0-alpha.19
 
-### Major Changes
+### 重大变更
 
-- Improve tool definition of `editThreads` tool to avoid errors where the AI would sometimes fail to create threads.
-- Improve prompt of the Comments workflow to avoid errors where the AI would sometimes fail to create threads.
+- 改进 `editThreads` 工具的工具定义，避免 AI 有时无法创建线程的错误。
+- 改进评论工作流的提示，避免 AI 有时无法创建线程的错误。
 
 ## 3.0.0-alpha.18
 
-### Patch Changes
+### 修补变更
 
-- Improved the tool definition of tiptapEdit to make edits more efficient.
+- 改进 tiptapEdit 的工具定义，使编辑更高效。
 
 ## 3.0.0-alpha.17
 
-### Patch Changes
+### 修补变更
 
-- Bump version to align with refactored Tiptap edit implementation in the core AI Toolkit.
+- 提升版本以匹配核心 AI 工具包中重构的 Tiptap 编辑实现。
 
 ## 3.0.0-alpha.16
 
-### Patch Changes
+### 修补变更
 
-- Bump version to align with updated `getThreads` pagination semantics in the core AI Toolkit.
+- 提升版本以匹配核心 AI 工具包中更新的 `getThreads` 分页语义。
 
 ## 3.0.0-alpha.15
 
-### Patch Changes
+### 修补变更
 
-- Update `getThreads` tool schema to require a `from` index for pagination.
+- 更新 `getThreads` 工具架构，要求分页时必须提供 `from` 索引。
 
 ## 3.0.0-alpha.14
 
-### Major Changes
+### 重大变更
 
-- **Breaking**: Change `editThreads` tool to use a new, more efficient format. The new format is faster, more efficient, uses fewer tokens, and avoids diff mismatch errors completely, significantly improving the accuracy of the tool.
+- **重大破坏性修改**：将 `editThreads` 工具改用一种新的、更高效的格式。新格式更快、更高效，使用更少令牌，且完全避免差异不匹配错误，显著提升工具的准确性。
 
 ## 3.0.0-alpha.13
 
-### Minor Changes
+### 次要变更
 
-- Server AI Toolkit tool definitions
+- 服务器端 AI 工具包工具定义。
 
 ## 3.0.0-alpha.12
 
-### Major Changes
+### 重大变更
 
-- Add `tiptapEdit`, `tiptapRead`, and `tiptapReadSelection` tools and set them as default. Remove `readNodeRange`, `readSelection`, `insertContent` and `applyPatch` tools.
+- 添加 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具并设为默认。移除 `readNodeRange`、`readSelection`、`insertContent` 和 `applyPatch` 工具。
 
 ## 3.0.0-alpha.11
 
-### Minor Changes
+### 次要变更
 
-- Add `tiptapEdit`, `tiptapRead`, and `tiptapReadSelection` tools that make edits faster and more efficient. These tools are experimental and opt-in.
+- 添加 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，使编辑更快捷更高效。此类工具为实验性质，需自行选择启用。
 
 ## 3.0.0-alpha.10
 
-### Patch Changes
+### 修补变更
 
-- Fix bug that caused the AI to not read the document at the beginning of the chat interaction.
+- 修复导致 AI 在聊天交互开始时未读取文档的错误。
 
 ## 3.0.0-alpha.9
 
-### Patch Changes
+### 修补变更
 
-- Fix bug that caused the AI to read the entire document when it was not necessary to do so.
+- 修复导致 AI 在不必要时读取整个文档的错误。
 
 ## 3.0.0-alpha.8
 
-### Patch Changes
+### 修补变更
 
-- Fix bug that caused the AI to read the incorrect content of the document after updating the document.
+- 修复更新文档后 AI 读取了错误内容的错误。
 
 ## 3.0.0-alpha.7
 
-### Patch Changes
+### 修补变更
 
-- Fix bug where new threads and comments were not created in the right position of the document.
+- 修复新线程和评论未创建在文档正确位置的错误。
 
 ## 3.0.0-alpha.6
 
-### Major Changes
+### 重大变更
 
-- New format for the tool input of the `applyPatch` tool. This format makes the tool definitions simpler and more consistent.
-- Improved tool output and tool definitions of all the built-in tools.
-- Requires upgrading to a version of the `@tiptap-pro/ai-toolkit` package that is equal or higher than `3.0.0-alpha.37`
+- `applyPatch` 工具的输入格式全新设计，使工具定义更简单一致。
+- 改进所有内置工具的输出及工具定义。
+- 需要升级 `@tiptap-pro/ai-toolkit` 包版本至 `3.0.0-alpha.37` 及以上。
 
 ## 3.0.0-alpha.5
 
-### Major Changes
+### 重大变更
 
-- Makes the insertContent tool independent of the format of the content, by renaming the "html" property to "content".
-- Requires upgrading to a version of the `@tiptap-pro/ai-toolkit` package that is equal or higher than `3.0.0-alpha.36`
+- 通过将 “html” 属性重命名为 “content”，使 `insertContent` 工具与内容格式独立。
+- 需要升级 `@tiptap-pro/ai-toolkit` 包版本至 `3.0.0-alpha.36` 及以上。
 
-### Patch Changes
+### 修补变更
 
-- Fixes bug in insertContent tool where the activeNodeRange is not a valid value for the position.
-- Fixes bug where the insertContent tool would cause the activeNodeRange to always reset to 0.
+- 修复 `insertContent` 工具中 `activeNodeRange` 作为位置无效的问题。
+- 修复 `insertContent` 工具导致 `activeNodeRange` 总被重置为 0 的错误。
 
 ## 3.0.0-alpha.4
 
-### Major Changes
+### 重大变更
 
-- Add new `editThreads` and `getThreads` tools for AI-powered comment and thread management
-- Requires upgrading to a version of the `@tiptap-pro/ai-toolkit` package that is equal or higher than `3.0.0-alpha.26`
+- 新增用于 AI 驱动的评论和线程管理的 `editThreads` 及 `getThreads` 工具。
+- 需要升级 `@tiptap-pro/ai-toolkit` 包版本至 `3.0.0-alpha.26` 及以上。
 
 ## 3.0.0-alpha.3
 
-### Major Changes
+### 重大变更
 
-- Rename `applyDiff` tool to `applyPatch`
-- Improve format and tool definition of the `applyDiff` tool (now called `applyPatch`) so that the AI generates a list of patch operations. This improves accuracy (because the AI is not tempted to do unnecessary jumps) and reduces token usage significantly
+- 将 `applyDiff` 工具重命名为 `applyPatch`。
+- 改进 `applyDiff` 工具（现称 `applyPatch`）的格式和工具定义，使 AI 生成修补操作列表。这提升了准确性（因为AI不会做不必要跳转）且显著减少令牌使用量。
 
 ## 3.0.0-alpha.2
 
-### Minor Changes
+### 次要变更
 
-- Add `activeNodeRange` position to the `insertContent` tool to allow the AI to insert content at the active node range. This improves the accuracy of the edits when the `applyDiff` tool is disabled.
+- 在 `insertContent` 工具中添加 `activeNodeRange` 位置，允许 AI 在活动节点范围内插入内容。禁用 `applyDiff` 工具时，这提升了编辑准确性。
 
 ## 3.0.0-alpha.1
 
-### Major changes
+### 重大变更
 
-- Initial release
+- 初始版本发布

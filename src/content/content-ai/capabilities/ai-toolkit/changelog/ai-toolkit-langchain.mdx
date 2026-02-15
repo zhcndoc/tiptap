@@ -8,48 +8,60 @@ meta:
 
 # @tiptap-pro/ai-toolkit-langchain
 
+## 3.0.0-alpha.26
+
+### 修补改动
+
+- 参考了正确的 `@tiptap-pro/ai-toolkit-tool-definitions@3.0.0-alpha.30` 依赖版本。
+
+## 3.0.0-alpha.25
+
+### 小改动
+
+- 在 `toolDefinitions()` 和 `tiptapEditTool()` 中新增 `operationMeta` 选项。设置后，AI 会在每个编辑操作中包含一个 `meta` 字段，解释为何进行了该更改。
+
 ## 3.0.0-alpha.24
 
-### Major Changes
+### 重大改动
 
-- Improve tool definition of `editThreads` tool to avoid errors where the AI would sometimes fail to create threads.
-- Improve prompt of the Comments workflow to avoid errors where the AI would sometimes fail to create threads.
+- 改进 `editThreads` 工具的定义，避免 AI 有时无法创建线程的错误。
+- 改进评论工作流的提示，避免 AI 有时无法创建线程的错误。
 
 ## 3.0.0-alpha.23
 
-### Patch Changes
+### 修补改动
 
-- Improved the tool definition of tiptapEdit to make edits more efficient.
+- 改进 tiptapEdit 工具定义，使编辑更高效。
 
 ## 3.0.0-alpha.22
 
-### Patch Changes
+### 修补改动
 
-- Bump version to align with refactored Tiptap edit implementation in the core AI Toolkit.
+- 提升版本以配合核心 AI Toolkit 中重构的 Tiptap 编辑实现。
 
 ## 3.0.0-alpha.21
 
-### Patch Changes
+### 修补改动
 
-- Bump version to align with updated `getThreads` pagination semantics in the core AI Toolkit.
+- 提升版本以配合核心 AI Toolkit 中更新的 `getThreads` 分页语义。
 
 ## 3.0.0-alpha.20
 
-### Patch Changes
+### 修补改动
 
-- Update `getThreads` tool schema to require a `from` index for pagination.
+- 更新 `getThreads` 工具模式，要求分页时必须指定 `from` 索引。
 
 ## 3.0.0-alpha.19
 
-### Major Changes
+### 重大改动
 
-- **Breaking**: Change `editThreads` tool to use a new, more efficient format. The new format is faster, more efficient, uses fewer tokens, and avoids diff mismatch errors completely, significantly improving the accuracy of the tool.
+- **破坏性变更**：将 `editThreads` 工具改为使用新的、更高效的格式。新格式更快、更高效，使用更少令牌，完全避免差异不匹配错误，大幅提升工具准确性。
 
 ## 3.0.0-alpha.18
 
-### Patch Changes
+### 修补改动
 
-- Upgrade LangChain.js version to fix vulnerability.
+- 升级 LangChain.js 版本以修复安全漏洞。
 
 ## 3.0.0-alpha.17
 
@@ -61,7 +73,7 @@ meta:
 
 ### 重大改动
 
-- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，并将其设置为默认工具。移除 `readNodeRange`、`readSelection`、`insertContent` 和 `applyPatch` 工具。
+- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，并设置为默认工具。移除 `readNodeRange`、`readSelection`、`insertContent` 和 `applyPatch` 工具。
 
 ## 3.0.0-alpha.15
 
@@ -73,25 +85,25 @@ meta:
 
 ### 修补改动
 
-- 修复一个导致 AI 在聊天交互开始时未能读取文档的错误。
+- 修复 AI 在聊天交互开始时未能读取文档的错误。
 
 ## 3.0.0-alpha.13
 
 ### 修补改动
 
-- 修复一个导致 AI 在不必要时读取整个文档的错误。
+- 修复 AI 在不必要时读取整个文档的错误。
 
 ## 3.0.0-alpha.12
 
 ### 修补改动
 
-- 修复一个导致 AI 在文档更新后读取到错误内容的错误。
+- 修复 AI 在文档更新后读取到错误内容的错误。
 
 ## 3.0.0-alpha.11
 
 ### 修补改动
 
-- 修复一个新线程和评论未能创建在文档正确位置的错误。
+- 修复新线程和评论未能创建在文档正确位置的错误。
 
 ## 3.0.0-alpha.10
 

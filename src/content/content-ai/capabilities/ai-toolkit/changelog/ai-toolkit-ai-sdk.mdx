@@ -8,78 +8,90 @@ meta:
 
 # @tiptap-pro/ai-toolkit-ai-sdk
 
+## 3.0.0-alpha.32
+
+### 修补变更
+
+- 引用正确的 `@tiptap-pro/ai-toolkit-tool-definitions@3.0.0-alpha.30` 依赖版本。
+
+## 3.0.0-alpha.31
+
+### 小变动
+
+- 向 `toolDefinitions()` 和 `tiptapEditTool()` 添加了 `operationMeta` 选项。设置后，AI 在每个编辑操作中包含带有更改原因解释的 `meta` 字段。
+
 ## 3.0.0-alpha.30
 
-### Major Changes
+### 重大变动
 
-- Improve tool definition of `editThreads` tool to avoid errors where the AI would sometimes fail to create threads.
-- Improve prompt of the Comments workflow to avoid errors where the AI would sometimes fail to create threads.
+- 改进了 `editThreads` 工具的工具定义，避免 AI 有时无法创建线程的错误。
+- 改进了评论工作流的提示，避免 AI 有时无法创建线程的错误。
 
 ## 3.0.0-alpha.29
 
-### Patch Changes
+### 修补变更
 
-- Improved the tool definition of tiptapEdit to make edits more efficient.
+- 改进了 tiptapEdit 工具定义，使编辑更高效。
 
 ## 3.0.0-alpha.28
 
-### Patch Changes
+### 修补变更
 
-- Bump version to align with refactored Tiptap edit implementation in the core AI Toolkit.
+- 版本提升以配合核心 AI 工具包中重构的 Tiptap 编辑实现。
 
 ## 3.0.0-alpha.27
 
-### Patch Changes
+### 修补变更
 
-- Bump version to align with updated `getThreads` pagination semantics in the core AI Toolkit.
+- 版本提升以配合核心 AI 工具包中更新的 `getThreads` 分页语义。
 
 ## 3.0.0-alpha.26
 
-### Patch Changes
+### 修补变更
 
-- Update `getThreads` tool schema to require a `from` index for pagination.
+- 更新 `getThreads` 工具模式，要求分页时必须提供 `from` 索引。
 
 ## 3.0.0-alpha.25
 
-### Major Changes
+### 重大变动
 
-- **Breaking**: Remove server tool definitions and exports from this package.
+- **重大破坏性变更**：从此包中移除服务器工具定义及导出。
 
 ## 3.0.0-alpha.24
 
-### Major Changes
+### 重大变动
 
-- **Breaking**: Change `editThreads` tool to use a new, more efficient format. The new format is faster, more efficient, uses fewer tokens, and avoids diff mismatch errors completely, significantly improving the accuracy of the tool.
+- **重大破坏性变更**：将 `editThreads` 工具改为使用全新更高效的格式。新格式更快、更高效，使用更少的令牌，且完全避免了差异不匹配错误，显著提升了工具准确性。
 
 ## 3.0.0-alpha.23
 
-### Patch Changes
+### 修补变更
 
-- Enable structured outputs by default for `tiptapRead` and `tiptapEdit` tools. This fixes a bug where Claude Haiku 4.5 would sometimes not call the tools correctly.
+- 默认启用 `tiptapRead` 和 `tiptapEdit` 工具的结构化输出。修复 Claude Haiku 4.5 有时无法正确调用工具的 bug。
 
 ## 3.0.0-alpha.22
 
-### Major Changes
+### 重大变动
 
-- Upgrade to Vercel AI SDK v6.
+- 升级至 Vercel AI SDK v6。
 
 ## 3.0.0-alpha.21
 
 ### 小变动
 
-- 服务器 AI 工具包工具定义
+- 服务器 AI 工具包工具定义。
 
 ## 3.0.0-alpha.20
 
 ### 重大变动
 
-- 添加 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，并将其设为默认。移除 `readNodeRange`、`readSelection`、`insertContent` 和 `applyPatch` 工具。
+- 添加 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，设为默认。移除 `readNodeRange`、`readSelection`、`insertContent` 和 `applyPatch` 工具。
 
 ## 3.0.0-alpha.19
 
 ### 小变动
 
-- 添加 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，使编辑更快速高效。这些工具处于实验阶段，需主动启用。
+- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，使编辑更快速高效。该些工具处于实验阶段，需主动启用。
 
 ## 3.0.0-alpha.18
 
@@ -97,7 +109,7 @@ meta:
 
 ### 修复更新
 
-- 修复了文档更新后，AI 读取错误文档内容的 bug。
+- 修复文档更新后，AI 读取错误文档内容的 bug。
 
 ## 3.0.0-alpha.15
 

@@ -34,6 +34,10 @@ import { Callout } from '@/components/ui/Callout'
 
 检索文档中的所有线程和评论。该工具提供有关文档中现有讨论和反馈的全面信息。
 
+<Callout title="需要 Tiptap Cloud 文档" variant="warning">
+  此工具需要在请求体中包含 `experimental_documentOptions`，因为线程存储在 Tiptap 文档服务器上。请传入引用你 Tiptap Cloud 文档的 `documentId`。
+</Callout>
+
 ### 参数
 
 - `from`（`number`）：要读取的线程起始索引。
@@ -45,6 +49,10 @@ import { Callout } from '@/components/ui/Callout'
 ## `editThreads`
 
 对文档中的线程和评论进行操作。该工具支持全面的线程和评论管理，包括创建、更新和删除线程及评论。
+
+<Callout title="需要 Tiptap Cloud 文档" variant="warning">
+  此工具需要在请求体中包含 `experimental_documentOptions`，因为线程存储在 Tiptap 文档服务器上。请传入引用你 Tiptap Cloud 文档的 `documentId`。
+</Callout>
 
 ### 参数
 

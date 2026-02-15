@@ -12,6 +12,7 @@ meta:
 - [校对器](/content-ai/capabilities/ai-toolkit/workflows/proofreader)。
 - [Tiptap 编辑](/content-ai/capabilities/ai-toolkit/workflows/tiptap-edit)。
 - [评论](/content-ai/capabilities/ai-toolkit/workflows/comments)。
+- [模板](/content-ai/capabilities/ai-toolkit/workflows/template)。
 
 以下是支持这些内置工作流程的方法的 API 参考。
 
@@ -353,4 +354,109 @@ const result = toolkit.editThreadsWorkflow({
 if (result.success) {
   console.log('所有评论操作均成功完成')
 }
+```
+
+## `createTemplateWorkflow`（服务器端工具）
+
+创建一个预设的模板填充工作流程配置。接受一个 HTML 模板字符串（由客户端的 `createHtmlTemplate` 方法生成），自动提取所有模板键，并返回系统提示及验证 AI 输出的模式。
+
+该工作流程期望用户的输入为 JSON 对象，包含：
+
+- `task`：描述为模板生成内容的字符串
+
+### 参数
+
+- `options` (`CreateTemplateWorkflowOptions`): 配置选项
+  - `htmlTemplate` (`string`): 由客户端 `createHtmlTemplate` 方法生成的 HTML 模板字符串
+
+### 返回值
+
+- `systemPrompt`（`string`）：可直接使用的系统提示，指导 AI 模型如何填充模板
+- `zodOutputSchema`（`ZodObject`）：用于验证 AI 输出的 Zod 模式
+- `jsonOutputSchema`（`object`）：用于验证 AI 输出的 JSON 模式
+
+### 示例
+
+```ts
+import { createTemplateWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { Output, streamText } from 'ai'
+import { openai } from '@ai-sdk/openai'
+
+const { htmlTemplate, task } = apiEndpointRequest
+
+const workflow = createTemplateWorkflow({ htmlTemplate })
+
+const result = streamText({
+  model: openai('gpt-5-mini'),
+  system: workflow.systemPrompt,
+  prompt: JSON.stringify({ task }),
+  output: Output.object({ schema: workflow.zodOutputSchema }),
+})
+
+return result.toTextStreamResponse()
+```
+
+## `templateWorkflow`
+
+用 AI 生成的值填充 Tiptap JSON 模板，并将结果插入编辑器。模板使用特殊属性（`_templateSlot`、`_templateIf`、`_templateAttributes`）标记动态部分。
+
+### 参数
+
+- `options` (`TemplateWorkflowOptions`): 配置选项
+  - `template` (`Record<string, any>`): Tiptap JSON 格式的模板（doc 节点或片段数组）
+  - `values` (`TemplateValues`): AI 生成且填充模板的值。键名对应模板属性中的值。
+  - `position?` (`InsertPosition`): 插入填充模板的位置。默认：`'selection'`
+  - `hasFinished?` (`boolean`): 是否已完成流式传输。省略时方法以非流式模式运行。默认：`true`
+  - `workflowId?` (`unknown`): 此工作流运行的唯一 ID。提供时启用流式模式，方法将在多次调用中跟踪插入区间并逐步替换内容。
+  - `reviewOptions?` (`ReviewOptions`): 控制预览/审核行为
+    - `mode?` (`'disabled' | 'review' | 'preview'`): 是否在应用更改之前或之后进行审核。默认值：`'disabled'`
+
+### 示例
+
+```ts
+import { experimental_useObject as useObject } from '@ai-sdk/react'
+import { getAiToolkit } from '@tiptap-pro/ai-toolkit'
+import { z } from 'zod'
+
+const templateSchema = z.object({}).passthrough()
+
+const { submit, isLoading, object } = useObject({
+  api: '/api/template-workflow',
+  schema: templateSchema,
+})
+
+// 在 useEffect 中流式传输部分结果
+useEffect(() => {
+  if (!editor || !object) return
+
+  const toolkit = getAiToolkit(editor)
+  toolkit.templateWorkflow({
+    template: templateJson,
+    values: object as Record<string, unknown>,
+    position: 'document',
+    hasFinished: !isLoading,
+    workflowId,
+  })
+}, [object, workflowId, editor, isLoading])
+```
+
+## `createHtmlTemplate`
+
+将 Tiptap JSON 模板转换为带有模板属性的 HTML 字符串。结果 HTML 可以发送到服务器，`createTemplateWorkflow` 将解析模板键。
+
+由于这是 AI 工具包方法，自动拥有编辑器 schema，无需额外传入，直接传模板即可。
+
+### 参数
+
+- `template` (`Record<string, unknown>`): Tiptap JSON 格式的模板（doc 节点或片段数组）
+
+### 返回值
+
+- 带有小写模板属性（`_templateslot`、`_templateif`、`_templateattributes`）的 HTML `string`
+
+### 示例
+
+```ts
+const toolkit = getAiToolkit(editor)
+const htmlTemplate = toolkit.createHtmlTemplate(templateJson)
 ```

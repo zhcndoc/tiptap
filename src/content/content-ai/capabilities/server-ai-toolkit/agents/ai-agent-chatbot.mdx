@@ -115,6 +115,12 @@ TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET=your-document-management-api-secret
   本实现使用 Tiptap Cloud 的 REST API 管理文档状态。你需要拥有 Tiptap Cloud 账号及 REST API 密钥来存储和检索文档。使用文档 ID 来跟踪跨工具执行的文档状态。
 </Callout>
 
+<Callout title="Tiptap Cloud 文档方式" variant="info">
+  现在，Server AI Toolkit 支持在提供 `experimental_documentOptions` 中的 `documentId` 时，自动获取和保存 Tiptap Cloud 文档。这省去了下面示例中的 `getDocument` 和 `updateDocument` 辅助函数。见[注释指南](/content-ai/capabilities/server-ai-toolkit/agents/comments)。
+
+  以下教程演示如何自己提供并管理文档。
+</Callout>
+
 ### 辅助函数
 
 创建用于与 Server AI Toolkit API 交互的辅助函数：
@@ -136,7 +142,11 @@ export function getTiptapCloudAiJwtToken(): string {
     throw new Error('TIPTAP_CLOUD_AI_SECRET 环境变量未设置')
   }
 
-  const payload = {}
+  const payload = {
+    // 可选：包括以下声明以使用 Tiptap Cloud 文档
+    // experimental_document_app_id: process.env.TIPTAP_CLOUD_APP_ID,
+    // experimental_document_secret: process.env.TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET,
+  }
 
   return jwt.sign(payload, secret, { expiresIn: '1h' })
 }
@@ -630,7 +640,7 @@ export default function Page() {
 
 配合额外的 CSS 样式，效果是一个简单但精致的 AI 聊天机器人应用，使用 Server AI Toolkit 进行文档编辑：
 
-<CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/server-ai-agent-chatbot" />
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/server-ai-agent-chatbot" />
 
 查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
 

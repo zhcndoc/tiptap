@@ -77,8 +77,16 @@ const TIPTAP_CLOUD_AI_API_URL = 'https://api.tiptap.dev'
 const TIPTAP_CLOUD_AI_SECRET = 'your-secret-key'
 const TIPTAP_CLOUD_AI_APP_ID = 'your-app-id'
 
-// 从密钥生成 JWT 令牌
-const JWT_TOKEN = jwt.sign({}, TIPTAP_CLOUD_AI_SECRET, { expiresIn: '1h' })
+// 通过密钥生成 JWT 令牌
+const JWT_TOKEN = jwt.sign(
+  {
+    // 可选：为评论工具或 Tiptap 云端文档包含这些字段
+    // experimental_document_app_id: 'your-document-app-id',
+    // experimental_document_secret: 'your-document-api-secret',
+  },
+  TIPTAP_CLOUD_AI_SECRET,
+  { expiresIn: '1h' },
+)
 
 // Server AI 工具包 API 请求头
 const headers = {
@@ -87,6 +95,12 @@ const headers = {
   'X-App-Id': TIPTAP_CLOUD_AI_APP_ID,
 }
 ```
+
+<Callout title="Tiptap 云端文档" variant="info">
+  若想让 AI 服务器自动从 Tiptap 文档服务器获取和保存文档，
+  请在您的 JWT 中包含 `experimental_document_app_id` 和 `experimental_document_secret` 声明。
+  详见[评论指南](/content-ai/capabilities/server-ai-toolkit/agents/comments)。
+</Callout>
 
 ## 调用 API 端点
 

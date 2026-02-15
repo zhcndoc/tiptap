@@ -1,0 +1,242 @@
+---
+title: 模板工作流
+meta:
+  title: 使用 AI 工具包构建模板工作流 | Tiptap 内容 AI
+  description: 使用 Tiptap AI 工具包将 AI 生成的内容填充到结构化模板中。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+<Callout title="实验性功能" variant="warning">
+  此功能属于实验性质，将来版本中可能会发生变化。
+</Callout>
+
+使用 AI 生成的内容填充结构化的 Tiptap 模板，并将结果插入编辑器中。
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/template-workflow" />
+
+查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 模板工作原理
+
+Tiptap 模板是带有特殊属性的 Tiptap JSON 结构，用于标记动态部分：
+
+- **`_templateSlot`**（字符串键）：整个节点将被 AI 生成的 HTML 内容替换。
+- **`_templateIf`**（字符串键）：节点仅在布尔值为真时才包含。
+- **`_templateAttributes`**（由 `{key, attribute}` 对象组成的数组）：将特定节点属性设为 AI 生成的值。
+
+以下是一个 Tiptap JSON 格式的示例模板：
+
+```json
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "heading",
+      "attrs": { "level": 1 },
+      "content": [{ "type": "text", "text": "保密协议" }]
+    },
+    {
+      "type": "paragraph",
+      "attrs": { "_templateSlot": "parties" },
+      "content": [{ "type": "text", "text": "当事方信息将在此生成。" }]
+    },
+    {
+      "type": "paragraph",
+      "attrs": { "_templateIf": "includeArbitration" },
+      "content": [{ "type": "text", "text": "仲裁条款内容..." }]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "level": 1,
+        "_templateAttributes": [{ "key": "sectionLevel", "attribute": "level" }]
+      },
+      "content": [{ "type": "text", "text": "适用法律" }]
+    }
+  ]
+}
+```
+
+AI 会生成含有每个键对应值的 JSON 对象：
+
+```json
+{
+  "parties": "<p>本协议由 <strong>Acme Corp</strong> 与 <strong>Beta LLC</strong> 签订。</p>",
+  "includeArbitration": true,
+  "sectionLevel": 2
+}
+```
+
+## 技术栈
+
+- [React](https://react.dev/) + [Next.js](https://nextjs.org/)
+- [Vercel AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
+- Tiptap AI 工具包
+
+## 项目概览
+
+此示例使用 AI 工具包的模板工作流，将 AI 生成内容填充到法律文档模板（保密协议）中。模板包含预定义部分的插槽、条件条款和动态属性。AI 填充动态部分，其余固定的法律模板内容保持不变。
+
+## 安装
+
+创建一个 [Next.js](https://nextjs.org/) 项目：
+
+```bash
+npx create-next-app@latest template-workflow
+```
+
+安装核心 Tiptap 包以及用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
+
+```bash
+npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/openai zod
+```
+
+安装 Tiptap AI 工具包：
+
+<Callout title="Pro 版本包" variant="hint">
+  AI 工具包为专业版包。安装前请先根据[私有注册表指南](/guides/pro-extensions)配置对私有 NPM 注册表的访问权限。
+</Callout>
+
+```bash
+npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
+```
+
+## 服务端设置
+
+创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型。
+
+在 API 端点内部，使用 `createTemplateWorkflow` 将 HTML 模板转换为工作流配置。该函数会自动提取 HTML 中所有模板键，生成系统提示，并创建输出模式。
+
+```ts
+// app/api/template-workflow/route.ts
+import { openai } from '@ai-sdk/openai'
+import { createTemplateWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { Output, streamText } from 'ai'
+
+export async function POST(req: Request) {
+  const { htmlTemplate, task } = await req.json()
+
+  // 从 HTML 模板创建工作流。
+  // 会自动提取模板键，生成提示和输出模式。
+  const workflow = createTemplateWorkflow({ htmlTemplate })
+
+  const result = streamText({
+    model: openai('gpt-5-mini'),
+    system: workflow.systemPrompt,
+    prompt: JSON.stringify({ task }),
+    output: Output.object({ schema: workflow.zodOutputSchema }),
+  })
+
+  return result.toTextStreamResponse()
+}
+```
+
+## 客户端设置
+
+客户端定义模板为 Tiptap JSON。使用 Vercel AI SDK 的 `useObject` 钩子来流式接收服务器部分返回的值。传入一个宽松的 Zod schema (`z.object({}).passthrough()`) 来接受服务器返回的任意属性。
+
+随着部分值的到达，调用 `templateWorkflow` 并传入 `hasFinished` 和 `workflowId` 来逐步填充模板。`workflowId` 允许流式模式，方法会追踪多次调用间的插入范围，迭代替换内容。在调用 API 之前，使用 `createHtmlTemplate` 方法将模板转换为 HTML，供服务器解析模板键。
+
+```tsx
+// app/template-workflow/page.tsx
+'use client'
+
+import { experimental_useObject as useObject } from '@ai-sdk/react'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { AiToolkit, getAiToolkit } from '@tiptap-pro/ai-toolkit'
+import { useEffect, useState } from 'react'
+import { v4 as uuid } from 'uuid'
+import { z } from 'zod'
+
+// 定义模板为 Tiptap JSON
+const template = {
+  type: 'doc',
+  content: [
+    {
+      type: 'heading',
+      attrs: { level: 1 },
+      content: [{ type: 'text', text: '保密协议' }],
+    },
+    {
+      type: 'paragraph',
+      attrs: { _templateSlot: 'parties' },
+      content: [{ type: 'text', text: '当事方详情...' }],
+    },
+    // ... 更多模板内容
+  ],
+}
+
+// 宽松的 schema，接受服务器返回任意属性
+const templateSchema = z.object({}).passthrough()
+
+export default function Page() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit, AiToolkit],
+    content: '<p>点击“生成”以填充模板。</p>',
+  })
+
+  const [workflowId, setWorkflowId] = useState('')
+
+  const { submit, isLoading, object } = useObject({
+    api: '/api/template-workflow',
+    schema: templateSchema,
+  })
+
+  // 监听部分结果流式到达
+  useEffect(() => {
+    if (!editor || !object) return
+
+    const toolkit = getAiToolkit(editor)
+    toolkit.templateWorkflow({
+      template,
+      values: object as Record<string, unknown>,
+      position: 'document',
+      hasFinished: !isLoading,
+      workflowId,
+    })
+  }, [object, workflowId, editor, isLoading])
+
+  const generate = () => {
+    if (!editor) return
+
+    const toolkit = getAiToolkit(editor)
+    const htmlTemplate = toolkit.createHtmlTemplate(template)
+
+    setWorkflowId(uuid())
+    submit({
+      htmlTemplate,
+      task: '生成 Acme Corp 和 Beta LLC 之间的保密协议',
+    })
+  }
+
+  if (!editor) return null
+
+  return (
+    <div>
+      <EditorContent editor={editor} />
+      <button onClick={generate} disabled={isLoading}>
+        {isLoading ? '生成中…' : '生成'}
+      </button>
+    </div>
+  )
+}
+```
+
+## 最终效果
+
+通过额外的 CSS 样式，效果是一个精致的模板工作流应用：
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/template-workflow" />
+
+查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 相关指南
+
+- [`templateWorkflow` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#templateworkflow)
+- [`createHtmlTemplate` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#createhtmltemplate)
+- [`createTemplateWorkflow` 工具的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#createtemplateworkflow-server-side-utility)

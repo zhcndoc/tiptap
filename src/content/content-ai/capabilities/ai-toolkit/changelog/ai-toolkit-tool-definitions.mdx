@@ -8,78 +8,90 @@ meta:
 
 # @tiptap-pro/ai-toolkit-tool-definitions
 
+## 3.0.0-alpha.31
+
+### 小改动
+
+- 新增 `createTemplateWorkflow` 服务器端工作流，用于生成模板填充提示和模式。
+
+## 3.0.0-alpha.30
+
+### 小改动
+
+- 向 `toolDefinitions()` 和 `tiptapEditTool()` 添加了 `operationMeta` 选项。设置后，AI 会在每个编辑操作中包含一个带有变更原因说明的 `meta` 字段。
+
 ## 3.0.0-alpha.29
 
-### Major Changes
+### 重大改动
 
-- Improve tool definition of `editThreads` tool to avoid errors where the AI would sometimes fail to create threads.
-- Improve prompt of the Comments workflow to avoid errors where the AI would sometimes fail to create threads.
+- 改进了 `editThreads` 工具的定义，避免 AI 有时无法创建线程的错误。
+- 改进了 Comments 工作流的提示，避免 AI 有时无法创建线程的错误。
 
 ## 3.0.0-alpha.28
 
-### Patch Changes
+### 补丁改动
 
-- Improved the tool definition of tiptapEdit to make edits more efficient.
+- 改进了 tiptapEdit 工具定义，使编辑更高效。
 
 ## 3.0.0-alpha.27
 
-### Major Changes
+### 重大改动
 
-- **Breaking**: Rename `nodes` input property to `content` in workflow user prompts. This affects `createTiptapEditWorkflow` and `createEditThreadsWorkflow`. Update your workflow calls to use `content` instead of `nodes`.
+- **重大破坏性变更**：在工作流用户提示中，将输入属性 `nodes` 重命名为 `content`。这影响 `createTiptapEditWorkflow` 和 `createEditThreadsWorkflow`。请更新工作流调用，使用 `content` 替代 `nodes`。
 
-### Patch Changes
+### 补丁改动
 
-- Update `editThreadsWorkflow` to clarify that `htmlContent` must include the entire node HTML, including the HTML tag of that node.
-- Update `editThreads` tool description to clarify HTML content requirements.
+- 更新 `editThreadsWorkflow`，明确 `htmlContent` 必须包含整个节点的 HTML，包括该节点的 HTML 标签。
+- 更新 `editThreads` 工具描述，明确 HTML 内容要求。
 
 ## 3.0.0-alpha.26
 
-### Patch Changes
+### 补丁改动
 
-- Clarify `getThreads` pagination range to use an exclusive upper bound in tool output.
+- 明确 `getThreads` 分页范围，工具输出中使用排他性的上界。
 
 ## 3.0.0-alpha.25
 
-### Patch Changes
+### 补丁改动
 
-- Add pagination fields to the `getThreads` tool schema and description.
+- 在 `getThreads` 工具模式和描述中新增分页字段。
 
 ## 3.0.0-alpha.24
 
-### Major Changes
+### 重大改动
 
-- **Breaking**: Remove server tool definitions and exports from this package.
+- **重大破坏性变更**：移除此包中的服务器工具定义和导出。
 
 ## 3.0.0-alpha.23
 
-### Minor Changes
+### 小改动
 
-- Add `createTiptapEditWorkflow` method. This method creates the prompt and schema for a built-in workflow that allows the AI to edit the document.
-- Add `createEditThreadsWorkflow` method. This method creates the prompt and schema for a built-in workflow that allows the AI to manage comments and threads.
+- 新增 `createTiptapEditWorkflow` 方法。该方法创建一个内置工作流的提示和模式，允许 AI 编辑文档。
+- 新增 `createEditThreadsWorkflow` 方法。该方法创建一个内置工作流的提示和模式，允许 AI 管理评论和线程。
 
 ## 3.0.0-alpha.22
 
-### Major Changes
+### 重大改动
 
-- **Breaking**: Change `editThreads` tool to use a new, more efficient format. The new format is faster, more efficient, uses fewer tokens, and avoids diff mismatch errors completely, significantly improving the accuracy of the tool.
+- **重大破坏性变更**：修改 `editThreads` 工具，采用新的更高效的格式。新格式更快、更高效，使用更少代币，并完全避免差异不匹配错误，显著提升工具准确性。
 
 ## 3.0.0-alpha.21
 
-### Minor Changes
+### 小改动
 
-- Include Zod schemas in tool definitions, in the `zodInputSchema` property.
+- 在工具定义中包含 Zod 模式，位于 `zodInputSchema` 属性。
 
 ## 3.0.0-alpha.20
 
-### Minor Changes
+### 小改动
 
-- Add `createInsertContentWorkflow` method. This method creates the prompt for a built-in workflow that allows the AI to insert or replace content in the document.
+- 新增 `createInsertContentWorkflow` 方法。该方法创建允许 AI 插入或替换文档内容的内置工作流提示。
 
 ## 3.0.0-alpha.19
 
-### Minor Changes
+### 小改动
 
-- Add `createProofreaderWorkflow` method. This method creates the prompt and schema for a built-in workflow that allows the AI to proofread the document.
+- 新增 `createProofreaderWorkflow` 方法。该方法创建允许 AI 校对文档的内置工作流提示和模式。
 
 ## 3.0.0-alpha.18
 
@@ -91,13 +103,13 @@ meta:
 
 ### 重大改动
 
-- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，并设为默认。移除 `readNodeRange`、`readSelection`、`insertContent` 和 `applyPatch` 工具。
+- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，设为默认。移除 `readNodeRange`、`readSelection`、`insertContent` 和 `applyPatch` 工具。
 
 ## 3.0.0-alpha.16
 
 ### 小改动
 
-- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，使编辑更快速高效。此类工具为实验性且需自行选择使用。
+- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，使编辑更快速高效。此类工具为实验性且需用户自行选择使用。
 
 ## 3.0.0-alpha.15
 
@@ -127,7 +139,7 @@ meta:
 
 ### 重大改动
 
-- `applyPatch` 工具输入格式全新设计，使工具定义更简洁一致。
+- 全新设计 `applyPatch` 工具输入格式，使工具定义更简洁一致。
 - 改进所有内置工具的输出和工具定义。
 - 需要升级至 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.37`
 
@@ -135,7 +147,7 @@ meta:
 
 ### 重大改动
 
-- 通过将 “html” 属性重命名为 “content”，使 insertContent 工具内容格式独立。
+- 将 insertContent 工具中 “html” 属性重命名为 “content”，使内容格式独立。
 - 需要升级至 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.36`
 
 ### 补丁改动
@@ -161,7 +173,7 @@ meta:
 
 ### 小改动
 
-- 在 `insertContent` 工具添加 `activeNodeRange` 位置，允许 AI 在活动节点范围内插入内容。当禁用 `applyDiff` 工具时，此改动提升编辑精度。
+- 在 `insertContent` 工具中添加 `activeNodeRange` 位置，允许 AI 在活动节点范围内插入内容。当禁用 `applyDiff` 工具时，此改动提升编辑精度。
 
 ## 3.0.0-alpha.6
 
