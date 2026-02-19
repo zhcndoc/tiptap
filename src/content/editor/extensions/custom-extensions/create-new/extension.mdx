@@ -357,50 +357,50 @@ const CustomExtension = Extension.create({
 
 ### `dispatchTransaction`
 
-This hook allows you to intercept and modify transactions before they are dispatched. It uses a **middleware-like pattern** similar to Koa or Express, where each extension receives the `transaction` and a `next` function.
+该钩子允许您在事务分发之前拦截和修改事务。它采用类似 Koa 或 Express 的**中间件模式**，每个扩展都会接收到 `transaction` 和 `next` 函数。
 
-#### How it works
+#### 工作原理
 
-1.  **Middleware Chain**: When a transaction is dispatched, Tiptap creates a chain of all extensions that define a `dispatchTransaction` hook.
-2.  **Order by Priority**: The chain is sorted by [extension priority](#priority). Extensions with a **higher priority** (e.g., `1000`) will be called **earlier** in the chain and wrap around extensions with a lower priority.
-3.  **Passing Through**: You must call `next(transaction)` to pass the transaction to the next extension in the chain. Eventually, the last `next()` call will pass the transaction to the editor's base dispatch function (or your custom `editorProps.dispatchTransaction` if defined).
-4.  **Blocking Transactions**: If you don't call `next(transaction)`, the transaction will be blocked and never reach the editor.
+1.  **中间件链**：当事务被分发时，Tiptap 会创建一个包含所有定义了 `dispatchTransaction` 钩子的扩展的链。
+2.  **按优先级排序**：该链按[扩展优先级](#priority)排序。具有**更高优先级**（如 `1000`）的扩展会**更早调用**，并且包装优先级较低的扩展。
+3.  **传递调用**：您必须调用 `next(transaction)` 才能将事务传递给链中的下一个扩展。最终，最后的 `next()` 调用会将事务传递给编辑器的基础分发函数（或者如果定义了自定义的 `editorProps.dispatchTransaction`，则调用自定义函数）。
+4.  **阻止事务**：如果您不调用 `next(transaction)`，事务将被阻止，不会传递给编辑器。
 
 ```typescript
 import { Extension } from '@tiptap/core'
 
 const LoggingExtension = Extension.create({
   name: 'loggingExtension',
-  priority: 1000, // Runs early
+  priority: 1000, // 提前运行
 
   dispatchTransaction({ transaction, next }) {
-    console.log('Intercepting transaction before others...')
+    console.log('在其他扩展之前拦截事务...')
     
-    // You can modify the transaction here if needed
+    // 您可以在此修改事务
     // transaction.setMeta('customMeta', true)
 
-    // Call next to pass it to the next extension
+    // 调用 next 将其传递给下一个扩展
     next(transaction)
     
-    console.log('Transaction has been processed by the rest of the chain.')
+    console.log('事务已由后续链处理。')
   },
 })
 ```
 
-#### Middleware Lifecycle
+#### 中间件生命周期
 
-Because each extension "wraps" the next one, you can execute code both before and after the transaction is processed by the rest of the chain (and the editor itself).
+因为每个扩展都会“包裹”下一个扩展，您可以在事务被后续链和编辑器处理之前和之后执行代码。
 
 ```typescript
 dispatchTransaction({ transaction, next }) {
-  // 1. Pre-processing: Code before next()
+  // 1. 预处理：在调用 next() 之前执行的代码
   const start = performance.now()
 
   next(transaction)
 
-  // 2. Post-processing: Code after next()
+  // 2. 后处理：在调用 next() 之后执行的代码
   const end = performance.now()
-  console.log(`Dispatch took ${end - start}ms`)
+  console.log(`分发耗时 ${end - start} 毫秒`)
 }
 ```
 
@@ -443,7 +443,7 @@ const CustomExtension = Extension.create({
         view() {
           return {
             update() {
-              console.log('Custom plugin updated')
+              console.log('自定义插件已更新')
             },
           }
         },
@@ -454,6 +454,43 @@ const CustomExtension = Extension.create({
 ```
 
 要了解有关 ProseMirror 插件的更多信息，请查阅 [ProseMirror 文档](https://prosemirror.net/docs/ref/#state.Plugin)。
+
+### `addGlobalAttributes`
+
+`addGlobalAttributes` 方法用于为多个扩展同时添加属性。这对于诸如文本对齐、行高或其他应在许多节点和标记类型上可用的样式相关属性非常有用。
+
+您可以通过 `types` 属性指定哪些扩展将接收该属性：
+- `types: ['heading', 'paragraph']` - 应用于特定类型名称
+- `types: '*'` - 应用于所有节点类型（不包括内置的文本节点）和所有标记类型
+- `types: 'nodes'` - 应用于所有节点类型（不包括内置的文本节点）
+- `types: 'marks'` - 应用于所有标记类型
+
+以下示例演示了如何将属性应用于特定类型：
+
+```typescript
+const TextAlign = Extension.create({
+  name: 'textAlign',
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['heading', 'paragraph'],
+        attributes: {
+          textAlign: {
+            default: 'left',
+            renderHTML: (attributes) => ({
+              style: `text-align: ${attributes.textAlign}`,
+            }),
+            parseHTML: (element) => element.style.textAlign || 'left',
+          },
+        },
+      },
+    ]
+  },
+})
+```
+
+更多选项（包括字符串简写语法）请参阅[应用全局属性](/editor/extensions/custom-extensions/extend-existing#apply-global-attributes-to-all-extensions) 指南。
 
 ### `addExtensions`
 

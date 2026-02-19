@@ -59,6 +59,7 @@ npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
 
 - `content`: 待校对文档的内容（详见客户端设置部分，如何获取内容）
 - `task`: AI 要执行的任务，例如 `Correct all grammar and spelling mistakes`（纠正所有语法和拼写错误）
+- `context`: （可选）与任务相关的额外上下文或背景信息。
 
 当 AI 模型生成响应时，API 端点会将建议流式传输给客户端。
 
@@ -83,6 +84,7 @@ export async function POST(req: Request) {
     prompt: JSON.stringify({
       content,
       task: 'Correct all grammar and spelling mistakes',
+      context: 'This is a formal business document',
     }),
     output: Output.object({ schema: workflow.zodOutputSchema }),
     // 如果使用 gpt-5-mini，设置 reasoningEffort 为 minimal 以提升响应速度。

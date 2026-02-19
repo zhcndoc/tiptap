@@ -290,6 +290,10 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot',
                 },
                 {
+                  title: '审核更改',
+                  href: '/content-ai/capabilities/server-ai-toolkit/agents/review-changes',
+                },
+                {
                   title: '模式感知',
                   href: '/content-ai/capabilities/server-ai-toolkit/agents/schema-awareness',
                 },

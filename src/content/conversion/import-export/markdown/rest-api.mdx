@@ -33,7 +33,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 ```bash
 curl -X POST "https://api.tiptap.dev/v1/convert/import?format=md" \
-  -H "Authorization: Bearer <your-jwt-token>" \
+  -H "Authorization: Bearer <your-jwt>" \
   -H "X-App-Id: <your-app-id>" \
   -F "file=@/path/to/file.md"
 ```
@@ -57,7 +57,7 @@ curl -X POST "https://api.tiptap.dev/v1/convert/import?format=md" \
 
 ```bash
 curl -X POST "https://api.tiptap.dev/v1/convert/export" \
-  -H "Authorization: Bearer <your-jwt-token>" \
+  -H "Authorization: Bearer <your-jwt>" \
   -H "X-App-Id: <your-app-id>" \
   -F 'prosemirrorJson={"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hello from Tiptap!"}]}]}' \
   -F 'to=md' \

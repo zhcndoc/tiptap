@@ -1,4 +1,3 @@
-```markdown
 ---
 title: AI Agent 扩展配置选项
 meta:
@@ -245,24 +244,23 @@ const provider = new AiAgentProvider({
 ## 关键配置选项
 
 | 选项                           | 类型                                | 默认值                     | 描述                                                                                 |
-| ------------------------------ | ----------------------------------- | -------------------------- | ------------------------------------------------------------------------------------ |
+| ------------------------------ | ---------------------------------- | -------------------------- | ------------------------------------------------------------------------------------ |
 | `appId`                        | `string`                           | `""`                       | 您的 Tiptap 内容 AI 应用 ID                                                         |
 | `token`                        | `string`                           | `""`                       | 用于认证的 JWT 令牌                                                                  |
 | `baseUrl`                      | `string`                           | `""`                       | AI 服务 API 的基础 URL                                                               |
 | `modelName`                    | `AiAgentModelName`                 | `"gpt-4.1"`                | 要使用的 OpenAI 模型（推荐 gpt-4.1 和 gpt-4o）                                     |
 | `autoAccept`                   | `"always" \| "never" \| "onlyRead"` | `"onlyRead"`               | 控制是否自动接受 AI 变更                                                             |
-| `autoSaveCheckpoints`          | `boolean`                         | `false`                    | 当用户发送消息时是否自动保存检查点                                                  |
-| `chunkSize`                    | `number`                          | `1000`                     | 读取文档时的块大小（以字符计）                                                       |
+| `autoSaveCheckpoints`          | `boolean`                          | `false`                    | 当用户发送消息时是否自动保存检查点                                                  |
+| `chunkSize`                    | `number`                           | `1000`                     | 读取文档时的块大小（以字符计）                                                       |
 | `chunkHtml`                    | `Function`                        | `defaultChunkHtmlFunction` | 自定义如何将文档拆分成块                                                             |
-| `useAiChangesExtension`        | `boolean`                         | `true`                     | 是否使用 AI Changes 扩展                                                             |
-| `initialChatMessages`          | `ChatMessage[]`                   | `[]`                       | 用于填充对话的初始聊天消息                                                           |
-| `resolver`                     | `Function`                       | `defaultAiAgentResolver`   | 用于通过自定义后端解析 AI Agent 请求的函数                                           |
-| `toolHandlers`                 | `AiAgentToolCallHandler[]`        | `toolHandlersStarterKit()` | 自定义工具的处理器                                                                   |
-| `onStateChange`                | `Function`                       | `undefined`                | 当 AI Agent 状态变化时调用的函数                                                     |
-| `onLoadingError`               | `Function`                       | `undefined`                | 加载 AI Agent 出错时调用的函数                                                       |
-| `onBeforeToolCall`             | `Function`                       | `undefined`                | 在执行工具调用之前调用的函数                                                         |
-| `onAfterToolCall`              | `Function`                       | `undefined`                | 在执行工具调用之后调用的函数                                                         |
-| `onStopRunning`                | `Function`                       | `undefined`                | 当 AI Agent 停止运行时调用的函数                                                     |
-| `systemPrompt`                 | `string`                         | `undefined`                | 使用 Tiptap Cloud 时为 AI Agent 定义的自定义系统提示                                 |
-| `schemaAwarenessCustomElements` | `SchemaAwarenessItem[]`          | `[]`                       | 关于文档中可能包含的自定义节点的 AI 模型信息                                         |
-```
+| `useAiChangesExtension`        | `boolean`                          | `true`                     | 是否使用 AI Changes 扩展                                                             |
+| `initialChatMessages`          | `ChatMessage[]`                    | `[]`                       | 用于填充对话的初始聊天消息                                                           |
+| `resolver`                     | `Function`                        | `defaultAiAgentResolver`   | 用于通过自定义后端解析 AI Agent 请求的函数                                           |
+| `toolHandlers`                 | `AiAgentToolCallHandler[]`         | `toolHandlersStarterKit()` | 自定义工具的处理器                                                                   |
+| `onStateChange`                | `Function`                        | `undefined`                | 当 AI Agent 状态变化时调用的函数                                                     |
+| `onLoadingError`               | `Function`                        | `undefined`                | 加载 AI Agent 出错时调用的函数                                                       |
+| `onBeforeToolCall`             | `Function`                        | `undefined`                | 在执行工具调用之前调用的函数                                                         |
+| `onAfterToolCall`              | `Function`                        | `undefined`                | 在执行工具调用之后调用的函数                                                         |
+| `onStopRunning`                | `Function`                        | `undefined`                | 当 AI Agent 停止运行时调用的函数                                                     |
+| `systemPrompt`                 | `string`                          | `undefined`                | 使用 Tiptap Cloud 时为 AI Agent 定义的自定义系统提示                                 |
+| `schemaAwarenessCustomElements` | `SchemaAwarenessItem[]`            | `[]`                       | 关于文档中可能包含的自定义节点的 AI 模型信息                                         |

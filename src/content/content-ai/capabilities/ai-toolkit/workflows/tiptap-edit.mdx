@@ -58,7 +58,8 @@ npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
 此外，用户消息中需包含以下两个属性：
 
 - `content`: 要编辑的文档内容（从 `tiptapRead` 获取）
-- `task`: 由 AI 执行的任务，例如“使文本更正式”。
+- `task`: 由 AI 执行的任务，例如 “使文本更正式”。
+- `context`: （可选）与任务相关的额外上下文或背景信息。
 
 当 AI 模型生成响应时，API 端点会将操作流式传输给客户端。
 
@@ -83,6 +84,7 @@ export async function POST(req: Request) {
     prompt: JSON.stringify({
       content,
       task,
+      context,
     }),
     output: Output.object({ schema: workflow.zodOutputSchema }),
     // 如果使用 gpt-5-mini，请将推理强度设置为最低以提升响应速度。

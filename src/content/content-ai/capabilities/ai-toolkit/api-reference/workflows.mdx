@@ -24,6 +24,7 @@ meta:
 
 - `content`: 需要校对的文档内容（详情见客户端设置章节如何获取）
 - `task`：描述待完成任务的字符串
+- `context`: （可选）与任务相关的额外上下文或背景信息
 
 ### 返回值
 
@@ -54,6 +55,7 @@ const result = streamText({
   prompt: JSON.stringify({
     content,
     task: '纠正所有语法和拼写错误',
+    context: '这是一个正式的商务文件',
   }),
   output: Output.object({ schema: workflow.zodOutputSchema }),
   // 若使用 gpt-5-mini，设置推理努力度为最小以提升响应速度
@@ -181,6 +183,7 @@ const result = toolkit.proofreaderWorkflow({
 
 - `content`: 待编辑文档的内容（来自 `tiptapRead`）
 - `task`：描述待完成编辑任务的字符串
+- `context`: （可选）与任务相关的额外上下文或背景信息
 
 ### 返回值
 
@@ -204,7 +207,7 @@ const workflow = createTiptapEditWorkflow()
 const result = streamText({
   model: openai('gpt-5-mini'),
   system: workflow.systemPrompt,
-  prompt: JSON.stringify({ content, task }),
+  prompt: JSON.stringify({ content, task, context }),
   output: Output.object({ schema: workflow.zodOutputSchema }),
 })
 ```
@@ -363,6 +366,7 @@ if (result.success) {
 该工作流程期望用户的输入为 JSON 对象，包含：
 
 - `task`：描述为模板生成内容的字符串
+- `context`: （可选）与任务相关的额外上下文或背景信息
 
 ### 参数
 
@@ -389,7 +393,7 @@ const workflow = createTemplateWorkflow({ htmlTemplate })
 const result = streamText({
   model: openai('gpt-5-mini'),
   system: workflow.systemPrompt,
-  prompt: JSON.stringify({ task }),
+  prompt: JSON.stringify({ task, context }),
   output: Output.object({ schema: workflow.zodOutputSchema }),
 })
 

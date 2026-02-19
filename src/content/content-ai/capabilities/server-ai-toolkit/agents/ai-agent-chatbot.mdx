@@ -95,8 +95,9 @@ export function getSchemaAwareness(editor: Editor) {
 - **TIPTAP_CLOUD_AI_API_URL**：Server AI Toolkit API 的基础 URL。
 - **TIPTAP_CLOUD_AI_SECRET**：用于认证 Server AI Toolkit API 的密钥。用于生成 JWT 令牌。
 - **TIPTAP_CLOUD_AI_APP_ID**：Server AI Toolkit API 的应用 ID。
-- **TIPTAP_CLOUD_APP_ID**：用于协作和文档管理的 Tiptap Cloud 应用 ID。
-- **TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET**：用于访问 Tiptap Cloud 文档管理 API 的 REST API 密钥。
+- **TIPTAP_CLOUD_DOCUMENT_SERVER_ID**：你的 Tiptap Cloud 文档服务器 ID。作为 `experimental_document_server_id` JWT 声明包含，使 Server AI Toolkit 能自动获取和保存文档。
+- **TIPTAP_CLOUD_SECRET**：Tiptap Cloud 文档服务器的密钥。
+- **TIPTAP_CLOUD_DOCUMENT_SERVER_MANAGEMENT_API_SECRET**：你的文档服务器管理 API 密钥。作为 `experimental_document_server_management_api_secret` JWT 声明包含，用于文档访问。
 
 在项目根目录创建 `.env` 文件，添加这些变量：
 
@@ -105,8 +106,9 @@ export function getSchemaAwareness(editor: Editor) {
 TIPTAP_CLOUD_AI_API_URL=https://api.tiptap.dev/v3/ai
 TIPTAP_CLOUD_AI_SECRET=your-secret-key
 TIPTAP_CLOUD_AI_APP_ID=your-app-id
-TIPTAP_CLOUD_APP_ID=your-tiptap-cloud-app-id
-TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET=your-document-management-api-secret
+TIPTAP_CLOUD_DOCUMENT_SERVER_ID=your-tiptap-cloud-document-server-id
+TIPTAP_CLOUD_SECRET=your-tiptap-cloud-document-server-secret
+TIPTAP_CLOUD_DOCUMENT_SERVER_MANAGEMENT_API_SECRET=your-tiptap-cloud-document-management-api-secret
 ```
 
 你可以在 [Server AI Toolkit 设置](https://cloud.tiptap.dev/v2/cloud/ai) 页面获取你的 App ID 和密钥。密钥用于生成 JWT 令牌以进行认证。
@@ -146,6 +148,9 @@ export function getTiptapCloudAiJwtToken(): string {
     // 可选：包括以下声明以使用 Tiptap Cloud 文档
     // experimental_document_app_id: process.env.TIPTAP_CLOUD_APP_ID,
     // experimental_document_secret: process.env.TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET,
+    // 文档服务器凭证用于自动获取/保存文档
+    experimental_document_server_id: process.env.TIPTAP_CLOUD_DOCUMENT_SERVER_ID,
+    experimental_document_server_management_api_secret: process.env.TIPTAP_CLOUD_DOCUMENT_SERVER_MANAGEMENT_API_SECRET,
   }
 
   return jwt.sign(payload, secret, { expiresIn: '1h' })
@@ -241,7 +246,7 @@ export async function getSchemaAwarenessPrompt(schemaAwarenessData: unknown): Pr
 
 ### 执行工具
 
-此函数通过 Server AI Toolkit API 执行指定工具。它将工具名称、输入参数、当前文档状态和 schema 识别数据发送给 API，API 处理工具执行并返回结果，以及如果工具修改了文档，返回更新后的文档。
+此函数通过 Server AI Toolkit API 执行指定工具。它将工具名称、输入参数、文档 ID 和 schema 识别数据发送给 API。服务器会借助 JWT 中的凭证自动从 Tiptap Cloud 获取和保存文档。
 
 ```ts
 // lib/server-ai-toolkit/execute-tool.ts
@@ -253,9 +258,9 @@ import { getTiptapCloudAiJwtToken } from './get-tiptap-cloud-ai-jwt-token'
 export async function executeTool(
   toolName: string,
   input: unknown,
-  document: unknown,
+  documentId: string,
   schemaAwarenessData: unknown,
-): Promise<{ output: unknown; docChanged: boolean; document?: unknown }> {
+): Promise<{ output: unknown; docChanged: boolean }> {
   const apiBaseUrl = process.env.TIPTAP_CLOUD_AI_API_URL || 'https://api.tiptap.dev/v3/ai'
   const appId = process.env.TIPTAP_CLOUD_AI_APP_ID
 
@@ -273,7 +278,7 @@ export async function executeTool(
     body: JSON.stringify({
       toolName,
       input,
-      document,
+      experimental_documentOptions: { documentId },
       schemaAwarenessData,
     }),
   })
@@ -402,10 +407,8 @@ import { openai } from '@ai-sdk/openai'
 import { createAgentUIStreamResponse, ToolLoopAgent, tool, type UIMessage } from 'ai'
 import z from 'zod'
 import { executeTool } from '@/lib/server-ai-toolkit/execute-tool'
-import { getDocument } from '@/lib/server-ai-toolkit/get-document'
 import { getSchemaAwarenessPrompt } from '@/lib/server-ai-toolkit/get-schema-awareness-prompt'
 import { getToolDefinitions } from '@/lib/server-ai-toolkit/get-tool-definitions'
-import { updateDocument } from '@/lib/server-ai-toolkit/update-document'
 
 export async function POST(req: Request) {
   const {
@@ -433,16 +436,7 @@ export async function POST(req: Request) {
         inputSchema: z.fromJSONSchema(toolDef.inputSchema),
         execute: async (input) => {
           try {
-            // 执行工具前获取最新版本的文档
-            const document = await getDocument(documentId)
-
-            const result = await executeTool(toolDef.name, input, document, schemaAwarenessData)
-
-            // 工具执行后，如果文档有修改则更新
-            if (result.docChanged && result.document && documentId) {
-              await updateDocument(documentId, result.document)
-            }
-
+            const result = await executeTool(toolDef.name, input, documentId, schemaAwarenessData)
             return result.output
           } catch (error) {
             console.error(`执行工具 ${toolDef.name} 失败:`, error)
@@ -492,7 +486,7 @@ ${schemaAwarenessPrompt}`,
 import jwt from 'jsonwebtoken'
 
 const TIPTAP_CLOUD_SECRET = process.env.TIPTAP_CLOUD_SECRET
-const TIPTAP_CLOUD_APP_ID = process.env.TIPTAP_CLOUD_APP_ID
+const TIPTAP_CLOUD_DOCUMENT_SERVER_ID = process.env.TIPTAP_CLOUD_DOCUMENT_SERVER_ID
 
 export async function getCollabConfig(
   userId: string,
@@ -502,8 +496,8 @@ export async function getCollabConfig(
     throw new Error('TIPTAP_CLOUD_SECRET 环境变量未设置')
   }
 
-  if (!TIPTAP_CLOUD_APP_ID) {
-    throw new Error('TIPTAP_CLOUD_APP_ID 环境变量未设置')
+  if (!TIPTAP_CLOUD_DOCUMENT_SERVER_ID) {
+    throw new Error('TIPTAP_CLOUD_DOCUMENT_SERVER_ID 环境变量未设置')
   }
 
   const payload = {
@@ -513,7 +507,7 @@ export async function getCollabConfig(
 
   const token = jwt.sign(payload, TIPTAP_CLOUD_SECRET, { expiresIn: '1h' })
 
-  return { token, appId: TIPTAP_CLOUD_APP_ID }
+  return { token, appId: TIPTAP_CLOUD_DOCUMENT_SERVER_ID }
 }
 ```
 
@@ -634,6 +628,10 @@ export default function Page() {
 
 <Callout title="文档状态管理" variant="info">
   此实现使用 `documentId` 代替直接传递文档。文档状态通过 Tiptap Cloud 的 REST API 在服务器端管理，确保工具多次执行时状态一致。客户端则使用 Tiptap Collaboration 进行实时同步。
+</Callout>
+
+<Callout title="替代方案：直接提供文档" variant="info">
+  你也可以不使用 Tiptap Cloud 文档，而是自己提供并管理文档——在执行工具的请求体中传入 `document` 字段（替代 `experimental_documentOptions`）。这样，你需要在每次工具执行前获取文档，并在 `result.docChanged` 为 `true` 时保存更新的文档。请参阅[REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)。
 </Callout>
 
 ## 最终效果

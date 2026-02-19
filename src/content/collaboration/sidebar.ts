@@ -83,11 +83,6 @@ export const sidebarConfig: SidebarConfig = {
           href: '/collaboration/documents/content-injection',
           tags: ['Team'],
         },
-        {
-          title: '语义搜索',
-          href: '/collaboration/documents/semantic-search',
-          beta: true,
-        },
       ],
     },
     {

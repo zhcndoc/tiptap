@@ -59,19 +59,19 @@ const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
 
 您的 JWT 必须包含文档服务器的凭证作为声明：
 
-- `experimental_document_app_id`（`string`）：文档服务器的 Tiptap Cloud 应用 ID
-- `experimental_document_secret`（`string`）：文档服务器的管理员 API 密钥
+- `experimental_document_server_id` (`string`): Tiptap Cloud 文档服务器 ID  
+- `experimental_document_server_management_api_secret` (`string`): 文档服务器的管理员 API 密钥
 
 ### 请求体
 
 在请求体中包含 `experimental_documentOptions`：
 
-- `documentId`（`string`，必填）：文档 ID
+- `documentId`（`string`，必填）：文档 ID  
 - `userId`（`string`，可选）：创建评论的用户 ID。如果省略，则评论将不带用户归属创建。
 
 可选包含 `experimental_commentsOptions` 以添加元数据：
 
-- `threadData`（`Record<string, any>`，可选）：使用 `editThreads` 工具创建的新线程附加的元数据。
+- `threadData`（`Record<string, any>`，可选）：使用 `editThreads` 工具创建的新线程附加的元数据。  
 - `commentData`（`Record<string, any>`，可选）：使用 `editThreads` 工具创建的新评论附加的元数据。
 
 ```ts
@@ -80,9 +80,9 @@ import jwt from 'jsonwebtoken'
 
 const jwtToken = jwt.sign(
   {
-    // 文档服务器凭证（评论工具必需）
-    experimental_document_app_id: 'your-document-app-id',
-    experimental_document_secret: 'your-document-api-secret',
+    // Document Server credentials (required for comment tools)
+    experimental_document_server_id: 'your-document-server-id',
+    experimental_document_server_management_api_secret: 'your-document-server-management-api-secret',
   },
   TIPTAP_CLOUD_AI_SECRET,
   { expiresIn: '1h' },
@@ -123,5 +123,5 @@ const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
 
 ## 下一步
 
-- 了解所有可用的[工具定义](/content-ai/capabilities/server-ai-toolkit/agents/tools)
+- 了解所有可用的[工具定义](/content-ai/capabilities/server-ai-toolkit/agents/tools)  
 - 探索[REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)

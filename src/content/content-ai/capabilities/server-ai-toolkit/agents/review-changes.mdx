@@ -1,0 +1,104 @@
+---
+title: 审核更改
+meta:
+  title: 审核 Server AI Toolkit 更改 | Tiptap 内容 AI
+  description: 在应用之前，显示一个差异界面以审核 Server AI Toolkit 所做的更改。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+
+<Requirements>
+  <RequirementItem label="1. Server AI Toolkit">
+    按照 [AI 代理聊天机器人指南](/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot) 设置 Server AI Toolkit。
+  </RequirementItem>
+  <RequirementItem label="2. AI Toolkit 扩展">
+    在你的 Tiptap 编辑器中安装客户端的 [AI Toolkit 扩展](/content-ai/capabilities/ai-toolkit/install)。
+  </RequirementItem>
+</Requirements>
+
+当 Server AI Toolkit 在服务器端编辑文档后，你可以在客户端显示一个审核界面，让用户在更改应用之前接受或拒绝这些更改。
+
+本指南展示如何使用客户端 AI Toolkit 的 `setSuggestions` 方法配合 `compareDocuments` 格式来显示服务器端更改的差异。
+
+## 工作原理
+
+1. Server AI Toolkit 在服务器上编辑文档并返回更新后的文档。
+2. 在客户端，将更新后的文档传入 AI Toolkit 的 `setSuggestions` 方法，使用 `compareDocuments` 格式。
+3. AI Toolkit 比较当前编辑器文档与更新文档，显示差异作为建议。
+4. 用户可以单独接受或拒绝更改，或一次性接受/拒绝所有更改。
+
+## 显示差异
+
+收到 Server AI Toolkit 返回的更新文档后，使用 `setSuggestions` 显示更改：
+
+```ts
+import { getAiToolkit } from '@tiptap-pro/ai-toolkit'
+import { Node } from '@tiptap/pm/model'
+
+// 从编辑器获取 AI Toolkit 实例
+const toolkit = getAiToolkit(editor)
+
+// `doc` 是 Server AI Toolkit 返回的更新文档。
+// 使用编辑器的 schema 将其转换为 ProseMirror Node。
+const otherDoc = Node.fromJSON(editor.state.schema, doc)
+
+// 显示差异
+toolkit.setSuggestions([
+  {
+    format: 'compareDocuments',
+    doc: otherDoc,
+  },
+])
+```
+
+<Callout title="Schema 兼容性" variant="warning">
+  Server AI Toolkit 返回的文档必须使用编辑器的 schema 转换为 ProseMirror `Node`。  
+  使用 `Node.fromJSON(editor.state.schema, doc)` 以确保两个文档使用相同的 schema。
+</Callout>
+
+编辑器随后会显示当前文档与服务器编辑版本之间的差异，删除的内容以红色高亮，插入的内容以绿色高亮。
+
+## 定制差异样式
+
+添加 CSS 样式，将建议内容以红/绿差异突出显示：
+
+```css
+/* 将删除文字高亮为红色 */
+.tiptap-ai-suggestion,
+.tiptap-ai-suggestion > * {
+  background-color: oklch(80.8% 0.114 19.571);
+}
+
+/* 将插入文字高亮为绿色 */
+.tiptap-ai-suggestion-diff,
+.tiptap-ai-suggestion-diff > * {
+  background-color: oklch(87.1% 0.15 154.449);
+}
+```
+
+## 接受或拒绝更改
+
+差异显示后，用户可以通过建议方法接受或拒绝更改：
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 接受所有更改
+toolkit.acceptAllSuggestions()
+
+// 拒绝所有更改
+toolkit.rejectAllSuggestions()
+
+// 或处理单个建议
+const suggestions = toolkit.getSuggestions()
+toolkit.acceptSuggestion(suggestions[0].id)
+toolkit.rejectSuggestion(suggestions[1].id)
+```
+
+## 后续步骤
+
+- 学习如何使用自定义 CSS 或 React 组件来[定制建议样式](/content-ai/capabilities/ai-toolkit/advanced-guides/style-suggestions)
+- 查看完整的 [setSuggestions API 参考](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#setsuggestions--addsuggestions)
+- 探索[比较文档指南](/content-ai/capabilities/ai-toolkit/advanced-guides/compare-documents)，了解更高级的比较选项

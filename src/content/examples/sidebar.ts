@@ -85,10 +85,6 @@ export const sidebarConfig: SidebarConfig = {
           href: '/examples/advanced/interactive-react-and-vue-views',
         },
         {
-          title: '检索增强生成',
-          href: '/examples/advanced/retrieval-augmented-generation-rag',
-        },
-        {
           title: 'React 性能优化',
           href: '/examples/advanced/react-performance',
         },

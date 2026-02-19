@@ -131,7 +131,7 @@ const CustomParagraph = Paragraph.extend({
       color: {
         default: 'pink',
       },
-    },
+    }
   },
 })
 
@@ -244,6 +244,117 @@ const TextAlign = Extension.create({
   },
 })
 ```
+
+### 将全局属性应用到所有扩展
+
+除了应用属性到特定类型，您还可以为 `types` 属性使用简写字符串选项以更广泛地应用属性。这些提供了一个明确且自解释的 API。
+
+#### 应用到所有节点和标记
+
+使用 `types: '*'` 将属性应用于所有节点类型（不包含内置文本节点）和所有标记类型：
+
+```js
+import { Extension } from '@tiptap/core'
+
+const UniversalAttribute = Extension.create({
+  addGlobalAttributes() {
+    return [
+      {
+        types: '*',
+        attributes: {
+          customAttribute: {
+            default: 'default-value',
+            renderHTML: (attributes) => ({
+              'data-custom': attributes.customAttribute,
+            }),
+            parseHTML: (element) => element.getAttribute('data-custom') || 'default-value',
+          },
+        },
+      },
+    ]
+  },
+})
+```
+
+#### 应用到所有节点
+
+使用 `types: 'nodes'` 将属性应用于所有节点类型（不包括内置文本节点）：
+
+```js
+const NodeAttribute = Extension.create({
+  addGlobalAttributes() {
+    return [
+      {
+        types: 'nodes',
+        attributes: {
+          nodeClass: {
+            default: null,
+            renderHTML: (attributes) => ({
+              class: attributes.nodeClass,
+            }),
+            parseHTML: (element) => element.className || null,
+          },
+        },
+      },
+    ]
+  },
+})
+```
+
+#### 应用到所有标记
+
+使用 `types: 'marks'` 将属性应用于所有标记类型：
+
+```js
+const MarkAttribute = Extension.create({
+  addGlobalAttributes() {
+    return [
+      {
+        types: 'marks',
+        attributes: {
+          emphasis: {
+            default: false,
+            renderHTML: (attributes) => {
+              if (!attributes.emphasis) return {}
+              return { style: 'font-style: italic' }
+            },
+            parseHTML: (element) => element.style.fontStyle === 'italic',
+          },
+        },
+      },
+    ]
+  },
+})
+```
+
+#### 应用到特定类型
+
+如果想有更多控制，您仍然可以指定具体的类型名称数组：
+
+```js
+const TextAlignAttribute = Extension.create({
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['heading', 'paragraph'],
+        attributes: {
+          textAlign: {
+            default: 'left',
+            renderHTML: (attributes) => ({
+              style: `text-align: ${attributes.textAlign}`,
+            }),
+            parseHTML: (element) => element.style.textAlign || 'left',
+          },
+        },
+      },
+    ]
+  },
+})
+```
+
+<Callout title="提示">
+字符串简写选项（`'*'`、`'nodes'`、`'marks'`）比省略 `types` 属性提供了更明确且自解释的 API。当您想让其他开发者立即清楚全局属性的作用范围时，请使用它们。
+</Callout>
 
 ## 渲染 HTML
 

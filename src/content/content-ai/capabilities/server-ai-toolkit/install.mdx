@@ -66,9 +66,10 @@ const schemaAwarenessData = getSchemaAwarenessData(editor)
 
 Server AI 工具包是一个云端或本地服务。需认证后方可访问其 REST API。
 
-1. 在[Tiptap 云 AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 页面，获取您的 App ID 和密钥。
-2. 使用如 `jsonwebtoken` 库生成 JWT。生产环境中，请务必**在服务器端**创建 JWT，以保持密钥安全。
-3. 在 API 请求中使用 JWT。将其作为 Bearer token 放入 `Authorization` 头部，并在 `X-App-Id` 中传递 App ID。
+1. 在[Tiptap 云 AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 页面，获取您的 App ID 和密钥。  
+2. 在[文档服务器设置](https://cloud.tiptap.dev/v2/configuration/document-server) 页面，获取您的文档服务器凭据（ID 和管理 API 密钥）。这些会作为 JWT 声明包含，方便 Server AI 工具包自动获取并保存您的 Tiptap 云文档。  
+3. 使用诸如 `jsonwebtoken` 的库生成 JWT。生产环境中，请务必**在服务器端**创建 JWT，以保持密钥安全。  
+4. 在 API 请求中使用 JWT。将其作为 Bearer token 放入 `Authorization` 头部，并在 `X-App-Id` 中传递 App ID。
 
 ```ts
 import jwt from 'jsonwebtoken'
@@ -76,13 +77,16 @@ import jwt from 'jsonwebtoken'
 const TIPTAP_CLOUD_AI_API_URL = 'https://api.tiptap.dev'
 const TIPTAP_CLOUD_AI_SECRET = 'your-secret-key'
 const TIPTAP_CLOUD_AI_APP_ID = 'your-app-id'
+const TIPTAP_DOCUMENT_SERVER_ID = 'your-document-server-id'
+const TIPTAP_DOCUMENT_SERVER_MANAGEMENT_API_SECRET = 'your-document-server-management-api-secret'
 
 // 通过密钥生成 JWT 令牌
+// 包含文档服务器凭据，方便 Server AI 工具包自动获取并保存 Tiptap 云端文档。
 const JWT_TOKEN = jwt.sign(
   {
-    // 可选：为评论工具或 Tiptap 云端文档包含这些字段
-    // experimental_document_app_id: 'your-document-app-id',
-    // experimental_document_secret: 'your-document-api-secret',
+    // 文档服务器凭据，用于 Tiptap 云端文档
+    experimental_document_server_id: TIPTAP_DOCUMENT_SERVER_ID,
+    experimental_document_server_management_api_secret: TIPTAP_DOCUMENT_SERVER_MANAGEMENT_API_SECRET,
   },
   TIPTAP_CLOUD_AI_SECRET,
   { expiresIn: '1h' },
@@ -96,10 +100,8 @@ const headers = {
 }
 ```
 
-<Callout title="Tiptap 云端文档" variant="info">
-  若想让 AI 服务器自动从 Tiptap 文档服务器获取和保存文档，
-  请在您的 JWT 中包含 `experimental_document_app_id` 和 `experimental_document_secret` 声明。
-  详见[评论指南](/content-ai/capabilities/server-ai-toolkit/agents/comments)。
+<Callout title="可选：直接提供文档" variant="info">
+  如果您使用自己的存储管理文档，而非 Tiptap 云，您可以省略 JWT 中的 `experimental_document_server_id` 和 `experimental_document_server_management_api_secret` 声明，直接通过 API 请求中的 `document` 字段传递文档。详见[REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)。
 </Callout>
 
 ## 调用 API 端点
