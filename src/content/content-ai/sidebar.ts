@@ -174,6 +174,10 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret',
                 },
                 {
+                  title: '非 TypeScript 后端',
+                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/non-typescript-backends',
+                },
+                {
                   title: '迁移指南',
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/migration-guides',
                   children: [
@@ -220,6 +224,10 @@ export const sidebarConfig: SidebarConfig = {
                 {
                   title: '模式感知',
                   href: '/content-ai/capabilities/ai-toolkit/api-reference/schema-awareness',
+                },
+                {
+                  title: '审查选项',
+                  href: '/content-ai/capabilities/ai-toolkit/api-reference/review-options',
                 },
                 {
                   title: '显示建议',

@@ -275,10 +275,10 @@ curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_
 ## 回退到版本
 
 ```bash
-POST /api/documents/:identifier/versions
+POST /api/documents/:identifier/versions/:versionId/revertTo
 ```
 
-此调用允许您通过应用与文档的先前状态相对应的更新将文档回退到特定的先前版本。您必须在请求体中指定要回退到的版本。
+此调用允许您将文档回退到特定的先前版本，通过应用与文档先前状态对应的更新。
 
 如果文档成功回退，该端点返回 HTTP 状态 `204`，如果文档或版本未找到，则返回 `404`。
 
@@ -287,6 +287,16 @@ curl --location --request POST 'https://YOUR_APP_ID.collab.tiptap.cloud/api/docu
 --header 'Content-Type: application/json' \
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
 ```
+
+### 更新版本
+
+```bash
+PATCH /api/documents/:identifier/versions/:versionId
+```
+
+此调用允许您更新版本的名称或元数据。您可以用它来重命名版本或在创建后附加更多上下文。
+
+有关请求体参数和示例，请参阅 [Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/folder/33042171-a6e8aa7e-c077-46ee-a2a3-241f8efd5d25?action=share&creator=33042171&active-environment=33042171-378cfb31-9c16-40f0-95b8-b9f0d3c7d2ab)。
 
 ## 更新文档
 

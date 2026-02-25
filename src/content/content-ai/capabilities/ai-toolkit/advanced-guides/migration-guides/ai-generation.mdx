@@ -64,7 +64,7 @@ OPENAI_API_KEY=your-api-key
 const toolkit = getAiToolkit(editor)
 
 // 使用 AI 工具包获取选区的 HTML 格式内容
-const selection = toolkit.getHtmlSelection()
+const selection = toolkit.getHtmlRange(editor.state.selection)
 
 // 调用 API 端点获取编辑后的 HTML 内容
 const response = await fetch('/api', {

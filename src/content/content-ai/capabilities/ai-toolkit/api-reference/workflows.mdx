@@ -409,11 +409,10 @@ return result.toTextStreamResponse()
 - `options` (`TemplateWorkflowOptions`): 配置选项
   - `template` (`Record<string, any>`): Tiptap JSON 格式的模板（doc 节点或片段数组）
   - `values` (`TemplateValues`): AI 生成且填充模板的值。键名对应模板属性中的值。
-  - `position?` (`InsertPosition`): 插入填充模板的位置。默认：`'selection'`
+  - `position?` (`Range | number`): 插入填充模板的位置。默认：整个文档区间。
   - `hasFinished?` (`boolean`): 是否已完成流式传输。省略时方法以非流式模式运行。默认：`true`
   - `workflowId?` (`unknown`): 此工作流运行的唯一 ID。提供时启用流式模式，方法将在多次调用中跟踪插入区间并逐步替换内容。
   - `reviewOptions?` (`ReviewOptions`): 控制预览/审核行为
-    - `mode?` (`'disabled' | 'review' | 'preview'`): 是否在应用更改之前或之后进行审核。默认值：`'disabled'`
 
 ### 示例
 

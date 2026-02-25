@@ -2,41 +2,47 @@
 
 本项目的所有重大变更将记录在此文件中。
 
+## [2026-02-19]
+
+### Changed
+
+- **AI menu**：为 `<AiMenu>` 添加了 `anchorToSelection` 属性，用于将菜单锚定到当前文本选区，且菜单宽度与编辑器宽度一致。
+
 ## [2026-02-10]
 
 ### 修复
 
-- **工具栏按钮**：修正按钮显示逻辑，之前在未设置 `hideWhenUnavailable` 时按钮错误地被隐藏。按钮现在默认始终显示，仅当 `hideWhenUnavailable={true}` 且所需扩展/模式不可用时才隐藏。
-- **链接弹出框**：在 `setMark("link")` 周围添加错误处理，防止在某些编辑器状态下抛出未捕获异常。
-- **转换下拉菜单**：新增缺失的 `!editor.isEditable` 条件，防止在只读编辑器中显示下拉菜单。
-- **标题节点**：修正 `margin-top` 取消样式，确保正确作用于首个标题及其前为 ProseMirror 小部件（如装饰、节点视图）的标题。
-- **颜色高亮**：将 `toggleMark("highlight", { color })` 切换为正确的 `toggleHighlight({ color })` 命令，实现正确的切换行为。
+- **工具栏按钮**：修正按钮显示逻辑，之前未设置 `hideWhenUnavailable` 时按钮错误隐藏。按钮现在默认始终显示，只有当 `hideWhenUnavailable={true}` 且所需扩展/模式不可用时才隐藏。
+- **链接弹出框**：在 `setMark("link")` 周围添加错误处理，避免在某些编辑器状态下抛出未捕获异常。
+- **转换下拉菜单**：新增缺失的 `!editor.isEditable` 条件，避免只读编辑器中显示该菜单。
+- **标题节点**：修复 `margin-top` 取消样式，确保正确应用于首个标题及其前方为 ProseMirror 小部件（如装饰、节点视图）的标题。
+- **颜色高亮**：将 `toggleMark("highlight", { color })` 的调用改为正确的 `toggleHighlight({ color })`，实现正确切换行为。
 
 ### 变更
 
-- **CLI 在 `-c` 参数上的认证检查**：使用 `-c`（组件）标志时，CLI 现在验证 `.npmrc` 身份认证，防止未认证用户出现静默失败。
-- **自动生成 `scss.d.ts`**：当通过 CLI 安装含 SCSS 文件的组件时，自动创建 SCSS 类型声明。
-- **嵌套列表样式**：新增最多 8 级深度嵌套列表样式循环：
-  - 有序列表：`decimal → lower-alpha → lower-roman → decimal → ...`
-  - 无序列表：`disc → circle → square → disc → ...`
-- **颜色高亮的 `useColorValue` 属性**：新增支持使用原始十六进制颜色值代替 CSS 变量，确保在不支持 CSS 自定义属性的环境中也能应用高亮。
+- **CLI `-c` 参数的认证检查**：使用 `-c`（组件）标志时，CLI 现在验证 `.npmrc` 身份认证，防止未认证用户发生静默失败。
+- **自动生成 `scss.d.ts`**：通过 CLI 安装包含 SCSS 文件的组件时，自动创建 SCSS 类型声明文件。
+- **嵌套列表样式**：新增最多 8 级嵌套列表样式循环：
+  - 有序列表：`decimal → lower-alpha → lower-roman → decimal → …`
+  - 无序列表：`disc → circle → square → disc → …`
+- **颜色高亮的 `useColorValue` 属性**：新增支持直接使用十六进制颜色值代替 CSS 变量，确保在不支持 CSS 自定义属性的环境下也能应用高亮样式。
 - **标题下拉菜单**：新增支持自定义 `children` 属性，允许用户覆盖默认的图标和箭头渲染。
-- **内联图片**：段落内的图片现在显示为 `inline-block`。
+- **内联图片**：段落内图片现设为 `inline-block` 显示。
 
 ### 移除
 
-- **评论页面示例**：移除 `/comments` 和 `/preview/templates/comments` 路由及所有相关组件。
+- **评论页面示例**：移除 `/comments` 和 `/preview/templates/comments` 路由及相关所有组件。
 
 ## [2026-02-03]
 
-- 更新 CLI 版本至 3.18.0。修复自定义路径的 `-p` 参数问题。
+- 更新 CLI 版本至 3.18.0，修复自定义路径下 `-p` 参数问题。
 
 ## [2026-01-15]
 
 ### 修复
 
-- 防止多选多个区块时执行“转换为”操作，确保节点切换仅应用于单个选中的区块。  
-  通过运行 `pnpm dlx @tiptap/cli@latest add heading-button blockquote-button list-button text-button code-block-button -o` 更新现有代码。
+- 避免多选多个区块时执行“转换为”操作，确保节点切换仅应用于单个被选中的区块。  
+  请运行 `pnpm dlx @tiptap/cli@latest add heading-button blockquote-button list-button text-button code-block-button -o` 来更新现有代码。
 
 ## [2026-01-09]
 
@@ -49,19 +55,19 @@
 
 ### 新增
 
-- 为 `FloatingElement` 添加 `resetTextSelectionOnClose` 属性，增加编辑器失去焦点时保留当前选区的选项
+- 为 `FloatingElement` 添加 `resetTextSelectionOnClose` 属性，增加编辑器失焦时保留当前光标选区的选项
 
 ## [2025-12-15]
 
 ### 修复
 
-- 移除图片的 stopEvent，修复复制粘贴内联图片的问题
+- 移除图片的 stopEvent，修复复制粘贴内联图片时的问题
 
 ## [2025-12-04]
 
 ### 新增
 
-- 在退格键时合并相邻列表，防止垂直间距卡住
+- 退格键时合并相邻列表，防止垂直间距卡顿
 
 ---
 

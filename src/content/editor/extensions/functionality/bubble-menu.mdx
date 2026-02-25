@@ -22,12 +22,17 @@ extension:
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
 
 此扩展会使上下文菜单在文本选择附近出现。使用户能够对其文本选择应用 [标记](/editor/extensions/marks)。
 
 和往常一样，标记和样式完全由您决定。
 
 <CodeDemo path="/Extensions/BubbleMenu" />
+
+<Callout variant="warning">
+    如果您使用的是 React 或 Vue 等框架，请使用特定于框架的 `BubbleMenu` 组件，而不是扩展。该组件提供了更方便的 API，并为您处理 DOM 元素。您可以在下方的[与框架一起使用](#usage-with-frameworks)章节中找到有关该组件的更多信息。
+</Callout>
 
 ## 安装
 
@@ -141,9 +146,59 @@ new Editor({
 })
 ```
 
-### 其他框架
+### 与框架一起使用
 
-查看本页面顶部的演示，了解如何将气泡菜单扩展与 React 或 Vue 集成。
+#### React
+
+`@tiptap/react` 包含一个可从 `@tiptap/react/menus` 导入的 `BubbleMenu` 组件。它提供与扩展相同的功能，但采用了更适合 React 的 API。使用此组件时，无需将 `BubbleMenu` 扩展添加到编辑器中。
+
+```jsx
+import { BubbleMenu } from '@tiptap/react/menus'
+
+function MyBubbleMenu({ editor }) {
+  return (
+    <BubbleMenu editor={editor}>
+      <button onClick={() => editor.chain().focus().toggleBold().run()}>
+        Bold
+      </button>
+      <button onClick={() => editor.chain().focus().toggleItalic().run()}>
+        Italic
+      </button>
+    </BubbleMenu>
+  )
+}
+```
+
+#### Vue
+
+`@tiptap/vue-3` 包含一个可从 `@tiptap/vue-3/menus` 导入的 `BubbleMenu` 组件。它提供与扩展相同的功能，但采用了更适合 Vue 的 API。使用此组件时，无需将 `BubbleMenu` 扩展添加到编辑器中。
+
+```vue
+<template>
+  <BubbleMenu :editor="editor">
+    <button @click="editor.chain().focus().toggleBold().run()">
+      Bold
+    </button>
+    <button @click="editor.chain().focus().toggleItalic().run()">
+      Italic
+    </button>
+  </BubbleMenu>
+</template>
+
+<script setup>
+  import { BubbleMenu } from '@tiptap/vue-3/menus'
+  
+  // 确保将编辑器实例作为属性传递给 BubbleMenu 组件
+  const { editor } = defineProps({
+    editor: {
+      type: Object,
+      required: true,
+    },
+  })
+</script>
+```
+
+**注意**：相同的菜单也可用于 Vue 2 版本的 Tiptap，您可以从 `@tiptap/vue-2/menus` 导入。
 
 ### 自定义逻辑
 

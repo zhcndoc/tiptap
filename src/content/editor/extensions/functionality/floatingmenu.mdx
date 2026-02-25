@@ -22,10 +22,15 @@ extension:
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
 
 在 Tiptap 中使用浮动菜单扩展，使菜单在空行上出现。
 
 <CodeDemo path="/Extensions/FloatingMenu" />
+
+<Callout variant="warning">
+    如果您正在使用类似 React 或 Vue 的框架，请使用这些框架特定的 `FloatingMenu` 组件，而不是扩展。该组件提供了更便利的 API，并为您处理 DOM 元素。有关该组件的更多信息，请参见下方的[框架中的使用](#usage-with-frameworks)部分。
+</Callout>
 
 ## 安装扩展
 
@@ -128,9 +133,59 @@ new Editor({
 })
 ```
 
-### 其他框架
+## 框架中的使用
 
-请查看此页顶部的演示 [#](#)，了解如何将浮动菜单扩展与 React 或 Vue 集成。
+### React
+
+`@tiptap/react` 包提供了一个 `FloatingMenu` 组件，可以从 `@tiptap/react/menus` 导入。它提供了与扩展相同的功能，但使用了更适合 React 的 API。使用该组件时，无需将 `FloatingMenu` 扩展添加到编辑器中。
+
+```jsx
+import { FloatingMenu } from '@tiptap/react/menus'
+
+function MyFloatingMenu({ editor }) {
+  return (
+    <FloatingMenu editor={editor}>
+      <button onClick={() => editor.chain().focus().setHeading({ level: 1 }).run()}>
+        H1
+      </button>
+      <button onClick={() => editor.chain().focus().setBulletList().run()}>
+        List
+      </button>
+    </FloatingMenu>
+  )
+}
+```
+
+### Vue
+
+`@tiptap/vue-3` 包提供了一个 `FloatingMenu` 组件，可以从 `@tiptap/vue-3/menus` 导入。它提供了与扩展相同的功能，但使用了更适合 Vue 的 API。使用该组件时，无需将 `FloatingMenu` 扩展添加到编辑器中。
+
+```vue
+<template>
+  <FloatingMenu :editor="editor">
+    <button @click="editor.chain().focus().setHeading({ level: 1 }).run()">
+      H1
+    </button>
+    <button @click="editor.chain().focus().setBulletList().run()">
+      List
+    </button>
+  </FloatingMenu>
+</template>
+
+<script setup>
+  import { FloatingMenu } from '@tiptap/vue-3/menus'
+
+  // 确保将编辑器实例作为 prop 传递给 FloatingMenu 组件
+  const { editor } = defineProps({
+    editor: {
+      type: Object,
+      required: true,
+    },
+  })
+</script>
+```
+
+**注意**：相同的菜单也可在 Tiptap 的 Vue 2 版本中使用，可从 `@tiptap/vue-2/menus` 导入。
 
 ### 自定义逻辑
 

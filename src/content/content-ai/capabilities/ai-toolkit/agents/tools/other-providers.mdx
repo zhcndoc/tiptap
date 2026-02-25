@@ -16,15 +16,10 @@ Tiptap AI 工具包提供了最流行的 AI 提供商库的工具定义，例如
 
 认证完成后，在包含 `.npmrc` 的目录下运行此 shell 脚本：
 
-```bash
-ORIG_DIR=$(pwd) && cd $(mktemp -d) && cp $ORIG_DIR/.npmrc . && \
-  npm init -y && \
-  npm install @tiptap-pro/ai-toolkit-tool-definitions && \
-  node --input-type=module -e \
-    "import {toolDefinitions} from '@tiptap-pro/ai-toolkit-tool-definitions'; \
-    console.log(JSON.stringify(toolDefinitions(), null, 2))" \
-  > "$ORIG_DIR/tool-definitions.json" && \
-  cd $ORIG_DIR
+```ts
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-tool-definitions'
+
+const tools = toolDefinitions()
 ```
 
 该脚本会创建一个包含工具定义的 `tool-definitions.json` 文件。每个工具定义是一个包含以下属性的对象：
@@ -34,6 +29,10 @@ ORIG_DIR=$(pwd) && cd $(mktemp -d) && cp $ORIG_DIR/.npmrc . && \
 - `inputSchema`：一个描述工具输入参数的 [JSON schema](https://json-schema.org/)。
 
 使用此数据以您的 AI 提供商格式构建工具定义。
+
+### 非 TypeScript 后端
+
+如果您的后端不是 TypeScript，可以使用 CLI 生成包含工具定义的 JSON 文件。详见[非 TypeScript 后端](/content-ai/capabilities/ai-toolkit/advanced-guides/non-typescript-backends) 指南。
 
 ## API 参考
 

@@ -61,16 +61,24 @@ editor.commands.updateThread({
 })
 ```
 
-### selectThread( id, selectAround )
+### selectThread( options )
 
 选择具有指定 ID 的线程。如果将 `selectAround` 设置为 `true`，编辑器将创建一个覆盖整个线程的选定范围。
 
 ```js
 editor.commands.selectThread({
   id: '101',
-  selectAround: true,
 })
 ```
+
+#### 选项
+
+- `id` (string)：要选择的线程 ID。
+- `selectAround` (boolean，默认值：false)：如果为 true，则选择线程周围的内容。
+- `focus` (boolean，默认值：true)：如果为 true，选择线程后将聚焦编辑器。
+- `scrollIntoView` (boolean，默认值：true)：如果为 true，滚动编辑器以使所选线程可见。
+- `updateSelection` (boolean，默认值：true)：如果为 true，更新编辑器的选区到所选线程。
+- `triggerClick` (boolean，默认值：false)：如果为 true，模拟一次点击。
 
 ### unselectThread()
 

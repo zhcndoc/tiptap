@@ -303,3 +303,34 @@ const smallerChunks = toolkit.getJsonChunks({ chunkSize: 1000 })
 ### 返回值 (`TiptapReadResult`)
 
 - `content` (`string`): 允许 AI 快速高效编辑的文档内容格式。
+
+## `tiptapReadChunks`
+
+以 Tiptap Read 格式读取文档，并分块处理大内容。
+
+### 参数
+
+- `options?` (`TiptapReadChunksOptions`): `tiptapReadChunks` 方法的选项
+  - `chunkSize?` (`number`): 每块最大字符数。默认 32000 字符（8000 令牌 \* 每令牌 4 字符）
+  - `selectableNodeTypes?` (`string[]`): AI 可选择的节点类型名称数组，默认所有块级节点可选择。若设为 `[]`，则仅顶层节点可选
+
+### 返回值
+
+`TiptapReadChunk[]`：分块数组，每块含有：
+
+- `content` (`string`): Tiptap Read 格式的 HTML 内容
+- `range` (`Range`): 该块在文档中的起止范围
+  - `from` (`number`): 文档起始位置
+  - `to` (`number`): 文档结束位置
+- `nodeRange` (`NodeRange`): 该块起止的节点范围
+  - `from` (`number`): 文档中起始节点位置
+  - `to` (`number`): 文档中结束节点位置
+
+### 示例
+
+```ts
+// 将文档拆分成若干块
+const chunks = toolkit.tiptapReadChunks()
+// 将文档拆分成更小的块
+const smallerChunks = toolkit.tiptapReadChunks({ chunkSize: 16000 })
+```

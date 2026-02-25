@@ -100,7 +100,7 @@ ydoc.getMap<number>('__tiptapcollab__config').set('intervalSeconds', 900)
 | status              | `string`               | 提供程序的状态 - 可以是 `connecting`、`connected` 或 `disconnected`        |
 | synced              | `boolean`              | 版本历史是否与服务器同步                                                   |
 | versioningEnabled   | `boolean`              | 版本控制是否启用                                                             |
-| versions            | `array<Version>`       | 存储在历史记录中的版本数组。                                                 |
+| versions            | `array<Version>`       | 存储在历史记录中的版本数组。每个版本包含 `version`（数字）、`date`（数字）、可选的 `name`（字符串）和可选的 `meta`（对象）。 |
 
 ## 命令
 
@@ -154,7 +154,7 @@ const editor = new Editor({
         currentVersion = payload.currentVersion
         latestVersion = payload.version
         versions = payload.versions
-        autoversioningEnabled = payload.autoVersioning
+        autoversioningEnabled = payload.versioningEnabled
       },
     }),
   ],
@@ -190,10 +190,43 @@ const autoversioningEnabled = editor.storage.snapshot.versioningEnabled
 editor.commands.saveVersion('我的新自定义版本')
 ```
 
-### 切换文档的自动版本控制
+### 使用元数据创建版本
+
+您可以向版本附加任意元数据。这对于存储额外的上下文信息（如作者、标签或任何自定义数据）非常有用。
 
 ```js
-editor.commands.toggleVersioning()
+editor.commands.saveVersion('Release v1.0', false, {
+  author: 'Jane Doe',
+  tags: ['release', 'stable'],
+})
+```
+
+`saveVersion` 命令接受三个参数：
+
+| 参数       | 类型                      | 默认值       | 描述                                |
+| ---------- | ------------------------- | ------------ | ----------------------------------- |
+| name       | `string`                  | `undefined`  | 版本的可选名称                     |
+| force      | `boolean`                 | `false`      | 即使未检测到更改也创建版本         |
+| meta       | `Record<string, unknown>` | `undefined`  | 附加到版本的任意元数据             |
+
+### 从服务器获取版本列表
+
+您可以使用 `fetchVersions` 命令手动刷新服务器上的版本列表。这会更新扩展存储中的最新版本数据。
+
+```js
+editor.commands.fetchVersions()
+```
+
+### 启用文档自动版本控制
+
+```js
+editor.commands.enableVersioning()
+```
+
+### 禁用文档自动版本控制
+
+```js
+editor.commands.disableVersioning()
 ```
 
 ### 通过版本 ID 恢复
@@ -225,7 +258,7 @@ editor.commands.revertToVersion(4, '恢复到版本', '恢复之前的未版本�
 首先，附加一个监听器到提供程序：
 
 ```js
-// 导入 getPreviewContentFromVersionPayload 辅助函数（请参阅下面的详细信息）
+// 导入 watchPreviewContent 函数（请参阅下面的详细信息）
 import { watchPreviewContent } from '@tiptap-pro/extension-snapshot'
 
 // 配置提供程序
@@ -330,40 +363,47 @@ provider.sendStateless(
 创建一个带有可选标题的新版本。
 
 ```js
-this.options.provider.sendStateless(
+provider.sendStateless(
   JSON.stringify({ action: 'version.create', name: '我的自定义版本' }),
+)
+```
+
+#### `versions.list`
+
+请求服务器上的全部版本列表。
+
+```js
+provider.sendStateless(
+  JSON.stringify({ action: 'versions.list' }),
 )
 ```
 
 ### 内发
 
-#### `saved`
+#### `version.created`
 
-此无状态消息可用于检索最后保存的时间戳。
+此无状态消息包含有关新创建版本的信息，包括任何附加的元数据。
 
 ```js
 provider.on('stateless', (data) => {
   const payload = JSON.parse(data.payload)
 
-  if (payload.action === 'saved') {
-    const lastSaved = new Date()
+  if (payload.event === 'version.created') {
+    const latestVersion = payload.version
+    const name = payload.name // 可选版本名称
+    const date = payload.date // 创建时间戳
+    const meta = payload.meta // 可选元数据对象
   }
 })
 ```
 
-#### `version.created`
+#### `versions.list`
 
-此无状态消息包含有关新创建版本的信息。
+`listVersions` 方法返回完整的版本列表。每个版本包含 `version`、`date`，以及可选的 `name` 和 `meta` 字段。
 
 ```js
-provider.on('stateless', (data) => {
-  const payload = JSON.parse(data.payload)
-
-  if (payload.action === 'version.created') {
-    const latestVersion = payload.version
-    const currentVersion = payload.version
-  }
-})
+const versions = await provider.listVersions()
+// versions 是一个包含 { version: number, date: number, name?: string, meta?: object } 的数组
 ```
 
 #### `document.reverted`
@@ -374,7 +414,7 @@ provider.on('stateless', (data) => {
 provider.on('stateless', (data) => {
   const payload = JSON.parse(data.payload)
 
-  if (payload.action === 'document.reverted') {
+  if (payload.event === 'document.reverted') {
     const currentVersion = payload.version
   }
 })

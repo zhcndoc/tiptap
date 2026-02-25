@@ -1,29 +1,143 @@
 ---
-title: Style suggestions with the AI Toolkit
+title: 使用 AI 工具包的样式建议
 meta:
-  title: Style suggestions guide | Tiptap Content AI
-  description: Apply styles to suggestions with the AI Toolkit.
-  category: Content AI
+  title: 样式建议指南 | Tiptap 内容 AI
+  description: 使用 AI 工具包为建议应用样式。
+  category: 内容 AI
 ---
 
-When the AI makes changes to the document, you can display them as [suggestions](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions) in the editor. In this guide, you'll learn how to customize the suggestions' appearance by modifying their styles and displaying custom elements like menus inside them.
+当 AI 对文档进行更改时，您可以在编辑器中将其显示为[建议](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions)。本指南将教您如何通过修改样式和在建议内显示自定义元素（如菜单）来定制建议的外观。
 
-## Add CSS styles to suggestions
+## 为建议添加 CSS 样式
 
-When the default `renderDecorations` function is used, the following classes are applied:
+当使用默认的 `renderDecorations` 函数时，会应用以下类名：
 
-- `.tiptap-ai-suggestion`: Applied on the content that is covered by the suggestion range.
-- `.tiptap-ai-suggestion--selected`: Applied when the cursor is inside the suggestion range.
-- `.tiptap-ai-suggestion-diff`: Applied on the diff widget that is displayed next to the suggestion range.
-- `.tiptap-ai-suggestion-diff--selected`: Applied to the diff widget when the cursor is inside the suggestion range.
+- `.tiptap-ai-suggestion`：应用于被建议范围覆盖的内容。
+- `.tiptap-ai-suggestion--selected`：当光标位于建议范围内时应用。
+- `.tiptap-ai-suggestion--change-group`：当建议是多个更改组成的组而非单个更改时应用。
+- `.tiptap-ai-suggestion-sub-change`：应用于更改组中的单个子更改。
+- `.tiptap-ai-suggestion-diff`：应用于显示在建议范围旁边的差异部件。
+- `.tiptap-ai-suggestion-diff--selected`：当光标位于建议范围内，应用于差异部件。
+- `.tiptap-ai-suggestion-diff--change-group`：当差异部件是多个更改组成的组而非单个更改时应用。
+- `.tiptap-ai-suggestion-diff-sub-change`：应用于差异更改组中的单个子更改。
 
-Use the above classes to style the suggestions, or provide a custom `renderDecorations` function for full control over the UI.
+您可以使用上述类来样式化建议，或提供自定义的 `renderDecorations` 函数以完全控制 UI。
 
-### Render React components inside a suggestion
+### CSS 样式示例
 
-You can use the `renderDecorations` option, combined with [React portals](https://react.dev/reference/react-dom/createPortal), to display a React component inside a suggestion.
+我们提供示例 CSS 样式供您快速上手。
 
-First, define a React component with a hook to store the HTML element where the React Portal will be rendered.
+#### 预览模式
+
+在[预览模式](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions#two-types-of-suggestions)中使用这些样式，以在将更改插入文档前预览它们。
+
+```css
+/* 将删除文字高亮为红色 */
+.tiptap-ai-suggestion,
+.tiptap-ai-suggestion > * {
+  background-color: oklch(80.8% 0.114 19.571);
+  color: oklch(0.396 0.141 25.723);
+}
+
+/* 更改组的背景色较浅（子更改变为较强高亮） */
+.tiptap-ai-suggestion.tiptap-ai-suggestion--change-group,
+.tiptap-ai-suggestion.tiptap-ai-suggestion--change-group > *:not(.tiptap-ai-suggestion-sub-change) {
+  background-color: oklch(0.936 0.032 17.717);
+}
+
+/* 行内更改组内的子更改高亮 */
+.tiptap-ai-suggestion-sub-change {
+  background-color: oklch(80.8% 0.114 19.571);
+}
+
+/* 将插入文字高亮为绿色 */
+.tiptap-ai-suggestion-diff,
+.tiptap-ai-suggestion-diff > * {
+  background-color: oklch(87.1% 0.15 154.449);
+}
+
+/* 差异更改组的背景色较浅（子更改变为较强高亮） */
+.tiptap-ai-suggestion-diff.tiptap-ai-suggestion-diff--change-group,
+.tiptap-ai-suggestion-diff.tiptap-ai-suggestion-diff--change-group
+  > *:not(.tiptap-ai-suggestion-diff-sub-change) {
+  background-color: oklch(0.962 0.044 156.743);
+}
+
+/* 替换差异部件内的子更改高亮 */
+.tiptap-ai-suggestion-diff-sub-change {
+  background-color: oklch(87.1% 0.15 154.449);
+}
+
+/* 正确渲染表格行插入 */
+.tiptap-ai-suggestion-diff:has(tr) {
+  display: contents;
+}
+
+.tiptap-ai-suggestion-diff:has(tr) td,
+.tiptap-ai-suggestion-diff:has(tr) th {
+  background-color: oklch(87.1% 0.15 154.449);
+}
+```
+
+#### 审阅模式 / 文档比较
+
+在[审阅模式](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions#two-types-of-suggestions)中使用这些样式，审阅已插入文档中的更改。
+
+显示由[文档比较](/content-ai/capabilities/ai-toolkit/advanced-guides/compare-documents)功能生成的建议时也使用这些样式。
+
+```css
+/* 将插入文字高亮为绿色 */
+.tiptap-ai-suggestion,
+.tiptap-ai-suggestion > * {
+  background-color: oklch(87.1% 0.15 154.449);
+}
+
+/* 更改组的背景色较浅（子更改变为较强高亮） */
+.tiptap-ai-suggestion.tiptap-ai-suggestion--change-group,
+.tiptap-ai-suggestion.tiptap-ai-suggestion--change-group > *:not(.tiptap-ai-suggestion-sub-change) {
+  background-color: oklch(0.962 0.044 156.743);
+}
+
+/* 行内更改组内的子更改高亮 */
+.tiptap-ai-suggestion-sub-change {
+  background-color: oklch(87.1% 0.15 154.449);
+}
+
+/* 将删除文字高亮为红色 */
+.tiptap-ai-suggestion-diff,
+.tiptap-ai-suggestion-diff > * {
+  background-color: oklch(80.8% 0.114 19.571);
+  color: oklch(0.396 0.141 25.723);
+}
+
+/* 差异更改组的背景色较浅（子更改变为较强高亮） */
+.tiptap-ai-suggestion-diff.tiptap-ai-suggestion-diff--change-group,
+.tiptap-ai-suggestion-diff.tiptap-ai-suggestion-diff--change-group
+  > *:not(.tiptap-ai-suggestion-diff-sub-change) {
+  background-color: oklch(0.936 0.032 17.717);
+}
+
+/* 替换差异部件内的子更改高亮 */
+.tiptap-ai-suggestion-diff-sub-change {
+  background-color: oklch(80.8% 0.114 19.571);
+}
+
+/* 正确渲染表格行删除 */
+.tiptap-ai-suggestion-diff:has(tr) {
+  display: contents;
+}
+
+.tiptap-ai-suggestion-diff:has(tr) td,
+.tiptap-ai-suggestion-diff:has(tr) th {
+  background-color: oklch(80.8% 0.114 19.571);
+}
+```
+
+## 在建议内渲染 React 组件
+
+您可以使用 `renderDecorations` 选项，结合[React 门户](https://react.dev/reference/react-dom/createPortal)，在建议内显示 React 组件。
+
+首先，定义一个 React 组件并用 hook 存储 React 门户的挂载 HTML 元素。
 
 ```tsx
 import { useState } from 'react'
@@ -35,11 +149,11 @@ function MyComponent() {
 }
 ```
 
-Then, in the `displayOptions.renderDecorations` option, create a widget decoration with a HTML element that will be used as the entry point of the React portal.
+然后，在 `displayOptions.renderDecorations` 选项里，创建一个带有 HTML 元素的小部件装饰，用作 React 门户的入口点。
 
 ```tsx
 const aiToolkit = getAiToolkit(editor)
-// Example method of the AI Toolkit that generates suggestions
+// AI 工具包中生成建议的示例方法
 aiToolkit.executeTool({
   reviewOptions: {
     mode: 'preview',
@@ -60,7 +174,7 @@ aiToolkit.executeTool({
 })
 ```
 
-Finally, in the React component, render any React elements inside the portal.
+最后，在 React 组件内，将任意 React 元素渲染到该门户内。
 
 ```tsx
 import { useState } from 'react'
@@ -76,26 +190,26 @@ function MyComponent() {
 }
 ```
 
-## Show a popover or a tooltip when a suggestion is selected
+## 选中建议时显示弹出框或提示框
 
-You can use the technique explained above to show a tooltip when a suggestion is selected.
+您可以使用上述技术，在选中建议时显示提示框。
 
-To show a popover when you select a suggestion, you need to use the `getCustomSuggestionDecoration` option. This function allows you to add custom elements to the suggestions, including popovers.
+若要在选中建议时显示弹出框，需要使用 `getCustomSuggestionDecoration` 选项。此函数允许您向建议中添加自定义元素，包括弹出框。
 
-Below is a simplified example on how to do it with the React UI library.
+下面是使用 React UI 库实现的简化示例。
 
 ```tsx
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 
-// Inside the React component
+// 在 React 组件内部
 function MyComponent() {
   const toolkit = getAiToolkit(editor)
 
-  // First, define a hook to store the HTML element where the popover will be rendered
+  // 首先，定义 hook 存储弹出框挂载的 HTML 元素
   const [popoverElement, setPopoverElement] = useState<HTMLElement | null>(null)
 
-  // When the tool is executed, configure how the decorations are rendered
+  // 工具执行时，配置装饰的渲染方式
   aiToolkit.executeTool({
     reviewOptions: {
       mode: 'preview',
@@ -103,7 +217,7 @@ function MyComponent() {
         renderDecorations({ suggestion, defaultRenderDecorations }) {
           const decorations = defaultRenderDecorations()
 
-          // Then, create a Prosemirror decoration that contains the HTML element
+          // 创建包含 HTML 元素的 Prosemirror 装饰
           decorations.push(
             Decoration.widget(suggestion.range.to, () => {
               const element = document.createElement('span')
@@ -122,7 +236,7 @@ function MyComponent() {
   const selectedSuggestion = toolkit.getSelectedSuggestion()
 
   if (popoverElement && selectedSuggestion) {
-    // Then, add the content to the custom element. In this example, we use React Portals to render the popover.
+    // 将内容添加到自定义元素中。本例使用 React 门户渲染弹出框。
     return <>{createPortal(<Popover suggestion={selectedSuggestion} />, popoverElement)}</>
   }
 
@@ -130,48 +244,48 @@ function MyComponent() {
 }
 ```
 
-We recommend using the [Floating UI](https://floating-ui.com/) library to display the popover.
+我们推荐使用 [Floating UI](https://floating-ui.com/) 库来显示弹出框。
 
-When you render the suggestion in the popover, use the `getNextWord` and `getPreviousWord` utility functions to show the previous and next words of the sentence where the suggestion is located.
+在弹出框中渲染建议时，可以使用 `getNextWord` 和 `getPreviousWord` 工具函数，显示建议所在句子的前后单词。
 
 ```ts
 import { getNextWord, getPreviousWord } from '@tiptap-pro/ai-toolkit'
 
-// Get the previous word in the sentence.
+// 获取句子中的前一个单词。
 const { previousWord } = getPreviousWord(editor, suggestion.range.from)
-// Get the next word in the sentence and the punctuation mark that follows it, if it's the end of the sentence.
+// 获取句子中的后一个单词及其后面的标点符号（如果为句尾）。
 const { nextWord, punctuationMark } = getNextWord(editor, suggestion.range.to)
 ```
 
-## Display suggestions in a sidebar outside the editor
+## 在编辑器外的侧边栏中显示建议
 
-You can access the current suggestions from the AI Toolkit's `getSuggestions` method.
+您可以通过 AI 工具包的 `getSuggestions` 方法获取当前建议。
 
 ```ts
 const toolkit = getAiToolkit(editor)
 const suggestions = toolkit.getSuggestions()
 ```
 
-Then, you can use this data to render suggestions in the UI, outside the editor. Here is an example of how to do it with the React UI library:
+然后，您可以使用这些数据在 UI 中（编辑器外）渲染建议。以下是使用 React UI 库实现的示例：
 
 ```tsx
-// Get the suggestions from the AI Toolkit
+// 从 AI 工具包获取建议
 const toolkit = getAiToolkit(editor)
 const suggestions = toolkit.getSuggestions()
 
-// Render the suggestions in the UI
+// 在 UI 中渲染建议
 return (
   <div>
     {suggestions.map((suggestion) => (
       <div key={suggestion.id}>
-        <p>Delete: {toolkit.getTextRange(suggestion.range)}</p>
-        <p>Add: {suggestion.replacementOptions[0].addSlice.toString()}</p>
+        <p>删除内容: {toolkit.getTextRange(suggestion.range)}</p>
+        <p>添加内容: {suggestion.replacementOptions[0].content.toString()}</p>
       </div>
     ))}
   </div>
 )
 ```
 
-## Next steps
+## 后续步骤
 
-- Learn more about suggestions in the [API reference](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions). See the `displayOptions` parameter for all the customization options.
+- 了解更多关于建议的内容，请参考[API 文档](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions)。查看 `displayOptions` 参数获取所有自定义选项。

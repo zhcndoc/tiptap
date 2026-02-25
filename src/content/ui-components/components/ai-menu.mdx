@@ -134,7 +134,7 @@ const AiEditor = ({ aiToken }: { aiToken: string }) => {
       </div>
 
       <EditorContent editor={editor} role="presentation" className="control-showcase">
-        <AiMenu />
+        <AiMenu anchorToSelection />
       </EditorContent>
     </EditorContext.Provider>
   )
@@ -143,9 +143,10 @@ const AiEditor = ({ aiToken }: { aiToken: string }) => {
 
 #### 属性
 
-| 名称       | 类型              | 默认值      | 描述                   |
-| --------- | ----------------- | ---------- | ---------------------- |
-| `editor`  | `Editor \| null`  | `undefined` | Tiptap 编辑器实例      |
+| 名称               | 类型               | 默认值     | 描述                                                                                  |
+| ------------------ | ------------------ | ---------- | ------------------------------------------------------------------------------------- |
+| `editor`           | `Editor \| null`   | `undefined`| Tiptap 编辑器实例                                                                     |
+| `anchorToSelection`| `boolean`          | `false`    | 若为 `true`，菜单锚点定位于当前文本选区，覆盖整个编辑器宽度，并动态响应滚动。             |
 
 ### `<AiMenuStateProvider />`
 
@@ -167,9 +168,10 @@ function App() {
 
 #### 属性
 
-| 名称       | 类型              | 默认值      | 描述                   |
-| --------- | ----------------- | ---------- | ---------------------- |
-| `editor`  | `Editor \| null`  | `undefined` | Tiptap 编辑器实例      |
+| 名称               | 类型                | 默认值     | 描述                                                                                  |
+| ------------------ | ------------------- | ---------- | ------------------------------------------------------------------------------------- |
+| `editor`           | `Editor \| null`    | `undefined`| Tiptap 编辑器实例                                                                     |
+| `anchorToSelection`| `boolean`           | `false`    | 若为 `true`，菜单锚点定位于当前文本选区，覆盖整个编辑器宽度，并动态响应滚动。             |
 
 ## Hooks
 
@@ -203,16 +205,16 @@ function MyComponent() {
 
 #### 返回值
 
-| 名称                 | 类型                                            | 描述                       |
-| ------------------- | ----------------------------------------------- | -------------------------- |
-| `state`             | `AiMenuState`                                   | 当前 AI 菜单状态           |
-| `updateState`       | `(updates: Partial<AiMenuState>) => void`       | 更新菜单状态的函数         |
-| `setFallbackAnchor` | `(element: HTMLElement \| null, rect?) => void` | 设置备用定位锚点           |
-| `reset`             | `() => void`                                    | 重置菜单状态到初始状态     |
+| 名称                 | 类型                                             | 描述                   |
+| -------------------- | ------------------------------------------------ | ---------------------- |
+| `state`              | `AiMenuState`                                    | 当前 AI 菜单状态       |
+| `updateState`        | `(updates: Partial<AiMenuState>) => void`       | 更新菜单状态的函数     |
+| `setFallbackAnchor`  | `(element: HTMLElement \| null, rect?) => void` | 设置备用定位锚点       |
+| `reset`              | `() => void`                                     | 重置菜单状态为初始值   |
 
 ### `useAiContentTracker()`
 
-用于追踪编辑器中 AI 生成内容变化的 Hook。
+用于追踪编辑器中 AI 生成内容变化的 Hook。支持两种定位模式：**流式模式**（当 `anchorToSelection` 为 `true` 并且 AI 正在加载时），使用 `ResizeObserver` 实时调整锚点位置；**静态模式**则基于 AI 元素位置建立带滚动感知的虚拟锚点。
 
 #### 使用示例
 
@@ -222,19 +224,29 @@ import { useAiContentTracker } from '@/components/tiptap-ui/ai-menu'
 function MyComponent() {
   const { editor } = useTiptapEditor()
 
-  useAiContentTracker(editor, {
-    onContentChange: (hasAiContent) => {
-      console.log('检测到 AI 内容:', hasAiContent)
-    },
+  useAiContentTracker({
+    editor,
+    aiGenerationActive: true,
+    setAnchorElement: (el) => store.setAnchorElement(el),
+    anchorToSelection: true,
   })
 
   return <div>带 AI 内容跟踪的组件</div>
 }
 ```
 
+#### 参数
+
+| 名称                 | 类型                              | 默认值  | 描述                                                                                   |
+| -------------------- | -------------------------------- | ------- | -------------------------------------------------------------------------------------- |
+| `editor`             | `Editor \| null`                 | —       | Tiptap 编辑器实例                                                                       |
+| `aiGenerationActive` | `boolean`                        | —       | AI 生成内容是否处于活跃状态                                                             |
+| `setAnchorElement`   | `(element: HTMLElement) => void`| —       | 设置浮动菜单锚点元素的回调函数                                                         |
+| `anchorToSelection`  | `boolean`                       | `false` | 是否使用覆盖整个编辑器宽度的虚拟锚点，并支持滚动及流式调整                             |
+
 ### `useTextSelectionTracker()`
 
-用于追踪文本选择变化以调整菜单定位的 Hook。
+用于追踪文本选择变化以调整菜单定位的 Hook。当 `anchorToSelection` 为 `true` 时，基于选区的垂直位置创建覆盖编辑器宽度的虚拟锚点，替代原生选区 DOM 元素。
 
 #### 使用示例
 
@@ -244,21 +256,35 @@ import { useTextSelectionTracker } from '@/components/tiptap-ui/ai-menu'
 function MyComponent() {
   const { editor } = useTiptapEditor()
 
-  useTextSelectionTracker(editor, {
-    onSelectionChange: (selection) => {
-      console.log('选择发生变化:', selection)
-    },
+  useTextSelectionTracker({
+    editor,
+    aiGenerationActive: true,
+    showMenuAtElement: (el) => show(el),
+    setMenuVisible: (visible) => updateState({ isOpen: visible }),
+    anchorToSelection: true,
   })
 
   return <div>带选择跟踪的组件</div>
 }
 ```
 
+#### 参数
+
+| 名称                | 类型                                                             | 默认值  | 描述                                                                                |
+| ------------------- | ---------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------- |
+| `editor`            | `Editor \| null`                                                | —       | Tiptap 编辑器实例                                                                  |
+| `aiGenerationActive`| `boolean`                                                       | —       | AI 生成内容是否处于活跃状态                                                        |
+| `showMenuAtElement` | `(element: HTMLElement) => void`                                | —       | 显示菜单于指定元素的回调                                                           |
+| `setMenuVisible`    | `(visible: boolean) => void`                                    | —       | 设置菜单可见状态的回调                                                             |
+| `onSelectionChange` | `(element: HTMLElement \| null, rect: DOMRect \| null) => void`| —       | 选区变化时的可选回调                                                                |
+| `prevent`           | `boolean`                                                       | `false` | 若为 `true`，阻止追踪                                                               |
+| `anchorToSelection` | `boolean`                                                       | `false` | 是否使用覆盖编辑器宽度的虚拟锚点，基于选区的垂直位置                                |
+
 ## 子组件
 
 ### `<AiMenuItems />`
 
-根据类别分组展示可用 AI 操作的组件。
+按类别分组展示可用 AI 操作的组件。
 
 #### 使用示例
 
@@ -353,6 +379,57 @@ const targetElement = findPrioritizedAIElement(editor)
 if (targetElement) {
   // 将菜单相对于此元素定位
 }
+```
+
+### `getSelectionRangeRect(editor)`
+
+使用浏览器的 Selection API 获取当前文本选区的边界矩形。若选区为空，则返回 `null`。当原生方法失效时，使用 ProseMirror 坐标做备选。
+
+```tsx
+import { getSelectionRangeRect } from '@/components/tiptap-ui/ai-menu'
+
+const rect = getSelectionRangeRect(editor)
+if (rect) {
+  // 使用 rect 进行定位
+}
+```
+
+### `createEditorWidthAnchorRect(editorDom, sourceRect)`
+
+基于给定的源矩形，在编辑器内容区（排除内边距和边框）创建一条覆盖编辑器宽度、位置在源矩形垂直位置的锚点矩形。
+
+```tsx
+import { createEditorWidthAnchorRect } from '@/components/tiptap-ui/ai-menu'
+
+const selectionRect = getSelectionRangeRect(editor)
+if (selectionRect) {
+  const anchorRect = createEditorWidthAnchorRect(editor.view.dom, selectionRect)
+  // anchorRect 覆盖编辑器内容区宽度，垂直对应选区位置
+}
+```
+
+### `createVirtualAnchor(rect, referenceElement?)`
+
+创建一个虚拟锚点元素，其 `getBoundingClientRect()` 方法返回传入的矩形。当提供了 `referenceElement` 时，锚点会存储相对于该元素的偏移，并在每次调用时动态计算视口坐标，从而实现支持滚动感知的定位。
+
+```tsx
+import { createVirtualAnchor, createEditorWidthAnchorRect } from '@/components/tiptap-ui/ai-menu'
+
+const anchorRect = createEditorWidthAnchorRect(editor.view.dom, selectionRect)
+const anchor = createVirtualAnchor(anchorRect, editor.view.dom)
+
+// 锚点的 getBoundingClientRect() 会随着编辑器滚动实时更新
+store.setAnchorElement(anchor)
+```
+
+### `getEditorContentRect(editorDom)`
+
+计算编辑器元素的内容区矩形（排除内边距和边框），返回包含 `left` 和 `width` 属性的对象。
+
+```tsx
+import { getEditorContentRect } from '@/components/tiptap-ui/ai-menu'
+
+const { left, width } = getEditorContentRect(editor.view.dom)
 ```
 
 ## AI 操作

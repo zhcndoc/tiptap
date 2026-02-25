@@ -33,15 +33,15 @@ import { Callout } from '@/components/ui/Callout'
 
 ```json
 {
-  "appName": "", // 您应用的名称
-  "name": "", // 文档的名称（如有必要则进行 URI 编码）
-  "time": // 当前时间作为 ISOString (new Date()).toISOString())
-  "tiptapJson": {}, // 来自 Tiptap 的 JSON 输出（见 https://tiptap.dev/guide/output#option-1-json）：TiptapTransformer.fromYdoc()
-  "ydocState"?: {}, // 可选包含整个 yDoc 的 base64。请联系我们以启用此属性！
-  "clientsCount": 100, // 当前连接的客户端数量
-  "type": "", // 有效载荷类型（如果文档发生更改，则为 DOCUMENT）；仅在您使用 webhook v2 时可用
-  "trigger": "", // 触发事件的原因（通常为 "document.saved"）；仅在您使用 webhook v2 时可用
-  "users": [] // 自上次 webhook 以来更改内容的用户列表（JWT 中的 "sub" 字段）
+  "appName": "", // name of your document server
+  "name": "", // name of the document (URI encoded if necessary)
+  "time": 0, // current time as ISOString (Date.getTime())
+  "tiptapJson": {}, // JSON output from Tiptap (see https://tiptap.dev/guide/output#option-1-json): TiptapTransformer.fromYdoc()
+  "ydocState"?: {}, // optionally contains the entire yDoc as base64. This can be enabled in the runtime configuration (see https://tiptap.dev/docs/collaboration/operations/configure `webhook_include_ydoc_state`)
+  "clientsCount": 100,// number of currently connected clients
+  "type": "", // the payload type (if the document was changed, this is DOCUMENT) ; only available if you are on webhooks v2
+  "trigger": "", // what triggered the event (usually "document.saved") ; only available if you are on webhooks v2
+  "users": [] // list of users who changed the content since the last webhook ("sub" field from the JWT)
 }
 ```
 
@@ -89,7 +89,7 @@ import { Callout } from '@/components/ui/Callout'
 
 事件如下所示：
 
-```
+```json
 {
   "trigger": "user.connected", // 或者 user.disconnected
   "user": "user_1",
@@ -99,4 +99,22 @@ import { Callout } from '@/components/ui/Callout'
   "time": "2025-04-21T19:32:55.632Z",
   "type": "DOCUMENT"
 }
+```
+
+## 自定义字段
+
+如果您在 Yjs 中使用自定义字段，可以通过在 [运行时配置](/collaboration/operations/configure) 中设置 `webhook_include_fields=1` 将它们添加到 webhook。
+
+为了让我们识别 yjs 字段的正确类型，您需要在 Tiptap Typemap 中配置它们。
+
+```typescript
+// 在 Yjs 中存储任何数据。参见官方文档：https://docs.yjs.dev/api/shared-types
+// 这里的 "config" 可以替换为任何字符串。map 给您一个键值存储。
+const ydoc = new Y.Doc()
+ydoc.getMap('config').set('mycustomoption', 'value123');
+
+// 在 provider 中，您需要告诉我们 yjs 类型。
+// 我们目前支持的可能选项有：map、array、text、xmlfragment、xmlelement
+const provider = new TiptapCollabProvider({document: ydoc})
+provider.setFieldType('config', 'map');
 ```

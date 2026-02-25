@@ -44,13 +44,10 @@ const toolkit = getAiToolkit(editor)
 // 使用编辑器的 schema 将其转换为 ProseMirror Node。
 const otherDoc = Node.fromJSON(editor.state.schema, doc)
 
-// 显示差异
-toolkit.setSuggestions([
-  {
-    format: 'compareDocuments',
-    doc: otherDoc,
-  },
-])
+// Display the diff
+toolkit.setSuggestionsFromDiff({
+  doc: otherDoc,
+})
 ```
 
 <Callout title="Schema 兼容性" variant="warning">
@@ -65,16 +62,50 @@ toolkit.setSuggestions([
 添加 CSS 样式，将建议内容以红/绿差异突出显示：
 
 ```css
-/* 将删除文字高亮为红色 */
+/* Highlight inserted text in green */
 .tiptap-ai-suggestion,
 .tiptap-ai-suggestion > * {
+  background-color: oklch(87.1% 0.15 154.449);
+}
+
+/* Lighter background for change groups (sub-changes carry the stronger highlight) */
+.tiptap-ai-suggestion.tiptap-ai-suggestion--change-group,
+.tiptap-ai-suggestion.tiptap-ai-suggestion--change-group > *:not(.tiptap-ai-suggestion-sub-change) {
+  background-color: oklch(0.962 0.044 156.743);
+}
+
+/* Highlight sub-changes within inline groups */
+.tiptap-ai-suggestion-sub-change {
+  background-color: oklch(87.1% 0.15 154.449);
+}
+
+/* Highlight deleted text in red */
+.tiptap-ai-suggestion-diff,
+.tiptap-ai-suggestion-diff > * {
+  background-color: oklch(80.8% 0.114 19.571);
+  color: oklch(0.396 0.141 25.723);
+}
+
+/* Lighter background for diff change groups (sub-changes carry the stronger highlight) */
+.tiptap-ai-suggestion-diff.tiptap-ai-suggestion-diff--change-group,
+.tiptap-ai-suggestion-diff.tiptap-ai-suggestion-diff--change-group
+  > *:not(.tiptap-ai-suggestion-diff-sub-change) {
+  background-color: oklch(0.936 0.032 17.717);
+}
+
+/* Highlight sub-changes within the replacement diff widget */
+.tiptap-ai-suggestion-diff-sub-change {
   background-color: oklch(80.8% 0.114 19.571);
 }
 
-/* 将插入文字高亮为绿色 */
-.tiptap-ai-suggestion-diff,
-.tiptap-ai-suggestion-diff > * {
-  background-color: oklch(87.1% 0.15 154.449);
+/* Render table row deletions correctly */
+.tiptap-ai-suggestion-diff:has(tr) {
+  display: contents;
+}
+
+.tiptap-ai-suggestion-diff:has(tr) td,
+.tiptap-ai-suggestion-diff:has(tr) th {
+  background-color: oklch(80.8% 0.114 19.571);
 }
 ```
 

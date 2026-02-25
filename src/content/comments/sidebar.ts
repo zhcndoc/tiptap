@@ -37,6 +37,10 @@ export const sidebarConfig: SidebarConfig = {
           title: '配置',
           href: '/comments/core-concepts/configure',
         },
+        {
+          title: '线程认证',
+          href: '/comments/core-concepts/thread-authentication',
+        },
       ],
     },
     {

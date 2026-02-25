@@ -51,7 +51,7 @@ npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
 
 ## 服务器设置
 
-创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型。
+创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型。如果你的后端不是 TypeScript，请参阅[非 TypeScript 后端](/content-ai/capabilities/ai-toolkit/advanced-guides/non-typescript-backends)。
 
 在 API 端点内，使用 `createProofreaderWorkflow` 函数创建并配置校对工作流程。该工作流程包含一个可直接使用的系统提示，指导 AI 模型如何生成内容。
 
@@ -217,6 +217,30 @@ export default function Page() {
 <CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/proofreader" />
 
 查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 校对文档的一部分
+
+要校对文档的子区域，请设置 `range` 选项。此参数接受一个描述文档将被校对区域的 [Range](/content-ai/capabilities/ai-toolkit/advanced-guides/concepts#range)。
+
+例如，校对选中的内容：
+
+```ts
+// 创建一个 Range 来指定校对区域
+const range = editor.state.selection
+
+// 只读取选中的文档部分
+const { content } = toolkit.tiptapRead({
+  range,
+})
+
+const operations = callApi(content)
+
+// 在相同范围内应用操作
+toolkit.proofreaderWorkflow({
+  operations,
+  range,
+})
+```
 
 ## 相关指南
 

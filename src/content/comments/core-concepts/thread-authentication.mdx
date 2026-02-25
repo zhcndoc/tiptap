@@ -1,0 +1,87 @@
+---
+title: 线程认证
+meta:
+  title: 线程认证 | Tiptap 评论文档
+  description: 强制执行线程和评论的所有权规则，防止用户编辑或删除彼此的讨论。
+  category: 评论
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+线程认证用于在协作文档中强制执行线程和评论的所有权规则。启用后，用户只能编辑和删除自己的线程和评论，线程创建时会自动分配认证用户的 ID。
+
+<Callout title="需要 JWT 认证" variant="hint">
+  线程认证依赖于[JWT 认证](/collaboration/getting-started/authenticate)来识别用户。请确保您的 JWT 包含带有唯一用户标识符的 `sub` 声明。
+</Callout>
+
+## 启用线程认证
+
+通过 [设置 API](/collaboration/operations/configure) 将 `thread_authenticator` 设置为 `1` 来启用线程认证：
+
+```bash
+curl --location --request PUT 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin/settings/thread_authenticator' \
+--header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA' \
+--header 'Content-Type: text/plain' \
+-d '1'
+```
+
+在自托管实例中，您也可以将环境变量 `COLLAB_THREAD_AUTHENTICATOR` 设置为 `1`。
+
+## 工作原理
+
+启用后，线程认证器会拦截所有修改线程或评论的文档更新，并根据认证用户身份进行验证。
+
+### 自动分配用户 ID
+
+当用户创建线程或评论时，认证器会自动将用户 ID（来自 JWT 的 `sub` 声明）分配给线程和评论。这是透明处理的，不需要任何客户端更改。
+
+### 所有权强制执行
+
+以下规则适用于所有线程和评论操作：
+
+| 操作 | 规则 |
+|-----------|------|
+| **创建线程** | 允许。自动分配已认证用户的 ID。 |
+| **编辑线程** | 仅线程所有者可编辑。 |
+| **删除线程** | 仅线程所有者可删除。 |
+| **解决/取消解决线程** | 所有者始终可解决。非所有者权限取决于访问级别（见下文）。 |
+| **创建评论** | 允许。自动分配已认证用户的 ID。 |
+| **编辑评论** | 仅评论所有者可编辑。 |
+| **删除评论** | 仅评论所有者可删除。 |
+
+若用户尝试未授权操作，服务器将拒绝更新并返回未授权错误。
+
+<Callout title="没有用户 ID 的线程" variant="default">
+  在启用线程认证之前创建的线程和评论可能没有分配用户 ID。这些线程和评论可以被任何人编辑或删除。一旦用户修改了此类线程，他们的用户 ID 将被分配给该线程。
+</Callout>
+
+## 解决非本人线程
+
+默认情况下，所有有写入或评论访问权限的用户均可解决非自己拥有的线程。这对于审核者或编辑者需要将讨论标记为已解决的工作流程很有用。
+
+若要禁止仅有评论权限的用户解决他人线程，请将 `commentonly_disallow_resolve_foreign_threads` 设置为 `1`：
+
+```bash
+curl --location --request PUT 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin/settings/commentonly_disallow_resolve_foreign_threads' \
+--header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA' \
+--header 'Content-Type: text/plain' \
+-d '1'
+```
+
+解决非本人线程的权限矩阵如下：
+
+| 访问级别 | 默认行为 | 设置 `commentonly_disallow_resolve_foreign_threads=1` |
+|---|---|---|
+| 写入访问 | 可以解决 | 可以解决 |
+| 仅评论访问 | 可以解决 | 不允许解决 |
+
+线程所有者无论此设置如何，总能解决自己的线程。
+
+## 配置参考
+
+| 设置 | 环境变量 | 默认值 | 描述 |
+|---|---|---|---|
+| `thread_authenticator` | `COLLAB_THREAD_AUTHENTICATOR` | `0`（禁用） | 设置为 `1` 以启用线程认证。 |
+| `commentonly_disallow_resolve_foreign_threads` | `COLLAB_COMMENTONLY_DISALLOW_RESOLVE_FOREIGN_THREADS` | `0`（允许） | 设置为 `1` 以阻止仅评论用户解决非自有线程。 |
+
+这两个设置可通过 [设置 API](/collaboration/operations/configure) 或环境变量进行配置。

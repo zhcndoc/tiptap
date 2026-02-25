@@ -24,19 +24,18 @@ import { Callout } from '@/components/ui/Callout'
 
 ### 参数 (`StartComparingDocumentsOptions`)
 
-- `otherDoc?` (`Node`): 用于比较的文档。它是一个 [ProseMirror Node 对象](https://prosemirror.net/docs/ref/#model.Node)。如果省略，则默认为当前文档的快照。
-- `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 控制如何将差异渲染为建议
-  - `showAsDiff?` (`boolean`): 是否将替代内容显示为差异小部件。默认：比较流程中为 `true`
-  - `diffPosition?` (`'before' | 'after'`): 差异相对于建议的位置。默认：`'before'`
+- `otherDoc?` (`Node`): 用于比较的文档。它是一个 [ProseMirror Node 对象](https://prosemirror.net/docs/ref/#model.Node)。如果省略，默认为当前文档的快照
+- `displayOptions?` (`DisplayOptions`): 控制如何将差异呈现为建议
+  - `showReplacement?` (`boolean`): 是否将替代内容显示为差异小部件。默认：比较流程中为 `true`
+  - `hideCurrentContent?` (`boolean`): 是否隐藏差异小部件中的当前内容。默认：`false`
+  - `showSubChanges?` (`boolean`): 当显示内联分组时是否显示子变更。默认：`true`
   - `attributes?` (`Record<string, any>`): 添加到渲染元素的属性
-  - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 自定义渲染函数
-- `debounceTimeout?` (`number`): 重新计算差异前等待的毫秒数。较低的值会让应用看起来更响应，但可能会在大型文档中引发性能问题。默认：`500`
-- `diffUtilityConfig?` (`DiffUtilityConfig`): 使用差异工具比较文档的选项
-  - `simplifyChanges?` (`boolean`): 是否简化变更。若为 `true`，例如同一单词内的两个变更将合并成一个。仅在模式为 'detailed'、'smartInline' 或 'smartInlineV2' 时生效。默认：`true`
-  - `ignoreAttributes?` (`string[]`): 忽略的属性。默认：`['id', 'data-thread-id']`
-  - `ignoreMarks?` (`string[]`): 忽略的标记。默认：`['inlineThread']`
-  - `changeMergeDistance?` (`number | null`): 合并变更的最大距离（文档位置）。如果两个相邻变更在 rangeA 或 rangeB 中的距离小于或等于该值，则合并成一个变更。设置为 `null` 或 `undefined` 禁用合并。仅在模式为 'detailed' 时生效。默认：`null`
-  - `mode?` (`'detailed' | 'block' | 'smartInline' | 'smartInlineV2'`): 比较时使用的差异模式。'detailed' 执行字符级差异，精确定位文本内变化（默认）。'block' 执行块级差异，将每个顶级节点视为单元。块模式适合只需知道哪些段落、标题或其他块级元素变更，而无需字符级细节。块模式下忽略 `simplifyChanges` 和 `changeMergeDistance` 选项。'smartInline' 结合了两者：先识别变更块，再在块内执行内联差异。适合部分内容变更的文档，兼具性能和字符级精度。'smartInlineV2' 在 'smartInline' 基础上改进，可以正确显示块元素（如表格）内的变更。默认：`'detailed'`
+  - `replacementAttributes?` (`Record<string, any>`): 替代装饰的额外属性
+  - `subChangeAttributes?` (`Record<string, any>`): 内联子变更高亮的额外属性
+  - `replacementSubChangeAttributes?` (`Record<string, any>`): 替代内容内子变更高亮的额外属性
+  - `renderDecorations?` (`RenderDecorations`): 自定义渲染函数
+- `debounceTimeout?` (`number`): 重新计算差异前等待的毫秒数。较低值会让应用显得更响应，但可能在大型文档中引发性能问题。默认：`500`
+- `diffUtilityOptions?` ([`ExternalDiffUtilityOptions`](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility#parameters-diffutilityoptions)): 使用差异工具比较文档的选项。[可用选项见此](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility#parameters-diffutilityoptions)。
 
 ### 返回
 
