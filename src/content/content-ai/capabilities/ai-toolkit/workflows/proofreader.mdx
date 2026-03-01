@@ -242,8 +242,30 @@ toolkit.proofreaderWorkflow({
 })
 ```
 
+对于大型文档，你可以使用 [`tiptapReadChunks`](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapreadchunks) 方法，将文档拆分成多个块并平行处理。每个块都包含一个 [Range](/content-ai/capabilities/ai-toolkit/advanced-guides/concepts#range) 以指明该块的区域。
+
+## 显示审阅界面
+
+配置 [review options](/content-ai/capabilities/ai-toolkit/api-reference/review-options)，显示校对建议，允许用户接受或拒绝。
+
+```tsx
+toolkit.proofreaderWorkflow({
+  operations,
+  workflowId,
+  // 以预览模式显示建议
+  reviewOptions: { mode: 'preview' },
+  hasFinished: true,
+})
+
+// 接受所有建议
+toolkit.acceptAllSuggestions()
+```
+
+查看 [显示建议](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions) 指南，了解更多关于审阅文档和在编辑器中显示建议的信息。
+
 ## 相关指南
 
 - [`tiptapRead` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapread)
+- [`tiptapReadChunks` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapreadchunks)
 - [`proofreaderWorkflow` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#proofreaderworkflow)
-- [显示建议](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions)：了解如何审阅文档并在编辑器中显示建议。
+- [显示建议](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions)：了解如何审阅文档并在编辑器中显示建议。

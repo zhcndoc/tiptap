@@ -8,129 +8,165 @@ meta:
 
 # @tiptap-pro/ai-toolkit
 
+## 3.0.0-alpha.87
+
+### 小幅更新
+
+- 新增 `invertSuggestions` 方法。该方法执行模拟运行，将所有当前建议应用于文档副本，并返回结果文档及可撤销这些更改的反向建议。反向建议保留原建议的元数据。预览模式的建议在反向结果中转为审核模式，反之亦然。
+
+## 3.0.0-alpha.86
+
+### 小幅更新
+
+- 为 `diffUtility` 和 `ExternalDiffUtilityOptions` 添加 `expandBlockChanges` 选项。当匹配节点的类型在指定列表中，且其所有内联内容均已更改时，个别内联改动会被替换为覆盖整个节点的单一块级改动。默认为 `['listItem']`。仅在模式为 'smart' 时生效。
+
+### 修复更新
+
+- 修复当差异改动跨越无法作为直接 `doc` 内容的节点（例如，没有包裹 `bulletList` 的 `listItem` 节点）时，替换装饰渲染导致崩溃的问题。渲染时会先将内容包裹在所需的父节点中，再应用子改动标记。
+
+## 3.0.0-alpha.85
+
+### 小幅更新
+
+- 为 `templateWorkflow` 和 `fillTemplate` 添加 `preserveSlotAttr` 选项。启用后，填充后节点会保留 `_templateSlot` 属性，以便识别 AI 填充内容及重新填充模板字段。
+- 为 `fillTemplate` 增加相邻槽合并功能。多个连续的具有相同 `_templateSlot` 属性值的节点将被视为单一槽，一起替换为一个 HTML 输出。
+- 为 `createTemplateValuesSchema` 添加 `requiredSlots`、`requiredConditions` 和 `requiredAttributes` 选项。省略时所有字段默认必填，传入空数组可使对应字段类型的所有字段变为可选。
+- 新增 `TemplateField` Tiptap 扩展，注册 `_templateSlot`、`_templateIf` 和 `_templateAttributes` 为编辑器 schema 中所有节点类型的全局属性。该扩展提供命令（`setTemplateSlot`、`unsetTemplateSlot`、`setTemplateIf`、`unsetTemplateIf`、`setTemplateAttributes`、`unsetTemplateAttributes`）用于设置或取消当前选中节点的模板属性。
+
+### 破坏性变更
+
+- **破坏性变更**：`fillTemplate` 方法参数签名由位置参数 `(template, values, schema)` 改为命名选项对象 `(options: FillTemplateOptions)`。
+- **破坏性变更**：`createTemplateValuesSchema` 方法参数签名由 `(template)` 改为 `(options: CreateTemplateValuesSchemaOptions)`。
+
+## 3.0.0-alpha.84
+
+### 修复更新
+
+- 修复启用 `groupInlineChanges` 时，改动可能显示在文档完全不同位置的 Bug。
+
 ## 3.0.0-alpha.83
 
 ### 小幅更新
 
-- 新增 `tiptapReadChunks` 方法
+- 新增 `tiptapReadChunks` 方法。
 
 ## 3.0.0-alpha.82
 
 ### 重大更新
 
-- **破坏性变更**：移除 `getText`、`getHtml`、`getJson`、`getTextSelection`、`getHtmlSelection` 和 `getJsonSelection` 方法。请改用 Tiptap 编辑器 API 或 `getTextRange`、`getHtmlRange`、`getJsonRange` 等方法。
-- **破坏性变更**：简化 `InsertPosition` 类型，由 8 个选项的联合类型改为 `Range | number`。位置参数现在接受数字偏移或 `Range` 对象。默认为整个文档范围。
-- **破坏性变更**：移除 `setHtmlSuggestions` 方法，请改用校对工作流（Proofreader Workflow）。
-- **破坏性变更**：移除 `smartInline` 和 `smartInlineV2` 差异模式，请改用 `smart` 模式。
-- **破坏性变更**：简化 `setSuggestions` 和 `addSuggestions`，直接接受 `Suggestion[]`，不再支持 `SuggestionsFormat[]`。不再支持 `compareDocuments` 格式。请改用新的 `setSuggestionsFromDiff` 方法。
-- **破坏性变更**：简化 `ReplacementOption`，由判别联合类型（`SliceReplacementOption | TextReplacementOption`）改为单一接口，包含 `content` 属性（类型为 `string | Slice`）。移除 `type`、`addSlice` 和 `addText` 属性。
+- **破坏性变更**：移除 `getText`、`getHtml`、`getJson`、`getTextSelection`、`getHtmlSelection` 和 `getJsonSelection` 方法。请改用 Tiptap 编辑器 API 或 `getTextRange`、`getHtmlRange`、`getJsonRange` 等新方法。
+- **破坏性变更**：简化 `InsertPosition` 类型，由原有 8 个选项的联合类型改为 `Range | number`。位置参数现在接受数字偏移或 `Range` 对象，默认值为整个文档范围。
+- **破坏性变更**：移除 `setHtmlSuggestions` 方法，建议改用校对工作流（Proofreader Workflow）。
+- **破坏性变更**：移除 `smartInline` 和 `smartInlineV2` 差异模式，建议改用 `smart` 模式。
+- **破坏性变更**：简化 `setSuggestions` 和 `addSuggestions` 方法，改为直接接受 `Suggestion[]`，不再支持 `SuggestionsFormat[]`。`compareDocuments` 格式亦不再支持。建议改用新的 `setSuggestionsFromDiff` 方法。
+- **破坏性变更**：简化 `ReplacementOption` 类型，由判别联合类型（`SliceReplacementOption | TextReplacementOption`）改为包含 `content` 属性（类型为 `string | Slice`）的单一接口，移除 `type`、`addSlice` 和 `addText` 属性。
 
 ### 小幅更新
 
-- 新增 `setSuggestionsFromDiff` 方法，可比较两个文档并根据差异设置建议，替代之前 `setSuggestions` 中的 `compareDocuments` 格式。
+- 新增 `setSuggestionsFromDiff` 方法，支持比较两个文档并根据差异设置建议，用以替代旧版 `setSuggestions` 中的 `compareDocuments` 格式。
 
 ## 3.0.0-alpha.81
 
-### 修补更新
+### 修复更新
 
-- 修复自定义节点视图嵌套于容器节点例如引用块或列表时无法渲染的问题。
+- 修复自定义节点视图嵌套于容器节点（如引用块或列表）时无法正确渲染的问题。
 
 ## 3.0.0-alpha.80
 
-### 修补更新
+### 修复更新
 
-- 修复替换子更改标记跨节点边界时错误显示的问题。
-- 修正 `simplifyChanges` 误将改动扩展至单词边界之外的问题。现改动相邻非字母字符（如空格、标点）不再被纳入改动范围。计算单词边界时，修订为同时检测原始和修改后文档内容。
+- 修复替换子更改标记跨节点边界时显示错误的问题。
+- 修正 `simplifyChanges` 误将改动范围扩展至单词边界之外的错误。现改动相邻的非字母字符（如空格、标点符号）不会被包含在改动范围内。单词边界计算时同时检测原文和修改后的文档内容。
 
 ## 3.0.0-alpha.79
 
-### 修补更新
+### 修复更新
 
-- 改进编辑后重复文档节点的哈希稳定性。
+- 改进编辑后文档节点哈希的稳定性。
 
 ## 3.0.0-alpha.78
 
-### 修补更新
+### 修复更新
 
-- 降低识别文档节点时的哈希碰撞概率。
+- 降低文档节点哈希计算时的碰撞概率。
 
 ## 3.0.0-alpha.77
 
-### 修补更新
+### 修复更新
 
-- 修复用户修改文档后，AI 无法定位用户修改内容下方任何内容，导致必须重新读取文档的问题。
+- 修复用户修改文档后，AI 无法定位用户修改内容下方内容，导致必须重新读取文档的问题。
 
 ## 3.0.0-alpha.76
 
-### 修补更新
+### 修复更新
 
-- 修复 `offsetChanges` 在映射改动时未保留 `isInlineGroup` 属性，导致内联组信息丢失的问题。
+- 修复 `offsetChanges` 映射改动时未保留 `isInlineGroup` 属性，导致内联组信息丢失的问题。
 
 ## 3.0.0-alpha.75
 
 ### 重大更新
 
-- **破坏性变更**：新增 `smart` 差异模式，设为默认。此模式智能适应块级和内联内容。改动绝不跨块边界，适合结构化文档修改，生成清晰差异。
-- **破坏性变更**：重命名 `detailed` 差异模式为 `inline`。
-- **破坏性变更**：在 `ReviewOptions` 中用布尔类型 `useDiffUtility` 取代 `diffMode` 属性。设置 `useDiffUtility: true` 取代 `diffMode: 'detailed'`，`useDiffUtility: false` 取代 `diffMode: 'full'`。
-- **破坏性变更**：默认 `changeMergeDistance` 设为 `10`。
-- **破坏性变更**：重命名 `displayOptions.showAsDiff` 为 `displayOptions.showReplacement`。
+- **破坏性变更**：新增默认差异模式 `smart`，智能适配块级和内联内容。改动绝不跨越块边界，适用于结构化文档的编辑，生成清晰的差异结果。
+- **破坏性变更**：将 `detailed` 差异模式重命名为 `inline`。
+- **破坏性变更**：在 `ReviewOptions` 中，使用布尔类型 `useDiffUtility` 替代 `diffMode` 属性。`useDiffUtility: true` 替代以前的 `diffMode: 'detailed'`，`useDiffUtility: false` 替代 `diffMode: 'full'`。
+- **破坏性变更**：默认 `changeMergeDistance` 设置为 `10`。
+- **破坏性变更**：将 `displayOptions.showAsDiff` 重命名为 `displayOptions.showReplacement`。
 - **破坏性变更**：移除 `displayOptions.diffPosition`。
-- **破坏性变更**：重命名 `displayOptions.diffAttributes` 为 `displayOptions.replacementAttributes`。
-- **破坏性变更**：重命名类型 `DiffUtilityConfig` 为 `ExternalDiffUtilityOptions`。
-- **破坏性变更**：所有方法和选项中把属性 `diffUtilityConfig` 重命名为 `diffUtilityOptions`。
+- **破坏性变更**：将 `displayOptions.diffAttributes` 重命名为 `displayOptions.replacementAttributes`。
+- **破坏性变更**：类型 `DiffUtilityConfig` 重命名为 `ExternalDiffUtilityOptions`。
+- **破坏性变更**：所有方法与选项中的属性 `diffUtilityConfig` 重命名为 `diffUtilityOptions`。
 
 ### 弃用提示
 
-- 弃用 `smartInline` 和 `smartInlineV2` 差异模式，推荐使用 `smart` 模式。
+- 弃用 `smartInline` 和 `smartInlineV2` 差异模式，推荐使用 `smart` 模式替代。
 
 ### 小幅更新
 
 - 提升内联差异模式的性能。
-- 修正差异工具中新增内容和删除内容均以空格结尾的 Bug。
-- 在 `diffUtility` 和 `diffUtilityOptions` 中新增 `groupInlineChanges`，用于控制内联编辑何时分组为一个建议。
-- 在 `displayOptions` 中新增 `showSubChanges`、`subChangeAttributes` 和 `replacementSubChangeAttributes`，用于自定义分组内联改动的展示。
-- 在 `Suggestion` 类型中新增 `isInlineGroup` 字段，表示分组的内联改动。
-- 在 `proofreaderWorkflow` 中，默认不对内联改动分组。需要时可通过 `reviewOptions.diffUtilityOptions.groupInlineChanges` 覆盖。
+- 修复差异工具在新增和删除内容均以空格结尾时的 Bug。
+- 在 `diffUtility` 和 `diffUtilityOptions` 中增加 `groupInlineChanges`，用于控制内联改动何时合并为单一建议。
+- 在 `displayOptions` 中新增 `showSubChanges`、`subChangeAttributes` 和 `replacementSubChangeAttributes`，支持自定义分组内联改动的展示。
+- 在 `Suggestion` 类型中增加 `isInlineGroup` 字段，表示分组的内联改动。
+- 校对工作流（`proofreaderWorkflow`）中默认不对内联改动分组，可通过 `reviewOptions.diffUtilityOptions.groupInlineChanges` 覆盖。
 
 ## 3.0.0-alpha.74
 
 ### 修复更新
 
-- 修复在协作文档中其他用户删除建议所在内容时，建议未被移除的问题。
+- 修复在协作文档中，其他用户删除建议内容时未自动移除该建议的问题。
 
 ## 3.0.0-alpha.73
 
 ### 小幅更新
 
-- 新增模板工作流：`templateWorkflow` 方法，支持使用 AI 生成内容填充结构化 Tiptap 模板。
-- 新增 `createHtmlTemplate` 工具，将 Tiptap JSON 模板转换成 HTML。
+- 新增模板工作流：`templateWorkflow` 方法，支持使用 AI 生成内容以填充结构化的 Tiptap 模板。
+- 新增 `createHtmlTemplate` 工具，可将 Tiptap JSON 模板转换为 HTML。
 
 ## 3.0.0-alpha.72
 
 ### 修复更新
 
-- 修复 ES2025 迭代器辅助函数（如 `Map.entries().filter()`、`.map()`）在 Safari < 18.4、Firefox < 131 及其他不支持迭代器辅助函数的浏览器中导致 `TypeError` 的兼容性问题。
+- 修复 ES2025 迭代器辅助函数（如 `Map.entries().filter()`、`.map()` 等）在 Safari < 18.4、Firefox < 131 及其他不支持此特性的浏览器中导致 `TypeError` 的兼容性问题。
 
 ## 3.0.0-alpha.71
 
 ### 修复更新
 
-- 修复建议范围内的空段落未被视觉标记的问题。
+- 修复建议范围内空段落未被正确视觉标记的问题。
 
 ## 3.0.0-alpha.70
 
 ### 小幅更新
 
-- 为 `toolDefinitions()` 和 `tiptapEditTool()` 新增 `operationMeta` 选项。启用后，AI 每次编辑操作会包含 `meta` 字段，说明变更原因。
+- 为 `toolDefinitions()` 和 `tiptapEditTool()` 添加 `operationMeta` 选项。启用后，AI 每次编辑操作均包含 `meta` 字段，说明改动原因。
 
 ## 3.0.0-alpha.69
 
 ### 小幅更新
 
-- 改进 `diffUtility` 中 `simplifyChanges` 行为。
-- 启用 `simplifyChanges` 时，单字符词内编辑会扩展至整个单词边界。
-- 支持单字符的插入、删除和替换，使差异更易阅读。
+- 改进 `diffUtility` 中 `simplifyChanges` 的行为。
+- 启用 `simplifyChanges` 时，单字符词内编辑将扩展至整个单词边界。
+- 支持单字符的插入、删除和替换，使差异更可读。
 
 ## 3.0.0-alpha.68
 
@@ -142,8 +178,8 @@ meta:
 
 ### 重大更新
 
-- 使用 Tiptap 位置工具进行位置映射，新版本要求 Tiptap 版本 ≥ 3.12.0。
-- 全新流处理实现，允许 AI 流式期间其他用户编辑文档。影响操作包括：
+- 改用 Tiptap 位置工具进行位置映射，要求 Tiptap 版本 ≥ 3.12.0。
+- 全新流处理实现，允许 AI 流式期间其他用户编辑文档。相关操作包括：
   - `tiptapEdit` 工具
   - `proofreaderWorkflow`
   - `tiptapEditWorkflow`
@@ -152,7 +188,7 @@ meta:
 
 ### 小幅更新
 
-- 新增 `AiCaret` 扩展，AI 流式操作时显示闪烁光标。
+- 新增 `AiCaret` 扩展，在 AI 流式操作时显示闪烁光标。
 - 移除未使用依赖：`@tiptap/y-tiptap` 和 `@tiptap-pro/extension-comments`。
 
 ### 修复更新
@@ -169,7 +205,7 @@ meta:
 
 ### 小幅更新
 
-- 为 `diffUtility` 新增 `smartInlineV2` 差异模式。该模式改进了 `smartInline`，可正确显示块元素（例如表格）中的更改。
+- 为 `diffUtility` 新增 `smartInlineV2` 差异模式。该模式改进了 `smartInline`，可正确展示块元素（比如表格）内的改动。
 
 ## 3.0.0-alpha.64
 
@@ -181,7 +217,7 @@ meta:
 
 ### 小幅更新
 
-- 为 `executeTool`、`streamTool` 和 `tiptapEditWorkflow` 新增 `tiptapEditHooks` 选项，允许在应用 Tiptap 编辑操作前拦截、修改或拒绝操作。`beforeOperation` 钩子接受操作上下文，返回 `BeforeOperationResult`，用于控制操作的应用及其修改。
+- 为 `executeTool`、`streamTool` 和 `tiptapEditWorkflow` 增加 `tiptapEditHooks` 选项，允许在应用 Tiptap 编辑操作前拦截、修改或拒绝操作。`beforeOperation` 钩子接收操作上下文，返回 `BeforeOperationResult`，控制操作是否应用及其修改。
 
 ## 3.0.0-alpha.62
 
@@ -204,47 +240,47 @@ meta:
 
 ### 修复更新
 
-- 修正 `editThreads` 工具及评论工作流中，线程有时创建于错误位置的 Bug。
+- 修正 `editThreads` 工具和评论工作流中线程有时创建于错误位置的 Bug。
 
 ## 3.0.0-alpha.59
 
 ### 小幅更新
 
-- 为 `editThreads` 工具新增操作追踪的流式支持，通过计数在扩展存储追踪，防止流式操作时重复执行。工具调用 ID 变更时，存储重置。
-- 评论工作流新增流式支持。`editThreadsWorkflow` 增加 `isStreaming` 选项，设置为 true 时执行所有操作但不执行最后一个；为 false 或未定义时执行全部（含最后一个）。操作通过计数追踪防止重复，工作流 ID 变更时存储重置。
+- 为 `editThreads` 工具新增操作追踪流式支持，利用计数器在扩展存储追踪防止操作重复执行。工具调用 ID 变更时重置存储。
+- 评论工作流新增流式支持。`editThreadsWorkflow` 增加 `isStreaming` 选项，设为 true 时执行所有操作但跳过最后一个；为 false 或未设置时执行全部操作（含最后一个）。操作计数防止重复执行，工作流 ID 变更时重置存储。
 
 ### 修复更新
 
-- 流式 HTML 内容时不再显示尾随 `<` 字符。
+- 流式 HTML 内容时不再显示尾随的 `<` 字符。
 
 ## 3.0.0-alpha.58
 
 ### 重大更新
 
-- `executeTool` 和 `streamTool` 返回类型中 `output` 属性现返回 JSON 对象，方便日志记录及解析工具输出。
+- `executeTool` 和 `streamTool` 返回类型中的 `output` 属性现返回 JSON 对象，便于日志记录和工具输出解析。
 
 ### 小幅更新
 
-- 为 `diffUtility` 新增 `smartInline` 差异模式。该模式结合块级和内联比较，先识别变更块，再在块内执行字符级差异。适合文档部分内容修改，兼备效率和细节。
+- 为 `diffUtility` 新增 `smartInline` 差异模式。该模式结合块级和内联比较，先识别变更块，然后在块内执行字符级差异。适合文档局部修改，兼顾效率与细节。
 
 ## 3.0.0-alpha.57
 
 ### 重大更新
 
-- **破坏性变更**：重构 Tiptap 编辑实现，提升效率与准确性。移除 `HashAttributeExtension`，增强 schema 处理和哈希生成。
-- **破坏性变更**：`tiptapRead` 方法返回类型中 `nodeRange` 重命名为 `contentRange`，增强清晰度。
-- **破坏性变更**：工作流用户提示中，将 `nodes` 输入参数重命名为 `content`，影响 `tiptapEditWorkflow` 和 `editThreadsWorkflow`。请更新调用代码。
+- **破坏性变更**：重构 Tiptap 编辑实现，提升效率和准确度。移除 `HashAttributeExtension`，增强 schema 处理和哈希生成逻辑。
+- **破坏性变更**：`tiptapRead` 方法返回类型中的 `nodeRange` 重命名为 `contentRange`，增强清晰度。
+- **破坏性变更**：工作流用户提示输入参数由 `nodes` 重命名为 `content`，影响 `tiptapEditWorkflow` 和 `editThreadsWorkflow`，请相应更新调用代码。
 
 ### 小幅更新
 
-- 统一所有 Tiptap 方法中 `selectableNodeTypes` 的处理。
+- 统一所有 Tiptap 方法中 `selectableNodeTypes` 的处理方式。
 - 将 `addHashesToDocument` 工具移动至 `tiptap-read` 目录，优化结构。
 
 ### 修复更新
 
 - 修正评论工具中评论插入位置错误。
 - 简化 `addHashesToDocument` 和 `shortHash` 中的哈希生成流程。
-- 简化 Tiptap 编辑函数中可选节点处理逻辑。
+- 优化 Tiptap 编辑函数中可选节点的处理逻辑。
 
 ## 3.0.0-alpha.56
 
@@ -262,7 +298,7 @@ meta:
 
 ### 修复更新
 
-- 修正接受或拒绝所有建议时偶发的“范围越界”错误。
+- 修正接受或拒绝全部建议时偶发的“范围越界”错误。
 - 修复“比较文档”功能修改结果反馈错误。
 
 ## 3.0.0-alpha.53
@@ -283,21 +319,21 @@ meta:
 
 ### 重大更新
 
-- **破坏性变更**：`editThreads` 工具采用全新更高效格式，新格式更快、更节省令牌，完全避免差异不匹配错误，显著提升准确性。
+- **破坏性变更**：`editThreads` 工具采用全新更高效格式。新格式更快、更节省令牌，完全避免差异不匹配错误，显著提升准确性。
 
 ## 3.0.0-alpha.50
 
 ### 重大更新
 
-- 简化建议 API，合并普通建议和“比较文档”的更改为单一方法集。
-- 移除“比较文档”功能中的 `acceptChange`、`rejectChange` 和 `rejectAllChanges`，改用 `acceptSuggestion`、`rejectSuggestion`、`acceptAllSuggestions` 和 `rejectAllSuggestions`，支持两类场景。
+- 简化建议 API，合并普通建议和“比较文档”更改为统一方法集。
+- 移除“比较文档”功能中的 `acceptChange`、`rejectChange` 和 `rejectAllChanges`，改用 `acceptSuggestion`、`rejectSuggestion`、`acceptAllSuggestions` 和 `rejectAllSuggestions`，支持两种使用场景。
 - 重命名 `applySuggestion` 为 `acceptSuggestion`，`applyAllSuggestions` 为 `acceptAllSuggestions`，增强一致性和清晰度。
 
 ### 小幅更新
 
-- 为 `Suggestion` 接口新增 `reviewMode` 字段，指示建议处于“预览”还是“审核”模式。该字段由 `reviewOptions.mode` 自动设置。
-- 新增 `rejectSuggestion` 和 `rejectAllSuggestions` 方法用于拒绝建议，并返回 AI 针对拒绝更改的反馈。
-- 修改 `acceptSuggestion` 和 `acceptAllSuggestions` 方法，返回包含用户接受或拒绝更改的 `aiFeedback`，其中含删除和插入内容及状态，用于指导 AI 改进建议。
+- 为 `Suggestion` 接口新增 `reviewMode` 字段，用于指示建议处于“预览”还是“审核”模式。该字段由 `reviewOptions.mode` 自动设置。
+- 新增 `rejectSuggestion` 和 `rejectAllSuggestions` 方法，用于拒绝建议，并返回 AI 针对拒绝更改的反馈。
+- 修改 `acceptSuggestion` 和 `acceptAllSuggestions` 方法，返回包含用户接受或拒绝改动的 `aiFeedback`，包含删除和插入内容及状态，用于指导 AI 改进建议。
 
 ## 3.0.0-alpha.49
 
@@ -317,7 +353,7 @@ meta:
 
 ### 小幅更新
 
-- 新增 AI 工具包的 `proofreaderWorkflow` 方法，支持 AI 校对文档工作流。
+- 新增 AI 工具包的 `proofreaderWorkflow` 方法，支持 AI 校对文档的工作流。
 - 新增 AI 工具包的 `tiptapRead` 方法，允许 AI 快速高效读取文档。
 
 ## 3.0.0-alpha.47
@@ -336,13 +372,13 @@ meta:
 
 ### 小幅更新
 
-- 为 `diffUtility` 增加块级差异对比选项。`mode` 参数可设为 `block`，按顶级节点比较文档，适用于仅需了解段落或标题变动且不需要字符级细节的场景。
+- 为 `diffUtility` 增加块级差异对比选项。`mode` 参数可设置为 `block`，按顶级节点比较文档，适用于仅需了解段落或标题变动且不需字符级细节的场景。
 
 ### 修复更新
 
-- 修正 `diffUtility` 中使用 `changeMergeDistance` 时，不同顶级节点相邻改动被错误合并的问题，确保不同块改动分离。
-- 修复 `editThreads` 工具 Bug：未读取文档即创建线程，线程不会被创建。
-- 确保 `startComparingDocuments` 中被比文档与主文档使用同一 schema。
+- 修正 `diffUtility` 使用 `changeMergeDistance` 时，不同顶级节点相邻改动被误合并的问题，确保不同块改动正确分离。
+- 修复 `editThreads` 工具 Bug：未读取文档即创建线程，导致线程未被创建。
+- 确保 `startComparingDocuments` 中被比较文档与主文档使用相同的 schema。
 
 ## 3.0.0-alpha.44
 
@@ -353,7 +389,7 @@ meta:
 
 ### 修复更新
 
-- 修正 `setHtmlSuggestions` 和 `setMarkdownSuggestions` 替换文本时错误修改 HTML 标签的问题。例如替换 "a" 为 "an" 不会将标签 `<a>` 错误替换为 `<an>`，且如果删除文本不含 `<` 或 `>`，替换操作仅影响文本，不修改标签。
+- 修正 `setHtmlSuggestions` 和 `setMarkdownSuggestions` 替换文本时错误修改 HTML 标签的问题。例如替换 "a" 为 "an" 不会误改标签 `<a>` 为 `<an>`，且如果删除的文本不包含 `<` 或 `>`，替换操作仅影响文本内容，不修改标签。
 
 ## 3.0.0-alpha.43
 
@@ -371,12 +407,12 @@ meta:
 
 ### 重大更新
 
-- 使用 `diffUtilityOptions` 替代 `changeMergeDistance`，以提供更丰富的文档比较工具自定义选项。
+- 使用 `diffUtilityOptions` 替代 `changeMergeDistance` 参数，提供更丰富的文档比较工具自定义选项。
 
 ### 小幅更新
 
 - 在 `setSuggestions` 的 `compareDocuments` 格式中新增 `diffUtilityOptions` 选项，允许配置文档比较工具。
-- 在 `Suggestion` 类型的 `displayOptions` 中新增 `diffAttributes` 选项，允许自定义差异装饰的属性。
+- 在 `Suggestion` 类型的 `displayOptions` 中新增 `diffAttributes` 选项，用于自定义差异装饰属性。
 
 ## 3.0.0-alpha.40
 
@@ -400,7 +436,7 @@ meta:
 
 ### 重大更新
 
-- `applyPatch` 工具采用全新格式，显著提升速度与准确性。
+- `applyPatch` 工具采用全新格式，显著提升速度和准确性。
 - 改进所有内置工具的输入输出格式及工具定义。
 - 需升级以下提供者库至指定版本或更高：
   - `@tiptap-pro/ai-toolkit-tool-definitions@3.0.0-alpha.11`
@@ -425,21 +461,21 @@ meta:
 
 - 修复 `insertContent` 工具中 `activeNodeRange` 位置无效问题。
 - 修复 `insertContent` 导致 `activeNodeRange` 总被重置为 0 的问题。
-- 修正 `setHtmlSuggestions` 边界错误及格式丢失。边界使用 `content.size` 替代 `nodeSize - 1`，应用建议时保留 HTML 格式（加粗、斜体、链接等）。
+- 修正 `setHtmlSuggestions` 边界错误及格式丢失。边界使用 `content.size` 替代 `nodeSize - 1`，应用建议时保留 HTML 格式（粗体、斜体、链接等）。
 
 ## 3.0.0-alpha.35
 
 ### 修复更新
 
-- 修复 `streamText` 和 `streamHtml` 方法中不必要将 `ReadableStream` 转换为 `AsyncIterable` 导致性能下降的问题。
+- 修复 `streamText` 和 `streamHtml` 方法中不必要将 `ReadableStream` 转为 `AsyncIterable` 导致性能下降的问题。
 
 ## 3.0.0-alpha.34
 
 ### 小幅更新
 
 - 为 `diffUtility`、`startComparingDocuments`、`setSuggestions`（`compareDocuments` 格式）、`setHtmlSuggestions` 及所有编辑方法的 `reviewOptions` 添加入参 `changeMergeDistance`，支持合并相近改动，限定最大改动间距进行合并。
-- 为 `setHtmlSuggestions` 新增 `reviewOptions` 参数，支持用户定制建议显示选项（如 `diffPosition`、`showAsDiff`、自定义 `renderDecorations`）和自定义元数据，模式与其他编辑方法一致。
-- 修正 `setHtmlSuggestions` 无 `range` 参数时偏移计算错误，确保建议高亮准确，修复位置偏移 -1 的 Bug。
+- 为 `setHtmlSuggestions` 新增 `reviewOptions` 参数，支持用户定制建议显示选项（如 `diffPosition`、`showAsDiff`、自定义 `renderDecorations`）和自定义元数据，使用模式与其他编辑方法保持一致。
+- 修正当 `setHtmlSuggestions` 无 `range` 参数时偏移计算错误，确保建议高亮准确，修复位置偏差为 -1 的 Bug。
 - 修正 `setHtmlSuggestions` 默认 `diffPosition` 为 'after'，支持通过 `reviewOptions.displayOptions.diffPosition` 配置。
 
 ## 3.0.0-alpha.33
@@ -465,8 +501,8 @@ meta:
 ### 修复更新
 
 - 修复节点属性变更未被正确检测的问题。
-- 在实时比较文档时忽略 Unique ID 扩展的改动。
-- 在实时比较文档时忽略 Comments 扩展的改动。
+- 实时比较文档时忽略 Unique ID 扩展的改动。
+- 实时比较文档时忽略 Comments 扩展的改动。
 
 ## 3.0.0-alpha.29
 
@@ -478,14 +514,14 @@ meta:
 
 ### 修复更新
 
-- 修复因错误导入导致打包失败的问题。
+- 修复错误导入导致打包失败的问题。
 
 ## 3.0.0-alpha.27
 
 ### 修复更新
 
 - 修复 `createThread` 操作中线程偶尔创建于错误位置的 Bug。
-- 优化 `createThread` 失败时 AI 接收到的错误信息。
+- 优化 `createThread` 失败时 AI 接收的错误信息。
 
 ## 3.0.0-alpha.26
 
@@ -503,7 +539,7 @@ meta:
 
 ### 修复更新
 
-- 修复 `applyPatch` 流式处理导致最后操作未正确解析回退，防止文本流式内容逐渐消失的问题。
+- 修复 `applyPatch` 流式处理导致最后操作未正确解析回退，防止文本流内容逐渐消失的问题。
 
 ## 3.0.0-alpha.24
 
@@ -523,7 +559,7 @@ meta:
 
 ### 小幅更新
 
-- `insertContent` 工具新增 `activeNodeRange` 位置参数，允许 AI 在活动节点范围内插入内容。禁用 `applyDiff` 工具时可提升编辑准确率。
+- `insertContent` 工具新增 `activeNodeRange` 位置参数，允许 AI 在活动节点范围内插入内容。禁用 `applyDiff` 工具可提升编辑准确率。
 - 需升级以下提供者库至指定版本或更高：
   - `@tiptap-pro/ai-toolkit-tool-definitions@3.0.0-alpha.7`
   - `@tiptap-pro/ai-toolkit-ai-sdk@3.0.0-alpha.10`
@@ -549,19 +585,19 @@ meta:
 ### 重大更新
 
 - 将 `getSchemaAwareness` 改名为 `getHtmlSchemaAwareness`。
-- 优化 schema 识别提示语，使 AI 模型更加准确。
+- 优化 schema 识别提示，令 AI 模型判断更准确。
 
 ## 3.0.0-alpha.19
 
 ### 小幅更新
 
-- 实验性实现 AI 工具包与 Pages 扩展集成，新增 `readPage` 工具。
+- 实验性支持 AI 工具包与 Pages 扩展集成，新增 `readPage` 工具。
 
 ## 3.0.0-alpha.18
 
 ### 修复更新
 
-- 使 `streamHtml` 和 `streamText` 方法返回在流结束时 resolve 的 Promise。
+- 修复 `streamHtml` 和 `streamText` 方法返回的 Promise 仅在流结束时 resolve 的问题。
 
 ## 3.0.0-alpha.17
 
@@ -571,20 +607,20 @@ meta:
 
 ### 修复更新
 
-- 修复 `streamHtml` 和 `streamText` 方法不支持 `ReadableStream` 参数的问题。
+- 修复 `streamHtml` 和 `streamText` 不支持 `ReadableStream` 参数的问题。
 
 ## 3.0.0-alpha.16
 
 ### 重大更新
 
-- 在审核选项中将 `detailedDiff` 重命名为 `diffMode`，用于控制原文与修改内容差异的显示方式。
+- 审核选项中将 `detailedDiff` 重命名为 `diffMode`，用于控制显示原文与修改内容差异的方式。
 
 ## 3.0.0-alpha.15
 
 ### 重大更新
 
 - 审核选项新增 `detailedDiff`，控制是否以详细差异形式展示更改。原 `showDiff` 选项改名为 `detailedDiff`，语义更清晰。
-- 工具执行和流处理选项中新增 `detailedDiff`，默认值为 `true`，使更改默认以详细差异形式显示。
+- 工具执行和流处理选项中新增 `detailedDiff`，默认值为 `true`，使更改默认以详细差异形式展示。
 
 ## 3.0.0-alpha.14
 
@@ -595,41 +631,41 @@ meta:
   - `@tiptap-pro/ai-toolkit-ai-sdk@3.0.0-alpha.7`
   - `@tiptap-pro/ai-toolkit-langchain@3.0.0-alpha.3`
   - `@tiptap-pro/ai-toolkit-openai@3.0.0-alpha.2`
-- 移除 `executeTool` 的 `currentChunk` 参数及返回字段。
-- 新增 `getActiveNodeRange` 方法，获取活动节点范围，用以替代旧的 `currentChunk`，提升编辑准确性。
+- 移除 `executeTool` 中的 `currentChunk` 参数及返回字段。
+- 新增 `getActiveNodeRange` 方法，获取活动节点范围，替代旧的 `currentChunk`，提升编辑准确性。
 - 新增 `setActiveNodeRange` 方法，设置活动节点范围。
 - 移除 `readFirstChunk`、`readNextChunk`、`readPreviousChunk` 工具。
-- 新增 `readNodeRange` 工具，允许 AI 读取任意顶级节点范围，灵活度更高。
+- 新增 `readNodeRange` 工具，允许 AI 读取任意顶级节点范围，提高灵活性。
 
 ### 小幅更新
 
-- 新增 `streamTool` 方法，支持向编辑器流式输入工具调用的结果。
+- 新增 `streamTool` 方法，支持向编辑器流式输入工具调用结果。
 
 ## 3.0.0-alpha.13
 
 ### 小幅更新
 
-- 审核选项新增 `metadata`，允许附加自定义元数据和属性。
+- 审核选项新增 `metadata` 字段，允许添加自定义元数据和属性。
 - 新增 `streamText` 和 `streamHtml` 方法，支持向编辑器流式输入文本和 HTML。
 
 ### 修复更新
 
 - 修复 `insertJson` 不支持 ProseMirror Fragment Tiptap JSON 的问题。
-- 修复建议差异视图显示多余元素（如多余段落）的错误。
+- 修复建议差异视图中显示多余元素（如多余段落）的错误。
 
 ## 3.0.0-alpha.12
 
 ### 修复更新
 
 - 当编辑器未安装 AiToolkit 扩展时，调用 `getAiToolkit` 会显示警告。
-- 修复 `getJsonChunks` 未正确返回 JSON 块格式。
+- 修复 `getJsonChunks` 未正确返回 JSON 块格式的问题。
 - 改进 `readFirstChunk` 的响应格式。
 
 ## 3.0.0-alpha.11
 
 ### 修复更新
 
-- 修复 `diffUtility` 错误地将两个完全相同的空文档判断为不同的问题。
+- 修复 `diffUtility` 错误地将两个完全相同的空文档判定为不同的问题。
 
 ## 3.0.0-alpha.10
 
@@ -683,14 +719,14 @@ meta:
 ### 小幅更新
 
 - 在 `executeTool` 返回类型中新增 `needsReview` 字段，表明调用是否需要用户审核。
-- 新增一次性应用所有建议的 `applyAllSuggestions` 方法。
-- 优化工具调用失败时的错误提示。
+- 新增一次应用所有建议的 `applyAllSuggestions` 方法。
+- 优化工具调用失败时错误提示。
 
 ## 3.1.0-alpha.2
 
 ### 修复更新
 
-- 修复 `executeTool` 参数中 `input` 类型，使之兼容 Vercel AI SDK。
+- 修复 `executeTool` 参数中 `input` 类型，使其兼容 Vercel AI SDK。
 
 ## 3.1.0-alpha.1
 

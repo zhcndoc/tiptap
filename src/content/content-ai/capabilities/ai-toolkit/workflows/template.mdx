@@ -15,7 +15,12 @@ import { Callout } from '@/components/ui/Callout'
 
 使用 AI 生成的内容填充结构化的 Tiptap 模板，并将结果插入编辑器中。
 
-<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/template-workflow" />
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/template-workflow"
+/>
 
 查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
@@ -106,7 +111,9 @@ npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
 
 ## 服务端设置
 
-创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型。如果你的后端不是 TypeScript，请参阅[非 TypeScript 后端](/content-ai/capabilities/ai-toolkit/advanced-guides/non-typescript-backends)。
+创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型。
+
+如果你的后端不是 TypeScript，请参阅[非 TypeScript 后端](/content-ai/capabilities/ai-toolkit/advanced-guides/non-typescript-backends)。
 
 在 API 端点内部，使用 `createTemplateWorkflow` 将 HTML 模板转换为工作流配置。该函数会自动提取 HTML 中所有模板键，生成系统提示，并创建输出模式。
 
@@ -126,7 +133,10 @@ export async function POST(req: Request) {
   const result = streamText({
     model: openai('gpt-5-mini'),
     system: workflow.systemPrompt,
-    prompt: JSON.stringify({ task, context: "Additional background information related to the task" }),
+    prompt: JSON.stringify({
+      task,
+      context: 'Additional background information related to the task',
+    }),
     output: Output.object({ schema: workflow.zodOutputSchema }),
   })
 
@@ -231,9 +241,166 @@ export default function Page() {
 
 通过额外的 CSS 样式，效果是一个精致的模板工作流应用：
 
-<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/template-workflow" />
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/template-workflow"
+/>
 
 查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 在文档部分插入模板
+
+若要将模板结果插入到特定区域，而不是替换整个文档，请设置 `position` 选项。它可以是位置或一个 [Range](/content-ai/capabilities/ai-toolkit/advanced-guides/concepts#range)。
+
+```ts
+// 在特定范围插入模板结果
+toolkit.templateWorkflow({
+  template,
+  values: object,
+  position: { from: 10, to: 50 },
+  hasFinished: !isLoading,
+  workflowId,
+})
+```
+
+## 构建模板编辑器
+
+你可以构建一个系统，让用户在富文本编辑器中创建和编辑模板，并定义 AI 应填充的部分。使用 `_templateSlot` 属性来标记节点为模板字段。
+
+首先，在编辑器中注册 `TemplateField` 扩展。该扩展会将三个模板属性（`_templateSlot`、`_templateIf`、`_templateAttributes`）作为全局属性添加至编辑器模式的所有节点类型：
+
+```tsx
+import { TemplateField } from '@tiptap-pro/ai-toolkit'
+
+const editor = new Editor({
+  extensions: [StarterKit, TemplateField],
+})
+```
+
+<Callout title="TemplateField 与 AiToolkit" variant="hint">
+  你可以将 `TemplateField` 与 `AiToolkit` 扩展一起使用，或者单独使用它，若你只需要模板字段支持而不需要完整的 AI 工具包功能。
+</Callout>
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://deploy-preview-405--tiptap-pro.netlify.app/src/Extensions/AiToolkitTemplateEditor/"
+/>
+
+`TemplateField` 扩展提供命令，用于在当前选择的节点上设置和取消模板属性：
+
+```tsx
+// 将选中节点标记为模板插槽
+editor.commands.setTemplateSlot('intro')
+
+// 移除模板插槽
+editor.commands.unsetTemplateSlot()
+
+// 将选中节点标记为条件包含
+editor.commands.setTemplateIf('showDisclaimer')
+
+// 移除条件
+editor.commands.unsetTemplateIf()
+
+// 将模板键映射到节点属性
+editor.commands.setTemplateAttributes([{ key: 'sectionLevel', attribute: 'level' }])
+
+// 移除属性映射
+editor.commands.unsetTemplateAttributes()
+```
+
+使用 `[_templateslot]` CSS 属性选择器为模板插槽设置样式。`TemplateField` 扩展会以小写形式输出模板属性到 DOM：
+
+```css
+[_templateslot] {
+  border: 2px dashed #6a00f5;
+  border-radius: 4px;
+  padding: 4px 8px;
+  background-color: rgba(106, 0, 245, 0.05);
+  position: relative;
+}
+
+[_templateslot]::after {
+  content: attr(_templateslot);
+  position: absolute;
+  top: -10px;
+  right: 4px;
+  font-size: 10px;
+  background: #6a00f5;
+  color: white;
+  padding: 0 4px;
+  border-radius: 2px;
+}
+```
+
+## 填充后保留模板字段
+
+默认情况下，`templateWorkflow` 方法填充模板后会移除所有 `_templateSlot` 属性。设置 `preserveSlotAttr` 为 `true`，可在填充节点上保留这些属性：
+
+```tsx
+toolkit.templateWorkflow({
+  template,
+  values: object,
+  position: 'document',
+  hasFinished: !isLoading,
+  workflowId,
+  preserveSlotAttr: true,
+})
+```
+
+当启用 `preserveSlotAttr` 时，每个填充节点都会保留其 `_templateSlot` 属性。这允许你：
+
+- **识别 AI 填充的内容**：检查文档中哪些部分由 AI 生成。
+- **重新填充模板字段**：以填充后的文档作为新模板，重新生成特定部分。
+
+## 重新填充模板字段
+
+当 `preserveSlotAttr` 为 `true` 时，填充后的文档仍包含 `_templateSlot` 属性。你可以提取文档 JSON，并传回 `templateWorkflow` 来重新填充特定字段：
+
+```tsx
+// 将当前文档提取为模板
+const currentDoc = editor.getJSON()
+
+// 使用新值重新填充
+const toolkit = getAiToolkit(editor)
+toolkit.templateWorkflow({
+  template: currentDoc,
+  values: newValues,
+  position: 'document',
+  preserveSlotAttr: true,
+})
+```
+
+这支持迭代式编辑流程，用户可请求 AI 重新生成文档的单个部分，而不会影响其他内容。
+
+## 控制模板字段哪些为必填
+
+默认情况下，所有模板字段都是必填的——AI 必须填写每个字段。要将特定字段设为可选，请在服务器端使用 `requiredSlots`、`requiredConditions` 和 `requiredAttributes`。仅列表中的字段是必填，未列出的字段则为可选：
+
+```ts
+// 服务器端：仅 "intro" 是必填，其他插槽为可选
+const workflow = createTemplateWorkflow({
+  htmlTemplate,
+  requiredSlots: ['intro'],
+})
+```
+
+AI 会始终填充必填插槽，也可能根据任务上下文选择填充其他插槽。
+
+要将某类字段全部设为可选，请传入空数组：
+
+```ts
+// 所有插槽可选，但特定条件和属性为必填
+const workflow = createTemplateWorkflow({
+  htmlTemplate,
+  requiredSlots: [],
+  requiredConditions: ['includeDisclaimer'],
+  requiredAttributes: ['headingLevel'],
+})
+```
 
 ## 相关指南
 

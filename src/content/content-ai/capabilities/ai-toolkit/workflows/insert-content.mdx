@@ -51,7 +51,9 @@ npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
 
 ## 服务器设置
 
-创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型。如果您的后端不是 TypeScript，参见[非 TypeScript 后端](/content-ai/capabilities/ai-toolkit/advanced-guides/non-typescript-backends)。
+创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型。
+
+如果您的后端不是 TypeScript，参见[非 TypeScript 后端](/content-ai/capabilities/ai-toolkit/advanced-guides/non-typescript-backends)。
 
 在该 API 端点内，使用 `createInsertContentWorkflow` 函数创建并配置插入内容工作流程。该流程包含一个可直接使用的系统提示，用于指导 AI 模型如何生成内容。
 
@@ -211,10 +213,26 @@ const editor = useEditor({
 
 请参阅 [AI 光标指南](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret) 了解配置选项和 CSS 样式。
 
+## 显示审核界面
+
+为了让用户审核插入的内容，请配置[审核选项](/content-ai/capabilities/ai-toolkit/api-reference/review-options)。更改将作为建议显示，用户可以接受或拒绝。
+
+```tsx
+await toolkit.streamHtml(readableStream, {
+  position: selectionPosition,
+  reviewOptions: { mode: 'review' },
+})
+
+// 接受所有建议
+toolkit.acceptAllSuggestions()
+```
+
+参见[显示建议](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions)指南，了解有关建议的更多内容。
+
 ## 下一步
 
 - [`createInsertContentWorkflow` 函数的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#createinsertcontentworkflow)
-- [`getHtmlSelection` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#gethtmlselection)
+- [`getHtmlRange` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#gethtmlrange)
 - [`streamHtml` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/edit-the-document#streamhtml)
-- [显示建议](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions)：了解如何审查文档并在编辑器中显示建议。
+- [显示建议](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions)：了解如何审查文档并在编辑器中显示建议。
 - [AI 光标](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret)：显示 AI 正在插入内容的位置光标。

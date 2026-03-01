@@ -372,6 +372,9 @@ if (result.success) {
 
 - `options` (`CreateTemplateWorkflowOptions`): 配置选项
   - `htmlTemplate` (`string`): 由客户端 `createHtmlTemplate` 方法生成的 HTML 模板字符串
+  - `requiredSlots?` (`string[]`): AI 必须填写的 Slot 名称列表。未列出的 Slot 为可选。未传入时所有 Slot 皆为必填，传入空数组时所有 Slot 皆为可选。
+  - `requiredConditions?` (`string[]`): AI 必须计算的条件名称列表。未列出的条件为可选。未传入时所有条件皆为必填，传入空数组时所有条件皆为可选。
+  - `requiredAttributes?` (`string[]`): AI 必须设置的属性键名称列表。未列出的属性为可选。未传入时所有属性皆为必填，传入空数组时所有属性皆为可选。
 
 ### 返回值
 
@@ -412,6 +415,7 @@ return result.toTextStreamResponse()
   - `position?` (`Range | number`): 插入填充模板的位置。默认：整个文档区间。
   - `hasFinished?` (`boolean`): 是否已完成流式传输。省略时方法以非流式模式运行。默认：`true`
   - `workflowId?` (`unknown`): 此工作流运行的唯一 ID。提供时启用流式模式，方法将在多次调用中跟踪插入区间并逐步替换内容。
+  - `preserveSlotAttr?` (`boolean`): 是否保留节点上的 `_templateSlot` 属性。保留后，可识别 AI 填充的内容，便于后续重新填充模板字段。默认：`false`
   - `reviewOptions?` (`ReviewOptions`): 控制预览/审核行为
 
 ### 示例
@@ -462,4 +466,39 @@ useEffect(() => {
 ```ts
 const toolkit = getAiToolkit(editor)
 const htmlTemplate = toolkit.createHtmlTemplate(templateJson)
+```
+
+## `TemplateField`
+
+一个 Tiptap 扩展，给编辑器 schema 中的所有节点类型添加模板字段属性。注册此扩展后，编辑器 DOM（渲染、解析和 CSS 样式）中即可支持模板字段的使用。
+
+该扩展添加三个全局属性：
+
+- `_templateSlot`（`string | null`）：标记节点为内容占位符。填充模板时，该节点将被 AI 生成的 HTML 替换。
+- `_templateIf`（`string | null`）：标记节点为条件包含。当值为 `false` 时，该节点将从输出中移除。
+- `_templateAttributes`（`TemplateAttributeEntry[] | null`）：映射模板键到具体节点属性。
+
+### 命令
+
+- `setTemplateSlot(name: string)`：在当前选中节点上设置 `_templateSlot` 属性。
+- `unsetTemplateSlot()`：移除当前选中节点的 `_templateSlot` 属性。
+- `setTemplateIf(name: string)`：在当前选中节点上设置 `_templateIf` 属性。
+- `unsetTemplateIf()`：移除当前选中节点的 `_templateIf` 属性。
+- `setTemplateAttributes(entries: TemplateAttributeEntry[])`：在当前选中节点上设置 `_templateAttributes` 属性。
+- `unsetTemplateAttributes()`：移除当前选中节点的 `_templateAttributes` 属性。
+
+### 示例
+
+```ts
+import { TemplateField } from '@tiptap-pro/ai-toolkit'
+
+const editor = new Editor({
+  extensions: [StarterKit, TemplateField],
+})
+
+// 将当前选中节点标记为模板插槽
+editor.commands.setTemplateSlot('intro')
+
+// 移除模板插槽
+editor.commands.unsetTemplateSlot()
 ```

@@ -494,3 +494,35 @@ toolkit.setMarkdownSuggestions({
   range: { from: 0, to: 500 },
 })
 ```
+
+## `invertSuggestions`
+
+将所有当前的建议应用于文档的副本，并返回应用建议后的文档及可以撤销这些变化的反向建议。这是一个演练操作 — 不会修改编辑器中的文档。
+
+对于每个原始建议，首先将其替换应用于新文档，然后创建一个反向建议。接受反向建议可撤销该建议的更改。预览模式的建议在反向结果中变为审核模式，反之亦然。每个反向建议保留原建议的 id、元数据和显示选项。
+
+### 参数
+
+- `options?` (`InvertSuggestionsOptions`): 可选配置
+  - `schema?` (`Schema`): 目标 ProseMirror schema。若提供，返回文档及所有替换片段都会被转换为该 schema。当反转结果用于与当前编辑器 schema 不同的编辑器时非常有用。
+
+### 返回值
+
+`InvertSuggestionsResult`
+
+返回一个对象，包含：
+
+- `doc` (`Node`): 应用所有建议后的文档。该文档不会应用于编辑器。
+- `suggestions` (`Suggestion[]`): 反向建议，可在返回文档上撤销已应用的更改。
+
+### 示例
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 获取反转结果但不修改编辑器
+const { doc, suggestions } = toolkit.invertSuggestions()
+
+// 将结果转换为其他编辑器的 schema
+const { doc, suggestions } = toolkit.invertSuggestions({ schema: otherEditor.schema })
+```

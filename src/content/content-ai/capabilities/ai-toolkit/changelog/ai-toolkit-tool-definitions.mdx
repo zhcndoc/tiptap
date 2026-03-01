@@ -8,23 +8,29 @@ meta:
 
 # @tiptap-pro/ai-toolkit-tool-definitions
 
+## 3.0.0-alpha.35
+
+### 小改动
+
+- 为 `createTemplateWorkflow` 添加了 `requiredSlots`、`requiredConditions` 和 `requiredAttributes` 选项。若省略，则所有字段均为必填（默认）。传入空数组则使该类型的所有字段变为可选。
+
 ## 3.0.0-alpha.34
 
 ### 小改动
 
-- 添加了 CLI 工具。现在该包可通过命令行工具使用，方式为 `npx @tiptap-pro/ai-toolkit-tool-definitions`。可用命令有：`tool-definitions`、`tiptap-edit-workflow`、`proofreader-workflow`、`template-workflow`、`edit-threads-workflow` 和 `insert-content-workflow`。每个命令都会将 JSON 输出到标准输出。
+- 添加了 CLI 工具。现在该包可通过命令行工具使用，命令为 `npx @tiptap-pro/ai-toolkit-tool-definitions`。可用命令包括：`tool-definitions`、`tiptap-edit-workflow`、`proofreader-workflow`、`template-workflow`、`edit-threads-workflow` 和 `insert-content-workflow`。每个命令都会将 JSON 输出到标准输出。
 
 ## 3.0.0-alpha.33
 
 ### 小改动
 
-- 为 `createProofreaderWorkflow`、`createTemplateWorkflow` 和 `createTiptapEditWorkflow` 工作流的用户提示添加了可选的 `context` 字段。该字段允许开发者提供与任务相关的额外背景信息。
+- 为 `createProofreaderWorkflow`、`createTemplateWorkflow` 和 `createTiptapEditWorkflow` 工作流的用户提示添加了可选的 `context` 字段。该字段允许开发者提供与任务相关的额外上下文信息。
 
 ## 3.0.0-alpha.32
 
 ### 补丁改动
 
-- 明确了模板工作流的提示，指出槽位内容会替换整个槽位元素。
+- 明确了模板工作流的提示，指出槽位内容将替换整个槽位元素。
 
 ## 3.0.0-alpha.31
 
@@ -36,14 +42,14 @@ meta:
 
 ### 小改动
 
-- 向 `toolDefinitions()` 和 `tiptapEditTool()` 添加了 `operationMeta` 选项。开启后，AI 会在每个编辑操作中包含一个带有变更原因说明的 `meta` 字段。
+- 向 `toolDefinitions()` 和 `tiptapEditTool()` 添加了 `operationMeta` 选项。启用后，AI 会在每次编辑操作中包含一个带有变更原因说明的 `meta` 字段。
 
 ## 3.0.0-alpha.29
 
 ### 重大改动
 
 - 改进了 `editThreads` 工具定义，避免 AI 有时无法创建线程的错误。
-- 优化了 Comments 工作流的提示，避免 AI 有时无法创建线程的错误。
+- 优化了 Comments 工作流的提示，减少 AI 无法创建线程的错误。
 
 ## 3.0.0-alpha.28
 
@@ -55,7 +61,7 @@ meta:
 
 ### 重大改动
 
-- **重大破坏性变更**：在工作流用户提示中，输入属性 `nodes` 重命名为 `content`。此更改影响 `createTiptapEditWorkflow` 和 `createEditThreadsWorkflow`。请更新工作流调用，使用 `content` 替代 `nodes`。
+- **重大破坏性变更**：在工作流的用户提示中，输入属性 `nodes` 重命名为 `content`。此更改影响 `createTiptapEditWorkflow` 和 `createEditThreadsWorkflow`。请更新工作流调用，使用 `content` 替代 `nodes`。
 
 ### 补丁改动
 
@@ -66,7 +72,7 @@ meta:
 
 ### 补丁改动
 
-- 明确了 `getThreads` 的分页范围，工具输出中使用排他性的上界。
+- 明确了 `getThreads` 分页范围，工具输出中使用排他性上界。
 
 ## 3.0.0-alpha.25
 
@@ -127,7 +133,7 @@ meta:
 
 ### 小改动
 
-- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，提高编辑速度和效率。此类工具为实验性，需用户自行选择使用。
+- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，提高编辑速度和效率。此类工具为实验性，需要用户自行选择是否使用。
 
 ## 3.0.0-alpha.15
 
@@ -145,7 +151,7 @@ meta:
 
 ### 补丁改动
 
-- 修复了文档更新后 AI 读取到错误内容的缺陷。
+- 修复了文档更新后 AI 读取错误内容的缺陷。
 
 ## 3.0.0-alpha.12
 

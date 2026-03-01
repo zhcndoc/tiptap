@@ -234,10 +234,6 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions',
                 },
                 {
-                  title: '文档对比',
-                  href: '/content-ai/capabilities/ai-toolkit/api-reference/compare-documents',
-                },
-                {
                   title: '差异对比工具',
                   href: '/content-ai/capabilities/ai-toolkit/api-reference/diff-utility',
                 },

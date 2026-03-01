@@ -205,8 +205,51 @@ const editor = useEditor({
 
 有关配置选项和 CSS 样式，请参阅 [AI 光标指南](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret)。
 
+## 编辑文档的部分内容
+
+要仅编辑文档的子区域，请设置 `range` 选项。该参数接收一个带有待编辑区域的 [Range](/content-ai/capabilities/ai-toolkit/advanced-guides/concepts#range)。
+
+例如，要仅编辑选中的内容：
+
+```ts
+const range = editor.state.selection
+
+// 仅读取文档中选中的部分
+const { content } = toolkit.tiptapRead({ range })
+
+const operations = callApi(content)
+
+// 在相同范围内应用操作
+toolkit.tiptapEditWorkflow({
+  operations,
+})
+```
+
+对于大型文档，你可以使用 [`tiptapReadChunks`](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapreadchunks) 方法，将文档拆分为多个块并进行并行处理。每个块都包含其区域范围的 [Range](/content-ai/capabilities/ai-toolkit/advanced-guides/concepts#range)。
+
+## 显示复审界面
+
+要让用户复审修改内容，可以配置 [复审选项](/content-ai/capabilities/ai-toolkit/api-reference/review-options)。修改将以建议的形式显示，用户可以接受或拒绝。
+
+```tsx
+toolkit.tiptapEditWorkflow({
+  operations,
+  workflowId,
+  // 以预览模式应用操作
+  reviewOptions: { mode: 'preview' },
+  hasFinished: true,
+})
+
+// 接受所有建议
+toolkit.acceptAllSuggestions()
+```
+
+请参阅 [建议](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions) 指南，了解更多关于建议的内容。
+
 ## 相关指南
 
 - [`tiptapRead` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapread)
+- [`tiptapReadChunks` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapreadchunks)
 - [`tiptapEditWorkflow` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#tiptapeditworkflow)
-- [AI 光标](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret)：显示 AI 插入内容的位置光标。
+- [建议](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions)：了解文档复审和在编辑器中显示建议的相关知识。
+- [AI 光标](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret)：显示 AI 插入内容位置的光标。

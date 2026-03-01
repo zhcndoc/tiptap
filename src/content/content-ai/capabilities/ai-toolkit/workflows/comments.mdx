@@ -233,6 +233,27 @@ export default function Page() {
 
 查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
+## 文档部分评论
+
+要只对文档的某一子部分添加评论，可以在 `tiptapRead` 上设置 `range` 选项。该参数接收一个带有指定区域的 [Range](/content-ai/capabilities/ai-toolkit/advanced-guides/concepts#range)。
+
+例如，只对选中的内容评论：
+
+```ts
+const range = editor.state.selection
+
+// 只读取文档中选中的部分
+const { content } = toolkit.tiptapRead({ range })
+const { threads } = toolkit.getThreads()
+
+const operations = callApi(content, threads)
+
+// 应用评论操作
+toolkit.editThreadsWorkflow({ operations, workflowId })
+```
+
+对于大型文档，可以使用 [`tiptapReadChunks`](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapreadchunks) 方法将文档拆分为多个块并行处理。每个块都包含一个带有该块区域的 [Range](/content-ai/capabilities/ai-toolkit/advanced-guides/concepts#range)。
+
 ## 相关指南
 
 - [`tiptapRead` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapread)

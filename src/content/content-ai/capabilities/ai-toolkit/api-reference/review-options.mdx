@@ -27,15 +27,7 @@ const result = toolkit.executeTool({
   - `'disabled'`：不显示审阅界面。
   - `'review'`：先应用更改，然后显示审阅界面，允许用户撤销更改。
   - `'preview'`：在应用更改之前显示预览界面，允许用户接受或拒绝更改。
-- `displayOptions?`（`DisplayOptions`）：自定义建议的显示方式
-  - `showReplacement?`（`boolean`）：是否以差异形式显示替换内容。默认值：`true`
-  - `hideCurrentContent?`（`boolean`）：在差异控件中隐藏当前内容。默认值：`false`
-  - `showSubChanges?`（`boolean`）：当显示内联组时，是否显示子更改。默认值：`true`
-  - `attributes?`（`Record<string, any>`）：添加到建议的额外 HTML 属性
-  - `replacementAttributes?`（`Record<string, any>`）：替换装饰的额外 HTML 属性
-  - `subChangeAttributes?`（`Record<string, any>`）：内联子更改高亮的额外 HTML 属性
-  - `replacementSubChangeAttributes?`（`Record<string, any>`）：替换内容内子更改高亮的额外 HTML 属性
-  - `renderDecorations?`（`RenderDecorations`）：用于将建议渲染为 ProseMirror 装饰的函数
+- `displayOptions?`（`DisplayOptions`）：自定义建议的显示方式，设置 [`Suggestion`](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#the-suggestion-object) 类型的 `displayOptions` 属性。[查看可用选项](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#the-suggestion-object)。
 - `metadata?`（`Record<string, any>`）：为建议添加的额外元数据，可用于存储附加信息（例如其来源或类别）。该属性不由扩展内部使用，但可帮助开发者自定义建议在 UI 中的显示方式。
 - `useDiffUtility?`（`boolean`）：是否使用[差异工具](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility)比较更改前后的文档，并以丰富的差异形式显示删除和添加的内容。若为 `false`，则删除内容和添加内容作为整块内容显示，视为单个更改。默认值：`true`
 - `diffUtilityOptions?`（[`ExternalDiffUtilityOptions`](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility#parameters-diffutilityoptions)）：用于差异工具比较文档的选项。[查看可用选项](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility#parameters-diffutilityoptions)。
