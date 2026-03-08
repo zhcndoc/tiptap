@@ -1,0 +1,223 @@
+---
+title: 使用 Tiptap 转换 ODT（旧版）
+tags:
+  - type: deprecated
+meta:
+    title: 旧版 ODT 编辑器扩展 | Tiptap 转换
+    description: 学习如何在 Tiptap 编辑器中使用旧版导入/导出扩展处理 ODT 文件（OpenDocument 文字）。
+    category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+
+<Callout title="旧版 ODT 编辑器扩展 — 已弃用" variant="warning">
+    这些编辑器扩展已弃用，预计将在 2026 年某个时间点停用，届时团队将提前通知。新集成请使用更新的 [ODT 导出扩展](/conversion/export/odt/editor-export) 和 [导入扩展](/conversion/import/docx/editor-import)。
+</Callout>
+
+OpenDocument 文字 `.odt` 是 LibreOffice 和 OpenOffice 中广泛使用的格式。Tiptap 的转换工具提供了三种处理 ODT 文件的方法：
+
+- **编辑器导入** – 将 `.odt` 文件直接转换为 Tiptap JSON，便于在编辑器中编辑。
+- **编辑器导出** – 将当前 Tiptap 编辑器内容转换为 `.odt` 文件。
+- **REST API** – 在服务器端或外部服务集成 ODT 转换，使用 [ODT 转换 REST API](/conversion/legacy/odt/rest-api)。
+
+- **编辑器导入** – 将 `.odt` 文件直接转换为 Tiptap JSON，以便在编辑器中编辑。
+- **编辑器导出** – 将当前 Tiptap 编辑器内容转换为 `.odt` 文件。
+- **REST API** – 在服务器端或从外部服务集成 ODT 转换，使用 [ODT 转换 REST API](/conversion/import-export/odt/rest-api)。
+
+<Requirements>
+    <RequirementItem label="1. 启用试用或订阅">
+        在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装这些前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行身份验证，以访问 Tiptap 的私有 npm 注册表。
+    </RequirementItem>
+</Requirements>
+
+## 编辑器 ODT 导入
+这些转换扩展已发布于 Tiptap 的私有 npm 注册表。请按照 [私有注册表指南](/guides/pro-extensions) 集成这些扩展。
+
+要将 `.odt` 文档导入编辑器，请安装导入扩展
+
+```bash
+npm i @tiptap-pro/extension-import
+```
+
+在编辑器设置中添加并配置扩展
+
+### 配置扩展
+
+```js
+// 启用导入扩展
+import { Import } from '@tiptap-pro/extension-import'
+
+const editor = new Editor({
+  // ...
+  extensions: [
+    // ...
+    Import.configure({
+      // 从转换设置页面获取的转换 App-ID: https://cloud.tiptap.dev/convert-settings
+      appId: 'your-app-id',
+
+      // 您在上一步中生成的 JWT 令牌
+      token: 'your-jwt',
+
+      // 上传图像的 URL，如果未提供，图像将从文档中剥离
+      imageUploadCallbackUrl: 'https://your-image-upload-url.com',
+    }),
+  ],
+})
+```
+
+### 导入您的第一个文档
+
+```js
+// 导入文件最简单的方式
+// 这将导入上传的文件，替换编辑器内容
+// 并聚焦编辑器
+editor.chain().focus().import({ file }).run()
+```
+
+### 自定义导入行为
+
+```js
+// 您还可以使用 onImport 回调来自定义导入行为
+editor
+  .chain()
+  .import({
+    file,
+    onImport(context) {
+      const { setEditorContent, content, error } = context
+
+      // 添加错误处理
+      if (error) {
+        showErrorToast({ message: error.message })
+      }
+
+      // 您还可以在插入之前修改内容
+      content.doc.content.push({ type: 'paragraph', content: [{ type: 'text', text: '你好！' }] })
+
+      // 例如，您可以更改应用程序的加载状态
+      isLoading = false
+
+      // 如果您想运行扩展的默认插入行为，请确保调用 setEditorContent 函数
+      // setEditorContent()
+      // 但因为我们修改了内容，需要手动进行插入
+      editor.commands.setContent(content)
+    },
+  })
+  .focus()
+  .run()
+```
+
+### 选项
+
+| 名称                     | 类型       | 默认值       | 描述                                                                                                                                          |
+|--------------------------|------------|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| `appId`                  | `string`   | `undefined` | 从转换设置页面获取的转换 App ID: [https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings)                        |
+| `token`                  | `string`   | `undefined` | 从您的服务器通过密钥生成的 JWT 令牌                                                                                                            |
+| `imageUploadCallbackUrl` | `string`   | `undefined` | 上传图像的 URL，如果未提供，图像将从文档中剥离，[查看更多信息](/conversion/import-export/docx/preserve-images)                             |
+
+### 命令
+
+| 名称     | 描述                       |
+|----------|---------------------------|
+| `import` | 将文件导入到编辑器中       |
+
+### `import`
+
+#### 参数
+
+| 名称       | 类型       | 默认值     | 选项         | 描述                                                                                                                |
+|------------|------------|-------------|---------------|---------------------------------------------------------------------------------------------------------------------|
+| `file`     | `File`     | `undefined` | 任意文件      | 要导入的文件                                                                                                        |
+| `format`   | `string`   | `undefined` | `gfm`         | 对 ODT 文件类型无关                                                                                                 |
+| `onImport` | `Function` | `undefined` | `fn(context)` | 用于自定义导入行为的回调。上下文参数包含内容、错误信息及 `setEditorContent` 函数以修改内容                            |
+
+## 编辑器 ODT 导出
+要使用转换扩展，您需要安装 `@tiptap-pro/extension-export` 包：
+
+```bash
+npm i @tiptap-pro/extension-export
+```
+
+### 配置扩展
+
+```js
+// 启用导出扩展
+import { Export } from '@tiptap-pro/extension-export'
+
+const editor = new Editor({
+  // ...
+  extensions: [
+    // ...
+    Export.configure({
+      // 从转换设置页面获取的转换 App-ID: https://cloud.tiptap.dev/convert-settings
+      appId: 'your-app-id',
+
+      // 您在上一步中生成的 JWT 令牌
+      token: 'your-jwt',
+    }),
+  ],
+})
+```
+
+### 导出文档
+
+```js
+// 简单导出为 docx
+// 支持的格式：docx、odt、md 和 gfm
+editor.chain().focus().export({ format: 'docx' }).run()
+```
+
+### 自定义导出行为
+
+```js
+// 您还可以使用 onExport 回调来自定义导出行为
+editor.chain().export({
+  format: 'docx',
+  onExport(context) {
+    const { blob, error, download, filename } = context
+
+    // 添加错误处理
+    if (error) {
+      showErrorToast({ message: error.message })
+    }
+
+    // 例如，您可以更改应用程序的加载状态
+    isLoading = false
+
+    // 您可以在这里修改文件名或以不同方式处理 blob
+    // 但这里保持不变
+
+    // 通过调用 download 方法直接触发下载
+    download()
+
+    // 请记住，download 方法只在浏览器中有效
+    // 如果之前修改了 blob 和文件名，则需手动管理
+  },
+})
+```
+
+### 选项
+
+| 名称    | 类型     | 默认值       | 描述                                                                                                                                          |
+|---------|----------|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| `appId` | `string` | `undefined` | 从转换设置页面获取的转换 App ID: [https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings)                        |
+| `token` | `string` | `undefined` | 从您的服务器通过密钥生成的 JWT 令牌                                                                                                            |
+
+### 命令
+
+| 名称     | 描述                      |
+|----------|--------------------------|
+| `export` | 导出编辑器内容            |
+
+#### `export`
+
+#### 参数
+
+| 名称       | 类型          | 默认值     | 选项           | 描述                                                                                                                                                            |
+|------------|---------------|-------------|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `format`   | `string`      | `undefined` | `docx,odt,md,gfm` | 您希望导出的格式                                                                                                                                               |
+| `content`  | `JSONContent` | `undefined` | 任意 Tiptap JSON | 您希望导出的 Tiptap JSON 内容                                                                                                                                |
+| `onExport` | `Function`    | `undefined` | `fn(context)`     | 用于自定义导出行为的回调。上下文参数包含 blob、文件名、错误信息，以及直接下载文档的 `download` 函数                                                           |

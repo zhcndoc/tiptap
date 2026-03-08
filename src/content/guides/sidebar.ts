@@ -58,10 +58,6 @@ export const sidebarConfig: SidebarConfig = {
           title: '离线协作',
         },
         {
-          href: '/guides/legacy-conversion',
-          title: '旧版转换',
-        },
-        {
           href: '/guides/upgrade-tiptap-v1',
           title: '升级到 Tiptap V1',
         },

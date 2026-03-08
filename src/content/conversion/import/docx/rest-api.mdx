@@ -1,0 +1,258 @@
+---
+title: 通过 REST API 导入 DOCX
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v2.6.0
+meta:
+    title: 导入 DOCX REST API | Tiptap 转换
+    description: 了解如何通过 Conversion REST API 将 .docx 文件导入为 Tiptap JSON 格式。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅起始计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 配置 Convert 应用">
+       使用 Convert REST API 需从[您的仪表板](https://cloud.tiptap.dev/v2/cloud/convert)获取 App ID 和 Convert 密钥。
+    </RequirementItem>
+</Requirements>
+
+DOCX 导入 API 可将 `.docx` 文件转换为 Tiptap 的 JSON 格式。
+
+<Callout title="查看 Postman 集合" variant="hint">
+    您也可以通过我们的 [Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60)体验文档转换 API。
+</Callout>
+
+
+## 导入 DOCX
+
+`POST /v2/convert/import/docx`
+
+`/v2/convert/import/docx` 端点将 `docx` 文件转换为 Tiptap 的 JSON 格式。用户可向该端点 `POST` 文档，并通过多种参数定制转换过程中对不同文档元素的处理方式。
+
+### 示例（cURL）
+```bash
+curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -F "file=@/path/to/your/file.docx" \
+    -F "imageUploadCallbackUrl=https://your-image-upload-endpoint.com" \
+    -F "prosemirrorNodes={\"nodeKey\":\"nodeValue\"}" \
+    -F "prosemirrorMarks={\"markKey\":\"markValue\"}"
+```
+
+<Callout title="需要订阅" variant="warning">
+    该端点需有效的 Tiptap 订阅。详细信息请查看我们的 [定价页面](https://tiptap.dev/pricing)。
+</Callout>
+
+### 必需的请求头
+
+| 名称              | 说明                                                                                                                                    |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization`   | 用于身份验证的 JWT 令牌。例如：`Bearer your-jwt-token`                                                                                  |
+| `X-App-Id`        | 来自 Convert 设置页面的 Convert App-ID：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert)            |
+
+### 请求体
+
+| 名称                       | 类型           | 说明                                                                                                                        |
+| -------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `file`                     | `File`         | 需要转换的文件                                                                                                              |
+| `imageUploadCallbackUrl`   | `string`       | 用于上传上传文档中遇到的图片的回调端点，详见 [更多信息](#image-uploading)                                                     |
+| `prosemirrorNodes`         | `Object string`| 自定义节点映射用于转换，详见 [更多信息](/conversion/import/docx/custom-node-conversion)。                                     |
+| `prosemirrorMarks`         | `Object string`| 自定义标记映射用于转换，详见 [更多信息](/conversion/import/docx/custom-mark-conversion)                                       |
+| `verbose`                  | `string \| number` | 一个配置属性，用于控制导入过程中的诊断输出级别。尤其适合调试或获取转换过程的更多信息。详见 [详细输出](#import-verbose-output) |
+
+### 导入详细输出
+
+DOCX 导入扩展提供了一个 `verbose` 配置属性，帮助您控制导入过程中的诊断输出级别。此功能特别适合调试或获取转换过程的更多细节。
+
+`verbose` 属性是一个位掩码数字，用于决定输出哪些类型的日志信息。扩展使用以下级别：
+
+| 值    | 级别      | 说明                          |
+|-------|-----------|-------------------------------|
+| 1     | `log`     | 一般信息日志                  |
+| 2     | `warn`    | 警告                          |
+| 4     | `error`   | 错误                          |
+
+<Callout title="详细输出位掩码">
+  您可以通过相加值来组合级别。例如，`verbose: 3` 会启用 `log` (1) 和 `warn` (2) 两种消息。
+</Callout>
+
+详细输出会在返回的 `data` 属性外，增加一个名为 `logs` 的属性，包含 `info`、`warn` 和 `error` 三个数组，分别保存对应级别的日志信息。
+
+```js
+{
+  "data": {
+    "content": {
+        // Tiptap JSON
+    }
+  },
+  "logs": {
+    "info": [],
+    "warn": [
+      {
+        "message": "Image file not found in media files",
+        "fileName": "image1.gif",
+        "availableMediaFiles": []
+      }
+    ],
+    "error": [
+      {
+        "message": "Image upload failed: General error",
+        "fileName": "image1.gif",
+        "url": "https://your-image-upload-endpoint.com",
+        "error": "Unable to connect. Is the computer able to access the url?",
+        "context": "uploadImage general error"
+      }
+    ]
+  }
+}
+```
+
+## 响应中的页眉与页脚
+
+导入 API 会从 `.docx` 文件中提取页眉和页脚。当文档包含页眉或页脚内容时，响应的 `data` 对象会包含额外字段。
+
+### 响应字段
+
+| 字段名              | 类型               | 说明                                                         |
+|---------------------|--------------------|--------------------------------------------------------------|
+| `content`           | `Object`           | 以 Tiptap JSON 格式表示的文档主体                            |
+| `header`            | `Object \| null`   | 默认页眉内容，Tiptap JSON                                    |
+| `footer`            | `Object \| null`   | 默认页脚内容，Tiptap JSON                                    |
+| `headerFirstPage`   | `Object \| null`   | 首页页眉（当 Word 中启用了“首页不同”功能时）                |
+| `footerFirstPage`   | `Object \| null`   | 首页页脚（当 Word 中启用了“首页不同”功能时）                |
+| `headerOdd`         | `Object \| null`   | 奇数页页眉（当 Word 中启用了“奇偶页不同”功能时）            |
+| `footerOdd`         | `Object \| null`   | 奇数页页脚（当 Word 中启用了“奇偶页不同”功能时）            |
+| `headerEven`        | `Object \| null`   | 偶数页页眉（当 Word 中启用了“奇偶页不同”功能时）            |
+| `footerEven`        | `Object \| null`   | 偶数页页脚（当 Word 中启用了“奇偶页不同”功能时）            |
+
+### 响应示例
+
+```json
+{
+  "data": {
+    "content": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "text": "Document body content..." }]
+        }
+      ]
+    },
+    "header": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "text": "Default Header" }]
+        }
+      ]
+    },
+    "footer": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "text": "Page {page} of {total}" }]
+        }
+      ]
+    },
+    "headerFirstPage": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Title Page Header",
+              "marks": [{ "type": "bold" }]
+            }
+          ]
+        }
+      ]
+    },
+    "footerFirstPage": null,
+    "headerOdd": null,
+    "footerOdd": null,
+    "headerEven": null,
+    "footerEven": null
+  }
+}
+```
+
+字段为 `null` 表示该文档未定义该特定页眉或页脚内容。
+
+### 自定义节点与标记映射
+
+您可以通过请求体中的 `prosemirrorNodes` 和 `prosemirrorMarks` 覆盖导入时的默认 `node/mark` 类型。如果您的编辑器使用自定义的 `nodes/marks`，希望导入的 `JSON` 采用它们，则需要提供这些映射。
+
+例如，如果您的 schema 使用名为 `textBlock` 的自定义节点替代默认的段落，可以在请求体中包含 `"{\"textBlock\":\"paragraph\"}"`。
+
+您也可以类似地调整标题、列表、加粗或斜体等标记。
+
+#### 默认节点
+
+| 名称             | 说明                                         |
+| ---------------- | -------------------------------------------- |
+| `paragraph`      | 指定用于段落转换的 ProseMirror 类型          |
+| `heading`        | 指定用于标题转换的 ProseMirror 类型          |
+| `blockquote`     | 指定用于引用块转换的 ProseMirror 类型        |
+| `codeblock`      | 指定用于代码块转换的 ProseMirror 类型        |
+| `bulletlist`     | 指定用于无序列表转换的 ProseMirror 类型      |
+| `orderedlist`    | 指定用于有序列表转换的 ProseMirror 类型      |
+| `listitem`       | 指定用于列表项转换的 ProseMirror 类型        |
+| `hardbreak`      | 指定用于硬换行转换的 ProseMirror 类型        |
+| `horizontalrule` | 指定用于水平线转换的 ProseMirror 类型        |
+| `table`          | 指定用于表格转换的 ProseMirror 类型          |
+| `tablecell`      | 指定用于表格单元转换的 ProseMirror 类型      |
+| `tableheader`    | 指定用于表头转换的 ProseMirror 类型          |
+| `tablerow`       | 指定用于表格行转换的 ProseMirror 类型        |
+| `image`          | 指定用于图片转换的 ProseMirror 标记          |
+
+#### 默认标记
+
+| 名称             | 说明                                         |
+| ---------------- | -------------------------------------------- |
+| `bold`           | 指定用于加粗转换的 ProseMirror 标记          |
+| `italic`         | 指定用于斜体转换的 ProseMirror 标记          |
+| `underline`      | 指定用于下划线转换的 ProseMirror 标记        |
+| `strikethrough`  | 指定用于删除线转换的 ProseMirror 标记        |
+| `link`           | 指定用于链接转换的 ProseMirror 标记          |
+| `code`           | 指定用于代码转换的 ProseMirror 标记          |
+
+## 支持与限制
+
+当前支持的功能及已知 DOCX 导入限制：
+
+| **功能**                  | **支持情况**                                                                   |
+|---------------------------|--------------------------------------------------------------------------------|
+| **文本内容**              | ✓ 基本文本，间距，标点                                                         |
+| **文本格式**              | ✓ 加粗，斜体，下划线，删除线，对齐，行高                                       |
+| **块元素**                | ✓ 段落，标题（1-6级），引用块，有序与无序列表                                  |
+| **表格**                  | ✓ 基础结构，表头行，合并单元格                                                |
+| **链接**                  | ✓ 超链接                                                                       |
+| **媒体（图片）**          | ✓ 内嵌图片，保留大小                                                           |
+| **样式**                  | ✓ 字体系列*，字体颜色，字体大小，背景颜色，行高                               |
+| **页眉与页脚**            | ✓ 支持（需[页面扩展](/editor/extensions/functionality/pages)）                |
+| **节与分页符**            | ~ 开发中                                                                      |
+| **脚注与尾注**            | ~ 开发中                                                                      |
+| **数学公式**              | ~ 开发中                                                                      |
+| **评论与修订**            | ✗ 不支持                                                                      |
+| **目录**                  | ✗ 不支持                                                                      |
+| **高级格式**              | ✗ 不支持列，文本方向，表单，宏，嵌入脚本                                      |
+| **元数据**                | ✗ 不支持                                                                      |
+| **文本框，形状，SmartArt** | ✗ 不支持                                                                      |
+
+<span style={{fontSize: '1rem'}}>* 字体系列支持的前提是在打开 `.docx` 文件时，目标字体已安装于操作系统中。</span>

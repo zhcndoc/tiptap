@@ -1,0 +1,124 @@
+---
+title: 使用页眉和页脚扩展您的 DOC 导出功能
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.2.0
+meta:
+    title: 使用页眉和页脚扩展您的 DOC 导出功能 | Tiptap 转换
+    description: 学习如何使用 Export DOC 扩展自定义您的 DOC 导出中的页眉和页脚。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="doc" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅起始计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)认证访问 Tiptap 的私有 npm 注册表。
+    </RequirementItem>
+</Requirements>
+
+<Callout title="考虑使用 DOCX 代替" variant="info">
+    DOC 格式是 Microsoft Word 97-2003 的传统格式。对于现代使用，我们推荐导出为[DOCX](/conversion/export/docx/headers-footers)。仅在需要兼容旧系统时使用 DOC。
+</Callout>
+
+`@tiptap-pro/extension-export-doc` 扩展内置支持定制导出文档的页眉和页脚。您可以为首页、奇数页和偶数页配置不同的页眉和页脚。
+
+## 页眉配置
+
+`headers` 对象允许您自定义导出 DOC 文档的页眉：
+
+| 属性                | 类型         | 描述                                                                                                  |
+| ------------------- | ------------ | ---------------------------------------------------------------------------------------------------- |
+| `evenAndOddHeaders` | `boolean`    | 是否对奇数页和偶数页使用不同的页眉                                                                     |
+| `differentFirstPage` | `boolean`    | 是否首页使用不同的页眉。为 `true` 时，首页使用 `first` 值代替 `default`。                                    |
+| `default`           | `string`     | 默认页眉，应用于所有页面，或当 `evenAndOddHeaders` 生效时应用于奇数页。支持纯文本字符串或序列化的 Tiptap JSONContent，用于丰富格式化。 |
+| `first`             | `string`     | 首页的页眉，仅当 `differentFirstPage` 为 `true` 时生效。支持纯文本字符串或序列化的 Tiptap JSONContent。                 |
+| `even`              | `string`     | 当启用 `evenAndOddHeaders` 时，偶数页的页眉。支持纯文本字符串或序列化的 Tiptap JSONContent。                     |
+
+使用纯文本时，会生成简单无样式的页眉。使用序列化的 Tiptap JSONContent（通过 `JSON.stringify()`）时，则会保留加粗、斜体和链接等丰富格式。
+
+## 页脚配置
+
+`footers` 对象允许您自定义导出 DOC 文档的页脚：
+
+| 属性                | 类型         | 描述                                                                                                  |
+| ------------------- | ------------ | ---------------------------------------------------------------------------------------------------- |
+| `evenAndOddFooters` | `boolean`    | 是否对奇数页和偶数页使用不同的页脚                                                                     |
+| `differentFirstPage` | `boolean`    | 是否首页使用不同的页脚。为 `true` 时，首页使用 `first` 值代替 `default`。                                    |
+| `default`           | `string`     | 默认页脚，应用于所有页面，或当 `evenAndOddFooters` 生效时应用于奇数页。支持纯文本字符串或序列化的 Tiptap JSONContent。 |
+| `first`             | `string`     | 首页的页脚，仅当 `differentFirstPage` 为 `true` 时生效。支持纯文本字符串或序列化的 Tiptap JSONContent。                 |
+| `even`              | `string`     | 当启用 `evenAndOddFooters` 时，偶数页的页脚。支持纯文本字符串或序列化的 Tiptap JSONContent。                     |
+
+使用纯文本时，会生成简单无样式的页脚。使用序列化的 Tiptap JSONContent（通过 `JSON.stringify()`）时，则会保留加粗、斜体和链接等丰富格式。
+
+## 完整示例
+
+```js
+import { ExportDoc } from '@tiptap-pro/extension-export-doc'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展...
+    ExportDoc.configure({
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      headers: {
+        evenAndOddHeaders: true,
+        default: '我的文档 - 机密',
+        first: '欢迎阅读我的文档',
+        even: '我的文档 - 偶数页',
+      },
+      footers: {
+        evenAndOddFooters: true,
+        default: '公司名称 - 版权所有',
+        first: '草稿版本 1.0',
+        even: '公司名称 - 偶数页页脚',
+      },
+    }),
+    // 其他扩展...
+  ],
+})
+
+// 带页眉和页脚导出
+editor
+  .chain()
+  .exportDoc({
+    onCompleteExport(result) {
+      const url = URL.createObjectURL(result)
+      const a = document.createElement('a')
+
+      a.href = url
+      a.download = 'document-with-headers.doc'
+      a.click()
+
+      URL.revokeObjectURL(url)
+    },
+  })
+  .run()
+```
+
+## 简单的页眉和页脚
+
+如果您不需要奇偶页不同的页眉，可以只提供 `default` 的值：
+
+```js
+ExportDoc.configure({
+  token: 'YOUR_TOKEN',
+  appId: 'YOUR_APP_ID',
+  headers: {
+    default: '我的文档标题',
+  },
+  footers: {
+    default: '页脚 - 公司名称',
+  },
+})
+```

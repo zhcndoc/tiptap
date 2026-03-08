@@ -1,0 +1,100 @@
+---
+title: 通过 REST API 导入 Markdown
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v2.6.0
+meta:
+    title: 导入 Markdown REST API | Tiptap 转换
+    description: 了解如何使用 Tiptap Conversion REST API v2 将 Markdown 文件导入为 Tiptap JSON 格式。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="markdown" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 配置 Convert 应用">
+        要使用 Convert REST API，请从[您的仪表盘](https://cloud.tiptap.dev/v2/cloud/convert)获取您的 App ID 和 Convert 密钥。
+    </RequirementItem>
+</Requirements>
+
+Markdown 导入 API 将 `.md` 文件转换为 Tiptap JSON 格式。
+
+<Callout title="查看 Postman 集合" variant="hint">
+    您也可以通过访问我们的[Postman
+    集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60)来体验文档转换 API。
+</Callout>
+
+## 导入 Markdown
+
+`POST /v2/convert/import/markdown`
+
+`/v2/convert/import/markdown` 端点将 Markdown 文件（`.md` 或 `.markdown`）转换为 Tiptap 的 JSON 格式。使用 `multipart/form-data` 上传文件。
+
+### 示例 (cURL)
+
+```bash
+curl -X POST "https://api.tiptap.dev/v2/convert/import/markdown" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -F "file=@/path/to/file.md"
+```
+
+<Callout title="需要订阅" variant="warning">
+    此端点需要有效的 Tiptap 订阅。更多详情请查看我们的[定价页面](https://tiptap.dev/pricing)。
+</Callout>
+
+### 必填请求头
+
+| 名称             | 说明                                                                                                             |
+| ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `Authorization`  | 用于认证请求的 JWT 令牌。例如：`Bearer your-jwt-token`                                                         |
+| `X-App-Id`       | 从 Convert 设置页获取的 Convert 应用 ID：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert) |
+
+### 请求体
+
+| 名称       | 类型      | 必填   | 说明                                         |
+| ---------- | --------- | ------ | -------------------------------------------- |
+| `file`     | `File`    | 是     | 需要转换的 Markdown 文件（`.md` 或 `.markdown`） |
+| `verbose`  | `string`  | 否     | 日志详细级别（位掩码：1=log，2=warn，4=error） |
+
+### 响应 (200 OK)
+
+```json
+{
+  "data": {
+    "content": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Hello from Markdown!"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "logs": []
+}
+```
+
+### 错误响应
+
+| 状态码 | 错误代码                            | 说明                              |
+| ------ | --------------------------------- | --------------------------------- |
+| 400    | `NO_FILE_PROVIDED`                | 未提供文件                       |
+| 400    | `INVALID_FILE_TYPE`               | 文件不是 `.md` 或 `.markdown` 类型 |
+| 422    | `FAILED_TO_GET_FILE_ARRAY_BUFFER` | 读取文件缓冲失败                |
+| 500    | `FAILED_TO_CONVERT_MARKDOWN_TO_TIPTAP_JSON` | Markdown 转换为 JSON 失败       |

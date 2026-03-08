@@ -3,6 +3,8 @@ title: 在编辑器中导入 .docx
 tags:
   - type: start
   - type: beta
+  - type: version
+    label: v0.6.0
 meta:
     title: 导入 DOCX | Tiptap 转换
     description: 学习如何使用我们的文档中的导入扩展将 DOCX（Word）文档导入 Tiptap 编辑器。
@@ -29,7 +31,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 将 `.docx` 文件转换为 Tiptap JSON 使用 `@tiptap-pro/extension-import-docx` 编辑器扩展很简单，该扩展可以直接集成到你的 Tiptap 编辑器中。
 
-如果你需要在编辑器外导入 `.docx` 内容，请使用[REST API](/conversion/import-export/docx/rest-api)。
+如果你需要在编辑器外导入 `.docx` 内容，请使用[REST API](/conversion/import/docx/rest-api)。
 
 ## 安装 DOCX 导入扩展
 
@@ -38,7 +40,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 安装 Tiptap 导入扩展包：
 
 ```bash
-npm i @tiptap-pro/extension-import-docx
+npm i @tiptap-pro/extension-import-docx@beta
 ```
 
 确保你的编辑器包含处理 DOCX 内容所需的所有 Tiptap 扩展。例如，包含图像扩展以处理行内图像，和表格扩展以处理表格。
@@ -69,9 +71,9 @@ const editor = new Editor({
   extensions: [
     // 其他扩展 ...
     Import.configure({
-      appId: 'your-app-id', // Your Convert App ID (see Tiptap Cloud settings)
-      token: 'your-jwt', // JWT for authentication (see Authentication documentation)
-      imageUploadCallbackUrl: 'https://your-image-upload-endpoint.com', // Your upload images endpoint
+      appId: 'your-app-id', // 你的 Convert 应用 ID（请参阅 Tiptap Cloud 设置）
+      token: 'your-jwt', // 用于身份验证的 JWT（请参阅身份验证文档）
+      imageUploadCallbackUrl: 'https://your-image-upload-endpoint.com', // 你上传图像的端点
     }),
     // 其他扩展 ...
   ],
@@ -133,7 +135,100 @@ editor
 | 内容修改 | 可以插入额外的节点、删除某些节点，或根据需要调整转换后的 Tiptap JSON。                                                                                                                                                                          |
 | 编辑器插入     | 如果希望依赖扩展的默认插入行为（替换编辑器内容），可以调用回调中提供的 `setEditorContent()` 函数。如果你自己修改内容，必须手动使用 `editor.commands.setContent(content)` 设置它。 |
 
-## Verbose 输出
+## 页眉和页脚
+
+当导入包含页眉和页脚的 `.docx` 文件时，如果已安装[页面扩展](/editor/extensions/functionality/pages)，导入扩展会自动检测并应用它们。
+
+### 自动处理
+
+如果在编辑器中注册了页面扩展，则在调用 `setEditorContent()` 时，会自动应用页眉和页脚：
+
+```js
+editor
+  .chain()
+  .import({
+    file,
+    onImport(context) {
+      if (context.error) {
+        console.error(context.error)
+        return
+      }
+
+      // 页眉和页脚会和主体内容一起自动应用
+      context.setEditorContent()
+    },
+  })
+  .focus()
+  .run()
+```
+
+如果页面扩展未安装，页眉和页脚数据将被静默忽略，正文内容按常规导入。
+
+### 手动处理
+
+`onImport` 回调提供所有页眉和页脚字段，供手动处理：
+
+```js
+editor
+  .chain()
+  .import({
+    file,
+    onImport(context) {
+      if (context.error) {
+        console.error(context.error)
+        return
+      }
+
+      // 直接访问页眉/页脚数据
+      const {
+        header,           // 默认页眉（Tiptap JSON 或 null）
+        footer,           // 默认页脚（Tiptap JSON 或 null）
+        headerFirstPage,  // 首页页眉（Word 中启用“首页不同”时）（Tiptap JSON 或 null）
+        footerFirstPage,  // 首页页脚（Word 中启用“首页不同”时）（Tiptap JSON 或 null）
+        headerOdd,        // 奇数页页眉（Word 中启用“奇偶页不同”时）（Tiptap JSON 或 null）
+        footerOdd,        // 奇数页页脚（Word 中启用“奇偶页不同”时）（Tiptap JSON 或 null）
+        headerEven,       // 偶数页页眉（Word 中启用“奇偶页不同”时）（Tiptap JSON 或 null）
+        footerEven,       // 偶数页页脚（Word 中启用“奇偶页不同”时）（Tiptap JSON 或 null）
+      } = context
+
+      // 设置正文内容，不自动应用页眉/页脚
+      editor.commands.setContent(context.content)
+
+      // 通过页面扩展命令手动应用页眉和页脚
+      if (header) editor.commands.setHeader(header)
+      if (footer) editor.commands.setFooter(footer)
+
+      if (headerFirstPage || footerFirstPage) {
+        editor.commands.setDifferentFirstPage(true)
+        if (headerFirstPage) editor.commands.setHeaderFirstPage(headerFirstPage)
+        if (footerFirstPage) editor.commands.setFooterFirstPage(footerFirstPage)
+      }
+
+      if (headerOdd || headerEven || footerOdd || footerEven) {
+        editor.commands.setDifferentOddEven(true)
+        if (headerOdd) editor.commands.setHeaderOdd(headerOdd)
+        if (headerEven) editor.commands.setHeaderEven(headerEven)
+        if (footerOdd) editor.commands.setFooterOdd(footerOdd)
+        if (footerEven) editor.commands.setFooterEven(footerEven)
+      }
+    },
+  })
+  .focus()
+  .run()
+```
+
+### 可用字段
+
+| 字段 | 描述 |
+|-------|-------------|
+| `header` | 默认页眉内容（Tiptap JSON），或 `null` |
+| `footer` | 默认页脚内容（Tiptap JSON），或 `null` |
+| `headerFirstPage` | 首页页眉（Word 中启用“首页不同”时），或 `null` |
+| `footerFirstPage` | 首页页脚（Word 中启用“首页不同”时），或 `null` |
+| `headerOdd` | 奇数页页眉（Word 中启用“奇偶页不同”时），或 `null` |
+| `footerOdd` | 奇数页页脚（Word 中启用“奇偶页不同”时），或 `null` |
+| `headerEven` | 偶数页页眉（Word 中启用“奇偶页不同”时），或 `null` |
+| `footerEven` | 偶数页页脚（Word 中启用“奇偶页不同”时），或 `null` |
 
 DOCX 导入扩展提供了一个 `verbose` 配置属性，帮助你控制导入过程中的诊断输出级别。这对于调试或深入了解转换过程尤为有用。
 
@@ -194,7 +289,7 @@ verbose 输出会在返回的数据中（`data` 属性）附带一个名为 `log
 | **链接**                        | ✓ 超链接                                                               |
 | **媒体（图像)**               | ✓ 嵌入图像，尺寸保留                                          |
 | **样式**                       | ✓ 字体系列*、字体颜色、字体大小、背景颜色、行高 |
-| **页眉和页脚**            | ~ 开发中                                                           |
+| **页眉和页脚**            | ✓ 支持（需安装[页面扩展](/editor/extensions/functionality/pages)）                            |
 | **部分和分页**       | ~ 开发中                                                           |
 | **脚注和尾注**         | ~ 开发中                                                           |
 | **数学**                         | ~ 开发中                                                           |

@@ -1,0 +1,167 @@
+---
+title: 通过 REST API 导出 ODT
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v2.6.0
+meta:
+    title: ODT REST API | Tiptap 转换
+    description: 了解如何使用 Tiptap Conversion REST API v2 将 Tiptap JSON 文档导出为 ODT（OpenDocument Text）格式。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="odt" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中启动[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅初级计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 配置 Convert 应用">
+        使用 Convert REST API 需要从[您的仪表盘](https://cloud.tiptap.dev/v2/cloud/convert)获取您的 App ID 和 Convert 密钥。
+    </RequirementItem>
+</Requirements>
+
+ODT 导出 API 将 Tiptap JSON 文档转换为 OpenDocument Text（`.odt`）文件，与 LibreOffice 和 OpenOffice 兼容。
+
+<Callout title="查看 Postman 集合" variant="hint">
+    您也可以通过我们的 [Postman
+    集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60) 来体验文档转换 API。
+</Callout>
+
+## 导出 ODT
+
+`POST /v2/convert/export/odt`
+
+`/v2/convert/export/odt` 端点将 Tiptap JSON 文档转换为 ODT 格式。发送带有文档 JSON 正文的 `POST` 请求，即可接收可下载的 ODT 文件。
+
+### 示例 (cURL)
+
+```bash
+curl --output document.odt -X POST "https://api.tiptap.dev/v2/convert/export/odt" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}"
+    }'
+```
+
+<Callout title="需要订阅" variant="warning">
+    使用此端点需要有效的 Tiptap 订阅。详情请查看我们的[价格页面](https://tiptap.dev/pricing)。
+</Callout>
+
+### 必填请求头
+
+| 名称             | 描述                                                                                                                                    |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization` | 用于认证请求的 JWT 令牌。例如：`Bearer your-jwt-token`                                                                                   |
+| `X-App-Id`      | 来自 Convert 设置页面的 Convert App-ID：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert)              |
+| `Content-Type`  | 必须为 `application/json`                                                                                                                |
+
+### 请求体参数
+
+| 名称              | 类型       | 描述                        | 默认值       |
+| ---------------- | ---------- | --------------------------- | ----------- |
+| `doc`            | `String`   | 以字符串形式传递的 Tiptap JSON 文档 | `N/A`       |
+| `exportType`     | `string`   | 期望的导出类型               | `blob`      |
+| `styleOverrides` | `Object`   | 样式覆盖                    | `{}`        |
+| `pageSize`       | `Object`   | 页面尺寸配置                | `undefined` |
+| `pageMargins`    | `Object`   | 页面边距配置                | `undefined` |
+| `headers`        | `Object`   | 页面页眉配置                | `undefined` |
+| `footers`        | `Object`   | 页面页脚配置                | `undefined` |
+
+#### 页面尺寸配置
+
+`pageSize` 对象允许自定义导出 ODT 文档的页面尺寸：
+
+| 属性      | 类型     | 描述                                                                                              | 默认值    |
+| --------- | -------- | ------------------------------------------------------------------------------------------------ | --------- |
+| `width`   | `string` | 页面宽度。必须是紧跟有效单位（cm，in，pt，pc，mm，px）的正数。                                      | `"21.0cm"` |
+| `height`  | `string` | 页面高度。必须是紧跟有效单位（cm，in，pt，pc，mm，px）的正数。                                      | `"29.7cm"` |
+
+#### 页面边距配置
+
+`pageMargins` 对象允许自定义导出 ODT 文档的页面边距：
+
+| 属性       | 类型     | 描述                                                                                                      | 默认值    |
+| ---------- | -------- | -------------------------------------------------------------------------------------------------------- | --------- |
+| `top`      | `string` | 页面顶部边距。可以为负。必须是数字，紧跟有效单位（cm，in，pt，pc，mm，px）。                                | `"1.0cm"` |
+| `bottom`   | `string` | 页面底部边距。可以为负。必须是数字，紧跟有效单位（cm，in，pt，pc，mm，px）。                                | `"1.0cm"` |
+| `left`     | `string` | 页面左侧边距。必须是紧跟有效单位（cm，in，pt，pc，mm，px）的正数。                                        | `"1.0cm"` |
+| `right`    | `string` | 页面右侧边距。必须是紧跟有效单位（cm，in，pt，pc，mm，px）的正数。                                        | `"1.0cm"` |
+
+#### 页眉配置
+
+`headers` 对象允许自定义导出 ODT 文档的页眉：
+
+| 属性                 | 类型       | 描述                                                                                             |
+| -------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| `evenAndOddHeaders`  | `boolean`  | 是否为奇数页和偶数页使用不同的页眉                                                               |
+| `differentFirstPage` | `boolean`  | 是否为首页使用不同的页眉。设置为 `true` 时，第一页使用 `first` 的值，替代默认的 `default` 页眉。   |
+| `default`            | `string`   | 每页的标准默认页眉，或开启 `evenAndOddHeaders` 时的奇数页页眉。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。 |
+| `first`              | `string`   | 首页的页眉，仅在 `differentFirstPage` 为 `true` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。   |
+| `even`               | `string`   | 偶数页页眉，仅当启用 `evenAndOddHeaders` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。           |
+
+<Callout title="纯文本 VS Tiptap JSONContent">
+    每个页眉值可以是**纯文本字符串**（生成简单无样式页眉）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，发送请求体前请用 `JSON.stringify()` 对对象进行字符串化。
+</Callout>
+
+#### 页脚配置
+
+`footers` 对象允许自定义导出 ODT 文档的页脚：
+
+| 属性                 | 类型       | 描述                                                                                             |
+| -------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| `evenAndOddFooters`  | `boolean`  | 是否为奇数页和偶数页使用不同的页脚                                                               |
+| `differentFirstPage` | `boolean`  | 是否为首页使用不同的页脚。设置为 `true` 时，第一页使用 `first` 的值，替代默认的 `default` 页脚。   |
+| `default`            | `string`   | 每页的标准默认页脚，或开启 `evenAndOddFooters` 时的奇数页页脚。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。 |
+| `first`              | `string`   | 首页的页脚，仅在 `differentFirstPage` 为 `true` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。   |
+| `even`               | `string`   | 偶数页页脚，仅当启用 `evenAndOddFooters` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。           |
+
+<Callout title="纯文本 VS Tiptap JSONContent">
+    每个页脚值可以是**纯文本字符串**（生成简单无样式页脚）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，发送请求体前请用 `JSON.stringify()` 对对象进行字符串化。
+</Callout>
+
+### 自定义页面布局示例
+
+```bash
+curl --output document.odt -X POST "https://api.tiptap.dev/v2/convert/export/odt" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}",
+      "pageSize": {
+        "width": "210mm",
+        "height": "297mm"
+      },
+      "pageMargins": {
+        "top": "20mm",
+        "bottom": "20mm",
+        "left": "15mm",
+        "right": "15mm"
+      }
+    }'
+```
+
+### 响应
+
+成功时，API 返回 ODT 文件作为二进制下载：
+
+- **状态**：`200 OK`
+- **Content-Type**：`application/vnd.oasis.opendocument.text`
+- **Content-Disposition**：`attachment; filename=export-{timestamp}.odt`
+
+### 错误响应
+
+| 状态码 | 代码                         | 描述                              |
+| ------ | ---------------------------- | --------------------------------- |
+| 400    | `NO_DOCUMENT_PROVIDED`       | 请求体中未提供文档                 |
+| 422    | `FAILED_TO_PARSE_DOCX_FILE`  | 解析 JSON 输入失败                 |
+| 422    | `FAILED_TO_EXPORT_ODT_FILE`  | 导出中间格式失败                  |
+| 422    | `FAILED_TO_CONVERT_DOCX_TO_ODT` | 转换为 ODT 失败                 |

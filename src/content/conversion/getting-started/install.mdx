@@ -10,29 +10,40 @@ meta:
 ---
 
 import { Callout } from '@/components/ui/Callout'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
-Tiptap 转换允许您将 Tiptap JSON 在 `DOCX`、`ODT` 和 `Markdown` 之间导入导出。您可以通过专用插件将导入/导出功能直接集成到 Tiptap 编辑器中，或在您的服务器上使用转换的 REST API。
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
+
+Tiptap 转换允许您将 Tiptap JSON 在 `DOCX`、`PDF`、`ODT`、`EPUB`、`DOC` 和 `Markdown` 之间导入导出。您可以通过专用插件将导入/导出功能直接集成到 Tiptap 编辑器中（适用于 DOCX 和 Markdown），或在您的服务器上使用转换的 REST API 以支持所有格式。
 
 ## 设置授权
 
 大多数转换操作都需要进行身份验证。使用您的 Tiptap Cloud 账户中的 `密钥` 生成一个 JWT（JSON Web Token）。在请求或扩展配置中包含此 JWT。
 
 <Callout title="导出 DOCX 扩展" variant="info">
-    `<code>extension-export-docx</code>` 包不需要进行身份验证！
-    如果您只需要此扩展，可以随意[跳过](/conversion/import-export/docx/editor-export)这些步骤。
+    `<code>extension-export-docx</code>` 包不需要进行身份验证！  
+    如果您只需要此扩展，可以随意[跳过](/conversion/export/docx/editor-export)这些步骤。
 </Callout>
 
-1. **激活计划：** 开始[免费试用或选择订阅](https://cloud.tiptap.dev/v2/billing)。
-2. **在[转换设置](https://cloud.tiptap.dev/v2/cloud/convert)页面获取您的 App ID 和密钥。**
-3. **使用任何 JWT 工具（例如 JWT Builder）生成测试用的 JWT。** 对于生产环境，请务必在**服务器端**创建 JWT，以确保您的密钥安全。
+1. **激活计划：** 开始[免费试用或选择订阅](https://cloud.tiptap.dev/v2/billing)。  
+2. **在[转换设置](https://cloud.tiptap.dev/v2/cloud/convert)页面获取您的 App ID 和密钥。**  
+3. **使用任何 JWT 工具（例如 JWT Builder）生成测试用的 JWT。** 对于生产环境，请务必在**服务器端**创建 JWT，以确保您的密钥安全。  
 4. **在您的请求或扩展配置中使用 JWT。** API 调用时，将其放在 `Authorization` 头中，App ID 放在 `X-App-Id`。
 
 ## 探索文件类型集成
 
-根据您希望操作的格式，不同的文件类型都有自己的安装和配置相关导入导出扩展的指南：
+根据您希望操作的格式，不同的文件类型都有自己的指南，涵盖可用的 REST API 端点，及在适用时的编辑器扩展：
 
-- [DOCX 集成](/conversion/import-export/docx/)
-- [ODT 集成](/conversion/import-export/odt)
-- [Markdown 集成](/conversion/import-export/markdown)
+**导入：**  
+- [DOCX 导入](/conversion/import/docx/rest-api)（编辑器扩展 + REST API）  
+- [Markdown 导入](/conversion/import/markdown/rest-api)（REST API）
 
-这些指南详细说明了如何将相应的扩展和 REST API 端点集成到您的应用中，并配置任何必要的选项。
+**导出：**  
+- [DOCX 导出](/conversion/export/docx/rest-api)（编辑器扩展 + REST API）  
+- [PDF 导出](/conversion/export/pdf/rest-api)（REST API）  
+- [ODT 导出](/conversion/export/odt/rest-api)（REST API）  
+- [EPUB 导出](/conversion/export/epub/rest-api)（REST API）  
+- [DOC 导出](/conversion/export/doc/rest-api)（REST API）  
+- [Markdown 导出](/conversion/export/markdown/rest-api)（REST API）
+
+这些指南详细说明了如何将相应的 REST API 端点集成到您的应用中，并配置任何必要的选项。

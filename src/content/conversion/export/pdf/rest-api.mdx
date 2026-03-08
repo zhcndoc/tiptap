@@ -1,0 +1,199 @@
+---
+title: 通过 REST API 导出 PDF
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v2.6.0
+meta:
+    title: PDF REST API | Tiptap 转换
+    description: 了解如何使用 Tiptap Conversion REST API v2 将 Tiptap JSON 文档导出为 PDF 格式。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="pdf" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 配置 Convert 应用">
+        要使用 Convert REST API，请从[您的控制面板](https://cloud.tiptap.dev/v2/cloud/convert)中获取您的应用 ID 和 Convert secret。
+    </RequirementItem>
+</Requirements>
+
+PDF 导出 API 将 Tiptap JSON 文档转换为 PDF 文件。
+
+<Callout title="查看 Postman 集合" variant="hint">
+    您也可以通过访问我们的[Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60)来试用文档转换 API。
+</Callout>
+
+## 导出 PDF
+
+`POST /v2/convert/export/pdf`
+
+`/v2/convert/export/pdf` 端点将 Tiptap JSON 文档转换为 PDF 格式。发送包含您文档的 JSON 请求体的 `POST` 请求，即可获得可下载的 PDF 文件。
+
+### 示例（cURL）
+
+```bash
+curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}"
+    }'
+```
+
+<Callout title="需要订阅" variant="warning">
+    此端点需要有效的 Tiptap 订阅。更多详情请查看我们的[定价页面](https://tiptap.dev/pricing)。
+</Callout>
+
+### 必要请求头
+
+| 名称             | 说明                                                                                                               |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `Authorization`  | 用于认证请求的 JWT 令牌。例如：`Bearer your-jwt-token`                                                              |
+| `X-App-Id`       | 从 Convert 设置页面获取的 Convert 应用 ID：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert) |
+| `Content-Type`   | 必须为 `application/json`                                                                                            |
+
+### 请求体
+
+| 名称             | 类型       | 描述                                    | 默认值      |
+| ---------------- | ---------- | --------------------------------------- | ----------- |
+| `doc`            | `String`   | 以字符串形式传递的 Tiptap JSON 文档     | `N/A`       |
+| `exportType`     | `string`   | 期望的导出类型                          | `blob`      |
+| `styleOverrides` | `Object`   | 样式覆盖                              | `{}`        |
+| `pageSize`       | `Object`   | 页面大小配置                          | `undefined` |
+| `pageMargins`    | `Object`   | 页面边距配置                          | `undefined` |
+| `headers`        | `Object`   | 页面页眉配置                          | `undefined` |
+| `footers`        | `Object`   | 页面页脚配置                          | `undefined` |
+| `customFonts`    | `Array`    | 自定义字体文件配置（仅限本地部署）          | `undefined` |
+
+#### 页面大小配置
+
+`pageSize` 对象允许您自定义导出 PDF 文档的尺寸：
+
+| 属性      | 类型     | 描述                                                                                       | 默认值     |
+| --------- | -------- | ------------------------------------------------------------------------------------------ | ---------- |
+| `width`   | `string` | 页面宽度。必须是正数，并带有有效单位（cm、in、pt、pc、mm、px）。                           | `"21.0cm"` |
+| `height`  | `string` | 页面高度。必须是正数，并带有有效单位（cm、in、pt、pc、mm、px）。                           | `"29.7cm"` |
+
+#### 页面边距配置
+
+`pageMargins` 对象允许您自定义导出 PDF 的页边距：
+
+| 属性      | 类型     | 描述                                                                                                     | 默认值    |
+| --------- | -------- | -------------------------------------------------------------------------------------------------------- | --------- |
+| `top`     | `string` | 页面顶部边距，可以为负数。必须是数字，并带有有效单位（cm、in、pt、pc、mm、px）。                           | `"1.0cm"` |
+| `bottom`  | `string` | 页面底部边距，可以为负数。必须是数字，并带有有效单位（cm、in、pt、pc、mm、px）。                           | `"1.0cm"` |
+| `left`    | `string` | 页面左侧边距。必须是正数，并带有有效单位（cm、in、pt、pc、mm、px）。                                    | `"1.0cm"` |
+| `right`   | `string` | 页面右侧边距。必须是正数，并带有有效单位（cm、in、pt、pc、mm、px）。                                    | `"1.0cm"` |
+
+#### 页眉配置
+
+`headers` 对象允许您自定义导出 PDF 的页眉：
+
+| 属性                  | 类型      | 描述                                                                                                                         |
+| --------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `evenAndOddHeaders`   | `boolean` | 是否对奇数页和偶数页使用不同的页眉                                                                                           |
+| `differentFirstPage`  | `boolean` | 是否对首页使用不同的页眉。为 `true` 时，首页使用 `first` 值替代 `default`                                                     |
+| `default`             | `string`  | 每页的标准默认页眉，或激活 `evenAndOddHeaders` 时奇数页的页眉。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于富文本格式。 |
+| `first`               | `string`  | 首页页眉。仅当 `differentFirstPage` 为 `true` 时有效。支持纯文本字符串或字符串化的 Tiptap JSONContent。                       |
+| `even`                | `string`  | 偶数页页眉，仅当 `evenAndOddHeaders` 启用时有效。支持纯文本字符串或字符串化的 Tiptap JSONContent。                            |
+
+<Callout title="纯文本 vs. Tiptap JSONContent">
+    每个页眉值可以是**纯文本字符串**（生成简单无样式页眉）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等富格式）。使用 JSONContent 时，请先用 `JSON.stringify()` 进行字符串化，然后再放入请求体。
+</Callout>
+
+#### 页脚配置
+
+`footers` 对象允许您自定义导出 PDF 的页脚：
+
+| 属性                  | 类型      | 描述                                                                                                                         |
+| --------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `evenAndOddFooters`   | `boolean` | 是否对奇数页和偶数页使用不同的页脚                                                                                           |
+| `differentFirstPage`  | `boolean` | 是否对首页使用不同的页脚。为 `true` 时，首页使用 `first` 值替代 `default`                                                     |
+| `default`             | `string`  | 每页的标准默认页脚，或激活 `evenAndOddFooters` 时奇数页的页脚。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于富文本格式。 |
+| `first`               | `string`  | 首页页脚。仅当 `differentFirstPage` 为 `true` 时有效。支持纯文本字符串或字符串化的 Tiptap JSONContent。                       |
+| `even`                | `string`  | 偶数页页脚，仅当 `evenAndOddFooters` 启用时有效。支持纯文本字符串或字符串化的 Tiptap JSONContent。                            |
+
+<Callout title="纯文本 vs. Tiptap JSONContent">
+    每个页脚值可以是**纯文本字符串**（生成简单无样式页脚）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等富格式）。使用 JSONContent 时，请先用 `JSON.stringify()` 进行字符串化，然后再放入请求体。
+</Callout>
+
+#### 自定义字体配置
+
+<Callout title="仅限本地部署" variant="warning">
+    自定义字体仅支持本地部署。如果您希望在 Tiptap 云服务中使用自定义字体，请[联系我们了解企业计划](https://tiptap.dev/pricing)。
+</Callout>
+
+`customFonts` 数组允许您为 PDF 生成提供自定义字体文件。每个条目指定字体文件的 URL 及其字体族名称：
+
+| 属性         | 类型     | 描述                                                         |
+| ------------ | -------- | ------------------------------------------------------------- |
+| `url`        | `string` | 直接指向 `.ttf` 或 `.woff2` 字体文件的 HTTPS 链接             |
+| `fontFamily` | `string` | 文档中使用的字体族名称                                         |
+
+### 自定义字体示例（本地部署）
+
+```bash
+curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}",
+      "customFonts": [
+        {
+          "url": "https://your-cdn.com/fonts/CustomFont-Regular.ttf",
+          "fontFamily": "Custom Font"
+        }
+      ]
+    }'
+```
+
+### 自定义页面布局示例
+
+```bash
+curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}",
+      "pageSize": {
+        "width": "210mm",
+        "height": "297mm"
+      },
+      "pageMargins": {
+        "top": "20mm",
+        "bottom": "20mm",
+        "left": "15mm",
+        "right": "15mm"
+      }
+    }'
+```
+
+### 响应
+
+请求成功时，API 返回 PDF 文件作为二进制下载：
+
+- **状态**: `200 OK`
+- **Content-Type**: `application/pdf`
+- **Content-Disposition**: `attachment; filename=export-{timestamp}.pdf`
+
+### 错误响应
+
+| 状态码 | 错误码                       | 描述                                   |
+| ------ | ---------------------------- | -------------------------------------- |
+| 400    | `NO_DOCUMENT_PROVIDED`       | 请求体中未提供文档                     |
+| 422    | `FAILED_TO_PARSE_DOCX_FILE`  | 解析 JSON 输入失败                     |
+| 422    | `FAILED_TO_EXPORT_PDF_FILE`  | 导出中间格式 PDF 失败                 |
+| 403    | `CUSTOM_FONTS_NOT_AVAILABLE` | 自定义字体仅支持本地部署               |
+| 422    | `FAILED_TO_CONVERT_DOCX_TO_PDF` | 转换为 PDF 失败                      |

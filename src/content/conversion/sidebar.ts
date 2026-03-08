@@ -22,80 +22,45 @@ export const sidebarConfig: SidebarConfig = {
     },
     {
       type: 'group',
-      href: '/conversion/import-export',
-      title: '导入和导出',
+      href: '/conversion/import',
+      title: 'Import',
+      tags: ['Start'],
       children: [
         {
           title: 'DOCX',
-          href: '/conversion/import-export/docx',
+          href: '/conversion/import/docx/editor-import',
           beta: true,
-          tags: ['Start'],
           children: [
             {
-              title: '编辑器导入',
-              href: '/conversion/import-export/docx/editor-import',
-            },
-            {
-              title: '编辑器导出',
-              href: '/conversion/import-export/docx/editor-export',
-            },
-            {
-              title: 'REST API',
-              href: '/conversion/import-export/docx/rest-api',
-            },
-            {
-              title: '页眉和页脚',
-              href: '/conversion/import-export/docx/headers-footers',
-              tags: ['Team', 'New'],
-            },
-            {
-              title: '自定义页面布局',
-              href: '/conversion/import-export/docx/custom-page-layout',
-              tags: ['New'],
+              title: '编辑器扩展',
+              href: '/conversion/import/docx/editor-import',
             },
             {
               title: '转换自定义节点',
-              href: '/conversion/import-export/docx/custom-node-conversion',
+              href: '/conversion/import/docx/custom-node-conversion',
             },
             {
               title: '转换自定义标记',
-              href: '/conversion/import-export/docx/custom-mark-conversion',
+              href: '/conversion/import/docx/custom-mark-conversion',
             },
             {
-              title: '导出样式',
-              href: '/conversion/import-export/docx/export-styles',
-            },
-            {
-              title: '保存图像',
-              href: '/conversion/import-export/docx/preserve-images',
-            },
-          ],
-        },
-        {
-          href: '/conversion/import-export/odt',
-          title: 'ODT',
-          children: [
-            {
-              title: '编辑器扩展',
-              href: '/conversion/import-export/odt/editor-extensions',
+              title: '保留图片',
+              href: '/conversion/import/docx/preserve-images',
             },
             {
               title: 'REST API',
-              href: '/conversion/import-export/odt/rest-api',
+              href: '/conversion/import/docx/rest-api',
             },
           ],
         },
         {
-          href: '/conversion/import-export/markdown',
           title: 'Markdown',
+          href: '/conversion/import/markdown/rest-api',
+          beta: true,
           children: [
             {
-              title: '编辑器扩展',
-              href: '/conversion/import-export/markdown/editor-extensions',
-            },
-            {
               title: 'REST API',
-              href: '/conversion/import-export/markdown/rest-api',
+              href: '/conversion/import/markdown/rest-api',
             },
           ],
         },
@@ -103,12 +68,205 @@ export const sidebarConfig: SidebarConfig = {
     },
     {
       type: 'group',
-      href: '/conversion/resources',
-      title: '资源',
+      href: '/conversion/export',
+      title: '导出',
+      tags: ['Start'],
       children: [
         {
-          title: '遗留扩展',
-          href: '/guides/legacy-conversion',
+          title: 'DOCX',
+          href: '/conversion/export/docx/editor-export',
+          beta: true,
+          children: [
+            {
+              title: '编辑器扩展',
+              href: '/conversion/export/docx/editor-export',
+            },
+            {
+              title: '页眉和页脚',
+              href: '/conversion/export/docx/headers-footers',
+            },
+            {
+              title: '自定义页面布局',
+              href: '/conversion/export/docx/custom-page-layout',
+            },
+            {
+              title: '转换自定义节点',
+              href: '/conversion/export/docx/custom-node-conversion',
+            },
+            {
+              title: '导出样式',
+              href: '/conversion/export/docx/export-styles',
+            },
+            {
+              title: 'REST API',
+              href: '/conversion/export/docx/rest-api',
+            },
+          ],
+        },
+        {
+          title: 'PDF',
+          href: '/conversion/export/pdf/editor-export',
+          beta: true,
+          children: [
+            {
+              title: '编辑器扩展',
+              href: '/conversion/export/pdf/editor-export',
+            },
+            {
+              title: '页眉和页脚',
+              href: '/conversion/export/pdf/headers-footers',
+            },
+            {
+              title: '自定义页面布局',
+              href: '/conversion/export/pdf/custom-page-layout',
+            },
+            {
+              title: '导出样式',
+              href: '/conversion/export/pdf/export-styles',
+            },
+            {
+              title: 'REST API',
+              href: '/conversion/export/pdf/rest-api',
+            },
+          ],
+        },
+        {
+          title: 'ODT',
+          href: '/conversion/export/odt/editor-export',
+          beta: true,
+          children: [
+            {
+              title: '编辑器扩展',
+              href: '/conversion/export/odt/editor-export',
+            },
+            {
+              title: '页眉和页脚',
+              href: '/conversion/export/odt/headers-footers',
+            },
+            {
+              title: '自定义页面布局',
+              href: '/conversion/export/odt/custom-page-layout',
+            },
+            {
+              title: '导出样式',
+              href: '/conversion/export/odt/export-styles',
+            },
+            {
+              title: 'REST API',
+              href: '/conversion/export/odt/rest-api',
+            },
+          ],
+        },
+        {
+          title: 'EPUB',
+          href: '/conversion/export/epub/editor-export',
+          beta: true,
+          children: [
+            {
+              title: '编辑器扩展',
+              href: '/conversion/export/epub/editor-export',
+            },
+            {
+              title: '页眉和页脚',
+              href: '/conversion/export/epub/headers-footers',
+            },
+            {
+              title: '自定义页面布局',
+              href: '/conversion/export/epub/custom-page-layout',
+            },
+            {
+              title: '导出样式',
+              href: '/conversion/export/epub/export-styles',
+            },
+            {
+              title: 'REST API',
+              href: '/conversion/export/epub/rest-api',
+            },
+          ],
+        },
+        {
+          title: 'DOC',
+          href: '/conversion/export/doc/editor-export',
+          beta: true,
+          children: [
+            {
+              title: '编辑器扩展',
+              href: '/conversion/export/doc/editor-export',
+            },
+            {
+              title: '页眉和页脚',
+              href: '/conversion/export/doc/headers-footers',
+            },
+            {
+              title: '自定义页面布局',
+              href: '/conversion/export/doc/custom-page-layout',
+            },
+            {
+              title: '导出样式',
+              href: '/conversion/export/doc/export-styles',
+            },
+            {
+              title: 'REST API',
+              href: '/conversion/export/doc/rest-api',
+            },
+          ],
+        },
+        {
+          title: 'Markdown',
+          href: '/conversion/export/markdown/editor-export',
+          beta: true,
+          children: [
+            {
+              title: '编辑器扩展',
+              href: '/conversion/export/markdown/editor-export',
+            },
+            {
+              title: 'REST API',
+              href: '/conversion/export/markdown/rest-api',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'group',
+      href: '/conversion/legacy',
+      title: 'Legacy Import/Export',
+      children: [
+        {
+          title: 'DOCX',
+          href: '/conversion/legacy/overview',
+          tags: ['Deprecated'],
+        },
+        {
+          title: 'ODT',
+          href: '/conversion/legacy/odt/editor-extensions',
+          tags: ['Deprecated'],
+          children: [
+            {
+              title: '编辑器扩展',
+              href: '/conversion/legacy/odt/editor-extensions',
+            },
+            {
+              title: 'REST API',
+              href: '/conversion/legacy/odt/rest-api',
+            },
+          ],
+        },
+        {
+          title: 'Markdown',
+          href: '/conversion/legacy/markdown/editor-extensions',
+          tags: ['Deprecated'],
+          children: [
+            {
+              title: '编辑器扩展',
+              href: '/conversion/legacy/markdown/editor-extensions',
+            },
+            {
+              title: 'REST API',
+              href: '/conversion/legacy/markdown/rest-api',
+            },
+          ],
         },
       ],
     },

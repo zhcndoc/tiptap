@@ -167,6 +167,7 @@ const operations = await callApiEndpoint({ content })
 
 // 应用校对更正
 const result = toolkit.proofreaderWorkflow({
+  hasFinished: true,
   operations,
   workflowId: 'proofread-123',
   reviewOptions: {
@@ -247,6 +248,7 @@ const operations = await callApiEndpoint({ content, task: '使文本更正式' }
 
 // 应用编辑操作
 const result = toolkit.tiptapEditWorkflow({
+  hasFinished: true,
   operations,
   workflowId: 'edit-123',
   reviewOptions: {

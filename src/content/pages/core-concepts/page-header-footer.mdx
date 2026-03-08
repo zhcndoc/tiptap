@@ -147,21 +147,499 @@ editor.commands.setFooterHeight(30) // 较小的页脚！
 
 ```js
 Pages.configure({
-  pageFormat: {
-    id: 'custom-layout',
-    width: 794,   // px
-    height: 1123, // px
-    margins: {
-      top: 60,    // px
-      right: 40,  // px
-      bottom: 60, // px
-      left: 40,   // px
-    },
+  header: 'Default Header',
+  footer: 'Page {page}',
+  differentFirstPage: true,
+  headerFirstPage: 'Title Page',
+  footerFirstPage: '', // 首页无页脚
+})
+```
+
+### 命令
+
+```js
+// 启用首页不同（同时影响页眉和页脚）
+editor.commands.setDifferentFirstPage(true)
+
+// 设置首页页眉和页脚内容
+editor.commands.setHeaderFirstPage('Welcome to My Document')
+editor.commands.setFooterFirstPage('')
+```
+
+## 奇偶页不同
+
+启用奇数页（1、3、5……）和偶数页（2、4、6……）不同的页眉和/或页脚，类似于微软 Word 的“奇偶页不同”选项。
+
+<Callout title="注意" variant="info">
+  `setDifferentOddEven()` 命令会同时启用奇偶页不同的页眉和页脚，这与微软 Word 的行为一致。
+</Callout>
+
+### 配置
+
+```js
+Pages.configure({
+  differentOddEven: true,
+  headerOdd: '章节标题 – 奇数页',
+  headerEven: '书名 – 偶数页',
+  footerOdd: '第 {page} 页',
+  footerEven: '第 {page} 页',
+})
+```
+
+### 命令
+
+```js
+// 启用奇偶页不同（同时影响页眉和页脚）
+editor.commands.setDifferentOddEven(true)
+
+// 设置奇数页和偶数页页眉
+editor.commands.setHeaderOdd('奇数页页眉')
+editor.commands.setHeaderEven('偶数页页眉')
+
+// 设置奇数页和偶数页页脚
+editor.commands.setFooterOdd('第 {page} 页')
+editor.commands.setFooterEven('第 {page} 页')
+```
+
+## 首页与奇偶页同时启用
+
+当同时启用 `differentFirstPage` 和 `differentOddEven` 时，首页页眉/页脚优先于奇偶页设置，同时页 1 使用首页设置。
+
+**优先级顺序：**
+1. 首页（如果启用 `differentFirstPage`）——应用于第 1 页
+2. 奇偶页（如果启用 `differentOddEven`）——应用于第 2 页及以后
+3. 默认页眉/页脚——作为回退
+
+```js
+Pages.configure({
+  header: '默认页眉',                         // 回退
+  differentFirstPage: true,
+  headerFirstPage: '首页标题页',              // 第 1 页
+  differentOddEven: true,
+  headerOdd: '奇数页页眉',                    // 第 3、5、7……页
+  headerEven: '偶数页页眉',                   // 第 2、4、6……页
+})
+```
+
+## 可编辑的页眉和页脚
+
+用户可以通过双击页眉或页脚直接编辑它们。这将打开一个功能完备的 Tiptap 编辑器，允许丰富文本编辑。
+
+### 自定义扩展
+
+默认情况下，页眉/页脚编辑器使用 `StarterKit`。你可以提供自定义扩展，启用如图片、表格、文本对齐等额外功能：
+
+```js
+import { Extension } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Image from '@tiptap/extension-image'
+import Table from '@tiptap/extension-table'
+import TableRow from '@tiptap/extension-table-row'
+import TableCell from '@tiptap/extension-table-cell'
+import TableHeader from '@tiptap/extension-table-header'
+import TextAlign from '@tiptap/extension-text-align'
+
+Pages.configure({
+  header: '我的页眉',
+  headerFooterExtensions: [
+    StarterKit,
+    Image,
+    Table.configure({
+      resizable: true,
+    }),
+    TableRow,
+    TableCell,
+    TableHeader,
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+    }),
+  ],
+})
+```
+
+任何 Tiptap 扩展都可以通过 `headerFooterExtensions` 选项添加到页眉/页脚编辑器中。
+
+### 激活的编辑器状态
+
+当用户双击页眉或页脚进行编辑时，扩展通过存储暴露当前激活的编辑器。这允许你构建自定义工具栏以配合页眉/页脚编辑器。
+
+**存储属性：**
+
+- `activeEditor` – 当前打开的页眉或页脚编辑器的 Tiptap 实例（或 `null`）
+- `activeEditorType` – `'header'`、`'footer'` 或 `null`
+- `activePageNumber` – 当前正在编辑的页码（或 `null`）
+
+### 构建自定义工具栏
+
+下面是一个 React 组件示例，提供一个统一的工具栏，用于主编辑器和页眉/页脚编辑器：
+
+```tsx
+import { useEditor, useEditorState, EditorContent } from '@tiptap/react'
+import { useEffect, useState } from 'react'
+
+function DocumentEditor() {
+  const [headerFooterEditor, setHeaderFooterEditor] = useState(null)
+  const [activeEditorType, setActiveEditorType] = useState(null)
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Pages.configure({
+        header: '文档页眉',
+        footer: '第 {page} 页',
+      }),
+    ],
+  })
+
+  // 监听页眉/页脚编辑器的激活变化
+  useEffect(() => {
+    if (!editor) return
+
+    const handleUpdate = () => {
+      const { activeEditor, activeEditorType } = editor.storage.pages
+      setHeaderFooterEditor(activeEditor)
+      setActiveEditorType(activeEditorType)
+    }
+
+    editor.on('update', handleUpdate)
+    return () => editor.off('update', handleUpdate)
+  }, [editor])
+
+  // 使用激活的编辑器（页眉/页脚或主编辑器）
+  const activeEditor = activeEditorType ? headerFooterEditor : editor
+
+  const { isBoldActive } = useEditorState({
+    editor: activeEditor,
+    selector: ({ editor: e }) => ({
+      isBoldActive: e?.isActive('bold') ?? false,
+    }),
+  })
+
+  return (
+    <div>
+      <div className="toolbar">
+        <span>正在编辑：{activeEditorType || '文档'}</span>
+        <button
+          className={isBoldActive ? 'is-active' : ''}
+          onClick={() => activeEditor?.chain().focus().toggleBold().run()}
+        >
+          加粗
+        </button>
+      </div>
+      <EditorContent editor={editor} />
+    </div>
+  )
+}
+```
+
+## 访问页眉和页脚内容
+
+用户通过页眉或页脚编辑器修改内容后，内容会存储在扩展的存储区。这对于保存文档或导出为 DOCX 等格式非常有用。
+
+### HTML 内容
+
+访问编辑后的 HTML 内容：
+
+```js
+// 默认页眉/页脚
+const headerHTML = editor.storage.pages.headerHTML
+const footerHTML = editor.storage.pages.footerHTML
+
+// 首页
+const headerFirstPageHTML = editor.storage.pages.headerFirstPageHTML
+const footerFirstPageHTML = editor.storage.pages.footerFirstPageHTML
+
+// 奇偶页
+const headerOddHTML = editor.storage.pages.headerOddHTML
+const headerEvenHTML = editor.storage.pages.headerEvenHTML
+const footerOddHTML = editor.storage.pages.footerOddHTML
+const footerEvenHTML = editor.storage.pages.footerEvenHTML
+```
+
+<Callout title="注意" variant="info">
+  这些存储值在用户通过对应的页眉/页脚编辑器进行编辑之前均为 `null`。编辑之前，使用的是配置中的原始模板。
+</Callout>
+
+### 用于 DOCX 导出的 JSON 内容
+
+对于 DOCX 导出，使用 JSON 版本，它们提供结构化的 Tiptap 文档格式：
+
+```js
+// 默认页眉/页脚
+const headerJSON = editor.storage.pages.headerJSON
+const footerJSON = editor.storage.pages.footerJSON
+
+// 首页
+const headerFirstPageJSON = editor.storage.pages.headerFirstPageJSON
+const footerFirstPageJSON = editor.storage.pages.footerFirstPageJSON
+
+// 奇偶页
+const headerOddJSON = editor.storage.pages.headerOddJSON
+const headerEvenJSON = editor.storage.pages.headerEvenJSON
+const footerOddJSON = editor.storage.pages.footerOddJSON
+const footerEvenJSON = editor.storage.pages.footerEvenJSON
+```
+
+<Callout title="注意" variant="info">
+  这些存储值在用户通过对应的页眉/页脚编辑器进行编辑之前均为 `null`。编辑之前，使用的是配置中的原始模板。
+</Callout>
+
+### 保存页眉和页脚内容
+
+保存页眉和页脚内容是你的责任。保存文档时从存储区获取内容，加载时再恢复。
+
+**保存所有页眉和页脚内容：**
+
+```js
+function getHeaderFooterContent(editor) {
+  const { pages } = editor.storage
+
+  return {
+    // 默认页眉/页脚
+    headerHTML: pages.headerHTML,
+    headerJSON: pages.headerJSON,
+    footerHTML: pages.footerHTML,
+    footerJSON: pages.footerJSON,
+
+    // 首页
+    headerFirstPageHTML: pages.headerFirstPageHTML,
+    headerFirstPageJSON: pages.headerFirstPageJSON,
+    footerFirstPageHTML: pages.footerFirstPageHTML,
+    footerFirstPageJSON: pages.footerFirstPageJSON,
+
+    // 奇偶页
+    headerOddHTML: pages.headerOddHTML,
+    headerOddJSON: pages.headerOddJSON,
+    headerEvenHTML: pages.headerEvenHTML,
+    headerEvenJSON: pages.headerEvenJSON,
+    footerOddHTML: pages.footerOddHTML,
+    footerOddJSON: pages.footerOddJSON,
+    footerEvenHTML: pages.footerEvenHTML,
+    footerEvenJSON: pages.footerEvenJSON,
+  }
+}
+
+// 保存到后端
+const headerFooterData = getHeaderFooterContent(editor)
+await saveDocument({ content: editor.getJSON(), headerFooter: headerFooterData })
+```
+
+## 编程式打开和关闭编辑器
+
+你可以通过编程方式打开和关闭页眉和页脚编辑器。这对于集成自定义 UI 元素、构建导航界面或响应用户操作非常有用。
+
+### 打开编辑器
+
+使用 `openHeaderEditor` 和 `openFooterEditor` 命令为指定页面打开编辑器：
+
+```js
+// 打开第 1 页的页眉编辑器
+editor.commands.openHeaderEditor({ pageNumber: 1 })
+
+// 打开第 3 页的页脚编辑器
+editor.commands.openFooterEditor({ pageNumber: 3 })
+```
+
+这些命令在成功打开编辑器时返回 `true`，页面不存在时返回 `false`。
+
+<Callout title="注意" variant="info">
+  打开一个编辑器会自动关闭之前打开的页眉或页脚编辑器。页眉或页脚编辑器打开时，主文档编辑器将不可编辑。
+</Callout>
+
+**使用场景：**
+- 构建页面导航 UI，允许用户直接跳转编辑特定页面的页眉或页脚
+- 在工具栏中创建“前往页眉/页脚”按钮
+- 实现快捷键以打开页眉或页脚
+- 响应外部事件编程式打开编辑器
+
+**示例：页面导航组件**
+
+```tsx
+function PageNavigation({ editor }) {
+  const pageCount = editor.storage.pages.getPageCount?.() ?? 1
+
+  return (
+    <div>
+      {Array.from({ length: pageCount }, (_, i) => (
+        <div key={i + 1}>
+          <span>第 {i + 1} 页</span>
+          <button onClick={() => editor.commands.openHeaderEditor({ pageNumber: i + 1 })}>
+            编辑页眉
+          </button>
+          <button onClick={() => editor.commands.openFooterEditor({ pageNumber: i + 1 })}>
+            编辑页脚
+          </button>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### 关闭编辑器
+
+使用关闭命令关闭页眉或页脚编辑器：
+
+```js
+// 关闭当前打开的任何编辑器
+editor.commands.closeHeaderFooterEditors()
+
+// 关闭特定编辑器
+editor.commands.closeHeaderEditor()
+editor.commands.closeFooterEditor()
+```
+
+## 防止双击关闭编辑器
+
+默认情况下，在打开的页眉或页脚编辑器外双击会关闭编辑器。你可以使用回调选项防止此行为，这在有工具栏按钮或其他 UI 元素时很有用，避免用户双击时编辑器意外关闭。
+
+### 配置
+
+提供三种回调选项：
+
+- `onDblClickHeaderFooterPreventClose` - 适用于页眉和页脚（回退）
+- `onDblClickHeaderPreventClose` - 仅适用于页眉（优先于回退）
+- `onDblClickFooterPreventClose` - 仅适用于页脚（优先于回退）
+
+每个回调函数接收 `MouseEvent`，返回 `true` 表示阻止关闭，`false` 允许关闭。
+
+**示例：点击工具栏时防止关闭**
+
+```js
+Pages.configure({
+  header: '我的页眉',
+  footer: '第 {page} 页',
+  onDblClickHeaderFooterPreventClose: (event) => {
+    // 如果点击在工具栏内，保持编辑器打开
+    const toolbar = document.querySelector('.my-toolbar')
+    return toolbar?.contains(event.target)
   },
 })
 ```
 
-<Callout title="灵活性" variant="info">
-  使用自定义页面格式，你可以完全控制页面尺寸和边距，创建你需要的精确布局。  
-  有关详细指南和更多示例，请参阅 [页面格式](/pages/core-concepts/page-format) 文档中的 [自定义页面格式章节](/pages/core-concepts/page-format#custom-page-formats)。
-</Callout> 
+**示例：对页眉和页脚采用不同行为**
+
+```js
+Pages.configure({
+  header: '我的页眉',
+  footer: '第 {page} 页',
+  // 双击页眉外部永不关闭
+  onDblClickHeaderPreventClose: () => true,
+  // 仍允许双击页脚外部关闭
+  onDblClickFooterPreventClose: () => false,
+})
+```
+
+## 重点强调颜色
+
+可以自定义页眉和页脚编辑器覆盖层的视觉样式，调整强调色包括：
+
+- **光标颜色** — 编辑器中的文本光标颜色
+- **工具栏边框** — 编辑工具栏的顶部边框（页眉）或底部边框（页脚）
+- **标签背景** — “Header” 或 “Footer” 标签背景色
+
+### 配置
+
+在扩展配置时设置强调色：
+
+```js
+Pages.configure({
+  header: '我的页眉',
+  footer: '第 {page} 页',
+  // 同时设置页眉和页脚的颜色
+  accentColor: '#3b82f6',
+})
+```
+
+也可以分别设置页眉和页脚的强调色：
+
+```js
+Pages.configure({
+  header: '我的页眉',
+  footer: '第 {page} 页',
+  headerAccentColor: '#3b82f6',  // 页眉蓝色
+  footerAccentColor: '#10b981',  // 页脚绿色
+})
+```
+
+### 运行时更新
+
+使用命令动态修改强调色：
+
+```js
+// 同时更新页眉和页脚颜色
+editor.commands.setAccentColor('#8b5cf6')
+
+// 仅更新页眉颜色
+editor.commands.setHeaderAccentColor('#3b82f6')
+
+// 仅更新页脚颜色
+editor.commands.setFooterAccentColor('#ef4444')
+```
+
+<Callout title="CSS 颜色值" variant="info">
+  强调色选项支持所有有效的 CSS 颜色值，包括十六进制 (`#3b82f6`)、rgb (`rgb(59, 130, 246)`)、hsl (`hsl(217, 91%, 60%)`)、oklch 或 CSS 变量 (`var(--primary-color)`)。
+</Callout>
+
+## 限制
+
+### 无法禁用编辑
+
+双击编辑行为内置于扩展，无法禁用。所有有编辑器访问权限的用户都可以编辑页眉和页脚。
+
+### 页眉和页脚编辑器样式
+
+页眉/页脚编辑器使用内置样式，但你可通过 `accentColor`、`headerAccentColor` 和 `footerAccentColor` 选项自定义强调色。
+
+### 协作支持
+
+页眉和页脚编辑不支持协作同步。它们分别是独立的 Tiptap 实例，与主文档的协作会话无关。
+
+## 完整选项参考
+
+| 选项                                | 类型                            | 默认值               | 描述                                             |
+|-----------------------------------|------------------------------|--------------------|--------------------------------------------------|
+| `header`                          | `string \| JSONContent`      | `''`               | 默认页眉内容                                      |
+| `footer`                          | `string \| JSONContent`      | `''`               | 默认页脚内容                                      |
+| `headerTopMargin`                 | `number`                     | 顶部边距的 50%      | 页眉内容距离页面顶部的距离（像素）                  |
+| `footerBottomMargin`              | `number`                     | 底部边距的 50%      | 页脚内容距离页面底部的距离（像素）                  |
+| `differentFirstPage`              | `boolean`                    | `false`            | 启用首页不同的页眉和页脚                           |
+| `headerFirstPage`                 | `PagesHeaderFooter`          | `''`               | 首页页眉内容                                      |
+| `footerFirstPage`                 | `PagesHeaderFooter`          | `''`               | 首页页脚内容                                      |
+| `differentOddEven`                | `boolean`                    | `false`            | 启用奇偶页不同的页眉和页脚                         |
+| `headerOdd`                      | `PagesHeaderFooter`          | `''`               | 奇数页页眉内容                                    |
+| `headerEven`                     | `PagesHeaderFooter`          | `''`               | 偶数页页眉内容                                    |
+| `footerOdd`                      | `PagesHeaderFooter`          | `''`               | 奇数页页脚内容                                    |
+| `footerEven`                     | `PagesHeaderFooter`          | `''`               | 偶数页页脚内容                                    |
+| `headerFooterExtensions`          | `Extension[]`                | `StarterKit`       | 用于页眉/页脚编辑器的扩展                          |
+| `onDblClickHeaderFooterPreventClose` | `(event: MouseEvent) => boolean` | `undefined`        | 双击页眉/页脚外部时阻止关闭编辑器的回调            |
+| `onDblClickHeaderPreventClose`   | `(event: MouseEvent) => boolean` | `undefined`        | 双击页眉外部时阻止关闭编辑器的回调                  |
+| `onDblClickFooterPreventClose`   | `(event: MouseEvent) => boolean` | `undefined`        | 双击页脚外部时阻止关闭编辑器的回调                  |
+| `accentColor`                    | `string`                     | `'#6366f1'`        | 页眉/页脚编辑器覆盖层的强调色                      |
+| `headerAccentColor`              | `string`                     | 使用 `accentColor`  | 页眉编辑器覆盖层的强调色                           |
+| `footerAccentColor`              | `string`                     | 使用 `accentColor`  | 页脚编辑器覆盖层的强调色                           |
+
+## 命令参考
+
+| 命令                            | 参数                           | 描述                                  |
+|-------------------------------|------------------------------|-------------------------------------|
+| `setHeader`                   | `header: PagesHeaderFooter`  | 设置默认页眉内容                      |
+| `setFooter`                   | `footer: PagesHeaderFooter`  | 设置默认页脚内容                      |
+| `setHeaderTopMargin`          | `margin: number`             | 设置页眉顶部边距（像素）              |
+| `setFooterBottomMargin`       | `margin: number`             | 设置页脚底部边距（像素）              |
+| `setDifferentFirstPage`       | `enabled: boolean`           | 切换首页不同（包含页眉和页脚）        |
+| `setHeaderFirstPage`          | `header: PagesHeaderFooter`  | 设置首页页眉内容                      |
+| `setFooterFirstPage`          | `footer: PagesHeaderFooter`  | 设置首页页脚内容                      |
+| `setDifferentOddEven`         | `enabled: boolean`           | 切换奇偶页不同（包含页眉和页脚）       |
+| `setHeaderOdd`                | `header: PagesHeaderFooter`  | 设置奇数页页眉内容                    |
+| `setHeaderEven`               | `header: PagesHeaderFooter`  | 设置偶数页页眉内容                    |
+| `setFooterOdd`                | `footer: PagesHeaderFooter`  | 设置奇数页页脚内容                    |
+| `setFooterEven`               | `footer: PagesHeaderFooter`  | 设置偶数页页脚内容                    |
+| `openHeaderEditor`            | `{ pageNumber: number }`     | 打开指定页的页眉编辑器（页码从 1 开始） |
+| `openFooterEditor`            | `{ pageNumber: number }`     | 打开指定页的页脚编辑器（页码从 1 开始） |
+| `closeHeaderFooterEditors`    | 无                          | 关闭当前打开的任意页眉/页脚编辑器      |
+| `closeHeaderEditor`           | 无                          | 关闭页眉编辑器（如果打开）              |
+| `closeFooterEditor`           | 无                          | 关闭页脚编辑器（如果打开）              |
+| `setAccentColor`              | `color: string`              | 设置页眉/页脚编辑器覆盖层的强调色       |
+| `setHeaderAccentColor`        | `color: string`              | 设置页眉编辑器覆盖层强调色              |
+| `setFooterAccentColor`        | `color: string`              | 设置页脚编辑器覆盖层强调色              |

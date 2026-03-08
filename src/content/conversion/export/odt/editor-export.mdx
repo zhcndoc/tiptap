@@ -1,0 +1,217 @@
+---
+title: 从编辑器导出 ODT
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.2.0
+meta:
+    title: 导出 ODT | Tiptap 转换
+    description: 了解如何使用文档中的 Export ODT 扩展将 Tiptap 编辑器内容导出为 ODT（OpenDocument）文件。
+    category: Conversion
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="odt" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账号中开启[免费试用](https://cloud.tiptap.dev/v2?trial=true)或者[订阅起步计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有注册表安装">
+        若要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)进行身份验证，登录 Tiptap 私有 npm 注册表。
+    </RequirementItem>
+</Requirements>
+
+<CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ExportOdt" />
+
+使用 Tiptap 的 `@tiptap-pro/extension-export-odt` 将编辑器内容导出为 `.odt` 文件。此扩展通过将文档发送到 Tiptap 转换服务来集成 ODT 导出功能。
+
+如果您希望在客户端自行处理转换，也可使用[REST API](/conversion/export/odt/rest-api)。
+
+## 安装 ODT 导出扩展
+
+转换扩展发布在 Tiptap 的私有 npm 注册表中。请按照[私有注册表指南](/guides/pro-extensions)集成这些扩展。
+
+完成后即可安装并导入 **Export ODT** 扩展包。
+
+```bash
+npm i @tiptap-pro/extension-export-odt@beta
+```
+
+```js
+import { ExportOdt } from '@tiptap-pro/extension-export-odt'
+```
+
+## 配置扩展
+
+`ExportOdt` 扩展可通过传入 `ExportOdtOptions`（对象）作为 `configure` 方法参数来配置，包含以下属性：
+
+```ts
+import { ExportOdt } from '@tiptap-pro/extension-export-odt'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    ExportOdt.configure({
+      endpoint: 'https://api.tiptap.dev/v2/convert',
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      styleOverrides: {},
+      headers: {},
+      footers: {},
+      pageSize: { width: '21cm', height: '29.7cm' },
+      pageMargins: { top: '1cm', bottom: '1cm', left: '1cm', right: '1cm' },
+      onCompleteExport: (result) => {
+        // 处理导出的 Blob
+      },
+    }),
+    // 其他扩展 ...
+  ],
+})
+```
+
+| 参数              | 类型                     | 说明                                         | 默认值                               |
+| ----------------- | ------------------------ | -------------------------------------------- | ----------------------------------- |
+| `endpoint`        | `string`                 | 用于转换的 Tiptap API 端点                    | `'https://api.tiptap.dev/v2/convert'` |
+| `token`           | `string`                 | 用于认证的 Tiptap JWT                         | `''`                                |
+| `appId`           | `string`                 | 用于认证的 Tiptap 应用 ID                      | `''`                                |
+| `styleOverrides`  | `Record<string, string>` | 应用于导出的样式覆盖                          | `undefined`                         |
+| `headers`         | `HeaderConfig`           | 导出文档的页眉配置                            | `undefined`                         |
+| `footers`         | `FooterConfig`           | 导出文档的页脚配置                            | `undefined`                         |
+| `pageSize`        | `PageSize`               | 页面尺寸配置                                | `undefined`                         |
+| `pageMargins`     | `PageMargins`            | 页面边距配置                                | `undefined`                         |
+| `onCompleteExport`| `(result: Blob) => void` | 接收导出文件 Blob 的回调函数                   | 未提供时抛出错误                      |
+
+### HeaderConfig（页眉配置）
+
+| 属性                 | 类型       | 说明                                                                                             |
+| -------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| `evenAndOddHeaders`  | `boolean`  | 是否为奇数页和偶数页使用不同的页眉                                                                |
+| `differentFirstPage` | `boolean`  | 是否首页使用不同的页眉。为 `true` 时，第 1 页使用 `first` 内容，非首页使用 `default` 内容                          |
+| `default`            | `string`   | 每页标准默认页眉，或当启用 `evenAndOddHeaders` 时，奇数页使用的页眉。接受纯文本或字符串化的 Tiptap JSONContent 用于富格式。 |
+| `first`              | `string`   | 首页的页眉，只在 `differentFirstPage` 为 `true` 时生效。接受纯文本或字符串化的 Tiptap JSONContent。                        |
+| `even`               | `string`   | 偶数页的页眉（启用 `evenAndOddHeaders` 时）。接受纯文本或字符串化的 Tiptap JSONContent。                                |
+
+### FooterConfig（页脚配置）
+
+| 属性                 | 类型       | 说明                                                                                             |
+| -------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| `evenAndOddFooters`  | `boolean`  | 是否为奇数页和偶数页使用不同的页脚                                                                |
+| `differentFirstPage` | `boolean`  | 是否首页使用不同的页脚。为 `true` 时，第 1 页使用 `first` 内容，非首页使用 `default` 内容                          |
+| `default`            | `string`   | 每页标准默认页脚，或当启用 `evenAndOddFooters` 时，奇数页使用的页脚。接受纯文本或字符串化的 Tiptap JSONContent 用于富格式。 |
+| `first`              | `string`   | 首页的页脚，只在 `differentFirstPage` 为 `true` 时生效。接受纯文本或字符串化的 Tiptap JSONContent。                        |
+| `even`               | `string`   | 偶数页的页脚（启用 `evenAndOddFooters` 时）。接受纯文本或字符串化的 Tiptap JSONContent。                                |
+
+### PageSize（页面尺寸）
+
+| 属性     | 类型     | 说明                                                                                             | 默认值     |
+| -------- | -------- | ------------------------------------------------------------------------------------------------ | ---------- |
+| `width`  | `string` | 页面宽度。必须是一个正数字，后跟有效单位（cm、in、pt、pc、mm、px）                                  | `"21cm"`   |
+| `height` | `string` | 页面高度。必须是一个正数字，后跟有效单位（cm、in、pt、pc、mm、px）                                  | `"29.7cm"` |
+
+### PageMargins（页面边距）
+
+| 属性       | 类型     | 说明                                                                                                            | 默认值     |
+| ---------- | -------- | ---------------------------------------------------------------------------------------------------------------- | ---------- |
+| `top`      | `string` | 页面顶部边距。允许负数。必须是数字后跟有效单位（cm、in、pt、pc、mm、px）                                          | `"1cm"`    |
+| `bottom`   | `string` | 页面底部边距。允许负数。必须是数字后跟有效单位（cm、in、pt、pc、mm、px）                                          | `"1cm"`    |
+| `left`     | `string` | 页面左边距。必须是正数，后跟有效单位（cm、in、pt、pc、mm、px）                                                    | `"1cm"`    |
+| `right`    | `string` | 页面右边距。必须是正数，后跟有效单位（cm、in、pt、pc、mm、px）                                                    | `"1cm"`    |
+
+## 导出 ODT 文件
+
+安装扩展后，您可以使用 `exportOdt` 命令将编辑器内容导出为 `.odt` 文件。
+
+```ts
+/**
+ * 通过 Tiptap 转换服务将当前文档导出为 ODT 文件。
+ *
+ * @param options - 可在每次调用时覆盖所有扩展级选项
+ * @example editor.commands.exportOdt({ onCompleteExport: (result) => {} })
+ */
+exportOdt: (options?: ExportOdtCommandOptions) => ReturnType
+```
+
+`ExportOdtCommandOptions` 接口继承自 `ExportOdtOptions`，因此每个配置选项均可在每次调用时覆盖：
+
+| 属性               | 类型                      | 说明                                                       |
+| ------------------ | ------------------------- | ---------------------------------------------------------- |
+| `endpoint`         | `string`                  | 覆盖该次导出的 API 端点                                     |
+| `token`            | `string`                  | 覆盖该次导出的 JWT                                          |
+| `appId`            | `string`                  | 覆盖该次导出的 App ID                                       |
+| `styleOverrides`   | `Record<string, string>`  | 覆盖该次导出的样式覆盖                                     |
+| `headers`          | `HeaderConfig`            | 覆盖该次导出的页眉配置                                     |
+| `footers`          | `FooterConfig`            | 覆盖该次导出的页脚配置                                     |
+| `pageSize`         | `PageSize`                | 覆盖该次导出的页面尺寸                                     |
+| `pageMargins`      | `PageMargins`             | 覆盖该次导出的页面边距                                     |
+| `onCompleteExport` | `(result: Blob) => void`  | 覆盖该次导出的回调函数                                     |
+
+```js
+import { ExportOdt } from '@tiptap-pro/extension-export-odt'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    ExportOdt.configure({
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      onCompleteExport(result) {
+        // 下载 ODT 文件
+        const url = URL.createObjectURL(result)
+        const a = document.createElement('a')
+
+        a.href = url
+        a.download = 'document.odt'
+        a.click()
+
+        URL.revokeObjectURL(url)
+      },
+    }),
+    // 其他扩展 ...
+  ],
+})
+
+// 使用扩展级回调
+editor.chain().exportOdt().run()
+
+// 或为特定导出覆盖选项
+editor.chain().exportOdt({
+  pageSize: { width: '8.5in', height: '11in' },
+  onCompleteExport(result) {
+    // 针对本次导出的自定义处理
+    const url = URL.createObjectURL(result)
+    window.open(url)
+  },
+}).run()
+```
+
+### 工作原理
+
+调用 `exportOdt` 时，扩展会将编辑器文档序列化为 JSON，并连同配置的选项（样式覆盖、页面布局、页眉、页脚）发送至 Tiptap 转换服务。服务将文档转换为 ODT 格式并以二进制 Blob 形式返回。`onCompleteExport` 回调会接收此 Blob，您可以基于它进行下载或后续处理。错误则作为异常抛出，不通过回调传递。
+
+## 支持与限制
+
+| **功能**                  | **支持情况**                                                           |
+|---------------------------|-----------------------------------------------------------------------|
+| **文本内容**               | ✓ 基础文本、空格、标点                                               |
+| **文本格式**               | ✓ 粗体、斜体、下划线、删除线、对齐、行高                           |
+| **块级元素**               | ✓ 段落、标题（1–6 级）、引用、顺序和无序列表                         |
+| **表格**                   | ✓ 基础结构、表头行、合并单元格                                       |
+| **链接**                   | ✓ 超链接                                                             |
+| **媒体（图片）**           | ✓ 内嵌图片，保留尺寸                                               |
+| **样式**                   | ✓ 字体家族*、字体颜色、字号、背景色、行高                            |
+| **页眉与页脚**             | ✓                                                                    |
+| **数学公式**               | ✓                                                                    |
+| **章节与分页**             | ~ 开发中                                                             |
+| **脚注与尾注**             | ~ 开发中                                                             |
+| **评论与修订**             | ✗                                                                    |
+| **目录**                   | ✗                                                                    |
+| **高级格式**               | ✗ 多栏、文本方向、表单、宏、嵌入脚本                                |
+| **元数据**                 | ✗                                                                    |
+| **文本框、形状、SmartArt** | ✗                                                                    |
+
+<span style={{fontSize: '1rem'}}>* 只要目标字体在打开导出文件的操作系统中已安装，即支持字体家族。</span>

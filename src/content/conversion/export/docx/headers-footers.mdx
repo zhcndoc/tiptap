@@ -1,8 +1,10 @@
 ---
 title: 使用页眉和页脚扩展您的 DOCX 导出功能
 tags:
-  - type: team
+  - type: start
   - type: beta
+  - type: version
+    label: v0.12.0
 meta:
     title: 使用页眉和页脚扩展您的 DOCX 导出功能 | Tiptap 转换
     description: 学习如何使用页眉和页脚扩展您的 DOCX 导出
@@ -12,6 +14,9 @@ meta:
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
@@ -22,7 +27,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
     </RequirementItem>
 </Requirements>
 
-使用 `@tiptap-pro/extension-export-docx-header-footer`，您可以扩展 DOCX 导出功能，允许自定义导出文档的页眉和页脚。
+`@tiptap-pro/extension-export-docx` 扩展内置支持自定义导出文档的页眉和页脚。
 
 <CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ExportDocxCustomHeaderFooter" />
 
@@ -35,8 +40,9 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 | 属性 | 类型 | 描述 |
 | --- | --- | --- |
 | `evenAndOddHeaders` | `boolean` | 是否为奇数页和偶数页使用不同的页眉 |
+| `differentFirstPage` | `boolean` | 是否首页使用不同的页眉。当为 `true` 时，首页使用 `first` 值，取代 `default`。 |
 | `default` | `Header \| (() => Promise<Header>)` | 每页的标准默认页眉，或当激活 `evenAndOddHeaders` 选项时用于奇数页的页眉。可以是 `Header` 对象或返回 `Header` 的异步函数 |
-| `first` | `Header \| (() => Promise<Header>)` | 当启用“首页不同”选项时首页的页眉。可以是 `Header` 对象或返回 `Header` 的异步函数 |
+| `first` | `Header \| (() => Promise<Header>)` | 首页的页眉，仅在 `differentFirstPage` 设置为 `true` 时使用。可以是 `Header` 对象或返回 `Header` 的异步函数 |
 | `even` | `Header \| (() => Promise<Header>)` | 当激活 `evenAndOddHeaders` 选项时偶数页的页眉。可以是 `Header` 对象或返回 `Header` 的异步函数 |
 
 ## 页脚配置
@@ -46,8 +52,9 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 | 属性 | 类型 | 描述 |
 | --- | --- | --- |
 | `evenAndOddFooters` | `boolean` | 是否为奇数页和偶数页使用不同的页脚 |
+| `differentFirstPage` | `boolean` | 是否首页使用不同的页脚。当为 `true` 时，首页使用 `first` 值，取代 `default`。 |
 | `default` | `Footer \| (() => Promise<Footer>)` | 每页的标准默认页脚，或当激活 `evenAndOddFooters` 选项时用于奇数页的页脚。可以是 `Footer` 对象或返回 `Footer` 的异步函数 |
-| `first` | `Footer \| (() => Promise<Footer>)` | 当启用“首页不同”选项时首页的页脚。可以是 `Footer` 对象或返回 `Footer` 的异步函数 |
+| `first` | `Footer \| (() => Promise<Footer>)` | 首页的页脚，仅在 `differentFirstPage` 设置为 `true` 时使用。可以是 `Footer` 对象或返回 `Footer` 的异步函数 |
 | `even` | `Footer \| (() => Promise<Footer>)` | 当激活 `evenAndOddFooters` 选项时偶数页的页脚。可以是 `Footer` 对象或返回 `Footer` 的异步函数 |
 
 # 使用示例

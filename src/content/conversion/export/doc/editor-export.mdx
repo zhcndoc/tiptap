@@ -1,0 +1,222 @@
+---
+title: 从编辑器导出 DOC
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.2.0
+meta:
+    title: 导出 DOC | Tiptap 转换
+    description: 了解如何使用文档中的 Export DOC 扩展将 Tiptap 编辑器内容导出为 DOC（旧版 Word）文件。
+    category: Conversion
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="doc" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)进行身份验证，登录 Tiptap 的私有 npm 注册表。
+    </RequirementItem>
+</Requirements>
+
+<CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ExportDoc" />
+
+<Callout title="建议改用 DOCX" variant="info">
+    DOC 格式是 Microsoft Word 97-2003 的旧版格式。建议现代使用时导出为[DOCX](/conversion/export/docx/editor-export)格式。仅在需要兼容旧系统时使用 DOC。
+</Callout>
+
+使用 Tiptap 的 `@tiptap-pro/extension-export-doc` 将编辑器内容导出为 `.doc` 文件。此扩展通过将文档发送到 Tiptap 转换服务，实现 DOC 导出功能的集成。
+
+如果您希望自行处理转换，也可以使用[REST API](/conversion/export/doc/rest-api)。
+
+## 安装 DOC 导出扩展
+
+转换扩展发布在 Tiptap 的私有 npm 注册表。按[私有注册表指南](/guides/pro-extensions)集成扩展。
+
+完成后，您即可安装并导入 **Export DOC** 扩展包。
+
+```bash
+npm i @tiptap-pro/extension-export-doc@beta
+```
+
+```js
+import { ExportDoc } from '@tiptap-pro/extension-export-doc'
+```
+
+## 配置扩展
+
+`ExportDoc` 扩展可使用 `ExportDocOptions`（对象）作为 `configure` 方法参数配置，包含以下属性：
+
+```ts
+import { ExportDoc } from '@tiptap-pro/extension-export-doc'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    ExportDoc.configure({
+      endpoint: 'https://api.tiptap.dev/v2/convert',
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      styleOverrides: {},
+      headers: {},
+      footers: {},
+      pageSize: { width: '21cm', height: '29.7cm' },
+      pageMargins: { top: '1cm', bottom: '1cm', left: '1cm', right: '1cm' },
+      onCompleteExport: (result) => {
+        // 处理导出的 Blob
+      },
+    }),
+    // 其他扩展 ...
+  ],
+})
+```
+
+| 参数              | 类型                     | 说明                                         | 默认值                                  |
+| ----------------- | ------------------------ | -------------------------------------------- | ------------------------------------- |
+| `endpoint`        | `string`                 | 用于转换的 Tiptap API 端点                    | `'https://api.tiptap.dev/v2/convert'` |
+| `token`           | `string`                 | 用于认证的 Tiptap JWT                         | `''`                                  |
+| `appId`           | `string`                 | 用于认证的 Tiptap 应用 ID                      | `''`                                  |
+| `styleOverrides`  | `Record<string, string>` | 应用于导出的样式覆盖                         | `undefined`                           |
+| `headers`         | `HeaderConfig`           | 导出文档的页眉配置                           | `undefined`                           |
+| `footers`         | `FooterConfig`           | 导出文档的页脚配置                           | `undefined`                           |
+| `pageSize`        | `PageSize`               | 页面尺寸配置                                | `undefined`                           |
+| `pageMargins`     | `PageMargins`            | 页面边距配置                                | `undefined`                           |
+| `onCompleteExport`| `(result: Blob) => void` | 接收导出文件 Blob 的回调函数                  | 未提供时抛出错误                      |
+
+### HeaderConfig
+
+| 属性               | 类型      | 说明                                                                                             |
+| ------------------ | --------- | ------------------------------------------------------------------------------------------------ |
+| `evenAndOddHeaders`| `boolean` | 是否为奇偶页使用不同的页眉                                                                         |
+| `differentFirstPage`| `boolean` | 是否首页使用不同的页眉。若为 `true`，第一页使用 `first` 配置值，而非 `default`。                       |
+| `default`          | `string`  | 默认页眉，应用于所有页面，或者当启用 `evenAndOddHeaders` 时应用于奇数页。支持纯文本字符串或字符串化的 Tiptap JSONContent 以实现富格式。 |
+| `first`            | `string`  | 首页页眉，仅当 `differentFirstPage` 设置为 `true` 时使用。支持纯文本字符串或字符串化的 Tiptap JSONContent。          |
+| `even`             | `string`  | 偶数页页眉，当启用 `evenAndOddHeaders` 选项时使用。支持纯文本字符串或字符串化的 Tiptap JSONContent。            |
+
+### FooterConfig
+
+| 属性                | 类型      | 说明                                                                                            |
+| ------------------- | --------- | ------------------------------------------------------------------------------------------------ |
+| `evenAndOddFooters` | `boolean` | 是否为奇偶页使用不同的页脚                                                                        |
+| `differentFirstPage`| `boolean` | 是否首页使用不同的页脚。若为 `true`，第一页使用 `first` 配置值，而非 `default`。                      |
+| `default`           | `string`  | 默认页脚，应用于所有页面，或者当启用 `evenAndOddFooters` 时应用于奇数页。支持纯文本字符串或字符串化的 Tiptap JSONContent。 |
+| `first`             | `string`  | 首页页脚，仅当 `differentFirstPage` 设置为 `true` 时使用。支持纯文本字符串或字符串化的 Tiptap JSONContent。           |
+| `even`              | `string`  | 偶数页页脚，当启用 `evenAndOddFooters` 选项时使用。支持纯文本字符串或字符串化的 Tiptap JSONContent。           |
+
+### PageSize
+
+| 属性      | 类型     | 说明                                                                                                     | 默认值      |
+| --------- | -------- | -------------------------------------------------------------------------------------------------------- | ---------- |
+| `width`   | `string` | 页面宽度。必须为正数，后跟有效单位（cm、in、pt、pc、mm、px）。                                             | `"21cm"`   |
+| `height`  | `string` | 页面高度。必须为正数，后跟有效单位（cm、in、pt、pc、mm、px）。                                             | `"29.7cm"` |
+
+### PageMargins
+
+| 属性      | 类型     | 说明                                                                                                     | 默认值    |
+| --------- | -------- | -------------------------------------------------------------------------------------------------------- | -------- |
+| `top`     | `string` | 页面上边距，可以为负值。必须是数字，后跟有效单位（cm、in、pt、pc、mm、px）。                               | `"1cm"`  |
+| `bottom`  | `string` | 页面下边距，可以为负值。必须是数字，后跟有效单位（cm、in、pt、pc、mm、px）。                               | `"1cm"`  |
+| `left`    | `string` | 页面左边距。必须为正数，后跟有效单位（cm、in、pt、pc、mm、px）。                                           | `"1cm"`  |
+| `right`   | `string` | 页面右边距。必须为正数，后跟有效单位（cm、in、pt、pc、mm、px）。                                           | `"1cm"`  |
+
+## 导出 DOC 文件
+
+安装扩展后，可以使用 `exportDoc` 命令将编辑器内容导出为 `.doc` 文件。
+
+```ts
+/**
+ * 通过 Tiptap 转换服务导出当前文档为 DOC 文件。
+ *
+ * @param options - 可覆盖的扩展级选项
+ * @example editor.commands.exportDoc({ onCompleteExport: (result) => {} })
+ */
+exportDoc: (options?: ExportDocCommandOptions) => ReturnType
+```
+
+`ExportDocCommandOptions` 接口继承 `ExportDocOptions`，因此每次命令调用时都可以覆盖所有配置选项：
+
+| 属性               | 类型                     | 说明                                                     |
+| ------------------ | ------------------------ | -------------------------------------------------------- |
+| `endpoint`         | `string`                 | 覆盖此特定导出的 API 端点                                |
+| `token`            | `string`                 | 覆盖此特定导出的 JWT Token                               |
+| `appId`            | `string`                 | 覆盖此特定导出的 App ID                                  |
+| `styleOverrides`   | `Record<string, string>` | 覆盖此特定导出的样式覆盖                                 |
+| `headers`          | `HeaderConfig`           | 覆盖此特定导出的页眉配置                                 |
+| `footers`          | `FooterConfig`           | 覆盖此特定导出的页脚配置                                 |
+| `pageSize`         | `PageSize`               | 覆盖此特定导出的页面尺寸                                 |
+| `pageMargins`      | `PageMargins`            | 覆盖此特定导出的页面边距                                 |
+| `onCompleteExport` | `(result: Blob) => void` | 覆盖此特定导出的回调函数                                 |
+
+```js
+import { ExportDoc } from '@tiptap-pro/extension-export-doc'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    ExportDoc.configure({
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      onCompleteExport(result) {
+        // 下载 DOC 文件
+        const url = URL.createObjectURL(result)
+        const a = document.createElement('a')
+
+        a.href = url
+        a.download = 'document.doc'
+        a.click()
+
+        URL.revokeObjectURL(url)
+      },
+    }),
+    // 其他扩展 ...
+  ],
+})
+
+// 使用扩展级回调
+editor.chain().exportDoc().run()
+
+// 或针对特定导出覆盖选项
+editor.chain().exportDoc({
+  pageSize: { width: '8.5in', height: '11in' },
+  onCompleteExport(result) {
+    // 针对该次导出的自定义处理
+    const url = URL.createObjectURL(result)
+    window.open(url)
+  },
+}).run()
+```
+
+### 工作原理
+
+调用 `exportDoc` 时，扩展将编辑器文档序列化为 JSON 并连同配置选项（样式覆盖、页面布局、页眉、页脚）发送给 Tiptap 转换服务。该服务将文档转换为 DOC（旧版 Word 97-2003 格式）并以二进制 Blob 返回。`onCompleteExport` 回调会直接接收此 Blob，您可以据此下载或处理。错误作为异常抛出，不会通过回调传递。
+
+## 支持与限制
+
+| **功能**                       | **支持情况**                                                             |
+|-------------------------------|-------------------------------------------------------------------------|
+| **文本内容**                  | ✓ 基本文本、间距、标点符号                                              |
+| **文本格式**                  | ✓ 加粗、斜体、下划线、删除线、对齐方式、行高                            |
+| **块级元素**                  | ✓ 段落、标题（1–6 级）、引用、排序和无序列表                            |
+| **表格**                     | ✓ 基本结构、表头行、合并列                                              |
+| **链接**                     | ✓ 超链接                                                                 |
+| **媒体（图片）**             | ✓ 内嵌图片，保持尺寸                                                     |
+| **样式**                     | ✓ 字体系列*、字体颜色、字体大小、背景颜色、行高                          |
+| **页眉与页脚**               | ✓                                                                       |
+| **数学公式**                 | ✓                                                                       |
+| **节与分页**                 | ~ 开发中                                                                |
+| **脚注与尾注**               | ~ 开发中                                                                |
+| **评论与修订**               | ✗                                                                       |
+| **目录**                    | ✗                                                                       |
+| **高级格式**                | ✗ 多栏、文字方向、表单、宏、内嵌脚本                                   |
+| **元数据**                  | ✗                                                                       |
+| **文本框、形状、SmartArt**   | ✗                                                                       |
+
+<span style={{fontSize: '1rem'}}>* 字体系列支持前提是目标字体在打开导出文件时已安装于操作系统中。</span>

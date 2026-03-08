@@ -1,0 +1,146 @@
+---
+title: 从编辑器导出 Markdown
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.1.0
+meta:
+    title: 导出 Markdown | Tiptap 转换
+    description: 学习如何使用文档中的导出 Markdown 扩展，将 Tiptap 编辑器内容导出为 Markdown 文件。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="markdown" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在你的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅起步计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装这个前端扩展，请按照[设置指南](/guides/pro-extensions)认证访问 Tiptap 的私有 npm 注册表。
+    </RequirementItem>
+</Requirements>
+
+<CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ExportMarkdown" />
+
+使用 Tiptap 的 `@tiptap-pro/extension-export-markdown` 扩展，将你的编辑器内容导出为 `.md` 文件。该扩展通过 `@tiptap/markdown` 扩展在本地将编辑器内容转换为 Markdown —— 无需调用 API 或提供凭证。
+
+如果你更愿意在服务器上处理转换，也可以使用[REST API](/conversion/export/markdown/rest-api)。
+
+## 安装 Markdown 导出扩展
+
+转换扩展发布在 Tiptap 的私有 npm 注册表。请按照[私有注册表指南](/guides/pro-extensions)集成这些扩展。
+
+完成后，你即可安装并导入 **Export Markdown** 扩展包。
+
+```bash
+npm i @tiptap-pro/extension-export-markdown@beta
+```
+
+<Callout title="必需的同级依赖" variant="hint">
+    该扩展需要在你的编辑器中安装并配置 `@tiptap/markdown` 扩展。`@tiptap/markdown` 扩展提供用于将编辑器内容序列化为 Markdown 的逻辑。
+</Callout>
+
+```bash
+npm i @tiptap/markdown
+```
+
+```js
+import { ExportMarkdown } from '@tiptap-pro/extension-export-markdown'
+```
+
+## 配置扩展
+
+你可以通过 `configure` 方法，传入一个带有以下属性的 `ExportMarkdownOptions`（对象）来配置 `ExportMarkdown` 扩展：
+
+```ts
+import { Markdown } from '@tiptap/markdown'
+import { ExportMarkdown } from '@tiptap-pro/extension-export-markdown'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    Markdown,
+    ExportMarkdown.configure({
+      onCompleteExport: (result) => {
+        // 处理导出的 Markdown 字符串
+      },
+    }),
+    // 其他扩展 ...
+  ],
+})
+```
+
+| 参数                | 类型                       | 描述                                                        | 默认值                        |
+| ------------------ | -------------------------- | ------------------------------------------------------------ | ---------------------------- |
+| `onCompleteExport` | `(result: string) => void` | 接收导出的 Markdown 内容字符串的回调                           | 如果未提供则抛出错误         |
+
+## 导出 Markdown 文件
+
+安装该扩展后，你可以使用 `exportMarkdown` 命令将编辑器内容导出为 `.md` 文件。
+
+```ts
+/**
+ * 将当前文档导出为 Markdown 字符串。
+ *
+ * 需要安装并在编辑器中配置 @tiptap/markdown 扩展，确保序列化功能正常。
+ *
+ * @param options.onCompleteExport - 可选回调，覆盖扩展级别的处理函数
+ * @example editor.commands.exportMarkdown({ onCompleteExport: (markdown) => console.log(markdown) })
+ */
+exportMarkdown: (options?: ExportMarkdownCommandOptions) => ReturnType
+```
+
+`ExportMarkdownCommandOptions` 接口：
+
+| 属性                | 类型                       | 描述                                                        |
+| ------------------ | -------------------------- | ------------------------------------------------------------ |
+| `onCompleteExport` | `(result: string) => void` | 可选的每次调用时回调，覆盖扩展级别的 `onCompleteExport`     |
+
+```js
+import { Markdown } from '@tiptap/markdown'
+import { ExportMarkdown } from '@tiptap-pro/extension-export-markdown'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    Markdown,
+    ExportMarkdown.configure({
+      onCompleteExport(result) {
+        // 下载 Markdown 文件
+        const blob = new Blob([result], { type: 'text/markdown' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+
+        a.href = url
+        a.download = 'document.md'
+        a.click()
+
+        URL.revokeObjectURL(url)
+      },
+    }),
+    // 其他扩展 ...
+  ],
+})
+
+// 使用扩展级回调
+editor.chain().exportMarkdown().run()
+
+// 或为特定导出覆盖回调
+editor.chain().exportMarkdown({
+  onCompleteExport(result) {
+    // 自定义处理，比如复制到剪贴板
+    navigator.clipboard.writeText(result)
+  },
+}).run()
+```
+
+### 工作原理
+
+调用 `exportMarkdown` 时，该扩展会调用 `@tiptap/markdown` 扩展的 `getMarkdown()` 方法，在本地序列化编辑器内容。不涉及任何外部服务。回调 `onCompleteExport` 直接接收 Markdown 字符串，你可以将其下载为 `.md` 文件、复制到剪贴板或进行其他处理。

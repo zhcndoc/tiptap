@@ -3,6 +3,8 @@ title: 从编辑器导出 .docx
 tags:
   - type: start
   - type: beta
+  - type: version
+    label: v0.12.0
 meta:
     title: 导出 DOCX | Tiptap 转换
     description: 学习如何使用我们的文档中的导出扩展将 Tiptap 编辑器内容导出为 DOCX（Word）文件。
@@ -30,9 +32,9 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 您可以在任何 JavaScript 环境使用此扩展，包括服务器端应用程序，这得益于 `exportDocx` 函数的同构特性。
 
-如果您更倾向于在我们的服务端处理转换，也可以使用 [REST API](/conversion/import-export/docx/rest-api)。
+您也可以使用 [REST API](/conversion/export/docx/rest-api)，如果您希望由我们端处理转换。
 
-默认情况下，该扩展将 Tiptap 节点映射为 DOCX 元素。如果您的内容包含自定义节点，请配置它们的[导出行为](/conversion/import-export/docx/custom-node-conversion)，确保正确转换。
+默认情况下，该扩展将 Tiptap 节点映射为 DOCX 元素。如果您的内容包含自定义节点，请配置它们的[导出行为](/conversion/export/docx/custom-node-conversion)，确保正确转换。
 
 ## 安装 DOCX 导出扩展
 
@@ -41,7 +43,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 完成后，您可以安装并导入 **Export DOCX** 扩展包：
 
 ```bash
-npm i @tiptap-pro/extension-export-docx
+npm i @tiptap-pro/extension-export-docx@beta
 ```
 
 使用导出扩展不需要任何 Tiptap 转换凭据，因为转换在扩展内部即时处理。
@@ -243,10 +245,10 @@ app.post('/export-docx', async (req, res) => {
 | **链接**                | ✓ 超链接                                       |
 | **媒体（图片）**        | ✓ 内嵌图片，保持大小                             |
 | **样式**                | ✓ 字体系列*、字体颜色、字体大小、背景色、行距   |
-| **页眉和页脚**          | ~ 正在开发                                     |
+| **页眉和页脚**          | ✓                                             |
 | **分节和分页**          | ~ 正在开发                                     |
 | **脚注和尾注**          | ~ 正在开发                                     |
-| **数学公式**            | ~ 正在开发                                     |
+| **数学公式**            | ✓                                             |
 | **评论和修订**          | ✗ 不支持                                       |
 | **目录**                | ✗ 不支持                                       |
 | **高级格式**            | ✗ 列、文本方向、表单、宏、嵌入脚本等不支持     |

@@ -1,8 +1,7 @@
 ---
 title: 通过 REST API 转换 ODT 文件
 tags:
-  - type: start
-  - type: beta
+  - type: deprecated
 meta:
     title: ODT REST API | Tiptap 转换
     description: 学习如何在 Tiptap 编辑器中处理 ODT 文件（OpenDocument 文本），包括编辑器内的导入/导出和 REST API 的使用。
@@ -11,6 +10,10 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
+
+<Callout title="Legacy ODT REST API — Deprecated" variant="warning">
+    该 REST API 已被弃用，预计将在 2026 年的某个时间点终止，团队会提前通知。对于新的集成，请使用更新的[ODT 导出 REST API](/conversion/export/odt/rest-api)和[导入 REST API](/conversion/import/docx/rest-api)。
+</Callout>
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
@@ -27,8 +30,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 ODT 文档转换 API 支持从和转换到 Tiptap 的 JSON 格式。
 
 <Callout title="查看 Postman 集合" variant="hint">
-    您还可以通过访问我们的[Postman
-    集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/request/33042171-d272bdec-dba8-48d9-839e-04423fad6ef2)来体验文档转换 API。
+    您还可以通过访问我们的[Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/request/33042171-d272bdec-dba8-48d9-839e-04423fad6ef2)来体验文档转换 API。
 </Callout>
 
 ## 导入 API 端点
@@ -62,7 +64,7 @@ ODT 文档转换 API 支持从和转换到 Tiptap 的 JSON 格式。
 ## 导出 API 端点
 `POST /export`
 
-`/export` 端点将 Tiptap 文档转换回 `docx` 格式。
+`/export` 端点将 Tiptap 文档转换回 `odt` 格式。
 
 ### 必需的请求头
 

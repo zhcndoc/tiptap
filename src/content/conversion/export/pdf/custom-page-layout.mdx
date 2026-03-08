@@ -1,0 +1,181 @@
+---
+title: PDF 中的自定义页面布局
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.2.0
+meta:
+    title: PDF 中的自定义页面布局 | Tiptap 转换
+    description: 了解如何使用 Export PDF 扩展自定义 PDF 页面和页边距大小。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="pdf" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)认证登录 Tiptap 的私有 npm 注册表。
+    </RequirementItem>
+</Requirements>
+
+PDF 导出扩展支持自定义页面大小和页边距，使您能够创建符合需求的精确定布局文档。无论您需要 A5 纸张、自定义纸张尺寸，还是特定的页边距配置，都可以直接在扩展中进行设置。
+
+## 页面大小配置
+
+使用 `pageSize` 选项定义导出 PDF 文件的自定义页面尺寸。页面大小配置支持多种计量单位的宽度和高度数值。
+
+### 支持的单位
+
+所有页面大小和页边距的尺寸均支持以下单位：
+
+| 单位 | 说明              |
+|------|-------------------|
+| `cm` | 厘米（默认单位）  |
+| `in` | 英寸              |
+| `pt` | 点（points）      |
+| `pc` | 派卡（picas）     |
+| `mm` | 毫米              |
+| `px` | 像素              |
+
+### 配置选项
+
+| 属性       | 类型      | 说明                                                                                                 | 默认值      |
+|------------|-----------|-----------------------------------------------------------------------------------------------------|-------------|
+| `width`    | `string`  | 页面宽度。必须是正数并跟随有效单位（cm, in, pt, pc, mm, px）。                                     | `"21cm"`    |
+| `height`   | `string`  | 页面高度。必须是正数并跟随有效单位（cm, in, pt, pc, mm, px）。                                    | `"29.7cm"`  |
+
+```js
+import { ExportPdf } from '@tiptap-pro/extension-export-pdf'
+
+ExportPdf.configure({
+  token: 'YOUR_TOKEN',
+  appId: 'YOUR_APP_ID',
+  pageSize: {
+    width: '14.8cm',    // A5 宽度
+    height: '21cm',     // A5 高度
+  },
+})
+```
+
+## 页面边距配置
+
+`pageMargins` 选项允许您为文档页面的各侧设置自定义边距。与页面大小不同，顶部和底部边距可以接受负值。
+
+### 配置选项
+
+| 属性       | 类型      | 说明                                                                                                        | 默认值    |
+|------------|-----------|-------------------------------------------------------------------------------------------------------------|-----------|
+| `top`      | `string`  | 页面顶部边距。可为负值。必须是数字，后跟有效单位（cm, in, pt, pc, mm, px）。                                | `"1cm"`   |
+| `bottom`   | `string`  | 页面底部边距。可为负值。必须是数字，后跟有效单位（cm, in, pt, pc, mm, px）。                                | `"1cm"`   |
+| `left`     | `string`  | 页面左侧边距。必须为正数，后跟有效单位（cm, in, pt, pc, mm, px）。                                          | `"1cm"`   |
+| `right`    | `string`  | 页面右侧边距。必须为正数，后跟有效单位（cm, in, pt, pc, mm, px）。                                          | `"1cm"`   |
+
+```js
+import { ExportPdf } from '@tiptap-pro/extension-export-pdf'
+
+ExportPdf.configure({
+  token: 'YOUR_TOKEN',
+  appId: 'YOUR_APP_ID',
+  pageMargins: {
+    top: '2cm',
+    bottom: '2cm',
+    left: '1.5cm',
+    right: '1.5cm',
+  },
+})
+```
+
+## 完整示例
+
+以下是一个完整示例，展示如何使用 PDF 导出扩展配置自定义页面布局：
+
+```js
+import { ExportPdf } from '@tiptap-pro/extension-export-pdf'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展...
+    ExportPdf.configure({
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      // A5 页面尺寸
+      pageSize: {
+        width: '14.8cm',
+        height: '21cm',
+      },
+      // 自定义边距
+      pageMargins: {
+        top: '2cm',
+        bottom: '2cm',
+        left: '2cm',
+        right: '2cm',
+      },
+    }),
+    // 其他扩展...
+  ],
+})
+
+// 使用自定义布局导出
+editor
+  .chain()
+  .exportPdf({
+    onCompleteExport(result) {
+      const url = URL.createObjectURL(result)
+      const a = document.createElement('a')
+
+      a.href = url
+      a.download = 'custom-layout.pdf'
+      a.click()
+
+      URL.revokeObjectURL(url)
+    },
+  })
+  .run()
+```
+
+## 常用页面尺寸
+
+以下是一些常用的页面尺寸供参考：
+
+| 格式       | 宽度     | 高度     |
+|------------|----------|----------|
+| **A4**     | `21cm`   | `29.7cm` |
+| **A5**     | `14.8cm` | `21cm`   |
+| **Letter** | `8.5in`  | `11in`   |
+| **Legal**  | `8.5in`  | `14in`   |
+| **Tabloid**| `11in`   | `17in`   |
+
+## 不同计量单位混用
+
+您可以根据喜好混合使用不同的单位：
+
+```js
+ExportPdf.configure({
+  token: 'YOUR_TOKEN',
+  appId: 'YOUR_APP_ID',
+  // 美式 Letter 纸尺寸，单位英寸
+  pageSize: {
+    width: '8.5in',
+    height: '11in',
+  },
+  // 不同单位的边距
+  pageMargins: {
+    top: '0.75in',    // 英寸
+    bottom: '72pt',   // 点（1英寸 = 72点）
+    left: '2cm',      // 厘米
+    right: '20mm',    // 毫米
+  },
+})
+```
+
+<Callout title="单位一致性" variant="hint">
+    虽然可以混合使用不同单位，但通常建议在整个配置中保持单位一致，以便于维护和理解。
+</Callout>

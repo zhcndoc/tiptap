@@ -1,12 +1,18 @@
 ---
 title: 更新日志 - LangChain.js
 meta:
-  title: 更新日志 - LangChain.js | Tiptap AI Toolkit
+  title: 更新日志 - LangChain.js | Tiptap AI 工具包
   description: '@tiptap-pro/ai-toolkit-langchain 包的更新日志'
   category: 内容 AI
 ---
 
 # @tiptap-pro/ai-toolkit-langchain
+
+## 3.0.0-alpha.27
+
+### 修补改动
+
+- 更新了 `@tiptap-pro/ai-toolkit-tool-definitions` 依赖。
 
 ## 3.0.0-alpha.26
 
@@ -18,38 +24,38 @@ meta:
 
 ### 小改动
 
-- 在 `toolDefinitions()` 和 `tiptapEditTool()` 中新增 `operationMeta` 选项。设置后，AI 会在每个编辑操作中包含一个 `meta` 字段，解释为何进行了该更改。
+- 在 `toolDefinitions()` 和 `tiptapEditTool()` 中新增了 `operationMeta` 选项。启用后，AI 会在每个编辑操作中包含一个 `meta` 字段，说明为何进行了该更改。
 
 ## 3.0.0-alpha.24
 
 ### 重大改动
 
-- 改进 `editThreads` 工具的定义，避免 AI 有时无法创建线程的错误。
-- 改进评论工作流的提示，避免 AI 有时无法创建线程的错误。
+- 改进了 `editThreads` 工具定义，避免 AI 有时无法创建线程的错误。
+- 改进了评论工作流的提示，避免 AI 有时无法创建线程的错误。
 
 ## 3.0.0-alpha.23
 
 ### 修补改动
 
-- 改进 tiptapEdit 工具定义，使编辑更高效。
+- 改进了 tiptapEdit 工具定义，使编辑更高效。
 
 ## 3.0.0-alpha.22
 
 ### 修补改动
 
-- 提升版本以配合核心 AI Toolkit 中重构的 Tiptap 编辑实现。
+- 升级版本以配合核心 AI Toolkit 中重构的 Tiptap 编辑实现。
 
 ## 3.0.0-alpha.21
 
 ### 修补改动
 
-- 提升版本以配合核心 AI Toolkit 中更新的 `getThreads` 分页语义。
+- 升级版本以配合核心 AI Toolkit 中更新的 `getThreads` 分页语义。
 
 ## 3.0.0-alpha.20
 
 ### 修补改动
 
-- 更新 `getThreads` 工具模式，要求分页时必须指定 `from` 索引。
+- 更新了 `getThreads` 工具模式，分页时必须指定 `from` 索引。
 
 ## 3.0.0-alpha.19
 
@@ -67,13 +73,13 @@ meta:
 
 ### 小改动
 
-- 服务器 AI Toolkit 工具定义
+- 服务器端 AI Toolkit 工具定义。
 
 ## 3.0.0-alpha.16
 
 ### 重大改动
 
-- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，并设置为默认工具。移除 `readNodeRange`、`readSelection`、`insertContent` 和 `applyPatch` 工具。
+- 新增 `tiptapEdit`、`tiptapRead` 和 `tiptapReadSelection` 工具，并设为默认工具。移除了 `readNodeRange`、`readSelection`、`insertContent` 和 `applyPatch` 工具。
 
 ## 3.0.0-alpha.15
 
@@ -85,93 +91,94 @@ meta:
 
 ### 修补改动
 
-- 修复 AI 在聊天交互开始时未能读取文档的错误。
+- 修复了 AI 在聊天交互开始时未能读取文档的错误。
 
 ## 3.0.0-alpha.13
 
 ### 修补改动
 
-- 修复 AI 在不必要时读取整个文档的错误。
+- 修复了 AI 在不必要时读取整个文档的错误。
 
 ## 3.0.0-alpha.12
 
 ### 修补改动
 
-- 修复 AI 在文档更新后读取到错误内容的错误。
+- 修复了 AI 在文档更新后读取到错误内容的错误。
 
 ## 3.0.0-alpha.11
 
 ### 修补改动
 
-- 修复新线程和评论未能创建在文档正确位置的错误。
+- 修复了新线程和评论未能创建在文档正确位置的错误。
 
 ## 3.0.0-alpha.10
 
 ### 重大改动
 
-- 为 `applyPatch` 工具引入新的工具输入格式，使工具定义更简洁、一致。
-- 改进所有内置工具的输出和工具定义。
-- 需要升级到 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.37`
+- 为 `applyPatch` 工具引入了新的工具输入格式，使工具定义更简洁、一致。
+- 改进了所有内置工具的输出和工具定义。
+- 需升级 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.37`
 
 ## 3.0.0-alpha.9
 
 ### 重大改动
 
-- 通过将 "html" 属性重命名为 "content"，使 `insertContent` 工具与内容格式无关。
-- 需要升级到 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.36`
+- 将 `insertContent` 工具的 "html" 属性重命名为 "content"，使其与内容格式无关。
+- 需升级 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.36`
 
 ### 修补改动
 
-- 修复 `insertContent` 工具中 `activeNodeRange` 作为位置值无效的错误。
-- 修复 `insertContent` 工具导致 `activeNodeRange` 总是重置为 0 的错误。
+- 修复了 `insertContent` 工具中 `activeNodeRange` 作为位置值无效的错误。
+- 修复了 `insertContent` 工具导致 `activeNodeRange` 总是重置为 0 的错误。
 
 ## 3.0.0-alpha.8
 
 ### 重大改动
 
 - 新增 `editThreads` 和 `getThreads` 工具，实现 AI 驱动的评论和线程管理。
-- 需要升级到 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.26`
+- 需升级 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.26`
 
 ## 3.0.0-alpha.7
 
 ### 重大改动
 
 - 将 `applyDiff` 工具重命名为 `applyPatch`。
-- 改进 `applyDiff` 工具（现称 `applyPatch`）的格式和工具定义，使 AI 生成补丁操作列表，提升准确性（避免不必要跳转）并显著减少令牌使用。
+- 改进了 `applyDiff` 工具（现称 `applyPatch`）的格式和工具定义，使 AI 生成补丁操作列表，提升准确性（避免不必要跳转），并显著减少令牌使用。
 
 ## 3.0.0-alpha.6
 
 ### 小改动
 
-- 为 `insertContent` 工具新增 `activeNodeRange` 位置，允许 AI 在活动节点区间插入内容，提高当禁用 `applyDiff` 工具时编辑的准确性。
+- 为 `insertContent` 工具新增了 `activeNodeRange` 位置，允许 AI 在活动节点区间插入内容，在禁用 `applyDiff` 工具时提高编辑准确性。
 
 ## 3.0.0-alpha.5
 
 ### 小改动
 
-- AI Toolkit 与 Pages 扩展集成的试验性实现。引入 `readPage` 工具。
+- AI Toolkit 与 Pages 扩展集成的试验性实现，引入了 `readPage` 工具。
 
 ## 3.0.0-alpha.4
 
 ### 重大改动
 
-- 改进 `readSelection` 和 `insertContent` 工具的定义，修复用户在 AI 读取选区后改变选区导致 AI 将内容插入错误位置的错误。需要 AI Toolkit 版本不低于 `3.0.0-alpha-17`
+- 改进了 `readSelection` 和 `insertContent` 工具的定义，修复用户在 AI 读取选区后改变选区导致 AI 将内容插入错误位置的错误。
+- 需 AI Toolkit 版本不低于 `3.0.0-alpha-17`
 
 ## 3.0.0-alpha.3
 
 ### 重大改动
 
-- 需要升级到 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.14`
+- 需升级 `@tiptap-pro/ai-toolkit` 包版本不低于 `3.0.0-alpha.14`
 - 优化了文档读取与编辑的工具定义
 
 ## 3.0.0-alpha.2
 
 ### 小改动
 
-- 改善 `readFirstChunk` 工具说明
+- 改善了 `readFirstChunk` 工具说明
 
 ## 3.0.0-alpha.1
 
 ### 重大改动
 
-- 初始版本，带有适用于 Tiptap AI Toolkit 的 LangChain.js 工具定义
+- 初始版本，包含适用于 Tiptap AI Toolkit 的 LangChain.js 工具定义

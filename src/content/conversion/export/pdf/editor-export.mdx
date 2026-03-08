@@ -1,0 +1,275 @@
+---
+title: 从编辑器导出 PDF
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.2.0
+meta:
+    title: 导出 PDF | Tiptap 转换
+    description: 了解如何使用文档中的导出 PDF 扩展将 Tiptap 编辑器内容导出为 PDF 文件。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="pdf" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始一个<a href="https://cloud.tiptap.dev/v2?trial=true">免费试用</a>或<a href="https://cloud.tiptap.dev/v2/billing">订阅入门计划</a>。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照<a href="/guides/pro-extensions">设置指南</a>进行操作，进行 Tiptap 私有 npm 注册表的身份验证。
+    </RequirementItem>
+</Requirements>
+
+<CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ExportPdf" />
+
+使用 Tiptap 的 `@tiptap-pro/extension-export-pdf` 可以将编辑器内容导出为 `.pdf` 文件。此扩展通过将文档发送至 Tiptap 转换服务，实现 PDF 导出功能并集成到编辑器中。
+
+如果您更愿意在自己端处理转换，也可以使用[REST API](/conversion/export/pdf/rest-api)。
+
+## 安装 PDF 导出扩展
+
+转换扩展发布在 Tiptap 的私有 npm 注册表中。请按[私有注册表指南](/guides/pro-extensions)集成扩展。
+
+完成后即可安装并导入**导出 PDF**扩展包。
+
+```bash
+npm i @tiptap-pro/extension-export-pdf@beta
+```
+
+```js
+import { ExportPdf } from '@tiptap-pro/extension-export-pdf'
+```
+
+## 配置扩展
+
+`ExportPdf` 扩展可通过 `configure` 方法传入一个带有以下属性的 `ExportPdfOptions`（对象）进行配置：
+
+```ts
+import { ExportPdf } from '@tiptap-pro/extension-export-pdf'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    ExportPdf.configure({
+      endpoint: 'https://api.tiptap.dev/v2/convert',
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      styleOverrides: {},
+      headers: {},
+      footers: {},
+      pageSize: { width: '21cm', height: '29.7cm' },
+      pageMargins: { top: '1cm', bottom: '1cm', left: '1cm', right: '1cm' },
+      onCompleteExport: (result) => {
+        // 处理导出的 Blob
+      },
+    }),
+    // 其他扩展 ...
+  ],
+})
+```
+
+| 参数               | 类型                     | 描述                                            | 默认值                                |
+| ------------------ | ------------------------ | ----------------------------------------------- | ------------------------------------ |
+| `endpoint`         | `string`                 | 用于转换的 Tiptap API 端点                       | `'https://api.tiptap.dev/v2/convert'` |
+| `token`            | `string`                 | 用于身份验证的 Tiptap JWT                        | `''`                                 |
+| `appId`            | `string`                 | 用于身份验证的 Tiptap 应用 ID                     | `''`                                 |
+| `styleOverrides`   | `Record<string, string>` | 应用于导出的样式覆盖                             | `undefined`                          |
+| `headers`          | `HeaderConfig`           | 导出文档的页眉配置                               | `undefined`                          |
+| `footers`          | `FooterConfig`           | 导出文档的页脚配置                               | `undefined`                          |
+| `pageSize`         | `PageSize`               | 页面大小配置                                    | `undefined`                          |
+| `pageMargins`      | `PageMargins`            | 页面边距配置                                    | `undefined`                          |
+| `customFonts`      | `CustomFont[]`           | 提供 PDF 导出的自定义字体文件（仅限本地部署）     | `undefined`                          |
+| `onCompleteExport` | `(result: Blob) => void` | 回调函数，接收导出的文件 Blob                     | 不提供时抛出错误                     |
+
+### HeaderConfig
+
+| 属性                 | 类型      | 描述                                                                                                 |
+| -------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
+| `evenAndOddHeaders`  | `boolean` | 是否为奇数页和偶数页使用不同的页眉                                                                   |
+| `differentFirstPage` | `boolean` | 是否在首页使用不同的页眉。当为 `true` 时，首页使用 `first` 的值代替 `default`。                             |
+| `default`            | `string`  | 每页的标准默认页眉，或当启用 `evenAndOddHeaders` 时为奇数页的页眉。可接受纯文本字符串或字符串化的 Tiptap JSONContent（用于富格式）。 |
+| `first`              | `string`  | 首页的页眉，仅当 `differentFirstPage` 设置为 `true` 时生效。可接受纯文本字符串或字符串化的 Tiptap JSONContent（用于富格式）。   |
+| `even`               | `string`  | 偶数页的页眉，当启用 `evenAndOddHeaders` 选项时生效。可接受纯文本字符串或字符串化的 Tiptap JSONContent（用于富格式）。         |
+
+### FooterConfig
+
+| 属性                 | 类型      | 描述                                                                                                 |
+| -------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
+| `evenAndOddFooters`  | `boolean` | 是否为奇数页和偶数页使用不同的页脚                                                                   |
+| `differentFirstPage` | `boolean` | 是否在首页使用不同的页脚。当为 `true` 时，首页使用 `first` 的值代替 `default`。                             |
+| `default`            | `string`  | 每页的标准默认页脚，或当启用 `evenAndOddFooters` 时为奇数页的页脚。可接受纯文本字符串或字符串化的 Tiptap JSONContent（用于富格式）。 |
+| `first`              | `string`  | 首页的页脚，仅当 `differentFirstPage` 设置为 `true` 时生效。可接受纯文本字符串或字符串化的 Tiptap JSONContent（用于富格式）。   |
+| `even`               | `string`  | 偶数页的页脚，当启用 `evenAndOddFooters` 选项时生效。可接受纯文本字符串或字符串化的 Tiptap JSONContent（用于富格式）。         |
+
+### PageSize
+
+| 属性    | 类型     | 描述                                                                                              | 默认值    |
+| ------- | -------- | ------------------------------------------------------------------------------------------------ | -------- |
+| `width` | `string` | 页面宽度。必须是正数且紧跟有效单位（cm、in、pt、pc、mm、px）。                                  | `"21cm"` |
+| `height`| `string` | 页面高度。必须是正数且紧跟有效单位（cm、in、pt、pc、mm、px）。                                  | `"29.7cm"` |
+
+### PageMargins
+
+| 属性     | 类型     | 描述                                                                                                    | 默认值   |
+| -------- | -------- | ------------------------------------------------------------------------------------------------------ | -------- |
+| `top`    | `string` | 页面上边距。允许为负数。必须为数字且紧跟有效单位（cm、in、pt、pc、mm、px）。                            | `"1cm"`  |
+| `bottom` | `string` | 页面下边距。允许为负数。必须为数字且紧跟有效单位（cm、in、pt、pc、mm、px）。                            | `"1cm"`  |
+| `left`   | `string` | 页面左边距。必须为正数且紧跟有效单位（cm、in、pt、pc、mm、px）。                                      | `"1cm"`  |
+| `right`  | `string` | 页面右边距。必须为正数且紧跟有效单位（cm、in、pt、pc、mm、px）。                                      | `"1cm"`  |
+
+### CustomFont
+
+<Callout title="仅限本地部署" variant="warning">
+    自定义字体仅在本地部署中可用。如果您有兴趣在 Tiptap 云服务中使用自定义字体，请<a href="https://tiptap.dev/pricing">联系我们了解企业计划</a>。
+</Callout>
+
+| 属性          | 类型     | 描述                                            |
+| ------------- | -------- | ------------------------------------------------ |
+| `url`         | `string` | 指向 `.ttf` 或 `.woff2` 字体文件的 HTTPS 直接链接 |
+| `fontFamily`  | `string` | 文档中使用的字体族名称                             |
+
+## 导出 PDF 文件
+
+安装该扩展后，可以使用 `exportPdf` 命令将编辑器内容导出为 `.pdf`。
+
+```ts
+/**
+ * 通过 Tiptap 转换服务将当前文档导出为 PDF 文件。
+ *
+ * @param options - 可覆盖所有扩展级选项
+ * @example editor.commands.exportPdf({ onCompleteExport: (result) => {} })
+ */
+exportPdf: (options?: ExportPdfCommandOptions) => ReturnType
+```
+
+`ExportPdfCommandOptions` 接口继承了 `ExportPdfOptions`，因此每个配置选项都可以在命令调用时覆盖：
+
+| 属性               | 类型                      | 描述                                                 |
+| ------------------ | ------------------------- | ---------------------------------------------------- |
+| `endpoint`         | `string`                  | 覆盖此特定导出的 API 端点                             |
+| `token`            | `string`                  | 覆盖此特定导出的 JWT 令牌                             |
+| `appId`            | `string`                  | 覆盖此特定导出的应用 ID                               |
+| `styleOverrides`   | `Record<string, string>`  | 覆盖此特定导出的样式覆盖                             |
+| `headers`          | `HeaderConfig`            | 覆盖此特定导出的页眉配置                             |
+| `footers`          | `FooterConfig`            | 覆盖此特定导出的页脚配置                             |
+| `pageSize`         | `PageSize`                | 覆盖此特定导出的页面大小                             |
+| `pageMargins`      | `PageMargins`             | 覆盖此特定导出的页面边距                             |
+| `customFonts`      | `CustomFont[]`            | 覆盖此特定导出的自定义字体（仅限本地部署）             |
+| `onCompleteExport` | `(result: Blob) => void`  | 覆盖此特定导出的回调函数                             |
+
+```js
+import { ExportPdf } from '@tiptap-pro/extension-export-pdf'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    ExportPdf.configure({
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      onCompleteExport(result) {
+        // 下载 PDF 文件
+        const url = URL.createObjectURL(result)
+        const a = document.createElement('a')
+
+        a.href = url
+        a.download = 'document.pdf'
+        a.click()
+
+        URL.revokeObjectURL(url)
+      },
+    }),
+    // 其他扩展 ...
+  ],
+})
+
+// 使用扩展级回调
+editor.chain().exportPdf().run()
+
+// 或为特定导出覆盖选项
+editor.chain().exportPdf({
+  pageSize: { width: '8.5in', height: '11in' },
+  onCompleteExport(result) {
+    // 针对该导出自定义处理
+    const url = URL.createObjectURL(result)
+    window.open(url)
+  },
+}).run()
+```
+
+### 工作原理
+
+调用 `exportPdf` 时，扩展将编辑器文档序列化为 JSON，并连同配置的选项（样式覆盖、页面布局、页眉、页脚、自定义字体）一起发送给 Tiptap 转换服务。服务将文档转换为 PDF，并以二进制 Blob 返回。`onCompleteExport` 回调直接接收该 Blob，您可以根据需要进行下载或处理。错误将作为异常抛出，而非通过回调传递。
+
+## 自定义字体
+
+<Callout title="仅限本地部署" variant="warning">
+    自定义字体仅在本地部署中可用。如果您有兴趣在 Tiptap 云服务中使用自定义字体，请<a href="https://tiptap.dev/pricing">联系我们了解企业计划</a>。
+</Callout>
+
+PDF 导出支持本地部署的自定义字体。您可以通过提供字体 URL 数组来配置转换服务下载并在生成 PDF 时使用这些字体。
+
+字体文件必须是 `.ttf` 或 `.woff2` 格式，且支持 HTTPS 访问。`fontFamily` 必须与文档文本样式中使用的字体名匹配。
+
+```ts
+ExportPdf.configure({
+  token: 'YOUR_TOKEN',
+  appId: 'YOUR_APP_ID',
+  customFonts: [
+    {
+      url: 'https://your-cdn.com/fonts/CustomFont-Regular.ttf',
+      fontFamily: 'Custom Font',
+    },
+    {
+      url: 'https://your-cdn.com/fonts/CustomFont-Bold.ttf',
+      fontFamily: 'Custom Font',
+    },
+  ],
+  onCompleteExport(result) {
+    // 处理导出的 PDF
+  },
+})
+```
+
+您也可以在命令调用时覆盖自定义字体：
+
+```ts
+editor.chain().exportPdf({
+  customFonts: [
+    {
+      url: 'https://your-cdn.com/fonts/SpecialFont.woff2',
+      fontFamily: 'Special Font',
+    },
+  ],
+}).run()
+```
+
+## 支持与限制
+
+| **功能**                             | **支持情况**                                                             |
+|-------------------------------------|-------------------------------------------------------------------------|
+| **文本内容**                        | ✓ 基本文字、间距、标点                                                  |
+| **文本格式**                       | ✓ 粗体、斜体、下划线、删除线、对齐、行高                              |
+| **块级元素**                       | ✓ 段落、标题（1–6 级）、引用块、有序列表和无序列表                    |
+| **表格**                         | ✓ 基本结构、表头行、跨列                                               |
+| **链接**                          | ✓ 超链接                                                               |
+| **媒体（图片）**                   | ✓ 内嵌图片，保持大小                                                   |
+| **样式**                          | ✓ 字体族*、字体颜色、字体大小、背景颜色、行高                         |
+| **自定义字体**                     | ✓ 仅限本地部署（`.ttf` 和 `.woff2`）                                  |
+| **页眉与页脚**                     | ✓                                                                      |
+| **数学公式**                      | ✓                                                                      |
+| **章节与分页**                     | ~ 正在开发                                                             |
+| **脚注与尾注**                     | ~ 正在开发                                                             |
+| **评论与修订**                     | ✗                                                                      |
+| **目录**                          | ✗                                                                      |
+| **高级格式化**                    | ✗ 列、文本方向、表单、宏、嵌入脚本                                    |
+| **元数据**                        | ✗                                                                      |
+| **文本框、形状、智能图形**         | ✗                                                                      |
+
+<span style={{fontSize: '1rem'}}>* 字体族支持使用 Google Fonts（自动提供）或通过 `customFonts` 选项配置的自定义字体（仅限本地部署）。</span>

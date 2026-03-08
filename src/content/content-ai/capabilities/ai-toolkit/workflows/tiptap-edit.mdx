@@ -70,7 +70,7 @@ import { createTiptapEditWorkflow } from '@tiptap-pro/ai-toolkit-tool-definition
 import { Output, streamText } from 'ai'
 
 export async function POST(req: Request) {
-  const { content, task } = await req.json()
+  const { content, task, context } = await req.json()
 
   // 创建并配置 Tiptap 编辑工作流（默认设置）。
   // 包含可直接使用的系统提示和输出模式。
@@ -116,8 +116,13 @@ export async function POST(req: Request) {
 import { experimental_useObject as useObject } from '@ai-sdk/react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { AiToolkit, getAiToolkit, tiptapEditWorkflowOutputSchema } from '@tiptap-pro/ai-toolkit'
-import { useEffect, useState } from 'react'
+import {
+  AiToolkit,
+  type TiptapReadResult,
+  getAiToolkit,
+  tiptapEditWorkflowOutputSchema,
+} from '@tiptap-pro/ai-toolkit'
+import { useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
 export default function Page() {
@@ -128,7 +133,8 @@ export default function Page() {
   })
 
   const [workflowId, setWorkflowId] = useState('')
-  const [task, setTask] = useState('使文本更正式和专业')
+  const tiptapReadResultRef = useRef<TiptapReadResult | null>(null)
+  const [task, setTask] = useState('Make the text more formal and professional')
 
   const { submit, isLoading, object } = useObject({
     api: '/api/tiptap-edit-workflow',
@@ -139,13 +145,16 @@ export default function Page() {
 
   // 随着分段结果到达实时流式处理
   useEffect(() => {
-    if (!editor || operations.length === 0) return
+    if (!editor || !operations) return
 
     const toolkit = getAiToolkit(editor)
+    if (!tiptapReadResultRef.current) return
+
     toolkit.tiptapEditWorkflow({
       operations,
       workflowId,
       hasFinished: !isLoading,
+      tiptapReadResult: tiptapReadResultRef.current,
     })
   }, [operations, workflowId, editor, isLoading])
 
@@ -154,14 +163,15 @@ export default function Page() {
   const editDocument = () => {
     const toolkit = getAiToolkit(editor)
 
-    // 获取待编辑文档的内容
-    const { content } = toolkit.tiptapRead()
+    // Obtain the content of the document to be edited
+    const readResult = toolkit.tiptapRead()
+    tiptapReadResultRef.current = readResult
 
     // 每个工作流必须有唯一 ID
     setWorkflowId(uuid())
 
-    // 调用 API 端点启动工作流
-    submit({ content, task })
+    // Call the API endpoint to start the workflow
+    submit({ content: readResult.content, task })
   }
 
   return (

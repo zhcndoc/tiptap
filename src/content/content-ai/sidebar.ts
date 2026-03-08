@@ -56,10 +56,6 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/agents/justified-changes',
                 },
                 {
-                  title: '审查作为摘要',
-                  href: '/content-ai/capabilities/ai-toolkit/agents/review-changes-as-summary',
-                },
-                {
                   title: '工具流式处理',
                   href: '/content-ai/capabilities/ai-toolkit/agents/tool-streaming',
                 },

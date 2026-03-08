@@ -1,0 +1,170 @@
+---
+title: 通过 REST API 导出 DOC
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v2.6.0
+meta:
+    title: DOC REST API | Tiptap 转换
+    description: 了解如何使用 Tiptap Conversion REST API v2 将 Tiptap JSON 文档导出为 DOC 格式（传统 Microsoft Word）。
+    category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="doc" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始一个 <a href="https://cloud.tiptap.dev/v2?trial=true" target="_blank" rel="noopener noreferrer">免费试用</a> 或 <a href="https://cloud.tiptap.dev/v2/billing" target="_blank" rel="noopener noreferrer">订阅 Start 计划</a>。
+    </RequirementItem>
+    <RequirementItem label="2. 配置 Convert 应用">
+        要使用 Convert REST API，请在 <a href="https://cloud.tiptap.dev/v2/cloud/convert" target="_blank" rel="noopener noreferrer">您的仪表盘</a> 获取您的 App ID 和 Convert 密钥。
+    </RequirementItem>
+</Requirements>
+
+DOC 导出 API 将 Tiptap JSON 文档转换为 DOC 文件（传统 Microsoft Word 97-2003 格式）。
+
+<Callout title="建议改用 DOCX" variant="info">
+    DOC 格式是 Microsoft Word 97-2003 的传统格式。对于现代应用，我们推荐导出为 <a href="/conversion/export/docx/rest-api">DOCX</a> 格式。仅在需要兼容旧系统时使用 DOC。
+</Callout>
+
+<Callout title="查看 Postman 集合" variant="hint">
+    您也可以通过我们的 <a href="https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60" target="_blank" rel="noopener noreferrer">Postman 集合</a> 来体验文档转换 API。
+</Callout>
+
+## 导出 DOC
+
+`POST /v2/convert/export/doc`
+
+`/v2/convert/export/doc` 端点将 Tiptap JSON 文档转换为 DOC 格式。发送包含文档 JSON 的 `POST` 请求，即可获得可下载的 DOC 文件。
+
+### 示例（cURL）
+
+```bash
+curl --output document.doc -X POST "https://api.tiptap.dev/v2/convert/export/doc" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}"
+    }'
+```
+
+<Callout title="需要订阅" variant="warning">
+    此端点需要有效的 Tiptap 订阅。详情请参阅我们的 <a href="https://tiptap.dev/pricing" target="_blank" rel="noopener noreferrer">定价页面</a>。
+</Callout>
+
+### 必填请求头
+
+| 名称             | 描述                                                                                                                              |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization`  | 用于认证请求的 JWT 令牌。例如：`Bearer your-jwt-token`                                                                           |
+| `X-App-Id`       | 来自 Convert 设置页面的 Convert 应用 ID：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert)  |
+| `Content-Type`   | 必须为 `application/json`                                                                                                         |
+
+### 请求体
+
+| 名称              | 类型      | 描述                                        | 默认值       |
+| ----------------- | --------- | ------------------------------------------- | ------------ |
+| `doc`             | `String`  | 以字符串形式的 Tiptap JSON 文档              | `N/A`        |
+| `exportType`      | `string`  | 预期导出类型                                | `blob`       |
+| `styleOverrides`  | `Object`  | 样式覆盖                                    | `{}`         |
+| `pageSize`        | `Object`  | 页面尺寸配置                                | `undefined`  |
+| `pageMargins`     | `Object`  | 页面边距配置                                | `undefined`  |
+| `headers`         | `Object`  | 页面页眉配置                                | `undefined`  |
+| `footers`         | `Object`  | 页面页脚配置                                | `undefined`  |
+
+#### 页面尺寸配置
+
+`pageSize` 对象允许您自定义导出 DOC 文档的页面尺寸：
+
+| 属性       | 类型      | 描述                                                                                             | 默认值      |
+| ---------- | --------- | ------------------------------------------------------------------------------------------------ | ----------- |
+| `width`    | `string`  | 页面宽度。必须是正数且后跟有效单位（cm、in、pt、pc、mm、px）。                                  | `"21.0cm"`  |
+| `height`   | `string`  | 页面高度。必须是正数且后跟有效单位（cm、in、pt、pc、mm、px）。                                  | `"29.7cm"`  |
+
+#### 页面边距配置
+
+`pageMargins` 对象允许您自定义导出 DOC 文档的页面边距：
+
+| 属性       | 类型      | 描述                                                                                                       | 默认值      |
+| ---------- | --------- | ---------------------------------------------------------------------------------------------------------- | ----------- |
+| `top`      | `string`  | 页面顶部边距。可为负数。必须是数字且后跟有效单位（cm、in、pt、pc、mm、px）。                               | `"1.0cm"`   |
+| `bottom`   | `string`  | 页面底部边距。可为负数。必须是数字且后跟有效单位（cm、in、pt、pc、mm、px）。                               | `"1.0cm"`   |
+| `left`     | `string`  | 页面左侧边距。必须是正数且后跟有效单位（cm、in、pt、pc、mm、px）。                                        | `"1.0cm"`   |
+| `right`    | `string`  | 页面右侧边距。必须是正数且后跟有效单位（cm、in、pt、pc、mm、px）。                                        | `"1.0cm"`   |
+
+#### 页眉配置
+
+`headers` 对象允许您自定义导出 DOC 文档的页眉：
+
+| 属性                 | 类型       | 描述                                                                                                  |
+| -------------------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| `evenAndOddHeaders`  | `boolean`  | 是否为奇数页和偶数页使用不同的页眉                                                                   |
+| `differentFirstPage` | `boolean`  | 是否首页使用不同的页眉。若为 `true`，则首页使用 `first` 值，非首页使用 `default` 值。                   |
+| `default`            | `string`   | 每页的默认页眉，或开启 `evenAndOddHeaders` 时奇数页使用的页眉。支持纯文本字符串或字符串化的 Tiptap JSONContent 以实现丰富格式。 |
+| `first`              | `string`   | 首页页眉，仅当 `differentFirstPage` 为 `true` 时使用。支持纯文本字符串或字符串化的 Tiptap JSONContent。  |
+| `even`               | `string`   | 偶数页页眉，仅当开启 `evenAndOddHeaders` 时使用。支持纯文本字符串或字符串化的 Tiptap JSONContent。        |
+
+<Callout title="纯文本 vs. Tiptap JSONContent">
+    每个页眉值可以是**纯文本字符串**（生成简单无样式的页眉）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，请先用 `JSON.stringify()` 序列化对象，再放入请求体中。
+</Callout>
+
+#### 页脚配置
+
+`footers` 对象允许您自定义导出 DOC 文档的页脚：
+
+| 属性                 | 类型       | 描述                                                                                                  |
+| -------------------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| `evenAndOddFooters`  | `boolean`  | 是否为奇数页和偶数页使用不同的页脚                                                                   |
+| `differentFirstPage` | `boolean`  | 是否首页使用不同的页脚。若为 `true`，则首页使用 `first` 值，非首页使用 `default` 值。                   |
+| `default`            | `string`   | 每页的默认页脚，或开启 `evenAndOddFooters` 时奇数页使用的页脚。支持纯文本字符串或字符串化的 Tiptap JSONContent 以实现丰富格式。 |
+| `first`              | `string`   | 首页页脚，仅当 `differentFirstPage` 为 `true` 时使用。支持纯文本字符串或字符串化的 Tiptap JSONContent。  |
+| `even`               | `string`   | 偶数页页脚，仅当开启 `evenAndOddFooters` 时使用。支持纯文本字符串或字符串化的 Tiptap JSONContent。        |
+
+<Callout title="纯文本 vs. Tiptap JSONContent">
+    每个页脚值可以是**纯文本字符串**（生成简单无样式的页脚）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，请先用 `JSON.stringify()` 序列化对象，再放入请求体中。
+</Callout>
+
+### 自定义页面布局示例
+
+```bash
+curl --output document.doc -X POST "https://api.tiptap.dev/v2/convert/export/doc" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}",
+      "pageSize": {
+        "width": "210mm",
+        "height": "297mm"
+      },
+      "pageMargins": {
+        "top": "20mm",
+        "bottom": "20mm",
+        "left": "15mm",
+        "right": "15mm"
+      }
+    }'
+```
+
+### 响应
+
+成功时，API 返回 DOC 文件的二进制下载：
+
+- **状态**：`200 OK`
+- **Content-Type**：`application/msword`
+- **Content-Disposition**：`attachment; filename=export-{timestamp}.doc`
+
+### 错误响应
+
+| 状态码 | 代码                             | 描述                             |
+| ------ | -------------------------------- | -------------------------------- |
+| 400    | `NO_DOCUMENT_PROVIDED`           | 请求体中未提供文档               |
+| 422    | `FAILED_TO_PARSE_DOCX_FILE`      | 解析 JSON 输入失败               |
+| 422    | `FAILED_TO_EXPORT_DOC_FILE`      | 导出中间格式失败                 |
+| 422    | `FAILED_TO_CONVERT_DOCX_TO_DOC`  | 转换为 DOC 失败                  |

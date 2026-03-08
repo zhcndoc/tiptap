@@ -1,0 +1,217 @@
+---
+title: 从编辑器导出 EPUB
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.2.0
+meta:
+    title: 导出 EPUB | Tiptap 转换
+    description: 学习如何使用文档中的 Export EPUB 扩展，将 Tiptap 编辑器内容导出为 EPUB 文件。
+    category: 转换
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="epub" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中启动[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)认证到 Tiptap 的私有 npm 注册表。
+    </RequirementItem>
+</Requirements>
+
+<CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ExportEpub" />
+
+使用 Tiptap 的 `@tiptap-pro/extension-export-epub` 将编辑器的内容导出为 `.epub` 文件。该扩展通过将文档发送到 Tiptap 的转换服务，为编辑器集成了 EPUB 导出功能。
+
+如果您希望在自己的端处理转换，也可以使用[REST API](/conversion/export/epub/rest-api)。
+
+## 安装 EPUB 导出扩展
+
+转换扩展发布在 Tiptap 的私有 npm 注册表。请按照[私有注册表指南](/guides/pro-extensions)集成这些扩展。
+
+完成后，您即可安装并导入 **Export EPUB** 扩展包。
+
+```bash
+npm i @tiptap-pro/extension-export-epub@beta
+```
+
+```js
+import { ExportEpub } from '@tiptap-pro/extension-export-epub'
+```
+
+## 配置扩展
+
+`ExportEpub` 扩展可通过 `configure` 方法传入一个 `ExportEpubOptions`（对象）进行配置，包含以下属性：
+
+```ts
+import { ExportEpub } from '@tiptap-pro/extension-export-epub'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    ExportEpub.configure({
+      endpoint: 'https://api.tiptap.dev/v2/convert',
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      styleOverrides: {},
+      headers: {},
+      footers: {},
+      pageSize: { width: '21cm', height: '29.7cm' },
+      pageMargins: { top: '1cm', bottom: '1cm', left: '1cm', right: '1cm' },
+      onCompleteExport: (result) => {
+        // 处理导出的 Blob
+      },
+    }),
+    // 其他扩展 ...
+  ],
+})
+```
+
+| 参数               | 类型                      | 描述                                          | 默认值                                 |
+| ------------------ | ------------------------- | --------------------------------------------- | ------------------------------------- |
+| `endpoint`         | `string`                  | 用于转换的 Tiptap API 端点                     | `'https://api.tiptap.dev/v2/convert'` |
+| `token`            | `string`                  | 认证用的 Tiptap JWT                            | `''`                                  |
+| `appId`            | `string`                  | 认证用的 Tiptap App ID                         | `''`                                  |
+| `styleOverrides`   | `Record<string, string>`  | 导出时应用的样式覆盖                           | `undefined`                           |
+| `headers`          | `HeaderConfig`            | 导出文档的页眉配置                             | `undefined`                           |
+| `footers`          | `FooterConfig`            | 导出文档的页脚配置                             | `undefined`                           |
+| `pageSize`         | `PageSize`                | 页面尺寸配置                                  | `undefined`                           |
+| `pageMargins`      | `PageMargins`             | 页边距配置                                    | `undefined`                           |
+| `onCompleteExport` | `(result: Blob) => void`  | 导出完成的回调，接收导出的文件 Blob            | 未提供则抛出错误                       |
+
+### HeaderConfig
+
+| 属性                | 类型       | 描述                                                                                          |
+| ------------------- | ---------- | --------------------------------------------------------------------------------------------- |
+| `evenAndOddHeaders` | `boolean`  | 是否为奇数页和偶数页使用不同的页眉                                                             |
+| `differentFirstPage` | `boolean`  | 是否在首页使用不同的页眉。当为 `true` 时，首页使用 `first` 字段代替 `default`                  |
+| `default`           | `string`   | 通用页眉文本，或在 `evenAndOddHeaders` 激活时为奇数页页眉。支持纯文本字符串或字符串化的 Tiptap JSONContent（用于富格式） |
+| `first`             | `string`   | 首页页眉，仅在 `differentFirstPage` 为 `true` 时使用。支持纯文本字符串或字符串化的 Tiptap JSONContent |
+| `even`              | `string`   | 偶数页页眉，仅在激活 `evenAndOddHeaders` 时使用。支持纯文本字符串或字符串化的 Tiptap JSONContent |
+
+### FooterConfig
+
+| 属性                | 类型       | 描述                                                                                          |
+| ------------------- | ---------- | --------------------------------------------------------------------------------------------- |
+| `evenAndOddFooters` | `boolean`  | 是否为奇数页和偶数页使用不同的页脚                                                             |
+| `differentFirstPage` | `boolean`  | 是否在首页使用不同的页脚。当为 `true` 时，首页使用 `first` 字段代替 `default`                  |
+| `default`           | `string`   | 通用页脚文本，或在 `evenAndOddFooters` 激活时为奇数页页脚。支持纯文本字符串或字符串化的 Tiptap JSONContent |
+| `first`             | `string`   | 首页页脚，仅在 `differentFirstPage` 为 `true` 时使用。支持纯文本字符串或字符串化的 Tiptap JSONContent |
+| `even`              | `string`   | 偶数页页脚，仅在激活 `evenAndOddFooters` 时使用。支持纯文本字符串或字符串化的 Tiptap JSONContent |
+
+### PageSize
+
+| 属性     | 类型     | 描述                                                                                              | 默认值     |
+| -------- | -------- | ------------------------------------------------------------------------------------------------ | ---------- |
+| `width`  | `string` | 页面宽度。必须为正数，后跟有效单位（cm、in、pt、pc、mm、px）                                     | `"21cm"`   |
+| `height` | `string` | 页面高度。必须为正数，后跟有效单位（cm、in、pt、pc、mm、px）                                     | `"29.7cm"` |
+
+### PageMargins
+
+| 属性      | 类型     | 描述                                                                                                  | 默认值    |
+| --------- | -------- | ----------------------------------------------------------------------------------------------------- | --------- |
+| `top`     | `string` | 页面顶部边距。可为负值。必须为数字并带有效单位（cm、in、pt、pc、mm、px）                              | `"1cm"`   |
+| `bottom`  | `string` | 页面底部边距。可为负值。必须为数字并带有效单位（cm、in、pt、pc、mm、px）                              | `"1cm"`   |
+| `left`    | `string` | 页面左侧边距。必须为正数并带有效单位（cm、in、pt、pc、mm、px）                                       | `"1cm"`   |
+| `right`   | `string` | 页面右侧边距。必须为正数并带有效单位（cm、in、pt、pc、mm、px）                                       | `"1cm"`   |
+
+## 导出 EPUB 文件
+
+安装扩展后，可以使用 `exportEpub` 命令将编辑器内容导出为 `.epub` 文件。
+
+```ts
+/**
+ * 通过 Tiptap 的转换服务将当前文档导出为 EPUB 文件。
+ *
+ * @param options - 可以覆盖所有扩展层级选项
+ * @example editor.commands.exportEpub({ onCompleteExport: (result) => {} })
+ */
+exportEpub: (options?: ExportEpubCommandOptions) => ReturnType
+```
+
+`ExportEpubCommandOptions` 接口继承自 `ExportEpubOptions`，因此每个配置项都能在命令调用时覆盖：
+
+| 属性                | 类型                      | 描述                                                    |
+| ------------------ | ------------------------- | -------------------------------------------------------- |
+| `endpoint`         | `string`                  | 覆盖此特定导出的 API 端点                                |
+| `token`            | `string`                  | 覆盖此特定导出的 JWT 令牌                                |
+| `appId`            | `string`                  | 覆盖此特定导出的 App ID                                  |
+| `styleOverrides`   | `Record<string, string>`  | 覆盖此特定导出的样式覆盖                                 |
+| `headers`          | `HeaderConfig`            | 覆盖此特定导出的页眉配置                                 |
+| `footers`          | `FooterConfig`            | 覆盖此特定导出的页脚配置                                 |
+| `pageSize`         | `PageSize`                | 覆盖此特定导出的页面尺寸                                 |
+| `pageMargins`      | `PageMargins`             | 覆盖此特定导出的页边距                                   |
+| `onCompleteExport` | `(result: Blob) => void`  | 覆盖此特定导出的导出完成回调                             |
+
+```js
+import { ExportEpub } from '@tiptap-pro/extension-export-epub'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    ExportEpub.configure({
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      onCompleteExport(result) {
+        // 下载 EPUB 文件
+        const url = URL.createObjectURL(result)
+        const a = document.createElement('a')
+
+        a.href = url
+        a.download = 'document.epub'
+        a.click()
+
+        URL.revokeObjectURL(url)
+      },
+    }),
+    // 其他扩展 ...
+  ],
+})
+
+// 使用扩展层级的回调
+editor.chain().exportEpub().run()
+
+// 或为特定导出覆盖选项
+editor.chain().exportEpub({
+  pageSize: { width: '8.5in', height: '11in' },
+  onCompleteExport(result) {
+    // 针对该导出的自定义处理
+    const url = URL.createObjectURL(result)
+    window.open(url)
+  },
+}).run()
+```
+
+### 工作原理
+
+调用 `exportEpub` 时，扩展会将编辑器的文档序列化为 JSON，并与配置的选项（样式覆盖、页面布局、页眉、页脚）一起发送到 Tiptap 转换服务。该服务将文档转换为 EPUB 格式，返回一个二进制 Blob。`onCompleteExport` 回调会直接接收此 Blob，您可以据此下载或进一步处理。错误会作为异常抛出，而非通过回调返回。
+
+## 支持与限制
+
+| **功能**                     | **支持情况**                                                              |
+| ---------------------------- | ------------------------------------------------------------------------- |
+| **文本内容**                 | ✓ 支持基础文本、间距、标点                                              |
+| **文本格式**                 | ✓ 支持加粗、斜体、下划线、删除线、对齐、行高                            |
+| **块级元素**                 | ✓ 段落，标题（1–6级），引用， 有序和无序列表                             |
+| **表格**                     | ✓ 基础结构，表头行，跨列                                                |
+| **链接**                     | ✓ 超链接                                                                  |
+| **媒体（图片）**             | ✓ 嵌入图片，保留尺寸                                                     |
+| **样式**                     | ✓ 字体系列*、字体颜色、字号、背景色、行高                               |
+| **页眉和页脚**               | ✓                                                                       |
+| **数学公式**                 | ✓                                                                       |
+| **章节与分页**               | ~ 研发中                                                                 |
+| **脚注与尾注**               | ~ 研发中                                                                 |
+| **评论与修订**               | ✗                                                                       |
+| **目录**                     | ✗                                                                       |
+| **高级格式**                 | ✗ 列、文本方向、表单、宏、嵌入脚本                                     |
+| **元数据**                   | ✗                                                                       |
+| **文本框、形状、SmartArt**   | ✗                                                                       |
+
+<span style={{fontSize: '1rem'}}>* 只要导出文件打开时目标字体已安装在操作系统上，就支持字体系列。</span>

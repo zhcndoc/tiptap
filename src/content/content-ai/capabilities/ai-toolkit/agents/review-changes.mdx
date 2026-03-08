@@ -16,7 +16,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 AI 工具包让你可以在漂亮的差异 UI 中展示 AI 生成的更改，方便用户预览并接受或拒绝这些更改。
 
-<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/review-changes" />
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/preview-changes" />
 
 查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
@@ -31,11 +31,11 @@ const result = toolkit.executeTool({
 })
 ```
 
-执行工具后，编辑器内会显示多个 **建议**。每条建议表示 AI 模型希望对文档进行的更改。
+After executing the tool, several **suggestions** will be displayed inside the editor. Each suggestion represents a change that the AI model made to the document.
 
-在继续对话之前，AI 代理必须等待用户审核更改。所以如果工具调用修改了文档，`addtoolOutput` 不应立即调用，而是应显示审核 UI。
+You can keep the conversation going while users review suggestions. Call `addToolOutput` immediately after each tool call, and show the review UI in parallel.
 
-编辑代码使聊天机器人暂停，等待用户审核更改：
+Edit the code so that the chatbot continues running while showing a review UI:
 
 ```tsx
 const [reviewState, setReviewState] = useState({
@@ -49,7 +49,7 @@ const [reviewState, setReviewState] = useState({
   userFeedback: [] as SuggestionFeedbackEvent[],
 })
 
-const { messages, sendMessage, addtoolOutput } = useChat({
+const { messages, sendMessage, addToolOutput } = useChat({
   transport: new DefaultChatTransport({ api: '/api/chat' }),
   sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
   async onToolCall({ toolCall }) {
@@ -67,9 +67,11 @@ const { messages, sendMessage, addtoolOutput } = useChat({
       },
     })
 
-    // 如果工具调用修改了文档，暂停并显示审核 UI
+    // Continue the conversation right away
+    addToolOutput({ tool: toolName, toolCallId, output: result.output })
+
+    // If the tool call modifies the document, also show a review UI
     if (result.docChanged) {
-      // 显示审核 UI
       setReviewState({
         isReviewing: true,
         tool: toolName,
@@ -77,9 +79,6 @@ const { messages, sendMessage, addtoolOutput } = useChat({
         output: result.output,
         userFeedback: [],
       })
-    } else {
-      // 继续对话
-      addtoolOutput({ tool: toolName, toolCallId, output: result.output })
     }
   },
 })
@@ -166,7 +165,7 @@ import './suggestions.css'
             output += `\n\n<user_feedback>\n${JSON.stringify(userFeedback)}\n</user_feedback>`
           }
 
-          addtoolOutput({
+          addToolOutput({
             tool: reviewState.tool,
             toolCallId: reviewState.toolCallId,
             output,
@@ -191,7 +190,7 @@ import './suggestions.css'
           const rejectionMessage =
             'Some changes you made were rejected by the user. Ask the user why, and what you can do to improve them.'
           const outputWithFeedback = `${rejectionMessage}\n\n<user_feedback>\n${JSON.stringify(userFeedback)}\n</user_feedback>`
-          addtoolOutput({
+          addToolOutput({
             tool: reviewState.tool,
             toolCallId: reviewState.toolCallId,
             output: outputWithFeedback,
@@ -372,9 +371,11 @@ export default function Page() {
         },
       })
 
-      // 如果工具调用修改了文档，暂停对话并显示审核 UI
+      // Continue the conversation right away
+      addToolOutput({ tool: toolName, toolCallId, output: result.output })
+
+      // If the tool call modifies the document, also show a review UI
       if (result.docChanged) {
-        // 显示审核 UI
         setReviewState({
           isReviewing: true,
           tool: toolName,
@@ -382,9 +383,6 @@ export default function Page() {
           output: result.output,
           userFeedback: [],
         })
-      } else {
-        // 继续对话
-        addToolOutput({ tool: toolName, toolCallId, output: result.output })
       }
     },
   })
@@ -406,19 +404,17 @@ export default function Page() {
             .join('\n')}
         </div>
       ))}
-      {!reviewState.isReviewing && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            if (input.trim()) {
-              sendMessage({ text: input })
-              setInput('')
-            }
-          }}
-        >
-          <input value={input} onChange={(e) => setInput(e.target.value)} />
-        </form>
-      )}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (input.trim()) {
+            sendMessage({ text: input })
+            setInput('')
+          }
+        }}
+      >
+        <input value={input} onChange={(e) => setInput(e.target.value)} />
+      </form>
       {reviewState.isReviewing && (
         <div>
           <h2>审核更改</h2>
@@ -429,17 +425,18 @@ export default function Page() {
               const result = toolkit.acceptAllSuggestions()
               // 合并所有反馈事件（之前的 + 新的）
               const userFeedback = [...reviewState.userFeedback, ...result.aiFeedback.events]
-              let output = reviewState.output
 
               // 如果有未接受的更改，附加反馈到工具输出
               if (userFeedback.length > 0 && userFeedback.some((event) => !event.accepted)) {
-                output += `\n\n<user_feedback>\n${JSON.stringify(userFeedback)}\n</user_feedback>`
+                sendMessage({
+                  text: `\n\n<user_feedback>\n${JSON.stringify(userFeedback)}\n</user_feedback>`,
+                })
               }
 
               addToolOutput({
                 tool: reviewState.tool,
                 toolCallId: reviewState.toolCallId,
-                output,
+                output: reviewState.output,
               })
               // 重置反馈事件并关闭审核 UI
               setReviewState({
@@ -462,11 +459,7 @@ export default function Page() {
               const rejectionMessage =
                 'Some changes you made were rejected by the user. Ask the user why, and what you can do to improve them.'
               const outputWithFeedback = `${rejectionMessage}\n\n<user_feedback>\n${JSON.stringify(userFeedback)}\n</user_feedback>`
-              addToolOutput({
-                tool: reviewState.tool,
-                toolCallId: reviewState.toolCallId,
-                output: outputWithFeedback,
-              })
+              sendMessage({ text: outputWithFeedback })
               // 重置反馈事件并关闭审核 UI
               setReviewState({
                 ...reviewState,
@@ -488,7 +481,7 @@ export default function Page() {
 
 通过额外的 CSS 样式，结果是一个简单但精致的 AI 聊天机器人应用，用户可以审核 AI 生成的更改：
 
-<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/review-changes" />
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/preview-changes" />
 
 查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
@@ -505,7 +498,7 @@ export default function Page() {
 
 完整的 `reviewOptions` 参数参考，请见 [executeTool 方法的 API 参考](/content-ai/capabilities/ai-toolkit/primitives/execute-tool)。
 
-像 [Cursor](https://www.cursor.com/) 这样的热门 AI 代理聊天机器人，会连续调用多个工具，并在 AI 代理完成所有工作后展示所有更改的汇总。要实现此类工作流程，请参阅 [将更改作为汇总进行审核](/content-ai/capabilities/ai-toolkit/guides/review-changes-as-summary) 指南。
+You can combine this guide with [Tool streaming](/content-ai/capabilities/ai-toolkit/agents/tool-streaming) to stream operations and keep the assistant responsive while suggestions are reviewed.
 
 ### 自定义建议的显示方式
 

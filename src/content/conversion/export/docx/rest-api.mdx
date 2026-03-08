@@ -1,0 +1,208 @@
+---
+title: 通过 REST API 导出 DOCX
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v2.6.0
+meta:
+    title: 通过 REST API 导出 DOCX | Tiptap 转换
+    description: 学习如何通过 Conversion REST API 将 Tiptap JSON 文档导出为 DOCX 格式。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 配置 Convert 应用">
+       要使用 Convert REST API，请从[仪表盘](https://cloud.tiptap.dev/v2/cloud/convert)获取您的 App ID 和 Convert 密钥。
+    </RequirementItem>
+</Requirements>
+
+DOCX 导出 API 可以将 Tiptap JSON 文档转换为 `.docx`（Microsoft Word）文件。
+
+<Callout title="查看 Postman 集合" variant="hint">
+    您也可以前往我们的[Postman
+    集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60)来试用文档转换 API。
+</Callout>
+
+
+## 导出 DOCX
+
+`POST /v2/convert/export/docx`
+
+`/v2/convert/export/docx` 端点将 Tiptap 文档转换为 `DOCX` 格式。用户可以向此端点 `POST` 文档，并使用多种参数自定义转换过程中不同文档元素的处理方式。
+
+
+<Callout title="导出自定义支持" variant="info">
+    `/v2/convert/export/docx` 端点不支持自定义节点转换，因为函数无法序列化，但支持[自定义样式覆盖](/conversion/export/docx/export-styles)。如果您希望在自己服务器上进行文档转换以启用此选项，可以参考[服务器端导出指南](/conversion/export/docx/editor-export#server-side-export)。
+</Callout>
+
+### 示例（cURL）
+```bash
+curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"left\"},\"content\":[{\"type\":\"text\",\"text\":\"欢迎参加本次演示，展示我们的编辑器如何将各种格式选项导出为 DOCX，确保您的内容在 Word 中保持预期外观。\"}]}]}",
+      "exportType": "blob"
+    }'
+```
+
+<Callout title="需订阅支持" variant="warning">
+    使用此端点需要有效的 Tiptap 订阅。详情请参阅我们的[定价页面](https://tiptap.dev/pricing)。
+</Callout>
+
+### 必填请求头
+
+| 名称              | 说明                                                                                                                                   |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization` | 用于验证请求的 JWT 令牌。例如：`Bearer your-jwt-token`                                                                                 |
+| `X-App-Id`      | 来自 Convert 设置页面的 Convert App-ID：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert)           |
+| `Content-Type`  | 必须为 `application/json`                                                                                                              |
+
+### 请求体
+
+| 名称                  | 类型      | 说明                        | 默认值       |
+| --------------------- | --------- | --------------------------- | ------------ |
+| `doc`                 | `String`  | Tiptap 的 JSON              | `N/A`        |
+| `exportType`          | `string`  | 期望的导出类型              | `blob`       |
+| `styleOverrides`      | `Object`  | 样式覆盖                    | `{}`         |
+| `pageSize`            | `Object`  | 页面尺寸配置                | `undefined`  |
+| `pageMargins`         | `Object`  | 页面边距配置                | `undefined`  |
+| `headers`             | `Object`  | 页面页眉配置                | `undefined`  |
+| `footers`             | `Object`  | 页面页脚配置                | `undefined`  |
+
+#### 页面尺寸配置
+
+`pageSize` 对象允许您自定义导出 DOCX 文档的页面尺寸：
+
+| 属性    | 类型     | 说明                                                                                         | 默认值      |
+| ------- | -------- | -------------------------------------------------------------------------------------------- | ----------- |
+| `width` | `string` | 页面宽度。必须是一个正数，后跟有效单位 (cm, in, pt, pc, mm, px)。                           | `"21.0cm"`  |
+| `height`| `string` | 页面高度。必须是一个正数，后跟有效单位 (cm, in, pt, pc, mm, px)。                           | `"29.7cm"`  |
+
+**带自定义页面尺寸的示例 cURL：**
+```bash
+curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"自定义页面尺寸的文档\"}]}]}",
+      "exportType": "blob",
+      "pageSize": {"width": "21.0cm", "height": "29.7cm"}
+    }'
+```
+
+#### 页面边距配置
+
+`pageMargins` 对象允许您自定义导出 DOCX 文档的页面边距：
+
+| 属性      | 类型     | 说明                                                    | 默认值      |
+| --------- | -------- | ------------------------------------------------------- | ----------- |
+| `top`     | `string` | 页面上边距。可为负值。必须是一个数字加有效单位 (cm, in, pt, pc, mm, px)。 | `"1.0cm"`   |
+| `bottom`  | `string` | 页面下边距。可为负值。必须是一个数字加有效单位 (cm, in, pt, pc, mm, px)。 | `"1.0cm"`   |
+| `left`    | `string` | 页面左边距。必须为正数加有效单位 (cm, in, pt, pc, mm, px)。             | `"1.0cm"`   |
+| `right`   | `string` | 页面右边距。必须为正数加有效单位 (cm, in, pt, pc, mm, px)。             | `"1.0cm"`   |
+
+
+**带自定义页面边距的示例 cURL：**
+```bash
+curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"自定义边距的文档\"}]}]}",
+      "exportType": "blob",
+      "pageMargins": {"top": "2.0cm", "bottom": "2.0cm", "left": "1.5cm", "right": "1.5cm"}
+    }'
+```
+
+#### 页眉和页脚
+
+`headers` 和 `footers` 对象允许您自定义导出 DOCX 的一系列页眉和页脚选项。
+
+##### 页眉配置
+
+`headers` 对象允许您自定义导出 DOCX 文档的页眉：
+
+| 属性                 | 类型      | 说明                                                                                           |
+| -------------------- | --------- | ---------------------------------------------------------------------------------------------- |
+| `evenAndOddHeaders`  | `boolean` | 是否为奇偶页使用不同的页眉                                                                     |
+| `differentFirstPage` | `boolean` | 是否为首页使用不同的页眉。当为 `true` 时，第一页使用 `first` 的值，替代 `default`。             |
+| `default`            | `string`  | 所有页面的默认页眉，或在启用 `evenAndOddHeaders` 时奇数页的页眉。支持纯文本字符串或字符串化的 Tiptap JSONContent，实现富格式。  |
+| `first`              | `string`  | 首页的页眉，仅当 `differentFirstPage` 为 `true` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent。       |
+| `even`               | `string`  | 启用 `evenAndOddHeaders` 后偶数页的页眉。支持纯文本字符串或字符串化的 Tiptap JSONContent。                           |
+
+<Callout title="纯文本与 Tiptap JSONContent">
+    每个页眉值可以是**纯文本字符串**（生成简单无样式的页眉），也可以是**字符串化的 Tiptap JSONContent** 对象（支持粗体、斜体、链接等富格式）。传递 JSONContent 时，请先用 `JSON.stringify()` 进行字符串化，然后再放入请求体。
+</Callout>
+
+**带自定义页眉的示例 cURL：**
+```bash
+curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"带自定义页眉的文档\"}]}]}",
+      "exportType": "blob",
+      "headers": {"evenAndOddHeaders": true, "default": "默认页眉", "first": "首页页眉", "even": "偶数页页眉"}
+    }'
+```
+
+#### 页脚配置
+
+`footers` 对象允许您自定义导出 DOCX 文档的页脚：
+
+| 属性                 | 类型      | 说明                                                                                           |
+| -------------------- | --------- | ---------------------------------------------------------------------------------------------- |
+| `evenAndOddFooters`  | `boolean` | 是否为奇偶页使用不同的页脚                                                                     |
+| `differentFirstPage` | `boolean` | 是否为首页使用不同的页脚。当为 `true` 时，第一页使用 `first` 的值，替代 `default`。             |
+| `default`            | `string`  | 所有页面的默认页脚，或在启用 `evenAndOddFooters` 时奇数页的页脚。支持纯文本字符串或字符串化的 Tiptap JSONContent，实现富格式。  |
+| `first`              | `string`  | 首页的页脚，仅当 `differentFirstPage` 为 `true` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent。       |
+| `even`               | `string`  | 启用 `evenAndOddFooters` 后偶数页的页脚。支持纯文本字符串或字符串化的 Tiptap JSONContent。                           |
+
+<Callout title="纯文本与 Tiptap JSONContent">
+    每个页脚值可以是**纯文本字符串**（生成简单无样式的页脚），也可以是**字符串化的 Tiptap JSONContent** 对象（支持粗体、斜体、链接等富格式）。传递 JSONContent 时，请先用 `JSON.stringify()` 进行字符串化，然后再放入请求体。
+</Callout>
+
+**带自定义页脚的示例 cURL：**
+```bash
+curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"带自定义页脚的文档\"}]}]}",
+      "exportType": "blob",
+      "footers": {"evenAndOddFooters": true, "default": "默认页脚", "first": "首页页脚", "even": "偶数页页脚"}
+    }'
+```
+
+### 响应
+
+成功时，API 以二进制形式返回 DOCX 文件下载：
+
+- **状态**: `200 OK`
+- **Content-Type**: `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
+- **Content-Disposition**: `attachment; filename=export-{timestamp}.docx`
+
+### 错误响应
+
+| 状态码 | 错误码                            | 说明                                    |
+| ------ | -------------------------------- | --------------------------------------- |
+| 400    | `NO_DOCUMENT_PROVIDED`           | 请求体中未提供文档                      |
+| 422    | `FAILED_TO_PARSE_DOCX_FILE`      | JSON 输入解析失败                       |
+| 422    | `FAILED_TO_EXPORT_DOCX_FILE`     | 导出 DOCX 失败                         |
+| 422    | `FAILED_TO_CONVERT_DOCX_TO_BLOB` | 转换结果类型失败                       |

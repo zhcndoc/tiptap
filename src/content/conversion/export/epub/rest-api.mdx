@@ -1,0 +1,166 @@
+---
+title: 通过 REST API 导出 EPUB
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v2.6.0
+meta:
+    title: EPUB REST API | Tiptap 转换
+    description: 了解如何使用 Tiptap Conversion REST API v2 将 Tiptap JSON 文档导出为 EPUB 格式。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="epub" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 配置 Convert 应用">
+        要使用 Convert REST API，请从[您的控制面板](https://cloud.tiptap.dev/v2/cloud/convert)获取您的应用 ID 和 Convert 密钥。
+    </RequirementItem>
+</Requirements>
+
+EPUB 导出 API 将 Tiptap JSON 文档转换为 EPUB 文件。
+
+<Callout title="查看 Postman 集合" variant="hint">
+    您也可以通过访问我们的[Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60)来试用文档转换 API。
+</Callout>
+
+## 导出 EPUB
+
+`POST /v2/convert/export/epub`
+
+`/v2/convert/export/epub` 端点将 Tiptap JSON 文档转换为 EPUB 格式。发送附带文档的 JSON 请求体的 `POST` 请求，便可获取可下载的 EPUB 文件。
+
+### 示例（cURL）
+
+```bash
+curl --output document.epub -X POST "https://api.tiptap.dev/v2/convert/export/epub" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}"
+    }'
+```
+
+<Callout title="需要订阅" variant="warning">
+    此端点需要有效的 Tiptap 订阅。详见我们的[价格页面](https://tiptap.dev/pricing)。
+</Callout>
+
+### 必要请求头
+
+| 名称             | 描述                                                                                                                         |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization` | 用于认证请求的 JWT 令牌。例如：`Bearer your-jwt-token`                                                                        |
+| `X-App-Id`      | Convert 应用 ID，从 Convert 设置页面获取：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert) |
+| `Content-Type`  | 必须为 `application/json`                                                                                                    |
+
+### 请求体参数
+
+| 名称             | 类型      | 描述                                 | 默认值      |
+| ---------------- | --------- | ---------------------------------- | ---------- |
+| `doc`            | `String`  | Tiptap JSON 文档，字符串格式          | `N/A`      |
+| `exportType`     | `string`  | 期望的导出类型                       | `blob`     |
+| `styleOverrides` | `Object`  | 样式覆盖配置                       | `{}`       |
+| `pageSize`       | `Object`  | 页面尺寸配置                       | `undefined`|
+| `pageMargins`    | `Object`  | 页面边距配置                       | `undefined`|
+| `headers`        | `Object`  | 页面页眉配置                       | `undefined`|
+| `footers`        | `Object`  | 页面页脚配置                       | `undefined`|
+
+#### 页面尺寸配置
+
+`pageSize` 对象允许您定制导出 EPUB 文档的页面尺寸：
+
+| 属性     | 类型      | 描述                                                                                                                          | 默认值    |
+| -------- | --------- | ----------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `width`  | `string`  | 页面宽度。必须是正数，单位有效（cm、in、pt、pc、mm、px）                                                                       | `"21.0cm"`|
+| `height` | `string`  | 页面高度。必须是正数，单位有效（cm、in、pt、pc、mm、px）                                                                       | `"29.7cm"`|
+
+#### 页面边距配置
+
+`pageMargins` 对象允许您定制导出 EPUB 文档的页面边距：
+
+| 属性      | 类型      | 描述                                                                                                      | 默认值     |
+| --------- | --------- | -------------------------------------------------------------------------------------------------------- | ---------- |
+| `top`     | `string`  | 页面顶部边距。可为负值。必须为数字加有效单位（cm、in、pt、pc、mm、px）                                    | `"1.0cm"`  |
+| `bottom`  | `string`  | 页面底部边距。可为负值。必须为数字加有效单位（cm、in、pt、pc、mm、px）                                    | `"1.0cm"`  |
+| `left`    | `string`  | 页面左侧边距。必须为正数加有效单位（cm、in、pt、pc、mm、px）                                              | `"1.0cm"`  |
+| `right`   | `string`  | 页面右侧边距。必须为正数加有效单位（cm、in、pt、pc、mm、px）                                              | `"1.0cm"`  |
+
+#### 页眉配置
+
+`headers` 对象允许您定制导出 EPUB 文档的页眉：
+
+| 属性                | 类型       | 描述                                                                                                         |
+| ------------------- | ---------- | ------------------------------------------------------------------------------------------------------------ |
+| `evenAndOddHeaders` | `boolean`  | 是否对奇偶页使用不同的页眉                                                                                   |
+| `differentFirstPage`| `boolean`  | 是否对首页使用不同的页眉。为 `true` 时，首页使用 `first` 配置，非首页使用 `default` 配置。                   |
+| `default`           | `string`   | 默认页眉，应用于所有页面，或在启用 `evenAndOddHeaders` 时应用于奇数页。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于丰富格式。  |
+| `first`             | `string`   | 首页页眉，仅当 `differentFirstPage` 为 `true` 时启用。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于丰富格式。                   |
+| `even`              | `string`   | 偶数页页眉，仅当启用 `evenAndOddHeaders` 时启用。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于丰富格式。                       |
+
+<Callout title="纯文本与 Tiptap JSONContent">
+    每个页眉值可以是**纯文本字符串**（生成简单无样式页眉），也可以是**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，请先用 `JSON.stringify()` 转换成字符串再发送。
+</Callout>
+
+#### 页脚配置
+
+`footers` 对象允许您定制导出 EPUB 文档的页脚：
+
+| 属性                | 类型       | 描述                                                                                                         |
+| ------------------- | ---------- | ------------------------------------------------------------------------------------------------------------ |
+| `evenAndOddFooters` | `boolean`  | 是否对奇偶页使用不同的页脚                                                                                   |
+| `differentFirstPage`| `boolean`  | 是否对首页使用不同的页脚。为 `true` 时，首页使用 `first` 配置，非首页使用 `default` 配置。                   |
+| `default`           | `string`   | 默认页脚，应用于所有页面，或在启用 `evenAndOddFooters` 时应用于奇数页。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于丰富格式。   |
+| `first`             | `string`   | 首页页脚，仅当 `differentFirstPage` 为 `true` 时启用。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于丰富格式。                   |
+| `even`              | `string`   | 偶数页页脚，仅当启用 `evenAndOddFooters` 时启用。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于丰富格式。                       |
+
+<Callout title="纯文本与 Tiptap JSONContent">
+    每个页脚值可以是**纯文本字符串**（生成简单无样式页脚），也可以是**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，请先用 `JSON.stringify()` 转换成字符串再发送。
+</Callout>
+
+### 自定义页面布局示例
+
+```bash
+curl --output document.epub -X POST "https://api.tiptap.dev/v2/convert/export/epub" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}",
+      "pageSize": {
+        "width": "210mm",
+        "height": "297mm"
+      },
+      "pageMargins": {
+        "top": "20mm",
+        "bottom": "20mm",
+        "left": "15mm",
+        "right": "15mm"
+      }
+    }'
+```
+
+### 响应
+
+成功时，API 返回 EPUB 文件的二进制下载流：
+
+- **状态**：`200 OK`
+- **Content-Type**：`application/epub+zip`
+- **Content-Disposition**：`attachment; filename=export-{timestamp}.epub`
+
+### 错误响应
+
+| 状态码 | 错误代码                          | 描述                              |
+| ------ | --------------------------------- | --------------------------------- |
+| 400    | `NO_DOCUMENT_PROVIDED`            | 请求体中未提供文档                  |
+| 422    | `FAILED_TO_PARSE_DOCX_FILE`       | 解析 JSON 输入失败                 |
+| 422    | `FAILED_TO_EXPORT_EPUB_FILE`      | 导出中间格式失败                   |
+| 422    | `FAILED_TO_CONVERT_DOCX_TO_EPUB`  | 转换为 EPUB 失败                   |

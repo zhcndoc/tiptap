@@ -1,0 +1,119 @@
+---
+title: 使用页眉和页脚扩展您的 PDF 导出
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.2.0
+meta:
+    title: 使用页眉和页脚扩展您的 PDF 导出 | Tiptap 转换
+    description: 学习如何使用 Export PDF 扩展，自定义 PDF 导出的页眉和页脚。
+    category: Conversion
+---
+
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="pdf" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账号中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有注册表安装">
+        若要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)认证访问 Tiptap 的私有 npm 注册表。
+    </RequirementItem>
+</Requirements>
+
+`@tiptap-pro/extension-export-pdf` 扩展内置支持自定义导出文档的页眉和页脚。您可以为首页、奇数页和偶数页配置不同的页眉和页脚。
+
+## 页眉配置
+
+`headers` 对象允许您自定义导出 PDF 文档的页眉：
+
+| 属性                 | 类型       | 描述                                                                                               |
+| -------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
+| `evenAndOddHeaders`  | `boolean`  | 是否对奇数页和偶数页使用不同的页眉                                                                |
+| `differentFirstPage` | `boolean`  | 是否对首页使用不同的页眉。当值为 `true` 时，首页使用 `first` 中的配置，而非 `default`。                |
+| `default`            | `string`   | 每页的标准默认页眉，或当 `evenAndOddHeaders` 启用时奇数页的页眉。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于丰富格式。 |
+| `first`              | `string`   | 首页的页眉。仅在 `differentFirstPage` 设置为 `true` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于丰富格式。    |
+| `even`               | `string`   | 偶数页的页眉，当启用 `evenAndOddHeaders` 选项时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于丰富格式。               |
+
+使用纯文本时，将生成简单无样式的页眉。使用字符串化的 Tiptap JSONContent（通过 `JSON.stringify()`）则可保留加粗、斜体和链接等富格式。
+
+## 页脚配置
+
+`footers` 对象允许您自定义导出 PDF 文档的页脚：
+
+| 属性                 | 类型       | 描述                                                                                               |
+| -------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
+| `evenAndOddFooters`  | `boolean`  | 是否对奇数页和偶数页使用不同的页脚                                                                |
+| `differentFirstPage` | `boolean`  | 是否对首页使用不同的页脚。当值为 `true` 时，首页使用 `first` 中的配置，而非 `default`。                |
+| `default`            | `string`   | 每页的标准默认页脚，或当 `evenAndOddFooters` 启用时奇数页的页脚。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于丰富格式。 |
+| `first`              | `string`   | 首页的页脚。仅在 `differentFirstPage` 设置为 `true` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于丰富格式。    |
+| `even`               | `string`   | 偶数页的页脚，当启用 `evenAndOddFooters` 选项时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于丰富格式。               |
+
+使用纯文本时，将生成简单无样式的页脚。使用字符串化的 Tiptap JSONContent（通过 `JSON.stringify()`）则可保留加粗、斜体和链接等富格式。
+
+## 完整示例
+
+```js
+import { ExportPdf } from '@tiptap-pro/extension-export-pdf'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展...
+    ExportPdf.configure({
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      headers: {
+        evenAndOddHeaders: true,
+        default: 'My Document - Confidential',
+        first: 'Welcome to My Document',
+        even: 'My Document - Even Page',
+      },
+      footers: {
+        evenAndOddFooters: true,
+        default: 'Company Name - All Rights Reserved',
+        first: 'Draft Version 1.0',
+        even: 'Company Name - Even Page Footer',
+      },
+    }),
+    // 其他扩展...
+  ],
+})
+
+// 使用页眉和页脚导出
+editor
+  .chain()
+  .exportPdf({
+    onCompleteExport(result) {
+      const url = URL.createObjectURL(result)
+      const a = document.createElement('a')
+
+      a.href = url
+      a.download = 'document-with-headers.pdf'
+      a.click()
+
+      URL.revokeObjectURL(url)
+    },
+  })
+  .run()
+```
+
+## 简单的页眉和页脚
+
+如果不需要为奇数和偶数页使用不同的页眉，可以只提供 `default` 值：
+
+```js
+ExportPdf.configure({
+  token: 'YOUR_TOKEN',
+  appId: 'YOUR_APP_ID',
+  headers: {
+    default: 'My Document Title',
+  },
+  footers: {
+    default: 'Page Footer - Company Name',
+  },
+})
+```

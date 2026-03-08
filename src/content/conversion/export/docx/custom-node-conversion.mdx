@@ -3,6 +3,8 @@ title: 使用 .docx 导入和导出自定义节点
 tags:
   - type: start
   - type: beta
+  - type: version
+    label: v0.12.0
 meta:
     title: DOCX 中的自定义节点 | Tiptap 转换
     description: 了解如何使用导出扩展将自定义节点导出到 DOCX（Word）文件。
@@ -12,7 +14,9 @@ meta:
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
@@ -217,32 +221,3 @@ editor
 ```
 
 您可以在 `render` 函数中使用 `Docx` 库类（`Paragraph`、`TextRun`、`Table` 等）构建任何支持的 `DOCX` 元素，这些类是通过从 `@tiptap-pro/extension-export-docx` 包的 `Docx` 导入提供的。
-
-## 从 .docx 导入自定义节点
-
-<CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ImportDocxCustomNode" />
-
-在导入 DOCX 文件时，您还可以定义自定义节点应如何转换回 Tiptap 节点。这是通过将自定义节点定义数组传递给 `import` 命令来完成的。
-
-```ts
-import { Import } from '@tiptap-pro/extension-import-docx'
-
-// ... 在您的编辑器或 useEditor 设置中：
-Import.configure({
-  appId: 'your-app-id',
-  token: 'your-jwt',
-  // 注意：这仅用于演示目的
-  endpoint: 'https://your-endpoint.com',
-  imageUploadCallbackUrl: 'https://your-endpoint.com/image-upload',
-  // ProseMirror 自定义节点映射
-  prosemirrorNodes: {
-    Hintbox: 'hintbox',
-  },
-}),
-```
-
-`@tiptap-pro/extension-import-docx` 的最新版本提供了 `prosemirrorNodes` 配置选项。此选项允许您将 DOCX 中的自定义节点映射到您的 Tiptap 模式。在上例中，我们将 DOCX 的 `Hintbox` 自定义节点映射到 Tiptap 模式中的 `hintbox` 自定义节点。这样，当导入包含 `Hintbox` 自定义节点的 DOCX 文件时，它会转换为 Tiptap 中的 `hintbox` 节点。
-
-<Callout title='DOCX, "prosemirrorNodes" 和 "prosemirrorMarks"' variant="info">
-  请注意，`prosemirrorNodes` 和 `prosemirrorMarks` 选项仅在您导入 `.docx` 文件时有效。如果您导入另一种类型的文件，例如 `.odt` 文件，则会使用 `/import` 端点而不是 `/import-docx` 端点，`prosemirrorNodes` 和 `prosemirrorMarks` 选项将不可用，因此您需要依赖于 [自定义节点和标记映射 API](/conversion/import-export/docx/rest-api#custom-node-and-mark-mapping) 处理这些端点。
-</Callout>

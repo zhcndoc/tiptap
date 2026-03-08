@@ -1,0 +1,59 @@
+---
+title: 从 .docx 导入自定义节点
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.6.0
+meta:
+    title: 从 DOCX 导入自定义节点 | Tiptap 转换
+    description: 了解如何使用 Import 扩展从 DOCX（Word）文件导入自定义节点。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有仓库安装">
+        若要安装此前端扩展，请根据[设置指南](/guides/pro-extensions)进行身份验证以访问 Tiptap 的私有 npm 仓库。
+    </RequirementItem>
+</Requirements>
+
+`@tiptap-pro/extension-import-docx` 扩展允许您定义在导入时，DOCX 文件中的自定义节点如何映射回您的 Tiptap 结构。
+
+## 从 .docx 导入自定义节点
+
+<CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ImportDocxCustomNode" />
+
+在导入 DOCX 文件时，您可以定义自定义节点如何转换回 Tiptap 节点。此操作通过向 `import` 命令传递一个自定义节点定义的数组来完成。
+
+```ts
+import { Import } from '@tiptap-pro/extension-import-docx'
+
+// ... 在您的 Editor 或 useEditor 配置中：
+Import.configure({
+  appId: 'your-app-id',
+  token: 'your-jwt',
+  // 注意：此配置仅用于演示
+  endpoint: 'https://your-endpoint.com',
+  imageUploadCallbackUrl: 'https://your-endpoint.com/image-upload',
+  // ProseMirror 自定义节点映射
+  prosemirrorNodes: {
+    Hintbox: 'hintbox',
+  },
+}),
+```
+
+`@tiptap-pro/extension-import-docx` 的最新版本提供了 `prosemirrorNodes` 配置选项。此选项允许您将 DOCX 中的自定义节点映射到您的 Tiptap 结构中。上例中，我们将 DOCX 的 `Hintbox` 自定义节点映射为 Tiptap 结构中的 `hintbox` 自定义节点。这样，当 DOCX 中包含 `Hintbox` 自定义节点时，导入到 Tiptap 时会转换成 `hintbox` 节点。
+
+<Callout title='DOCX、"prosemirrorNodes" 和 "prosemirrorMarks"' variant="info">
+  请注意，`prosemirrorNodes` 和 `prosemirrorMarks` 选项仅在导入 `.docx` 文件时有效。如果您导入的是其他类型的文件，例如 `.odt` 文件，则会调用 `/import` 接口而非 `/import-docx`，此时 `prosemirrorNodes` 和 `prosemirrorMarks` 选项将不可用，因此您需要依赖[自定义节点和标记映射 API](/conversion/import/docx/rest-api#custom-node-and-mark-mapping)来处理那些接口的映射。
+</Callout>
