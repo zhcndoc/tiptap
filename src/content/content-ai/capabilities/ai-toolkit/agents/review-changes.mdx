@@ -31,11 +31,11 @@ const result = toolkit.executeTool({
 })
 ```
 
-After executing the tool, several **suggestions** will be displayed inside the editor. Each suggestion represents a change that the AI model made to the document.
+执行工具后，多个**建议**会显示在编辑器内。每条建议都代表 AI 模型对文档所做的更改。
 
-You can keep the conversation going while users review suggestions. Call `addToolOutput` immediately after each tool call, and show the review UI in parallel.
+你可以在用户审核建议时继续对话。在每次调用工具后立即调用 `addToolOutput`，并同时显示审核 UI。
 
-Edit the code so that the chatbot continues running while showing a review UI:
+修改代码，使聊天机器人在显示审核 UI 的同时继续运行：
 
 ```tsx
 const [reviewState, setReviewState] = useState({
@@ -67,10 +67,10 @@ const { messages, sendMessage, addToolOutput } = useChat({
       },
     })
 
-    // Continue the conversation right away
+    // 立即继续对话
     addToolOutput({ tool: toolName, toolCallId, output: result.output })
 
-    // If the tool call modifies the document, also show a review UI
+    // 如果工具调用修改了文档，也显示审核 UI
     if (result.docChanged) {
       setReviewState({
         isReviewing: true,
@@ -86,7 +86,7 @@ const { messages, sendMessage, addToolOutput } = useChat({
 
 ## 样式建议
 
-创建一个 CSS 文件（`app/suggestions.css`）来将建议样式化为红色/绿色。
+创建一个 CSS 文件（`app/suggestions.css`）将建议样式化为红色/绿色。
 
 ```css
 /* 将删除的文本突出显示为红色 */
@@ -96,36 +96,36 @@ const { messages, sendMessage, addToolOutput } = useChat({
   color: oklch(0.396 0.141 25.723);
 }
 
-/* Lighter background for change groups (sub-changes carry the stronger highlight) */
+/* 较浅的背景色用于更改组（子更改带有更明显的高亮） */
 .tiptap-ai-suggestion.tiptap-ai-suggestion--change-group,
 .tiptap-ai-suggestion.tiptap-ai-suggestion--change-group > *:not(.tiptap-ai-suggestion-sub-change) {
   background-color: oklch(0.936 0.032 17.717);
 }
 
-/* Highlight sub-changes within inline groups */
+/* 突出显示内联组内的子更改 */
 .tiptap-ai-suggestion-sub-change {
   background-color: oklch(80.8% 0.114 19.571);
 }
 
-/* Highlight inserted text in green */
+/* 将插入文本突出显示为绿色 */
 .tiptap-ai-suggestion-diff,
 .tiptap-ai-suggestion-diff > * {
   background-color: oklch(87.1% 0.15 154.449);
 }
 
-/* Lighter background for diff change groups (sub-changes carry the stronger highlight) */
+/* 较浅背景色用于差异更改组（子更改带有更明显的高亮） */
 .tiptap-ai-suggestion-diff.tiptap-ai-suggestion-diff--change-group,
 .tiptap-ai-suggestion-diff.tiptap-ai-suggestion-diff--change-group
   > *:not(.tiptap-ai-suggestion-diff-sub-change) {
   background-color: oklch(0.962 0.044 156.743);
 }
 
-/* Highlight sub-changes within the replacement diff widget */
+/* 在替换差异部件中突出子更改 */
 .tiptap-ai-suggestion-diff-sub-change {
   background-color: oklch(87.1% 0.15 154.449);
 }
 
-/* Render table row insertions correctly */
+/* 正确渲染表格行插入 */
 .tiptap-ai-suggestion-diff:has(tr) {
   display: contents;
 }
@@ -136,7 +136,7 @@ const { messages, sendMessage, addToolOutput } = useChat({
 }
 ```
 
-在你的应用中导入样式表：
+在应用中导入样式表：
 
 ```ts
 // app/page.tsx
@@ -145,7 +145,7 @@ import './suggestions.css'
 
 ## 接受/拒绝所有建议
 
-然后，在 React 组件中显示按钮来拒绝/接受这些更改：
+然后，在 React 组件中显示按钮以拒绝/接受这些更改：
 
 ```tsx
 {
@@ -371,10 +371,10 @@ export default function Page() {
         },
       })
 
-      // Continue the conversation right away
+      // 立即继续对话
       addToolOutput({ tool: toolName, toolCallId, output: result.output })
 
-      // If the tool call modifies the document, also show a review UI
+      // 如果工具调用修改了文档，也显示审核 UI
       if (result.docChanged) {
         setReviewState({
           isReviewing: true,
@@ -498,7 +498,7 @@ export default function Page() {
 
 完整的 `reviewOptions` 参数参考，请见 [executeTool 方法的 API 参考](/content-ai/capabilities/ai-toolkit/primitives/execute-tool)。
 
-You can combine this guide with [Tool streaming](/content-ai/capabilities/ai-toolkit/agents/tool-streaming) to stream operations and keep the assistant responsive while suggestions are reviewed.
+你可以将本指南与 [Streaming](/content-ai/capabilities/ai-toolkit/agents/streaming) 结合使用，以便在建议被审核时，流式传输操作并保持助手的响应性。
 
 ### 自定义建议的显示方式
 

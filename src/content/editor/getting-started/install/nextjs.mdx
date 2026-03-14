@@ -6,7 +6,9 @@ meta:
   category: 编辑器
 ---
 
-使用此逐步指南将 Tiptap 集成到您的 Next.js 项目中。
+import { Callout } from '@/components/ui/Callout'
+
+Integrate Tiptap with your Next.js project using this step-by-step guide.
 
 ### 要求
 
@@ -61,7 +63,11 @@ const Tiptap = () => {
 export default Tiptap
 ```
 
-### 将组件添加到应用中
+<Callout title="Why immediatelyRender: false?" variant="hint">
+  Next.js 默认使用服务器端渲染。设置 `immediatelyRender: false` 可以防止编辑器在服务器端渲染，从而避免出现 [React hydration mismatch 错误](https://react.dev/errors/418)。编辑器将在客户端水合完成后初始化。`'use client'` 指令确保此组件仅在浏览器中运行。
+</Callout>
+
+### Add it to your app
 
 现在，让我们用以下示例代码替换 `app/page.js`（如果您使用的是 Pages 路由，则替换 `pages/index.js`）的内容，将 `Tiptap` 组件集成到应用里。
 
@@ -75,7 +81,11 @@ export default function Home() {
 
 现在您应该能在浏览器中看到 Tiptap，给自己点个赞吧！:)
 
-### 在 Next.js 中使用 yjs
+## Optimize your performance
+
+We recommend visiting the [React Performance Guide](/guides/performance) to integrate the Tiptap Editor efficiently. This will help you avoid potential issues as your app scales.
+
+## Next steps
 
 为避免出现错误：“Yjs was already imported. This breaks constructor checks and will lead to issues!”，请在您的 Next.js 配置文件中添加以下内容。根据您的 `node_modules` 目录所在位置，您可能需要将 `'node_modules/yjs'` 调整为 `'../node_modules/yjs'` 或 `'../../node_modules/yjs'`。
 

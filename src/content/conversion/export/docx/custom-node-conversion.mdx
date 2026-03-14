@@ -4,17 +4,17 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.12.0
+    label: v0.13.0
 meta:
     title: DOCX 中的自定义节点 | Tiptap 转换
     description: 了解如何使用导出扩展将自定义节点导出到 DOCX（Word）文件。
     category: 转换
 ---
 
-import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import CustomNodeConversionGuide from '../_custom-node-conversion-guide.mdx'
 
 <EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
 
@@ -31,102 +31,17 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 这使您能够在导出的 Word 文件中保留特定于应用程序的内容。
 
-<Callout title="自定义节点规范" variant="warning">
-  自定义节点转换器必须遵循底层 DOCX 生成库的要求。在实践中，自定义转换函数返回的 DOCX 应该是该节点的允许元素之一：一个 `Paragraph` 类（或一个 `Paragraph` 类的数组）、一个 `Table` 类，或如果节点应该在输出中被跳过则返回 `null`。
-</Callout>
-
-## 导出自定义节点至 .docx
+## 导出自定义节点到 .docx
 
 <CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ExportDocxCustomNode" />
 
 调用 `editor.exportDocx()` 时，可以在 `ExportDocxOptions` 参数中传递一个自定义节点定义数组。每个定义指定节点类型和渲染函数。
 
-为了举例，假设您的编辑器有一个自定义节点类型 `hintbox`（一个提示框样式的盒子）。您可以定义它在 DOCX 中的外观。
+<CustomNodeConversionGuide />
 
-以下是 `Hintbox` 扩展的自定义节点可能的样子：
+### 定义自定义节点渲染函数
 
-```ts
-import { mergeAttributes, Node } from '@tiptap/core'
-
-export interface ParagraphOptions {
-  /**
-   * 段落节点的 HTML 属性。
-   * @default {}
-   * @example { class: 'foo' }
-   */
-  HTMLAttributes: Record<string, any>
-}
-
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    hintbox: {
-      /**
-       * 设置一个提示框
-       * @example editor.commands.setHintbox()
-       */
-      setHintbox: () => ReturnType
-      /**
-       * 切换一个提示框
-       * @example editor.commands.toggleHintbox()
-       */
-      toggleHintbox: () => ReturnType
-    }
-  }
-}
-
-/**
- * 此扩展允许您创建提示框。
- * @see https://www.tiptap.dev/api/nodes/paragraph
- */
-export const Hintbox = Node.create<ParagraphOptions>({
-  name: 'hintbox',
-
-  priority: 1000,
-
-  addOptions() {
-    return {
-      HTMLAttributes: {
-        style: 'padding: 20px; border: 1px solid #b8d8ff; border-radius: 5px; background-color: #e6f3ff;',
-      },
-    }
-  },
-
-  group: 'block',
-
-  content: 'inline*',
-
-  parseHTML() {
-    return [{ tag: 'p' }]
-  },
-
-  renderHTML({ HTMLAttributes }) {
-    return ['p', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0]
-  },
-
-  addCommands() {
-    return {
-      setHintbox:
-        () =>
-        ({ commands }) => {
-          return commands.setNode(this.name)
-        },
-      toggleHintbox:
-        () =>
-        ({ commands }) => {
-          return commands.toggleNode(this.name, 'paragraph')
-        },
-    }
-  },
-
-  addKeyboardShortcuts() {
-    return {
-      'Mod-Alt-h': () => this.editor.commands.toggleHintbox(),
-    }
-  },
-})
-```
-
-然后，我们会定义 `Hintbox` 自定义节点在 `DOCX` 中的渲染方式：
+我们将定义在导出文档中，`Hintbox` 自定义节点应如何渲染：
 
 ```ts
 // 导入 ExportDocx 扩展
@@ -211,7 +126,7 @@ const editor = new Editor({
 })
 ```
 
-然后，在你的应用程序的某个后期，可以将编辑器内容导出为 `DOCX` 文件：
+然后，在应用程序的后续阶段，您可以将编辑器内容导出为 `DOCX` 文件：
 
 ```ts
 editor

@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.2.0
+    label: v0.3.0
 meta:
     title: ODT 中的自定义页面布局 | Tiptap 转换
     description: 了解如何使用 Export ODT 扩展自定义您的 ODT 页面和页边距大小。
@@ -18,11 +18,11 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 <EnterpriseCalloutAuto variant="odt" renderMode="sidebar" disableWaitlist />
 
 <Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
+    <RequirementItem label="1. Activate Trial or Subscription">
+        Start a [free trial](https://cloud.tiptap.dev/v2?trial=true) or [subscribe to the Start plan](https://cloud.tiptap.dev/v2/billing) in your account.
     </RequirementItem>
-    <RequirementItem label="2. 从私有注册表安装">
-        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 对 Tiptap 的私有 npm 注册表进行身份验证。
+    <RequirementItem label="2. Install from Private Registry">
+        To install this frontend extension, authenticate with Tiptap’s private npm registry following the [setup guide](/guides/pro-extensions).
     </RequirementItem>
 </Requirements>
 
@@ -59,8 +59,8 @@ ExportOdt.configure({
   token: 'YOUR_TOKEN',
   appId: 'YOUR_APP_ID',
   pageSize: {
-    width: '14.8cm',    // A5 宽度
-    height: '21cm',     // A5 高度
+    width: '14.8cm',    // A5 width
+    height: '21cm',     // A5 height
   },
 })
 ```
@@ -102,16 +102,16 @@ import { ExportOdt } from '@tiptap-pro/extension-export-odt'
 
 const editor = new Editor({
   extensions: [
-    // 其他扩展...
+    // Other extensions...
     ExportOdt.configure({
       token: 'YOUR_TOKEN',
       appId: 'YOUR_APP_ID',
-      // A5 页面尺寸
+      // A5 page size
       pageSize: {
         width: '14.8cm',
         height: '21cm',
       },
-      // 自定义边距
+      // Custom margins
       pageMargins: {
         top: '2cm',
         bottom: '2cm',
@@ -119,11 +119,11 @@ const editor = new Editor({
         right: '2cm',
       },
     }),
-    // 其他扩展...
+    // Other extensions...
   ],
 })
 
-// 使用自定义布局导出
+// Export with custom layout
 editor
   .chain()
   .exportOdt({
@@ -161,17 +161,17 @@ editor
 ExportOdt.configure({
   token: 'YOUR_TOKEN',
   appId: 'YOUR_APP_ID',
-  // 美式 Letter 尺寸（英寸）
+  // US Letter size (inches)
   pageSize: {
     width: '8.5in',
     height: '11in',
   },
-  // 不同单位的边距
+  // Margins with different units
   pageMargins: {
-    top: '0.75in',    // 英寸
-    bottom: '72pt',   // 磅点（1 英寸 = 72 磅点）
-    left: '2cm',      // 厘米
-    right: '20mm',    // 毫米
+    top: '0.75in',    // inches
+    bottom: '72pt',   // points (1 inch = 72 points)
+    left: '2cm',      // centimeters
+    right: '20mm',    // millimeters
   },
 })
 ```

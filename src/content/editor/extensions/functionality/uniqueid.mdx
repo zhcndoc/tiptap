@@ -23,8 +23,9 @@ meta:
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-`UniqueID` 扩展会为所有节点添加唯一 ID。该扩展会跟踪你的节点，即使你拆分它们、合并它们、撤销/重做更改、裁剪内容、粘贴内容……它都能正常工作。
-此外，你可以配置哪些节点类型会获得唯一 ID，哪些不会，并且可以自定义 ID 的生成方式。
+`UniqueID` 扩展为你配置的节点类型添加唯一 ID。  
+该扩展会跟踪你的节点，即使你拆分它们、合并它们、撤销/重做更改、裁剪内容、粘贴内容……它都能正常工作。  
+此外，你可以配置哪些节点类型获得唯一 ID，哪些不获得，且可以自定义这些 ID 的生成方式。
 
 <CodeDemo path="/Extensions/UniqueID" />
 
@@ -50,13 +51,20 @@ UniqueID.configure({
 
 ### types
 
-所有需要获得唯一 ID 的节点类型，例如 `['heading', 'paragraph']`
+所有应获得唯一 ID 的节点类型，例如 `['heading', 'paragraph']`。  
+你也可以传入 `'all'`，为文档中除 `doc` 和 `text` 之外的所有节点类型添加 ID。
 
 默认值：`[]`
 
 ```js
 UniqueID.configure({
   types: ['heading', 'paragraph'],
+})
+```
+
+```js
+UniqueID.configure({
+  types: 'all',
 })
 ```
 

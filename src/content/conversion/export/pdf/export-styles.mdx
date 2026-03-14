@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.2.0
+    label: v0.3.0
 meta:
     title: 将样式导出为 PDF | Tiptap 转换
     description: 学习如何使用 Export PDF 扩展将 Tiptap JSON 的自定义样式导出为 PDF。
@@ -42,7 +42,7 @@ import { ExportPdf } from '@tiptap-pro/extension-export-pdf'
 
 const editor = new Editor({
   extensions: [
-    // 其他扩展...
+    // other extensions...
     ExportPdf.configure({
       token: 'YOUR_TOKEN',
       appId: 'YOUR_APP_ID',
@@ -53,11 +53,11 @@ const editor = new Editor({
         'color': '#333333',
       },
     }),
-    // 其他扩展...
+    // other extensions...
   ],
 })
 
-// 使用自定义样式导出
+// Export using custom styles
 editor
   .chain()
   .exportPdf({

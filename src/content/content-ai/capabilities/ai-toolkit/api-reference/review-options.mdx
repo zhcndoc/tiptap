@@ -23,11 +23,14 @@ const result = toolkit.executeTool({
 
 ## `ReviewOptions`
 
-- `mode?` （`'disabled' | 'review' | 'preview'`）：是否在应用更改前或后进行审阅。默认值：`'disabled'`
+- `mode?` (`'disabled' | 'review' | 'preview' | 'trackedChanges'`): 是否在应用更改之前或之后进行审阅。默认值：`'disabled'`
   - `'disabled'`：不显示审阅界面。
-  - `'review'`：先应用更改，然后显示审阅界面，允许用户撤销更改。
+  - `'review'`：先应用更改，然后显示一个审阅界面允许用户撤销更改。
   - `'preview'`：在应用更改之前显示预览界面，允许用户接受或拒绝更改。
-- `displayOptions?`（`DisplayOptions`）：自定义建议的显示方式，设置 [`Suggestion`](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#the-suggestion-object) 类型的 `displayOptions` 属性。[查看可用选项](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#the-suggestion-object)。
-- `metadata?`（`Record<string, any>`）：为建议添加的额外元数据，可用于存储附加信息（例如其来源或类别）。该属性不由扩展内部使用，但可帮助开发者自定义建议在 UI 中的显示方式。
-- `useDiffUtility?`（`boolean`）：是否使用[差异工具](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility)比较更改前后的文档，并以丰富的差异形式显示删除和添加的内容。若为 `false`，则删除内容和添加内容作为整块内容显示，视为单个更改。默认值：`true`
-- `diffUtilityOptions?`（[`ExternalDiffUtilityOptions`](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility#parameters-diffutilityoptions)）：用于差异工具比较文档的选项。[查看可用选项](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility#parameters-diffutilityoptions)。
+  - `'trackedChanges'`：AI 生成的更改以[审阅更改](/tracked-changes/getting-started/overview)扩展编码，允许用户接受或拒绝单个更改。
+- `displayOptions?` (`DisplayOptions`): 自定义建议在编辑器 UI 中的显示方式。设置[`Suggestion`](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#the-suggestion-object)类型的 `displayOptions` 属性。[查看可用选项](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#the-suggestion-object)。
+- `metadata?` (`Record<string, any>`): 建议的额外元数据，可用于存储关于建议的附加信息（例如其来源或类别）。扩展内部不使用此字段，但它可能帮助开发者自定义建议在 UI 中的显示方式。
+- `trackedChangesOptions?` (`{ userId: string, userMetadata?: Record<string, unknown> | null }`): `trackedChanges` 模式的配置。`userId` 用于标识审阅更改的作者。`userMetadata` 存储作者的附加信息。
+- `commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`): 在配合 `trackedChanges` 模式下使用时，操作元数据（编辑操作中的 `meta` 字段）将成为与每个审阅更改相关联的评论线程。需要[评论](/comments/getting-started/overview)扩展。
+- `useDiffUtility?` (`boolean`): 是否使用[差异工具](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility) 比较更改前后的文档，以富文本差异的形式显示删除和新增内容。若为 `false`，删除和新增内容将作为一整块显示，作为单次更改。默认值：`true`
+- `diffUtilityOptions?` ([`ExternalDiffUtilityOptions`](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility#parameters-diffutilityoptions)): 使用差异工具比较文档的选项。[查看可用选项](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility#parameters-diffutilityoptions)。

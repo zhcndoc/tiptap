@@ -1,0 +1,208 @@
+---
+title: 追踪更改
+meta:
+  title: 追踪更改 | Tiptap 内容 AI
+  description: 显示 AI 生成的更改为可被用户单独接受或拒绝的追踪更改。
+  category: 内容 AI
+sidebars:
+  hideSecondary: true
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+<Callout title="实验性功能" variant="warning">
+  本指南使用了处于积极开发中的 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展。API 未来版本可能会发生变化。
+</Callout>
+
+<Callout title="继续自 AI 代理聊天机器人指南" variant="info">
+  本指南是对 [AI 代理聊天机器人指南](/content-ai/capabilities/ai-toolkit/agents/ai-agent-chatbot) 的延续。请先阅读该指南。
+</Callout>
+
+显示 AI 生成的更改为修订模式，以便用户能够逐条审阅并接受或拒绝。此功能将 AI Toolkit 与 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展集成。
+
+## 显示修订更改
+
+要以修订模式显示 AI 编辑，执行工具时将 `reviewOptions.mode` 设置为 `'trackedChanges'`。
+
+### API 端点
+
+API 端点与 [AI 代理聊天机器人指南](/content-ai/capabilities/ai-toolkit/agents/ai-agent-chatbot) 中相同。服务器端无需做任何更改即可支持修订更改。
+
+```ts
+// app/api/tracked-changes/route.ts
+import { openai } from '@ai-sdk/openai'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { createAgentUIStreamResponse, ToolLoopAgent, type UIMessage } from 'ai'
+
+export async function POST(req: Request) {
+  const { messages }: { messages: UIMessage[] } = await req.json()
+
+  const agent = new ToolLoopAgent({
+    model: openai('gpt-4o-mini'),
+    instructions:
+      'You are an assistant that can edit rich text documents. Use tiptapRead before tiptapEdit.',
+    tools: toolDefinitions(),
+  })
+
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
+  })
+}
+```
+
+### 客户端设置
+
+在客户端，添加 `TrackedChanges` 扩展，并向 `executeTool` 方法传递包含模式 `'trackedChanges'` 的 `reviewOptions`。
+
+`TrackedChanges` 扩展必须配置为 `enabled: false` —— AI Toolkit 会在需要时自动启用它。
+
+```tsx
+import { useChat } from '@ai-sdk/react'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { AiToolkit, getAiToolkit } from '@tiptap-pro/ai-toolkit'
+import { TrackedChanges } from '@tiptap-pro/extension-tracked-changes'
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from 'ai'
+
+export default function Page() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit,
+      TrackedChanges.configure({
+        enabled: false,
+      }),
+      AiToolkit,
+    ],
+    content: `<p>Ask the AI to improve this document.</p>`,
+  })
+
+  const { messages, sendMessage, addToolOutput } = useChat({
+    transport: new DefaultChatTransport({ api: '/api/tracked-changes' }),
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    async onToolCall({ toolCall }) {
+      if (!editor) return
+
+      const toolkit = getAiToolkit(editor)
+      const result = toolkit.executeTool({
+        toolName: toolCall.toolName,
+        input: toolCall.input,
+        reviewOptions: {
+          mode: 'trackedChanges',
+          trackedChangesOptions: {
+            userId: 'ai-assistant',
+            userMetadata: {
+              name: 'AI',
+            },
+          },
+        },
+      })
+
+      addToolOutput({
+        tool: toolCall.toolName,
+        toolCallId: toolCall.toolCallId,
+        output: result.output,
+      })
+    },
+  })
+
+  // ... 渲染编辑器和聊天界面
+}
+```
+
+AI 编辑文档后，更改将以修订模式显示。用户可以使用 Tracked Changes 扩展提供的 `acceptSuggestion`、`rejectSuggestion`、`acceptAllSuggestions` 和 `rejectAllSuggestions` 命令接受或拒绝更改。
+
+### 最终效果
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/tracked-changes" />
+
+查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 通过修订更改添加评论
+
+你可以让 AI 对每次更改提供说明。每条说明会作为与修订更改关联的评论线程，使用 [Comments](/comments/getting-started/overview) 扩展实现。
+
+### API 端点
+
+在服务器端，向 `toolDefinitions` 传递 `operationMeta` 选项，为编辑操作添加 `meta` 字段。然后指导 AI 在 `meta` 字段中提供说明。
+
+```ts
+// app/api/tracked-changes-comments/route.ts
+import { openai } from '@ai-sdk/openai'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { createAgentUIStreamResponse, ToolLoopAgent, type UIMessage } from 'ai'
+
+export async function POST(req: Request) {
+  const { messages }: { messages: UIMessage[] } = await req.json()
+
+  const agent = new ToolLoopAgent({
+    model: openai('gpt-4o-mini'),
+    instructions: `You are an assistant that can edit rich text documents.
+Rule: Use tiptapRead before tiptapEdit.
+Rule: When editing the document, ALWAYS provide a brief justification for each change in the meta field.`,
+    tools: toolDefinitions({
+      operationMeta:
+        'Brief justification explaining why this change improves the document.',
+    }),
+  })
+
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
+  })
+}
+```
+
+### 客户端设置
+
+在客户端，添加 `CommentsKit` 扩展，并向 `executeTool` 方法传递 `commentsOptions`。`commentsOptions` 属性配置 AI 生成评论的线程和评论元数据。
+
+```tsx
+import { AiToolkit, getAiToolkit } from '@tiptap-pro/ai-toolkit'
+import { CommentsKit } from '@tiptap-pro/extension-comments'
+import { TrackedChanges } from '@tiptap-pro/extension-tracked-changes'
+
+const editor = useEditor({
+  extensions: [
+    StarterKit,
+    TrackedChanges.configure({ enabled: false }),
+    AiToolkit,
+    CommentsKit.configure({
+      provider, // 你的 TiptapCollabProvider 实例
+    }),
+  ],
+})
+
+// 在 onToolCall 中：
+const result = toolkit.executeTool({
+  toolName: toolCall.toolName,
+  input: toolCall.input,
+  reviewOptions: {
+    mode: 'trackedChanges',
+    trackedChangesOptions: {
+      userId: 'ai-assistant',
+      userMetadata: { name: 'AI' },
+    },
+  },
+  commentsOptions: {
+    threadData: { userName: 'AI' },
+    commentData: { userName: 'AI' },
+  },
+})
+```
+
+编辑操作中每个非空的 `meta` 字段都会变成与修订更改关联的评论线程。用户可以在侧边栏中审阅更改并阅读 AI 的说明。
+
+### 最终效果
+
+<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/tracked-changes-comments" />
+
+查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 下一步
+
+- 在 API 参考中了解更多关于[审阅选项](/content-ai/capabilities/ai-toolkit/api-reference/review-options)。
+- 通过[流式指南](/content-ai/capabilities/ai-toolkit/agents/streaming)添加实时流式传输。
+- 了解[Tracked Changes](/tracked-changes/getting-started/overview) 扩展的样式和配置选项。

@@ -1,0 +1,101 @@
+---
+title: 事件
+tags:
+  - type: addon
+meta:
+  title: 事件 | Tiptap 追踪更改文档
+  description: Tiptap 追踪更改扩展发出的所有编辑器事件。
+  category: 追踪更改
+---
+
+该扩展会触发事件，你可以通过 `editor.on()` 来监听。所有事件都包含触发它们的事务。
+
+## trackedChanges:suggestionCreated
+
+当创建新建议时触发（无论是用户编辑还是通过撤销/协作恢复）。编程命令也可以包含一个可选的 `reason`，该原因会暴露在该事件的负载中。
+
+```js
+editor.on('trackedChanges:suggestionCreated', ({ suggestion, reason, transaction }) => {
+  console.log('新建议:', suggestion.id, suggestion.type, reason)
+})
+```
+
+## trackedChanges:suggestionAccepted
+
+当建议被接受时触发。
+
+```js
+editor.on('trackedChanges:suggestionAccepted', ({ suggestionId, suggestion, transaction }) => {
+  console.log('已接受:', suggestionId)
+})
+```
+
+## trackedChanges:suggestionRejected
+
+当建议被拒绝时触发。
+
+```js
+editor.on('trackedChanges:suggestionRejected', ({ suggestionId, suggestion, transaction }) => {
+  console.log('已拒绝:', suggestionId)
+})
+```
+
+## trackedChanges:suggestionRemoved
+
+当建议从文档中被删除时触发（例如，通过删除“添加”建议的内容）。
+
+```js
+editor.on(
+  'trackedChanges:suggestionRemoved',
+  ({ suggestionId, suggestion, removedBy, canRestore }) => {
+    // removedBy 是 'edit' 或 'delete'
+    console.log('已移除:', suggestionId, '通过', removedBy)
+  },
+)
+```
+
+## trackedChanges:suggestionsUpdated
+
+在批量操作后触发，如 `acceptAllSuggestions`，`rejectSuggestionsInRange` 等。
+
+```js
+editor.on('trackedChanges:suggestionsUpdated', ({ suggestions, operation, affectedIds }) => {
+  // operation: 'acceptAll' | 'rejectAll' | 'acceptInRange' | 'rejectInRange' | 'acceptByUser' | 'rejectByUser'
+  console.log(`${operation} 影响了 ${affectedIds.length} 个建议`)
+})
+```
+
+## trackedChanges:suggestionRangeChanged
+
+当建议的文档位置因文档中的其他编辑而变化时触发。
+
+```js
+editor.on(
+  'trackedChanges:suggestionRangeChanged',
+  ({ suggestionId, oldRange, newRange, suggestion }) => {
+    console.log(
+      `建议 ${suggestionId} 从 ${oldRange.from}-${oldRange.to} 移动到 ${newRange.from}-${newRange.to}`,
+    )
+  },
+)
+```
+
+## trackedChanges:enabled
+
+启用追踪更改模式时触发。
+
+```js
+editor.on('trackedChanges:enabled', ({ userId }) => {
+  console.log('启用追踪更改，用户:', userId)
+})
+```
+
+## trackedChanges:disabled
+
+禁用追踪更改模式时触发。
+
+```js
+editor.on('trackedChanges:disabled', ({ userId }) => {
+  console.log('已禁用追踪更改')
+})
+```

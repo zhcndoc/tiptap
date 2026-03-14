@@ -4,10 +4,10 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v2.6.0
+    label: v2.12.0
 meta:
     title: ODT REST API | Tiptap 转换
-    description: 了解如何使用 Tiptap Conversion REST API v2 将 Tiptap JSON 文档导出为 ODT（OpenDocument Text）格式。
+    description: 了解如何使用 Tiptap Conversion REST API v2 将 Tiptap JSON 文档导出为 ODT（OpenDocument 文本）格式。
     category: Conversion
 ---
 
@@ -108,7 +108,7 @@ curl --output document.odt -X POST "https://api.tiptap.dev/v2/convert/export/odt
 | `even`               | `string`   | 偶数页页眉，仅当启用 `evenAndOddHeaders` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。           |
 
 <Callout title="纯文本 VS Tiptap JSONContent">
-    每个页眉值可以是**纯文本字符串**（生成简单无样式页眉）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，发送请求体前请用 `JSON.stringify()` 对对象进行字符串化。
+    每个页眉值可以是**纯文本字符串**（生成简单无样式页眉）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，发送请求体前请用 `JSON.stringify()` 对象进行字符串化。
 </Callout>
 
 #### 页脚配置
@@ -124,7 +124,7 @@ curl --output document.odt -X POST "https://api.tiptap.dev/v2/convert/export/odt
 | `even`               | `string`   | 偶数页页脚，仅当启用 `evenAndOddFooters` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。           |
 
 <Callout title="纯文本 VS Tiptap JSONContent">
-    每个页脚值可以是**纯文本字符串**（生成简单无样式页脚）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，发送请求体前请用 `JSON.stringify()` 对对象进行字符串化。
+    每个页脚值可以是**纯文本字符串**（生成简单无样式页脚）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，发送请求体前请用 `JSON.stringify()` 对象进行字符串化。
 </Callout>
 
 ### 自定义页面布局示例

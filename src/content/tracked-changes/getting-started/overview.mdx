@@ -1,0 +1,48 @@
+---
+title: 在你的编辑器中跟踪更改
+tags:
+  - type: addon
+    tooltip: 将“跟踪更改”添加到你的订阅中
+  - type: beta
+meta:
+  title: 跟踪更改 | Tiptap 跟踪更改文档
+  description: 在你的 Tiptap 编辑器中启用跟踪更改和建议模式，以实现协作编辑和文档审核。
+  category: 跟踪更改
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+Tracked Changes 扩展为协作编辑工作流启用建议模式。启用后，所有编辑都会以提议形式出现，可以被接受或拒绝，类似于文字处理软件中的变更跟踪。
+
+<Callout title="实验性" variant="warning">
+  此扩展仍在积极开发中。API 可能在未来版本中发生变化。所有低于 1.0.0 的版本预期不稳定，使用需自行承担风险。
+</Callout>
+
+<CodeDemo isPro path="/Experiments/TrackedChanges" />
+
+## 功能
+
+该扩展跟踪三种类型的更改：
+
+- **插入** (`add`) — 向文档中添加的新内容
+- **删除** (`delete`) — 标记为删除的现有内容
+- **替换** (`replace`) — 同时删除并用新内容替换的内容
+
+每条建议都包含元数据，包括创建者、创建时间和唯一标识符。
+
+## 主要功能
+
+- **建议模式** — 按用户切换跟踪开关
+- **接受和拒绝** — 单独、批量、按范围或按用户审查建议
+- **建议分组** — 连续编辑自动合并为单条建议
+- **协作支持** — 兼容基于 Yjs 的实时协作
+- **评论集成** — 将建议链接到评论线程，用于审查工作流
+- **原子节点支持** — 跟踪图像、水平线及其他非文本内容的更改
+- **完整查询 API** — 以编程方式查找、筛选和检查建议
+
+## 下一步
+
+- [安装扩展](/tracked-changes/getting-started/install) 以开始使用
+- 学习[基本用法](/tracked-changes/usage/basic-usage)模式
+- 探索[命令](/tracked-changes/api-reference/commands)和[工具函数](/tracked-changes/api-reference/utilities)API

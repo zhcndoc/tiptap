@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.12.0
+    label: v0.13.0
 meta:
     title: 导出 DOCX | Tiptap 转换
     description: 学习如何使用我们的文档中的导出扩展将 Tiptap 编辑器内容导出为 DOCX（Word）文件。
@@ -43,7 +43,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 完成后，您可以安装并导入 **Export DOCX** 扩展包：
 
 ```bash
-npm i @tiptap-pro/extension-export-docx@beta
+npm i @tiptap-pro/extension-export-docx
 ```
 
 使用导出扩展不需要任何 Tiptap 转换凭据，因为转换在扩展内部即时处理。
@@ -64,10 +64,15 @@ const editor = new Editor({
   extensions: [
     // 其他扩展 ...
     ExportDocx.configure({
-      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => void, // 必填
+      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => void, // 必须
       exportType: 'blob', // 可选。默认值：'blob'
       customNodes: [], // 可选。默认值：[]
       styleOverrides: {}, // 可选。默认值：{}
+      paragraphOverrides: {}, // 可选。默认值：{}
+      textRunOverrides: {}, // 可选。默认值：{}
+      tableOverrides: {}, // 可选。默认值：{}
+      tableCellOverrides: {}, // 可选。默认值：{}
+      imageOverrides: {}, // 可选。默认值：{}
     }),
     // 其他扩展 ...
   ],
@@ -76,11 +81,16 @@ const editor = new Editor({
 ```
 
 | 参数 | 描述 | 默认值 |
-|------|------|-------|
-| onCompleteExport | 一个 **必填** 的回调函数，接收导出的数据。您可以根据需求处理数据（例如，提示文件下载） | N/A |
-| options | 一个对象，用于配置导出行为：<br/><br/>**exportType**：返回数据类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅服务器端）<br/>- **stream**：返回 Node.js `Stream`（仅服务器端）<br/>- **string**：返回一个字符串<br/>- **blob**：返回一个 `Blob` | 'blob' |
-| customNodes | 自定义节点定义数组。如果内容含自定义节点，请传入定义以确保正确转换 | [] |
-| styleOverrides | 用于覆盖导出文档默认样式的对象 | {} |
+|-----------|-------------|---------|
+| onCompleteExport | **必需**的回调函数，接收导出的数据。您可以在回调中根据需求处理数据（例如，触发文件下载） | `无` |
+| options | 用于配置导出部分行为的对象：<br/><br/>**exportType**：方法返回数据的类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅服务器端）<br/>- **stream**：返回 Node.js `Stream`（仅服务器端）<br/>- **string**：返回 `String`<br/>- **blob**：返回 `Blob` | `blob` |
+| customNodes | 自定义节点定义数组。如果您的内容中包含自定义节点，请将它们的定义传入以确保正确转换 | `[]` |
+| styleOverrides | 用于应用于导出文档的自定义样式对象。请参阅 [导出样式](/conversion/export/docx/export-styles) | `{}` |
+| paragraphOverrides | 所有段落的基础默认样式。请参阅 [元素覆盖](/conversion/export/docx/export-styles#element-overrides) | `{}` |
+| textRunOverrides | 所有文本运行的基础默认样式。请参阅 [元素覆盖](/conversion/export/docx/export-styles#element-overrides) | `{}` |
+| tableOverrides | 表级属性覆盖。请参阅 [元素覆盖](/conversion/export/docx/export-styles#element-overrides) | `{}` |
+| tableCellOverrides | 所有表格单元格的基础默认样式。请参阅 [元素覆盖](/conversion/export/docx/export-styles#element-overrides) | `{}` |
+| imageOverrides | 图片属性覆盖。请参阅 [元素覆盖](/conversion/export/docx/export-styles#element-overrides) | `{}` |
 
 ## 导出 DOCX 文件
 
@@ -108,13 +118,16 @@ exportDocx: (options?: ExportDocxOptions) => Promise<string | Buffer<ArrayBuffer
 `exportDocx` 方法接受一个可选的 `ExportDocxOptions` （`object`），属性可用于 *覆盖* 您通过 `ExportDocx.configure` 配置的选项：
 
 | 参数 | 描述 | 默认值 |
-|------|------|-------|
-| onCompleteExport | 一个 **必填** 的回调函数（若未在配置中定义），用于接收导出的数据。您可据需处理(如提示下载) | N/A |
-| options | 用于配置导出行为：<br/><br/>**exportType**：返回数据类型类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅服务器端）<br/>- **stream**：返回 Node.js `Stream`（仅服务器端）<br/>- **string**：返回字符串<br/>- **blob**：返回 `Blob` | 'blob' |
-| customNodes | 自定义节点定义数组。如果包含自定义节点，请传入定义以确保转换正确 | [] |
-| styleOverrides | 用于覆盖导出文档默认样式的对象 | {} |
-
-示例如下：
+|-----------|-------------|---------|
+| onCompleteExport | **必需**的回调函数（如果您尚未在扩展配置时定义），接收导出的数据。您可以在回调中根据需求处理数据（例如，触发文件下载） | `无` |
+| options | 用于配置导出部分行为的对象：<br/><br/>**exportType**：方法返回数据的类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅服务器端）<br/>- **stream**：返回 Node.js `Stream`（仅服务器端）<br/>- **string**：返回 `String`<br/>- **blob**：返回 `Blob` | `blob` |
+| customNodes | 自定义节点定义数组。如果您的内容中包含自定义节点，请将它们的定义传入以确保正确转换 | `[]` |
+| styleOverrides | 用于应用于导出文档的自定义样式对象。请参阅 [导出样式](/conversion/export/docx/export-styles) | `{}` |
+| paragraphOverrides | 所有段落的基础默认样式。请参阅 [元素覆盖](/conversion/export/docx/export-styles#element-overrides) | `{}` |
+| textRunOverrides | 所有文本运行的基础默认样式。请参阅 [元素覆盖](/conversion/export/docx/export-styles#element-overrides) | `{}` |
+| tableOverrides | 表级属性覆盖。请参阅 [元素覆盖](/conversion/export/docx/export-styles#element-overrides) | `{}` |
+| tableCellOverrides | 所有表格单元格的基础默认样式。请参阅 [元素覆盖](/conversion/export/docx/export-styles#element-overrides) | `{}` |
+| imageOverrides | 图片属性覆盖。请参阅 [元素覆盖](/conversion/export/docx/export-styles#element-overrides) | `{}` |
 
 ```js
 // 导入 ExportDocx 扩展
@@ -125,10 +138,15 @@ const editor = new Editor({
   extensions: [
     // 其他扩展 ...
     ExportDocx.configure({
-      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => {}, // 必填
-      exportType: 'blob', // 可选，默认: 'blob'
-      customNodes: [], // 可选，默认: []
-      styleOverrides: {}, // 可选，默认: {}
+      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => {}, // 必须
+      exportType: 'blob', // 可选。默认值：'blob'
+      customNodes: [], // 可选。默认值：[]
+      styleOverrides: {}, // 可选。默认值：{}
+      paragraphOverrides: {}, // 可选。默认值：{}
+      textRunOverrides: {}, // 可选。默认值：{}
+      tableOverrides: {}, // 可选。默认值：{}
+      tableCellOverrides: {}, // 可选。默认值：{}
+      imageOverrides: {}, // 可选。默认值：{}
     }),
     // 其他扩展 ...
   ],
@@ -194,12 +212,17 @@ handleExportDocxBuffer()
  * 因为它们分别利用 Node 的 Buffer 和 Stream API
  *
  * @param options.document - 文档的 JSON 表示
- * @param options.exportType - 导出类型
+ * @param options.exportType - 要执行的导出类型
  * @param options.customNodes - 自定义节点定义
- * @param options.styleOverrides - 样式覆盖
+ * @param options.styleOverrides - 导出文档的样式覆盖
+ * @param options.paragraphOverrides - 所有段落的基础默认样式
+ * @param options.textRunOverrides - 所有文本运行的基础默认样式
+ * @param options.tableOverrides - 表级属性覆盖
+ * @param options.tableCellOverrides - 所有表格单元格的基础默认样式
+ * @param options.imageOverrides - 图片属性覆盖
  * @example exportDocx({ document: editor.getJSON(), exportType: 'blob', customNodes: [], styleOverrides: {} })
  */
-async function exportDocx ({ document, exportType, customNodes, styleOverrides }: ExportDocxOptions) {}
+async function exportDocx ({ document, exportType, customNodes, styleOverrides, paragraphOverrides, textRunOverrides, tableOverrides, tableCellOverrides, imageOverrides }: ExportDocxOptions) {}
 ```
 
 `exportDocx` 函数将返回一个准备好的 DOCX 文档，以多种格式输出。
@@ -230,29 +253,42 @@ app.post('/export-docx', async (req, res) => {
 })
 ```
 
+## Node 属性推断
+
+DOCX 导出自动遵循编辑器设置的节点级属性，而非总是从头计算数值。这意味着调整大小的图片、调整列宽的表格以及其他编辑器层级的自定义设置都会保留在导出的文档中。
+
+| 功能 | 描述 |
+|---------|-------------|
+| **图片的 `width`/`height`** | 当图片在编辑器中被调整大小时，使用用户设置的尺寸。优先级：`imageOverrides.transformation` > `node.attrs.width/height` > 图片固有尺寸 |
+| **图片的 `alt` 文本** | 映射为 docx 的 `altText` 属性，用于无障碍元数据 |
+| **表格单元格的 `colwidth`** | 编辑器调整列宽时，每个单元格的像素数组用于导出中精确的列宽 |
+| **表格单元格的 `rowspan`** | 正确导出跨多行的单元格 |
+| **段落的 `textAlign: 'justify'`** | 正确映射到 `AlignmentType.JUSTIFIED`（之前默认左对齐） |
+| **文本运行的 `backgroundColor`** | `textStyle` 标记的 `backgroundColor` 作为实心字符阴影导出（之前被静默丢弃） |
+
 ## 支持与限制
 
 从 Tiptap JSON 导出 `.docx` 文件能满足处理大多数标准 Word 内容需求，但由于 DOCX 格式与基于 CSS 的 Tiptap 样式间固有限制，**不存在一对一完美映射**。
 
 当前支持功能及已知限制：
 
-| **功能**                 | **支持情况**                                      |
-|------------------------|-------------------------------------------------|
-| **文本内容**            | ✓ 基本文字、间距、标点                           |
-| **文本格式**            | ✓ 粗体、斜体、下划线、删除线、对齐、行距       |
-| **块级元素**            | ✓ 段落、标题（1–6 级）、引用、序列列表及无序列表 |
-| **表格**                | ✓ 基础结构、表头行、跨列                         |
-| **链接**                | ✓ 超链接                                       |
-| **媒体（图片）**        | ✓ 内嵌图片，保持大小                             |
-| **样式**                | ✓ 字体系列*、字体颜色、字体大小、背景色、行距   |
-| **页眉和页脚**          | ✓                                             |
-| **分节和分页**          | ~ 正在开发                                     |
-| **脚注和尾注**          | ~ 正在开发                                     |
-| **数学公式**            | ✓                                             |
-| **评论和修订**          | ✗ 不支持                                       |
-| **目录**                | ✗ 不支持                                       |
-| **高级格式**            | ✗ 列、文本方向、表单、宏、嵌入脚本等不支持     |
-| **元数据**              | ✗ 不支持                                       |
-| **文本框、形状、SmartArt** | ✗ 不支持                                     |
+| **功能**                        | **支持情况**                                                               |
+|--------------------------------|----------------------------------------------------------------------------|
+| **文本内容**                   | ✓ 基本文本、空格、标点                                                     |
+| **文本格式**                   | ✓ 加粗、斜体、下划线、删除线、对齐、行高                                  |
+| **块级元素**                   | ✓ 段落、标题（1–6 级）、引用块、有序与无序列表                             |
+| **表格**                       | ✓ 基本结构、表头行、单元格合并（跨列、跨行）、列宽                         |
+| **链接**                      | ✓ 超链接                                                                   |
+| **媒体（图片）**               | ✓ 嵌入图片，尺寸保持，替代文本，编辑器调整后尺寸                          |
+| **样式**                      | ✓ 字体系列*、字体颜色、字体大小、背景颜色、行高                            |
+| **页眉与页脚**                | ✓                                                                          |
+| **节与分页符**                | ~ 开发中                                                                    |
+| **脚注与尾注**                | ~ 开发中                                                                    |
+| **数学公式**                  | ✓                                                                          |
+| **评论与修订**                | ✗                                                                          |
+| **目录**                      | ✗                                                                          |
+| **高级格式**                  | ✗ 多栏、文本方向、表单、宏、嵌入脚本                                      |
+| **元数据**                    | ✗                                                                          |
+| **文本框、形状、SmartArt**    | ✗                                                                          |
 
 <span style={{fontSize: '1rem'}}>* 字体系列支持的前提是目标字体已安装于打开 `.docx` 文件的操作系统中。</span>

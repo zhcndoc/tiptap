@@ -1,0 +1,108 @@
+---
+title: 高级用法
+tags:
+  - type: addon
+meta:
+  title: 高级用法 | Tiptap 变更追踪文档
+  description: 了解 Tiptap 变更追踪中的建议分组、删除合并、协作兼容性和评论集成。
+  category: 变更追踪
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+Tracked Changes 扩展的高级行为和集成模式。
+
+## 建议分组
+
+当用户连续输入或连续删除多个字符时，这些编辑会被分组成一个单一的建议，而不是针对每个字符创建一个建议。分组发生在：
+
+1. 新的编辑与现有建议是**相邻的**（紧接在前面或后面）
+2. 现有建议是由**相同用户**创建的
+3. 现有建议具有**相同类型**（都是插入或都是删除）
+4. 距离上一次编辑的时间在**分组超时时间窗口**内（默认：2000毫秒）
+
+当编辑被分组时，建议的时间戳会被更新以保持分组窗口活跃状态。这意味着连续输入会持续扩展同一建议，直到用户暂停的时间超过超时设置。
+
+```js
+// 完全禁止分组
+TrackedChanges.configure({
+  suggestionGroupingTimeout: 0,
+})
+
+// 延长分组窗口（5秒）
+TrackedChanges.configure({
+  suggestionGroupingTimeout: 5000,
+})
+```
+
+## 删除合并
+
+当用户删除的内容与现有的删除建议重叠或相邻时，这些标记会自动合并，防止嵌套或重叠的删除。合并后的建议会使用范围内**最早创建的**原有删除标记的元数据（ID、用户、时间戳）。
+
+这样保证了：
+
+- 文档永远不会包含嵌套的删除标记
+- 相关删除在视觉上分组显示
+- 保留最初删除操作的原作者信息
+
+## 混合内容处理
+
+当删除或替换包含原始文本和之前建议插入内容混合的文本时：
+
+- **建议插入**（带有 `add` 标记的文本）会立即从文档中移除
+- **原始内容**（不带 `add` 标记的文本）会被标记为 `delete` 建议
+
+这种行为符合用户预期：删除仅为建议的文本（尚未被接受的）时，文本直接消失。原始文档内容的删除需要明确的接受操作。
+
+## 原子节点追踪
+
+扩展会自动追踪对原子节点（如图片、水平线和其他非文本内容）的更改。这些节点不能拥有标记，因此扩展使用节点属性（`suggestionId`、`suggestionType`、`suggestionUserId`、`suggestionCreatedAt`、`suggestionUserMetadata`）代替。这一过程是透明的——原子节点会在相同的建议查询中出现，并且可以像其他建议一样被接受或拒绝。
+
+## 协作兼容性
+
+该扩展设计兼容基于 Yjs 的协作。它会自动忽略：
+
+- 来自 Yjs 的**远程同步事务**（带有 `y-sync$` 元数据）
+- **历史事务**（撤销/重做由 ProseMirror 本地处理）
+- **带 `addToHistory: false` 的事务**（通常为远程变更）
+
+意味着仅跟踪本地用户的编辑作为建议。
+
+## 评论集成
+
+Tracked Changes 扩展与[评论](/editor/extensions/functionality/comments)扩展集成，支持将建议和评论线程一起处理的复审流程。该集成基于两个扩展提供的事件系统构建。
+
+当两个扩展同时激活时，评论线程会自动通过线程元数据与建议关联，实现双向同步：
+
+- **解决**与建议关联的评论线程会自动**接受**该建议
+- **删除**与建议关联的评论线程会自动**拒绝**该建议
+- **接受**建议会自动**解决**其关联的评论线程
+- **拒绝**建议会自动**删除**其关联的评论线程
+
+当建议内容发生变化（例如用户在跟踪插入中继续输入）时，关联线程的元数据会更新以保持同步。
+
+这意味着用户可以通过建议 UI 或评论面板审阅变更，两者保持一致。
+
+## 代码块兼容性
+
+默认情况下，Tiptap 代码块不允许使用标记，这阻碍了建议标记在代码内容内部的应用。该扩展导出辅助函数来解决此问题：
+
+```js
+import { CodeBlock } from '@tiptap/extension-code-block'
+import { TrackedChanges, withSuggestionMarkOnCodeBlock } from '@tiptap-pro/extension-tracked-changes'
+import StarterKit from '@tiptap/starter-kit'
+
+const TrackableCodeBlock = withSuggestionMarkOnCodeBlock(CodeBlock)
+
+const editor = new Editor({
+  extensions: [
+    StarterKit.configure({
+      codeBlock: false, // 禁用默认代码块
+    }),
+    TrackableCodeBlock, // 使用修补后的版本
+    TrackedChanges.configure({ enabled: true, userId: 'user-123' }),
+  ],
+})
+```
+
+这同样适用于 `CodeBlockLowlight` 或其他代码块扩展。

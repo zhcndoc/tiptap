@@ -44,10 +44,10 @@ export async function POST(req: Request) {
     instructions: 'You are an assistant that can add comments to a rich text document.',
     tools: toolDefinitions({
       tools: {
-        // 启用读取和编辑评论的工具
+        // Enable tools to read and edit comments
         getThreads: true,
         editThreads: true,
-        // （可选）阻止 AI 对文档进行更改
+        // (Optional) Prevent AI from editing document content
         tiptapEdit: false,
       },
     }),
@@ -82,7 +82,7 @@ export function CommentsAiChatbot({ editor }) {
     "请在最后一段的第一句添加一条评论，内容为“做得好”",
   )
 
-  // 修复问题：https://github.com/vercel/ai/issues/8148
+  // Fix issue: https://github.com/vercel/ai/issues/8148
   const editorRef = useRef(editor)
   editorRef.current = editor
 
@@ -94,7 +94,7 @@ export function CommentsAiChatbot({ editor }) {
 
       const { toolName, input, toolCallId } = toolCall
 
-      // 使用 AI 工具包执行工具
+      // Execute the tool using AI toolkit
       const toolkit = getAiToolkit(editor)
       const result = toolkit.executeTool({
         toolName,
@@ -156,6 +156,10 @@ AI 也可以被指示执行特定操作。借助[工具定义](/content-ai/capab
 
 了解更多提示工程相关内容，请参见[AI 工程指南](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-engineering)。
 
-## 路线图
+## Combine comments with tracked changes
+
+Want to make document edits and associate them with comments? See the [tracked changes guide](/content-ai/capabilities/ai-toolkit/agents/tracked-changes) to learn how to combine AI-generated tracked changes with comment threads that explain each change.
+
+## Roadmap
 
 在未来版本中，我们计划支持将评论流式写入编辑器，以提升用户体验。同时，我们也在探索改进令牌用量、速度和开发者体验的方法。

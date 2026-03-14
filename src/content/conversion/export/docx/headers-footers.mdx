@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.12.0
+    label: v0.13.0
 meta:
     title: 使用页眉和页脚扩展您的 DOCX 导出功能 | Tiptap 转换
     description: 学习如何使用页眉和页脚扩展您的 DOCX 导出
@@ -470,7 +470,7 @@ const editor = new Editor({
     // ... 其他扩展
     ExportDocx.configure({
       onCompleteExport: result => {
-        // 处理导出结果
+        // handle export result
         const blob = new Blob([result], {
           type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         })
@@ -511,7 +511,7 @@ const editor = new Editor({
   ],
 })
 
-// 触发导出
+// trigger export
 editor.commands.exportDocx()
 ```
 
@@ -525,7 +525,7 @@ const editor = new Editor({
     // ... 其他扩展
     ExportDocx.configure({
       onCompleteExport: result => {
-        // 处理导出结果
+        // handle export result
         const blob = new Blob([result], {
           type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         })
@@ -559,6 +559,6 @@ const editor = new Editor({
   ],
 })
 
-// 触发导出
+// trigger export
 editor.commands.exportDocx()
 ```

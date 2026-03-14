@@ -1,0 +1,134 @@
+---
+title: 安装“跟踪更改”扩展
+tags:
+  - type: addon
+meta:
+  title: 安装跟踪更改 | Tiptap 跟踪更改文档
+  description: 安装并配置“跟踪更改”扩展，以在您的 Tiptap 编辑器中启用建议模式。
+  category: 跟踪更改
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+安装并配置 Tracked Changes 扩展，按照本指南操作。
+
+## 安装
+
+```bash
+npm install @tiptap-pro/extension-tracked-changes
+```
+
+## 基本设置
+
+```js
+import { Editor } from '@tiptap/core'
+import { TrackedChanges } from '@tiptap-pro/extension-tracked-changes'
+
+const editor = new Editor({
+  extensions: [
+    TrackedChanges.configure({
+      enabled: true,
+      userId: 'user-123',
+      userMetadata: { name: 'John Doe' },
+    }),
+  ],
+})
+```
+
+## 设置
+
+### enabled
+
+启用或禁用跟踪更改模式。启用时，所有编辑都会变成建议，而不是直接更改。
+
+默认值：`false`
+
+```js
+TrackedChanges.configure({
+  enabled: true,
+})
+```
+
+### userId
+
+当前进行建议的用户 ID。应来自您的身份验证系统。
+
+默认值：`'anonymous'`
+
+```js
+TrackedChanges.configure({
+  userId: 'user-123',
+})
+```
+
+### userMetadata
+
+关于当前用户的任意元数据，作为 JSON 可序列化对象存储在每个建议中。用于存储显示名称、头像或其他自定义数据，无需单独的用户存储。
+
+默认值：`null`
+
+```js
+TrackedChanges.configure({
+  userId: 'user-123',
+  userMetadata: {
+    name: 'John Doe',
+    avatar: 'https://example.com/avatar.jpg',
+    role: 'editor',
+  },
+})
+```
+
+### suggestionGroupingTimeout
+
+用于分组相邻建议的时间窗口（毫秒）。如果用户在此时间窗口内对同一区域进行连续编辑，建议将合并为一个。设置为 `0` 禁用分组。
+
+默认值：`2000`
+
+```js
+TrackedChanges.configure({
+  suggestionGroupingTimeout: 3000,
+})
+```
+
+### onSuggestionCreate
+
+创建新建议时触发的回调。接收包含 id、type、userId、createdAt、from、to 和 text 的建议对象。
+
+默认值：`undefined`
+
+```js
+TrackedChanges.configure({
+  onSuggestionCreate: (suggestion) => {
+    console.log('New suggestion created:', suggestion)
+    // 更新你的界面，通知其他用户等。
+  },
+})
+```
+
+### onSuggestionAccept
+
+接受建议时触发的回调。接收建议 ID。
+
+默认值：`undefined`
+
+```js
+TrackedChanges.configure({
+  onSuggestionAccept: (id) => {
+    console.log('Suggestion accepted:', id)
+  },
+})
+```
+
+### onSuggestionReject
+
+拒绝建议时触发的回调。接收建议 ID。
+
+默认值：`undefined`
+
+```js
+TrackedChanges.configure({
+  onSuggestionReject: (id) => {
+    console.log('Suggestion rejected:', id)
+  },
+})
+```

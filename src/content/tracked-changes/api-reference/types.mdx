@@ -1,0 +1,119 @@
+---
+title: 类型
+tags:
+  - type: addon
+meta:
+  title: 类型 | Tiptap 变更追踪文档
+  description: Tiptap 变更追踪扩展的 TypeScript 类型定义。
+  category: 变更追踪
+---
+
+该扩展导出了用于处理建议的 TypeScript 类型。
+
+## SuggestionType
+
+查询 API 返回的公开建议类型：
+
+```ts
+type SuggestionType = 'add' | 'delete' | 'replace'
+```
+
+## SuggestionMarkType
+
+存储在建议标记上的内部标记级别类型。替换建议为其删除和插入部分使用不同的标记类型：
+
+```ts
+type SuggestionMarkType = 'add' | 'delete' | 'replaceDeletion' | 'replaceInsertion'
+```
+
+## Suggestion
+
+表示文档中发现的建议：
+
+```ts
+type Suggestion = {
+  id: string
+  type: SuggestionType
+  userId: string
+  createdAt: string
+  userMetadata: Record<string, unknown> | null
+  from: number
+  to: number
+  text: string
+  // 仅针对 'replace' 建议存在：
+  deletionRange?: { from: number; to: number }
+  insertionRange?: { from: number; to: number }
+  replacedText?: string
+}
+```
+
+对于 `replace` 建议：
+- `text` 包含 **新**（插入的）文本
+- `replacedText` 包含 **旧**（删除的）文本
+- `deletionRange` 和 `insertionRange` 给出每部分的确切位置
+- `from` 和 `to` 覆盖两部分的完整范围
+
+## SuggestionMarkAttrs
+
+存储在建议标记上的属性：
+
+```ts
+type SuggestionMarkAttrs = {
+  id: string
+  type: SuggestionMarkType
+  userId: string
+  createdAt: string
+  userMetadata: Record<string, unknown> | null
+}
+```
+
+## TrackedChangesOptions
+
+扩展的配置选项：
+
+```ts
+type TrackedChangesOptions = {
+  enabled: boolean
+  userId: string
+  userMetadata?: Record<string, unknown> | null
+  suggestionGroupingTimeout: number
+  onSuggestionCreate?: (suggestion: Suggestion) => void
+  onSuggestionAccept?: (id: string) => void
+  onSuggestionReject?: (id: string) => void
+}
+```
+
+## 类型辅助
+
+该扩展导出了用于处理建议类型的常量和辅助函数：
+
+```ts
+import {
+  SUGGESTION_TYPES,
+  isAddLikeType,
+  isDeleteLikeType,
+  isReplaceMarkType,
+  markTypeToSuggestionType,
+} from '@tiptap-pro/extension-tracked-changes'
+
+// 常量
+SUGGESTION_TYPES.ADD              // 'add'
+SUGGESTION_TYPES.DELETE           // 'delete'
+SUGGESTION_TYPES.REPLACE_DELETION  // 'replaceDeletion'
+SUGGESTION_TYPES.REPLACE_INSERTION // 'replaceInsertion'
+
+// 检查标记类型是否表示添加内容（匹配 'add' 和 'replaceInsertion'）
+isAddLikeType('add') // true
+isAddLikeType('replaceInsertion') // true
+
+// 检查标记类型是否表示删除内容（匹配 'delete' 和 'replaceDeletion'）
+isDeleteLikeType('delete') // true
+isDeleteLikeType('replaceDeletion') // true
+
+// 检查标记类型是否为替换子类型之一
+isReplaceMarkType('replaceDeletion') // true
+
+// 将标记级别类型转换为公开建议类型
+markTypeToSuggestionType('replaceDeletion') // 'replace'
+markTypeToSuggestionType('add') // 'add'
+```

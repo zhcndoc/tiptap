@@ -1,0 +1,93 @@
+import { Callout } from '@/components/ui/Callout'
+
+<Callout title="自定义节点约定" variant="warning">
+  自定义节点转换器必须遵守底层 DOCX 生成库的要求。在实践中，DOCX 的自定义转换函数应返回该节点允许的 DOCX 元素之一：`Paragraph` 类（或 `Paragraph` 类的数组）、`Table` 类、`TextRun` 类、`ExternalHyperlink` 类，或者如果该节点应在输出中跳过，则返回 `null`。
+</Callout>
+
+### 定义自定义节点扩展
+
+举例来说，假设你的编辑器有一个自定义节点类型 `hintbox`（一个带有提示样式的框）。你可以定义它在导出文档中应如何显示。
+
+下面是 `Hintbox` 扩展的自定义节点示例：
+
+```ts
+import { mergeAttributes, Node } from '@tiptap/core'
+
+export interface ParagraphOptions {
+  /**
+   * 段落节点的 HTML 属性。
+   * @default {}
+   * @example { class: 'foo' }
+   */
+  HTMLAttributes: Record<string, any>
+}
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    hintbox: {
+      /**
+       * 设置一个提示框
+       * @example editor.commands.setHintbox()
+       */
+      setHintbox: () => ReturnType
+      /**
+       * 切换一个提示框
+       * @example editor.commands.toggleHintbox()
+       */
+      toggleHintbox: () => ReturnType
+    }
+  }
+}
+
+/**
+ * 该扩展允许你创建提示框。
+ * @see https://www.tiptap.dev/api/nodes/paragraph
+ */
+export const Hintbox = Node.create<ParagraphOptions>({
+  name: 'hintbox',
+
+  priority: 1000,
+
+  addOptions() {
+    return {
+      HTMLAttributes: {
+        style: 'padding: 20px; border: 1px solid #b8d8ff; border-radius: 5px; background-color: #e6f3ff;',
+      },
+    }
+  },
+
+  group: 'block',
+
+  content: 'inline*',
+
+  parseHTML() {
+    return [{ tag: 'p' }]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['p', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0]
+  },
+
+  addCommands() {
+    return {
+      setHintbox:
+        () =>
+        ({ commands }) => {
+          return commands.setNode(this.name)
+        },
+      toggleHintbox:
+        () =>
+        ({ commands }) => {
+          return commands.toggleNode(this.name, 'paragraph')
+        },
+    }
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      'Mod-Alt-h': () => this.editor.commands.toggleHintbox(),
+    }
+  },
+})
+```
+

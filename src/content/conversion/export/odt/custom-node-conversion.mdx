@@ -1,0 +1,147 @@
+---
+title: 导出自定义节点为 .odt
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.4.0
+meta:
+    title: 导出自定义节点为 ODT | Tiptap 转换
+    description: 学习如何使用 Export ODT 扩展将自定义节点导出为 ODT（OpenDocument）文件。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import CustomNodeConversionGuide from '../_custom-node-conversion-guide.mdx'
+
+<EnterpriseCalloutAuto variant="odt" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)进行身份验证，连接到 Tiptap 的私有 npm 注册表。
+    </RequirementItem>
+</Requirements>
+
+`@tiptap-pro/extension-export-odt` 扩展支持自定义节点转换，允许您定义在 Tiptap 方案中的自定义节点如何在 ODT 导出中渲染。
+
+<Callout title="需要导出 DOCX 扩展" variant="warning">
+  ODT 导出的自定义节点转换需要 `@tiptap-pro/extension-export-docx` 扩展已安装并在编辑器中配置。ODT 导出底层使用 DOCX 生成后再转换为 ODT。若未安装，`customNodes` 选项将无效。
+</Callout>
+
+## 导出自定义节点为 .odt
+
+在配置 `ExportOdt` 时，通过 `customNodes` 选项传递您的自定义节点定义：
+
+```ts
+import { ExportOdt } from '@tiptap-pro/extension-export-odt'
+import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+
+const editor = new Editor({
+  extensions: [
+    ExportDocx,
+    ExportOdt.configure({
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      customNodes: [
+        {
+          type: 'hintbox',
+          render: node => {
+            // 定义您的自定义节点如何在文档中渲染
+          },
+        },
+      ],
+      onCompleteExport(result) {
+        // 处理导出的 ODT
+      },
+    }),
+  ],
+})
+```
+
+<CustomNodeConversionGuide />
+
+### 定义自定义节点的渲染函数
+
+我们来定义如何在导出文档中渲染 `Hintbox` 自定义节点：
+
+```ts
+import { ExportOdt } from '@tiptap-pro/extension-export-odt'
+import {
+  convertTextNode,
+  Docx,
+  ExportDocx,
+  lineHeightToDocx,
+  pixelsToHalfPoints,
+  pointsToTwips,
+} from '@tiptap-pro/extension-export-docx'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    ExportDocx,
+    ExportOdt.configure({
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      onCompleteExport: result => {
+        const url = URL.createObjectURL(result)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'export.odt'
+        a.click()
+        URL.revokeObjectURL(url)
+      },
+      customNodes: [
+        {
+          type: 'hintbox',
+          render: node => {
+            return new Docx.Paragraph({
+              children: node.content.map(content => convertTextNode(content)),
+              style: 'Hintbox',
+            })
+          },
+        },
+      ],
+      styleOverrides: {
+        paragraphStyles: [
+          {
+            id: 'Hintbox',
+            name: 'Hintbox',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: false,
+            run: {
+              font: 'Aptos Light',
+              size: pixelsToHalfPoints(16),
+            },
+            paragraph: {
+              spacing: {
+                before: pointsToTwips(12),
+                after: pointsToTwips(12),
+                line: lineHeightToDocx(1),
+              },
+              border: {
+                top: { style: Docx.BorderStyle.SINGLE, size: 1, color: 'b8d8ff', space: 5 },
+                bottom: { style: Docx.BorderStyle.SINGLE, size: 1, color: 'b8d8ff', space: 5 },
+                right: { style: Docx.BorderStyle.SINGLE, size: 1, color: 'b8d8ff', space: 5 },
+                left: { style: Docx.BorderStyle.SINGLE, size: 1, color: 'b8d8ff', space: 5 },
+              },
+              shading: {
+                type: Docx.ShadingType.SOLID,
+                color: 'e6f3ff',
+              },
+            },
+          },
+        ],
+      },
+    }),
+    // 其他扩展 ...
+  ],
+})
+```
+
+您可以在 `render` 函数中使用由 `@tiptap-pro/extension-export-docx` 包提供的 `Docx` 导入所包含的 `Docx` 库类（如 `Paragraph`、`TextRun`、`Table` 等）构造任意支持的 DOCX 元素。

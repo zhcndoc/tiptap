@@ -1,0 +1,234 @@
+---
+title: 命令
+tags:
+  - type: addon
+meta:
+  title: 命令 | Tiptap 受控变更文档
+  description: Tiptap 受控变更扩展中所有可用的编辑器命令。
+  category: 受控变更
+---
+
+受控变更扩展提供的所有编辑器命令。
+
+## enableTrackedChanges()
+
+启用受控变更模式。所有后续编辑将变为建议。
+
+```js
+editor.commands.enableTrackedChanges()
+```
+
+## disableTrackedChanges()
+
+禁用受控变更模式。编辑将直接应用到文档中。
+
+```js
+editor.commands.disableTrackedChanges()
+```
+
+## toggleTrackedChanges()
+
+切换受控变更模式开关。
+
+```js
+editor.commands.toggleTrackedChanges()
+```
+
+## setTrackedChangesUser()
+
+更改新建议的当前用户。
+
+| 参数           | 类型                              | 描述                                  |
+| -------------- | --------------------------------- | ------------------------------------ |
+| `userId`       | `string`                          | 新的用户ID                           |
+| `userMetadata` | `Record<string, unknown> \| null` | 关于用户的可选任意元数据             |
+
+```js
+editor.commands.setTrackedChangesUser({
+  userId: 'user-789',
+  userMetadata: { name: 'Alice Johnson' },
+})
+```
+
+## acceptSuggestion()
+
+接受建议，应用提议的更改。对于插入，移除建议标记并保留文本。对于删除，移除标记文本。对于替换，移除旧文本，保留新文本。
+
+| 参数   | 类型     | 描述                                                         |
+| ------ | -------- | ------------------------------------------------------------ |
+| `id`   | `string` | 可选的建议ID。若省略，则使用当前选区处的建议。               |
+
+```js
+// 接受选区处的建议
+editor.commands.acceptSuggestion()
+
+// 接受特定建议
+editor.commands.acceptSuggestion({ id: 'suggestion-123' })
+```
+
+## rejectSuggestion()
+
+拒绝建议，撤销提议的更改。对于插入，移除标记文本。对于删除，移除建议标记并保留文本。对于替换，移除新文本，保留旧文本。
+
+| 参数   | 类型     | 描述                                                         |
+| ------ | -------- | ------------------------------------------------------------ |
+| `id`   | `string` | 可选的建议ID。若省略，则使用当前选区处的建议。               |
+
+```js
+// 拒绝选区处的建议
+editor.commands.rejectSuggestion()
+
+// 拒绝特定建议
+editor.commands.rejectSuggestion({ id: 'suggestion-123' })
+```
+
+## acceptAllSuggestions()
+
+接受文档中的所有建议。
+
+```js
+editor.commands.acceptAllSuggestions()
+```
+
+## rejectAllSuggestions()
+
+拒绝文档中的所有建议。
+
+```js
+editor.commands.rejectAllSuggestions()
+```
+
+## acceptSuggestionsInRange()
+
+接受特定文档位置范围内的所有建议。
+
+| 参数   | 类型     | 描述                    |
+| ------ | -------- | ----------------------- |
+| `from` | `number` | 范围起始位置            |
+| `to`   | `number` | 范围结束位置            |
+
+```js
+editor.commands.acceptSuggestionsInRange({ from: 0, to: 100 })
+```
+
+## rejectSuggestionsInRange()
+
+拒绝特定文档位置范围内的所有建议。
+
+| 参数   | 类型     | 描述                    |
+| ------ | -------- | ----------------------- |
+| `from` | `number` | 范围起始位置            |
+| `to`   | `number` | 范围结束位置            |
+
+```js
+editor.commands.rejectSuggestionsInRange({ from: 0, to: 100 })
+```
+
+## acceptSuggestionsByUser()
+
+接受特定用户创建的所有建议。
+
+| 参数     | 类型     | 描述                              |
+| -------- | -------- | --------------------------------- |
+| `userId` | `string` | 需要接受建议的用户ID              |
+
+```js
+editor.commands.acceptSuggestionsByUser({ userId: 'user-123' })
+```
+
+## rejectSuggestionsByUser()
+
+拒绝特定用户创建的所有建议。
+
+| 参数     | 类型     | 描述                              |
+| -------- | -------- | --------------------------------- |
+| `userId` | `string` | 需要拒绝建议的用户ID              |
+
+```js
+editor.commands.rejectSuggestionsByUser({ userId: 'user-123' })
+```
+
+## addTrackedInsertion()
+
+以受控建议形式插入内容，而无需为整个编辑器启用受控变更模式。当你需要通过编程方式创建建议，并且希望结果匹配正常的受控输入事务时，此命令很有用。`content` 参数接受任何 Tiptap `Content` 值，包括文本、HTML 或 JSON 节点内容（如图像节点）。
+
+| 参数       | 类型      | 描述                                            |
+| ---------- | --------- | ------------------------------------------------ |
+| `from`     | `number`  | 应添加受控插入的位置                            |
+| `content`  | `Content` | 作为建议插入的内容                              |
+| `reason`   | `string`  | 可选描述，包含在 `trackedChanges:suggestionCreated` 事件负载中 |
+
+```js
+editor.commands.addTrackedInsertion({
+  from: 7,
+  content: 'big ',
+  reason: '应用 AI 重写',
+})
+```
+
+```js
+editor.commands.addTrackedInsertion({
+  from: 7,
+  content: {
+    type: 'image',
+    attrs: {
+      src: '/example.png',
+      alt: '示例图片',
+    },
+  },
+  reason: '插入审核通过的图片素材',
+})
+```
+
+## addTrackedDeletion()
+
+将现有文档范围转换为受控删除建议。这相当于用户在启用受控变更模式时删除内容的操作。
+
+| 参数       | 类型     | 描述                                                 |
+| ---------- | -------- | ---------------------------------------------------- |
+| `from`     | `number` | 标记为删除的范围起始位置                             |
+| `to`       | `number` | 标记为删除的范围结束位置                             |
+| `reason`   | `string` | 可选描述，包含在 `trackedChanges:suggestionCreated` 事件负载中 |
+
+```js
+editor.commands.addTrackedDeletion({
+  from: 7,
+  to: 12,
+  reason: '移除过时措辞',
+})
+```
+
+## addTrackedReplacement()
+
+用受控替换建议替换现有范围。被替换内容作为删除部分，新内容作为插入部分。`content` 参数接受任何 Tiptap `Content` 值，因此可以通过传递 JSON 内容将文本替换为不同的节点。
+
+| 参数       | 类型      | 描述                                                 |
+| ---------- | --------- | ---------------------------------------------------- |
+| `from`     | `number`  | 替换范围起始位置                                    |
+| `to`       | `number`  | 替换范围结束位置                                    |
+| `content`  | `Content` | 作为受控建议插入的替换内容                          |
+| `reason`   | `string`  | 可选描述，包含在 `trackedChanges:suggestionCreated` 事件负载中 |
+
+```js
+editor.commands.addTrackedReplacement({
+  from: 7,
+  to: 12,
+  content: 'earth',
+  reason: '替换为审核通过的术语',
+})
+```
+
+```js
+editor.commands.addTrackedReplacement({
+  from: 7,
+  to: 8,
+  content: {
+    type: 'image',
+    attrs: {
+      src: '/updated-diagram.png',
+      alt: '更新后的图表',
+    },
+  },
+  reason: '用最终图表替换占位符',
+})
+```

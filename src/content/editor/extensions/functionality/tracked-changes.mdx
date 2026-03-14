@@ -1,0 +1,102 @@
+---
+title: 变更追踪扩展
+extension:
+  name: 变更追踪
+  description: 启用建议模式以支持协作编辑和文档审阅工作流程。
+  type: extension
+  icon: FileEdit
+tags:
+  - type: addon
+    tooltip: 将变更追踪添加到您的订阅中
+  - type: beta
+meta:
+  category: 编辑器
+  title: 变更追踪扩展 | Tiptap 编辑器文档
+  description: 在您的 Tiptap 编辑器中启用变更追踪和建议模式，以支持协作编辑和文档审阅。
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+Tracked Changes 扩展启用了协作编辑工作流的建议模式。启用后，所有编辑都会以提议的形式出现，可以被接受或拒绝，类似于文字处理软件中的变更追踪。
+
+<Callout title="更多详情" variant="hint">
+  有关如何集成、安装和配置 Tiptap Tracked Changes 扩展的更详细信息，请访问我们的[功能页面](/tracked-changes/getting-started/overview)。
+</Callout>
+
+<Callout title="实验性" variant="warning">
+  此扩展正在积极开发中。API 在未来版本中可能会发生变化。所有低于 1.0.0 的版本预期不稳定，使用时请自行承担风险。
+</Callout>
+
+<CodeDemo isPro path="/Experiments/TrackedChanges" />
+
+## 安装
+
+```bash
+npm install @tiptap-pro/extension-tracked-changes
+```
+
+## 基本设置
+
+```js
+import { Editor } from '@tiptap/core'
+import { TrackedChanges } from '@tiptap-pro/extension-tracked-changes'
+
+const editor = new Editor({
+  extensions: [
+    TrackedChanges.configure({
+      enabled: true,
+      userId: 'user-123',
+      userMetadata: { name: 'John Doe' },
+    }),
+  ],
+})
+```
+
+## 编程式建议
+
+除了交互式审阅工作流外，该扩展还公开了用于直接从应用逻辑创建跟踪建议的命令。当你需要插入、删除或替换内容作为建议，但不想在每次编辑器交互时都开启跟踪变更模式时，可以使用这些命令。你也可以为编程式建议附加一个 `reason`，该理由会随着创建事件一起发出，供下游工作流使用。插入和替换命令接受完整的 Tiptap `Content`，因此可以处理诸如图片等 JSON 节点，而不仅仅是纯文本。
+
+```js
+editor.commands.addTrackedInsertion({
+  from: 7,
+  content: 'big ',
+  reason: 'Applied assistant suggestion',
+})
+
+editor.commands.addTrackedDeletion({
+  from: 7,
+  to: 12,
+  reason: 'Removed deprecated sentence',
+})
+
+editor.commands.addTrackedReplacement({
+  from: 7,
+  to: 12,
+  content: 'earth',
+  reason: 'Standardized terminology',
+})
+```
+
+```js
+editor.commands.addTrackedInsertion({
+  from: 7,
+  content: {
+    type: 'image',
+    attrs: {
+      src: '/example.png',
+      alt: 'Example image',
+    },
+  },
+  reason: 'Inserted approved image asset',
+})
+```
+
+完整 API 请见[命令参考](/tracked-changes/api-reference/commands)。
+
+## 下一步
+
+- [安装与配置](/tracked-changes/getting-started/install) — 完整设置参考
+- [基本用法](/tracked-changes/usage/basic-usage) — 启用追踪，接受和拒绝建议
+- [高级用法](/tracked-changes/usage/advanced-usage) — 分组、协作、评论集成
+- [API 参考](/tracked-changes/api-reference/commands) — 命令、事件、工具和类型

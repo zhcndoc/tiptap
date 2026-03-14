@@ -13,7 +13,10 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 `pageBreakBackground` 和 `pageGap` 选项允许您更改页面之间区域的背景颜色和页面之间的间距。这有助于视觉上区分页码，或使其与您的应用背景颜色设计保持一致。
 
-<CodeDemo isPro src="https://feature-pages-extension--tiptap-pro.netlify.app/preview/extensions/pagescustompagebreak" />
+<CodeDemo
+  isPro
+  src="https://feat-pages-and-docx--tiptap-pro.netlify.app/preview/extensions/pagescustompagebreak"
+/>
 
 ## 如何设置分页符背景
 
@@ -33,8 +36,8 @@ editor.commands.setPageBreakBackground(pageBreakBackground)
 document.body.style.backgroundColor = pageBreakBackground
 ```
 
-<Callout title="实用提示">
-您应该同时更改 body（或编辑器容器）的背景颜色以匹配分页符背景，因为分页符背景只应用于分页符本身，而不适用于整个文档或 Tiptap 编辑器。
+<Callout title="Helpful tip">
+  您也应该更改 body（或您的编辑器容器）的背景颜色以匹配分页符背景，因为分页符背景仅应用于分页符本身，而不是整个文档或 Tiptap 编辑器。
 </Callout>
 
 ## 页面间距
@@ -56,6 +59,6 @@ Pages.configure({
 editor.commands.setPageGap(20) // 单位为像素
 ```
 
-<Callout title="提示">
-`pageGap` 属性只影响页面之间的间距，不影响页面本身。
+<Callout title="Hint">
+  `pageGap` 属性只影响页面之间的间距，不影响页面本身。
 </Callout>

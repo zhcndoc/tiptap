@@ -406,6 +406,11 @@ export const sidebarConfig: SidebarConfig = {
               title: '文本对齐',
             },
             {
+              href: '/editor/extensions/functionality/tracked-changes',
+              title: '修订记录',
+              tags: ['Add-on'],
+            },
+            {
               href: '/editor/extensions/functionality/trailing-node',
               title: '尾部节点',
             },

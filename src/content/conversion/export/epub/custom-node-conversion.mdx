@@ -1,0 +1,147 @@
+---
+title: 导出自定义节点为 .epub
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.4.0
+meta:
+    title: 导出自定义节点为 EPUB | Tiptap 转换
+    description: 学习如何使用 Export EPUB 扩展将自定义节点导出为 EPUB 文件。
+    category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import CustomNodeConversionGuide from '../_custom-node-conversion-guide.mdx'
+
+<EnterpriseCalloutAuto variant="epub" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)进行身份验证以访问 Tiptap 的私有 npm 注册表。
+    </RequirementItem>
+</Requirements>
+
+`@tiptap-pro/extension-export-epub` 扩展支持自定义节点转换，允许您定义 Tiptap 结构中自定义节点在 EPUB 导出中的渲染方式。
+
+<Callout title="需要导出 DOCX 扩展" variant="warning">
+  EPUB 导出的自定义节点转换需要安装并配置 `@tiptap-pro/extension-export-docx` 扩展。EPUB 导出在转换为 EPUB 之前，底层使用 DOCX 生成。如果没有该扩展，`customNodes` 选项将不会生效。
+</Callout>
+
+## 将自定义节点导出为 .epub
+
+在配置 `ExportEpub` 时通过 `customNodes` 选项传入您的自定义节点定义：
+
+```ts
+import { ExportEpub } from '@tiptap-pro/extension-export-epub'
+import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+
+const editor = new Editor({
+  extensions: [
+    ExportDocx,
+    ExportEpub.configure({
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      customNodes: [
+        {
+          type: 'hintbox',
+          render: node => {
+            // 定义自定义节点在文档中的渲染方式
+          },
+        },
+      ],
+      onCompleteExport(result) {
+        // 处理导出的 EPUB 文件
+      },
+    }),
+  ],
+})
+```
+
+<CustomNodeConversionGuide />
+
+### 定义自定义节点渲染函数
+
+我们将定义 `Hintbox` 自定义节点在导出文档中的渲染方式：
+
+```ts
+import { ExportEpub } from '@tiptap-pro/extension-export-epub'
+import {
+  convertTextNode,
+  Docx,
+  ExportDocx,
+  lineHeightToDocx,
+  pixelsToHalfPoints,
+  pointsToTwips,
+} from '@tiptap-pro/extension-export-docx'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    ExportDocx,
+    ExportEpub.configure({
+      token: 'YOUR_TOKEN',
+      appId: 'YOUR_APP_ID',
+      onCompleteExport: result => {
+        const url = URL.createObjectURL(result)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'export.epub'
+        a.click()
+        URL.revokeObjectURL(url)
+      },
+      customNodes: [
+        {
+          type: 'hintbox',
+          render: node => {
+            return new Docx.Paragraph({
+              children: node.content.map(content => convertTextNode(content)),
+              style: 'Hintbox',
+            })
+            },
+        },
+      ],
+      styleOverrides: {
+        paragraphStyles: [
+          {
+            id: 'Hintbox',
+            name: 'Hintbox',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: false,
+            run: {
+              font: 'Aptos Light',
+              size: pixelsToHalfPoints(16),
+            },
+            paragraph: {
+              spacing: {
+                before: pointsToTwips(12),
+                after: pointsToTwips(12),
+                line: lineHeightToDocx(1),
+              },
+              border: {
+                top: { style: Docx.BorderStyle.SINGLE, size: 1, color: 'b8d8ff', space: 5 },
+                bottom: { style: Docx.BorderStyle.SINGLE, size: 1, color: 'b8d8ff', space: 5 },
+                right: { style: Docx.BorderStyle.SINGLE, size: 1, color: 'b8d8ff', space: 5 },
+                left: { style: Docx.BorderStyle.SINGLE, size: 1, color: 'b8d8ff', space: 5 },
+              },
+              shading: {
+                type: Docx.ShadingType.SOLID,
+                color: 'e6f3ff',
+              },
+            },
+          },
+        ],
+      },
+    }),
+    // 其他扩展 ...
+  ],
+})
+```
+
+您可以在 `render` 函数中使用 `@tiptap-pro/extension-export-docx` 包中的 `Docx` 导入提供的 `Docx` 库类（如 `Paragraph`、`TextRun`、`Table` 等）构建任意支持的 DOCX 元素。

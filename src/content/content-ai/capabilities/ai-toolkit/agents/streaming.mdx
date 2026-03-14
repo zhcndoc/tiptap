@@ -1,17 +1,16 @@
-```markdown
 ---
-title: 工具流式传输
+title: 流式传输
 meta:
-  title: 工具流式传输 | Tiptap 内容 AI
-  description: 为您的 AI 代理聊天机器人添加实时工具流式传输功能，实时查看变更。
+  title: 流式传输 | Tiptap 内容 AI
+  description: 为您的 AI 代理聊天机器人添加实时流式传输，实时查看变化。
   category: 内容 AI
 ---
 
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-<Callout title="接续自 AI 代理聊天机器人指南" variant="info">
-  本指南是对[AI 代理聊天机器人指南](/content-ai/capabilities/ai-toolkit/guides/ai-agent-chatbot)的延续。请先阅读该指南。
+<Callout title="延续 AI 代理聊天机器人指南" variant="info">
+  本指南是对[AI 代理聊天机器人指南](/content-ai/capabilities/ai-toolkit/agents/ai-agent-chatbot)的延续。请先阅读该指南。
 </Callout>
 
 启用 AI 工具包的工具流式传输功能，在 AI 生成内容的同时实时更新文档。
@@ -22,7 +21,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ## 关键更改
 
-要为我们在[前一篇指南](/content-ai/capabilities/ai-toolkit/guides/ai-agent-chatbot)中构建的 AI 代理聊天机器人添加流式传输功能，需要将 `executeTool` 方法替换为 `streamTool` 方法。
+要在我们之前构建的[AI 代理聊天机器人](/content-ai/capabilities/ai-toolkit/agents/ai-agent-chatbot)中添加流式传输，我们需要用 `streamTool` 方法替换 `executeTool` 方法。
 
 首先，在工具调用流式传输期间，每当接收到新的流式部分时，您可以反复调用 `streamTool`，这将增量更新文档。
 
@@ -52,7 +51,7 @@ const result = aiToolkit.streamTool({
 })
 ```
 
-要在我们在[前一篇指南](/content-ai/capabilities/ai-toolkit/guides/ai-agent-chatbot)构建的 AI 代理聊天机器人中实现此过程，请按以下步骤操作：
+要在我们之前构建的[AI 代理聊天机器人](/content-ai/capabilities/ai-toolkit/agents/ai-agent-chatbot)中实现此流程，请按照以下步骤：
 
 ### 1. 处理流式更新
 
@@ -252,4 +251,3 @@ export default function Page() {
 ## 下一步
 
 将工具流式传输与变更预览结合，获得最佳用户体验。请参阅[变更审查指南](/content-ai/capabilities/ai-toolkit/guides/review-changes)，了解如何让用户预览并批准变更后再应用。
-```

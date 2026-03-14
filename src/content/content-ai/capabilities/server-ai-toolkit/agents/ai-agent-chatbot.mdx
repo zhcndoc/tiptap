@@ -48,40 +48,26 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 npx create-next-app@latest server-ai-agent-chatbot
 ```
 
+<Callout title="Pro packages" variant="hint">
+  Server AI Toolkit 和 Collaboration 是专业版包。在安装之前，您需要设置[访问 Tiptap 私有 NPM 注册表](/guides/pro-extensions)。
+</Callout>
+
 安装核心 Tiptap 包、协作扩展和用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
 
 ```bash
 npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-collaboration @tiptap-pro/provider ai @ai-sdk/react @ai-sdk/openai zod uuid yjs jsonwebtoken
 ```
 
-安装 Server AI Toolkit 包。
-
-<Callout title="专业版包" variant="hint">
-  Server AI Toolkit 是一个专业版包。安装前，请按照[私有注册表指南](/guides/pro-extensions)设置访问私有 NPM 注册表。
-</Callout>
+安装 Server AI Toolkit 包：
 
 ```bash
 npm install @tiptap-pro/server-ai-toolkit
 ```
 
-安装 jsonwebtoken 和 uuid 的 TypeScript 类型：
+安装 jsonwebtoken 的 TypeScript 类型：
 
 ```bash
-npm install --save-dev @types/jsonwebtoken @types/uuid
-```
-
-## 获取 schema 识别数据
-
-首先，从你的 Tiptap 编辑器获取 schema 识别数据。该数据描述文档结构，所有 API 调用都需要它。
-
-```ts
-// lib/get-schema-awareness.ts
-import { Editor } from '@tiptap/core'
-import { getSchemaAwarenessData } from '@tiptap-pro/server-ai-toolkit'
-
-export function getSchemaAwareness(editor: Editor) {
-  return getSchemaAwarenessData(editor)
-}
+npm install --save-dev @types/jsonwebtoken
 ```
 
 ## API 端点
@@ -109,6 +95,7 @@ TIPTAP_CLOUD_AI_APP_ID=your-app-id
 TIPTAP_CLOUD_DOCUMENT_SERVER_ID=your-tiptap-cloud-document-server-id
 TIPTAP_CLOUD_SECRET=your-tiptap-cloud-document-server-secret
 TIPTAP_CLOUD_DOCUMENT_SERVER_MANAGEMENT_API_SECRET=your-tiptap-cloud-document-management-api-secret
+OPENAI_API_KEY=your-openai-key # AI SDK 会自动拾取
 ```
 
 你可以在 [Server AI Toolkit 设置](https://cloud.tiptap.dev/v2/cloud/ai) 页面获取你的 App ID 和密钥。密钥用于生成 JWT 令牌以进行认证。
@@ -117,11 +104,9 @@ TIPTAP_CLOUD_DOCUMENT_SERVER_MANAGEMENT_API_SECRET=your-tiptap-cloud-document-ma
   本实现使用 Tiptap Cloud 的 REST API 管理文档状态。你需要拥有 Tiptap Cloud 账号及 REST API 密钥来存储和检索文档。使用文档 ID 来跟踪跨工具执行的文档状态。
 </Callout>
 
-<Callout title="Tiptap Cloud 文档方式" variant="info">
-  现在，Server AI Toolkit 支持在提供 `experimental_documentOptions` 中的 `documentId` 时，自动获取和保存 Tiptap Cloud 文档。这省去了下面示例中的 `getDocument` 和 `updateDocument` 辅助函数。见[注释指南](/content-ai/capabilities/server-ai-toolkit/agents/comments)。
+创建几个辅助函数以支持你的端点并与 Server AI Toolkit 交互：
 
-  以下教程演示如何自己提供并管理文档。
-</Callout>
+#### 获取 JWT 令牌
 
 ### 辅助函数
 
@@ -157,7 +142,7 @@ export function getTiptapCloudAiJwtToken(): string {
 }
 ```
 
-### 获取工具定义
+#### 获取工具定义
 
 此函数从 Server AI Toolkit API 获取可用工具定义。
 
@@ -204,9 +189,9 @@ export async function getToolDefinitions(schemaAwarenessData: unknown): Promise<
 }
 ```
 
-### 获取 schema 识别提示
+#### 获取 schema 识别提示
 
-此函数从 Server AI Toolkit API 获取格式化的提示字符串，该字符串向 AI 模型描述文档的 schema。该提示将包含在代理的指令中，帮助 AI 理解文档中可用的节点、标记和属性。
+_Schema awareness_ 是 Server AI Toolkit 让你的 LLM 理解文档结构的能力。使用此函数，你可以生成该识别内容的格式化字符串，包含在提示中向模型描述文档。
 
 ```ts
 // lib/server-ai-toolkit/get-schema-awareness-prompt.ts
@@ -244,7 +229,7 @@ export async function getSchemaAwarenessPrompt(schemaAwarenessData: unknown): Pr
 }
 ```
 
-### 执行工具
+#### 执行工具
 
 此函数通过 Server AI Toolkit API 执行指定工具。它将工具名称、输入参数、文档 ID 和 schema 识别数据发送给 API。服务器会借助 JWT 中的凭证自动从 Tiptap Cloud 获取和保存文档。
 
@@ -451,11 +436,11 @@ export async function POST(req: Request) {
 
   const agent = new ToolLoopAgent({
     model: openai('gpt-5-mini'),
-    instructions: `你是一名能编辑富文本文档的助手。
-回答时请简洁明了。但你生成的文档内容无需简洁直白，应尽可能贴合用户请求。
-在调用任何工具前，用一句话或更短总结你将要做的高层任务，就像人类作者描述任务一样。
-规则：回答中不要透露工具调用的细节
-规则：回答中不要包含文档 HTML 内容的细节
+    instructions: `You are an assistant that can edit rich text documents.
+In your responses, be concise and to the point. However, the content you generate in the document does not need to be concise and to the point: instead, it should follow the user's request as closely as possible.
+Before calling any tools, summarize you're going to do (in a sentence or less), as a high-level view of the task, as a human writer would describe it.
+Rule: In your responses, do not provide any details of the tool calls.
+Rule: In your responses, do not provide any details of the HTML content of the document.
 
 ${schemaAwarenessPrompt}`,
     tools,
@@ -477,10 +462,10 @@ ${schemaAwarenessPrompt}`,
 
 创建一个客户端 React 组件渲染带协作支持的 Tiptap 编辑器和简单聊天界面。该组件使用 Vercel AI SDK 的[useChat hook](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat)调用 API 端点并管理聊天对话。
 
-首先创建一个服务器动作用于生成 Tiptap Cloud 协作的 JWT 令牌。此函数生成安全的 JWT，用于授权客户端访问 Tiptap Cloud 协作服务的特定文档。
+首先，创建一个服务器函数生成 Tiptap Cloud 协作用的 JWT。此函数创建一个安全的 JWT，授权客户端访问 Tiptap Cloud 协作服务中的特定文档。
 
 ```ts
-// app/server-ai-agent-chatbot/actions.ts
+// app/actions.ts
 'use server'
 
 import jwt from 'jsonwebtoken'
@@ -514,7 +499,7 @@ export async function getCollabConfig(
 现在创建主页面组件：
 
 ```tsx
-// app/server-ai-agent-chatbot/page.tsx
+// app/page.tsx
 'use client'
 
 import { useChat } from '@ai-sdk/react'
@@ -539,7 +524,7 @@ export default function Page() {
     extensions: [StarterKit, Collaboration.configure({ document: doc })],
   })
 
-  // 从服务器动作获取 JWT 令牌和 appId
+  // 从服务器函数获取 JWT 和 appId
   useEffect(() => {
     const setupProvider = async () => {
       try {
@@ -555,7 +540,7 @@ export default function Page() {
             console.log('WebSocket 连接已打开。')
           },
           onConnect() {
-            editor?.commands.setContent(initialContent)
+            editor?.commands.setContent('Hello, world!')
           },
         })
 
@@ -575,18 +560,12 @@ export default function Page() {
     }
   }, [documentId, doc, editor])
 
-  // 修复问题：https://github.com/vercel/ai/issues/7819
   const schemaAwarenessData = editor ? getSchemaAwarenessData(editor) : null
-  const schemaAwarenessDataRef = useRef(schemaAwarenessData)
-  schemaAwarenessDataRef.current = schemaAwarenessData
 
   const { messages, sendMessage } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/server-ai-agent-chatbot',
-      body: () => ({
-        schemaAwarenessData: schemaAwarenessDataRef.current,
-        documentId,
-      }),
+      body: { documentId },
     }),
   })
 
@@ -613,7 +592,7 @@ export default function Page() {
         onSubmit={(e) => {
           e.preventDefault()
           if (input.trim()) {
-            sendMessage({ text: input })
+            sendMessage({ text: input }, { body: { schemaAwarenessData } })
             setInput('')
           }
         }}

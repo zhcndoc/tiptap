@@ -1,0 +1,208 @@
+---
+title: 创建带有修订跟踪的编辑器
+tags:
+  - type: addon
+meta:
+  title: 创建带有修订跟踪的编辑器 | Tiptap 修订跟踪文档
+  description: 在 React 中使用 Tracked Changes 扩展设置 Tiptap 编辑器的分步指南。
+  category: 修订跟踪
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+了解如何创建一个具备修订跟踪功能的完整编辑器，包括用于切换修订跟踪和接受或拒绝建议的工具栏。
+
+<Callout title="框架说明" variant="hint">
+  本指南使用 React，但相同的概念也适用于 Vue 以及 Tiptap 支持的任何其他框架。
+</Callout>
+
+## 先决条件
+
+确保已安装 Tracked Changes 扩展。详情请参见[安装指南](/tracked-changes/getting-started/install)。
+
+## 设置编辑器
+
+首先创建一个包含 `TrackedChanges` 扩展的编辑器实例。你需要传入当前用户的 ID 和元数据，以便正确归属建议。
+
+```jsx
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { TrackedChanges } from '@tiptap-pro/extension-tracked-changes'
+
+function Editor() {
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      TrackedChanges.configure({
+        enabled: true,
+        userId: 'user-123',
+        userMetadata: {
+          name: 'John Doe',
+        },
+      }),
+    ],
+    content: '<p>开始编辑以查看修订跟踪的效果。</p>',
+  })
+
+  if (!editor) {
+    return null
+  }
+
+  return <EditorContent editor={editor} />
+}
+```
+
+此时，用户的每次编辑都会被作为建议跟踪。插入操作显示为 `add` 建议，删除操作显示为 `delete` 建议。
+
+## 添加工具栏
+
+接下来，添加控件用于切换修订跟踪以及接受或拒绝建议。该扩展提供了对应的编辑器命令来执行这些操作。
+
+```jsx
+import { useCallback, useState } from 'react'
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { TrackedChanges } from '@tiptap-pro/extension-tracked-changes'
+
+function Editor() {
+  const [isEnabled, setIsEnabled] = useState(true)
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      TrackedChanges.configure({
+        enabled: true,
+        userId: 'user-123',
+        userMetadata: { name: 'John Doe' },
+      }),
+    ],
+    content: '<p>开始编辑以查看修订跟踪的效果。</p>',
+  })
+
+  const toggleTrackedChanges = useCallback(() => {
+    if (!editor) return
+    editor.commands.toggleTrackedChanges()
+    setIsEnabled(!isEnabled)
+  }, [editor, isEnabled])
+
+  if (!editor) {
+    return null
+  }
+
+  return (
+    <div>
+      <div className="toolbar">
+        <button onClick={toggleTrackedChanges}>
+          {isEnabled ? '禁用' : '启用'} 修订跟踪
+        </button>
+        <button onClick={() => editor.commands.acceptAllSuggestions()}>
+          全部接受
+        </button>
+        <button onClick={() => editor.commands.rejectAllSuggestions()}>
+          全部拒绝
+        </button>
+      </div>
+      <EditorContent editor={editor} />
+    </div>
+  )
+}
+```
+
+## 添加建议样式
+
+建议通过带有数据属性的 `<span>` 元素渲染。添加 CSS 以在视觉上区分插入和删除。
+
+```css
+/* 插入 — 绿色高亮 */
+[data-suggestion-type="add"] {
+  background-color: rgba(0, 255, 0, 0.15);
+  text-decoration: underline;
+}
+
+/* 删除 — 红色删除线 */
+[data-suggestion-type="delete"] {
+  background-color: rgba(255, 0, 0, 0.15);
+  text-decoration: line-through;
+}
+
+/* 替换删除 */
+[data-suggestion-type="replaceDeletion"] {
+  background-color: rgba(255, 0, 0, 0.15);
+  text-decoration: line-through;
+}
+
+/* 替换插入 */
+[data-suggestion-type="replaceInsertion"] {
+  background-color: rgba(0, 255, 0, 0.15);
+  text-decoration: underline;
+}
+```
+
+查看[样式参考](/tracked-changes/api-reference/styling)了解所有可用的数据属性。
+
+## 在光标处接受和拒绝
+
+你也可以在当前光标处接受或拒绝建议，而无需传入 ID：
+
+```jsx
+<button onClick={() => editor.commands.acceptSuggestion()}>
+  光标处接受
+</button>
+<button onClick={() => editor.commands.rejectSuggestion()}>
+  光标处拒绝
+</button>
+```
+
+## 在选区中接受和拒绝
+
+要接受或拒绝当前文本选区中的所有建议：
+
+```jsx
+const acceptInSelection = useCallback(() => {
+  if (!editor) return
+  const { from, to } = editor.state.selection
+  editor.commands.acceptSuggestionsInRange({ from, to })
+}, [editor])
+
+const rejectInSelection = useCallback(() => {
+  if (!editor) return
+  const { from, to } = editor.state.selection
+  editor.commands.rejectSuggestionsInRange({ from, to })
+}, [editor])
+```
+
+## 切换用户
+
+在多用户应用中，活动用户变化时需要切换修订跟踪的用户。使用 `setTrackedChangesUser` 命令：
+
+```jsx
+editor.commands.setTrackedChangesUser({
+  userId: 'user-456',
+  userMetadata: { name: 'Jane Smith' },
+})
+```
+
+## 启用代码块跟踪
+
+默认情况下，代码块不支持 mark。该扩展提供了一个辅助方法，用于为任何代码块扩展添加修订跟踪支持：
+
+```jsx
+import CodeBlock from '@tiptap/extension-code-block'
+import { TrackedChanges, withSuggestionMarkOnCodeBlock } from '@tiptap-pro/extension-tracked-changes'
+
+const TrackableCodeBlock = withSuggestionMarkOnCodeBlock(CodeBlock)
+
+const editor = useEditor({
+  extensions: [
+    StarterKit.configure({ codeBlock: false }),
+    TrackableCodeBlock,
+    TrackedChanges.configure({ enabled: true, userId: 'user-123' }),
+  ],
+})
+```
+
+## 后续步骤
+
+- [构建建议列表侧边栏](/tracked-changes/guides/suggestion-list) 以显示所有建议
+- 了解[建议分组和高级行为](/tracked-changes/usage/advanced-usage)
+- 探索完整的[命令 API](/tracked-changes/api-reference/commands)

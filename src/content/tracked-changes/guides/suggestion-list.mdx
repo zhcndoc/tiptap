@@ -1,0 +1,271 @@
+---
+title: 构建建议列表
+tags:
+  - type: addon
+meta:
+  title: 构建建议列表 | Tiptap 变更跟踪文档
+  description: 创建一个侧边栏组件，显示所有变更跟踪的建议，并提供接受和拒绝操作。
+  category: 变更跟踪
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+学习如何构建一个侧边栏组件，列出文档中所有未决建议，显示每个更改的作者，并允许用户接受或拒绝这些建议。
+
+<Callout title="框架说明" variant="hint">
+  本指南使用 React，但相同的概念适用于 Vue 以及 Tiptap 支持的任何其他框架。
+</Callout>
+
+## 前置条件
+
+本指南假设你已经有一个包含已跟踪更改扩展的工作中的编辑器。如果还没有，请先参考[编辑器设置指南](/tracked-changes/guides/editor-setup)。
+
+## 查询建议
+
+该扩展导出一个 `findSuggestions` 工具，用于返回文档中的所有建议。在 `onCreate` 和 `onUpdate` 中调用它以保持列表同步。
+
+```jsx
+import { useState } from 'react'
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { TrackedChanges, findSuggestions } from '@tiptap-pro/extension-tracked-changes'
+
+function Editor() {
+  const [suggestions, setSuggestions] = useState([])
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      TrackedChanges.configure({
+        enabled: true,
+        userId: 'user-123',
+        userMetadata: { name: 'John Doe' },
+      }),
+    ],
+    content: '<p>Start editing to see tracked changes.</p>',
+    onCreate: ({ editor: currentEditor }) => {
+      setSuggestions(findSuggestions(currentEditor))
+    },
+    onUpdate: ({ editor: currentEditor }) => {
+      setSuggestions(findSuggestions(currentEditor))
+    },
+  })
+
+  // 去重 — 一个建议可能跨越多个文本节点
+  const uniqueSuggestions = Array.from(
+    new Map(suggestions.map(s => [s.id, s])).values(),
+  )
+
+  if (!editor) {
+    return null
+  }
+
+  return (
+    <div style={{ display: 'flex', gap: '1rem' }}>
+      <div style={{ flex: 1 }}>
+        <EditorContent editor={editor} />
+      </div>
+      <SuggestionList
+        suggestions={uniqueSuggestions}
+        onAccept={(id) => {
+          editor.commands.acceptSuggestion({ id })
+          setSuggestions(findSuggestions(editor))
+        }}
+        onReject={(id) => {
+          editor.commands.rejectSuggestion({ id })
+          setSuggestions(findSuggestions(editor))
+        }}
+      />
+    </div>
+  )
+}
+```
+
+`★ 小贴士 ─────────────────────────────────────`
+当一个建议跨越格式边界（例如部分文本是加粗）时，它可能占据多个文本节点。`findSuggestions` 对每个文本节点返回一个条目，因此需要通过 `id` 去重，以避免在列表中多次显示同一条建议。
+`─────────────────────────────────────────────────`
+
+## 构建 SuggestionList 组件
+
+每条建议有一个 `type`（`add`、`delete` 或 `replace`）、更改的 `text`、用户元数据和时间戳。使用这些信息渲染一个清晰的列表。
+
+```jsx
+function SuggestionList({ suggestions, onAccept, onReject }) {
+  if (suggestions.length === 0) {
+    return (
+      <div style={{ width: 280, padding: '1rem' }}>
+        <p>无待处理建议</p>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ width: 280, padding: '1rem' }}>
+      <h3>建议（{suggestions.length}）</h3>
+      {suggestions.map(suggestion => (
+        <SuggestionItem
+          key={suggestion.id}
+          suggestion={suggestion}
+          onAccept={() => onAccept(suggestion.id)}
+          onReject={() => onReject(suggestion.id)}
+        />
+      ))}
+    </div>
+  )
+}
+```
+
+## 构建 SuggestionItem 组件
+
+显示建议类型、文本预览、用户信息和操作按钮。
+
+```jsx
+function SuggestionItem({ suggestion, onAccept, onReject }) {
+  const typeLabel = {
+    add: '+ 插入',
+    delete: '− 删除',
+    replace: '~ 替换',
+  }
+
+  return (
+    <div style={{
+      padding: '0.75rem',
+      marginBottom: '0.5rem',
+      borderRadius: '0.375rem',
+      border: '1px solid #e2e8f0',
+    }}>
+      <div style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+        {typeLabel[suggestion.type]}
+      </div>
+
+      <div style={{ fontSize: '0.875rem', marginBottom: '0.25rem' }}>
+        "{suggestion.text}"
+        {suggestion.type === 'replace' && suggestion.replacedText && (
+          <span style={{ color: '#64748b' }}>
+            {' '}(原文: "{suggestion.replacedText}")
+          </span>
+        )}
+      </div>
+
+      <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
+        {suggestion.userMetadata?.name || suggestion.userId}
+        {' · '}
+        {new Date(suggestion.createdAt).toLocaleTimeString()}
+      </div>
+
+      <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <button onClick={onAccept}>接受</button>
+        <button onClick={onReject}>拒绝</button>
+      </div>
+    </div>
+  )
+}
+```
+
+## 添加批量操作
+
+在列表上方添加按钮，一次接受或拒绝所有建议。
+
+```jsx
+function SuggestionList({ suggestions, onAccept, onReject, onAcceptAll, onRejectAll }) {
+  return (
+    <div style={{ width: 280, padding: '1rem' }}>
+      <h3>建议（{suggestions.length}）</h3>
+
+      {suggestions.length > 0 && (
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+          <button onClick={onAcceptAll}>全部接受</button>
+          <button onClick={onRejectAll}>全部拒绝</button>
+        </div>
+      )}
+
+      {suggestions.map(suggestion => (
+        <SuggestionItem
+          key={suggestion.id}
+          suggestion={suggestion}
+          onAccept={() => onAccept(suggestion.id)}
+          onReject={() => onReject(suggestion.id)}
+        />
+      ))}
+    </div>
+  )
+}
+```
+
+在父组件中关联批量操作：
+
+```jsx
+<SuggestionList
+  suggestions={uniqueSuggestions}
+  onAccept={(id) => {
+    editor.commands.acceptSuggestion({ id })
+    setSuggestions(findSuggestions(editor))
+  }}
+  onReject={(id) => {
+    editor.commands.rejectSuggestion({ id })
+    setSuggestions(findSuggestions(editor))
+  }}
+  onAcceptAll={() => {
+    editor.commands.acceptAllSuggestions()
+    setSuggestions([])
+  }}
+  onRejectAll={() => {
+    editor.commands.rejectAllSuggestions()
+    setSuggestions([])
+  }}
+/>
+```
+
+## 筛选建议
+
+使用 `findSuggestions` 的选项参数，按类型或用户筛选：
+
+```jsx
+import { findSuggestions } from '@tiptap-pro/extension-tracked-changes'
+
+// 仅插入内容
+const insertions = findSuggestions(editor, 'suggestion', { type: 'add' })
+
+// 仅删除内容
+const deletions = findSuggestions(editor, 'suggestion', { type: 'delete' })
+
+// 仅来自特定用户
+const userSuggestions = findSuggestions(editor, 'suggestion', { userId: 'user-123' })
+```
+
+你可以在侧边栏添加筛选控件，让用户查看特定类型的建议。
+
+## 监听事件
+
+为了更响应式的更新，可监听扩展的事件，而不是（或除了）在 `onUpdate` 中轮询：
+
+```jsx
+import { useEffect } from 'react'
+
+useEffect(() => {
+  if (!editor) return
+
+  const updateSuggestions = () => {
+    setSuggestions(findSuggestions(editor))
+  }
+
+  editor.on('trackedChanges:suggestionCreated', updateSuggestions)
+  editor.on('trackedChanges:suggestionAccepted', updateSuggestions)
+  editor.on('trackedChanges:suggestionRejected', updateSuggestions)
+  editor.on('trackedChanges:suggestionRemoved', updateSuggestions)
+  editor.on('trackedChanges:suggestionsUpdated', updateSuggestions)
+
+  return () => {
+    editor.off('trackedChanges:suggestionCreated', updateSuggestions)
+    editor.off('trackedChanges:suggestionAccepted', updateSuggestions)
+    editor.off('trackedChanges:suggestionRejected', updateSuggestions)
+    editor.off('trackedChanges:suggestionRemoved', updateSuggestions)
+    editor.off('trackedChanges:suggestionsUpdated', updateSuggestions)
+  }
+}, [editor])
+```
+
+## 下一步
+
+- 添加[评论集成](/tracked-changes/guides/comments-integration)，实现完整的审核工作流
+- 探索[工具 API](/tracked-changes/api-reference/utilities)，获取更多查询函数，如 `getSuggestionAtSelection` 和 `findSuggestionsInRange`

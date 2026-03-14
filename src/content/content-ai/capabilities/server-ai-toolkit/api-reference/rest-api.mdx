@@ -147,8 +147,8 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-tool' \
     "experimental_documentOptions": {
       "documentId": "your-document-id"
     },
-    "schemaAwarenessData": { /* 从 getSchemaAwarenessData 获取的 schema 认知数据 */ },
-    "chunkSize": 1000,
+    "schemaAwarenessData": { /* schema awareness data from getSchemaAwarenessData */ },
+    "chunkSize": 32000,
     "format": "json"
 }'
 ```
@@ -162,33 +162,33 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-tool' \
 --header 'X-App-Id: YOUR_APP_ID' \
 --data '{
     "toolName": "tiptapRead",
-    "input": { /* 工具输入 */ },
-    "document": { /* Tiptap JSON 文档 */ },
-    "schemaAwarenessData": { /* 从 getSchemaAwarenessData 获取的 schema 认知数据 */ },
-    "chunkSize": 1000,
+    "input": { /* tool input */ },
+    "document": { /* Tiptap JSON document */ },
+    "schemaAwarenessData": { /* schema awareness data from getSchemaAwarenessData */ },
+    "chunkSize": 32000,
     "format": "json"
 }'
 ```
 
 ### 请求体
 
-- `toolName`（`string`，必填）：要执行的工具名称。必须是以下之一：
-  - `"tiptapRead"`：用高效格式读取文档部分内容
-  - `"tiptapEdit"`：用高效格式编辑文档
-  - `"getThreads"`：获取文档中的所有线程和评论
-  - `"editThreads"`：执行线程和评论的相关操作
-- `input`（`any`，必填）：工具的输入参数，遵循工具输入 schema。输入格式针对高效读取和编辑操作进行了优化。
-- `experimental_documentOptions`（`object`，条件必填）：引用 Tiptap Cloud 文档的信息。服务器会自动获取和保存文档，不能同时提供 `document`。
-  - `documentId`（`string`，必填）：Document Server 上的文档 ID
-  - `userId`（`string`，可选）：用于归属线程或评论作者身份的用户 ID
-- `document`（`object`，条件必填）：要操作的 Tiptap JSON 文档。提供此字段时，不能同时提供 `experimental_documentOptions`。
-- `experimental_commentsOptions`（`object`，可选）：线程或评论操作的元数据。
-  - `threadData`（`Record<string, any>`，可选）：附加到新建线程的元数据
-  - `commentData`（`Record<string, any>`，可选）：附加到新建评论的元数据
-- `schemaAwarenessData`（`SchemaAwarenessData`，必填）：从 `getSchemaAwarenessData` 获取的 schema 认知数据
-- `chunkSize?`（`number`，可选）：读取操作的分块大小。默认值：`1000`
-- `tiptapEditSelectableNodes?`（`string[]`，可选）：针对 tiptapEdit 操作的自定义可选节点类型
-- `format?`（`string`，可选）：AI 读取和编辑文档所使用的格式。必须为以下之一：
+- `toolName` (`string`, required): 要执行的工具名称。必须是以下之一：
+  - `"tiptapRead"`：使用高效格式读取文档部分内容
+  - `"tiptapEdit"`：使用高效格式编辑文档
+  - `"getThreads"`：获取文档中所有线程和评论
+  - `"editThreads"`：对线程和评论执行操作
+- `input` (`any`, required): 工具的输入参数，依据工具的输入 schema 定义。输入格式针对高效读取和编辑操作进行了优化。
+- `experimental_documentOptions` (`object`, conditional): 用于引用 Tiptap Cloud 文档的 ID。服务器会自动获取并保存文档。与 `document` 互斥。
+  - `documentId` (`string`, required): Document Server 上文档的 ID
+  - `userId` (`string`, optional): 用于标识线程/评论作者的用户 ID
+- `document` (`object`, conditional): 要操作的 Tiptap JSON 文档。当提供此字段时，须不包含 `experimental_documentOptions`。
+- `experimental_commentsOptions` (`object`, optional): 线程/评论操作的元数据。
+  - `threadData` (`Record<string, any>`, optional): 附加到新线程的元数据
+  - `commentData` (`Record<string, any>`, optional): 附加到新评论的元数据
+- `schemaAwarenessData` (`SchemaAwarenessData`, required): 从 `getSchemaAwarenessData` 获取的 schema 认知数据
+- `chunkSize?` (`number`, optional): 读取操作的块大小。默认值：`32000`
+- `tiptapEditSelectableNodes?` (`string[]`, optional): tiptapEdit 操作的自定义可选节点类型
+- `format?` (`string`, optional): AI 读取和编辑文档所使用的格式。必须为以下之一：
   - `"json"`（默认）：标准 JSON 格式
   - `"shorthand"`：Tiptap 简写格式，相较标准 JSON 可将 AI 令牌消耗降低最多 80%
 

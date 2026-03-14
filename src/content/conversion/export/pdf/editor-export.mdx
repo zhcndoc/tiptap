@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.2.0
+    label: v0.3.0
 meta:
     title: 导出 PDF | Tiptap 转换
     description: 了解如何使用文档中的导出 PDF 扩展将 Tiptap 编辑器内容导出为 PDF 文件。
@@ -40,7 +40,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 完成后即可安装并导入**导出 PDF**扩展包。
 
 ```bash
-npm i @tiptap-pro/extension-export-pdf@beta
+npm i @tiptap-pro/extension-export-pdf
 ```
 
 ```js
@@ -66,6 +66,7 @@ const editor = new Editor({
       footers: {},
       pageSize: { width: '21cm', height: '29.7cm' },
       pageMargins: { top: '1cm', bottom: '1cm', left: '1cm', right: '1cm' },
+      customNodes: [],
       onCompleteExport: (result) => {
         // 处理导出的 Blob
       },
@@ -75,18 +76,19 @@ const editor = new Editor({
 })
 ```
 
-| 参数               | 类型                     | 描述                                            | 默认值                                |
-| ------------------ | ------------------------ | ----------------------------------------------- | ------------------------------------ |
-| `endpoint`         | `string`                 | 用于转换的 Tiptap API 端点                       | `'https://api.tiptap.dev/v2/convert'` |
-| `token`            | `string`                 | 用于身份验证的 Tiptap JWT                        | `''`                                 |
-| `appId`            | `string`                 | 用于身份验证的 Tiptap 应用 ID                     | `''`                                 |
-| `styleOverrides`   | `Record<string, string>` | 应用于导出的样式覆盖                             | `undefined`                          |
-| `headers`          | `HeaderConfig`           | 导出文档的页眉配置                               | `undefined`                          |
-| `footers`          | `FooterConfig`           | 导出文档的页脚配置                               | `undefined`                          |
-| `pageSize`         | `PageSize`               | 页面大小配置                                    | `undefined`                          |
-| `pageMargins`      | `PageMargins`            | 页面边距配置                                    | `undefined`                          |
-| `customFonts`      | `CustomFont[]`           | 提供 PDF 导出的自定义字体文件（仅限本地部署）     | `undefined`                          |
-| `onCompleteExport` | `(result: Blob) => void` | 回调函数，接收导出的文件 Blob                     | 不提供时抛出错误                     |
+| Parameter        | Type                     | Description                                    | Default                               |
+| ---------------- | ------------------------ | ---------------------------------------------- | ------------------------------------- |
+| `endpoint`       | `string`                 | 用于转换的 Tiptap API 端点                     | `'https://api.tiptap.dev/v2/convert'` |
+| `token`          | `string`                 | 用于认证的 Tiptap JWT                           | `''`                                  |
+| `appId`          | `string`                 | 用于认证的 Tiptap 应用 ID                        | `''`                                  |
+| `styleOverrides` | `Record<string, string>` | 应用于导出的样式覆盖                            | `undefined`                           |
+| `headers`        | `HeaderConfig`           | 导出文档的页眉配置                              | `undefined`                           |
+| `footers`        | `FooterConfig`           | 导出文档的页脚配置                              | `undefined`                           |
+| `pageSize`       | `PageSize`               | 页面大小配置                                   | `undefined`                           |
+| `pageMargins`    | `PageMargins`            | 页面边距配置                                   | `undefined`                           |
+| `customNodes`    | `CustomNodeDefinition[]` | 用于基于 DOCX 转换的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`） | `undefined` |
+| `customFonts`    | `CustomFont[]`           | 为 PDF 导出提供的自定义字体文件（仅限本地部署）                 | `undefined`             |
+| `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调函数                     | 如果未提供则抛出错误                    |
 
 ### HeaderConfig
 
@@ -151,18 +153,19 @@ exportPdf: (options?: ExportPdfCommandOptions) => ReturnType
 
 `ExportPdfCommandOptions` 接口继承了 `ExportPdfOptions`，因此每个配置选项都可以在命令调用时覆盖：
 
-| 属性               | 类型                      | 描述                                                 |
-| ------------------ | ------------------------- | ---------------------------------------------------- |
-| `endpoint`         | `string`                  | 覆盖此特定导出的 API 端点                             |
-| `token`            | `string`                  | 覆盖此特定导出的 JWT 令牌                             |
-| `appId`            | `string`                  | 覆盖此特定导出的应用 ID                               |
-| `styleOverrides`   | `Record<string, string>`  | 覆盖此特定导出的样式覆盖                             |
-| `headers`          | `HeaderConfig`            | 覆盖此特定导出的页眉配置                             |
-| `footers`          | `FooterConfig`            | 覆盖此特定导出的页脚配置                             |
-| `pageSize`         | `PageSize`                | 覆盖此特定导出的页面大小                             |
-| `pageMargins`      | `PageMargins`             | 覆盖此特定导出的页面边距                             |
-| `customFonts`      | `CustomFont[]`            | 覆盖此特定导出的自定义字体（仅限本地部署）             |
-| `onCompleteExport` | `(result: Blob) => void`  | 覆盖此特定导出的回调函数                             |
+| Property           | Type                      | Description                                                                           |
+| ------------------ | ------------------------- | ------------------------------------------------------------------------------------- |
+| `endpoint`         | `string`                  | 针对该次导出覆盖 API 端点                                                             |
+| `token`            | `string`                  | 针对该次导出覆盖 JWT 令牌                                                             |
+| `appId`            | `string`                  | 针对该次导出覆盖 App ID                                                               |
+| `styleOverrides`   | `Record<string, string>`  | 针对该次导出覆盖样式覆盖                                                              |
+| `headers`          | `HeaderConfig`            | 针对该次导出覆盖页眉配置                                                              |
+| `footers`          | `FooterConfig`            | 针对该次导出覆盖页脚配置                                                              |
+| `pageSize`         | `PageSize`                | 针对该次导出覆盖页面大小                                                              |
+| `pageMargins`      | `PageMargins`             | 针对该次导出覆盖页面边距                                                              |
+| `customNodes`      | `CustomNodeDefinition[]`  | 针对该次导出覆盖自定义节点定义                                                        |
+| `customFonts`      | `CustomFont[]`            | 针对该次导出覆盖自定义字体（仅本地部署）                                              |
+| `onCompleteExport` | `(result: Blob) => void`  | 针对该次导出覆盖回调函数                                                              |
 
 ```js
 import { ExportPdf } from '@tiptap-pro/extension-export-pdf'
@@ -232,7 +235,7 @@ ExportPdf.configure({
     },
   ],
   onCompleteExport(result) {
-    // 处理导出的 PDF
+    // Handle the exported PDF
   },
 })
 ```

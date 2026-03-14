@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.2.0
+    label: v0.3.0
 meta:
     title: 导出 ODT | Tiptap 转换
     description: 了解如何使用文档中的 Export ODT 扩展将 Tiptap 编辑器内容导出为 ODT（OpenDocument）文件。
@@ -39,7 +39,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 完成后即可安装并导入 **Export ODT** 扩展包。
 
 ```bash
-npm i @tiptap-pro/extension-export-odt@beta
+npm i @tiptap-pro/extension-export-odt
 ```
 
 ```js
@@ -65,6 +65,7 @@ const editor = new Editor({
       footers: {},
       pageSize: { width: '21cm', height: '29.7cm' },
       pageMargins: { top: '1cm', bottom: '1cm', left: '1cm', right: '1cm' },
+      customNodes: [],
       onCompleteExport: (result) => {
         // 处理导出的 Blob
       },
@@ -74,51 +75,52 @@ const editor = new Editor({
 })
 ```
 
-| 参数              | 类型                     | 说明                                         | 默认值                               |
-| ----------------- | ------------------------ | -------------------------------------------- | ----------------------------------- |
-| `endpoint`        | `string`                 | 用于转换的 Tiptap API 端点                    | `'https://api.tiptap.dev/v2/convert'` |
-| `token`           | `string`                 | 用于认证的 Tiptap JWT                         | `''`                                |
-| `appId`           | `string`                 | 用于认证的 Tiptap 应用 ID                      | `''`                                |
-| `styleOverrides`  | `Record<string, string>` | 应用于导出的样式覆盖                          | `undefined`                         |
-| `headers`         | `HeaderConfig`           | 导出文档的页眉配置                            | `undefined`                         |
-| `footers`         | `FooterConfig`           | 导出文档的页脚配置                            | `undefined`                         |
-| `pageSize`        | `PageSize`               | 页面尺寸配置                                | `undefined`                         |
-| `pageMargins`     | `PageMargins`            | 页面边距配置                                | `undefined`                         |
-| `onCompleteExport`| `(result: Blob) => void` | 接收导出文件 Blob 的回调函数                   | 未提供时抛出错误                      |
+| Parameter        | Type                     | Description                                    | Default                               |
+| ---------------- | ------------------------ | ---------------------------------------------- | ------------------------------------- |
+| `endpoint`       | `string`                 | Tiptap 转换的 API 端点                         | `'https://api.tiptap.dev/v2/convert'` |
+| `token`          | `string`                 | 用于身份验证的 Tiptap JWT                      | `''`                                  |
+| `appId`          | `string`                 | 用于身份验证的 Tiptap 应用 ID                   | `''`                                  |
+| `styleOverrides` | `Record<string, string>` | 应用于导出的样式覆盖                           | `undefined`                           |
+| `headers`        | `HeaderConfig`           | 导出文档的页眉配置                             | `undefined`                           |
+| `footers`        | `FooterConfig`           | 导出文档的页脚配置                             | `undefined`                           |
+| `pageSize`       | `PageSize`               | 页面大小配置                                   | `undefined`                           |
+| `pageMargins`    | `PageMargins`            | 页面边距配置                                   | `undefined`                           |
+| `customNodes`    | `CustomNodeDefinition[]` | 基于 DOCX 转换的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`） | `undefined` |
+| `onCompleteExport` | `(result: Blob) => void` | 回调函数，接收导出的文件 Blob                  | 若未提供则抛出错误                    |
 
 ### HeaderConfig（页眉配置）
 
 | 属性                 | 类型       | 说明                                                                                             |
 | -------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
-| `evenAndOddHeaders`  | `boolean`  | 是否为奇数页和偶数页使用不同的页眉                                                                |
-| `differentFirstPage` | `boolean`  | 是否首页使用不同的页眉。为 `true` 时，第 1 页使用 `first` 内容，非首页使用 `default` 内容                          |
-| `default`            | `string`   | 每页标准默认页眉，或当启用 `evenAndOddHeaders` 时，奇数页使用的页眉。接受纯文本或字符串化的 Tiptap JSONContent 用于富格式。 |
-| `first`              | `string`   | 首页的页眉，只在 `differentFirstPage` 为 `true` 时生效。接受纯文本或字符串化的 Tiptap JSONContent。                        |
-| `even`               | `string`   | 偶数页的页眉（启用 `evenAndOddHeaders` 时）。接受纯文本或字符串化的 Tiptap JSONContent。                                |
+| `evenAndOddHeaders`  | `boolean`  | 是否奇偶页使用不同的页眉                                                                          |
+| `differentFirstPage` | `boolean`  | 是否首页使用不同的页眉。若为 `true`，第 1 页使用 `first` 内容，非首页使用 `default` 内容            |
+| `default`            | `string`   | 每页的默认页眉，或者当启用 `evenAndOddHeaders` 时奇数页的页眉。支持纯文本或字符串化的 Tiptap JSONContent 用于富文本格式 |
+| `first`              | `string`   | 首页的页眉，仅当 `differentFirstPage` 为 `true` 时生效。支持纯文本或字符串化的 Tiptap JSONContent  |
+| `even`               | `string`   | 偶数页的页眉（启用 `evenAndOddHeaders` 时）。支持纯文本或字符串化的 Tiptap JSONContent              |
 
 ### FooterConfig（页脚配置）
 
 | 属性                 | 类型       | 说明                                                                                             |
 | -------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
-| `evenAndOddFooters`  | `boolean`  | 是否为奇数页和偶数页使用不同的页脚                                                                |
-| `differentFirstPage` | `boolean`  | 是否首页使用不同的页脚。为 `true` 时，第 1 页使用 `first` 内容，非首页使用 `default` 内容                          |
-| `default`            | `string`   | 每页标准默认页脚，或当启用 `evenAndOddFooters` 时，奇数页使用的页脚。接受纯文本或字符串化的 Tiptap JSONContent 用于富格式。 |
-| `first`              | `string`   | 首页的页脚，只在 `differentFirstPage` 为 `true` 时生效。接受纯文本或字符串化的 Tiptap JSONContent。                        |
-| `even`               | `string`   | 偶数页的页脚（启用 `evenAndOddFooters` 时）。接受纯文本或字符串化的 Tiptap JSONContent。                                |
+| `evenAndOddFooters`  | `boolean`  | 是否奇偶页使用不同的页脚                                                                          |
+| `differentFirstPage` | `boolean`  | 是否首页使用不同的页脚。若为 `true`，第 1 页使用 `first` 内容，非首页使用 `default` 内容            |
+| `default`            | `string`   | 每页的默认页脚，或者当启用 `evenAndOddFooters` 时奇数页的页脚。支持纯文本或字符串化的 Tiptap JSONContent 用于富文本格式 |
+| `first`              | `string`   | 首页的页脚，仅当 `differentFirstPage` 为 `true` 时生效。支持纯文本或字符串化的 Tiptap JSONContent  |
+| `even`               | `string`   | 偶数页的页脚（启用 `evenAndOddFooters` 时）。支持纯文本或字符串化的 Tiptap JSONContent              |
 
 ### PageSize（页面尺寸）
 
 | 属性     | 类型     | 说明                                                                                             | 默认值     |
 | -------- | -------- | ------------------------------------------------------------------------------------------------ | ---------- |
-| `width`  | `string` | 页面宽度。必须是一个正数字，后跟有效单位（cm、in、pt、pc、mm、px）                                  | `"21cm"`   |
-| `height` | `string` | 页面高度。必须是一个正数字，后跟有效单位（cm、in、pt、pc、mm、px）                                  | `"29.7cm"` |
+| `width`  | `string` | 页面宽度。必须是正数，后跟有效单位（cm、in、pt、pc、mm、px）                                    | `"21cm"`   |
+| `height` | `string` | 页面高度。必须是正数，后跟有效单位（cm、in、pt、pc、mm、px）                                    | `"29.7cm"` |
 
 ### PageMargins（页面边距）
 
 | 属性       | 类型     | 说明                                                                                                            | 默认值     |
 | ---------- | -------- | ---------------------------------------------------------------------------------------------------------------- | ---------- |
-| `top`      | `string` | 页面顶部边距。允许负数。必须是数字后跟有效单位（cm、in、pt、pc、mm、px）                                          | `"1cm"`    |
-| `bottom`   | `string` | 页面底部边距。允许负数。必须是数字后跟有效单位（cm、in、pt、pc、mm、px）                                          | `"1cm"`    |
+| `top`      | `string` | 页面顶部边距。允许负数，必须是数字后跟有效单位（cm、in、pt、pc、mm、px）                                          | `"1cm"`    |
+| `bottom`   | `string` | 页面底部边距。允许负数，必须是数字后跟有效单位（cm、in、pt、pc、mm、px）                                          | `"1cm"`    |
 | `left`     | `string` | 页面左边距。必须是正数，后跟有效单位（cm、in、pt、pc、mm、px）                                                    | `"1cm"`    |
 | `right`    | `string` | 页面右边距。必须是正数，后跟有效单位（cm、in、pt、pc、mm、px）                                                    | `"1cm"`    |
 
@@ -138,17 +140,18 @@ exportOdt: (options?: ExportOdtCommandOptions) => ReturnType
 
 `ExportOdtCommandOptions` 接口继承自 `ExportOdtOptions`，因此每个配置选项均可在每次调用时覆盖：
 
-| 属性               | 类型                      | 说明                                                       |
-| ------------------ | ------------------------- | ---------------------------------------------------------- |
-| `endpoint`         | `string`                  | 覆盖该次导出的 API 端点                                     |
-| `token`            | `string`                  | 覆盖该次导出的 JWT                                          |
-| `appId`            | `string`                  | 覆盖该次导出的 App ID                                       |
-| `styleOverrides`   | `Record<string, string>`  | 覆盖该次导出的样式覆盖                                     |
-| `headers`          | `HeaderConfig`            | 覆盖该次导出的页眉配置                                     |
-| `footers`          | `FooterConfig`            | 覆盖该次导出的页脚配置                                     |
-| `pageSize`         | `PageSize`                | 覆盖该次导出的页面尺寸                                     |
-| `pageMargins`      | `PageMargins`             | 覆盖该次导出的页面边距                                     |
-| `onCompleteExport` | `(result: Blob) => void`  | 覆盖该次导出的回调函数                                     |
+| Property           | Type                      | Description                                                                           |
+| ------------------ | ------------------------- | ------------------------------------------------------------------------------------- |
+| `endpoint`         | `string`                  | 覆盖此特定导出的 API 端点                                                             |
+| `token`            | `string`                  | 覆盖此特定导出的 JWT                                                                   |
+| `appId`            | `string`                  | 覆盖此特定导出的应用 ID                                                                |
+| `styleOverrides`   | `Record<string, string>`  | 覆盖此特定导出的样式覆盖                                                               |
+| `headers`          | `HeaderConfig`            | 覆盖此特定导出的页眉配置                                                               |
+| `footers`          | `FooterConfig`            | 覆盖此特定导出的页脚配置                                                               |
+| `pageSize`         | `PageSize`                | 覆盖此特定导出的页面大小                                                               |
+| `pageMargins`      | `PageMargins`             | 覆盖此特定导出的页面边距                                                               |
+| `customNodes`      | `CustomNodeDefinition[]`  | 覆盖此特定导出的自定义节点定义                                                         |
+| `onCompleteExport` | `(result: Blob) => void`  | 覆盖此特定导出的回调函数                                                               |
 
 ```js
 import { ExportOdt } from '@tiptap-pro/extension-export-odt'

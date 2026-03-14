@@ -1,5 +1,5 @@
 ---
-title: "从零开始到打印就绪：页面 & DOCX 导出"
+title: '从零开始到打印就绪：Pages 与 DOCX 导出'
 tags:
   - type: alpha
 meta:
@@ -15,7 +15,10 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 本指南将带你从头开始设置 Tiptap 编辑器，添加 Pages 扩展以实现分页和类似打印的布局，以及启用 DOCX 导出和导入，构建一个专业的打印就绪工作流。
 
-<CodeDemo isPro src="https://feature-pages-extension--tiptap-pro.netlify.app/preview/extensions/pagesimportexportdocx" />
+<CodeDemo
+  isPro
+  src="https://feat-pages-and-docx--tiptap-pro.netlify.app/preview/extensions/pagesimportexportdocx"
+/>
 
 ---
 
@@ -61,7 +64,7 @@ const editor = new Editor({
 ```
 
 <Callout title="最佳实践" variant="info">
-  早期使用 Pages 扩展，以确保你的文档结构和布局从一开始就保持一致。
+  早期在设置中使用 Pages 扩展，确保你的文档结构和布局从一开始就是一致的。
 </Callout>
 
 ## 4. 添加 DOCX 导出功能
@@ -80,7 +83,9 @@ import { ExportDocx } from '@tiptap-pro/extension-export-docx'
 const editor = new Editor({
   extensions: [
     StarterKit,
-    Pages.configure({ /* ... */ }),
+    Pages.configure({
+      /* ... */
+    }),
     ExportDocx,
   ],
 })
@@ -96,7 +101,9 @@ import { ExportDocx } from '@tiptap-pro/extension-export-docx'
 const editor = new Editor({
   extensions: [
     StarterKit,
-    Pages.configure({ /* ... */ }),
+    Pages.configure({
+      /* ... */
+    }),
     ExportDocx.configure({
       // 这个回调是必需的！它接收导出的文件 (Blob、字符串等)
       onCompleteExport: (result) => {
@@ -125,7 +132,7 @@ const editor = new Editor({
 ```
 
 <Callout title="提示">
-  <code>onCompleteExport</code> 回调是必需的。在这里处理导出的文件（例如下载、上传等）。
+  <code>onCompleteExport</code> 回调是必需的。这是你处理导出文件的地方（例如，下载、上传等）。
 </Callout>
 
 ## 5. 导出你的文档
@@ -137,7 +144,7 @@ editor.commands.exportDocx()
 ```
 
 <Callout title="提示">
-  DOCX 导出扩展可无缝配合 Pages 使用。请注意，这并不意味着我们的 Pages 扩展与 Microsoft Word DOCX 文件之间可以完全一一对应，因为渲染引擎完全不同。
+  DOCX 导出扩展与 Pages 扩展无缝协作。请注意，Pages 扩展与 Microsoft Word DOCX 文件之间并非完美的 1:1 映射，因为渲染引擎完全不同。
 </Callout>
 
 ## 6. 将 DOCX 文件导入到你的编辑器
@@ -164,29 +171,33 @@ const editor = new Editor({
 触发导入使用：
 
 ```js
-editor.chain().importDocx({
-  file, // 来自 <input type="file" /> 的 File 对象
-  onImport(context) {
-    if (context.error) {
-      // 处理错误
-      return
-    }
-    context.setEditorContent(context.content)
-  },
-}).run()
+editor
+  .chain()
+  .importDocx({
+    file, // 来自 <input type="file" /> 的 File 对象
+    onImport(context) {
+      if (context.error) {
+        // 处理错误
+        return
+      }
+      context.setEditorContent(context.content)
+    },
+  })
+  .run()
 ```
 
 <Callout title="提示">
-  使用 ImportDocx 扩展需要有效的 <code>appId</code> 和 <code>token</code>。有关设置，请参阅 [Pro 扩展指南](/guides/pro-extensions)。
+  你需要有效的 <code>appId</code> 和 <code>token</code> 才能使用 ImportDocx 扩展。有关设置，请参阅 [Pro 扩展指南](/guides/pro-extensions)。
 </Callout>
 
 ---
 
-## 后续步骤
-- 探索更多 [Pages 选项](/pages/core-concepts/options) 以微调你的布局。
-- 使用随 Pages 扩展附带的表格扩展，添加 [表格](/pages/core-concepts/limitations#tables) 以确保最佳兼容性。
-- 结合其他 Tiptap Pro 扩展，打造功能完善的编辑器。
+## 接下来的步骤
+
+- 探索更多的 [Pages 选项](/pages/core-concepts/options)，以微调你的布局。
+- 使用 Pages 扩展中包含的 Table 扩展添加 [表格](/pages/core-concepts/limitations#tables)，以获得最佳兼容性。
+- 结合其他 Tiptap Pro 扩展，实现功能丰富的编辑器。
 
 <Callout title="需要帮助？">
-  查看剩余文档或联系我们的支持，获取更高级的工作流帮助！
-</Callout> 
+  查看其余文档，或联系我们的支持团队，获取更高级的工作流帮助！
+</Callout>

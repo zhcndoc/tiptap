@@ -38,6 +38,10 @@ export const sidebarConfig: SidebarConfig = {
           title: '评论',
         },
         {
+          href: '/tracked-changes/getting-started/overview',
+          title: '修订记录',
+        },
+        {
           href: '/content-ai/getting-started/overview',
           title: '内容 AI',
         },
@@ -78,11 +82,11 @@ export const sidebarConfig: SidebarConfig = {
         },
         {
           href: '/resources/changelog',
-          title: 'Editor changelog',
+          title: '编辑器更新日志',
         },
         {
           href: '/resources/incidents',
-          title: 'Incidents',
+          title: '事件',
         },
         {
           href: 'https://tiptap.dev/pro-license',

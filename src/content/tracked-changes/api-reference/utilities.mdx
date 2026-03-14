@@ -1,0 +1,280 @@
+---
+title: 实用工具
+tags:
+  - type: addon
+meta:
+  title: 实用工具 | Tiptap 变更跟踪文档
+  description: 用于查询和处理 Tiptap 变更跟踪扩展中建议的实用函数。
+  category: 变更跟踪
+---
+
+该扩展导出了用于查询和处理建议的实用函数。
+
+## findSuggestions()
+
+查找文档中的所有建议，并可选择性过滤。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `editor` | `Editor` | — | Tiptap 编辑器实例 |
+| `markName` | `string` | `'suggestion'` | 建议标记的名称 |
+| `options` | `FindSuggestionsOptions` | `{}` | 可选过滤条件（见下文） |
+
+### 选项
+
+| 选项 | 类型 | 说明 |
+| --- | --- | --- |
+| `type` | `'add' \| 'delete' \| 'replace'` | 按建议类型过滤 |
+| `userId` | `string` | 按用户 ID 过滤 |
+| `id` | `string` | 按建议 ID 过滤 |
+
+### 返回值
+
+`Suggestion[]` — 在文档中找到的建议数组。
+
+```js
+import { findSuggestions } from '@tiptap-pro/extension-tracked-changes'
+
+// 查找所有建议
+const allSuggestions = findSuggestions(editor)
+
+// 按类型查找建议
+const insertions = findSuggestions(editor, 'suggestion', { type: 'add' })
+const deletions = findSuggestions(editor, 'suggestion', { type: 'delete' })
+const replacements = findSuggestions(editor, 'suggestion', { type: 'replace' })
+
+// 按用户查找建议
+const userSuggestions = findSuggestions(editor, 'suggestion', { userId: 'user-123' })
+```
+
+## findSuggestionById()
+
+通过 ID 查找特定建议。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `editor` | `Editor` | — | Tiptap 编辑器实例 |
+| `id` | `string` | — | 要查找的建议 ID |
+| `markName` | `string` | `'suggestion'` | 建议标记的名称 |
+
+### 返回值
+
+`Suggestion | undefined` — 如果找到，则返回建议，否则返回 `undefined`。
+
+```js
+import { findSuggestionById } from '@tiptap-pro/extension-tracked-changes'
+
+const suggestion = findSuggestionById(editor, 'suggestion-123')
+
+if (suggestion) {
+  console.log(`找到建议: ${suggestion.text}`)
+}
+```
+
+## findSuggestionRanges()
+
+查找由建议覆盖的所有文档范围。当建议跨越格式边界时，单个建议可能覆盖多个文本节点。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `editor` | `Editor` | — | Tiptap 编辑器实例 |
+| `id` | `string` | — | 要查找的建议 ID |
+| `markName` | `string` | `'suggestion'` | 建议标记的名称 |
+
+### 返回值
+
+`Array<{ from: number; to: number }>` — 该建议覆盖的位置信息范围数组，相邻范围会自动合并。
+
+```js
+import { findSuggestionRanges } from '@tiptap-pro/extension-tracked-changes'
+
+const ranges = findSuggestionRanges(editor, 'suggestion-123')
+// 返回: [{ from: 10, to: 25 }, { from: 30, to: 35 }]
+```
+
+## getSuggestionAtSelection()
+
+获取当前光标选择位置的建议。支持基于标记的建议（文本）和基于属性的建议（原子节点）。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `editor` | `Editor` | — | Tiptap 编辑器实例 |
+| `markName` | `string` | `'suggestion'` | 建议标记的名称 |
+
+### 返回值
+
+`Suggestion | undefined` — 当前光标位置上的建议，若无则返回 `undefined`。
+
+```js
+import { getSuggestionAtSelection } from '@tiptap-pro/extension-tracked-changes'
+
+const suggestion = getSuggestionAtSelection(editor)
+
+if (suggestion) {
+  // 在 UI 中显示接受/拒绝按钮
+  showSuggestionPopup(suggestion)
+}
+```
+
+## getSuggestionAtPosition()
+
+获取文档中特定位置的建议。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `editor` | `Editor` | — | Tiptap 编辑器实例 |
+| `pos` | `number` | — | 要检查的文档位置 |
+| `markName` | `string` | `'suggestion'` | 建议标记的名称 |
+
+### 返回值
+
+`Suggestion | null` — 该位置的建议，如果未找到则返回 `null`。
+
+```js
+import { getSuggestionAtPosition } from '@tiptap-pro/extension-tracked-changes'
+
+const suggestion = getSuggestionAtPosition(editor, 42)
+```
+
+## findSuggestionsInRange()
+
+查找与指定文档范围重叠的所有建议。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `editor` | `Editor` | — | Tiptap 编辑器实例 |
+| `from` | `number` | — | 范围起始位置 |
+| `to` | `number` | — | 范围结束位置 |
+| `filters` | `{ userId?: string; type?: SuggestionType }` | `undefined` | 可选过滤条件 |
+| `markName` | `string` | `'suggestion'` | 建议标记的名称 |
+
+### 返回值
+
+`Suggestion[]` — 与该范围重叠的建议数组。
+
+```js
+import { findSuggestionsInRange } from '@tiptap-pro/extension-tracked-changes'
+
+// 查找位置 10 到 50 之间的所有建议
+const suggestions = findSuggestionsInRange(editor, 10, 50)
+
+// 使用过滤条件
+const userInsertions = findSuggestionsInRange(editor, 10, 50, {
+  userId: 'user-123',
+  type: 'add',
+})
+```
+
+## suggestionExists()
+
+检查建议是否仍存在于文档中。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `editor` | `Editor` | — | Tiptap 编辑器实例 |
+| `suggestionId` | `string` | — | 要检查的建议 ID |
+| `markName` | `string` | `'suggestion'` | 建议标记的名称 |
+
+### 返回值
+
+`boolean` — 如果建议存在则返回 `true`。
+
+```js
+import { suggestionExists } from '@tiptap-pro/extension-tracked-changes'
+
+if (suggestionExists(editor, 'suggestion-123')) {
+  // 建议仍在文档中
+}
+```
+
+## getSuggestionRange()
+
+获取建议的边界位置范围。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `editor` | `Editor` | — | Tiptap 编辑器实例 |
+| `suggestionId` | `string` | — | 建议 ID |
+| `markName` | `string` | `'suggestion'` | 建议标记的名称 |
+
+### 返回值
+
+`{ from: number; to: number } | null` — 边界范围，若未找到则返回 `null`。
+
+```js
+import { getSuggestionRange } from '@tiptap-pro/extension-tracked-changes'
+
+const range = getSuggestionRange(editor, 'suggestion-123')
+
+if (range) {
+  console.log(`建议覆盖范围从 ${range.from} 到 ${range.to}`)
+}
+```
+
+## acceptSuggestions()
+
+通过多个建议 ID 接受多条建议。逐条处理每个建议。
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `editor` | `Editor` | Tiptap 编辑器实例 |
+| `suggestionIds` | `string[]` | 要接受的建议 ID 数组 |
+
+### 返回值
+
+`boolean` — 如果至少接受了一条建议则返回 `true`。
+
+```js
+import { acceptSuggestions } from '@tiptap-pro/extension-tracked-changes'
+
+acceptSuggestions(editor, ['suggestion-1', 'suggestion-2', 'suggestion-3'])
+```
+
+## rejectSuggestions()
+
+通过多个建议 ID 拒绝多条建议。逐条处理每个建议。
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `editor` | `Editor` | Tiptap 编辑器实例 |
+| `suggestionIds` | `string[]` | 要拒绝的建议 ID 数组 |
+
+### 返回值
+
+`boolean` — 如果至少拒绝了一条建议则返回 `true`。
+
+```js
+import { rejectSuggestions } from '@tiptap-pro/extension-tracked-changes'
+
+rejectSuggestions(editor, ['suggestion-1', 'suggestion-2'])
+```
+
+## generateSuggestionId()
+
+生成唯一的建议 ID。结合时间戳和随机字符串确保唯一性。
+
+### 返回值
+
+`string` — 格式为 `suggestion-{timestamp}-{random}` 的唯一建议 ID。
+
+```js
+import { generateSuggestionId } from '@tiptap-pro/extension-tracked-changes'
+
+const id = generateSuggestionId()
+// 返回: 'suggestion-1706621696789-k7x2m9p'
+```
+
+## getTimestamp()
+
+获取当前时间的 ISO 8601 格式时间戳字符串。
+
+### 返回值
+
+`string` — 当前时间的 ISO 8601 格式字符串。
+
+```js
+import { getTimestamp } from '@tiptap-pro/extension-tracked-changes'
+
+const timestamp = getTimestamp()
+// 返回: '2024-01-30T12:34:56.789Z'
+```

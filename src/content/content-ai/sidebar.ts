@@ -56,15 +56,19 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/agents/justified-changes',
                 },
                 {
-                  title: '工具流式处理',
-                  href: '/content-ai/capabilities/ai-toolkit/agents/tool-streaming',
+                  title: '流媒体',
+                  href: '/content-ai/capabilities/ai-toolkit/agents/streaming',
                 },
                 {
                   title: '添加评论',
                   href: '/content-ai/capabilities/ai-toolkit/agents/comments',
                 },
                 {
-                  title: '多文档处理',
+                  title: '修订记录',
+                  href: '/content-ai/capabilities/ai-toolkit/agents/tracked-changes',
+                },
+                {
+                  title: '多文档',
                   href: '/content-ai/capabilities/ai-toolkit/agents/multi-document',
                 },
                 {

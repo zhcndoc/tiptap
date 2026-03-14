@@ -21,3 +21,147 @@ import { CodeDemo } from '@/components/CodeDemo'
 </Callout>
 
 <CodeDemo isPro path="/Extensions/Comments" />
+
+## 事件
+
+Comments 扩展会触发您可以通过 `editor.on()` 监听的事件。这些事件对于构建自定义 UI、同步状态以及与其他扩展（如 [Tracked Changes](/editor/extensions/functionality/tracked-changes)）集成非常有用。
+
+### 线程事件
+
+#### comments:threadCreated
+
+当创建新的评论线程时触发。
+
+```js
+editor.on('comments:threadCreated', ({ threadId, thread, initialComment, position, threadType }) => {
+  // threadType: 'block' | 'inline'
+  console.log(`线程 ${threadId} 创建于 ${position.from}-${position.to}`)
+})
+```
+
+#### comments:threadUpdated
+
+当线程的数据或元数据发生变化时触发。
+
+```js
+editor.on('comments:threadUpdated', ({ threadId, thread, changes, updatedBy }) => {
+  console.log(`线程 ${threadId} 由 ${updatedBy} 更新`)
+})
+```
+
+#### comments:threadResolved
+
+当线程被解决时触发。
+
+```js
+editor.on('comments:threadResolved', ({ threadId, thread, resolvedBy, resolvedAt }) => {
+  console.log(`线程 ${threadId} 由 ${resolvedBy} 于 ${resolvedAt} 解决`)
+})
+```
+
+#### comments:threadUnresolved
+
+当之前已解决的线程重新打开时触发。
+
+```js
+editor.on('comments:threadUnresolved', ({ threadId, thread, unresolvedBy }) => {
+  console.log(`线程 ${threadId} 由 ${unresolvedBy} 重新打开`)
+})
+```
+
+#### comments:threadDeleted
+
+当线程被删除时触发。
+
+```js
+editor.on('comments:threadDeleted', ({ threadId, thread, deletedBy, soft }) => {
+  // soft: 是否为软删除（归档）或硬删除
+  console.log(`线程 ${threadId} 由 ${deletedBy} 删除`)
+})
+```
+
+#### comments:threadRemovedFromDocument
+
+当线程标记从文档中被移除时触发（例如，注释的文本被删除或线程被归档）。
+
+```js
+editor.on('comments:threadRemovedFromDocument', ({ threadId, thread, removedBy, canRestore }) => {
+  // removedBy: 'edit' | 'command'
+  console.log(`线程 ${threadId} 从文档中移除`)
+})
+```
+
+### 评论事件
+
+#### comments:commentCreated
+
+当向线程添加新评论时触发。
+
+```js
+editor.on('comments:commentCreated', ({ threadId, commentId, comment, thread }) => {
+  console.log(`评论 ${commentId} 添加到线程 ${threadId}`)
+})
+```
+
+#### comments:commentUpdated
+
+当评论内容被编辑时触发。
+
+```js
+editor.on('comments:commentUpdated', ({ threadId, commentId, comment, oldContent, newContent }) => {
+  console.log(`评论 ${commentId} 更新`)
+})
+```
+
+#### comments:commentDeleted
+
+当线程中的评论被删除时触发。
+
+```js
+editor.on('comments:commentDeleted', ({ threadId, commentId, comment, deletedBy }) => {
+  console.log(`评论 ${commentId} 由 ${deletedBy} 删除`)
+})
+```
+
+### 选择与悬停事件
+
+#### comments:threadSelected
+
+当线程被选中时触发（例如，用户点击评论注释）。
+
+```js
+editor.on('comments:threadSelected', ({ threadId, thread }) => {
+  // 在侧边栏显示线程详情
+  console.log(`线程 ${threadId} 被选中`)
+})
+```
+
+#### comments:threadUnselected
+
+当线程被取消选中时触发。
+
+```js
+editor.on('comments:threadUnselected', ({ threadId }) => {
+  console.log('线程取消选中')
+})
+```
+
+#### comments:threadHovered
+
+当用户悬停在文档中的线程注释上时触发。
+
+```js
+editor.on('comments:threadHovered', ({ threadIds, threads }) => {
+  console.log(`悬停线程: ${threadIds.join(', ')}`)
+})
+```
+
+#### comments:threadUnhovered
+
+当用户停止悬停线程注释时触发。
+
+```js
+editor.on('comments:threadUnhovered', ({ threadIds }) => {
+  console.log('线程取消悬停')
+})
+```

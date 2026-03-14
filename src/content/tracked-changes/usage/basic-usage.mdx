@@ -1,0 +1,87 @@
+---
+title: 基本用法
+tags:
+  - type: addon
+meta:
+  title: 基本用法 | Tiptap 变更跟踪文档
+  description: 学习如何启用变更跟踪、管理用户，以及在你的 Tiptap 编辑器中接受或拒绝建议。
+  category: 变更跟踪
+---
+
+了解使用变更跟踪扩展的基本工作流程——启用建议模式、管理用户以及审阅建议。
+
+## 启用和禁用变更跟踪
+
+切换变更跟踪模式的开启和关闭：
+
+```js
+// 启用变更跟踪
+editor.commands.enableTrackedChanges()
+
+// 禁用变更跟踪
+editor.commands.disableTrackedChanges()
+
+// 切换变更跟踪状态
+editor.commands.toggleTrackedChanges()
+```
+
+## 设置当前用户
+
+更改新建议的用户：
+
+```js
+editor.commands.setTrackedChangesUser({
+  userId: 'user-456',
+  userMetadata: { name: 'Jane Smith' },
+})
+```
+
+## 接受和拒绝建议
+
+单独接受或拒绝建议：
+
+```js
+// 接受当前位置的建议
+editor.commands.acceptSuggestion()
+
+// 拒绝当前位置的建议
+editor.commands.rejectSuggestion()
+
+// 根据 ID 接受特定建议
+editor.commands.acceptSuggestion({ id: 'suggestion-123' })
+
+// 根据 ID 拒绝特定建议
+editor.commands.rejectSuggestion({ id: 'suggestion-123' })
+```
+
+## 批量操作
+
+一次性接受或拒绝所有建议：
+
+```js
+// 接受所有建议
+editor.commands.acceptAllSuggestions()
+
+// 拒绝所有建议
+editor.commands.rejectAllSuggestions()
+```
+
+接受或拒绝特定文档范围内的建议：
+
+```js
+// 接受范围内的建议
+editor.commands.acceptSuggestionsInRange({ from: 10, to: 50 })
+
+// 拒绝范围内的建议
+editor.commands.rejectSuggestionsInRange({ from: 10, to: 50 })
+```
+
+接受或拒绝特定用户的所有建议：
+
+```js
+// 接受某用户的所有建议
+editor.commands.acceptSuggestionsByUser({ userId: 'user-123' })
+
+// 拒绝某用户的所有建议
+editor.commands.rejectSuggestionsByUser({ userId: 'user-123' })
+```
