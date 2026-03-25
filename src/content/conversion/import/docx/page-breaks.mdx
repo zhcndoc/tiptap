@@ -1,0 +1,83 @@
+---
+title: DOCX 导入中的分页符
+tags:
+  - type: 入门
+  - type: Beta 版
+meta:
+    title: DOCX 导入中的分页符 | Tiptap 转换
+    description: 了解如何使用 PageBreak 扩展在将 DOCX 文件导入 Tiptap 编辑器时保留分页符。
+    category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开启[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有仓库安装">
+        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)向 Tiptap 的私有 npm 仓库进行身份验证。
+    </RequirementItem>
+</Requirements>
+
+导入包含分页符的 `.docx` 文件时，转换服务会在 Tiptap JSON 输出中发出 `pageBreak` 节点。要在编辑器中渲染并与这些分页符交互，请注册 `@tiptap-pro/extension-pagebreak` 扩展。
+
+<CodeDemo isPro path="/Extensions/PageBreak" />
+
+## 安装 PageBreak 扩展
+
+```bash
+npm install @tiptap-pro/extension-pagebreak
+```
+
+## 设置编辑器
+
+在注册 Import 扩展的同时注册 PageBreak 扩展。导入时支持分页符不需要额外的配置。
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { Import } from '@tiptap-pro/extension-import-docx'
+import { PageBreak } from '@tiptap-pro/extension-pagebreak'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    PageBreak,
+    Import.configure({
+      appId: 'your-app-id',
+      token: 'your-jwt',
+      imageUploadConfig: {
+        url: 'https://your-image-upload-endpoint.com',
+      },
+    }),
+  ],
+})
+```
+
+导入 `.docx` 文件时，文档中的任何分页符都会被保留为编辑器中的 `pageBreak` 节点。
+
+```js
+editor.chain().focus().import({ file }).run()
+```
+
+## 工作原理
+
+1. 转换服务检测 `.docx` 文件中的分页符元素（`<w:br w:type="page"/>`）。
+2. 每个分页符在 Tiptap JSON 输出中作为 `{ type: "pageBreak" }` 节点发出。
+3. PageBreak 扩展将这些节点渲染为带有居中"分页符"标签的视觉虚线分隔符。
+
+<Callout title="未安装 PageBreak 扩展时">
+  如果未注册 PageBreak 扩展，导入的 `pageBreak` 节点将被编辑器静默忽略，因为 schema 中没有匹配的节点类型。
+</Callout>
+
+## 了解更多
+
+- [PageBreak 扩展参考](/pages/core-concepts/page-break-node) 查看完整的选项、命令和键盘快捷键
+- [DOCX 导入指南](/conversion/import/docx/editor-import) 了解常规导入设置
+- [DOCX 导出中的分页符](/conversion/export/docx/page-breaks) 了解导出支持

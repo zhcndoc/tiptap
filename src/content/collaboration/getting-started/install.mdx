@@ -13,7 +13,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 本指南将帮助您开始在 Tiptap 编辑器中进行协作编辑。如果您已经在使用 Tiptap 编辑器，可以直接跳到 [准备您的编辑器](#prepare-your-editor) 部分。
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
+    <RequirementItem label="1. 激活试用或订阅">
         开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或在您的账户中[订阅开始计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 启动文档服务器">
@@ -108,9 +108,9 @@ npm install @tiptap-pro/provider
 
 接下来，在您的 index.jsx 文件中配置提供者，并输入您的服务器详细信息：
 
-- **name**：作为同步的文档标识符。
-- **appID**：在您启动应用后，可以在您的 [云账户](https://cloud.tiptap.dev/v2/configuration/document-server) 中找到。对于本地部署，使用 `baseUrl` 替换 `appID`。
-- **token**：在测试时使用您在 [云界面](https://cloud.tiptap.dev/v2/configuration/document-server) 中获取的 JWT，但在生产环境中生成您自己的 JWT。
+- **name**: 作为同步的文档标识符。
+- **appID**: 您的文档服务器 ID，在您的 [Cloud 仪表板](https://cloud.tiptap.dev/v2/configuration/document-server) 中找到，标签为 "Document server ID"。对于本地部署，将 `appID` 替换为 `baseUrl`。
+- **token**: 使用来自您的 [Cloud 界面](https://cloud.tiptap.dev/v2/configuration/document-server) 的 JWT 进行测试，但在生产环境中请生成您自己的 JWT。
 
 <Callout title="添加初始内容" variant="hint">
   在非协作设置中集成编辑器时，使用此处显示的方法来设置内容是完全可以接受的。然而，如果您转到协作环境，则需要修改添加初始内容的方式，如下一标题所示。
@@ -160,8 +160,8 @@ export default () => {
   useEffect(() => {
     const provider = new TiptapCollabProvider({
       name: 'document.name', // 用于同步的唯一文档标识符。这是您的文档名称。
-      appId: '7j9y6m10', // 您云仪表板的 AppID 或本地部署的 `baseURL`
-      token: 'notoken', // 您的 JWT 令牌
+      appId: '7j9y6m10', // 来自 Cloud 仪表板的文档服务器 ID，本地部署请使用 `baseURL`
+      token: 'notoken', // 您的 JWT
       document: doc,
     })
   }, [])
@@ -211,8 +211,8 @@ export default () => {
   useEffect(() => {
     const provider = new TiptapCollabProvider({
       name: 'document.name', // 用于同步的唯一文档标识符。这是您的文档名称。
-      appId: '7j9y6m10', // 您云仪表板的 AppID 或本地部署的 `baseURL`
-      token: 'notoken', // 您的 JWT 令牌
+      appId: '7j9y6m10', // 来自 Cloud 仪表板的文档服务器 ID，本地部署请使用 `baseURL`
+      token: 'notoken', // 您的 JWT
       document: doc,
 
       // onSynced 回调确保初始内容仅设置一次，使用 editor.setContent()，防止在编辑器同步时重复加载内容。

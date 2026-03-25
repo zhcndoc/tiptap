@@ -1,7 +1,7 @@
 ---
 title: 评论 REST API
 tags:
-  - type: team
+  - type: 团队
 meta:
   title: REST API | Tiptap 评论文档
   description: 使用 Tiptap 评论 REST API 从编辑器外部管理线程和评论。更多内容请查看文档！
@@ -15,14 +15,13 @@ import { Callout } from '@/components/ui/Callout'
 使用 [评论 Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/folder/33042171-01d1c110-e913-4d99-b47a-fc95aad877c9) 进行动手实验。
 
 <Requirements>
-    <RequirementItem label="1. Activate trial or subscribe">
+    <RequirementItem label="1. 激活试用或订阅">
         在您的账户中[开始免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅团队计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 启动文档服务器">
         要使用评论 REST API，请在您的仪表板中 [添加环境](https://cloud.tiptap.dev/v2/configuration/document-server) 并配置您的 [文档服务器](https://cloud.tiptap.dev/v2/configuration/document-server)。
     </RequirementItem>
 </Requirements>
-
 
 ## 访问 API
 
@@ -32,7 +31,9 @@ REST API 直接从您的文档服务器提供，位于您的自定义 URL：
 https://YOUR_APP_ID.collab.tiptap.cloud/
 ```
 
-身份验证使用 API 密钥，您可以在文档服务器的 [设置](https://cloud.tiptap.dev/v2/configuration/document-server) 中找到。密钥必须作为 `Authorization` 头发送。
+将 `YOUR_APP_ID` 替换为您的文档服务器 ID，该 ID 在 [Cloud 仪表板](https://cloud.tiptap.dev/v2/configuration/document-server) 中标记为 "Document server ID"。
+
+身份验证使用 API 密钥完成，您可以在文档服务器的 [设置](https://cloud.tiptap.dev/v2/configuration/document-server) 中找到该密钥。该密钥必须作为 `Authorization` 标头发送。
 
 如果您的文档标识符包含斜杠 (`/`)，请将其编码为 `%2F`，例如使用 `encodeURIComponent`。
 

@@ -1,0 +1,67 @@
+---
+title: DOC 导出中的分页符
+tags:
+  - type: start
+  - type: beta
+meta:
+  title: DOC 导出中的分页符 | Tiptap 转换
+  description: 了解在将 Tiptap 编辑器内容导出到 DOC 文件时的分页符支持。
+  category: 转换
+---
+
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="doc" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在你的账户中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有仓库安装">
+        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)向 Tiptap 的私有 npm 仓库进行身份验证。
+    </RequirementItem>
+</Requirements>
+
+[PageBreak 扩展](/pages/core-concepts/page-break-node)允许用户在编辑器中插入显式的分页符。当与 DOC 导出扩展结合使用时，这些分页符将包含在导出的文档中。
+
+## 工作原理
+
+DOC 导出完全支持分页符。DOC 导出在底层使用 DOCX 转换，其中 `pageBreak` 节点会被转换为 `<w:br w:type="page"/>`，从而在生成的 DOC 文件中产生标准的分页符。
+
+## 设置 PageBreak 与 DOC 导出
+
+将 PageBreak 扩展与 DOC 导出扩展一起注册。导出时，编辑器内容中的分页符将自动转换。
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { ExportDoc } from '@tiptap-pro/extension-export-doc'
+import { PageBreak } from '@tiptap-pro/extension-pagebreak'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    PageBreak,
+    ExportDoc.configure({
+      appId: 'your-app-id',
+      token: 'your-jwt',
+      onCompleteExport: (result) => {
+        const blob = new Blob([result], { type: 'application/msword' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'export.doc'
+        a.click()
+        URL.revokeObjectURL(url)
+      },
+    }),
+  ],
+})
+```
+
+## 了解更多
+
+- [PageBreak 扩展参考](/pages/core-concepts/page-break-node) —— 完整的选项、命令和键盘快捷键
+- [DOCX 导入中的分页符](/conversion/import/docx/page-breaks) —— 导入支持
+- [DOC 导出指南](/conversion/export/doc/editor-export) —— 通用导出设置

@@ -25,8 +25,10 @@ REST API 直接从您的文档服务器暴露，网址为您自定义的 URL：
 https://YOUR_APP_ID.collab.tiptap.cloud/
 ```
 
-### 身份验证
-通过在 `Authorization` 头中包含 API 秘钥来验证您的 API 请求。您可以在 Tiptap Cloud 仪表板的 [设置](https://cloud.tiptap.dev/v2/configuration/document-server) 中找到您的 API 秘钥。
+将 `YOUR_APP_ID` 替换为您的文档服务器 ID，它在 [Cloud 仪表板](https://cloud.tiptap.dev/v2/configuration/document-server) 中标记为"Document server ID"。
+
+### 认证
+通过在 `Authorization` 请求头中包含您的 API 密钥来认证您的 API 请求。您可以在 Tiptap Cloud 仪表板的 [设置](https://cloud.tiptap.dev/v2/configuration/document-server) 中找到您的 API 密钥。
 
 ### 文档标识符
 如果您的文档标识符包含斜杠 (`/`)，请将其编码为 `%2F`，例如，使用 `encodeURIComponent`。

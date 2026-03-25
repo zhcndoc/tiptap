@@ -24,15 +24,15 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ## 1. 需求
 
-- 支持协作的 Tiptap Pro 计划
+- 支持协作的 Tiptap Pro 订阅计划
 - 访问 Tiptap Cloud 或您自己的协作后端
-- `@tiptap-pro/extension-pages@alpha` 包
+- `@tiptap-pro/extension-pages` 包
 - `@tiptap-pro/provider-collab` 包（或您自己的提供者）
 
 ## 2. 安装所需包
 
 ```bash
-npm install @tiptap-pro/extension-pages@alpha @tiptap-pro/provider @tiptap/extension-collaboration
+npm install @tiptap-pro/extension-pages @tiptap-pro/provider @tiptap/extension-collaboration
 ```
 
 ## 3. 设置您的协作提供者
@@ -46,7 +46,7 @@ const doc = new Y.Doc() // 初始化 Y.Doc 用于共享编辑
 
 const provider = new TiptapCollabProvider({
   name: 'document.name', // 用于同步的唯一文档标识符。这是您的文档名称。
-  appId: 'your-app-id', // 您的云端控制台 AppID 或本地部署的 `baseURL`
+  appId: 'your-app-id', // 来自 Cloud 仪表板的文档服务器 ID，或针对本地部署使用 `baseURL`
   token: 'your-jwt', // 您的 JWT
   document: doc,
 })
@@ -66,7 +66,7 @@ const doc = new Y.Doc() // 初始化 Y.Doc 用于共享编辑
 
 const provider = new TiptapCollabProvider({
   name: 'document.name', // 用于同步的唯一文档标识符。这是您的文档名称。
-  appId: 'your-app-id', // 您的云端控制台 AppID 或本地部署的 `baseURL`
+  appId: 'your-app-id', // 来自 Cloud 仪表板的文档服务器 ID，或针对本地部署使用 `baseURL`
   token: 'your-jwt', // 您的 JWT
   document: doc,
 })
@@ -76,7 +76,7 @@ const editor = new Editor({
     StarterKit,
     Pages.configure({
       pageFormat: 'A4',
-      header: 'My Project',
+      header: '我的项目',
       footer: '第 {page} 页，共 {total} 页',
     }),
     Collaboration.configure({

@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.7.0
+    label: v0.8.0
 meta:
     title: 保留图像 | Tiptap 转换
     description: 通过提供图像上传回调 URL，保留您转换文档中的图像。请在文档中了解更多信息。
@@ -34,9 +34,9 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 ## 导入图像
 
-如果您导入的 DOCX 文件包含图像，则仅在提供图像上传回调 URL 时，转换服务才可以将这些图像包含在生成的 Tiptap JSON 中。
+如果您导入的 DOCX 文件包含图像，只有当您提供了图像上传配置时，转换服务才会将这些图像包含在生成的 Tiptap JSON 中。
 
-这是您服务器上的一个 URL 端点，转换服务将在导入过程中使用它来卸载图像。
+使用 `imageUploadConfig` 选项来指定您服务器上的一个端点，转换服务将在导入过程中将图像上传到该端点。
 
 ```js
  import { Editor } from '@tiptap/core'
@@ -48,31 +48,59 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
      Import.configure({
        appId: '<your-app-id>',
        token: '<your-jwt>',
-       imageUploadCallbackUrl: 'https://your-server.com/upload-image'
+       imageUploadConfig: {
+         url: 'https://your-server.com/upload-image',
+       },
      })
    ]
  })
  ```
-在此配置中，`imageUploadCallbackUrl` 设置为一个处理接收图像文件的端点（例如，在您的服务器上）。如果未提供此参数，导入器将从文档中删除图像。
+在此配置中，`imageUploadConfig.url` 设置为您服务器上的一个端点，该端点将负责接收图像文件。如果未提供此项，导入器将从文档中剥离图像。
 
 当触发导入时，转换服务将把每个嵌入的图像上传到您提供的 URL。
 
-### 回调过程
-此端点可以使用任何 Web 框架或云函数实现。您需要集成的关键步骤是：
+### 经过身份验证的图像上传
+
+如果您的上传端点需要身份验证或自定义请求头，您可以直接进行配置：
+
+```js
+Import.configure({
+  appId: '<your-app-id>',
+  token: '<your-jwt>',
+  imageUploadConfig: {
+    url: 'https://your-server.com/upload-image',
+    headers: {
+      Authorization: 'Bearer your-upload-token',
+    },
+    method: 'PUT',
+    queryParams: {
+      bucket: 'my-bucket',
+    },
+  },
+})
+```
+
+查看[图像上传配置](/conversion/import/docx/editor-import#image-upload-configuration)参考以了解所有可用选项。
+
+### 回调处理流程
+
+此端点可以使用任何 Web 框架或云函数实现。您需要集成的关键步骤如下：
 
 1. **接收文件：** 请求将包含图像文件数据，您需要在服务器上解析这些数据。
 2. **存储图像：** 将图像保存到可通过 URL 访问的位置。这可以是 AWS S3 存储桶、Cloudinary 等存储服务，或您服务器上的公共文件夹。为保存的文件生成公共 URL 或路径。
-3. **返回 URL：** 发送包含图像 URL 的 JSON 响应。例如：`{ "url": "https://my-cdn.com/uploads/unique-image-name.png" }`。确保发送 HTTP 200 状态。转换器将在编辑器内容中使用提供的 URL。
+3. **返回 URL：** 发送包含图像 URL 的 JSON 响应。例如：`{ "url": "https://my-cdn.com/uploads/unique-image-name.png" }`。确保发送 HTTP 200 状态码。转换器将在编辑器内容中使用提供的 URL。
 
 Tiptap 转换服务随后将该 URL 插入到 Tiptap JSON 中，作为图像节点的 `src`。
 
-### 重要考虑事项
-- **公共可访问性：** 您提供的端点 URL 必须可以从互联网访问，因为 Tiptap 的云服务将调用它。它不能是 localhost 或在防火墙后面。同样，返回的图像 URL 应该是公共可访问的（或至少对需要查看文档的任何人可访问）
-- **正确响应格式：** 您的端点应返回一个确切包含 url 字段的 JSON 对象。如果转换服务无法解析响应或找不到 URL，则图像将不会被插入。
-- **安全性：** Tiptap 不限制您使用的端点。您可以在 URL 中包含令牌或密钥（例如，https://your-server.com/upload-image?key=123）以控制访问。转换服务只会简单地调用该 URL。请在您的服务器上实现任何必要的身份验证（例如，验证请求头或 URL 中的秘密令牌）。
-- **图像的持久性：** 您返回的 URL 将在以后的编辑器内容中使用。例如，在导入之后，您的编辑器将具有 src: "https://my-cdn.com/uploads/unique-image-name.png" 的图像节点。之后，任何导出或查看该内容的人都将尝试加载该 URL。确保图像在这些 URL 上保持可用（不要立即删除它们）​。
+### 重要注意事项
+
+- **公共可访问性：** 您提供的端点 URL 必须能够从互联网访问，因为 Tiptap 的云服务将调用它。它不能是 localhost 或位于防火墙后面。同样，返回的图像 URL 应该是公开可访问的（或者至少对需要查看文档的任何人可访问）
+- **正确的响应格式：** 您的端点应该准确返回一个带有 url 字段的 JSON 对象。如果转换服务无法解析响应或找不到 URL，图像将不会被插入。
+- **安全性：** Tiptap 不限制您使用哪个端点。您可以通过 `imageUploadConfig` 选项传递自定义请求头（例如 `Authorization: Bearer ...`）和查询参数进行身份验证。转换服务将在上传图像时转发这些请求头。在您的端实现任何必要的身份验证（例如，在请求头中验证 Bearer 令牌或 API 密钥）。
+- **图像持久性：** 您返回的 URL 将在编辑器内容中继续使用。例如，导入后，您的编辑器将包含带有 src: "https://my-cdn.com/uploads/unique-image-name.png" 的图像节点。之后任何导出或查看该内容的人都会尝试加载该 URL。确保图像在这些 URL 上保持可用（不要立即删除它们）
 
 ### 服务器实现示例
+
 此示例显示了一个简单的服务器实现，该实现接受图像上传并将其上传到由环境变量配置的 S3 存储桶。
 
 ```ts

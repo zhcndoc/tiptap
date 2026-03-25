@@ -49,10 +49,10 @@ interface PagesOptions {
   footer?: string | ((page: number, total: number) => string)
 
   /**
-   * 分页区域的背景颜色。
+   * 页面间距区域的背景颜色。
    * @default undefined
    */
-  pageBreakBackground?: string
+  pageGapBackground?: string
 
   /**
    * 页面格式变化时调用的回调函数。
@@ -75,16 +75,16 @@ interface PageFormat {
 }
 ```
 
-| 选项                  | 类型 / 值                    | 默认值      | 描述                                                                                     |
-|-----------------------|------------------------------|-------------|------------------------------------------------------------------------------------------|
-| `pageFormat`          | `string \| PageFormat`       | `'A4'`      | 内置格式名或自定义页面格式对象                                                          |
-| `headerHeight`        | `number`（像素）             | `50`        | 页眉高度（像素）                                                                         |
-| `footerHeight`        | `number`（像素）             | `50`        | 页脚高度（像素）                                                                         |
-| `pageGap`             | `number`（像素）             | `50`        | 页面间距（像素）                                                                         |
-| `header`              | `string \| fn`               | `''`        | 页眉内容；字符串（支持 `{page}`/`{total}` 占位符）或 `(pageNumber, totalPages) => string` 函数 |
-| `footer`              | `string \| fn`               | `'{page}'`  | 页脚内容；字符串（支持 `{page}`/`{total}` 占位符）或 `(pageNumber, totalPages) => string` 函数 |
-| `pageBreakBackground` | `string`（CSS 颜色）          | `undefined` | 分页区域背景色                                                                          |
-| `onPageFormatChange`  | `fn`                         | `() => {}`  | 页面格式变化回调，接收新的 PageFormat 参数                                             |
+| 选项                | 类型/值                      | 默认值    | 描述                                                                                        |
+|---------------------|------------------------------|-----------|---------------------------------------------------------------------------------------------|
+| `pageFormat`        | `string \| PageFormat`       | `'A4'`    | 内置格式名称或自定义页面格式对象                                                            |
+| `headerHeight`      | `number` (px)                | `50`      | 页眉高度，单位为像素                                                                        |
+| `footerHeight`      | `number` (px)                | `50`      | 页脚高度，单位为像素                                                                        |
+| `pageGap`           | `number` (px)                | `50`      | 页面间距，单位为像素                                                                        |
+| `header`            | `string \| fn`               | `''`      | 页眉内容；字符串（支持 `{page}`/`{total}`）或函数 `(pageNumber, totalPages) => string`     |
+| `footer`            | `string \| fn`               | `'{page}'`| 页脚内容；字符串（支持 `{page}`/`{total}`）或函数 `(pageNumber, totalPages) => string`     |
+| `pageGapBackground` | `string` (CSS color)         | `undefined`| 页面间距的背景颜色                                                                         |
+| `onPageFormatChange`| `fn`                         | `() => {}`| 页面格式变化时的回调函数；接收新的 PageFormat                                               |
 
 ## 示例用法
 
@@ -100,9 +100,9 @@ const editor = new Editor({
       headerHeight: 60,
       footerHeight: 40,
       pageGap: 40,
-      header: '我的项目',
-      footer: (page, total) => `第 ${page} 页，共 ${total} 页`,
-      pageBreakBackground: '#f8f8f8',
+      header: 'My Project',
+      footer: (page, total) => `Page ${page} of ${total}`,
+      pageGapBackground: '#f8f8f8',
     }),
   ],
 })

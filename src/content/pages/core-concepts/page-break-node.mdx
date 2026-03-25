@@ -1,0 +1,128 @@
+---
+title: PageBreak 节点
+meta:
+  title: PageBreak 节点 | Tiptap Pages 文档
+  description: 了解如何使用 PageBreak 扩展在 Tiptap 编辑器中插入显式分页符，无论是否使用 Pages 扩展。
+  category: Pages
+sidebars:
+  hideSecondary: true
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+PageBreak 扩展（`@tiptap-pro/extension-pagebreak`）添加了一个块级原子节点，用于在文档中插入显式的分页符。它根据是否安装了 [Pages 扩展](/pages/getting-started/overview) 提供两种工作模式。
+
+<CodeDemo isPro path="/Extensions/Pages" />
+
+## 两种工作模式
+
+### 标准模式（无 Pages）
+
+当未使用 Pages 扩展时，PageBreak 会渲染为一条带居中标签的视觉虚线水平分隔线。这提供了清晰的分页符位置视觉指示，适用于最终会打印或导出的内容。
+
+### Pages 模式（有 Pages）
+
+当检测到 Pages 扩展时，PageBreak 会自动切换行为。它不再渲染视觉分隔线，而是渲染一个不可见的填充元素，该元素会扩展至填满当前页面的剩余高度，将所有后续内容推送到下一页。这模拟了 Microsoft Word 的分页符行为。
+
+<Callout title="自动检测">
+  PageBreak 会自动检测 Pages 扩展 —— 无需额外配置。只需
+  同时注册两个扩展，系统就会自动应用正确的模式。
+</Callout>
+
+## 安装
+
+```bash
+npm install @tiptap-pro/extension-pagebreak
+```
+
+## 基本用法
+
+将 PageBreak 作为独立扩展使用，以提供视觉分页符指示：
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { PageBreak } from '@tiptap-pro/extension-pagebreak'
+
+const editor = new Editor({
+  extensions: [StarterKit, PageBreak],
+})
+```
+
+## 与 Pages 一起使用
+
+当同时注册 PageBreak 和 Pages 时，PageBreak 会自动以 Pages 模式运行：
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { Pages } from '@tiptap-pro/extension-pages'
+import { PageBreak } from '@tiptap-pro/extension-pagebreak'
+
+const editor = new Editor({
+  extensions: [StarterKit, Pages.configure({ pageFormat: 'A4' }), PageBreak],
+})
+```
+
+## 通过 PageKit 使用
+
+使用 [PageKit](/pages/guides/pagekit-usage) 时，PageBreak 默认包含在内。要禁用它，请传递 `pagebreak: false`：
+
+```js
+import { PageKit } from '@tiptap-pro/extension-pages-pagekit'
+
+PageKit.configure({
+  pages: { pageFormat: 'A4' },
+  pagebreak: false, // 禁用 PageBreak
+})
+```
+
+## 选项
+
+| 选项           | 类型                      | 默认值        | 描述                                                                  |
+| ---------------- | ------------------------- | -------------- | ---------------------------------------------------------------------------- |
+| `label`          | `string`                  | `'Page break'` | 在分页符视觉提示内部渲染的标签文本（仅标准模式）   |
+| `nextNodeType`   | `string`                  | `'paragraph'`  | 当分页符放置在文档末尾时，在其后插入的节点类型 |
+| `HTMLAttributes` | `Record<string, unknown>` | `{}`           | 应用于分页符节点的自定义 HTML 属性                        |
+
+### 配置示例
+
+```js
+PageBreak.configure({
+  label: 'New page',
+  nextNodeType: 'heading',
+})
+```
+
+## 命令
+
+### insertPageBreak
+
+在当前选区处插入分页符。插入后，光标会放置在分页符后面的节点中。
+
+```js
+editor.commands.insertPageBreak()
+
+// 或使用链式调用
+editor.chain().focus().insertPageBreak().run()
+```
+
+## 键盘快捷键
+
+| 快捷键    | 命令             |
+| ----------- | ------------------- |
+| `Mod-Enter` | 插入分页符 |
+
+这与 Microsoft Word 插入分页符的约定一致。
+
+<Callout title="快捷键优先级">
+  如果你使用了 StarterKit 的 HardBreak 扩展（它也绑定了 `Mod-Enter`），请将 PageBreak
+  放在 StarterKit **之后**的扩展数组中，以便 PageBreak 的快捷键优先。
+</Callout>
+
+## DOCX 兼容性
+
+Tiptap [转换服务](/conversion/import/docx/editor-import) 在导入包含分页符的 `.docx` 文件时会生成 `pageBreak` 节点。这些节点直接映射到此扩展的节点类型，因此导入的文档会保留其分页符位置。
+
+导出时，分页符会在 DOCX 输出中转换为 `<w:br w:type="page"/>`，生成标准的 Word 分页符。有关设置详情，请参阅 [DOCX 导出分页符指南](/conversion/export/docx/page-breaks)。

@@ -35,7 +35,7 @@ npm install @tiptap/core @tiptap/starter-kit
 从 Tiptap Pro 注册表中安装 Pages 扩展：
 
 ```bash
-npm install @tiptap-pro/extension-pages@alpha
+npm install @tiptap-pro/extension-pages
 ```
 
 > **提示：** 确保你有访问 Tiptap Pro 注册表的权限。有关设置，请参阅 [Pro 扩展指南](/guides/pro-extensions)。
@@ -55,9 +55,9 @@ const editor = new Editor({
       headerHeight: 60,
       footerHeight: 60,
       pageGap: 40,
-      header: '我的项目',
-      footer: '第 {page} 页，共 {total} 页',
-      pageBreakBackground: '#f8f8f8',
+      header: 'My Project',
+      footer: 'Page {page} of {total}',
+      pageGapBackground: '#f8f8f8',
     }),
   ],
 })
@@ -162,7 +162,7 @@ const editor = new Editor({
       token: 'your-jwt', // 你的认证令牌
       // 可选：自定义设置的端点与图片上传URL
       // endpoint: 'https://your-api-endpoint',
-      // imageUploadCallbackUrl: 'https://your-upload-endpoint',
+      // imageUploadConfig: { url: 'https://your-upload-endpoint' },
     }),
   ],
 })

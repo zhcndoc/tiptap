@@ -1,0 +1,79 @@
+---
+title: DOCX 导出中的分页符
+tags:
+  - type: start
+  - type: beta
+meta:
+  title: DOCX 导出中的分页符 | Tiptap 转换
+  description: 了解在将 Tiptap 编辑器内容导出为 DOCX 文件时的分页符支持。
+  category: 转换
+---
+
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. Activate trial or subscribe">
+        开启[免费试用](https://cloud.tiptap.dev/v2?trial=true)或在账户中[订阅 Start 套餐](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. Install from private registry">
+        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)完成 Tiptap 私有 npm 仓库的认证。
+    </RequirementItem>
+</Requirements>
+
+[PageBreak 扩展](/pages/core-concepts/page-break-node)允许用户在编辑器中插入显式分页符。与 DOCX 导出扩展结合使用时，这些分页符将包含在导出的文档中。
+
+## 工作原理
+
+- 编辑器中的 `pageBreak` 节点在 DOCX 输出中转换为 `<w:br w:type="page"/>`
+- 这会生成标准的 Word 分页符，开启新的一页
+- 无需额外配置——如果已注册 PageBreak 扩展，导出将自动生效
+
+## 设置 PageBreak 与 DOCX 导出
+
+同时注册 PageBreak 扩展和 DOCX 导出扩展。编辑器内容中的分页符将在导出时自动转换。
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+import { PageBreak } from '@tiptap-pro/extension-pagebreak'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    PageBreak,
+    ExportDocx.configure({
+      onCompleteExport: (result) => {
+        const blob = new Blob([result], {
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'export.docx'
+        a.click()
+        URL.revokeObjectURL(url)
+      },
+    }),
+  ],
+})
+```
+
+## 独立使用
+
+对于自定义导出流程或服务器端使用，您可以直接使用 `convertPageBreak` 函数：
+
+```js
+import { convertPageBreak } from '@tiptap-pro/extension-export-docx'
+```
+
+该函数将 `pageBreak` 节点转换为包含分页符元素的对应 DOCX 段落，可在构建自定义节点转换流程时使用。
+
+## 了解更多
+
+- [PageBreak 扩展参考](/pages/core-concepts/page-break-node)——完整的选项、命令和快捷键
+- [DOCX 导入中的分页符](/conversion/import/docx/page-breaks)——导入支持
+- [DOCX 导出指南](/conversion/export/docx/editor-export)——通用导出设置

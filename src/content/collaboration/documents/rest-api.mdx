@@ -2,7 +2,7 @@
 title: 文档管理 API
 meta:
   title: REST API | Tiptap 协作文档
-  description: 使用协作管理 API 程序化管理您的 Tiptap 文档。请在文档中了解更多信息。
+  description: 使用协作管理 API 以编程方式管理您的 Tiptap 文档。在文档中了解更多信息。
   category: 协作
 ---
 
@@ -31,8 +31,11 @@ REST API 直接从您的文档服务器以自定义 URL 公开：
 ```bash
 https://YOUR_APP_ID.collab.tiptap.cloud/
 ```
-### 认证
-通过在 `Authorization` 头中包含您的 API 密钥来验证您的 API 请求。您可以在 Tiptap Cloud 控制面板的 [设置](https://cloud.tiptap.dev/v2/configuration/document-server) 中找到您的 API 密钥。
+
+将 `YOUR_APP_ID` 替换为您的文档服务器 ID，该 ID 在 [Cloud 控制台](https://cloud.tiptap.dev/v2/configuration/document-server) 中标示为"Document server ID"。
+
+### Authentication
+通过在 `Authorization` 请求头中包含您的 API 密钥来验证 API 请求。您可以在 Tiptap Cloud 控制台的 [设置](https://cloud.tiptap.dev/v2/configuration/document-server) 中找到您的 API 密钥。
 
 ### 文档标识符
 如果您的文档标识符包含斜杠 (`/`)，请将其编码为 `%2F`，例如，使用 `encodeURIComponent`。
@@ -272,15 +275,15 @@ curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_
   }'
 ```
 
-## Version management
+## 版本管理
 
-Versions capture the state of a document at a point in time. Each version has a `version` number, `date`, and optionally a `name` and `meta` (arbitrary metadata object).
+版本记录了文档在某一时间点的状态。每个版本都有一个 `version` 编号、`date`，以及可选的 `name` 和 `meta`（任意元数据对象）。
 
-Every version's `meta` object automatically includes a `__tiptap` key with server-generated metadata about who contributed changes and how the version was created. See [automatic version metadata](/collaboration/documents/snapshot#automatic-version-metadata) for details.
+每个版本的 `meta` 对象会自动包含一个 `__tiptap` 键，其中包含服务器生成的有关谁贡献了更改以及版本是如何创建的元数据。详情请参见 [自动版本元数据](/collaboration/documents/snapshot#automatic-version-metadata)。
 
-For a full interactive reference of all version endpoints, see the [Postman Collection](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/folder/33042171-a6e8aa7e-c077-46ee-a2a3-241f8efd5d25?action=share&creator=33042171&active-environment=33042171-378cfb31-9c16-40f0-95b8-b9f0d3c7d2ab).
+如需查看所有版本端点的完整交互式参考，请参见 [Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/folder/33042171-a6e8aa7e-c077-46ee-a2a3-241f8efd5d25?action=share&creator=33042171&active-environment=33042171-378cfb31-9c16-40f0-95b8-b9f0d3c7d2ab)。
 
-### Revert to version
+### 回退到版本
 
 ```bash
 POST /api/documents/:identifier/versions/:versionId/revertTo
@@ -376,5 +379,5 @@ POST /api/search
 curl -X POST https://YOUR_APP_ID.collab.tiptap.cloud/api/search \
   -H "Authorization: YOUR_SECRET_FROM_SETTINGS_AREA" \
   -H "Content-Type: application/json" \
-  -d '{"content": "您的搜索词"}'
+  -d '{"content": "your search term"}'
 ```

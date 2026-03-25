@@ -2,7 +2,7 @@
 title: 尾节点扩展
 tags:
   - type: image
-    src: https://img.shields.io/npm/v/@tiptap/extensions?label=version
+    src: https://img.shields.io/npm/v/@tiptap/extensions?label=版本
     url: https://www.npmjs.com/package/@tiptap/extensions
     label: 版本
   - type: image
@@ -70,6 +70,23 @@ TrailingNode.configure({
   notAfter: ['heading', 'blockquote'],
 })
 ```
+
+## 在事务中跳过尾节点创建
+
+你可以通过在特定事务上设置 `skipTrailingNode` 元标志来跳过该事务的自动尾节点插入。
+
+```ts
+editor
+  .chain()
+  .command(({ tr }) => {
+    tr.setMeta('skipTrailingNode', true)
+
+    return true
+  })
+  .run()
+```
+
+当你故意想让某个事务在离开文档时不留下额外的尾节点时，这会很有用。
 
 ## 源代码
 

@@ -13,7 +13,7 @@ sidebars:
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-要在你的分页编辑器中添加表格，你应该使用 Pages 包中包含的 TableKit 扩展。这确保了与分页的完全兼容，因为为了正确地将表格拆分到各个页面，我们需要大幅修改表格的行为和布局。
+要在分页编辑器中添加表格，你应该使用来自 `@tiptap-pro/extension-pages-tablekit` 包的 TableKit 扩展。这能确保与分页功能完全兼容，因为为了在页面间正确拆分表格，我们需要大幅修改表格的行为和布局。
 
 <CodeDemo
   isPro
@@ -22,16 +22,21 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ---
 
-## 1. 安装 TableKit 扩展（随 Pages 一起包含）
+## 1. 安装 TableKit 扩展
 
-如果你已经安装了 Pages 扩展，则无需单独安装 TableKit 包。兼容的 TableKit 扩展已包含在内。
+与 Pages 兼容的 TableKit 扩展作为一个单独的包提供。
 
-## 2. 导入并将 Table 添加到你的编辑器
+```bash
+npm install @tiptap-pro/extension-pages-tablekit
+```
+
+## 2. 导入并将表格添加到你的编辑器
 
 ```js
 import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
-import { Pages, TableKit } from '@tiptap-pro/extension-pages'
+import { Pages } from '@tiptap-pro/extension-pages'
+import { TableKit } from '@tiptap-pro/extension-pages-tablekit'
 
 const editor = new Editor({
   extensions: [
@@ -45,16 +50,16 @@ const editor = new Editor({
 ```
 
 <Callout title="最佳实践" variant="info">
-  在使用 Pages 时，始终使用来自 <code>@tiptap-pro/extension-pages</code> 的 TableKit 扩展。不要使用开源的 TableKit 扩展，因为它与 Pages 扩展生成的布局不兼容。
+  在使用 Pages 时，始终使用来自 <code>@tiptap-pro/extension-pages-tablekit</code> 的 TableKit 扩展。不要使用开源的 TableKit 扩展，因为它与 Pages 扩展生成的布局不兼容。
 </Callout>
 
 ## 3. 表格功能
 
-- 暴露的 TableKit 扩展的工作方式和行为与开源版本完全相同，也可以扩展以满足你的需求。
+- 暴露的 TableKit 扩展工作方式和行为与开源版本完全相同，也可以扩展以满足你的需求。
 - 表格会正确分页并能随着文档一同导出为 DOCX。
 
-<Callout title="扩展 Pages 的 TableKit 扩展" variant="default">
-  在扩展 Pages 包暴露的 TableKit 扩展时请小心，因为它的布局经过大幅修改，可能会破坏表格拆分逻辑。
+<Callout title="扩展 Page 的 TableKit 扩展" variant="default">
+  在扩展来自 <code>@tiptap-pro/extension-pages-tablekit</code> 的 TableKit 扩展时要小心，因为它的布局被大幅修改了，你可能会破坏表格拆分逻辑。
 </Callout>
 
 ## 4. 下一步

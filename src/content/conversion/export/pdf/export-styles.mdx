@@ -8,11 +8,13 @@ tags:
 meta:
     title: 将样式导出为 PDF | Tiptap 转换
     description: 学习如何使用 Export PDF 扩展将 Tiptap JSON 的自定义样式导出为 PDF。
-    category: Conversion
+    category: 转换
 ---
 
+import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import ExportStylesGuide from '../_export-styles-guide.mdx'
 
 <EnterpriseCalloutAuto variant="pdf" renderMode="sidebar" disableWaitlist />
 
@@ -25,52 +27,10 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
     </RequirementItem>
 </Requirements>
 
-导出为 PDF 时，可以定义自定义样式覆盖，这些样式将应用于导出的文档。当你想要定制导出内容的外观，超出默认样式时，这非常有用。
+导出 PDF 时，您可以定义将应用于导出文档的自定义样式。当您希望文档保持统一的视觉风格时，这将非常有用。
 
-## 样式覆盖
+<Callout title="需要 Export DOCX 扩展" variant="warning">
+  PDF 导出的样式覆盖功能需要 `@tiptap-pro/extension-export-docx` 扩展在您的编辑器中安装并配置。PDF 导出在底层会先生成 DOCX，再将其转换为 PDF。如果没有该扩展，`styleOverrides` 和元素覆盖选项将不会生效。
+</Callout>
 
-`styleOverrides` 选项接受一个 `Record<string, string>` 对象，键为样式属性名，值为样式属性值。这些覆盖样式会发送至 Tiptap 转换服务，并在转换过程中生效。
-
-| 参数             | 类型                     | 说明                                                      | 默认值       |
-| ---------------- | ------------------------ | --------------------------------------------------------- | ------------ |
-| `styleOverrides` | `Record<string, string>` | 应用于导出 PDF 文档的样式覆盖                             | `undefined`  |
-
-## 示例
-
-```js
-import { ExportPdf } from '@tiptap-pro/extension-export-pdf'
-
-const editor = new Editor({
-  extensions: [
-    // other extensions...
-    ExportPdf.configure({
-      token: 'YOUR_TOKEN',
-      appId: 'YOUR_APP_ID',
-      styleOverrides: {
-        'font-family': 'Arial, sans-serif',
-        'font-size': '12pt',
-        'line-height': '1.5',
-        'color': '#333333',
-      },
-    }),
-    // other extensions...
-  ],
-})
-
-// Export using custom styles
-editor
-  .chain()
-  .exportPdf({
-    onCompleteExport(result) {
-      const url = URL.createObjectURL(result)
-      const a = document.createElement('a')
-
-      a.href = url
-      a.download = 'styled-document.pdf'
-      a.click()
-
-      URL.revokeObjectURL(url)
-    },
-  })
-  .run()
-```
+<ExportStylesGuide />

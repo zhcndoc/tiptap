@@ -39,7 +39,9 @@ const editor = new Editor({
       token: 'your-jwt',
       // 注意：仅用于演示目的
       endpoint: 'https://your-endpoint.com',
-      imageUploadCallbackUrl: 'https://your-endpoint.com/image-upload',
+      imageUploadConfig: {
+        url: 'https://your-endpoint.com/image-upload',
+      },
       // ProseMirror 自定义标记映射
       prosemirrorMarks: {
         strong: 'bold',

@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.7.0
+    label: v0.8.0
 meta:
     title: 导入 DOCX | Tiptap 转换
     description: 学习如何使用我们的文档中的导入扩展将 DOCX（Word）文档导入 Tiptap 编辑器。
@@ -35,7 +35,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 ## 安装 DOCX 导入扩展
 
-转换扩展发布在 Tiptap 的私有 npm 注册表中。按照[私有注册表指南](/guides/pro-extensions)集成扩展。
+转换扩展发布在 Tiptap 的私有 npm 注册表上。按照[私有注册表指南](/guides/pro-extensions)集成扩展。
 
 安装 Tiptap 导入扩展包：
 
@@ -46,9 +46,11 @@ npm i @tiptap-pro/extension-import-docx
 确保你的编辑器包含处理 DOCX 内容所需的所有 Tiptap 扩展。例如，包含图像扩展以处理行内图像，和表格扩展以处理表格。
 
 ## 所需扩展
+
 为了完全映射 DOCX 内容（例如图像、表格、格式化文本）到 Tiptap 的架构中，必须包含相关的 Tiptap 扩展。没有这些扩展，某些 DOCX 元素可能不会被编辑器识别或正确呈现。
 
 ```js
+// 导入所需的扩展
 import StarterKit from '@tiptap/starter-kit'
 import Color from '@tiptap/extension-color'
 import FontFamily from '@tiptap/extension-font-family'
@@ -61,20 +63,23 @@ import { TextStyle } from '@tiptap/extension-text-style'
 ```
 
 ## 配置
+
 将导入扩展添加到你的编辑器设置中。
 
 ```ts
-// Import the import extension
+// 导入导入扩展
 import { Import } from '@tiptap-pro/extension-import-docx'
 
 const editor = new Editor({
   extensions: [
     // 其他扩展 ...
     Import.configure({
-      appId: 'your-app-id', // 你的 Convert 应用 ID（请参阅 Tiptap Cloud 设置）
-      token: 'your-jwt', // 用于身份验证的 JWT（请参阅身份验证文档）
-      imageUploadCallbackUrl: 'https://your-image-upload-endpoint.com', // 你上传图像的端点
-    }),
+      appId: 'your-app-id', // 你的 Convert 应用 ID（参见 Tiptap Cloud 设置）
+      token: 'your-jwt', // 用于认证的 JWT（参见认证文档）
+      imageUploadConfig: {
+        url: 'https://your-image-upload-endpoint.com',
+      },
+    })
     // 其他扩展 ...
   ],
   // 其他编辑器设置 ...
@@ -83,22 +88,78 @@ const editor = new Editor({
 
 | 属性 | 描述 |
 |--------|-------------|
-| `appId` | 你的 Tiptap 转换应用的 ID（在你的 Tiptap 账户的[转换设置](https://cloud.tiptap.dev/convert-settings)中查找） |
-| `token` | 由你的服务器为转换服务生成的 JWT 身份验证令牌。（有关获取和使用这些凭据的详细信息，请参见[身份验证指南](https://cloud.tiptap.dev/convert-settings)。） |
-| `imageUploadCallbackUrl` | 上传 DOCX 中找到的图像的端点。转换服务将把每个嵌入图像发送到此 URL，并在内容中使用返回的 URL。无法处理的任何图像将被删除。 |
+| `appId` | 你的 Tiptap Convert 应用的 ID（在你的 Tiptap 账户的[转换设置](https://cloud.tiptap.dev/convert-settings)中查找） |
+| `token` | 由你的服务器为 Convert 服务生成的 JWT 认证令牌。（有关获取和使用这些凭证的详细信息，请参阅[认证指南](https://cloud.tiptap.dev/convert-settings)。） |
+| `imageUploadConfig` | 导入期间图像上传的结构化配置。详见[图像上传配置](#image-upload-configuration)。 |
+| `verbose` | 一个 `string \| number` 配置属性，可帮助你控制导入过程中的诊断输出级别。这对调试或深入了解转换过程非常有用。更多信息请参见[详细输出](#verbose-output) |
+
+## 图像上传配置
+
+`imageUploadConfig` 选项让你可以配置转换服务如何将 DOCX 文件中找到的图像上传到你的服务器。这取代了已弃用的 `imageUploadCallbackUrl` 字符串选项，并让你可以完全控制请求头、HTTP 方法和查询参数。
+
+```ts
+Import.configure({
+  appId: 'your-app-id',
+  token: 'your-jwt',
+  imageUploadConfig: {
+    url: 'https://your-server.com/upload-image',
+    headers: {
+      Authorization: 'Bearer your-upload-token',
+      'X-Custom-Header': 'custom-value',
+    },
+    method: 'PUT',
+    queryParams: {
+      bucket: 'images',
+      folder: 'docx-imports',
+    },
+  },
+})
+```
+
+| 属性 | 类型 | 必需 | 描述 |
+|----------|------|----------|-------------|
+| `url` | `string` | 是 | 接收上传图像的端点 URL。必须是有效的 HTTP 或 HTTPS URL。 |
+| `headers` | `HeadersInit` | 否 | 转换服务在上传图像时转发的额外 HTTP 请求头。对于认证很有用（例如，Bearer 令牌、API 密钥）。接受普通对象、`Headers` 实例或键值对数组。 |
+| `method` | `string` | 否 | 用于上传图像的 HTTP 方法。如果省略，则默认为转换服务自己的默认值。 |
+| `queryParams` | `Record<string, string>` | 否 | 转换服务附加到上传 URL 的查询参数。 |
+
+<Callout title="从 imageUploadCallbackUrl 迁移" variant="warning">
+  `imageUploadCallbackUrl` 选项已弃用。请用 `imageUploadConfig` 替换：
+
+  ```ts
+  // 之前（已弃用）
+  Import.configure({
+    imageUploadCallbackUrl: 'https://your-server.com/upload-image',
+  })
+
+  // 之后
+  Import.configure({
+    imageUploadConfig: {
+      url: 'https://your-server.com/upload-image',
+    },
+  })
+  ```
+
+  如果同时提供了 `imageUploadConfig` 和 `imageUploadCallbackUrl`，`imageUploadConfig` 优先，并会发出控制台警告。
+</Callout>
 
 ## 导入 DOCX 文件
-扩展配置完成后，可以导入用户选择的 DOCX 文件。
+
+配置好扩展后，你可以导入用户选择的 DOCX 文件。
 
 ### 基本导入
-最简单的方法是将文件直接传递给 `import` 命令。在这里，它用转换的内容替换当前的编辑器内容并聚焦编辑器：
+
+最简单的方法是将文件直接传递给 `import` 命令。在这里，它用转换后的内容替换当前编辑器内容并聚焦编辑器：
+
 ```js
 editor.chain().focus().import({ file }).run()
 ```
+
 在大多数情况下，这一行代码就足以让用户导入 `.docx` 文件。扩展负责将文件发送到转换端点、检索转换后的 Tiptap JSON，然后将其插入到编辑器中。
 
 ### 导入处理
-为了在导入过程完成后获得更多控制，可以使用 `onImport` 回调来处理转换结果。此回调提供转换后的内容、发生的任何错误以及一个名为 `setEditorContent` 的函数来将 `context.content` 中的内容插入到编辑器中。如果不提供 `onImport` 回调，扩展将自动将内容插入到编辑器中，但你将无法处理任何其他内容，如错误或加载状态。
+
+为了在导入过程完成后获得更多控制，可以使用 `onImport` 回调来处理转换结果。此回调提供转换后的内容、发生的任何错误以及一个名为 `setEditorContent` 的函数，用于将 `context.content` 中的内容插入到编辑器。如果不提供 `onImport` 回调，扩展将自动将内容插入到编辑器，但你将无法处理其他任何事情，如错误或加载状态。
 
 ```js
 editor
@@ -131,9 +192,9 @@ editor
 
 | 操作 | 描述 |
 |----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 错误处理       | 如果转换失败，可以显示一个提示或记录错误。                                                                                                                                                                                                                  |
-| 内容修改 | 可以插入额外的节点、删除某些节点，或根据需要调整转换后的 Tiptap JSON。                                                                                                                                                                          |
-| 编辑器插入     | 如果希望依赖扩展的默认插入行为（替换编辑器内容），可以调用回调中提供的 `setEditorContent()` 函数。如果你自己修改内容，必须手动使用 `editor.commands.setContent(content)` 设置它。 |
+| 错误处理 | 如果转换失败，可以显示一个提示或记录错误。 |
+| 内容修改 | 可以插入额外的节点、删除某些节点，或根据需要调整转换后的 Tiptap JSON。 |
+| 编辑器插入 | 如果希望依赖扩展的默认插入行为（替换编辑器内容），可以调用回调中提供的 `setEditorContent()` 函数。如果你自己修改内容，必须手动使用 `editor.commands.setContent(content)` 设置它。 |
 
 ## 页眉和页脚
 
@@ -141,7 +202,7 @@ editor
 
 ### 自动处理
 
-如果在编辑器中注册了页面扩展，则在调用 `setEditorContent()` 时，会自动应用页眉和页脚：
+如果在编辑器中注册了页面扩展，则在调用 `setEditorContent()` 时会自动应用页眉和页脚：
 
 ```js
 editor
@@ -183,12 +244,12 @@ editor
       const {
         header,           // 默认页眉（Tiptap JSON 或 null）
         footer,           // 默认页脚（Tiptap JSON 或 null）
-        headerFirstPage,  // 首页页眉（Word 中启用“首页不同”时）（Tiptap JSON 或 null）
-        footerFirstPage,  // 首页页脚（Word 中启用“首页不同”时）（Tiptap JSON 或 null）
-        headerOdd,        // 奇数页页眉（Word 中启用“奇偶页不同”时）（Tiptap JSON 或 null）
-        footerOdd,        // 奇数页页脚（Word 中启用“奇偶页不同”时）（Tiptap JSON 或 null）
-        headerEven,       // 偶数页页眉（Word 中启用“奇偶页不同”时）（Tiptap JSON 或 null）
-        footerEven,       // 偶数页页脚（Word 中启用“奇偶页不同”时）（Tiptap JSON 或 null）
+        headerFirstPage,  // 首页页眉（Word 中启用"首页不同"时）（Tiptap JSON 或 null）
+        footerFirstPage,  // 首页页脚（Word 中启用"首页不同"时）（Tiptap JSON 或 null）
+        headerOdd,        // 奇数页页眉（Word 中启用"奇偶页不同"时）（Tiptap JSON 或 null）
+        footerOdd,        // 奇数页页脚（Word 中启用"奇偶页不同"时）（Tiptap JSON 或 null）
+        headerEven,       // 偶数页页眉（Word 中启用"奇偶页不同"时）（Tiptap JSON 或 null）
+        footerEven,       // 偶数页页脚（Word 中启用"奇偶页不同"时）（Tiptap JSON 或 null）
       } = context
 
       // 设置正文内容，不自动应用页眉/页脚
@@ -223,12 +284,12 @@ editor
 |-------|-------------|
 | `header` | 默认页眉内容（Tiptap JSON），或 `null` |
 | `footer` | 默认页脚内容（Tiptap JSON），或 `null` |
-| `headerFirstPage` | 首页页眉（Word 中启用“首页不同”时），或 `null` |
-| `footerFirstPage` | 首页页脚（Word 中启用“首页不同”时），或 `null` |
-| `headerOdd` | 奇数页页眉（Word 中启用“奇偶页不同”时），或 `null` |
-| `footerOdd` | 奇数页页脚（Word 中启用“奇偶页不同”时），或 `null` |
-| `headerEven` | 偶数页页眉（Word 中启用“奇偶页不同”时），或 `null` |
-| `footerEven` | 偶数页页脚（Word 中启用“奇偶页不同”时），或 `null` |
+| `headerFirstPage` | 首页页眉（Word 中启用"首页不同"时），或 `null` |
+| `footerFirstPage` | 首页页脚（Word 中启用"首页不同"时），或 `null` |
+| `headerOdd` | 奇数页页眉（Word 中启用"奇偶页不同"时），或 `null` |
+| `footerOdd` | 奇数页页脚（Word 中启用"奇偶页不同"时），或 `null` |
+| `headerEven` | 偶数页页眉（Word 中启用"奇偶页不同"时），或 `null` |
+| `footerEven` | 偶数页页脚（Word 中启用"奇偶页不同"时），或 `null` |
 
 ## 脚注和尾注
 
@@ -327,19 +388,19 @@ verbose 输出会在返回的数据中（`data` 属性）附带一个名为 `log
 | **功能**                      | **支持**                                                                |
 |----------------------------------|----------------------------------------------------------------------------|
 | **文本内容**                 | ✓ 基本文本、间距、标点符号                                         |
-| **文本格式化**              | ✓ 粗体、斜体、下划线、删除线、对齐、行高           |
-| **块元素**               | ✓ 段落、标题（1–6级）、引用、序号与无序列表     |
+| **文本格式**              | ✓ 粗体、斜体、下划线、删除线、对齐、行高           |
+| **块级元素**               | ✓ 段落、标题（1–6）、引用块、有序和无序列表     |
 | **表格**                       | ✓ 基本结构、表头行、跨列                                    |
 | **链接**                        | ✓ 超链接                                                               |
-| **媒体（图像）**               | ✓ 嵌入图像，保留尺寸                                          |
-| **样式**                       | ✓ 字体系列*、字体颜色、字体大小、背景颜色、行高 |
-| **页眉和页脚**            | ✓ 支持（需要[页面扩展](/editor/extensions/functionality/pages)）                            |
-| **节与分页符**       | ~ 开发中                                                           |
+| **媒体（图片）**               | ✓ 嵌入的图片、保留尺寸                                          |
+| **样式**                       | ✓ 字体系列*、字体颜色、字号、背景色、行高 |
+| **页眉和页脚**            | ✓ 支持（需要 [Pages 扩展](/editor/extensions/functionality/pages)）                            |
+| **分节和分页符**       | ✓ 支持分页符（需要 [PageBreak 扩展](/pages/core-concepts/page-break-node)） |
 | **脚注和尾注**         | ✓ 支持                                                                |
 | **数学公式**                         | ~ 开发中                                                           |
-| **注释与修订**         | ✗                                                                          |
+| **批注和修订**         | ✗                                                                          |
 | **目录**            | ✗                                                                          |
-| **高级格式化**          | ✗ 多栏、文本方向、表单、宏、嵌入脚本                 |
+| **高级格式**          | ✗ 分栏、文字方向、表单、宏、嵌入式脚本                 |
 | **元数据**                     | ✗                                                                          |
 | **文本框、形状、SmartArt** | ✗                                                                          |
 

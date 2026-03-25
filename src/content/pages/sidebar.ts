@@ -1,21 +1,21 @@
-import { SidebarConfig } from '@/types'
+import type { SidebarConfig } from '@/types'
 
 export const sidebarConfig: SidebarConfig = {
   id: 'pages',
   rootHref: '/pages/getting-started/overview',
-  title: 'Pages',
+  title: '页面',
   items: [
     {
       type: 'group',
       href: '/pages/getting-started',
-      title: 'Getting started',
+      title: '开始使用',
       children: [
         {
-          title: 'Overview',
+          title: '概述',
           href: '/pages/getting-started/overview',
         },
         {
-          title: 'Install',
+          title: '安装',
           href: '/pages/getting-started/install',
         },
       ],
@@ -23,27 +23,31 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/pages/core-concepts',
-      title: 'Core concepts',
+      title: '核心概念',
       children: [
         {
-          title: 'Options',
+          title: '选项',
           href: '/pages/core-concepts/options',
         },
         {
-          title: 'Page format',
+          title: '页面格式',
           href: '/pages/core-concepts/page-format',
         },
         {
-          title: 'Headers & Footers',
+          title: '页眉和页脚',
           href: '/pages/core-concepts/page-header-footer',
+        },
+        {
+          title: '页面间隙和背景',
+          href: '/pages/core-concepts/page-gap',
+        },
+        {
+          title: '分页节点',
+          href: '/pages/core-concepts/page-break-node',
           tags: ['New'],
         },
         {
-          title: 'Page break',
-          href: '/pages/core-concepts/page-break',
-        },
-        {
-          title: 'Limitations',
+          title: '限制条件',
           href: '/pages/core-concepts/limitations',
         },
       ],
@@ -51,18 +55,18 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/pages/utilities',
-      title: 'Utilities',
+      title: '实用工具',
       children: [
         {
-          title: 'Page formats',
+          title: '页面格式',
           href: '/pages/utilities/page-formats',
         },
         {
-          title: 'cmToPixels',
+          title: '厘米转像素',
           href: '/pages/utilities/cm-to-pixels',
         },
         {
-          title: 'inchToPixels',
+          title: '英寸转像素',
           href: '/pages/utilities/inch-to-pixels',
         },
       ],
@@ -70,22 +74,22 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/pages/guides',
-      title: 'Guides',
+      title: '指南',
       children: [
         {
-          title: 'From zero to print-ready',
+          title: '打印准备',
           href: '/pages/guides/zero-to-print-ready',
         },
         {
-          title: 'Pages with tables',
+          title: '页面与表格',
           href: '/pages/guides/table-with-pages',
         },
         {
-          title: 'PageKit',
+          title: '页面套件',
           href: '/pages/guides/pagekit-usage',
         },
         {
-          title: 'Adding collaboration to Pages',
+          title: '向页面添加协作功能',
           href: '/pages/guides/collaboration-with-pages',
         },
       ],

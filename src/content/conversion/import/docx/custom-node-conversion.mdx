@@ -44,7 +44,9 @@ Import.configure({
   token: 'your-jwt',
   // 注意：此配置仅用于演示
   endpoint: 'https://your-endpoint.com',
-  imageUploadCallbackUrl: 'https://your-endpoint.com/image-upload',
+  imageUploadConfig: {
+    url: 'https://your-endpoint.com/image-upload',
+  },
   // ProseMirror 自定义节点映射
   prosemirrorNodes: {
     Hintbox: 'hintbox',
