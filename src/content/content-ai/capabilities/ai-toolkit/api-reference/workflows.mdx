@@ -124,36 +124,23 @@ return result.toTextStreamResponse()
 ### 参数
 
 - `options` (`ProofreaderWorkflowOptions`): 配置选项
+  - `hasFinished` (`boolean`): 是否流式传输已完成。在操作仍在流式传输时传递 `false`，在最后一次调用时传递 `true`。
   - `operations` (`PartialProofreaderOperation[]`): 校对操作数组。
-  - `workflowId` (`unknown`): 此工作流运行的唯一 ID
-  - `reviewOptions?` (`ReviewOptions`): 控制预览/审核行为
-    - `mode?` (`'disabled' | 'review' | 'preview'`): 是否在应用更改之前或之后进行审核。`'disabled'` 表示不进行审核，`'review'` 表示在应用后进行审核，`'preview'` 表示在应用前进行预览。默认值：`'disabled'`
-    - `diffMode?` (`'detailed' | 'full'`): 当启用审核模式时，如何显示原始内容和修改内容之间的差异。`'detailed'` 比较更改前后的文档，并以丰富的差异形式显示删除的内容和添加的内容。`'full'` 以整体块的形式显示删除的内容和添加的内容，作为包含删除和添加内容的单个更改。默认值：`'detailed'`
-    - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义建议的显示方式
-      - `showAsDiff?` (`boolean`): 是否将建议显示为差异，其中插入的内容和原始内容并排显示。默认值：`true`
-      - `diffPosition?` (`'before' | 'after'`): 差异相对于建议的位置。默认值：`'before'`
-      - `attributes?` (`Record<string, any>`): 要添加到建议的额外 HTML 属性
-      - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 用于将建议呈现为 ProseMirror 装饰的函数
-    - `metadata?` (`Record<string, any>`): 建议的额外元数据，可用于存储有关它们的附加信息（例如其来源或类别）。扩展内部不使用此信息，但可能有助于开发人员自定义 UI 中建议的显示方式。
-    - `diffUtilityConfig?` (`DiffUtilityConfig`): 用于比较文档的差异工具的选项
-      - `simplifyChanges?` (`boolean`): 是否简化更改。如果为 `true`，更改将被简化，例如，将同一单词中的两个更改合并为一个更改。仅在模式为 'detailed'、'smartInline' 或 'smartInlineV2' 时适用。默认值：`true`
-      - `ignoreAttributes?` (`string[]`): 要忽略的属性。默认值：`['id', 'data-thread-id']`
-      - `ignoreMarks?` (`string[]`): 要忽略的标记。默认值：`['inlineThread']`
-      - `changeMergeDistance?` (`number | null`): 更改合并的最大距离（以文档位置为单位）。如果两个相邻更改在 rangeA 或 rangeB 中的距离小于或等于此值，它们将合并为一个更改。设置为 `null` 或 `undefined` 以禁用合并。仅在模式为 'detailed' 时适用。默认值：`null`
-      - `mode?` (`'detailed' | 'block' | 'smartInline' | 'smartInlineV2'`): 用于比较的差异模式。`'detailed'` 执行字符级别的差异，识别文本中的精确更改（默认）。`'block'` 执行块级差异，将每个顶层节点视为一个单元。块模式在只需知道哪些段落、标题或其他块级元素发生变化时非常有用，而不需要字符级的细节。在块模式下，`simplifyChanges` 和 `changeMergeDistance` 选项将被忽略。`'smartInline'` 结合了两者：首先识别更改的块，然后在这些块内执行内联差异。适用于只改变部分内容的文档，同时仍提供字符级精度。`'smartInlineV2'` 改进了 `smartInline`，能正确显示块元素（如表格）中的更改。默认值：`'detailed'`
-  - `range?` (`Range`): 应用校对操作的区间
+  - `workflowId` (`unknown`): 此工作流程运行的唯一 ID
+  - `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/ai-toolkit/api-reference/review-options)): 控制预览/审查行为。[查看可用选项](/content-ai/capabilities/ai-toolkit/api-reference/review-options)。
+    - 在此方法中，`diffUtilityOptions.groupInlineChanges` 默认为 `2` 而不是 `1`，因此编辑默认显示为内联更改。
+    - 当安装了 [修订跟踪](/tracked-changes/getting-started/overview) 扩展时支持 `mode: 'trackedChanges'`。
+  - `range?` (`Range`): 应用校对操作的范围
     - `from` (`number`): 起始位置
     - `to` (`number`): 结束位置
-  - `selectableNodeTypes?` (`string[]`): 始终应具有哈希的节点类型名称数组，即使它们不是顶层节点。默认情况下，所有块节点类型都可以有哈希。若设置为 `[]`，则仅顶层节点拥有哈希。
 
 ### 返回值（`ProofreaderWorkflowResult`）
 
-- `doc`（`Node`）：应用操作后的修改文档
-- `operations`（`ProofreaderOperationResult[]`）：与输入操作顺序对应的操作结果数组。每项内容包括：
-  - `delete`（`string`）：被删除（或待删除）的文本
-  - `insert`（`string`）：被插入（或待插入）的文本
-  - `success`（`boolean`）：操作是否成功
-  - `error?`（`string`）：失败时的错误信息
+- `doc` (`Node`): 应用操作后修改后的文档
+- `operationResults` (`OperationResult[]`): 操作结果数组，顺序与输入操作相同。每个结果包含：
+  - `target` (`string`): 与操作结果关联的目标哈希
+  - `success` (`boolean`): 操作是否成功
+  - `error` (`string | null`): 如果操作失败则为错误消息，否则为 `null`
 
 ### 示例
 
@@ -188,9 +175,9 @@ const result = toolkit.proofreaderWorkflow({
 
 ### 返回值
 
-- `systemPrompt`（`string`）：可直接使用的系统提示，指导 AI 模型如何生成编辑操作
-- `zodOutputSchema`（`ZodObject`）：用于验证 AI 输出的 Zod 模式
-- `jsonOutputSchema`（`object`）：用于验证 AI 输出的 JSON 模式
+- `systemPrompt` (`string`): 可直接使用的系统提示，指导 AI 模型如何生成编辑操作
+- `zodOutputSchema` (`ZodObject`): 用于验证 AI 输出的 Zod 模式。此模式验证模型返回的流式 `operations` 对象。
+- `jsonOutputSchema` (`object`): 用于验证 AI 输出的 JSON 模式
 
 ### 示例
 
@@ -220,21 +207,27 @@ const result = streamText({
 ### 参数
 
 - `options` (`TiptapEditWorkflowOptions`): 配置选项
-  - `operations` (`PartialTiptapEditOperation[]`): 编辑操作数组。每个操作为三元组 `[type, target, content]`：
+  - `hasFinished` (`boolean`): 是否流式传输已完成。在操作仍在流式传输时传递 `false`，在最后一次调用时传递 `true`。
+  - `operations` (`PartialTiptapEditOperation[]`): 编辑操作数组。每个操作是一个对象，包含：
     - `type`: `'replace'` | `'insertBefore'` | `'insertAfter'`
-    - `target`: 节点的 6 位哈希（来自 `tiptapRead`）或 `'doc'` 表示整个文档
-    - `content`: 要插入的 HTML 字符串内容
-  - `workflowId` (`unknown`): 此工作流运行的唯一 ID
-  - `selectableNodeTypes?` (`string[]`): 始终应具有哈希的节点类型名称数组，即使它们不是顶层节点。默认情况下，所有块节点类型都可以有哈希。若设置为 `[]`，则仅顶层节点拥有哈希。
-  - `reviewOptions?` (`ReviewOptions`): 控制预览/审核行为（同 `proofreaderWorkflow` 的选项）
-  - `tiptapEditHooks?` (`TiptapEditHooks`): 拦截和修改操作的钩子。详见 [Tiptap 编辑钩子指南](/content-ai/capabilities/ai-toolkit/advanced-guides/tiptap-edit-hooks)。
-    - `beforeOperation?` (`(context: BeforeOperationContext) => BeforeOperationResult`): 在每个操作应用之前调用。返回 `{ action: 'accept' }` 以应用操作（可选择提供 `fragment` 或 `operationType` 覆盖），或 `{ action: 'reject', error }` 以跳过该操作。
+    - `target`: 节点的 6 字符哈希（来自 `tiptapRead`）或 `'doc'` 表示整个文档
+    - `content`: 包含要插入内容的 HTML 字符串
+  - `workflowId` (`unknown`): 此工作流程运行的唯一 ID
+  - `tiptapReadResult` (`TiptapReadResult`): `tiptapRead` 返回的结果，用于在应用编辑操作时检测陈旧读取。
+  - `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/ai-toolkit/api-reference/review-options)): 控制预览/审查行为。
+    - 当安装了 [修订跟踪](/tracked-changes/getting-started/overview) 扩展时支持 `mode: 'trackedChanges'`。
+  - `streamingOptions?` (`StreamingOptions`): 控制如何应用流式操作。
+    - `disableTypingEffect?` (`boolean`): 禁用应用流式操作时的打字效果。
+  - `tiptapEditHooks?` (`TiptapEditHooks`): 用于拦截和修改操作的钩子。详见 [Tiptap Edit 钩子指南](/content-ai/capabilities/ai-toolkit/advanced-guides/tiptap-edit-hooks)。
+    - `beforeOperation?` (`(context: BeforeOperationContext) => BeforeOperationResult`): 在应用每个操作之前调用。返回 `{ action: 'accept' }` 以应用操作（可选带有 `fragment` 或 `operationType` 覆盖），或 `{ action: 'reject', error }` 以跳过。
 
 ### 返回值（`TiptapEditWorkflowResult`）
 
-- `doc`（`Node`）：应用操作后的修改文档
-- `successful`（`string[]`）：成功处理的目标哈希数组
-- `failed`（`{ target: string; error?: string }[]`）：失败操作数组，含错误信息
+- `doc` (`Node`): 应用操作后修改后的文档
+- `operationResults` (`OperationResult[]`): 操作结果数组，按执行顺序。每个结果包含：
+  - `target` (`string`): 与操作结果关联的目标哈希
+  - `success` (`boolean`): 操作是否成功完成
+  - `error` (`string | null`): 如果操作失败则为错误消息，否则为 `null`
 
 ### 示例
 
@@ -407,7 +400,7 @@ return result.toTextStreamResponse()
 
 ## `templateWorkflow`
 
-用 AI 生成的值填充 Tiptap JSON 模板，并将结果插入编辑器。模板使用特殊属性（`_templateSlot`、`_templateIf`、`_templateAttributes`）标记动态部分。
+使用 AI 生成的值填充 Tiptap JSON 模板，并将结果插入编辑器。模板使用特殊属性（`_templateSlot`, `_templateIf`, `_templateAttributes`, `_templateFieldMetadata`）来标记动态部分。
 
 ### 参数
 
@@ -461,7 +454,7 @@ useEffect(() => {
 
 ### 返回值
 
-- 带有小写模板属性（`_templateslot`、`_templateif`、`_templateattributes`）的 HTML `string`
+- 带有小写模板属性（`_templateslot`, `_templateif`, `_templateattributes`, `_templatefieldmetadata`）的 HTML `string`
 
 ### 示例
 
@@ -474,11 +467,12 @@ const htmlTemplate = toolkit.createHtmlTemplate(templateJson)
 
 一个 Tiptap 扩展，给编辑器 schema 中的所有节点类型添加模板字段属性。注册此扩展后，编辑器 DOM（渲染、解析和 CSS 样式）中即可支持模板字段的使用。
 
-该扩展添加三个全局属性：
+该扩展添加了四个全局属性：
 
-- `_templateSlot`（`string | null`）：标记节点为内容占位符。填充模板时，该节点将被 AI 生成的 HTML 替换。
-- `_templateIf`（`string | null`）：标记节点为条件包含。当值为 `false` 时，该节点将从输出中移除。
-- `_templateAttributes`（`TemplateAttributeEntry[] | null`）：映射模板键到具体节点属性。
+- `_templateSlot` (`string | null`): 将节点标记为内容占位符。填充模板时，节点将被替换为 AI 生成的 HTML。
+- `_templateIf` (`string | null`): 将节点标记为条件包含。当值为 `false` 时，节点将从输出中排除。
+- `_templateAttributes` (`TemplateAttributeEntry[] | null`): 将模板键映射到特定的节点属性。
+- `_templateFieldMetadata` (`Record<string, unknown> | null`): 存储字段出现实例的可选开发者定义元数据。
 
 ### 命令
 
@@ -503,4 +497,41 @@ editor.commands.setTemplateSlot('intro')
 
 // 移除模板插槽
 editor.commands.unsetTemplateSlot()
+```
+
+## `getTemplateFieldMatches`
+
+从 Tiptap JSON 文档中返回字段名称的所有匹配模板字段出现实例。
+
+搜索涵盖 `_templateSlot`, `_templateIf` 和 `_templateAttributes`。每个匹配项包括节点内容以及存储在该字段出现实例上的可选 `_templateFieldMetadata` 对象。
+
+### 参数
+
+- `options` (`GetTemplateFieldMatchesOptions`): 搜索选项
+  - `document` (`JSONContent | JSONContent[]`): Tiptap JSON 文档节点或片段数组
+  - `fieldName` (`string`): 要搜索的字段名称
+
+### 返回值
+
+- `TemplateFieldMatch[]`
+  - `fieldName` (`string`): 匹配的字段名称
+  - `fieldType` (`'slot' | 'condition' | 'attribute'`): 匹配的模板字段类型
+  - `metadata` (`Record<string, unknown> | null`): 该字段出现实例的 `_templateFieldMetadata` 对象
+  - `content` (`JSONContent[] | null`): 匹配节点内容，格式为 Tiptap JSON
+
+### 示例
+
+```ts
+import { getTemplateFieldMatches } from '@tiptap-pro/ai-toolkit'
+
+const matches = getTemplateFieldMatches({
+  document: editor.getJSON(),
+  fieldName: 'intro',
+})
+
+matches.forEach(match => {
+  console.log(match.fieldType)
+  console.log(match.metadata)
+  console.log(match.content)
+})
 ```

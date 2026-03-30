@@ -59,6 +59,25 @@ Details.configure({
 })
 ```
 
+### renderToggleButton
+
+自定义切换详情节点的按钮。回调接收按钮 `element`、当前 `isOpen` 状态以及应用于推导标签的 `node`。
+
+当您想要更改按钮的可访问标签或直接更新按钮元素时，这很有用。
+
+```js
+Details.configure({
+  renderToggleButton: ({ element, isOpen, node }) => {
+    element.setAttribute(
+      'aria-label',
+      isOpen
+        ? `Collapse details: ${node.textContent || 'details'}`
+        : `Expand details: ${node.textContent || 'details'}`,
+    )
+  },
+})
+```
+
 ### HTMLAttributes
 
 应添加到渲染的 HTML 标签中的自定义 HTML 属性。

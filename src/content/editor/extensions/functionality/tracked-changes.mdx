@@ -21,7 +21,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 Tracked Changes 扩展启用了协作编辑工作流的建议模式。启用后，所有编辑都会以提议的形式出现，可以被接受或拒绝，类似于文字处理软件中的变更追踪。
 
 <Callout title="更多详情" variant="hint">
-  有关如何集成、安装和配置 Tiptap Tracked Changes 扩展的更详细信息，请访问我们的[功能页面](/tracked-changes/getting-started/overview)。
+  有关如何集成、安装和配置 Tiptap Tracked Changes 扩展的更详细信息，请访问我们的 [功能页面](/tracked-changes/getting-started/overview)。
 </Callout>
 
 <Callout title="实验性" variant="warning">
@@ -55,7 +55,9 @@ const editor = new Editor({
 
 ## 编程式建议
 
-除了交互式审阅工作流外，该扩展还公开了用于直接从应用逻辑创建跟踪建议的命令。当你需要插入、删除或替换内容作为建议，但不想在每次编辑器交互时都开启跟踪变更模式时，可以使用这些命令。你也可以为编程式建议附加一个 `reason`，该理由会随着创建事件一起发出，供下游工作流使用。插入和替换命令接受完整的 Tiptap `Content`，因此可以处理诸如图片等 JSON 节点，而不仅仅是纯文本。
+除了交互式审查工作流外，该扩展还提供了用于直接从应用程序逻辑创建追踪建议的命令。当你需要插入、删除或替换内容作为建议，而无需为每次编辑器交互都开启追踪变更模式时，请使用这些命令。你还可以为编程式建议附加一个 `reason`，它会随创建事件一起发出，以供下游工作流使用。插入和替换命令接受完整的 Tiptap `Content`，因此它们可以处理诸如图片之类的 JSON 节点，而不仅仅是纯文本。追踪标记命令既支持简单的格式标记（如 `bold`），也支持带属性的标记（如 `link` 或 `highlight`）。
+
+如果你还使用了 [TrailingNode](/editor/extensions/functionality/trailing-node) 扩展，`addTrackedInsertion()` 和 `addTrackedReplacement()` 可以设置 `skipTrailingNode: true` 以将该事务元数据转发到发出的追踪变更事务上。
 
 ```js
 editor.commands.addTrackedInsertion({
@@ -75,6 +77,25 @@ editor.commands.addTrackedReplacement({
   to: 12,
   content: 'earth',
   reason: 'Standardized terminology',
+  skipTrailingNode: true,
+})
+
+editor.commands.addTrackedMark({
+  from: 7,
+  to: 12,
+  markName: 'bold',
+  reason: 'Emphasized approved terminology',
+})
+
+editor.commands.toggleTrackedMark({
+  from: 7,
+  to: 12,
+  markName: 'link',
+  markAttrs: {
+    href: 'https://tiptap.dev',
+    target: '_blank',
+  },
+  reason: 'Added canonical reference',
 })
 ```
 
@@ -92,7 +113,7 @@ editor.commands.addTrackedInsertion({
 })
 ```
 
-完整 API 请见[命令参考](/tracked-changes/api-reference/commands)。
+完整 API 请见 [命令参考](/tracked-changes/api-reference/commands)。
 
 ## 下一步
 

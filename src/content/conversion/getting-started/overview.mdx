@@ -1,5 +1,5 @@
 ---
-title: 使用 Tiptap 导入和导出文档
+title: "转换：使用 Tiptap 导入和导出文档"
 tags:
   - type: start
   - type: beta
@@ -17,13 +17,18 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 Tiptap 转换服务让 Tiptap 与文档文件格式之间的内容导入导出变得轻而易举。它提供：
 
-- **导入**：将文件（Word DOCX、OpenOffice/LibreOffice ODT 或 Markdown 文件）转换为 Tiptap 的 JSON 文档格式。
-- **导出**：将 Tiptap JSON 转回 Word DOCX、OpenOffice/LibreOffice ODT 或 Markdown 文件。
-- **编辑器扩展**：使用内置的 Tiptap Pro 扩展直接在 Tiptap 编辑器实例中进行导入/导出。
-- **REST API**：通过 HTTP 端点在任何需要的地方集成我们的转换服务，无需使用 Tiptap 编辑器。
+- **导入**: 将文件转换为 Tiptap 的 JSON 文档格式：Word DOCX 或 Markdown。
+- **导出**: 将 Tiptap JSON 转换为其他文档格式：Word DOCX、PDF、ODT (OpenDocument Text)、EPUB、DOC (旧版 Word) 或 Markdown。
+- **编辑器扩展**: 使用内置的 Tiptap Pro 扩展，直接在 Tiptap 编辑器实例中导入/导出 DOCX 和 Markdown。
+- **REST API**: 使用 HTTP 端点在任何需要的地方集成我们的转换服务，无需 Tiptap 编辑器。REST API 目前支持所有导入和导出格式。
+
+<Callout title="Pro 套餐" variant="hint">
+  转换功能是包含在所有 [Tiptap 订阅](https://tiptap.dev/pricing) 中的 Pro 套餐的一部分。在安装之前，您需要设置 [访问 Tiptap 私有 NPM 注册表](/guides/pro-extensions) 的权限。
+</Callout>
+
 
 <CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ExportImportDocx" />
 
 <Callout title="转换服务">
-    我们正在不断改进转换服务。通过 [PageBreak 扩展](/pages/core-concepts/page-break-node) 现已支持分页符**导入**。分页符导出和其他复杂功能正在积极开发中。
+    我们正在不断改进转换服务。现在可以通过 [PageBreak 扩展](/pages/core-concepts/page-break-node) 支持分页符**导入**。分页符导出和其他复杂功能正在积极开发中。
 </Callout>

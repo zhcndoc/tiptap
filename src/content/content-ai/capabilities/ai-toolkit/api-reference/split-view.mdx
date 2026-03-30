@@ -1,0 +1,188 @@
+---
+title: 拆分视图
+meta:
+  title: 拆分视图 API 参考 | Tiptap Content AI
+  description: createSplitView 和 SplitView 实例方法的 API 参考。
+  category: Content AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+本页是 `createSplitView` 和 `SplitView` 实例的 API 参考。
+
+如果你是分屏视图的新手，请先阅读 [分屏视图指南](/content-ai/capabilities/ai-toolkit/advanced-guides/split-view)。
+
+## `createSplitView`
+
+创建一个分屏视图实例，将三个编辑器连接在一起以并排审查更改。
+
+在 AI Toolkit 实例上调用：
+
+```ts
+const toolkit = getAiToolkit(mainEditor)
+const splitView = toolkit.createSplitView(options)
+```
+
+### 参数
+
+- `options` (`CreateSplitViewOptions`): 分屏视图的配置
+  - `leftEditor` (`Editor`): 左侧面板编辑器（显示原始文档）。必须安装 `AiToolkit`。
+  - `rightEditor` (`Editor`): 右侧面板编辑器（显示修改后的文档）。必须安装 `AiToolkit`。
+  - `leftContainer?` (`HTMLElement`): 左侧面板的滚动容器。当与 `rightContainer` 一起提供时，启用自动滚动同步。
+  - `rightContainer?` (`HTMLElement`): 右侧面板的滚动容器。当与 `leftContainer` 一起提供时，启用自动滚动同步。
+  - `diffOptions?` (`SplitViewDiffOptions`): 内部 diff 算法的选项
+    - `mode?` (`'smart' | 'inline' | 'block'`): Diff 算法模式。默认为 `'smart'`。
+    - `groupInlineChanges?` (`number`): 将内联更改分组为块级更改的阈值。默认为 `0`。
+
+### 返回值 (`SplitView`)
+
+返回一个 `SplitView` 实例。参见下方的 [SplitView 方法](#splitview-methods) 部分。
+
+### 示例
+
+```ts
+import { getAiToolkit } from '@tiptap-pro/ai-toolkit'
+
+const splitView = getAiToolkit(mainEditor).createSplitView({
+  leftEditor,
+  rightEditor,
+  leftContainer: leftScrollRef.current,
+  rightContainer: rightScrollRef.current,
+})
+```
+
+## `SplitView` 方法
+
+### `sync`
+
+根据主编辑器的跟踪更改重新计算 diff，并更新两个面板。将 before/after 快照加载到左侧和右侧编辑器中，然后渲染高亮装饰和占位符。
+
+每当主编辑器的跟踪更改发生变化时调用此方法（例如在应用新的 AI 建议后）。
+
+```ts
+splitView.sync()
+```
+
+### `getEntries`
+
+返回上一次 `sync()` 调用计算的当前 diff 条目列表。
+
+```ts
+const entries = splitView.getEntries()
+// SplitDiffEntry[]
+```
+
+参见 [`SplitDiffEntry`](#splitdiffentry) 了解每个条目的形状。
+
+### `acceptEntry`
+
+通过将其底层的跟踪更改应用到主编辑器来接受单个 diff 条目，然后重新同步。
+
+```ts
+const accepted = splitView.acceptEntry('diff-tc-abc123')
+// 如果未找到条目则返回 false
+```
+
+### `rejectEntry`
+
+通过在主编辑器中还原其底层的跟踪更改来拒绝单个 diff 条目，然后重新同步。
+
+```ts
+const rejected = splitView.rejectEntry('diff-tc-abc123')
+// 如果未找到条目则返回 false
+```
+
+### `acceptAll`
+
+一次性接受所有剩余的跟踪更改，然后重新同步。
+
+```ts
+splitView.acceptAll()
+```
+
+### `rejectAll`
+
+一次性拒绝所有剩余的跟踪更改，然后重新同步。
+
+```ts
+splitView.rejectAll()
+```
+
+### `setHighlight`
+
+设置用于跨编辑器悬停高亮的 diff 条目 ID。当悬停 `data-diff-id` 元素时，内置的悬停监听器会自动调用此方法。仅当你实现自定义悬停逻辑时才使用此方法。
+
+```ts
+splitView.setHighlight('diff-tc-abc123') // 高亮一个条目
+splitView.setHighlight(null)             // 清除高亮
+```
+
+### `on` / `off`
+
+注册或移除事件监听器。
+
+```ts
+const handler = (entries) => {
+  // entries: SplitDiffEntry[]
+  console.log(`${entries.length} diff entries remaining`)
+}
+
+splitView.on('sync', handler)
+splitView.off('sync', handler)
+```
+
+当前支持的事件：
+
+| 事件 | 负载 | 描述 |
+|---|---|---|
+| `sync` | `SplitDiffEntry[]` | 每次同步后触发，附带更新后的条目列表 |
+
+### `destroy`
+
+销毁实例：取消任何待处理的动画帧，清除两个编辑器中的所有装饰，并移除所有事件监听器。
+
+```ts
+splitView.destroy()
+```
+
+当不再需要分屏视图时，始终调用 `destroy()`（例如在组件卸载时）。
+
+## `SplitDiffEntry`
+
+`getEntries()` 返回的列表中的每个条目具有以下形状：
+
+```ts
+interface SplitDiffEntry {
+  /** 唯一标识符，例如 `"diff-tc-abc123"` */
+  id: string
+
+  /** 此更改在左侧（原始）文档中的范围 */
+  rangeInBefore: { from: number; to: number }
+
+  /** 此更改在右侧（修改后）文档中的范围 */
+  rangeInAfter: { from: number; to: number }
+
+  /** 构成此 diff 条目的跟踪更改的 ID */
+  trackedChangeIds: string[]
+
+  /** 更改类型 */
+  type?: 'add' | 'delete' | 'replace'
+}
+```
+
+## CSS 装饰类
+
+分屏视图将以下 CSS 类应用于编辑器 DOM。你必须在自己的样式表中定义这些类的样式。
+
+| 类 | 应用于 | 描述 |
+|---|---|---|
+| `split-diff-deletion` | 左侧编辑器 | 高亮被删除或修改的块 |
+| `split-diff-insertion` | 右侧编辑器 | 高亮被添加或修改的块 |
+| `split-diff-highlight` | 两个编辑器 | 与当前悬停条目的删除/插入一起添加 |
+| `split-diff-spacer` | 两个编辑器 | 维持面板之间垂直对齐的 widget 元素 |
+
+所有装饰元素都包含一个设置为条目 ID 的 `data-diff-id` 属性，你可以用于自定义点击和悬停处理。
+
+<Callout title="不要覆盖占位符边距">
+  分屏视图通过内联样式在每个占位符元素上设置 `margin: 0`。在 CSS 中覆盖此设置会破坏垂直对齐，因为占位符高度已经包含了包括周围块边距在内的完整视觉间隙。
+</Callout>

@@ -22,7 +22,7 @@ import { Callout } from '@/components/ui/Callout'
   src="https://ai-toolkit-demos.vercel.app/template-workflow"
 />
 
-查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
 ## 模板工作原理
 
@@ -102,7 +102,7 @@ npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/openai zod
 安装 Tiptap AI 工具包：
 
 <Callout title="Pro 版本包" variant="hint">
-  AI 工具包为专业版包。安装前请先根据[私有注册表指南](/guides/pro-extensions)配置对私有 NPM 注册表的访问权限。
+  AI 工具包为专业版包。安装前请先根据 [私有注册表指南](/guides/pro-extensions) 配置对私有 NPM 注册表的访问权限。
 </Callout>
 
 ```bash
@@ -113,7 +113,7 @@ npm install @tiptap-pro/ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
 
 创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型。
 
-如果你的后端不是 TypeScript，请参阅[非 TypeScript 后端](/content-ai/capabilities/ai-toolkit/advanced-guides/non-typescript-backends)。
+如果你的后端不是 TypeScript，请参阅 [非 TypeScript 后端](/content-ai/capabilities/ai-toolkit/advanced-guides/non-typescript-backends)。
 
 在 API 端点内部，使用 `createTemplateWorkflow` 将 HTML 模板转换为工作流配置。该函数会自动提取 HTML 中所有模板键，生成系统提示，并创建输出模式。
 
@@ -248,7 +248,7 @@ export default function Page() {
   src="https://ai-toolkit-demos.vercel.app/template-workflow"
 />
 
-查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
 ## 在文档部分插入模板
 
@@ -267,9 +267,7 @@ toolkit.templateWorkflow({
 
 ## 构建模板编辑器
 
-你可以构建一个系统，让用户在富文本编辑器中创建和编辑模板，并定义 AI 应填充的部分。使用 `_templateSlot` 属性来标记节点为模板字段。
-
-首先，在编辑器中注册 `TemplateField` 扩展。该扩展会将三个模板属性（`_templateSlot`、`_templateIf`、`_templateAttributes`）作为全局属性添加至编辑器模式的所有节点类型：
+首先，在编辑器中注册 `TemplateField` 扩展。此扩展将四个模板属性（`_templateSlot`、`_templateIf`、`_templateAttributes`、`_templateFieldMetadata`）作为全局属性添加到编辑器 schema 中的所有节点类型：
 
 ```tsx
 import { TemplateField } from '@tiptap-pro/ai-toolkit'
@@ -312,7 +310,26 @@ editor.commands.setTemplateAttributes([{ key: 'sectionLevel', attribute: 'level'
 editor.commands.unsetTemplateAttributes()
 ```
 
-使用 `[_templateslot]` CSS 属性选择器为模板插槽设置样式。`TemplateField` 扩展会以小写形式输出模板属性到 DOM：
+当你想要直接在模板中存储关于字段的额外信息时，请使用 `_templateFieldMetadata`。元数据值是可选的，可以包含任何 JSON 对象，以帮助你的应用程序稍后解释该字段：
+
+```json
+{
+  "type": "paragraph",
+  "attrs": {
+    "_templateSlot": "intro",
+    "_templateFieldMetadata": {
+      "label": "Introduction",
+      "group": "summary",
+      "analyticsKey": "template.intro"
+    }
+  },
+  "content": [{ "type": "text", "text": "Placeholder" }]
+}
+```
+
+你可以将元数据附加到插槽字段、条件字段和属性字段。元数据不会改变模板的填充方式。它仅用于你自己的应用程序逻辑。
+
+使用 `[_templateslot]` CSS 属性选择器为模板插槽设置样式。`TemplateField` 扩展在 DOM 中输出小写的模板属性：
 
 ```css
 [_templateslot] {
@@ -353,8 +370,9 @@ toolkit.templateWorkflow({
 
 当启用 `preserveSlotAttr` 时，每个填充节点都会保留其 `_templateSlot` 属性。这允许你：
 
-- **识别 AI 填充的内容**：检查文档中哪些部分由 AI 生成。
-- **重新填充模板字段**：以填充后的文档作为新模板，重新生成特定部分。
+- **识别 AI 填充的内容**：检查文档的哪些部分是由 AI 生成的。
+- **重新填充模板字段**：将填充后的文档用作新模板以重新生成特定部分。
+- **保持字段元数据可用**：稍后从填充后的文档中读取 `_templateFieldMetadata`。
 
 ## 重新填充模板字段
 
@@ -376,7 +394,38 @@ toolkit.templateWorkflow({
 
 这支持迭代式编辑流程，用户可请求 AI 重新生成文档的单个部分，而不会影响其他内容。
 
-## 控制模板字段哪些为必填
+## 读取字段内容和元数据
+
+AI 工具包还导出 `getTemplateFieldMatches()`，这是一个辅助函数，用于扫描 Tiptap JSON 文档中的字段名，并按文档顺序返回所有匹配的字段。
+
+当你想要以下操作时，这很有用：
+
+- 读取模板字段的当前内容
+- 访问存储在该字段上的 `_templateFieldMetadata`
+- 支持重新生成、分析或自定义 UI 标签等工作流
+
+```ts
+import { getTemplateFieldMatches } from '@tiptap-pro/ai-toolkit'
+
+const matches = getTemplateFieldMatches({
+  document: editor.getJSON(),
+  fieldName: 'intro',
+})
+
+for (const match of matches) {
+  console.log(match.fieldType)
+  console.log(match.metadata)
+  console.log(match.content)
+}
+```
+
+每个结果包括：
+
+- `fieldType`：匹配是否来自 `_templateSlot`、`_templateIf` 或 `_templateAttributes`
+- `metadata`：`_templateFieldMetadata` 对象，或 `null`
+- `content`：匹配节点的內容（Tiptap JSON 格式），空节点则为 `null`
+
+## 控制哪些模板字段是必填的
 
 默认情况下，所有模板字段都是必填的——AI 必须填写每个字段。要将特定字段设为可选，请在服务器端使用 `requiredSlots`、`requiredConditions` 和 `requiredAttributes`。仅列表中的字段是必填，未列出的字段则为可选：
 

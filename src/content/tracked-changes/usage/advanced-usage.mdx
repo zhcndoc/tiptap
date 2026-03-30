@@ -19,7 +19,7 @@ Tracked Changes 扩展的高级行为和集成模式。
 1. 新的编辑与现有建议是**相邻的**（紧接在前面或后面）
 2. 现有建议是由**相同用户**创建的
 3. 现有建议具有**相同类型**（都是插入或都是删除）
-4. 距离上一次编辑的时间在**分组超时时间窗口**内（默认：2000毫秒）
+4. 距离上一次编辑的时间在**分组超时时间窗口**内（默认：2000 毫秒）
 
 当编辑被分组时，建议的时间戳会被更新以保持分组窗口活跃状态。这意味着连续输入会持续扩展同一建议，直到用户暂停的时间超过超时设置。
 
@@ -29,7 +29,7 @@ TrackedChanges.configure({
   suggestionGroupingTimeout: 0,
 })
 
-// 延长分组窗口（5秒）
+// 延长分组窗口（5 秒）
 TrackedChanges.configure({
   suggestionGroupingTimeout: 5000,
 })
@@ -54,6 +54,54 @@ TrackedChanges.configure({
 
 这种行为符合用户预期：删除仅为建议的文本（尚未被接受的）时，文本直接消失。原始文档内容的删除需要明确的接受操作。
 
+## 标记追踪
+
+Tracked Changes 还可以将现有文本上的标记级编辑追踪为 `markChange` 建议。这包括简单的格式标记，如 `bold` 和 `italic`，以及带有属性的标记，如 `link` 或 `highlight`。
+
+标记追踪的行为如下：
+
+- 在现有文本上添加或移除标记会创建 `markChange` 建议
+- 应用于新插入内容的格式保留为插入建议的一部分，而不是创建第二个标记建议
+- 标记变更建议存储更改的标记名称和属性，以便在接受和拒绝期间正确恢复或移除带属性的标记
+
+### 标记追踪的工作原理
+
+在现有文本上，追踪的标记变更记录实际提出的标记变更：
+
+- 添加标记会创建带有 `added` 操作的 `markChange` 建议
+- 移除标记会创建带有 `removed` 操作的 `markChange` 建议
+
+例如，如果用户对单词应用 `bold`，建议会存储 `bold` 已被添加。如果用户从已格式化的文本中移除 `bold`，建议会存储 `bold` 已被移除。
+
+带属性的标记工作方式相同，但属性是追踪变更的一部分。这对于 `link` 等标记很重要，因为确切的属性标识了正在更改的标记变体：
+
+```js
+// 建议添加特定链接
+editor.commands.addTrackedMark({
+  from: 7,
+  to: 12,
+  markName: 'link',
+  markAttrs: {
+    href: 'https://tiptap.dev',
+    target: '_blank',
+  },
+})
+```
+
+在这种情况下，建议存储标记名称（`link`）和标记属性。接受或拒绝建议后可以保留、恢复或移除确切的链接标记，而不是将所有链接视为等同。
+
+如果用户应用了一个标记，然后在同一文本上撤销了相同的标记更改，追踪的标记更改可以相互抵消，而不是留下冗余的建议。这有助于在审查期间保持嵌套和重叠的标记建议稳定。
+
+默认情况下，Tracked Changes 忽略 `suggestion` 标记本身和内联评论/线程标记，因此这些内部标记不会创建递归的追踪建议。你也可以选择退出追踪额外的标记：
+
+```js
+TrackedChanges.configure({
+  ignoredTrackingMarks: ['highlight'],
+})
+```
+
+当你的应用程序具有装饰性或特定于集成的标记且绝不应出现在追踪变更中时，使用此选项。
+
 ## 原子节点追踪
 
 扩展会自动追踪对原子节点（如图片、水平线和其他非文本内容）的更改。这些节点不能拥有标记，因此扩展使用节点属性（`suggestionId`、`suggestionType`、`suggestionUserId`、`suggestionCreatedAt`、`suggestionUserMetadata`）代替。这一过程是透明的——原子节点会在相同的建议查询中出现，并且可以像其他建议一样被接受或拒绝。
@@ -70,7 +118,7 @@ TrackedChanges.configure({
 
 ## 评论集成
 
-Tracked Changes 扩展与[评论](/editor/extensions/functionality/comments)扩展集成，支持将建议和评论线程一起处理的复审流程。该集成基于两个扩展提供的事件系统构建。
+Tracked Changes 扩展与 [评论](/editor/extensions/functionality/comments) 扩展集成，支持将建议和评论线程一起处理的复审流程。该集成基于两个扩展提供的事件系统构建。
 
 当两个扩展同时激活时，评论线程会自动通过线程元数据与建议关联，实现双向同步：
 

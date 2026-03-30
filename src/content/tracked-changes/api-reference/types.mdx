@@ -15,7 +15,7 @@ meta:
 查询 API 返回的公开建议类型：
 
 ```ts
-type SuggestionType = 'add' | 'delete' | 'replace'
+type SuggestionType = 'add' | 'delete' | 'replace' | 'markChange'
 ```
 
 ## SuggestionMarkType
@@ -23,7 +23,27 @@ type SuggestionType = 'add' | 'delete' | 'replace'
 存储在建议标记上的内部标记级别类型。替换建议为其删除和插入部分使用不同的标记类型：
 
 ```ts
-type SuggestionMarkType = 'add' | 'delete' | 'replaceDeletion' | 'replaceInsertion'
+type SuggestionMarkType = 'add' | 'delete' | 'replaceDeletion' | 'replaceInsertion' | 'markChange'
+```
+
+## SuggestionMarkChangeOperation
+
+存储在标记更改建议中的操作：
+
+```ts
+type SuggestionMarkChangeOperation = 'added' | 'removed'
+```
+
+## SuggestionMarkChange
+
+描述存储在 `markChange` 建议上的一个标记变更：
+
+```ts
+type SuggestionMarkChange = {
+  operation: SuggestionMarkChangeOperation
+  markName: string
+  markAttrs: Record<string, unknown> | null
+}
 ```
 
 ## Suggestion
@@ -44,6 +64,8 @@ type Suggestion = {
   deletionRange?: { from: number; to: number }
   insertionRange?: { from: number; to: number }
   replacedText?: string
+  // 仅存在于 'markChange' 建议中：
+  markChanges?: SuggestionMarkChange[]
 }
 ```
 
@@ -52,6 +74,10 @@ type Suggestion = {
 - `replacedText` 包含 **旧**（删除的）文本
 - `deletionRange` 和 `insertionRange` 给出每部分的确切位置
 - `from` 和 `to` 覆盖两部分的完整范围
+
+对于 `markChange` 建议：
+- `text` 包含受影响的文本内容
+- `markChanges` 包含跟踪的标记操作，包括标记名称和属性
 
 ## SuggestionMarkAttrs
 
@@ -64,6 +90,7 @@ type SuggestionMarkAttrs = {
   userId: string
   createdAt: string
   userMetadata: Record<string, unknown> | null
+  markChanges?: SuggestionMarkChange[] | null
 }
 ```
 
@@ -77,6 +104,7 @@ type TrackedChangesOptions = {
   userId: string
   userMetadata?: Record<string, unknown> | null
   suggestionGroupingTimeout: number
+  ignoredTrackingMarks: string[]
   onSuggestionCreate?: (suggestion: Suggestion) => void
   onSuggestionAccept?: (id: string) => void
   onSuggestionReject?: (id: string) => void
@@ -101,6 +129,7 @@ SUGGESTION_TYPES.ADD              // 'add'
 SUGGESTION_TYPES.DELETE           // 'delete'
 SUGGESTION_TYPES.REPLACE_DELETION  // 'replaceDeletion'
 SUGGESTION_TYPES.REPLACE_INSERTION // 'replaceInsertion'
+SUGGESTION_TYPES.MARK_CHANGE      // 'markChange'
 
 // 检查标记类型是否表示添加内容（匹配 'add' 和 'replaceInsertion'）
 isAddLikeType('add') // true

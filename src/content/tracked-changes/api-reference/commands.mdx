@@ -40,7 +40,7 @@ editor.commands.toggleTrackedChanges()
 
 | 参数           | 类型                              | 描述                                  |
 | -------------- | --------------------------------- | ------------------------------------ |
-| `userId`       | `string`                          | 新的用户ID                           |
+| `userId`       | `string`                          | 新的用户 ID                           |
 | `userMetadata` | `Record<string, unknown> \| null` | 关于用户的可选任意元数据             |
 
 ```js
@@ -56,7 +56,7 @@ editor.commands.setTrackedChangesUser({
 
 | 参数   | 类型     | 描述                                                         |
 | ------ | -------- | ------------------------------------------------------------ |
-| `id`   | `string` | 可选的建议ID。若省略，则使用当前选区处的建议。               |
+| `id`   | `string` | 可选的建议 ID。若省略，则使用当前选区处的建议。               |
 
 ```js
 // 接受选区处的建议
@@ -72,7 +72,7 @@ editor.commands.acceptSuggestion({ id: 'suggestion-123' })
 
 | 参数   | 类型     | 描述                                                         |
 | ------ | -------- | ------------------------------------------------------------ |
-| `id`   | `string` | 可选的建议ID。若省略，则使用当前选区处的建议。               |
+| `id`   | `string` | 可选的建议 ID。若省略，则使用当前选区处的建议。               |
 
 ```js
 // 拒绝选区处的建议
@@ -130,7 +130,7 @@ editor.commands.rejectSuggestionsInRange({ from: 0, to: 100 })
 
 | 参数     | 类型     | 描述                              |
 | -------- | -------- | --------------------------------- |
-| `userId` | `string` | 需要接受建议的用户ID              |
+| `userId` | `string` | 需要接受建议的用户 ID              |
 
 ```js
 editor.commands.acceptSuggestionsByUser({ userId: 'user-123' })
@@ -142,7 +142,7 @@ editor.commands.acceptSuggestionsByUser({ userId: 'user-123' })
 
 | 参数     | 类型     | 描述                              |
 | -------- | -------- | --------------------------------- |
-| `userId` | `string` | 需要拒绝建议的用户ID              |
+| `userId` | `string` | 需要拒绝建议的用户 ID              |
 
 ```js
 editor.commands.rejectSuggestionsByUser({ userId: 'user-123' })
@@ -150,19 +150,21 @@ editor.commands.rejectSuggestionsByUser({ userId: 'user-123' })
 
 ## addTrackedInsertion()
 
-以受控建议形式插入内容，而无需为整个编辑器启用受控变更模式。当你需要通过编程方式创建建议，并且希望结果匹配正常的受控输入事务时，此命令很有用。`content` 参数接受任何 Tiptap `Content` 值，包括文本、HTML 或 JSON 节点内容（如图像节点）。
+在不为整个编辑器启用受控变更模式的情况下，将内容作为受控建议插入。当你需要以编程方式创建建议并希望结果匹配正常的受控输入事务时，这很有用。`content` 参数接受任何 Tiptap `Content` 值，包括文本、HTML 或 JSON 节点内容（如图像节点）。当 `skipTrailingNode` 为 `true` 时，发出的事务也会设置 `skipTrailingNode: true`，这对于 [TrailingNode](/editor/extensions/functionality/trailing-node) 扩展很有用。
 
-| 参数       | 类型      | 描述                                            |
-| ---------- | --------- | ------------------------------------------------ |
-| `from`     | `number`  | 应添加受控插入的位置                            |
-| `content`  | `Content` | 作为建议插入的内容                              |
-| `reason`   | `string`  | 可选描述，包含在 `trackedChanges:suggestionCreated` 事件负载中 |
+| 参数               | 类型      | 描述                                                                           |
+| ------------------ | --------- | ------------------------------------------------------------------------------------- |
+| `from`             | `number`  | 应添加受控插入的文档位置                                                                 |
+| `content`          | `Content` | 作为建议插入的内容                                                                     |
+| `reason`           | `string`  | 可选描述，包含在 `trackedChanges:suggestionCreated` 事件负载中                          |
+| `skipTrailingNode` | `boolean` | 可选标志，在发出的受控事务上设置 `skipTrailingNode: true`                               |
 
 ```js
 editor.commands.addTrackedInsertion({
   from: 7,
-  content: 'big ',
+  content: '大 ',
   reason: '应用 AI 重写',
+  skipTrailingNode: true,
 })
 ```
 
@@ -200,21 +202,23 @@ editor.commands.addTrackedDeletion({
 
 ## addTrackedReplacement()
 
-用受控替换建议替换现有范围。被替换内容作为删除部分，新内容作为插入部分。`content` 参数接受任何 Tiptap `Content` 值，因此可以通过传递 JSON 内容将文本替换为不同的节点。
+将现有范围替换为受控替换建议。被替换的内容成为建议的删除部分，新内容成为插入部分。`content` 参数接受任何 Tiptap `Content` 值，因此你可以通过传递 JSON 内容用不同的节点替换文本。当 `skipTrailingNode` 为 `true` 时，发出的事务也会设置 `skipTrailingNode: true`，这对于 [TrailingNode](/editor/extensions/functionality/trailing-node) 扩展很有用。
 
-| 参数       | 类型      | 描述                                                 |
-| ---------- | --------- | ---------------------------------------------------- |
-| `from`     | `number`  | 替换范围起始位置                                    |
-| `to`       | `number`  | 替换范围结束位置                                    |
-| `content`  | `Content` | 作为受控建议插入的替换内容                          |
-| `reason`   | `string`  | 可选描述，包含在 `trackedChanges:suggestionCreated` 事件负载中 |
+| 参数               | 类型      | 描述                                                                           |
+| ------------------ | --------- | ------------------------------------------------------------------------------------- |
+| `from`             | `number`  | 要替换范围的起始位置                                                                 |
+| `to`               | `number`  | 要替换范围的结束位置                                                                 |
+| `content`          | `Content` | 作为受控建议插入的替换内容                                                             |
+| `reason`           | `string`  | 可选描述，包含在 `trackedChanges:suggestionCreated` 事件负载中                          |
+| `skipTrailingNode` | `boolean` | 可选标志，在发出的受控事务上设置 `skipTrailingNode: true`                               |
 
 ```js
 editor.commands.addTrackedReplacement({
   from: 7,
   to: 12,
-  content: 'earth',
-  reason: '替换为审核通过的术语',
+  content: '地球',
+  reason: '替换为批准的术语',
+  skipTrailingNode: true,
 })
 ```
 
@@ -230,5 +234,81 @@ editor.commands.addTrackedReplacement({
     },
   },
   reason: '用最终图表替换占位符',
+})
+```
+
+## addTrackedMark()
+
+将标记应用于现有范围，作为受控 `markChange` 建议。当你想以编程方式建议格式或其他标记级更改而不全局启用受控变更模式时，请使用此方法。
+
+| 参数        | 类型                              | 描述                                                                           |
+| ----------- | --------------------------------- | ------------------------------------------------------------------------------------- |
+| `from`      | `number`                          | 要标记范围的起始位置                                                                 |
+| `to`        | `number`                          | 要标记范围的结束位置                                                                 |
+| `markName`  | `string`                          | 要添加的模式标记名称                                                                 |
+| `markAttrs` | `Record<string, unknown> \| null` | 被跟踪标记的可选属性                                                                  |
+| `reason`    | `string`                          | 可选描述，包含在 `trackedChanges:suggestionCreated` 事件负载中                          |
+
+```js
+editor.commands.addTrackedMark({
+  from: 7,
+  to: 12,
+  markName: 'bold',
+  reason: '强调批准的术语',
+})
+```
+
+```js
+editor.commands.addTrackedMark({
+  from: 7,
+  to: 12,
+  markName: 'link',
+  markAttrs: {
+    href: 'https://tiptap.dev',
+    target: '_blank',
+  },
+  reason: '链接到规范参考',
+})
+```
+
+## removeTrackedMark()
+
+从现有范围移除标记，作为受控 `markChange` 建议。这反映了用户在启用受控变更模式时移除格式化的操作。
+
+| 参数        | 类型                              | 描述                                                                           |
+| ----------- | --------------------------------- | ------------------------------------------------------------------------------------- |
+| `from`      | `number`                          | 要取消标记范围的起始位置                                                               |
+| `to`        | `number`                          | 要取消标记范围的结束位置                                                               |
+| `markName`  | `string`                          | 要移除的模式标记名称                                                                 |
+| `markAttrs` | `Record<string, unknown> \| null` | 用于识别标记变体的可选属性                                                              |
+| `reason`    | `string`                          | 可选描述，包含在 `trackedChanges:suggestionCreated` 事件负载中                          |
+
+```js
+editor.commands.removeTrackedMark({
+  from: 7,
+  to: 12,
+  markName: 'bold',
+  reason: '移除标签的强调',
+})
+```
+
+## toggleTrackedMark()
+
+在带有跟踪标记建议的现有范围上切换标记。对于混合选择，已标记的片段将变为跟踪删除，未标记的片段将变为跟踪添加，所有这些都在一个命令内完成。
+
+| 参数        | 类型                              | 描述                                                                                    |
+| ----------- | --------------------------------- | --------------------------------------------------------------------------------------- |
+| `from`      | `number`                          | 要切换范围的起始位置                                                                    |
+| `to`        | `number`                          | 要切换范围的结束位置                                                                    |
+| `markName`  | `string`                          | 要切换的 schema 标记名称                                                                |
+| `markAttrs` | `Record<string, unknown> \| null` | 用于识别或创建标记变体的可选属性                                                        |
+| `reason`    | `string`                          | 包含在 `trackedChanges:suggestionCreated` 事件负载中的可选描述                          |
+
+```js
+editor.commands.toggleTrackedMark({
+  from: 7,
+  to: 12,
+  markName: 'bold',
+  reason: 'Toggled emphasis based on editorial review',
 })
 ```

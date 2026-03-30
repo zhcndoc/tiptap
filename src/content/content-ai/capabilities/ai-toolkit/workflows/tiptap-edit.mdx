@@ -163,14 +163,14 @@ export default function Page() {
   const editDocument = () => {
     const toolkit = getAiToolkit(editor)
 
-    // Obtain the content of the document to be edited
+    // 获取要编辑的文档内容
     const readResult = toolkit.tiptapRead()
     tiptapReadResultRef.current = readResult
 
     // 每个工作流必须有唯一 ID
     setWorkflowId(uuid())
 
-    // Call the API endpoint to start the workflow
+    // 调用 API 端点启动工作流
     submit({ content: readResult.content, task })
   }
 
@@ -254,7 +254,28 @@ toolkit.tiptapEditWorkflow({
 toolkit.acceptAllSuggestions()
 ```
 
-请参阅 [建议](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions) 指南，了解更多关于建议的内容。
+如果需要在应用工作流后获取每个操作的执行状态，请读取 `result.operationResults`。
+
+## 将更改作为跟踪更改进行复审
+
+如果安装了 [跟踪更改](/tracked-changes/getting-started/overview) 扩展，`tiptapEditWorkflow` 可以将 AI 编辑应用为跟踪更改，而不是预览建议。
+
+```tsx
+toolkit.tiptapEditWorkflow({
+  operations,
+  workflowId,
+  hasFinished: true,
+  tiptapReadResult: readResult,
+  reviewOptions: {
+    mode: 'trackedChanges',
+    trackedChangesOptions: {
+      userId: 'ai-assistant',
+    },
+  },
+})
+```
+
+请参阅 [建议](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions) 指南以了解更多关于建议的信息。
 
 ## 相关指南
 

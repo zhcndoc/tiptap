@@ -16,7 +16,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
     <a href="https://tiptap.dev/contact-sales?form=server-ai-toolkit">联系我们的团队</a>。
   </RequirementItem>
   <RequirementItem label="2. 访问私有注册表">
-    Server AI Toolkit 包发布在 Tiptap 的私有 npm 注册表中。请按照[设置指南](/guides/pro-extensions)认证登录 Tiptap 私有 npm 注册表。
+    Server AI Toolkit 包发布在 Tiptap 的私有 npm 注册表中。请按照 [设置指南](/guides/pro-extensions) 认证登录 Tiptap 私有 npm 注册表。
   </RequirementItem>
   <RequirementItem label="3. 安装包">
     使用 npm 或您喜欢的包管理器从私有注册表安装该包。
@@ -48,8 +48,8 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 npx create-next-app@latest server-ai-agent-chatbot
 ```
 
-<Callout title="Pro packages" variant="hint">
-  Server AI Toolkit 和 Collaboration 是专业版包。在安装之前，您需要设置[访问 Tiptap 私有 NPM 注册表](/guides/pro-extensions)。
+<Callout title="专业版包" variant="hint">
+  Server AI Toolkit 和 Collaboration 是专业版包。在安装之前，您需要设置 [访问 Tiptap 私有 NPM 注册表](/guides/pro-extensions)。
 </Callout>
 
 安装核心 Tiptap 包、协作扩展和用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
@@ -181,7 +181,7 @@ export async function getToolDefinitions(schemaAwarenessData: unknown): Promise<
   })
 
   if (!response.ok) {
-    throw new Error(`获取工具失败: ${response.statusText}`)
+    throw new Error(`获取工具失败：${response.statusText}`)
   }
   const responseData = await response.json()
 
@@ -221,13 +221,19 @@ export async function getSchemaAwarenessPrompt(schemaAwarenessData: unknown): Pr
   })
 
   if (!response.ok) {
-    throw new Error(`获取 schema 识别提示失败: ${response.statusText}`)
+    throw new Error(`获取 schema 识别提示失败：${response.statusText}`)
   }
 
   const result: { prompt: string } = await response.json()
   return result.prompt
 }
 ```
+
+<Callout title="使用自定义节点？" variant="info">
+  如果您的编辑器包含自定义节点或标记，请使用
+  `addJsonSchemaAwareness` 配置它们。请参阅 [自定义节点
+  指南](/content-ai/capabilities/server-ai-toolkit/advanced-guides/custom-nodes)。
+</Callout>
 
 #### 执行工具
 
@@ -269,7 +275,7 @@ export async function executeTool(
   })
 
   if (!response.ok) {
-    throw new Error(`工具执行失败: ${response.statusText}`)
+    throw new Error(`工具执行失败：${response.statusText}`)
   }
 
   return response.json()
@@ -313,7 +319,7 @@ export async function getDocument(documentId: string): Promise<unknown> {
     if (response.status === 404) {
       throw new Error(`文档 ${documentId} 未找到`)
     }
-    throw new Error(`检索文档失败: ${response.status} ${response.statusText}`)
+    throw new Error(`检索文档失败：${response.status} ${response.statusText}`)
   }
 
   return response.json()
@@ -371,11 +377,11 @@ export async function updateDocument(documentId: string, document: unknown): Pro
 
         if (!createResponse.ok) {
           console.error(
-            `创建文档失败: ${createResponse.status} ${createResponse.statusText}`,
+            `创建文档失败：${createResponse.status} ${createResponse.statusText}`,
           )
         }
       } else {
-        console.error(`更新文档失败: ${response.status} ${response.statusText}`)
+        console.error(`更新文档失败：${response.status} ${response.statusText}`)
       }
     }
   } catch (error) {
@@ -460,7 +466,7 @@ ${schemaAwarenessPrompt}`,
 
 ## 客户端设置
 
-创建一个客户端 React 组件渲染带协作支持的 Tiptap 编辑器和简单聊天界面。该组件使用 Vercel AI SDK 的[useChat hook](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat)调用 API 端点并管理聊天对话。
+创建一个客户端 React 组件渲染带协作支持的 Tiptap 编辑器和简单聊天界面。该组件使用 Vercel AI SDK 的 [useChat 钩子](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat) 调用 API 端点并管理聊天对话。
 
 首先，创建一个服务器函数生成 Tiptap Cloud 协作用的 JWT。此函数创建一个安全的 JWT，授权客户端访问 Tiptap Cloud 协作服务中的特定文档。
 
@@ -610,7 +616,7 @@ export default function Page() {
 </Callout>
 
 <Callout title="替代方案：直接提供文档" variant="info">
-  你也可以不使用 Tiptap Cloud 文档，而是自己提供并管理文档——在执行工具的请求体中传入 `document` 字段（替代 `experimental_documentOptions`）。这样，你需要在每次工具执行前获取文档，并在 `result.docChanged` 为 `true` 时保存更新的文档。请参阅[REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)。
+  你也可以不使用 Tiptap Cloud 文档，而是自己提供并管理文档——在执行工具的请求体中传入 `document` 字段（替代 `experimental_documentOptions`）。这样，你需要在每次工具执行前获取文档，并在 `result.docChanged` 为 `true` 时保存更新的文档。请参阅 [REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)。
 </Callout>
 
 ## 最终效果
@@ -623,6 +629,6 @@ export default function Page() {
 
 ## 后续步骤
 
-- 允许你的 AI 使用[Schema 识别指南](/content-ai/capabilities/server-ai-toolkit/agents/schema-awareness)生成自定义元素
-- 了解更多可用工具，参见[代理部分](/content-ai/capabilities/server-ai-toolkit/agents)
-- 浏览[REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)获取完整端点文档
+- 允许您的 AI 通过 [自定义节点指南](/content-ai/capabilities/server-ai-toolkit/advanced-guides/custom-nodes) 生成自定义元素
+- 在 [智能体部分](/content-ai/capabilities/server-ai-toolkit/agents) 了解更多可用工具
+- 查阅 [REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api) 获取完整的端点文档

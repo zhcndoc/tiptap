@@ -54,6 +54,10 @@ editor.commands.acceptSuggestion({ id: 'suggestion-123' })
 editor.commands.rejectSuggestion({ id: 'suggestion-123' })
 ```
 
+格式变更通过相同的建议工作流程进行审阅。被跟踪的粗体、斜体、链接或其他标记变更会显示为 `markChange` 建议，并且可以像插入、删除或替换一样被接受或拒绝。
+
+如果你需要从应用逻辑中创建格式建议，请使用 [命令参考](/tracked-changes/api-reference/commands) 中描述的程序化标记命令：`addTrackedMark`、`removeTrackedMark` 和 `toggleTrackedMark`。
+
 ## 批量操作
 
 一次性接受或拒绝所有建议：

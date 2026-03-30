@@ -1,0 +1,141 @@
+---
+title: 分屏视图
+meta:
+  title: 分屏视图 | Tiptap Content AI
+  description: 构建并排差异视图以比较文档，并实现视觉对齐。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+构建一个并排对比视图，显示文档的原始版本和 AI 修改版本。每个更改块都会高亮显示，并且可以单独接受或拒绝。两个面板通过自动计算的间隔块保持垂直对齐。
+
+<CodeDemo
+  isPro
+  isLarge
+  src="https://ai-toolkit-demos.vercel.app/split-view"
+/>
+
+## 工作原理
+
+分割视图使用三个编辑器：**主编辑器**（持有文档和跟踪的更改，通常在分割视图期间隐藏）、**左侧编辑器**（显示原始版本）和**右侧编辑器**（显示修改版本）。需要两个独立的面板编辑器，因为每个编辑器加载具有不同装饰的不同文档快照。
+
+`createSplitView()` 将这三者连接在一起。它从主编辑器的跟踪更改中衍生出前后快照，将它们加载到面板编辑器中，渲染高亮，并使用间隔块保持两个面板垂直对齐。当提供滚动容器时，滚动同步和悬停高亮会自动处理。
+
+## 设置编辑器
+
+主编辑器需要 `AiToolkit` 和 `TrackedChanges`。面板编辑器只需要 `AiToolkit` 且为只读。
+
+```ts
+import { useEditor } from '@tiptap/react'
+import { AiToolkit } from '@tiptap-pro/ai-toolkit'
+import { TrackedChanges } from '@tiptap-pro/extension-tracked-changes'
+
+const mainEditor = useEditor({
+  extensions: [
+    // ... 你的内容扩展
+    AiToolkit.configure({ /* ... */ }),
+    TrackedChanges,
+  ],
+})
+
+const leftEditor = useEditor({
+  editable: false,
+  extensions: [
+    // ... 相同的内容扩展（不含 TrackedChanges）
+    AiToolkit.configure({ /* ... */ }),
+  ],
+})
+
+const rightEditor = useEditor({
+  editable: false,
+  extensions: [
+    // ... 相同的内容扩展（不含 TrackedChanges）
+    AiToolkit.configure({ /* ... */ }),
+  ],
+})
+```
+
+## 创建分割视图
+
+```ts
+import { getAiToolkit } from '@tiptap-pro/ai-toolkit'
+
+const splitView = getAiToolkit(mainEditor).createSplitView({
+  leftEditor,
+  rightEditor,
+  leftContainer: leftScrollRef.current,   // 可选：启用滚动同步
+  rightContainer: rightScrollRef.current, // 可选：启用滚动同步
+})
+
+// 当组件卸载时销毁
+return () => splitView.destroy()
+```
+
+## 接受和拒绝更改
+
+```ts
+// 接受或拒绝单个条目
+splitView.acceptEntry('diff-tc-abc123')
+splitView.rejectEntry('diff-tc-abc123')
+
+// 一次性接受或拒绝所有
+splitView.acceptAll()
+splitView.rejectAll()
+```
+
+要在条目列表更改时做出反应：
+
+```ts
+splitView.on('sync', (entries) => {
+  setDiffEntries(entries)
+
+  if (entries.length === 0) {
+    closeSplitView()
+  }
+})
+```
+
+## CSS
+
+```css
+.split-diff-deletion {
+  background-color: rgba(161, 161, 170, 0.15);
+  color: #71717a;
+  text-decoration: line-through;
+  text-decoration-color: rgba(161, 161, 170, 0.5);
+  cursor: pointer;
+}
+
+.split-diff-insertion {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #16a34a;
+  cursor: pointer;
+}
+
+.split-diff-deletion.split-diff-highlight {
+  background-color: rgba(161, 161, 170, 0.3);
+}
+
+.split-diff-insertion.split-diff-highlight {
+  background-color: rgba(34, 197, 94, 0.35);
+}
+
+.split-diff-spacer {
+  background-color: rgba(244, 244, 245, 0.6);
+  border-radius: 6px;
+}
+```
+
+## 示例演示
+
+<CodeDemo
+  isPro
+  isLarge
+  src="https://ai-toolkit-demos.vercel.app/split-view"
+/>
+
+## 下一步
+
+- [分割视图 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/split-view)
+- [对比文档](/content-ai/capabilities/ai-toolkit/advanced-guides/compare-documents)：适用于内联单编辑器方法

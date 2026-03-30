@@ -166,11 +166,15 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/compare-documents',
                 },
                 {
+                  title: '分割视图',
+                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/split-view',
+                },
+                {
                   title: 'Tiptap 编辑钩子',
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/tiptap-edit-hooks',
                 },
                 {
-                  title: 'AI Caret',
+                  title: 'AI 插入符号',
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret',
                 },
                 {
@@ -237,6 +241,10 @@ export const sidebarConfig: SidebarConfig = {
                   title: '差异对比工具',
                   href: '/content-ai/capabilities/ai-toolkit/api-reference/diff-utility',
                 },
+                {
+                  title: '分割视图',
+                  href: '/content-ai/capabilities/ai-toolkit/api-reference/split-view',
+                },
               ],
             },
             {
@@ -298,10 +306,6 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/server-ai-toolkit/agents/review-changes',
                 },
                 {
-                  title: '模式感知',
-                  href: '/content-ai/capabilities/server-ai-toolkit/agents/schema-awareness',
-                },
-                {
                   title: '评论',
                   href: '/content-ai/capabilities/server-ai-toolkit/agents/comments',
                 },
@@ -334,7 +338,11 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/server-ai-toolkit/advanced-guides',
               children: [
                 {
-                  title: 'Tiptap 速记',
+                  title: '自定义节点',
+                  href: '/content-ai/capabilities/server-ai-toolkit/advanced-guides/custom-nodes',
+                },
+                {
+                  title: 'Tiptap 简写',
                   href: '/content-ai/capabilities/server-ai-toolkit/advanced-guides/tiptap-shorthand',
                 },
               ],
