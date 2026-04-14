@@ -8,6 +8,48 @@ meta:
 
 # @tiptap-pro/ai-toolkit
 
+## 0.3.9
+
+### Patch Changes
+
+- 19c0fb9: 停止在编辑器加载和文档更新期间分配 `_hash` 值。现在哈希扩展仅定义 `_hash` 属性。
+
+## 0.3.8
+
+### Patch Changes
+
+- 99d0172: 确保 `tiptapReadChunks` 在返回分块内容前修复缺失的文档哈希。
+
+## 0.3.7
+
+### Patch Changes
+
+- 0608c46: 小的 Bug 修复和改进
+
+## 0.3.6
+
+### Patch Changes
+
+- 3ec3fe2: 在解析 HTML 时保留行内空白，避免将块节点周围的格式空白转换为独立的 AI 编辑块。
+
+## 0.3.5
+
+### Patch Changes
+
+- 8d4641c: 还原解析 HTML 为 ProseMirror 片段时的空白保留。
+
+## 0.3.4
+
+### Patch Changes
+
+- a0ef231: 在解析 HTML 为 ProseMirror 片段时保留空白。
+
+## 0.3.3
+
+### Patch Changes
+
+- f09d930: 保留节点哈希以确保校对替换期间连续校正能可靠地定位到相同内容。
+
 ## 0.3.2
 
 ## 0.3.1
@@ -58,11 +100,10 @@ meta:
 
   在使用带有修订跟踪的 AI 工具包时添加流式传输支持。当流式传输带有修订跟踪的内容时，流式传输支持不显示“打字效果”。相反，它按操作基础流式传输内容。
 
-  **破坏性变更：**
-
-  - `tiptapEdit` 工具输出现在包含 `operationResults` 属性，而不是 `successful` 和 `failed`。
-  - `tiptapEditWorkflow` 现在返回 `operationResults` 而不是 `successful` 和 `failed`。
-  - `proofreaderWorkflow` 现在返回 `operationResults` 而不是 `operations`。
+  **Breaking changes:**
+  - The `tiptapEdit` tool output now includes the `operationResults` property instead of `successful` and `failed`.
+  - `tiptapEditWorkflow` now returns `operationResults` instead of `successful` and `failed`.
+  - `proofreaderWorkflow` now returns `operationResults` instead of `operations`.
 
 - ecc8c58: 添加并排修订跟踪审查的分割视图
 
@@ -95,7 +136,7 @@ meta:
 
 ### 修复更新
 
-- 46addf3: 确保调用 `tiptapRead` 工具时所有可选择节点都正确设置。修复了 `tiptapRead` 工具返回的内容中未设置所有可选择节点的 bug。
+- 46addf3: 确保调用 `tiptapRead` 工具时所有可选择节点都正确设置。修复了 `tiptapRead` 工具返回的内容中未设置所有可选择节点的 Bug。
 - b95990d: 修复了一个 bug，当与协作扩展和外部创建的 Yjs 提供者一起使用 AiToolkit 扩展时，空段落会在每次页面重新加载时在文档中积累。
 - de48513: 修复 tiptapRead 在预览模式 tiptapEdit 更改文档节点结构后返回损坏内容的问题
 - 27eb52a: 修复了当 AI 生成的 HTML 包含标准表格包装元素（如 `<tbody>`、`<thead>` 或 `<tfoot>`）时，表格插入失败并出现"Invalid HTML content"错误的问题。
@@ -253,7 +294,7 @@ meta:
 
 ### 修复更新
 
-- 修复协作文档中，其他用户删除建议内容时未自动移除该建议的问题。
+- 修复协文学档中，其他用户删除建议内容时未自动移除该建议的问题。
 
 ## 3.0.0-alpha.73
 

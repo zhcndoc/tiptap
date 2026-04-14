@@ -1,0 +1,88 @@
+---
+title: Review options
+meta:
+  title: Review options | Tiptap Server AI Toolkit
+  description: Configure tracked changes review behavior for Server AI Toolkit tool execution.
+  category: Content AI
+---
+
+Server AI Toolkit 的 `execute-tool` 端点接受 `reviewOptions` 属性。使用它来控制 `tiptapEdit` 如何写入可审核的更改，而不是直接修改文档。
+
+```ts
+const response = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    toolName: 'tiptapEdit',
+    input: toolCallInput,
+    schemaAwarenessData,
+    document,
+    reviewOptions: {
+      mode: 'trackedChanges',
+    },
+  }),
+})
+```
+
+`reviewOptions` 属性接收一个 `ReviewOptions` 配置对象。
+
+## `ReviewOptions`
+
+- `mode?` (`'disabled' | 'trackedChanges'`)：控制编辑是直接应用还是作为可追踪更改写入。默认值：`'disabled'`
+  - `'disabled'`：编辑将直接应用到文档。
+  - `'trackedChanges'`：编辑将使用 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展编码为可追踪更改，以便用户可以接受或拒绝单个更改。
+- `trackedChangesOptions?` (`{ userId: string, userMetadata?: Record<string, unknown> | null }`)：`trackedChanges` 模式的作者元数据。`userId` 用于标识建议的作者，`userMetadata` 用于存储附加的作者信息，例如显示名称。
+- `diffUtilityOptions?` (`object`)：用于从修改前后的文档状态重构可追踪更改的高级选项。
+  - `simplifyChanges?` (`boolean`)：在生成可追踪更改之前简化附近的更改。
+  - `ignoreAttributes?` (`string[]`)：在差异对比时忽略特定的节点属性。
+  - `ignoreMarks?` (`string[]`)：在差异对比时忽略特定的标记。
+  - `changeMergeDistance?` (`number | null`)：在指定距离内合并附近的更改。
+  - `mode?` (`'inline' | 'block' | 'smart'`)：生成可追踪更改时使用的差异策略。
+  - `groupInlineChanges?` (`number`)：将位于此距离内的内联编辑进行分组。
+  - `expandBlockChanges?` (`string[]`)：应作为块更改展开的节点类型。
+
+## 典型配置
+
+### 直接编辑
+
+跳过审核模式并立即应用编辑：
+
+```ts
+reviewOptions: {
+  mode: 'disabled',
+}
+```
+
+### 带有 AI 作者元数据的可追踪更改
+
+为生成的建议附加一个稳定的 AI 身份：
+
+```ts
+reviewOptions: {
+  mode: 'trackedChanges',
+  trackedChangesOptions: {
+    userId: 'ai-assistant',
+    userMetadata: {
+      name: 'AI Assistant',
+    },
+  },
+}
+```
+
+### 带有自定义差异行为的可追踪更改
+
+调整编辑的分组和显示方式：
+
+```ts
+reviewOptions: {
+  mode: 'trackedChanges',
+  diffUtilityOptions: {
+    mode: 'block',
+    groupInlineChanges: 2,
+  },
+}
+```

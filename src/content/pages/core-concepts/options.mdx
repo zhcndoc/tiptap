@@ -60,6 +60,18 @@ interface PagesOptions {
    * @default () => {}
    */
   onPageFormatChange?: (pageFormat: PageFormat) => void
+
+  /**
+   * Initial zoom level for visual scaling. Clamped to [0.25, 4].
+   * @default 1
+   */
+  zoom?: number
+
+  /**
+   * Callback function called when the zoom level changes.
+   * Receives the new zoom level as an argument.
+   */
+  onZoomChange?: (zoom: number) => void
 }
 
 interface PageFormat {
@@ -75,16 +87,18 @@ interface PageFormat {
 }
 ```
 
-| 选项                | 类型/值                      | 默认值    | 描述                                                                                        |
-|---------------------|------------------------------|-----------|---------------------------------------------------------------------------------------------|
-| `pageFormat`        | `string \| PageFormat`       | `'A4'`    | 内置格式名称或自定义页面格式对象                                                            |
-| `headerHeight`      | `number` (px)                | `50`      | 页眉高度，单位为像素                                                                        |
-| `footerHeight`      | `number` (px)                | `50`      | 页脚高度，单位为像素                                                                        |
-| `pageGap`           | `number` (px)                | `50`      | 页面间距，单位为像素                                                                        |
-| `header`            | `string \| fn`               | `''`      | 页眉内容；字符串（支持 `{page}`/`{total}`）或函数 `(pageNumber, totalPages) => string`     |
-| `footer`            | `string \| fn`               | `'{page}'`| 页脚内容；字符串（支持 `{page}`/`{total}`）或函数 `(pageNumber, totalPages) => string`     |
-| `pageGapBackground` | `string` (CSS color)         | `undefined`| 页面间距的背景颜色                                                                         |
-| `onPageFormatChange`| `fn`                         | `() => {}`| 页面格式变化时的回调函数；接收新的 PageFormat                                               |
+| Option                | Type / Values                | Default   | Description                                                                                 |
+|-----------------------|------------------------------|-----------|---------------------------------------------------------------------------------------------|
+| `pageFormat`          | `string \| PageFormat`       | `'A4'`    | Built-in format name or custom page format object                                           |
+| `headerHeight`        | `number` (px)                | `50`      | Header height in pixels                                                                     |
+| `footerHeight`        | `number` (px)                | `50`      | Footer height in pixels                                                                     |
+| `pageGap`             | `number` (px)                | `50`      | Gap between pages in pixels                                                                 |
+| `header`              | `string \| fn`               | `''`      | Header content; string (supports `{page}`/`{total}`) or (pageNumber, totalPages) => string |
+| `footer`              | `string \| fn`               | `'{page}'`| Footer content; string (supports `{page}`/`{total}`) or (pageNumber, totalPages) => string |
+| `pageGapBackground` | `string` (CSS color)         | `undefined` | Background color for page gaps                                                          |
+| `onPageFormatChange`  | `fn`                         | `() => {}` | Callback when page format changes; receives new PageFormat                               |
+| `zoom`                | `number`                     | `1`        | Initial zoom level (0.25–4). See [Zoom](/pages/core-concepts/zoom)                      |
+| `onZoomChange`        | `fn`                         | `undefined`| Callback when zoom changes; receives new zoom level                                      |
 
 ## 示例用法
 
@@ -101,7 +115,7 @@ const editor = new Editor({
       footerHeight: 40,
       pageGap: 40,
       header: 'My Project',
-      footer: (page, total) => `Page ${page} of ${total}`,
+      footer: 'Page {page} of {total}',
       pageGapBackground: '#f8f8f8',
     }),
   ],
@@ -142,9 +156,10 @@ const editor = new Editor({
 
 Pages 扩展提供以下命令：
 
-| 命令               | 参数                     | 描述                          |
-|--------------------|--------------------------|-------------------------------|
-| `setPageFormat`    | `pageFormat: PageFormat` | 以编程方式更改页面格式         |
+| Command          | Parameters               | Description                                    |
+|------------------|--------------------------|------------------------------------------------|
+| `setPageFormat`  | `pageFormat: PageFormat` | Changes the page format programmatically      |
+| `setZoom`        | `zoom: number`           | Sets the zoom level (clamped to 0.25–4). See [Zoom](/pages/core-concepts/zoom) |
 
 ### 命令用法
 

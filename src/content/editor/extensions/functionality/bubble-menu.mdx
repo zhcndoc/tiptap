@@ -24,7 +24,7 @@ extension:
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 
-此扩展会使上下文菜单在文本选择附近出现。使用户能够对其文本选择应用 [标记](/editor/extensions/marks)。
+此扩展会在文本选择附近显示上下文菜单。用户可以对其文本选择应用 [标记](/editor/extensions/marks)。
 
 和往常一样，标记和样式完全由您决定。
 
@@ -258,8 +258,40 @@ new Editor({
 
 ### 强制更新气泡菜单位置
 
-如果气泡菜单在初次渲染后尺寸发生变化，其位置不会自动调整。为了解决此问题，可以通过触发 `'updatePosition'` 事件强制更新气泡菜单的位置。
+If the bubble menu changes size after the initial render, its position will not be adjusted automatically. To fix this, you can force update the position by setting a `pluginKey` on the extension and emitting an `'updatePosition'` event with that key.
 
 ```ts
-editor.commands.setMeta('bubbleMenu', 'updatePosition')
+BubbleMenu.configure({
+  pluginKey: 'myBubbleMenu',
+  element: document.querySelector('.menu'),
+})
+
+editor.commands.setMeta('myBubbleMenu', 'updatePosition')
 ```
+
+To target a specific bubble menu, pass that menu's `pluginKey` instead.
+
+```ts
+editor.commands.setMeta('bubbleMenuOne', 'updatePosition')
+```
+
+If you use the React or Vue `BubbleMenu` component and want to trigger `updatePosition` externally, pass an explicit `pluginKey` prop to the component first. If you omit `pluginKey`, the component creates its own ProseMirror `PluginKey`, which external code cannot reliably reference later.
+
+### Programmatically show or hide the bubble menu
+
+You can programmatically show or hide the bubble menu by setting a `pluginKey` on the extension and dispatching a transaction with the `'show'` or `'hide'` meta value using that key.
+
+```ts
+BubbleMenu.configure({
+  pluginKey: 'myBubbleMenu',
+  element: document.querySelector('.menu'),
+})
+
+// Show the bubble menu
+editor.commands.setMeta('myBubbleMenu', 'show')
+
+// Hide the bubble menu
+editor.commands.setMeta('myBubbleMenu', 'hide')
+```
+
+**Note:** dispatching `'show'` or `'hide'` will override the behavior defined in `shouldShow`.

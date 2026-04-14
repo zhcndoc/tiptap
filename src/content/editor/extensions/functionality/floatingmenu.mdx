@@ -11,7 +11,7 @@ tags:
     label: 下载次数
 meta:
   title: 浮动菜单扩展 | Tiptap 编辑器文档
-  description: 在 Tiptap 中使用浮动菜单扩展，添加在空行上显示的菜单。详细信息请查看文档。
+  description: 在 Tiptap 中使用浮动菜单扩展，在空行上显示菜单。详细信息请查看文档。
   category: 编辑器
 extension:
   name: 浮动菜单
@@ -93,7 +93,7 @@ npm install @tiptap/extension-floating-menu @floating-ui/dom@^1.6.0
 | `arrow`         | `ArrowOptions` 或 `false`           | [箭头中间件选项](https://floating-ui.com/docs/arrow#options)。如果为 `false` 禁用中间件                                                             |
 | `size`          | `SizeOptions` 或 `boolean`          | [大小中间件选项](https://floating-ui.com/docs/size#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件                               |
 | `autoPlacement` | `AutoPlacementOptions` 或 `boolean` | [自动放置中间件选项](https://floating-ui.com/docs/autoPlacement#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件                   |
-| `hide`          | `HideOptions` 或 `boolean`          | [隐藏中间件选项](https://floating-ui.com/docs/hide#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件                                |
+| `hide`          | `HideOptions` 或 `boolean`          | [隐藏中间件选项](https://floating-ui.com/docs/hide#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件的                                |
 | `inline`        | `InlineOptions` 或 `boolean`        | [内联中间件选项](https://floating-ui.com/docs/inline#options)。如果为 `true` 使用默认选项，如果为 `false` 禁用中间件                               |
 | `onShow`        | `Function` 或 `undefined`           | 菜单显示时调用的回调。可用于在菜单显示时添加自定义逻辑或样式。                                                                                    |
 | `onHide`        | `Function` 或 `undefined`           | 菜单隐藏时调用的回调。可用于在菜单隐藏时添加自定义逻辑或样式。                                                                                    |
@@ -245,14 +245,44 @@ new Editor({
 
 ### 强制更新浮动菜单位置
 
-如果浮动菜单在初始渲染后尺寸发生变化，其位置不会自动调整。您可以使用 `updateFloatingMenuPosition` 命令强制更新浮动菜单的位置：
+If the floating menu changes size after the initial render, its position will not be adjusted automatically. To fix this, you can force update the position by setting a `pluginKey` on the extension and emitting an `'updatePosition'` event with that key.
 
 ```ts
-editor.commands.updateFloatingMenuPosition()
+FloatingMenu.configure({
+  pluginKey: 'myFloatingMenu',
+  element: document.querySelector('.menu'),
+})
+
+editor.commands.setMeta('myFloatingMenu', 'updatePosition')
 ```
 
-或者，您可以通过事务元数据发送 `'updatePosition'` 事件：
+To target a specific floating menu, emit an `'updatePosition'` event via transaction metadata and use that menu's `pluginKey`:
 
 ```ts
-editor.commands.setMeta('floatingMenu', 'updatePosition')
+FloatingMenu.configure({
+  pluginKey: 'myFloatingMenu',
+  element: document.querySelector('.menu'),
+})
 ```
+
+For example, if you have multiple floating menus:
+
+```ts
+editor.commands.setMeta('floatingMenuOne', 'updatePosition')
+```
+
+If you use the React or Vue `FloatingMenu` component and want to trigger `updatePosition` externally, pass an explicit `pluginKey` prop to the component first. If you omit `pluginKey`, the component creates its own ProseMirror `PluginKey`, which external code cannot reliably reference later.
+
+### Programmatically show or hide the floating menu
+
+You can programmatically show or hide the floating menu by setting a `pluginKey` on the extension and dispatching a transaction with the `'show'` or `'hide'` meta value using that key.
+
+```ts
+// Show the floating menu
+editor.commands.setMeta('myFloatingMenu', 'show')
+
+// Hide the floating menu
+editor.commands.setMeta('myFloatingMenu', 'hide')
+```
+
+**Note:** dispatching `'show'` or `'hide'` will override the behavior defined in `shouldShow`.

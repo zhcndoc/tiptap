@@ -71,6 +71,41 @@ npm install @tiptap/extension-collaboration-caret
 
 选择的渲染函数，查看 [扩展源代码](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-collaboration-caret/) 以获取示例。
 
+## Styling
+
+此扩展不包括默认样式。如果没有以下 CSS，光标将渲染为未设置样式的内联元素。
+
+将以下样式添加到你的项目中：
+
+```css
+/* 给远程用户显示光标 */
+.tiptap .collaboration-carets__caret {
+  border-left: 1px solid #0d0d0d;
+  border-right: 1px solid #0d0d0d;
+  margin-left: -1px;
+  margin-right: -1px;
+  pointer-events: none;
+  position: relative;
+  word-break: normal;
+}
+
+/* 在光标上方显示用户名 */
+.tiptap .collaboration-carets__label {
+  border-radius: 3px 3px 3px 0;
+  color: #0d0d0d;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  left: -1px;
+  line-height: normal;
+  padding: 0.1rem 0.3rem;
+  position: absolute;
+  top: -1.4em;
+  user-select: none;
+  white-space: nowrap;
+}
+```
+
 ## 命令
 
 ### updateUser()

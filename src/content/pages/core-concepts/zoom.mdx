@@ -1,0 +1,168 @@
+---
+title: 缩放
+meta:
+  title: 缩放 | Tiptap Pages 文档
+  description: 学习如何在 Tiptap Pages 编辑器中放大和缩小内容，使内容变大或变小，就像在 Google Docs 或 Microsoft Word 中一样。
+  category: Pages
+sidebars:
+  hideSecondary: true
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+Zoom 让你的用户可以在不改变实际文档的情况下**放大**或**缩小**编辑器内容。这就像在手机上捏合缩放，或者在 Google Docs 中使用缩放滑块一样。
+
+- **放大**以近距离查看细节（非常适合精确排版）
+- **缩小**以同时查看文档更多内容（非常适合获取整体概览）
+- 文档本身不会改变 —— 缩放纯粹是视觉效果
+
+<CodeDemo isPro path="/Extensions/PagesZoom" />
+
+## 快速开始
+
+在配置扩展时设置初始缩放级别：
+
+```js
+import { Pages } from '@tiptap-pro/extension-pages'
+
+Pages.configure({
+  zoom: 0.75, // 75% —— 让所有内容变小
+})
+```
+
+随时通过命令更改缩放级别：
+
+```js
+// 放大到 150%
+editor.commands.setZoom(1.5)
+
+// 缩小到 50%
+editor.commands.setZoom(0.5)
+
+// 回到正常（100%）
+editor.commands.setZoom(1)
+```
+
+仅此而已。两行代码，你就拥有缩放功能。
+
+## 缩放范围
+
+缩放接受 **0.25**（25%）到 **4**（400%）之间的任意值。超出此范围的值会自动被限制。
+
+| 值   | 缩放级别 | 使用场景 |
+|------|---------|----------|
+| `0.25` | 25%    | 最大限度缩小 —— 查看整个文档布局 |
+| `0.5`  | 50%    | 概览模式 —— 适合长文档 |
+| `0.75` | 75%    | 略小一点 —— 屏幕容纳更多内容 |
+| `1`    | 100%   | 默认 —— 正常大小 |
+| `1.25` | 125%   | 略大一点 —— 更容易阅读 |
+| `1.5`  | 150%   | 舒适阅读缩放 |
+| `2`    | 200%   | 较大 —— 适合无障碍访问 |
+| `4`    | 400%   | 最大放大 —— 像素级细节 |
+
+```js
+// 这些都有效
+editor.commands.setZoom(0.25)  // 最小值
+editor.commands.setZoom(1.5)   // 150%
+editor.commands.setZoom(4)     // 最大值
+
+// 这些会自动被限制
+editor.commands.setZoom(0.1)   // 变为 0.25
+editor.commands.setZoom(10)    // 变为 4
+```
+
+## 读取当前缩放级别
+
+你可以随时从存储中读取当前缩放级别：
+
+```js
+// 直接读取当前缩放级别
+const zoom = editor.storage.pages.zoom
+console.log(`当前缩放: ${zoom * 100}%`) // 例如 "当前缩放: 125%"
+
+// 或者使用 getter 函数
+const zoom = editor.storage.pages.getZoom?.()
+```
+
+## 响应缩放变化
+
+使用 `onZoomChange` 回调函数，以便在缩放级别变化时保持界面同步。这对于构建缩放控件（如下拉菜单或滑块）非常有用。
+
+```js
+Pages.configure({
+  zoom: 1,
+  onZoomChange: (zoom) => {
+    // 更新你的 UI，例如下拉菜单或标签
+    console.log(`缩放已更改为 ${zoom * 100}%`)
+  },
+})
+```
+
+### 带有缩放下拉菜单的 React 示例
+
+```jsx
+import { Pages } from '@tiptap-pro/extension-pages'
+import { useState } from 'react'
+
+function MyEditor() {
+  const [zoom, setZoom] = useState(1)
+
+  const editor = useEditor({
+    extensions: [
+      Pages.configure({
+        pageFormat: 'A4',
+        onZoomChange: setZoom, // 保持下拉菜单同步
+      }),
+    ],
+  })
+
+  return (
+    <>
+      <select
+        value={zoom}
+        onChange={(e) => {
+          const value = parseFloat(e.target.value)
+          editor.commands.setZoom(value)
+        }}
+      >
+        <option value={0.5}>50%</option>
+        <option value={0.75}>75%</option>
+        <option value={1}>100%</option>
+        <option value={1.25}>125%</option>
+        <option value={1.5}>150%</option>
+        <option value={2}>200%</option>
+      </select>
+      <EditorContent editor={editor} />
+    </>
+  )
+}
+```
+
+## 配置参考
+
+### 选项
+
+| 选项 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| `zoom` | `number` | `1` | 初始缩放级别。限制在 `[0.25, 4]` 范围内。 |
+| `onZoomChange` | `(zoom: number) => void` | `undefined` | 通过 `setZoom` 更改缩放时触发的回调函数。 |
+
+### 命令
+
+| 命令 | 参数 | 描述 |
+|------|------|------|
+| `setZoom` | `zoom: number` | 设置缩放级别。值会限制在 `[0.25, 4]` 范围内。 |
+
+### 存储
+
+| 属性 | 类型 | 描述 |
+|------|------|------|
+| `zoom` | `number` | 当前缩放级别。 |
+| `getZoom` | `() => number` | 返回当前缩放级别。 |
+
+## 注意事项
+
+- **缩放仅限视觉效果。** 它不会更改文档结构、内容或格式。当你导出为 DOCX 或打印时，输出始终为 100%。
+- **页眉和页脚会跟随缩放。** 它们会随着页面其余部分一起缩放。如果你在编辑页眉或页脚，叠加层会与当前缩放级别匹配 —— 即使你在编辑时更改了缩放。
+- **分页保持准确。** 页面分隔符、页码以及所有分页计算在每个缩放级别下都保持正确。缩放不会增加或删除页面。

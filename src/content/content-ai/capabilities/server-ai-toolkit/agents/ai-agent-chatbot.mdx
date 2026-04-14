@@ -466,9 +466,9 @@ ${schemaAwarenessPrompt}`,
 
 ## 客户端设置
 
-创建一个客户端 React 组件渲染带协作支持的 Tiptap 编辑器和简单聊天界面。该组件使用 Vercel AI SDK 的 [useChat 钩子](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat) 调用 API 端点并管理聊天对话。
+创建一个客户端 React 组件，用于渲染支持协作功能的 Tiptap 编辑器和简单聊天界面。该组件使用 Vercel AI SDK 的 [useChat 钩子](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat) 调用 API 端点并管理聊天对话。
 
-首先，创建一个服务器函数生成 Tiptap Cloud 协作用的 JWT。此函数创建一个安全的 JWT，授权客户端访问 Tiptap Cloud 协作服务中的特定文档。
+首先，创建一个服务器函数来生成 Tiptap Cloud 协作的 JWT。此函数会创建一个安全的 JWT，用于授权客户端访问 Tiptap Cloud 协作服务中的特定文档。
 
 ```ts
 // app/actions.ts
@@ -513,7 +513,7 @@ import { Collaboration } from '@tiptap/extension-collaboration'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { TiptapCollabProvider } from '@tiptap-pro/provider'
-import { getSchemaAwarenessData } from '@tiptap-pro/server-ai-toolkit'
+import { ServerAiToolkit, getSchemaAwarenessData } from '@tiptap-pro/server-ai-toolkit'
 import { DefaultChatTransport } from 'ai'
 import { useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
@@ -527,7 +527,7 @@ export default function Page() {
 
   const editor = useEditor({
     immediatelyRender: false,
-    extensions: [StarterKit, Collaboration.configure({ document: doc })],
+    extensions: [StarterKit, Collaboration.configure({ document: doc }), ServerAiToolkit],
   })
 
   // 从服务器函数获取 JWT 和 appId
@@ -587,10 +587,12 @@ export default function Page() {
           <strong>{message.role}</strong>
           <br />
           <div className="mt-2 whitespace-pre-wrap">
-            {message.parts
-              .filter((p) => p.type === 'text')
-              .map((p) => p.text)
-              .join('\n') || '加载中...'}
+            {messages?.map((message) =>
+              message.parts
+                .filter((p) => p.type === 'text')
+                .map((p) => p.text)
+                .join('\n') || '加载中...'
+            )}
           </div>
         </div>
       ))}

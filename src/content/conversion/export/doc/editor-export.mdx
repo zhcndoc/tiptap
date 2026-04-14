@@ -27,7 +27,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
     </RequirementItem>
 </Requirements>
 
-<CodeDemo src="https://feature-beta-conversion-extensions--tiptap-pro.netlify.app/preview/Extensions/ExportDoc" />
+<CodeDemo isPro path="/Extensions/ExportDoc" />
 
 <Callout title="建议改用 DOCX" variant="info">
     DOC 格式是 Microsoft Word 97-2003 的旧版格式。建议现代使用时导出为[DOCX](/conversion/export/docx/editor-export)格式。仅在需要兼容旧系统时使用 DOC。
@@ -80,18 +80,18 @@ const editor = new Editor({
 })
 ```
 
-| Parameter        | Type                     | Description                                    | Default                               |
-| ---------------- | ------------------------ | ---------------------------------------------- | ------------------------------------- |
-| `endpoint`       | `string`                 | Tiptap 用于转换的 API 端点地址                   | `'https://api.tiptap.dev/v2/convert'` |
-| `token`          | `string`                 | 用于认证的 Tiptap JWT                           | `''`                                  |
-| `appId`          | `string`                 | 用于认证的 Tiptap 应用 ID                        | `''`                                  |
-| `styleOverrides` | `Record<string, string>` | 应用于导出的样式覆盖                            | `undefined`                           |
-| `headers`        | `HeaderConfig`           | 导出文档的页眉配置                              | `undefined`                           |
-| `footers`        | `FooterConfig`           | 导出文档的页脚配置                              | `undefined`                           |
-| `pageSize`       | `PageSize`               | 页面尺寸配置                                   | `undefined`                           |
-| `pageMargins`    | `PageMargins`            | 页面边距配置                                   | `undefined`                           |
-| `customNodes`    | `CustomNodeDefinition[]` | 基于 DOCX 的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`） | `undefined` |
-| `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调                        | 若未提供则抛出错误                   |
+| 参数         | 类型                     | 说明                                    | 默认值                               |
+| ------------ | ------------------------ | --------------------------------------- | ------------------------------------- |
+| `endpoint`   | `string`                 | Tiptap 用于转换的 API 端点地址           | `'https://api.tiptap.dev/v2/convert'` |
+| `token`      | `string`                 | 用于认证的 Tiptap JWT                    | `''`                                  |
+| `appId`      | `string`                 | 用于认证的 Tiptap 应用 ID                | `''`                                  |
+| `styleOverrides` | `Record<string, string>` | 应用于导出的样式覆盖                    | `undefined`                           |
+| `headers`    | `HeaderConfig`           | 导出文档的页眉配置                      | `undefined`                           |
+| `footers`    | `FooterConfig`           | 导出文档的页脚配置                      | `undefined`                           |
+| `pageSize`   | `PageSize`               | 页面尺寸配置                           | `undefined`                           |
+| `pageMargins`| `PageMargins`            | 页面边距配置                           | `undefined`                           |
+| `customNodes`| `CustomNodeDefinition[]` | 基于 DOCX 的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`） | `undefined` |
+| `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调               | 若未提供则抛出错误                   |
 
 ### HeaderConfig
 
@@ -145,18 +145,18 @@ exportDoc: (options?: ExportDocCommandOptions) => ReturnType
 
 `ExportDocCommandOptions` 接口继承 `ExportDocOptions`，因此每次命令调用时都可以覆盖所有配置选项：
 
-| Property           | Type                      | Description                                                                           |
-| ------------------ | ------------------------- | ------------------------------------------------------------------------------------- |
-| `endpoint`         | `string`                  | 覆盖此次导出的 API 端点地址                                                         |
-| `token`            | `string`                  | 覆盖此次导出的 JWT 令牌                                                              |
-| `appId`            | `string`                  | 覆盖此次导出的 App ID                                                                |
-| `styleOverrides`   | `Record<string, string>`  | 覆盖此次导出的样式覆盖                                                                |
-| `headers`          | `HeaderConfig`            | 覆盖此次导出的页眉配置                                                                |
-| `footers`          | `FooterConfig`            | 覆盖此次导出的页脚配置                                                                |
-| `pageSize`         | `PageSize`                | 覆盖此次导出的页面尺寸配置                                                            |
-| `pageMargins`      | `PageMargins`             | 覆盖此次导出的页面边距配置                                                            |
-| `customNodes`      | `CustomNodeDefinition[]`  | 覆盖此次导出的自定义节点定义                                                          |
-| `onCompleteExport` | `(result: Blob) => void`  | 覆盖此次导出的完成回调                                                                |
+| 属性           | 类型                      | 说明                                                                           |
+| -------------- | ------------------------- | ----------------------------------------------------------------------------- |
+| `endpoint`     | `string`                  | 覆盖此次导出的 API 端点地址                                                   |
+| `token`        | `string`                  | 覆盖此次导出的 JWT 令牌                                                        |
+| `appId`        | `string`                  | 覆盖此次导出的 App ID                                                          |
+| `styleOverrides` | `Record<string, string>`  | 覆盖此次导出的样式覆盖                                                         |
+| `headers`      | `HeaderConfig`            | 覆盖此次导出的页眉配置                                                         |
+| `footers`      | `FooterConfig`            | 覆盖此次导出的页脚配置                                                         |
+| `pageSize`     | `PageSize`                | 覆盖此次导出的页面尺寸配置                                                     |
+| `pageMargins`  | `PageMargins`             | 覆盖此次导出的页面边距配置                                                     |
+| `customNodes`  | `CustomNodeDefinition[]`  | 覆盖此次导出的自定义节点定义                                                   |
+| `onCompleteExport` | `(result: Blob) => void`  | 覆盖此次导出的完成回调                                                         |
 
 ```js
 import { ExportDoc } from '@tiptap-pro/extension-export-doc'

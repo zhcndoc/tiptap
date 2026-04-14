@@ -39,15 +39,17 @@ npm install @tiptap-pro/server-ai-toolkit
 
 ## 获取模式感知数据
 
-要使用 Server AI 工具包 API，您需要从 Tiptap 编辑器获取模式感知数据。此数据描述文档结构，帮助 AI 理解哪些内容是有效的。
+首先，在编辑器中安装 `ServerAiToolkit` 扩展。这将修改您的编辑器架构，使您的文档与 Server AI 工具包兼容。
+
+要使用 Server AI 工具包 API，您需要从 Tiptap 编辑器获取架构感知数据。这些数据描述了文档结构，并帮助 AI 理解哪些内容是有效的。
 
 ```tsx
 import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
-import { getSchemaAwarenessData } from '@tiptap-pro/server-ai-toolkit'
+import { getSchemaAwarenessData, ServerAiToolkit } from '@tiptap-pro/server-ai-toolkit'
 
 const editor = new Editor({
-  extensions: [StarterKit],
+  extensions: [StarterKit, ServerAiToolkit],
 })
 
 // 从编辑器获取模式感知数据
@@ -60,10 +62,9 @@ const schemaAwarenessData = getSchemaAwarenessData(editor)
   `getSchemaAwarenessData` 返回的模式感知数据是一个可序列化为 JSON 的对象，您可以将其存储在数据库中。无需每次都重新生成，仅在编辑器扩展或模式发生变化时更新即可。
 </Callout>
 
-<Callout title="使用自定义节点？" variant="info">
-  如果您的编辑器包含自定义节点或标记，请使用
-  `addJsonSchemaAwareness` 进行配置。请参阅 [自定义节点
-  指南](/content-ai/capabilities/server-ai-toolkit/advanced-guides/custom-nodes)。
+<Callout title="Using custom nodes?" variant="info">
+  如果您的编辑器包含自定义节点或标记，请使用 `addJsonSchemaAwareness` 进行配置。请参阅
+  [自定义节点指南](/content-ai/capabilities/server-ai-toolkit/advanced-guides/custom-nodes)。
 </Callout>
 
 更多详情，请参阅 [模式感知 API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/schema-awareness)。
@@ -92,7 +93,8 @@ const JWT_TOKEN = jwt.sign(
   {
     // 文档服务器凭据，用于 Tiptap 云端文档
     experimental_document_server_id: TIPTAP_DOCUMENT_SERVER_ID,
-    experimental_document_server_management_api_secret: TIPTAP_DOCUMENT_SERVER_MANAGEMENT_API_SECRET,
+    experimental_document_server_management_api_secret:
+      TIPTAP_DOCUMENT_SERVER_MANAGEMENT_API_SECRET,
   },
   TIPTAP_CLOUD_AI_SECRET,
   { expiresIn: '1h' },
@@ -106,8 +108,10 @@ const headers = {
 }
 ```
 
-<Callout title="可选：直接提供文档" variant="info">
-  如果您使用自己的存储管理文档，而非 Tiptap 云，您可以省略 JWT 中的 `experimental_document_server_id` 和 `experimental_document_server_management_api_secret` 声明，直接通过 API 请求中的 `document` 字段传递文档。详见 [REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)。
+<Callout title="Alternative: provide documents directly" variant="info">
+  如果您管理文档的方式不是使用 Tiptap Cloud，而是自行存储，可以省略 JWT 中的
+  `experimental_document_server_id` 和 `experimental_document_server_management_api_secret` 声明，并直接通过 API 请求中的 `document` 字段传递文档。请参阅 [REST API
+  参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)。
 </Callout>
 
 ## 调用 API 端点

@@ -1,0 +1,231 @@
+---
+title: 跟踪更改
+meta:
+  title: 跟踪更改 | Tiptap Server AI Toolkit
+  description: 将服务器端 AI 编辑显示为可单独接受或拒绝的跟踪更改。
+  category: 内容 AI
+sidebars:
+  hideSecondary: true
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+<Callout title="Experimental API" variant="warning">
+  本指南使用了 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展，该扩展尚处于实验阶段，未来版本可能会发生变化。
+</Callout>
+
+<Callout title="从 AI 代理聊天机器人指南延续" variant="info">
+  本指南延续了 [AI 代理聊天机器人指南](/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot)。请先阅读该指南。
+</Callout>
+
+将服务器端 AI 编辑显示为追踪变更（tracked changes），这样用户可以逐个查看、接受或拒绝这些变更。这会将 Server AI Toolkit 与 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展集成在一起。
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-ai-tracked-changes"
+/>
+
+请参阅 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 工作原理
+
+1. AI 使用 `tiptapRead` 读取文档。
+2. AI 以 `trackedChanges` 模式使用 `tiptapEdit` 编辑文档。
+3. 服务器写入追踪变更标记，而不是直接修改文档。
+4. 客户端显示追踪变更，并允许用户接受或拒绝它们。
+
+## 显示追踪变更
+
+要以追踪变更的形式显示服务器端 AI 编辑，请在执行工具时配置 `reviewOptions` 为 `trackedChanges` 模式。请参阅 [review options 参考文档](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options) 了解所有可用设置。
+
+### 使用追踪变更执行工具
+
+在调用 `execute-tool` 时传入 `reviewOptions`：
+
+```ts
+const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    toolName: 'tiptapEdit',
+    input: toolCallInput,
+    schemaAwarenessData,
+    experimental_documentOptions: {
+      documentId: 'your-document-id',
+      userId: 'ai-assistant',
+    },
+    reviewOptions: {
+      mode: 'trackedChanges',
+      trackedChangesOptions: {
+        userId: 'ai-assistant',
+        userMetadata: {
+          name: 'AI Assistant',
+        },
+      },
+    },
+  }),
+})
+```
+
+请参阅 [review options 参考文档](https://github.com/ueberdosis/ai-toolkit-demos) 以获取完整的 `reviewOptions` 形状，包括 `trackedChangesOptions` 和 `diffUtilityOptions`。
+
+### 客户端设置
+
+在客户端，添加 `ServerAiToolkit` 和 `TrackedChanges` 扩展。必须将 `TrackedChanges` 扩展配置为 `enabled: false`，因为服务器会在写入追踪变更时自动启用它。
+
+```tsx
+import { useChat } from '@ai-sdk/react'
+import { Collaboration } from '@tiptap/extension-collaboration'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { TrackedChanges, findSuggestions } from '@tiptap-pro/extension-tracked-changes'
+import { TiptapCollabProvider } from '@tiptap-pro/provider'
+import { ServerAiToolkit, getSchemaAwarenessData } from '@tiptap-pro/server-ai-toolkit'
+
+export default function Page() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit.configure({ undoRedo: false }),
+      Collaboration.configure({ document: doc }),
+      TrackedChanges.configure({ enabled: false }),
+      ServerAiToolkit,
+    ],
+  })
+
+  // ... 渲染编辑器和聊天界面
+}
+```
+
+在 AI 编辑文档后，更改将显示为追踪变更。用户可以使用追踪变更扩展提供的 `acceptSuggestion`、`rejectSuggestion`、`acceptAllSuggestions` 和 `rejectAllSuggestions` 命令来接受或拒绝它们。
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-ai-tracked-changes"
+/>
+
+请参阅 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 使用追踪变更添加评论
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-ai-tracked-changes-comments"
+/>
+
+请参阅 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+可以让 AI 为每个变更提供理由。每个理由都会成为一个评论线程，并与对应的追踪变更关联，使用 [Comments](/comments/getting-started/overview) 扩展。
+
+### API 端点
+
+在获取工具定义时，将顶层的 `operationMeta` 选项传递给它，以向 `tiptapEdit` 操作添加 `meta` 字段。然后指示 AI 在该 `meta` 字段中提供理由。
+
+```ts
+const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+    tools: {
+      tiptapEdit: true,
+    },
+    operationMeta: '简要说明此变更如何改进文档的理由。',
+  }),
+})
+```
+
+### 使用评论执行工具
+
+在调用 `execute-tool` 时，同时传递 `experimental_commentsOptions` 和 `reviewOptions`：
+
+```ts
+const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    toolName: 'tiptapEdit',
+    input: toolCallInput,
+    schemaAwarenessData,
+    experimental_documentOptions: {
+      documentId: 'your-document-id',
+      userId: 'ai-assistant',
+    },
+    reviewOptions: {
+      mode: 'trackedChanges',
+      trackedChangesOptions: {
+        userId: 'ai-assistant',
+        userMetadata: {
+          name: 'AI Assistant',
+        },
+      },
+    },
+    experimental_commentsOptions: {
+      threadData: { userName: 'Tiptap AI' },
+      commentData: { userName: 'Tiptap AI' },
+    },
+  }),
+})
+```
+
+每个非空的 `meta` 字段都会成为一个与对应追踪变更关联的评论线程。理由将存储为线程的第一个评论内容，并作为线程数据中的 `suggestionReason`。
+
+### 客户端设置
+
+在客户端，添加带有 `TiptapCollabProvider` 的 `CommentsKit` 扩展：
+
+```tsx
+import { CommentsKit } from '@tiptap-pro/extension-comments'
+import { TrackedChanges } from '@tiptap-pro/extension-tracked-changes'
+import { ServerAiToolkit } from '@tiptap-pro/server-ai-toolkit'
+
+const editor = useEditor({
+  extensions: [
+    StarterKit.configure({ undoRedo: false }),
+    Collaboration.configure({ document: doc }),
+    TrackedChanges.configure({ enabled: false }),
+    ServerAiToolkit,
+    CommentsKit.configure({
+      provider, // 你的 TiptapCollabProvider 实例
+    }),
+  ],
+})
+```
+
+用户可以在追踪变更侧边栏中查看追踪变更并阅读 AI 的理由。
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-ai-tracked-changes-comments"
+/>
+
+请参阅 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 下一步
+
+- 了解所有可用的 [工具定义](/content-ai/capabilities/server-ai-toolkit/agents/tools)
+- 了解更多关于 [review options](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options) 的信息
+- 探索 [REST API 参考文档](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)
+- 了解更多关于 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展
+</Callout>
