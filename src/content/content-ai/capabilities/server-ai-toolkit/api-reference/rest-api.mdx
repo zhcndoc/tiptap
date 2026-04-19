@@ -8,12 +8,10 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 
-服务器 AI 工具包提供 REST API 端点，用于获取工具定义并在 Tiptap 文档上执行工具。
-
-{/* eslint-disable-next-line prettier/prettier */}
+Server AI Toolkit 为 **工具** 和 **工作流** 都提供 REST API 端点。
 
 <Callout title="Postman collection" variant="info">
-  Browse the{' '}
+  浏览用于 Server AI Toolkit REST API 的{' '}
   <a
     href="https://www.postman.com/tiptap-platform/tiptap-workspace/collection/42722929-6a366c4c-10e4-4674-93c3-da35b70357a7?action=share&source=copy-link&creator=42722929"
     target="_blank"
@@ -21,29 +19,18 @@ import { Callout } from '@/components/ui/Callout'
   >
     Postman collection
   </a>{' '}
-  for the Server AI Toolkit REST API.
+  。
 </Callout>
 
 ## 认证
 
-所有 API 请求都需要认证。使用您 Tiptap Cloud 账户的 `secret key` 生成 JWT（JSON Web Token）。在请求头中，将此 JWT 以 Bearer 令牌形式包含在 `Authorization` 头中，并将您的应用 ID 包含在 `X-App-Id` 头中。
+所有请求都必须包含：
 
-您可以在 [服务器 AI 工具包设置](https://cloud.tiptap.dev/v2/cloud/ai) 页面获取您的应用 ID 和 secret key。
+- `Authorization: Bearer <JWT>`
+- `X-App-Id: <APP_ID>`
 
-生产环境中，请务必在 **服务器端** 创建 JWT 以保障您的 secret 安全。
-
-```curl
---header 'Authorization: Bearer YOUR_JWT_TOKEN' --header 'X-App-Id: YOUR_APP_ID'
-```
-
-### Document Server 凭据（可选）
-
-若需使用 Tiptap Cloud 文档或评论工具，请在生成令牌时将 Document Server 凭据包含为 JWT 声明：
-
-- `experimental_document_app_id`：您的 Tiptap Cloud Document Server 应用 ID
-- `experimental_document_secret`：您的 Document Server 管理 API 密钥
-
-这些凭据允许 AI 服务器代表您从 Tiptap Document Server 获取和保存文档。
+请在服务端使用你的 AI 密钥生成 JWT。请在 [Server AI
+Toolkit 设置](https://cloud.tiptap.dev/v2/cloud/ai) 页面获取你的 App ID 和密钥。
 
 ```ts
 const JWT_TOKEN = jwt.sign(
@@ -57,209 +44,565 @@ const JWT_TOKEN = jwt.sign(
 )
 ```
 
-示例中，`BASE_URL` 是 Tiptap Cloud AI 服务的基础 URL。Tiptap Cloud AI 服务的基础 URL 为 `https://api.tiptap.dev`。若为本地部署，该 URL 会有所不同。
+### Document Server 凭据
+
+当你希望 Server AI Toolkit 自动获取并保存 Tiptap Cloud 文档时，请在 JWT 声明中包含这些 claims：
+
+- `experimental_document_server_id`
+- `experimental_document_server_management_api_secret`
 
 ## 如何提供文档
 
-执行工具或工作流时，有两种方式提供文档：
+托管的基础 URL 是：
 
-**使用 Tiptap Cloud 文档（推荐）** — 在请求体中包含带有 `documentId` 的 `experimental_documentOptions`。服务器将自动从 Tiptap Document Server 获取文档、处理文档，并保存回更改。此方式需在您的 JWT 声明中包含 Document Server 凭据（见上文【Document Server 凭据】）。
+```txt
+https://api.tiptap.dev
+```
 
-**直接传递文档** — 在请求体中包含 `document` 字段，传入您的 Tiptap JSON 文档。服务器处理该文档并在响应中返回修改后的文档。
+在下面的示例中，请求写作 `BASE_URL/v3/ai/...`。
 
-您必须提供且仅提供其一：要么 `experimental_documentOptions`，要么 `document`。提供二者或都不提供将导致验证错误。
+**使用 Tiptap Cloud 文档（推荐）** — 在请求体中包含带有 `documentId` 的 `experimental_documentOptions`。服务器将自动从 Tiptap Document Server 获取文档、处理文档，并保存回修改。此方式要求你的 JWT 声明中包含 Document Server 凭据（见上文【Document Server 凭据】）。
 
-<Callout title="线程工具需要 Tiptap Cloud 文档" variant="info">
-  `getThreads` 和 `editThreads` 工具始终要求提供 `experimental_documentOptions`。
+大多数工具和工作流端点只接受一个文档来源：
+
+- `document`: 内联的 Tiptap JSON
+- `experimental_documentOptions`: 一个 Tiptap Cloud 文档引用
+
+`experimental_documentOptions` 具有以下结构：
+
+- `documentId` (`string`, 必填): Tiptap Cloud 文档标识符。
+- `userId?` (`string | null`, 可选): 标识 AI 执行的编辑归属。
+- `field?` (`string | null`, 可选): 指定文档内的特定协作字段（Y.js XML 片段）。省略或 `null` 时默认值为 `"default"`。当你的文档在同一个 `documentId` 下存储多个可编辑字段（例如独立的标题和正文）时，请使用此项。
+
+使用 Tiptap Cloud 文档的示例：
+
+```json
+{
+  "experimental_documentOptions": {
+    "documentId": "your-document-id",
+    "userId": "ai-assistant"
+  }
+}
+```
+
+定位到非默认协作字段的示例：
+
+```json
+{
+  "experimental_documentOptions": {
+    "documentId": "your-document-id",
+    "userId": "ai-assistant",
+    "field": "title"
+  }
+}
+```
+
+使用内联文档的示例：
+
+```json
+{
+  "document": {
+    "type": "doc",
+    "content": []
+  }
+}
+```
+
+<Callout title="Threads 需要云端文档" variant="info">
+  线程和评论端点始终需要 `experimental_documentOptions.documentId`。
 </Callout>
 
-## 获取工具定义
+## Session 机制
 
-调用此端点以获取服务器 AI 工具包可用的工具定义。
+读取端点会返回一个 `sessionId`，用于记录 AI 所看到的节点哈希和内容哈希。
+在后续的编辑请求中复用同一个 `sessionId`，以便服务器能拒绝过期的编辑，
+而不是覆盖更新过的用户更改。
 
-### 端点
+## 格式
 
-```
+大多数端点接受一个 `format` 字段：
+
+- `"json"`: 标准 JSON 表示
+- `"shorthand"`: Tiptap Shorthand，一种用于提示和模型输出的高效 token 格式
+
+`proofreader` 当前仅支持 shorthand。
+
+## 工具端点
+
+### 获取工具定义
+
+```txt
 POST /v3/ai/toolkit/tools
 ```
 
-### 请求
+为 AI 代理返回可用的工具定义。
 
-```curl
-curl --location 'BASE_URL/v3/ai/toolkit/tools' --header 'Content-Type: application/json' --header 'Authorization: Bearer YOUR_JWT_TOKEN' --header 'X-App-Id: YOUR_APP_ID' --data '{
-    "schemaAwarenessData": { /* schema awareness data from getSchemaAwarenessData */ },
-    "tools": {
-      "tiptapRead": true,
-      "tiptapEdit": true
-    },
-    "operationMeta": "Brief justification explaining why this change improves the document.",
-    "format": "json"
-}'
-```
+请求体：
 
-### 请求体
+- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
+- `tools?` (`object`, 可选): 启用或禁用各个单独的工具
+- `operationMeta?` (`string | null`, 可选)
+- `format?` (`'json' | 'shorthand'`, 可选)
 
-- `schemaAwarenessData` (`SchemaAwarenessData`, required): The schema awareness data obtained from `getSchemaAwarenessData`. This data describes the document structure for the Server AI Toolkit API.
-- `tools?` (`EnabledTools`, optional): Configuration for enabling/disabling specific tools. Each property can be set to `true` (enabled) or `false` (disabled). If not provided, all tools are enabled by default.
-  - `tiptapRead?` (`boolean`, optional): Enable/disable the `tiptapRead` tool (default: `true`)
-  - `tiptapEdit?` (`boolean`, optional): Enable/disable the `tiptapEdit` tool (default: `true`)
-- `operationMeta?` (`string | null`, optional): Adds a `meta` string field to `tiptapEdit` operations. Use this when you want the AI to attach a justification or other per-operation metadata.
-- `format?` (`string`, optional): The format in which the AI reads and edits the document. Must be one of:
-  - `"json"` (default): Standard JSON format
-  - `"shorthand"`: Tiptap Shorthand format, which reduces AI token costs by up to 80% compared to standard JSON
+响应：
 
-### 响应
+- `tools` (`array`)
+  - `name` (`string`)
+  - `description` (`string`)
+  - `inputSchema` (`object`)
 
-返回包含工具定义数组的对象：
+### 执行一个工具
 
-- `tools`（`array`）：工具定义数组。每个工具定义包含：
-  - `name`（`string`）：工具名（例如 `"tiptapRead"`、`"tiptapEdit"`）
-  - `description`（`string`）：工具功能描述
-  - `inputSchema`（`object`）：工具输入参数的 JSON schema
-
-### 示例响应
-
-```json
-{
-  "tools": [
-    {
-      "name": "tiptapRead",
-      "description": "工具描述",
-      "inputSchema": {
-        /* 工具输入的 JSON schema */
-      }
-    },
-    {
-      "name": "tiptapEdit",
-      "description": "工具描述",
-      "inputSchema": {
-        /* 工具输入的 JSON schema */
-      }
-    }
-  ]
-}
-```
-
-## 执行工具
-
-调用此端点，在 Tiptap 文档上执行工具。
-
-### 端点
-
-```
+```txt
 POST /v3/ai/toolkit/execute-tool
 ```
 
-### 请求
+执行一个 Server AI Toolkit 工具，例如 `tiptapRead`、`tiptapEdit`、`getThreads` 或
+`editThreads`。
 
-**使用 Tiptap Cloud 文档（推荐）** — JWT 必须包含 `experimental_document_app_id` 和 `experimental_document_secret` 声明：
+请求体：
+
+- `toolName` (`string`, 必填)
+- `input` (`unknown`, 必填)
+- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
+- `sessionId?` (`string | null`, 可选): 复用上一次读取或工具执行的 session，以启用对过期读取的保护。
+- `format?` (`'json' | 'shorthand'`, 可选)
+- `chunkSize?` (`number`, 可选)
+- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), 可选)
+- `experimental_commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`, 可选): 在与线程相关的工具执行过程中创建的新线程和评论所附带的元数据。
+- 且必须满足以下条件之一：
+  - `document`
+  - `experimental_documentOptions`
+
+响应：
+
+- `sessionId` (`string`)
+- `output` (`unknown`)
+- `docChanged` (`boolean`)
+- `document` (`object | null`)
+
+## 工作流端点
+
+### 获取工作流定义
+
+使用以下任意一个端点：
+
+- `POST /v3/ai/toolkit/workflows/edit`
+- `POST /v3/ai/toolkit/workflows/insert-content`
+- `POST /v3/ai/toolkit/workflows/proofreader`
+- `POST /v3/ai/toolkit/workflows/threads`
+
+请求体：
+
+- `format` (`'json' | 'shorthand'`, 必填)
+
+响应：
+
+- `systemPrompt` (`string`)
+- `outputSchema` (`object`)
+
+示例：
 
 ```curl
-curl --location 'BASE_URL/v3/ai/toolkit/execute-tool' --header 'Content-Type: application/json' --header 'Authorization: Bearer YOUR_JWT_TOKEN' --header 'X-App-Id: YOUR_APP_ID' --data '{
-    "toolName": "tiptapRead",
-    "input": { /* 工具输入 */ },
+curl --location 'BASE_URL/v3/ai/toolkit/workflows/edit' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+  --header 'X-App-Id: YOUR_APP_ID' \
+  --data '{
+    "format": "shorthand"
+  }'
+```
+
+保留返回的 `sessionId`，并在发起匹配的工作流执行请求时一并发送。
+
+### 为工作流读取文档内容
+
+```txt
+POST /v3/ai/toolkit/read/read-document
+```
+
+读取文档内容，并返回可供工作流使用的内容。
+
+请求体：
+
+- `range?` (`{ from: number, to: number }`, 可选): 省略时默认读取整个文档。
+- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
+- `format` (`'json' | 'shorthand'`, 必填)
+- `sessionId?` (`string | null`, 可选)
+- `chunkSize?` (`number`, 可选)
+- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), 可选)
+- 且必须满足以下条件之一：
+  - `document`
+  - `experimental_documentOptions`
+
+响应：
+
+- `sessionId` (`string`)
+- `output`
+  - `success` (`boolean`)
+  - `content?` (`unknown`)
+  - `error?` (`string`)
+- `docChanged` (`boolean`)
+- `document` (`object | null`)
+
+示例：
+
+```curl
+curl --location 'BASE_URL/v3/ai/toolkit/read/read-document' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+  --header 'X-App-Id: YOUR_APP_ID' \
+  --data '{
+    "schemaAwarenessData": { /* schema awareness data */ },
+    "format": "shorthand",
+    "reviewOptions": {
+      "mode": "disabled"
+    },
+    "experimental_documentOptions": {
+      "documentId": "your-document-id",
+      "userId": "ai-assistant"
+    }
+  }'
+```
+
+保留返回的 `sessionId`，并在发起匹配的 insert-content 执行请求时一并发送。
+
+### 读取当前选择
+
+```txt
+POST /v3/ai/toolkit/read/read-selection
+```
+
+读取选区内容，并返回要么是一个选区载荷，要么是一个明确的空状态。
+
+请求体：
+
+- `range` (`{ from: number, to: number }`, 必填)
+- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
+- `format` (`'json' | 'shorthand'`, 必填)
+- `sessionId?` (`string | null`, 可选)
+- `chunkSize?` (`number`, 可选)
+- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), 可选)
+- 且必须满足以下条件之一：
+  - `document`
+  - `experimental_documentOptions`
+
+响应：
+
+- `sessionId` (`string`)
+- `output`
+  - 当选区为空时：
+    - `isEmpty` (`true`)
+  - 当选区包含内容时：
+    - `isEmpty` (`false`)
+    - `content` (`unknown`)
+    - `nodeHashes` (`string[]`)
+    - `nodeRange` (`{ from: number, to: number }`)
+    - `prompt` (`string`)
+- `docChanged` (`boolean`)
+- `document` (`object | null`)
+
+示例：
+
+```curl
+curl --location 'BASE_URL/v3/ai/toolkit/read/read-selection' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+  --header 'X-App-Id: YOUR_APP_ID' \
+  --data '{
+    "schemaAwarenessData": { /* schema awareness data */ },
+    "range": { "from": 10, "to": 42 },
+    "format": "shorthand",
     "experimental_documentOptions": {
       "documentId": "your-document-id"
-    },
-    "schemaAwarenessData": { /* schema awareness data from getSchemaAwarenessData */ },
-    "chunkSize": 32000,
-    "format": "json"
-}'
+    }
+  }'
 ```
 
-**直接传递文档示例：**
+### 读取线程
+
+```txt
+POST /v3/ai/toolkit/read/threads
+```
+
+为一个 Tiptap Cloud 文档读取全部线程和评论。
+
+请求体：
+
+- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
+- `format` (`'json' | 'shorthand'`, 必填)
+- `experimental_documentOptions` (`{ documentId: string, userId?: string, field?: string | null }`, 必填)
+
+响应：
+
+- `output`
+  - `threads?` (`unknown[]`)
+  - `error?` (`string`)
+- `docChanged` (`boolean`)
+- `document` (`object | null`)
+
+示例：
 
 ```curl
-curl --location 'BASE_URL/v3/ai/toolkit/execute-tool' --header 'Content-Type: application/json' --header 'Authorization: Bearer YOUR_JWT_TOKEN' --header 'X-App-Id: YOUR_APP_ID' --data '{
-    "toolName": "tiptapRead",
-    "input": { /* tool input */ },
-    "document": { /* Tiptap JSON document */ },
-    "schemaAwarenessData": { /* schema awareness data from getSchemaAwarenessData */ },
-    "chunkSize": 32000,
-    "format": "json"
-}'
+curl --location 'BASE_URL/v3/ai/toolkit/read/threads' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+  --header 'X-App-Id: YOUR_APP_ID' \
+  --data '{
+    "schemaAwarenessData": { /* schema awareness data */ },
+    "format": "shorthand",
+    "experimental_documentOptions": {
+      "documentId": "your-document-id",
+      "userId": "ai-assistant"
+    }
+  }'
 ```
 
-### 请求体
+### 执行 insert-content 工作流
 
-- `toolName` (`string`, required): The name of the tool to execute. Must be one of:
-  - `"tiptapRead"`: Read part of the document using an efficient format
-  - `"tiptapEdit"`: Edit the document using an efficient format
-  - `"getThreads"`: Retrieve all threads and comments in the document
-  - `"editThreads"`: Perform operations on threads and comments
-- `input` (`any`, required): The input parameters for the tool, as defined by the tool's input schema. The input format is optimized for efficient reading and editing operations.
-- `experimental_documentOptions` (`object`, conditional): Use this to reference a Tiptap Cloud document by ID. The server fetches and saves the document automatically. Mutually exclusive with `document`.
-  - `documentId` (`string`, required): The ID of the document on the Document Server
-  - `userId` (`string`, optional): User ID for attributing thread/comment authorship
-- `document` (`object`, conditional): The Tiptap JSON document to operate on. Pass this when providing your own document. Mutually exclusive with `experimental_documentOptions`.
-- `experimental_commentsOptions` (`object`, optional): Metadata for thread/comment operations.
-  - `threadData` (`Record<string, any>`, optional): Metadata attached to new threads
-  - `commentData` (`Record<string, any>`, optional): Metadata attached to new comments
-- `schemaAwarenessData` (`SchemaAwarenessData`, required): The schema awareness data obtained from `getSchemaAwarenessData`
-- `chunkSize?` (`number`, optional): The chunk size for reading operations. Default: `32000`
-- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), optional): Review-mode configuration for tool execution. See the [review options reference](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options).
-- `format?` (`string`, optional): The format in which the AI reads and edits the document. Must be one of:
-  - `"json"` (default): Standard JSON format
-  - `"shorthand"`: Tiptap Shorthand format, which reduces AI token costs by up to 80% compared to standard JSON
-
-### 响应
-
-返回工具执行结果：
-
-- `output`（`any`）：工具执行的输出，输出格式针对高效读取和编辑操作进行了优化。
-- `hasError`（`boolean`）：执行过程中是否发生错误
-- `docChanged`（`boolean`）：文档是否被修改
-- `document`（`object | null`）：更新后的 Tiptap JSON 文档。若文档未被修改，返回 `null`；若 `docChanged` 为 `true`，则返回更新后的文档
-
-## 获取 schema 认知提示
-
-调用此端点，获取描述文档 schema 的提示字符串，供 AI 模型使用。
-
-### 端点
-
+```txt
+POST /v3/ai/toolkit/execute-workflow/insert-content
 ```
+
+请求体：
+
+- `input` (`unknown`, 必填): 生成的 insert-content 载荷
+- `range?` (`{ from: number, to: number }`, 可选)
+- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
+- `format` (`'json' | 'shorthand'`, 必填)
+- `sessionId?` (`string | null`, 可选)
+- `chunkSize?` (`number`, 可选)
+- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), 可选)
+- 且必须满足以下条件之一：
+  - `document`
+  - `experimental_documentOptions`
+
+响应：
+
+- `sessionId` (`string`)
+- `output`
+  - `error?` (`string`)
+  - `range?` (`{ from: number, to: number }`)
+- `docChanged` (`boolean`)
+- `document` (`object | null`)
+
+示例：
+
+```curl
+curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/insert-content' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+  --header 'X-App-Id: YOUR_APP_ID' \
+  --data '{
+    "schemaAwarenessData": { /* schema awareness data */ },
+    "input": "This is the replacement content.",
+    "range": { "from": 10, "to": 42 },
+    "format": "shorthand",
+    "reviewOptions": {
+      "mode": "disabled"
+    },
+    "experimental_documentOptions": {
+      "documentId": "your-document-id",
+      "userId": "ai-assistant"
+    }
+  }'
+```
+
+### 执行 Tiptap Edit 工作流
+
+```txt
+POST /v3/ai/toolkit/execute-workflow/tiptap-edit
+```
+
+请求体：
+
+- `input` (`object`, 必填): 编辑工作流操作
+- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
+- `format` (`'json' | 'shorthand'`, 必填)
+- `sessionId?` (`string | null`, 可选)
+- `chunkSize?` (`number`, 可选)
+- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), 可选)
+- 且必须满足以下条件之一：
+  - `document`
+  - `experimental_documentOptions`
+
+响应：
+
+- `sessionId` (`string`)
+- `output`
+  - `operationResults?` (`array`)
+  - `reason?` (`'validationError' | 'unexpectedError'`)
+  - `error?` (`string`)
+- `docChanged` (`boolean`)
+- `document` (`object | null`)
+
+示例：
+
+```curl
+curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/tiptap-edit' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+  --header 'X-App-Id: YOUR_APP_ID' \
+  --data '{
+    "schemaAwarenessData": { /* schema awareness data */ },
+    "input": {
+      "operations": [
+        {
+          "type": "replace",
+          "target": "abc123",
+          "content": "# Updated heading\n\nUpdated paragraph content."
+        }
+      ]
+    },
+    "format": "shorthand",
+    "reviewOptions": {
+      "mode": "disabled"
+    },
+    "experimental_documentOptions": {
+      "documentId": "your-document-id",
+      "userId": "ai-assistant"
+    }
+  }'
+```
+
+### 执行 proofreader 工作流
+
+```txt
+POST /v3/ai/toolkit/execute-workflow/proofreader
+```
+
+请求体：
+
+- `input` (`object`, 必填): Proofreader 操作
+- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
+- `format` (`'shorthand'`, 必填)
+- `sessionId?` (`string | null`, 可选)
+- `chunkSize?` (`number`, 可选)
+- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), 可选)
+- 且必须满足以下条件之一：
+  - `document`
+  - `experimental_documentOptions`
+
+响应：
+
+- `sessionId` (`string`)
+- `output`
+  - `operationResults` (`array`)
+- `docChanged` (`boolean`)
+- `document` (`object | null`)
+
+示例：
+
+```curl
+curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/proofreader' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+  --header 'X-App-Id: YOUR_APP_ID' \
+  --data '{
+    "schemaAwarenessData": { /* schema awareness data */ },
+    "input": {
+      "operations": []
+    },
+    "format": "shorthand",
+    "reviewOptions": {
+      "mode": "trackedChanges",
+      "trackedChangesOptions": {
+        "userId": "ai-assistant"
+      }
+    },
+    "experimental_documentOptions": {
+      "documentId": "your-document-id"
+    }
+  }'
+```
+
+### 执行 comments 工作流
+
+```txt
+POST /v3/ai/toolkit/execute-workflow/threads
+```
+
+请求体：
+
+- `input` (`object`, 必填): 线程操作
+- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
+- `format` (`'json' | 'shorthand'`, 必填)
+- `experimental_documentOptions` (`{ documentId: string, userId?: string, field?: string | null }`, 必填)
+- `experimental_commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`, 可选): 工作流创建的新线程和评论所附带的元数据。
+
+响应：
+
+- `output`
+  - `operations?` (`array`)
+  - `error?` (`string`)
+- `docChanged` (`boolean`)
+- `document` (`object | null`)
+
+示例：
+
+```curl
+curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/threads' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+  --header 'X-App-Id: YOUR_APP_ID' \
+  --data '{
+    "schemaAwarenessData": { /* schema awareness data */ },
+    "input": {
+      "operations": [
+        {
+          "type": "createComment",
+          "threadId": "thread-123",
+          "content": "Please clarify this point."
+        }
+      ]
+    },
+    "format": "shorthand",
+    "experimental_documentOptions": {
+      "documentId": "your-document-id",
+      "userId": "ai-assistant"
+    },
+    "experimental_commentsOptions": {
+      "threadData": {
+        "source": "ai"
+      },
+      "commentData": {
+        "source": "ai"
+      }
+    }
+  }'
+```
+
+## 架构感知提示（Schema awareness prompt）
+
+```txt
 POST /v3/ai/toolkit/schema-awareness-prompt
 ```
 
-### 请求
+返回一个提示，用于描述所请求格式的编辑器架构。
 
-```curl
-curl --location 'BASE_URL/v3/ai/toolkit/schema-awareness-prompt' --header 'Content-Type: application/json' --header 'Authorization: Bearer YOUR_JWT_TOKEN' --header 'X-App-Id: YOUR_APP_ID' --data '{
-    "schemaAwarenessData": { /* schema awareness data from getSchemaAwarenessData */ },
-    "format": "json"
-}'
-```
+请求体：
 
-### 请求体
+- `schemaAwarenessData`（`SchemaAwarenessData`，必填）
+- `format?`（`'json' | 'shorthand'`，可选）
 
-- `schemaAwarenessData`（`SchemaAwarenessData`，必填）：从 `getSchemaAwarenessData` 获取的 schema 认知数据。此数据描述服务器 AI 工具包 API 的文档结构。
-- `format?`（`string`，可选）：AI 读取和编辑文档所使用的格式。必须为以下之一：
-  - `"json"`（默认）：标准 JSON 格式
-  - `"shorthand"`：Tiptap 简写格式，相较标准 JSON 可将 AI 令牌消耗降低最多 80%
+响应：
 
-### 响应
-
-返回描述文档 schema 的提示字符串：
-
-- `prompt`（`string`）：描述文档 schema 结构的文本提示，适合用于 AI 模型提示中
-
-### 示例响应
-
-```json
-{
-  "prompt": "Schema Awareness prompt"
-}
-```
+- `prompt`（`string`）
 
 ## 错误处理
 
-当出现错误时，API 会返回带有相应 HTTP 状态码的错误响应：
+该 API 使用标准的 HTTP 错误代码：
 
-- `400 Bad Request`：请求体或参数无效。包括：
-  - 同时缺失或同时提供了 `document` 和 `experimental_documentOptions`
-  - 使用 `getThreads` 或 `editThreads` 工具时未提供 `experimental_documentOptions`
-  - 提供了 `experimental_documentOptions` 但 JWT 中缺少 Document Server 凭据（`missing_document_credentials`）
-- `401 Unauthorized`：缺失或无效的 JWT 令牌或 App ID
-- `404 Not Found`：未找到指定工具
-- `500 Internal Server Error`：工具执行时发生服务器错误
-- `502 Bad Gateway`：与 Document Server 通信失败（`document_load_failed`，`document_save_failed`）
+- `400 Bad Request`：无效的请求体、无效的格式、缺少文档源，或缺少 Document
+  服务器凭证
+- `401 Unauthorized`：缺少或无效的 JWT 或应用程序 ID
+- `404 Not Found`：未知的端点或工具
+- `422 Unprocessable Entity`：验证失败
+- `429 Too Many Requests`：重复请求或触发了速率限制保护
+- `500 Internal Server Error`：意外的服务器错误
+- `502 Bad Gateway`：无法加载或保存 Tiptap Cloud 文档
+
+## 相关页面
+
+- [审查选项](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options)
+- [架构感知](/content-ai/capabilities/server-ai-toolkit/api-reference/schema-awareness)

@@ -91,7 +91,7 @@ export const sidebarConfig: SidebarConfig = {
           children: [
             {
               href: '/editor/extensions/nodes/audio',
-              title: 'Audio',
+              title: '音频',
             },
             {
               href: '/editor/extensions/nodes/blockquote',
@@ -191,7 +191,7 @@ export const sidebarConfig: SidebarConfig = {
             },
             {
               href: '/editor/extensions/nodes/text',
-              title: 'Text',
+              title: '文本',
             },
             {
               href: '/editor/extensions/nodes/twitch',
@@ -256,12 +256,12 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/ai-generation',
               title: 'AI 生成',
-              tags: ['Start'],
+              tags: ['Start 计划'],
             },
             {
               href: '/editor/extensions/functionality/ai-toolkit',
-              title: 'AI Toolkit',
-              tags: ['Add-on'],
+              title: 'AI 工具包',
+              tags: ['附加组件'],
               beta: true,
             },
             {
@@ -291,7 +291,7 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/comments',
               title: '评论',
-              tags: ['Start'],
+              tags: ['Start 计划'],
               beta: true,
             },
             {
@@ -313,7 +313,7 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/export',
               title: '导出',
-              tags: ['Start'],
+              tags: ['Start 计划'],
               beta: true,
             },
             {
@@ -358,19 +358,19 @@ export const sidebarConfig: SidebarConfig = {
             },
             {
               href: '/editor/extensions/functionality/import',
-              title: 'Import',
-              tags: ['Start'],
+              title: '导入',
+              tags: ['Start 计划'],
               beta: true,
             },
             {
               href: '/editor/extensions/functionality/pages',
-              title: 'Pages',
-              tags: ['Team'],
+              title: '页面布局',
+              tags: ['Team 计划'],
             },
             {
               href: '/editor/extensions/functionality/paste-handler',
-              title: 'Paste Handler',
-              tags: ['Team'],
+              title: '粘贴处理程序',
+              tags: ['Team 计划'],
             },
             {
               href: '/editor/extensions/functionality/placeholder',
@@ -379,12 +379,12 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/snapshot',
               title: '版本',
-              tags: ['Starter'],
+              tags: ['Starter 计划'],
             },
             {
               href: '/editor/extensions/functionality/snapshot-compare',
-              title: 'Snapshot Compare',
-              tags: ['Team'],
+              title: '快照比较',
+              tags: ['Team 计划'],
             },
             {
               href: '/editor/extensions/functionality/selection',
@@ -413,7 +413,7 @@ export const sidebarConfig: SidebarConfig = {
             {
               href: '/editor/extensions/functionality/tracked-changes',
               title: '修订记录',
-              tags: ['Add-on'],
+              tags: ['附加组件'],
             },
             {
               href: '/editor/extensions/functionality/trailing-node',
@@ -526,10 +526,10 @@ export const sidebarConfig: SidebarConfig = {
         },
         {
           href: '/editor/core-concepts/keyboard-shortcuts',
-          title: 'Keyboard shortcuts',
+          title: '键盘快捷键',
         },
         {
-          title: 'Persistence',
+          title: '持久化',
           href: '/editor/core-concepts/persistence',
         },
         {
@@ -542,70 +542,70 @@ export const sidebarConfig: SidebarConfig = {
       type: 'group',
       href: '/editor/markdown',
       title: 'Markdown',
-      tags: ['beta'],
+      tags: ['测试版'],
       children: [
-        { href: '/editor/markdown', title: 'Introduction' },
+        { href: '/editor/markdown', title: '简介' },
         {
           href: '/editor/markdown/getting-started',
-          title: 'Getting Started',
+          title: '开始使用',
           children: [
             {
-              title: 'Installation & Setup',
+              title: '安装与设置',
               href: '/editor/markdown/getting-started/installation',
             },
             {
-              title: 'Basic Usage',
+              title: '基础用法',
               href: '/editor/markdown/getting-started/basic-usage',
             },
           ],
         },
         {
           href: '/editor/markdown/advanced-usage',
-          title: 'Advanced Usage',
+          title: '高级用法',
           children: [
             {
-              title: 'Custom Tokenizer',
+              title: '自定义 Markdown 分词器',
               href: '/editor/markdown/advanced-usage/custom-tokenizer',
             },
             {
-              title: 'Custom Parsing',
+              title: '自定义 Markdown 解析',
               href: '/editor/markdown/advanced-usage/custom-parsing',
             },
             {
-              title: 'Custom Serializing',
+              title: '自定义 Markdown 序列化',
               href: '/editor/markdown/advanced-usage/custom-serializing',
             },
           ],
         },
         {
           href: '/editor/markdown/guides',
-          title: 'Guides',
+          title: '指南',
           children: [
             {
-              title: 'Integrate Markdown in your Extension',
+              title: '自定义扩展中的 Markdown 集成',
               href: '/editor/markdown/guides/integrate-markdown-in-your-extension',
             },
             {
-              title: 'Create a Highlight Extension',
+              title: '创建支持 Markdown 的高亮标记',
               href: '/editor/markdown/guides/create-a-highlight-mark',
             },
             {
-              title: 'Create a Admonition Extension',
+              title: '使用支持 Markdown 的 Admonition 块',
               href: '/editor/markdown/guides/create-a-admonition-block',
             },
             {
-              title: 'Create a Emoji Extension',
+              title: '创建支持 Markdown 的 Emoji 内联节点',
               href: '/editor/markdown/guides/create-a-emoji-inline-block',
             },
           ],
         },
-        { href: '/editor/markdown/examples', title: 'Examples' },
+        { href: '/editor/markdown/examples', title: '示例' },
         {
           href: '/editor/markdown/api',
-          title: 'API Reference',
+          title: 'API 参考',
           children: [
             {
-              title: 'Editor',
+              title: '编辑器',
               href: '/editor/markdown/api/editor',
             },
             {
@@ -613,20 +613,20 @@ export const sidebarConfig: SidebarConfig = {
               href: '/editor/markdown/api/markdown-manager',
             },
             {
-              title: 'Extension',
+              title: '扩展',
               href: '/editor/markdown/api/extension',
             },
             {
-              title: 'Utilities',
+              title: '工具函数',
               href: '/editor/markdown/api/utilities',
             },
             {
-              title: 'Types',
+              title: '类型',
               href: '/editor/markdown/api/types',
             },
           ],
         },
-        { href: '/editor/markdown/glossary', title: 'Glossary' },
+        { href: '/editor/markdown/glossary', title: '术语表' },
       ],
     },
     {
@@ -898,11 +898,11 @@ export const sidebarConfig: SidebarConfig = {
             },
             {
               href: '/editor/api/utilities/position',
-              title: 'Position',
+              title: '位置工具',
             },
             {
               href: '/editor/api/utilities/static-renderer',
-              title: 'Static Renderer',
+              title: '静态渲染器',
             },
             {
               href: '/editor/api/utilities/suggestion',
@@ -916,23 +916,23 @@ export const sidebarConfig: SidebarConfig = {
         },
         {
           href: '/editor/api/node-positions',
-          title: 'Node Positions',
+          title: '节点位置',
         },
         {
-          title: 'Resizable Node views',
+          title: '可调整大小的节点视图',
           href: '/editor/api/resizable-nodeviews',
         },
         {
           href: '/editor/api/events',
-          title: 'Events',
+          title: '事件',
         },
         {
           href: '/editor/api/input-rules',
-          title: 'Input Rules',
+          title: '输入规则',
         },
         {
           href: '/editor/api/paste-rules',
-          title: 'Paste Rules',
+          title: '粘贴规则',
         },
       ],
     },

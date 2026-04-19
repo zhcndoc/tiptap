@@ -3,24 +3,24 @@ import { SidebarConfig } from '@/types'
 export const sidebarConfig: SidebarConfig = {
   id: 'ai-changes',
   rootHref: '/content-ai/capabilities/changes/overview',
-  title: 'AI Changes (Legacy)',
+  title: 'AI 变更（旧版）',
   items: [
     {
       type: 'link',
-      title: '← Back to Content AI',
+      title: '← 返回内容 AI',
       href: '/content-ai/getting-started/overview',
     },
     {
       type: 'group',
       href: '/content-ai/capabilities/changes/overview',
-      title: 'Get started',
+      title: '开始使用',
       children: [
         {
-          title: 'Overview',
+          title: '概述',
           href: '/content-ai/capabilities/changes/overview',
         },
         {
-          title: 'Install',
+          title: '安装',
           href: '/content-ai/capabilities/changes/install',
         },
       ],
@@ -28,14 +28,14 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/content-ai/capabilities/changes/features/review-changes',
-      title: 'Features',
+      title: '功能',
       children: [
         {
-          title: 'Review changes',
+          title: '审核 AI 变更',
           href: '/content-ai/capabilities/changes/features/review-changes',
         },
         {
-          title: 'Display changes',
+          title: '显示变更',
           href: '/content-ai/capabilities/changes/features/display-changes',
         },
       ],
@@ -43,18 +43,18 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/content-ai/capabilities/changes/configure',
-      title: 'Reference',
+      title: '参考',
       children: [
         {
-          title: 'Configure',
+          title: '配置',
           href: '/content-ai/capabilities/changes/configure',
         },
         {
-          title: 'API Reference',
+          title: 'API 参考',
           href: '/content-ai/capabilities/changes/api-reference',
         },
         {
-          title: 'Changelog',
+          title: '更新日志',
           href: '/content-ai/capabilities/changes/changelog',
         },
       ],

@@ -1,0 +1,202 @@
+---
+title: 评论
+meta:
+  title: 评论 | Tiptap Server AI Toolkit
+  description: 构建一个服务器端评论工作流：读取文档内容和线程，然后执行线程操作。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+构建一个工作流，用于在协作文档中创建并更新评论线程。
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-comments-workflow"
+/>
+
+查看 GitHub 上的[源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+<Callout title="Comments workflows require Tiptap Cloud" variant="info">
+  线程工作流会读取并写入存储在 Tiptap 文档服务器（Tiptap Document Server）上的评论，因此你必须
+  使用 `experimental_documentOptions.documentId`。
+</Callout>
+
+<Callout title="Reuse the document read session for thread edits" variant="info">
+  `read-document` 会返回一个 `sessionId`。在执行请求中发送相同的 `sessionId`，这样服务器才能
+  拒绝针对 AI 在用户修改内容之前已读取过的内容执行的线程操作。
+</Callout>
+
+## 1. 从 AI 服务器读取文档及现有线程
+
+评论工作流需要当前的文档内容和现有的线程列表。调用：
+
+- `POST /v3/ai/toolkit/read/read-document`
+- `POST /v3/ai/toolkit/read/threads`
+
+```ts
+const documentResponse = await fetch(`${apiBaseUrl}/toolkit/read/read-document`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+    format: 'shorthand',
+    sessionId,
+    reviewOptions: {
+      mode: 'disabled',
+    },
+    experimental_documentOptions: {
+      documentId,
+      userId: 'ai-assistant',
+    },
+  }),
+})
+
+const documentReadResult = await documentResponse.json()
+
+const threadsResponse = await fetch(`${apiBaseUrl}/toolkit/read/threads`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+    format: 'shorthand',
+    experimental_documentOptions: {
+      documentId,
+      userId: 'ai-assistant',
+    },
+  }),
+})
+
+const threadsReadResult = await threadsResponse.json()
+```
+
+## 2. 生成线程操作
+
+从 AI 服务器获取工作流定义，并让模型返回线程操作。
+
+```ts
+const workflowResponse = await fetch(`${apiBaseUrl}/toolkit/workflows/threads`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    format: 'shorthand',
+  }),
+})
+
+const workflow = await workflowResponse.json()
+
+const schemaResponse = await fetch(`${apiBaseUrl}/toolkit/schema-awareness-prompt`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+  }),
+})
+
+const { prompt: schemaAwarenessPrompt } = await schemaResponse.json()
+
+const result = streamText({
+  model,
+  system: `${workflow.systemPrompt}\n\n${schemaAwarenessPrompt}`,
+  prompt: JSON.stringify({
+    content: documentReadResult.output.content,
+    threads: threadsReadResult.output.threads ?? [],
+    task,
+  }),
+  output: Output.object({ schema: z.fromJSONSchema(workflow.outputSchema) }),
+})
+```
+
+## 3. 执行工作流
+
+线程工作流的输出可以直接发送到执行端点。然后调用：
+
+- `POST /v3/ai/toolkit/execute-workflow/threads`
+
+```ts
+const output = await result.output
+
+const executeResponse = await fetch(`${apiBaseUrl}/toolkit/execute-workflow/threads`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+    format: 'shorthand',
+    input: output,
+    sessionId: documentReadResult.sessionId,
+    experimental_documentOptions: {
+      documentId,
+      userId: 'ai-assistant',
+    },
+    experimental_commentsOptions: {
+      threadData: { userName: 'Tiptap AI' },
+      commentData: { userName: 'Tiptap AI' },
+    },
+  }),
+})
+
+const executeResult = await executeResponse.json()
+```
+
+## 4. 将工作流连接到评论 UI
+
+客户端发送一个任务，等待工作流响应，并让评论扩展从协作文档中渲染更新后的线程状态。
+
+```tsx
+const response = await fetch('/api/server-comments-workflow', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    documentId,
+    schemaAwarenessData: getSchemaAwarenessData(editor),
+    task,
+    sessionId,
+  }),
+})
+
+const result: { sessionId: string } = await response.json()
+setSessionId(result.sessionId)
+```
+
+## 最终结果
+
+这是一个基于服务器端的评论工作流，可创建、更新、解决（resolve）并移除线程：
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-comments-workflow"
+/>
+
+查看 GitHub 上的[源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 下一步
+
+- 查看[Server AI Toolkit REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)
+- 查看[REST API 请求详情](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api#execute-the-comments-workflow)

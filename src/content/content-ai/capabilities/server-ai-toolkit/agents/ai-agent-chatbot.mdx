@@ -25,6 +25,10 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 构建一个简单的 AI 代理聊天机器人，可以读取和编辑 Tiptap 文档。
 
+<Callout title="在对话轮次间保持会话" variant="info">
+  将最新的 `sessionId` 存储在对话历史中，并在后续的工具调用中复用它。这能让服务器拒绝过期的编辑，而不会覆盖更新的用户更改。
+</Callout>
+
 <CodeDemo
   isLarge
   path=""
@@ -48,11 +52,11 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 npx create-next-app@latest server-ai-agent-chatbot
 ```
 
-<Callout title="专业版包" variant="hint">
-  Server AI Toolkit 和 Collaboration 是专业版包。在安装之前，您需要设置 [访问 Tiptap 私有 NPM 注册表](/guides/pro-extensions)。
+<Callout title="Pro 包" variant="hint">
+  Server AI Toolkit 和 Collaboration 是 pro 包。在安装之前，你需要先设置 [访问 Tiptap 的私有 NPM 注册表](/guides/pro-extensions)。
 </Callout>
 
-安装核心 Tiptap 包、协作扩展和用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
+安装核心 Tiptap 包、协作扩展以及用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
 
 ```bash
 npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-collaboration @tiptap-pro/provider ai @ai-sdk/react @ai-sdk/openai zod uuid yjs jsonwebtoken
@@ -81,7 +85,7 @@ npm install --save-dev @types/jsonwebtoken
 - **TIPTAP_CLOUD_AI_API_URL**：Server AI Toolkit API 的基础 URL。
 - **TIPTAP_CLOUD_AI_SECRET**：用于认证 Server AI Toolkit API 的密钥。用于生成 JWT 令牌。
 - **TIPTAP_CLOUD_AI_APP_ID**：Server AI Toolkit API 的应用 ID。
-- **TIPTAP_CLOUD_DOCUMENT_SERVER_ID**：你的 Tiptap Cloud 文档服务器 ID。作为 `experimental_document_server_id` JWT 声明包含，使 Server AI Toolkit 能自动获取和保存文档。
+- **TIPTAP_CLOUD_DOCUMENT_SERVER_ID**：你的 Tiptap Cloud 文档服务器 ID。作为 `experimental_document_server_id` JWT 声明包含，以便 Server AI Toolkit 能自动获取和保存文档。
 - **TIPTAP_CLOUD_SECRET**：Tiptap Cloud 文档服务器的密钥。
 - **TIPTAP_CLOUD_DOCUMENT_SERVER_MANAGEMENT_API_SECRET**：你的文档服务器管理 API 密钥。作为 `experimental_document_server_management_api_secret` JWT 声明包含，用于文档访问。
 
@@ -135,7 +139,8 @@ export function getTiptapCloudAiJwtToken(): string {
     // experimental_document_secret: process.env.TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET,
     // 文档服务器凭证用于自动获取/保存文档
     experimental_document_server_id: process.env.TIPTAP_CLOUD_DOCUMENT_SERVER_ID,
-    experimental_document_server_management_api_secret: process.env.TIPTAP_CLOUD_DOCUMENT_SERVER_MANAGEMENT_API_SECRET,
+    experimental_document_server_management_api_secret:
+      process.env.TIPTAP_CLOUD_DOCUMENT_SERVER_MANAGEMENT_API_SECRET,
   }
 
   return jwt.sign(payload, secret, { expiresIn: '1h' })
@@ -191,7 +196,7 @@ export async function getToolDefinitions(schemaAwarenessData: unknown): Promise<
 
 #### 获取 schema 识别提示
 
-_Schema awareness_ 是 Server AI Toolkit 让你的 LLM 理解文档结构的能力。使用此函数，你可以生成该识别内容的格式化字符串，包含在提示中向模型描述文档。
+_Schema awareness_ 是 Server AI Toolkit 让你的 LLM 理解文档结构的能力。使用此函数，你可以生成该识别内容的格式化字符串，包含在提示中以向模型描述文档。
 
 ```ts
 // lib/server-ai-toolkit/get-schema-awareness-prompt.ts
@@ -230,9 +235,7 @@ export async function getSchemaAwarenessPrompt(schemaAwarenessData: unknown): Pr
 ```
 
 <Callout title="使用自定义节点？" variant="info">
-  如果您的编辑器包含自定义节点或标记，请使用
-  `addJsonSchemaAwareness` 配置它们。请参阅 [自定义节点
-  指南](/content-ai/capabilities/server-ai-toolkit/advanced-guides/custom-nodes)。
+  如果你的编辑器包含自定义节点或 marks，请使用 `addJsonSchemaAwareness` 进行配置。请参阅 [自定义节点指南](/content-ai/capabilities/server-ai-toolkit/advanced-guides/custom-nodes)。
 </Callout>
 
 #### 执行工具
@@ -251,7 +254,8 @@ export async function executeTool(
   input: unknown,
   documentId: string,
   schemaAwarenessData: unknown,
-): Promise<{ output: unknown; docChanged: boolean }> {
+  options: { sessionId?: string } = {},
+): Promise<{ output: unknown; docChanged: boolean; sessionId: string }> {
   const apiBaseUrl = process.env.TIPTAP_CLOUD_AI_API_URL || 'https://api.tiptap.dev/v3/ai'
   const appId = process.env.TIPTAP_CLOUD_AI_APP_ID
 
@@ -269,6 +273,7 @@ export async function executeTool(
     body: JSON.stringify({
       toolName,
       input,
+      sessionId: options.sessionId,
       experimental_documentOptions: { documentId },
       schemaAwarenessData,
     }),
@@ -282,124 +287,22 @@ export async function executeTool(
 }
 ```
 
-### 获取文档
-
-此函数通过文档 ID，从 Tiptap Cloud 的 REST API 获取当前文档状态。它在每次工具执行前被调用，确保工具在最新版本文档上执行，避免并发编辑冲突。
-
-```ts
-// lib/server-ai-toolkit/get-document.ts
-/**
- * 从 Tiptap Collaboration REST API 获取文档
- */
-export async function getDocument(documentId: string): Promise<unknown> {
-  const tiptapCloudAppId = process.env.TIPTAP_CLOUD_APP_ID
-  const documentManagementApiSecret = process.env.TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET
-
-  if (!tiptapCloudAppId) {
-    throw new Error('缺少 TIPTAP_CLOUD_APP_ID')
-  }
-
-  if (!documentManagementApiSecret) {
-    throw new Error('缺少 TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET')
-  }
-
-  const collabUrl = `https://${tiptapCloudAppId}.collab.tiptap.cloud/api/documents/${encodeURIComponent(
-    documentId,
-  )}?format=json`
-
-  const response = await fetch(collabUrl, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: documentManagementApiSecret,
-    },
-  })
-
-  if (!response.ok) {
-    if (response.status === 404) {
-      throw new Error(`文档 ${documentId} 未找到`)
-    }
-    throw new Error(`检索文档失败：${response.status} ${response.statusText}`)
-  }
-
-  return response.json()
-}
-```
-
-### 更新文档
-
-此函数在工具执行修改文档后，更新 Tiptap Cloud 的文档状态。它尝试 PATCH 更新已有文档，若文档不存在 (404)，则创建新文档，确保文档状态持久化且在所有客户端同步。
-
-```ts
-// lib/server-ai-toolkit/update-document.ts
-/**
- * 更新 Tiptap Collaboration REST API 中的文档
- */
-export async function updateDocument(documentId: string, document: unknown): Promise<void> {
-  const tiptapCloudAppId = process.env.TIPTAP_CLOUD_APP_ID
-  const documentManagementApiSecret = process.env.TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET
-
-  if (!tiptapCloudAppId) {
-    console.warn('缺少 TIPTAP_CLOUD_APP_ID，跳过更新')
-    return
-  }
-
-  if (!documentManagementApiSecret) {
-    console.warn('缺少 TIPTAP_CLOUD_DOCUMENT_MANAGEMENT_API_SECRET，跳过更新')
-    return
-  }
-
-  const collabUrl = `https://${tiptapCloudAppId}.collab.tiptap.cloud/api/documents/${encodeURIComponent(
-    documentId,
-  )}?format=json`
-
-  try {
-    const response = await fetch(collabUrl, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: documentManagementApiSecret,
-      },
-      body: JSON.stringify(document),
-    })
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        // 文档不存在，尝试创建
-        const createResponse = await fetch(collabUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: documentManagementApiSecret,
-          },
-          body: JSON.stringify(document),
-        })
-
-        if (!createResponse.ok) {
-          console.error(
-            `创建文档失败：${createResponse.status} ${createResponse.statusText}`,
-          )
-        }
-      } else {
-        console.error(`更新文档失败：${response.status} ${response.statusText}`)
-      }
-    }
-  } catch (error) {
-    console.error('更新文档时出错:', error)
-  }
-}
-```
+使用诸如 [`lib/server-ai-toolkit/session-id.ts`](https://github.com/ueberdosis/ai-toolkit-demos/blob/main/src/lib/server-ai-toolkit/session-id.ts) 这样的辅助工具，从对话历史中读取最新的 `sessionId`。
 
 现在创建主 API 路由：
 
 ```ts
 // app/api/server-ai-agent-chatbot/route.ts
 import { openai } from '@ai-sdk/openai'
-import { createAgentUIStreamResponse, ToolLoopAgent, tool, type UIMessage } from 'ai'
+import { createAgentUIStreamResponse, ToolLoopAgent, tool } from 'ai'
 import z from 'zod'
 import { executeTool } from '@/lib/server-ai-toolkit/execute-tool'
 import { getSchemaAwarenessPrompt } from '@/lib/server-ai-toolkit/get-schema-awareness-prompt'
 import { getToolDefinitions } from '@/lib/server-ai-toolkit/get-tool-definitions'
+import {
+  getSessionIdFromConversationHistory,
+  type ServerAiToolkitMessage,
+} from '@/lib/server-ai-toolkit/session-id'
 
 export async function POST(req: Request) {
   const {
@@ -407,10 +310,11 @@ export async function POST(req: Request) {
     schemaAwarenessData,
     documentId,
   }: {
-    messages: UIMessage[]
+    messages: ServerAiToolkitMessage[]
     schemaAwarenessData: unknown
     documentId: string
   } = await req.json()
+  let sessionId = getSessionIdFromConversationHistory(messages)
 
   // 从 Server AI Toolkit API 获取工具定义
   const toolDefinitions = await getToolDefinitions(schemaAwarenessData)
@@ -427,7 +331,10 @@ export async function POST(req: Request) {
         inputSchema: z.fromJSONSchema(toolDef.inputSchema),
         execute: async (input) => {
           try {
-            const result = await executeTool(toolDef.name, input, documentId, schemaAwarenessData)
+            const result = await executeTool(toolDef.name, input, documentId, schemaAwarenessData, {
+              sessionId,
+            })
+            sessionId = result.sessionId
             return result.output
           } catch (error) {
             console.error(`执行工具 ${toolDef.name} 失败:`, error)
@@ -442,11 +349,11 @@ export async function POST(req: Request) {
 
   const agent = new ToolLoopAgent({
     model: openai('gpt-5-mini'),
-    instructions: `You are an assistant that can edit rich text documents.
-In your responses, be concise and to the point. However, the content you generate in the document does not need to be concise and to the point: instead, it should follow the user's request as closely as possible.
-Before calling any tools, summarize you're going to do (in a sentence or less), as a high-level view of the task, as a human writer would describe it.
-Rule: In your responses, do not provide any details of the tool calls.
-Rule: In your responses, do not provide any details of the HTML content of the document.
+    instructions: `你是一个能够编辑富文本文档的助手。
+在你的回复中，保持简洁明了，切中要点。然而，你在文档中生成的内容不需要同样简洁明了：相反，它应尽可能贴合用户的请求。
+在调用任何工具之前，用不超过一句话先总结你将要做什么（从人类写作者的角度，用任务的高层视角来描述）。
+规则：在你的回复中，不要提供任何关于工具调用的细节。
+规则：在你的回复中，不要提供任何关于文档 HTML 内容的细节。
 
 ${schemaAwarenessPrompt}`,
     tools,
@@ -459,6 +366,8 @@ ${schemaAwarenessPrompt}`,
 
   return createAgentUIStreamResponse({
     agent,
+    messageMetadata: ({ part }) =>
+      part.type === 'finish' && sessionId ? { sessionId } : undefined,
     uiMessages: messages,
   })
 }
@@ -617,15 +526,24 @@ export default function Page() {
   此实现使用 `documentId` 代替直接传递文档。文档状态通过 Tiptap Cloud 的 REST API 在服务器端管理，确保工具多次执行时状态一致。客户端则使用 Tiptap Collaboration 进行实时同步。
 </Callout>
 
-<Callout title="替代方案：直接提供文档" variant="info">
-  你也可以不使用 Tiptap Cloud 文档，而是自己提供并管理文档——在执行工具的请求体中传入 `document` 字段（替代 `experimental_documentOptions`）。这样，你需要在每次工具执行前获取文档，并在 `result.docChanged` 为 `true` 时保存更新的文档。请参阅 [REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)。
+<Callout title="Alternative: provide the document directly" variant="info">
+  Instead of using Tiptap Cloud documents, you can provide and manage the document yourself by
+  passing a `document` field (instead of `experimental_documentOptions`) in the execute-tool request
+  body. With this approach, you need to fetch the document before each tool execution and save the
+  updated document when `result.docChanged` is `true`. See the [REST API
+  reference](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api).
 </Callout>
 
 ## 最终效果
 
 配合额外的 CSS 样式，效果是一个简单但精致的 AI 聊天机器人应用，使用 Server AI Toolkit 进行文档编辑：
 
-<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/server-ai-agent-chatbot" />
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-ai-agent-chatbot"
+/>
 
 查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
 

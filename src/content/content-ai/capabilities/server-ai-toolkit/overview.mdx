@@ -30,7 +30,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 <EnterpriseCalloutAuto variant="server-ai-toolkit" renderMode="sidebar" />
 
-在服务器端处理 Tiptap 文档。服务器 AI 工具包包含 AI 需要的工具，可在后台编辑文档，无需浏览器环境。
+在服务器端处理 Tiptap 文档。服务器 AI 工具包包含用于 AI 代理的工具，以及用于单一用途自动化的工作流。
 
 <CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/server-ai-agent-chatbot" />
 
@@ -38,9 +38,8 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 服务器 AI 工具包包括构建任何自定义 AI 功能的基础组件：
 
-- 用于构建能够执行复杂任务的 [AI 代理](/content-ai/capabilities/server-ai-toolkit/agents) 的**工具**。
-- AI 拥有单一明确定义任务的 [**工作流**](/content-ai/capabilities/ai-toolkit/workflows)：插入内容、校对文档等。
-- 处理您直接提供的文档，或自动通过 ID 获取**Tiptap Cloud 文档**。
+- **Tools** 用于构建能够执行复杂任务的 [AI 代理](/content-ai/capabilities/server-ai-toolkit/agents)。
+- [**Workflows**](/content-ai/capabilities/server-ai-toolkit/workflows) 中的 AI 只有一个明确的任务：插入内容、校对文档等。
 
 <Callout title="兼容任何 AI 模型" variant="info">
   服务器 AI 工具包可与任何能够生成文本的 AI 模型配合使用，包括开源和自托管模型。
@@ -85,7 +84,34 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ### 工作流
 
-构建自定义服务器端 AI 自动化的方法。
+构建专注于特定任务的服务器端 AI 自动化，并遵循固定的读取 → 生成 → 执行流程。
+
+<div className="grid md:grid-cols-2 gap-6 mt-6 md:items-start">
+  <Link
+    href="/content-ai/capabilities/server-ai-toolkit/workflows/insert-content"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">插入内容</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      替换当前选择内容，并返回已插入的范围。
+    </div>
+  </Link>
+  <Link
+    href="/content-ai/capabilities/server-ai-toolkit/workflows/proofreader"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">校对工具</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      读取文档，并应用语法修正（作为修订痕迹）。
+    </div>
+  </Link>
+</div>
 
 - 校对文档
 - 添加评论

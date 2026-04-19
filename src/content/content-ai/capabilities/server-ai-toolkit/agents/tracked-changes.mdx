@@ -1,9 +1,9 @@
 ---
-title: 跟踪更改
+title: Track Changes
 meta:
-  title: 跟踪更改 | Tiptap Server AI Toolkit
-  description: 将服务器端 AI 编辑显示为可单独接受或拒绝的跟踪更改。
-  category: 内容 AI
+  title: Track Changes | Tiptap Server AI Toolkit
+  description: Display server-side AI edits as track changes that can be individually accepted or rejected.
+  category: Content AI
 sidebars:
   hideSecondary: true
 ---
@@ -11,7 +11,7 @@ sidebars:
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-<Callout title="Experimental API" variant="warning">
+<Callout title="实验性 API" variant="warning">
   本指南使用了 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展，该扩展尚处于实验阶段，未来版本可能会发生变化。
 </Callout>
 
@@ -57,6 +57,7 @@ const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
     toolName: 'tiptapEdit',
     input: toolCallInput,
     schemaAwarenessData,
+    sessionId,
     experimental_documentOptions: {
       documentId: 'your-document-id',
       userId: 'ai-assistant',
@@ -166,6 +167,7 @@ const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
     toolName: 'tiptapEdit',
     input: toolCallInput,
     schemaAwarenessData,
+    sessionId,
     experimental_documentOptions: {
       documentId: 'your-document-id',
       userId: 'ai-assistant',

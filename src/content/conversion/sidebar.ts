@@ -23,8 +23,8 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/conversion/import',
-      title: 'Import',
-      tags: ['Start'],
+      title: '导入',
+      tags: ['Start 计划'],
       children: [
         {
           title: 'DOCX',
@@ -50,7 +50,17 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: '分页符',
               href: '/conversion/import/docx/page-breaks',
-              tags: ['New'],
+              tags: ['新增'],
+            },
+            {
+              title: 'ConvertKit',
+              href: '/conversion/import/docx/convertkit',
+              tags: ['实验性'],
+            },
+            {
+              title: 'CSS 注入',
+              href: '/conversion/import/docx/css-injection',
+              tags: ['实验性'],
             },
             {
               title: 'REST API',
@@ -75,7 +85,7 @@ export const sidebarConfig: SidebarConfig = {
       type: 'group',
       href: '/conversion/export',
       title: '导出',
-      tags: ['Start'],
+      tags: ['Start 计划'],
       children: [
         {
           title: 'DOCX',
@@ -93,7 +103,7 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: '分页符',
               href: '/conversion/export/docx/page-breaks',
-              tags: ['New'],
+              tags: ['新增'],
             },
             {
               title: '自定义页面布局',
@@ -106,6 +116,11 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: '导出样式',
               href: '/conversion/export/docx/export-styles',
+            },
+            {
+              title: 'CSS 转 DOCX',
+              href: '/conversion/export/docx/css-to-docx',
+              tags: ['实验性'],
             },
             {
               title: 'REST API',
@@ -129,7 +144,7 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: '分页符',
               href: '/conversion/export/pdf/page-breaks',
-              tags: ['New'],
+              tags: ['新增'],
             },
             {
               title: '自定义页面布局',
@@ -165,7 +180,7 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: '分页符',
               href: '/conversion/export/odt/page-breaks',
-              tags: ['New'],
+              tags: ['新增'],
             },
             {
               title: '自定义页面布局',
@@ -201,7 +216,7 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: '分页符',
               href: '/conversion/export/epub/page-breaks',
-              tags: ['New'],
+              tags: ['新增'],
             },
             {
               title: '自定义页面布局',
@@ -237,7 +252,7 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: '分页符',
               href: '/conversion/export/doc/page-breaks',
-              tags: ['New'],
+              tags: ['新增'],
             },
             {
               title: '自定义页面布局',
@@ -277,17 +292,17 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/conversion/legacy',
-      title: 'Legacy Import/Export',
+      title: '旧版导入/导出',
       children: [
         {
           title: 'DOCX',
           href: '/conversion/legacy/overview',
-          tags: ['Deprecated'],
+          tags: ['已弃用'],
         },
         {
           title: 'ODT',
           href: '/conversion/legacy/odt/editor-extensions',
-          tags: ['Deprecated'],
+          tags: ['已弃用'],
           children: [
             {
               title: '编辑器扩展',
@@ -302,7 +317,7 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: 'Markdown',
           href: '/conversion/legacy/markdown/editor-extensions',
-          tags: ['Deprecated'],
+          tags: ['已弃用'],
           children: [
             {
               title: '编辑器扩展',

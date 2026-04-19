@@ -3,24 +3,24 @@ import { SidebarConfig } from '@/types'
 export const sidebarConfig: SidebarConfig = {
   id: 'ai-assistant',
   rootHref: '/content-ai/capabilities/agent/overview',
-  title: 'AI Assistant (Legacy)',
+  title: 'AI 助手（旧版）',
   items: [
     {
       type: 'link',
-      title: '← Back to Content AI',
+      title: '← 返回内容 AI',
       href: '/content-ai/getting-started/overview',
     },
     {
       type: 'group',
       href: '/content-ai/capabilities/agent/overview',
-      title: 'Get started',
+      title: '开始使用',
       children: [
         {
-          title: 'Overview',
+          title: '概述',
           href: '/content-ai/capabilities/agent/overview',
         },
         {
-          title: 'Install',
+          title: '安装',
           href: '/content-ai/capabilities/agent/install',
         },
       ],
@@ -28,22 +28,22 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/content-ai/capabilities/agent/use-with-content-ai-cloud',
-      title: 'Integration',
+      title: '集成',
       children: [
         {
-          title: 'Use with Tiptap Cloud',
+          title: '在 Content AI Cloud 中使用',
           href: '/content-ai/capabilities/agent/use-with-content-ai-cloud',
         },
         {
-          title: 'Use with your AI agent',
+          title: '使用你的 AI 代理',
           href: '/content-ai/capabilities/agent/custom-llms',
           children: [
             {
-              title: 'Overview',
+              title: '概述',
               href: '/content-ai/capabilities/agent/custom-llms/overview',
             },
             {
-              title: 'Get started',
+              title: '开始使用',
               href: '/content-ai/capabilities/agent/custom-llms/get-started',
               children: [
                 {
@@ -65,15 +65,15 @@ export const sidebarConfig: SidebarConfig = {
               ],
             },
             {
-              title: 'Tools overview',
+              title: '工具概览',
               href: '/content-ai/capabilities/agent/custom-llms/tools',
             },
             {
-              title: 'Client-side tools',
+              title: '客户端工具',
               href: '/content-ai/capabilities/agent/custom-llms/client-side-tools',
             },
             {
-              title: 'Server-side tools',
+              title: '服务端工具',
               href: '/content-ai/capabilities/agent/custom-llms/server-side-tools',
               children: [
                 {
@@ -101,38 +101,38 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/content-ai/capabilities/agent/features/state',
-      title: 'Features',
+      title: '功能',
       children: [
         {
-          title: 'State',
+          title: 'AI 代理状态',
           href: '/content-ai/capabilities/agent/features/state',
         },
         {
-          title: 'Events',
+          title: '监听事件',
           href: '/content-ai/capabilities/agent/features/events',
         },
         {
-          title: 'Methods',
+          title: '可用方法',
           href: '/content-ai/capabilities/agent/features/methods',
         },
         {
-          title: 'Lifecycle',
+          title: 'AI 代理生命周期',
           href: '/content-ai/capabilities/agent/features/lifecycle',
         },
         {
-          title: 'Checkpoints',
+          title: '管理检查点',
           href: '/content-ai/capabilities/agent/features/checkpoints',
         },
         {
-          title: 'Provide context',
+          title: '提供上下文',
           href: '/content-ai/capabilities/agent/features/context',
         },
         {
-          title: 'Selection awareness',
+          title: '选区感知',
           href: '/content-ai/capabilities/agent/features/selection-awareness',
         },
         {
-          title: 'Read large documents',
+          title: '阅读大型文档',
           href: '/content-ai/capabilities/agent/features/large-documents',
         },
       ],
@@ -140,18 +140,18 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/content-ai/capabilities/agent/configure/options',
-      title: 'Configuration',
+      title: '配置',
       children: [
         {
-          title: 'Configuration options',
+          title: '配置选项',
           href: '/content-ai/capabilities/agent/configure/options',
         },
         {
-          title: 'System prompt',
+          title: '自定义系统提示',
           href: '/content-ai/capabilities/agent/configure/system-prompt',
         },
         {
-          title: 'Custom nodes/marks',
+          title: '自定义节点和标记',
           href: '/content-ai/capabilities/agent/configure/custom-nodes',
         },
       ],
@@ -159,14 +159,14 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/content-ai/capabilities/agent/review',
-      title: 'Review changes',
+      title: '审核更改',
       children: [
         {
-          title: 'With AI Changes',
+          title: '使用 AI Changes',
           href: '/content-ai/capabilities/agent/review/ai-changes',
         },
         {
-          title: 'With AI Suggestion',
+          title: '使用 AI Suggestion',
           href: '/content-ai/capabilities/agent/review/ai-suggestion',
         },
       ],
@@ -174,14 +174,14 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/content-ai/capabilities/agent/api-reference',
-      title: 'Reference',
+      title: '参考',
       children: [
         {
-          title: 'API Reference',
+          title: 'API 参考',
           href: '/content-ai/capabilities/agent/api-reference',
         },
         {
-          title: 'Changelog',
+          title: '更新日志',
           href: '/content-ai/capabilities/agent/changelog',
         },
       ],

@@ -1,0 +1,150 @@
+---
+title: 选择感知
+meta:
+  title: 选择感知 | Tiptap Server AI Toolkit
+  description: 让服务器端 AI 代理在编辑文档之前感知当前编辑器的选区。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+在决定如何编辑文档之前，构建一个读取当前选区的服务端 AI 代理。
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-selection-awareness"
+/>
+
+查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+<Callout title="来自 AI 代理聊天机器人指南的续篇" variant="info">
+  本指南扩展了 [AI 代理聊天机器人
+  指南](/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot)。请复用该指南中的相同身份验证配置。
+</Callout>
+
+## 1. 跟踪活动选区
+
+添加 `Selection` 扩展，并在选区发生变化时存储当前范围。
+
+```tsx
+import { Selection } from '@tiptap/extensions'
+import { EditorContent, useEditor } from '@tiptap/react'
+import { ServerAiToolkit } from '@tiptap-pro/server-ai-toolkit'
+import { useRef } from 'react'
+
+const selectionRangeRef = useRef({ from: 0, to: 0 })
+
+const editor = useEditor({
+  immediatelyRender: false,
+  extensions: [StarterKit, Collaboration.configure({ document: doc }), ServerAiToolkit, Selection],
+  onSelectionUpdate: ({ editor: currentEditor }) => {
+    selectionRangeRef.current = {
+      from: currentEditor.state.selection.from,
+      to: currentEditor.state.selection.to,
+    }
+  },
+})
+```
+
+## 2. 在用户消息中发送选区
+
+当用户发送消息时，在请求体中包含架构感知数据、文档 ID 以及已捕获的选区范围。
+
+```tsx
+const { messages, sendMessage, status } = useChat({
+  transport: new DefaultChatTransport({
+    api: '/api/server-selection-awareness',
+  }),
+})
+
+sendMessage(
+  { text: input },
+  {
+    body: {
+      schemaAwarenessData: getSchemaAwarenessData(editor),
+      documentId,
+      selectionRange: selectionRangeRef.current,
+    },
+  },
+)
+```
+
+## 3. 从 AI 服务器读取选区
+
+在后端路由中，代理开始它的工具循环之前，先调用 Server AI Toolkit 的 selection-read 端点：
+
+- `POST /v3/ai/toolkit/read/read-selection`
+
+```ts
+const response = await fetch(`${apiBaseUrl}/toolkit/read/read-selection`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+    range: selectionRange,
+    sessionId,
+    reviewOptions: {
+      mode: 'disabled',
+    },
+    format: 'json',
+    experimental_documentOptions: {
+      documentId,
+      userId: 'ai-assistant',
+    },
+  }),
+})
+
+const selectionResult = await response.json()
+
+const selectionPrompt = !selectionResult.output.isEmpty
+  ? selectionResult.output.prompt
+  : '当前没有活动选区。'
+```
+
+返回的 `prompt` 包含对已选内容的面向模型的描述，以及它在文档中的位置。
+
+## 4. 将选区上下文注入到代理指令中
+
+将选区 prompt 注入到代理指令中，让模型知道它应该关注文档的哪一部分。
+
+```ts
+const agent = new ToolLoopAgent({
+  model,
+  instructions: `你是一名能够编辑富文本文档的助手。
+在进行更改之前使用选区上下文。
+
+<selection-context>
+${selectionPrompt}
+</selection-context>
+
+${schemaAwarenessPrompt}`,
+  tools,
+})
+```
+
+随后，代理可以使用常规的 Server AI Toolkit 工具来读取更多上下文并编辑文档，同时始终保持对当前活动选区的约束。
+
+## 最终效果
+
+最终得到的是一种服务端 AI 聊天体验：只重写用户选中的内容：
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-selection-awareness"
+/>
+
+查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 下一步
+
+- 查看 [REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api#read-the-current-selection)
+- 了解 [架构感知](/content-ai/capabilities/server-ai-toolkit/api-reference/schema-awareness)

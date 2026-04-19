@@ -1,0 +1,161 @@
+---
+title: 将编辑器 CSS 导出为 DOCX 样式
+tags:
+  - type: start
+  - type: experiment
+  - type: version
+    label: v0.16.0
+meta:
+    title: CSS 到 DOCX | Tiptap 转换
+    description: 在导出时，将编辑器中的 CSS 规则编译为 DOCX 样式定义。实验性功能 — API 可能会发生变化。
+    category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
+
+<Callout variant="warning" title="实验性功能">
+  本页面所记录的 API 和属性映射可能在不另行通知的情况下发生变化。如果你依赖此功能，请固定准确的包版本。在采用之前请阅读
+  **不支持的内容** 部分。
+</Callout>
+
+<Requirements>
+  <RequirementItem label="1. 激活试用或订阅">
+    在你的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
+  </RequirementItem>
+  <RequirementItem label="2. 从私有注册表安装">
+    按照[安装指南](/guides/pro-extensions)连接到 Tiptap 的私有 npm 注册表并进行身份验证。
+  </RequirementItem>
+</Requirements>
+
+<CodeDemo isPro path="/Extensions/ExportDocxCssStyles" />
+
+## 这会做什么
+
+从 Tiptap 导出到 DOCX 通常需要读取文档的 **节点和标记属性**，并将其内联写入到每个段落、运行（run）和单元格中。最终得到的 DOCX 文件中，每个元素都携带自己的一份 `fontSize`、`color` 和间距——冗长、重复、在视觉上相同，但结构上很差。
+
+此功能让你把编辑器的 **样式表（stylesheet）** 作为唯一事实来源（source of truth）。你提供 CSS 规则（可以显式提供，也可以让我们从浏览器中提取），然后在导出时把这些规则编译为 DOCX **样式定义**——Word 将其作为自身事实来源使用的“命名条目”。导出的 DOCX 会包含完整的样式目录（style catalog），Word 用户只需编辑一次，就能改变所有使用该样式的段落外观。
+
+结合 [导入时的 CSS 注入](/conversion/import/docx/css-injection)，你就能获得文档的 *样式层* 的往返路径——与 *内容层* 分离。
+
+第二个示例演示浏览器提取（browser-extraction）变体：
+
+<CodeDemo isPro path="/Extensions/ExportDocxCssStylesExtract" />
+
+## 安装
+
+```bash
+npm i @tiptap-pro/extension-export-docx@^0.16.0
+```
+
+## 工作原理
+
+三个步骤：
+
+1. **收集 CSS。** 导出器会从两个可能来源读取你的样式（你可以任意选择其一或同时使用两者）：
+   - 你在 `configure()` 中传入的显式 `styles` 对象
+   - 浏览器的实时样式表（如果 `extractFromDocument: true`），作用域限定在你的编辑器根节点（editor root）
+2. **编译每个选择器。** 编译器在一个固定映射（import 侧相同的 16 个选择器）中查找每个选择器，把每个 CSS 属性转换为它的 DOCX 等效项，并丢弃那些无法映射的属性。
+3. **合并到样式目录（styles catalog）。** 编译后的 DOCX 样式片段会合并进导出选项的样式目录，然后交给 DOCX 写入器（writer）。
+
+```ts
+import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+
+ExportDocx.configure({
+  cssStyles: {
+    styles: {
+      h1: { fontSize: '32px', fontWeight: 'bold', color: '#1a1a1a' },
+      p:  { fontSize: '16px', lineHeight: 1.5, marginTop: '0pt', marginBottom: '8pt' },
+      blockquote: { fontStyle: 'italic', color: '#555' },
+    },
+    // 可选：也从实时浏览器样式表中提取规则
+    extractFromDocument: true,
+    // 可选：用于 rem/em 解析的基准
+    baseFontSize: 16,
+  },
+})
+```
+
+当 `extractFromDocument: true` 时，导出器会遍历 `document.styleSheets`，找到在你的编辑器根节点作用域下匹配这 16-selector 映射的规则，并将它们与任何显式 `styles` 合并。**逐属性而言，后者/显式样式优先（wins per-property）。**
+
+## 适用项
+
+**选择器（16）：** 与导入侧相同。
+
+`p`, `h1`–`h6`, `blockquote`, `ul li`, `ol li`, `strong`, `em`, `u`, `s`, `a`, `code`
+
+**CSS 属性。** 每个选择器都可以包含以下任意子集。未列出的属性在导出时会跳过，并在导出过程中输出 `console.warn`。
+
+- `fontSize` — 转换为半磅（DOCX `w:sz`）
+- `color` — 映射到 DOCX `w:color`（hex）
+- `fontFamily` — 映射到 DOCX `w:rFonts`
+- `fontWeight` — `bold` 会切换 `w:b`
+- `fontStyle` — `italic` 会切换 `w:i`
+- `textDecoration` — `underline` → `w:u`，`line-through` → `w:strike`
+- `backgroundColor` — 映射到 DOCX `w:shd` 填充
+- `letterSpacing` — 支持导出（导入时不提取）
+- `textAlign` — 映射到 DOCX `w:jc`（`justify` → DOCX `both`）
+- `marginTop` / `marginBottom` — 映射到 `w:spacing` 的 `before` / `after`（以 twips 为单位）
+- `lineHeight` — 无单位值 → 自动行规则（按比例）；`Npt` → 精确值；`Npx` → 转换
+
+**单位转换。** 编译器接受 `px`、`pt`、`rem`、`em`。`rem` 和 `em` 会基于 `baseFontSize`（默认 `16`）进行解析。其他单位（`%`、`vh`、`ch` 等）不被识别，相关属性会被跳过。
+
+**列表合并。** `ul li` 和 `ol li` 都映射到 DOCX `ListParagraph` 样式。如果两者都定义了，会合并它们的属性；逐属性而言，后面的条目胜出。
+
+## 不支持的内容
+
+<Callout variant="warning" title="这些是有意的限制">
+这些不是 bug。这些是功能的明确、文档化边界。如果你的工作流依赖下面任意一项，此功能就不是合适的工具。
+</Callout>
+
+- **跨域样式表。** 浏览器安全策略会阻止从任何“不同源（origin）”提供的样式表中访问 `.cssRules`。`extractFromDocument` 会在跳过这些样式表时保持静默（silently skip）。如果你的主题托管在 CDN 上，请改为通过 `styles` 显式传入规则。
+- **伪类、伪元素、媒体查询。** `a:hover`、`p::first-line`、`@media (min-width: …)` ——这些都无法映射到 DOCX，因此会被丢弃。
+- **CSS 变量和 `calc()`。** 编译器读取声明值（declared values），而不是计算值（computed values）——`var(--brand)` 或 `calc(100% - 2rem)` 不会被解析。请在传入样式之前先把它们解析为具体值。
+- **任意选择器。** 16-selector 映射就是完整菜单。像 `.prose p` 或 `article h1` 这样的后代选择器只有在“去掉作用域（scope stripping）之后”能与映射完全匹配时才会解析——否则会被丢弃。
+- **级联和特异性（cascade and specificity）。** 编译器会把每个选择器“扁平化”为一组单一属性集。如果你在不同特异性（specificities）下对同一选择器有冲突规则，那么只会把编译后的结果写入 DOCX——不会保留级联效果。
+- **计算样式继承（computed-style inheritance）。** 浏览器提取器会直接读取 `document.styleSheets`。它不会遍历 DOM，也不会计算继承值。如果某个属性在浏览器中会继承，但该属性并未在目标选择器上声明，它就不会被导出。
+
+## 你可以预期什么
+
+- 一个包含合适 `styles.xml` 的 DOCX 文件，Word 用户可以在里面集中编辑。
+- 对每个匹配到的选择器，DOCX 中只会有且仅有一个样式条目（style entry），并且只包含那些能顺利映射的属性。其他内容要么会被显式 `styles` 的覆盖合并，要么会在导出时使用 `console.warn` 跳过。
+- 行为确定性：在相同输入条件下（`styles` 对象和 DOM 样式表），导出的结果字节级可比较（byte-comparable）。
+- 安全的服务端使用：如果 `document` 未定义（Node、SSR），`extractFromDocument` 会成为无操作（no-op）——不会报错，不会注入任何内容。
+
+## 你不应该预期什么
+
+- **与导入侧完全一致的往返身份（Round-trip identity）。** 某些 CSS → DOCX 的转换是有损的（例如：`line-height: 1.5` → 自动行规则，但将该 DOCX 再导入时会把行高作为“无单位乘数”写回去，而它可能与 `1.5` 不完全相等——如果 Word 对存储的值做了归一化）。
+- **感知媒体查询的导出。** DOCX 不支持媒体查询。如果你的响应式 CSS 在移动端和桌面端不同，那么 `configure()` 时匹配到的那条规则（通常是桌面端）将被导出。
+- **与浏览器渲染的视觉一致性。** DOCX 的渲染引擎（Word、LibreOffice、Google Docs）对样式的解释方式与浏览器不同。预计在行距、字距微调（kerning）和段落间距上会有细微差异。
+- **自动主题翻译。** 颜色、字体和字号是 1:1 映射的。Word 的“主题”（强调色、字体搭配）不会自动对应——如果你想要 Word 主题，你需要直接在导出选项中设置好。
+
+## 配置参考
+
+```ts
+ExportDocx.configure({
+  cssStyles: {
+    // 二选一：选择器 → CSS 声明的显式对象
+    styles?: {
+      p?: { fontSize?: string; color?: string; /* … */ },
+      h1?: { /* … */ },
+      // …任意一个 16 个选择器
+    },
+
+    // 或：从浏览器的实时样式表中提取
+    extractFromDocument?: boolean,  // default: false
+
+    // 用于解析 rem / em 的基准大小
+    baseFontSize?: number,  // default: 16
+  },
+})
+```
+
+## 相关
+
+- [CSS 注入（导入）](/conversion/import/docx/css-injection) — 反向操作。
+- [导出样式](/conversion/export/docx/export-styles) — 原始 DOCX 导出样式指南（基于手动样式定义，而不是 CSS）。
+- [REST API](/conversion/export/docx/rest-api) — DOCX 导出端点。

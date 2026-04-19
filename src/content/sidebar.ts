@@ -74,7 +74,7 @@ export const sidebarConfig: SidebarConfig = {
         },
         {
           href: '/resources/agent-skill',
-          title: 'Agent 技能',
+          title: '代理技能',
         },
         {
           href: '/resources/tiptap-trial',
@@ -94,7 +94,7 @@ export const sidebarConfig: SidebarConfig = {
         },
         {
           href: 'https://tiptap.dev/pro-license',
-          title: '许可证',
+          title: '专业版许可证',
         },
       ],
     },

@@ -35,7 +35,7 @@ export const sidebarConfig: SidebarConfig = {
         },
         {
           href: '/guides/react-composable-api',
-          title: 'React Composable API',
+          title: 'React 组合式 API',
         },
         {
           href: '/guides/invalid-schema',
@@ -67,7 +67,7 @@ export const sidebarConfig: SidebarConfig = {
         },
         {
           href: '/guides/collaboration-api',
-          title: 'Collaboration API',
+          title: '协作 API',
         },
       ],
     },

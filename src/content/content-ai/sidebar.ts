@@ -28,7 +28,7 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: 'AI 工具包',
           href: '/content-ai/capabilities/ai-toolkit',
-          tags: ['Add-on'],
+          tags: ['附加组件'],
           beta: true,
           children: [
             {
@@ -132,7 +132,7 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/workflows/comments',
                 },
                 {
-                  title: 'Template',
+                  title: '模板工作流',
                   href: '/content-ai/capabilities/ai-toolkit/workflows/template',
                 },
               ],
@@ -282,7 +282,7 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: '服务端 AI 工具包',
           href: '/content-ai/capabilities/server-ai-toolkit',
-          tags: ['Add-on'],
+          tags: ['附加组件'],
           beta: true,
           children: [
             {
@@ -298,16 +298,24 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/server-ai-toolkit/agents',
               children: [
                 {
-                  title: 'AI 智能体聊天机器人',
+                  title: 'AI 代理聊天机器人',
                   href: '/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot',
                 },
                 {
-                  title: 'Tracked changes',
+                  title: '修订记录',
                   href: '/content-ai/capabilities/server-ai-toolkit/agents/tracked-changes',
                 },
                 {
                   title: '评论',
                   href: '/content-ai/capabilities/server-ai-toolkit/agents/comments',
+                },
+                {
+                  title: '选择感知',
+                  href: '/content-ai/capabilities/server-ai-toolkit/agents/selection-awareness',
+                },
+                {
+                  title: '流式传输',
+                  href: '/content-ai/capabilities/server-ai-toolkit/agents/streaming',
                 },
                 {
                   title: '工具定义',
@@ -318,6 +326,24 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: '工作流',
               href: '/content-ai/capabilities/server-ai-toolkit/workflows',
+              children: [
+                {
+                  title: '插入内容',
+                  href: '/content-ai/capabilities/server-ai-toolkit/workflows/insert-content',
+                },
+                {
+                  title: '校对工具',
+                  href: '/content-ai/capabilities/server-ai-toolkit/workflows/proofreader',
+                },
+                {
+                  title: 'Tiptap 编辑',
+                  href: '/content-ai/capabilities/server-ai-toolkit/workflows/tiptap-edit',
+                },
+                {
+                  title: '评论',
+                  href: '/content-ai/capabilities/server-ai-toolkit/workflows/comments',
+                },
+              ],
             },
             {
               title: 'API 参考',
@@ -328,7 +354,7 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/server-ai-toolkit/api-reference/schema-awareness',
                 },
                 {
-                  title: 'Review options',
+                  title: '审阅选项',
                   href: '/content-ai/capabilities/server-ai-toolkit/api-reference/review-options',
                 },
                 {
@@ -356,7 +382,7 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/server-ai-toolkit/changelog',
               children: [
                 {
-                  title: '服务器 AI 工具包',
+                  title: '服务端 AI 工具包',
                   href: '/content-ai/capabilities/server-ai-toolkit/changelog/server-ai-toolkit',
                 },
               ],
@@ -365,7 +391,7 @@ export const sidebarConfig: SidebarConfig = {
         },
         {
           title: 'AI 生成',
-          tags: ['Start'],
+          tags: ['Start 计划'],
           href: '/content-ai/capabilities/generation',
           children: [
             {

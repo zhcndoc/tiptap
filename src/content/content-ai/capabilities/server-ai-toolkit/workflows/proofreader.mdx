@@ -1,0 +1,207 @@
+---
+title: 校对工具
+meta:
+  title: 校对工具 | Tiptap Server AI Toolkit
+  description: 构建一个服务端校对工具：读取文档，生成修改建议，并在服务器端应用这些更改。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+构建一个校对器：在服务器上读取文档，生成修正，然后在服务器上应用这些修正。
+
+<CodeDemo
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-proofreader-workflow"
+/>
+
+查看 GitHub 上的[源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+<Callout title="Proofreader format" variant="info">
+  目前，Server AI Toolkit 的校对器工作流使用的是 `format: 'shorthand'`。
+</Callout>
+
+<Callout title="Reuse the same session across read and execute" variant="info">
+  读取步骤会返回一个 `sessionId`。在执行请求中发送同一个 `sessionId`，这样当文档在 AI 读取之后发生了变化时，服务器就能拒绝过期的编辑。
+</Callout>
+
+## 1. 从 AI 服务器读取文档内容
+
+首先以简写格式读取文档。调用：
+
+- `POST /v3/ai/toolkit/read/read-document`
+
+```ts
+const readResponse = await fetch(`${apiBaseUrl}/toolkit/read/read-document`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+    sessionId,
+    format: 'shorthand',
+    reviewOptions: {
+      mode: 'disabled',
+    },
+    experimental_documentOptions: {
+      documentId,
+      userId: 'ai-assistant',
+    },
+  }),
+})
+
+const readResult = await readResponse.json()
+```
+
+## 2. 生成校对器操作
+
+从 AI 服务器获取工作流定义，将其与模式感知提示（schema awareness prompt）合并，并让模型返回校对器操作。
+
+```ts
+const workflowResponse = await fetch(`${apiBaseUrl}/toolkit/workflows/proofreader`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    format: 'shorthand',
+  }),
+})
+
+const workflow = await workflowResponse.json()
+
+const schemaResponse = await fetch(`${apiBaseUrl}/toolkit/schema-awareness-prompt`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+  }),
+})
+
+const { prompt: schemaAwarenessPrompt } = await schemaResponse.json()
+
+const result = streamText({
+  model,
+  system: `${workflow.systemPrompt}\n\n${schemaAwarenessPrompt}`,
+  prompt: JSON.stringify({
+    content: readResult.output.content,
+    task: 'Correct all grammar and spelling mistakes',
+  }),
+  output: Output.object({ schema: z.fromJSONSchema(workflow.outputSchema) }),
+})
+
+const output = await result.output
+```
+
+## 3. 执行工作流
+
+直接执行该工作流，以将修正应用到文档。调用：
+
+- `POST /v3/ai/toolkit/execute-workflow/proofreader`
+
+```ts
+const executeResponse = await fetch(`${apiBaseUrl}/toolkit/execute-workflow/proofreader`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+    format: 'shorthand',
+    input: output,
+    sessionId: readResult.sessionId,
+    reviewOptions: {
+      mode: 'disabled',
+    },
+    experimental_documentOptions: {
+      documentId,
+      userId: 'ai-assistant',
+    },
+  }),
+})
+
+const executeResult = await executeResponse.json()
+```
+
+## 4. 从编辑器 UI 触发工作流
+
+客户端发送文档 ID 和当前的 session ID，然后从响应中存储更新后的 session ID。
+
+```tsx
+const runProofreader = async () => {
+  const response = await fetch('/api/server-proofreader-workflow', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      documentId,
+      schemaAwarenessData: getSchemaAwarenessData(editor),
+      sessionId,
+    }),
+  })
+
+  const result: { sessionId: string } = await response.json()
+  setSessionId(result.sessionId)
+}
+```
+
+## 跟踪更改（Tracked changes）
+
+为了让校对器在使用跟踪更改（tracked changes）而不是直接编辑时也能工作，请保持相同的设置，并只修改第 3 步中所示的执行调用以及客户端 UI。
+
+在第 3 步展示的 `POST /v3/ai/toolkit/execute-workflow/proofreader` 请求中，把这段：
+
+```ts
+reviewOptions: {
+  mode: 'disabled',
+}
+```
+
+替换为这段：
+
+```ts
+reviewOptions: {
+  mode: 'trackedChanges',
+  trackedChangesOptions: {
+    userId: 'ai-assistant',
+  },
+}
+```
+
+然后在编辑器中渲染跟踪更改控件，以便用户可以查看建议：
+
+```tsx
+editor.commands.acceptAllSuggestions()
+editor.commands.rejectAllSuggestions()
+```
+
+## 最终结果
+
+这是一个协作式的校对器工作流，用于在服务器端进行语法与拼写修正：
+
+<CodeDemo
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-proofreader-workflow"
+/>
+
+查看 GitHub 上的[源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 下一步
+
+- 阅读[评审选项（review options）](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options)
+- 查看[REST API 请求详情](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api#execute-the-proofreader-workflow)

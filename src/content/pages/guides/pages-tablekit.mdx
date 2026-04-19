@@ -1,0 +1,206 @@
+---
+title: PagesTableKit — Pages 扩展的表格
+tags:
+  - type: start
+  - type: experiment
+  - type: version
+    label: v0.2.0
+meta:
+    title: PagesTableKit | Tiptap Pages
+    description: 为 Pages 分页扩展量身定制的表格扩展。适用于任何 Pages 设置；并与 DOCX 导入配合以实现对 Word 文档的忠实渲染。实验性功能 — API 可能会变更。
+    category: Pages
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
+
+<Callout variant="warning" title="实验性功能">
+  PagesTableKit 专为 Pages 扩展而构建。其 API 和渲染行为可能在不另行通知的情况下发生变化。如果你依赖它，请固定精确的包版本。在采用之前请先阅读 **哪些不会工作** 部分。
+</Callout>
+
+<Requirements>
+  <RequirementItem label="1. 激活试用或订阅">
+    在你的账号中启动一个 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
+  </RequirementItem>
+  <RequirementItem label="2. 从私有注册表安装">
+    按照 [安装指南](/guides/pro-extensions) 认证访问 Tiptap 的私有 npm 注册表。
+  </RequirementItem>
+</Requirements>
+
+## 哪种设置适合我？
+
+<Callout title="两个受众，一个扩展" variant="info">
+  PagesTableKit 在两种截然不同的场景中都很有用。选择与您工作流匹配的那一种 —— 本页其余内容将围绕该分割来组织。
+</Callout>
+
+- **仅 Pages 工作流** — 你正在构建一个分页编辑器（可打印的版式、信件风格的文档、报告），并且需要能正确分页的表格。你**不会**导入 DOCX 文件。
+- **Pages + DOCX 导入工作流** — 你正在导入 `.docx` 文件，并在分页编辑器中渲染它们。你需要能分页**并且**忠实反映所编写 DOCX 的格式（声明的宽度、行高、缩进）。
+
+安装方式是相同的。设置与预期行为不同；下面每个部分都会标注适用于哪种场景。
+
+<CodeDemo isPro path="/Extensions/ImportDocxCssStylesPages" />
+
+## 安装
+
+```bash
+npm i @tiptap-pro/extension-pages-tablekit@^0.2.0
+```
+
+## 如何配置
+
+PagesTableKit 提供了一个单独的 `TableKit` 扩展，它将 Table、TableRow、TableCell 和 TableHeader 扩展打包在一起。请只注册一次，而不是分别手动接入这四个扩展。
+
+### 场景 A：仅 Pages（不导入 DOCX）
+
+你只需要 Pages + PagesTableKit。把 `TableKit` 注册到你已经使用的任意编辑器套件旁边即可。
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { Pages } from '@tiptap-pro/extension-pages'
+import { TableKit } from '@tiptap-pro/extension-pages-tablekit'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    TableKit,
+    Pages.configure({ /* 页面格式、页边距等. */ }),
+  ],
+})
+```
+
+### 场景 B：Pages + DOCX 导入
+
+将 PagesTableKit 与 [ConvertKit](/conversion/import/docx/convertkit)（具备 DOCX 感知的编辑器套件）以及 [ImportDocx 扩展](/conversion/import/docx/editor-import) 配套使用。禁用 ConvertKit 自带的表格栈，这样 PagesTableKit 的 `TableKit` 就可以接管：
+
+```ts
+import { Editor } from '@tiptap/core'
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+import { Import as ImportDocx } from '@tiptap-pro/extension-import-docx'
+import { Pages } from '@tiptap-pro/extension-pages'
+import { TableKit } from '@tiptap-pro/extension-pages-tablekit'
+
+const editor = new Editor({
+  extensions: [
+    ConvertKit.configure({ table: false }), // 禁用 ConvertKit 的表格栈
+    TableKit,
+    ImportDocx.configure({ /* appId, token, … */ }),
+    Pages.configure({ /* 页面格式、页边距等. */ }),
+  ],
+})
+```
+
+## 支持的内容
+
+### 通用行为（两种场景都适用）
+
+- **分页安全的表格渲染。** 表格位于页面内容区域内，不会发生水平溢出。
+- **列比例保持。** 当每个单元格都带有 `colwidth` 时，列会按比例缩小以适配页面 — 例如 10 % / 40 % / 50 % 的列分配会在任何页面宽度下都渲染为 10 / 40 / 50。
+- **行高行为。**
+  - `heightRule: "exact"` — 行按声明的高度渲染，并裁剪溢出的内容。
+  - `heightRule: "atLeast"`（或未设置）— 行会在内容过多或更窄的列导致本应裁剪时，向垂直方向增长。
+- **实时更新。** 增加、删除或重新排序单元格的编辑会立刻重新布局该行。
+
+### 仅 DOCX 专属行为（场景 B）
+
+当你的文档内容是通过 DOCX 导入器生成的时，这些额外能力会自动启用。你不需要单独配置它们 —— 如果转换器输出了该属性，PagesTableKit 就会遵从它。
+
+- **遵守已声明的 DOCX 宽度。** 如果 DOCX 表格作者设定的宽度大于页面，它会按比例缩小到内容区域，而不是溢出。
+- **DOCX 行高。** 使用 `w:trHeight` 且 `w:hRule="exact"` 时会裁剪；`w:hRule="atLeast"`（或缺失）时会增长。
+- **保留窄的间距列。** DOCX 间距列（1–15 px）不会被放大成可见宽度。
+- **负值 DOCX 缩进。** DOCX 中的负值 `w:tblInd`（Word 会把它渲染到纸张边缘的槽位/留白处）会保留到 `attrs.indent` 中，但会在视觉上被钳制为 0，防止表格推到页面边缘之外。
+- **单元格背景、垂直对齐、每侧边框。** 会从 DOCX 导入直接传递过来，无需额外处理。
+
+## 不支持的内容
+
+<Callout variant="warning" title="这些是有意设定的限制">
+这些不是漏洞。这些是该功能明确且有文档记录的边界。如果你的工作流依赖下面任何一项，那么该功能并不是合适的工具。
+</Callout>
+
+### 通用限制（两种场景都适用）
+
+- **没有 Pages 扩展的编辑器。** PagesTableKit 为 Pages 的分页布局而设计 —— 它依赖 Pages 将行限制在页面内。在标准编辑器中，行可能不会正确渲染，并且过宽的表格会水平溢出。请改用普通的表格扩展。
+- **手写行混合 `colwidth` / 无 `colwidth`。** 当**每个**单元格都携带列宽时，才会触发按比例缩小的行为。在某些单元格有列宽、某些没有的行中，列的比例可能与预期不一致。
+- **列调整手柄。** 支持从 `@tiptap/extension-table` 拖拽调整宽度，但最终渲染出来的宽度可能是按比例分配的，而不一定是你拖拽得到的精确像素值 —— 尤其是在每个单元格本来就已带有列宽的情况下。
+
+### 仅 DOCX 限制（场景 B）
+
+- **浮动表格。** DOCX 的 `w:tblpPr`（表格相对于锚点定位，并带有文字环绕）不会被导入器转换 —— 浮动表格会以普通的叠放（堆叠）表格形式渲染。
+- **与 Microsoft Word 表格布局的像素级一致。** Word 使用专有的布局算法，将固定与按比例 sizing 混合，并结合内容测量。对于用 Word 的“根据内容自动适配（AutoFit to contents）”创建的表格，可能会看到小的差异。
+
+## 已知问题
+
+### 行必须能放进单个页面
+
+当某个表格行无法放入当前页面时，Pages 会把**整行**作为一个原子单元移动到下一页。这与 Microsoft Word 不同；Word 会把很高的行在视觉上拆分到多个页面中 —— PagesTableKit 目前不支持在行内部进行分页拆分。
+
+如果一行的高度大于页面内容区域，即使将它移到下一页也依然放不下：它会继续被尝试向后移动，编辑器会无限循环地继续尝试。最终会导致无限分页循环和损坏的编辑器。
+
+**如何避免。** 保持行高小于页面内容区域。尤其注意：
+
+- `heightRule: "atLeast"` 的行：其内容可能无限增长。
+- 继承了非常高的精确高度行的 DOCX 导入：这些行是为比目标页面格式更大的纸张编写的。
+- 单元格内嵌套的表格：这可能导致外层行比页面更高。
+
+行内分页拆分在路线图中。ETA：待定。
+
+## 预期会发生什么
+
+### 通用（两种场景都适用）
+
+- 表格位于页面内容区域内；精确高度的行会被裁剪，`atLeast` 的行会增长。
+- 每个事务都会更新 — 添加或移除单元格会立即重新布局该行。
+- 非常大的表格（成千上万行）在编辑时可能会有明显的布局开销。如果遇到这种情况，考虑手动对大表格分页，或把它们拆分到多个文档中。
+
+### 仅 DOCX（场景 B）
+
+- DOCX 表格在导入时会保留其声明的宽度、行高、缩进、背景颜色以及每侧边框。
+- 过宽的 DOCX 表格（在 Word 模板中常见于全宽绘制）会在视觉上缩小以适配页面，而不是溢出。
+- 渲染导入的 DOCX JSON 之前你不需要做后处理 —— 扩展会读取导入器输出的属性。
+
+## 不要指望
+
+### 通用（两种场景都适用）
+
+- **Pages 的替代品。** PagesTableKit 只负责表格。分页、页面容器、页眉和页脚都是 Pages 的职责。
+- **来自你自定义 DOM 代码的列宽变更。** 列宽来自 ProseMirror 文档。请通过 `@tiptap/extension-table` 的命令（或你自己的事务）来改变它们，而不是直接写入 `dom.style`。
+
+### 仅 DOCX（场景 B）
+
+- **往返一致性（round-trip identity）。** 通过 Convert 管道导入再导出 DOCX 不能保证字节级完全一致。导入时会丢弃不支持的 DOCX 功能（浮动、某些表格样式）。
+
+## 配置参考
+
+PagesTableKit 导出一个单独的 `TableKit` 扩展，将 Table、TableRow、TableCell 和 TableHeader 打包在一起。
+
+```ts
+import { TableKit } from '@tiptap-pro/extension-pages-tablekit'
+
+// 使用默认值
+TableKit,
+```
+
+每个打包的扩展都可以配置（或用 `false` 禁用），通过 `TableKit.configure()`：
+
+```ts
+TableKit.configure({
+  table:       { cellMinWidth: 1 }, // 来自 @tiptap/extension-table 的表格选项
+  tableRow:    { /* TableRow 选项 */ },
+  tableCell:   { /* TableCell 选项 */ },
+  tableHeader: false, // 完全禁用表头扩展
+})
+```
+
+PagesTableKit 没有任何独有的配置选项 —— 每个键都会转发到底层扩展的标准选项。
+
+## 相关内容
+
+- [Pages 概览](/pages/getting-started/overview) — Pages 分页扩展（PagesTableKit 依赖它）。
+- [Pages 与表格](/pages/guides/table-with-pages) — 在 Pages 中编写表格的通用指南。
+- [ConvertKit](/conversion/import/docx/convertkit) — 具备 DOCX 感知的编辑器套件；用于场景 B。
+- [编辑器扩展（导入 DOCX）](/conversion/import/docx/editor-import) — `ImportDocx` 扩展如何把 Word 内容拉入你的编辑器。
+- [CSS 注入（导入）](/conversion/import/docx/css-injection) — 从 DOCX 样式目录中提取 CSS，以便在分页内容中获得一致的排版效果。

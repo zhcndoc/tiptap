@@ -4,7 +4,7 @@ extension:
   name: UniqueID
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-unique-id
   description: 为每个节点添加唯一 ID 并跟踪它们。
-  type: extension
+  type: 扩展
   icon: Hash
 tags:
   - type: image
@@ -22,6 +22,7 @@ meta:
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
 
 `UniqueID` 扩展为你配置的节点类型添加唯一 ID。  
 该扩展会跟踪你的节点，即使你拆分它们、合并它们、撤销/重做更改、裁剪内容、粘贴内容……它都能正常工作。  
@@ -107,7 +108,122 @@ UniqueID.configure({
 })
 ```
 
-## 服务端唯一 ID 工具
+## 与协作（Collaboration）一起使用
+
+<Callout title="Important" variant="warning">
+When using the UniqueID extension together with the [Collaboration extension](/editor/extensions/functionality/collaboration), ensure that the editor is only mounted **after** the collaboration provider has synced. Mounting the editor on an unsynced `Y.Doc` can lead to unintended document state (e.g., persistent empty paragraphs), which the UniqueID extension will then preserve.
+</Callout>
+
+### 不正确的设置
+
+In this example, the editor is mounted immediately with the Collaboration extension before the provider has synced. This causes the editor to initialize against an empty `Y.Doc`, which leads to unintended document mutations.
+
+```tsx
+import Collaboration from '@tiptap/extension-collaboration'
+import { isChangeOrigin } from '@tiptap/extension-collaboration'
+import { EditorContent, useEditor } from '@tiptap/react'
+import { TiptapCollabProvider } from '@tiptap-pro/provider'
+import { useEffect } from 'react'
+import * as Y from 'yjs'
+
+const doc = new Y.Doc()
+
+export default () => {
+  // ❌ Editor is mounted before the provider has synced
+  const editor = useEditor({
+    extensions: [
+      // ...other extensions
+      UniqueID.configure({
+        types: ['paragraph', 'heading'],
+        filterTransaction: (transaction) => !isChangeOrigin(transaction),
+      }),
+      Collaboration.configure({
+        document: doc,
+      }),
+    ],
+    content: '<p>Initial content</p>', // This will be duplicated on every sync
+  })
+
+  useEffect(() => {
+    // Provider connects and syncs after the editor is already mounted
+    const provider = new TiptapCollabProvider({
+      name: 'your-document-name',
+      appId: 'YOUR_APP_ID',
+      token: 'YOUR_JWT',
+      document: doc,
+    })
+  }, [])
+
+  return <EditorContent editor={editor} />
+}
+```
+
+### 正确的设置
+
+To avoid this issue, follow this initialization order:
+
+1. Initialize the `Y.Doc`
+2. Start the collaboration provider
+3. Wait for the `synced` event
+4. Check if the collaborative document is empty
+5. Mount the editor with the correct content
+
+```tsx
+import Collaboration from '@tiptap/extension-collaboration'
+import { isChangeOrigin } from '@tiptap/extension-collaboration'
+import { EditorContent, useEditor } from '@tiptap/react'
+import { TiptapCollabProvider } from '@tiptap-pro/provider'
+import { useEffect } from 'react'
+import * as Y from 'yjs'
+
+const doc = new Y.Doc()
+
+export default () => {
+  const editor = useEditor({
+    extensions: [
+      // ...other extensions
+      UniqueID.configure({
+        types: ['paragraph', 'heading'],
+        filterTransaction: (transaction) => !isChangeOrigin(transaction),
+      }),
+      Collaboration.configure({
+        document: doc,
+      }),
+    ],
+    // Do not set content here — wait for sync
+  })
+
+  useEffect(() => {
+    const provider = new TiptapCollabProvider({
+      name: 'your-document-name',
+      appId: 'YOUR_APP_ID',
+      token: 'YOUR_JWT',
+      document: doc,
+
+      onSynced() {
+        // Only seed content if the collaborative document is empty
+        const isEmpty = doc.getXmlFragment('default').length === 0
+
+        if (isEmpty && editor) {
+          editor.commands.setContent(yourInitialContent)
+        }
+      },
+    })
+  }, [])
+
+  return <EditorContent editor={editor} />
+}
+```
+
+### 关键要点
+
+- **不要在同步之前初始化编辑器内容。** 使用协作时不要依赖默认编辑器状态。
+- **使用 `filterTransaction`** 来忽略来自协作的变更。查看 [filterTransaction 设置](#filtertransaction)。
+- **避免在开发过程中复用损坏的文档名称。** 如果某个错误状态已经被持久化，请使用新的文档名称以干净地开始。
+
+有关完整的协作设置指南，请参考 [安装协作（Install Collaboration）](/collaboration/getting-started/install) 文档。
+
+## 服务器端唯一 ID 工具
 
 `generateUniqueIds` 函数允许你在服务端为 Tiptap 文档添加唯一 ID，无需创建 `Editor` 实例。这对于在服务端处理文档或需要为现有内容添加 ID 非常有用。
 

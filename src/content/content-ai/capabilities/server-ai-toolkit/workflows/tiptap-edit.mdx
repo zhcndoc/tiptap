@@ -1,0 +1,199 @@
+---
+title: Tiptap 编辑
+meta:
+  title: Tiptap 编辑 | Tiptap Server AI 工具包
+  description: 为 Tiptap 文档构建通用的服务器端编辑工作流。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+构建一个通用的编辑工作流：读取文档、生成编辑操作，并将其应用到服务器上。
+
+<CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/server-edit-workflow" />
+
+查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+<Callout title="当 AI 需要重写现有内容时使用该工作流" variant="info">
+  Tiptap 编辑工作流是最灵活的 Server AI Toolkit 工作流。可用于诸如
+  重写段落、在目标节点附近插入新块，或转换整份文档等任务。
+</Callout>
+
+<Callout title="在读取与执行中复用同一个 session" variant="info">
+  读取步骤会返回一个 `sessionId`。在执行请求中发送相同的 `sessionId`，以便当文档在 AI 读取之后发生变化时，服务器能够拒绝过期的编辑。
+</Callout>
+
+## 1. 从 AI 服务器读取文档
+
+读取你希望模型处理的文档部分。调用：
+
+- `POST /v3/ai/toolkit/read/read-document`
+
+```ts
+const readResponse = await fetch(`${apiBaseUrl}/toolkit/read/read-document`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+    sessionId,
+    format: 'shorthand',
+    reviewOptions: {
+      mode: 'disabled',
+    },
+    experimental_documentOptions: {
+      documentId,
+      userId: 'ai-assistant',
+    },
+  }),
+})
+
+const readResult = await readResponse.json()
+```
+
+## 2. 生成编辑操作
+
+从 AI 服务器获取工作流定义，并让模型生成结构化的编辑操作。
+
+```ts
+const workflowResponse = await fetch(`${apiBaseUrl}/toolkit/workflows/edit`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    format: 'shorthand',
+  }),
+})
+
+const workflow = await workflowResponse.json()
+
+const schemaResponse = await fetch(`${apiBaseUrl}/toolkit/schema-awareness-prompt`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+  }),
+})
+
+const { prompt: schemaAwarenessPrompt } = await schemaResponse.json()
+
+const result = streamText({
+  model,
+  system: `${workflow.systemPrompt}\n\n${schemaAwarenessPrompt}`,
+  prompt: JSON.stringify({
+    content: readResult.output.content,
+    task,
+  }),
+  output: Output.object({ schema: z.fromJSONSchema(workflow.outputSchema) }),
+})
+
+const output = await result.output
+```
+
+## 3. 执行编辑工作流
+
+将生成的操作发送回 Server AI Toolkit。当你使用的是 Tiptap Cloud 文档时，服务器会自动更新协作文档。调用：
+
+- `POST /v3/ai/toolkit/execute-workflow/tiptap-edit`
+
+```ts
+const executeResponse = await fetch(`${apiBaseUrl}/toolkit/execute-workflow/tiptap-edit`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+    format: 'shorthand',
+    input: output,
+    sessionId: readResult.sessionId,
+    reviewOptions: {
+      mode: 'disabled',
+    },
+    experimental_documentOptions: {
+      documentId,
+      userId: 'ai-assistant',
+    },
+  }),
+})
+
+const executeResult = await executeResponse.json()
+```
+
+## 4. 从编辑器 UI 触发工作流
+
+客户端应保存最新的 `sessionId`，并在下一次请求中一并发送。
+
+```tsx
+const response = await fetch('/api/server-edit-workflow', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    documentId,
+    schemaAwarenessData: getSchemaAwarenessData(editor),
+    task,
+    sessionId,
+  }),
+})
+
+const result: { sessionId: string } = await response.json()
+setSessionId(result.sessionId)
+```
+
+## 跟踪更改（Tracked changes）
+
+要以“跟踪更改”运行 Tiptap 编辑工作流，请保持相同的设置，并将第 3 步中“执行”请求从直接编辑改为使用跟踪更改：
+
+在 `POST /v3/ai/toolkit/execute-workflow/tiptap-edit` 的请求中（如第 3 步所示），将下面这段：
+
+```ts
+reviewOptions: {
+  mode: 'disabled',
+}
+```
+
+替换为这段：
+
+```ts
+reviewOptions: {
+  mode: 'trackedChanges',
+  trackedChangesOptions: {
+    userId: 'ai-assistant',
+  },
+}
+```
+
+然后在编辑器中渲染跟踪更改控件，让用户可以查看并接受或拒绝 AI 的更改：
+
+```tsx
+editor.commands.acceptAllSuggestions()
+editor.commands.rejectAllSuggestions()
+```
+
+## 最终效果
+
+完成的演示会在服务器端将协作文档进行整体重写：
+
+<CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/server-edit-workflow" />
+
+查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 下一步
+
+- 查看 [Server AI Toolkit REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)
+- 查看 [REST API 请求详情](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api#execute-the-tiptap-edit-workflow)

@@ -54,7 +54,7 @@ export const sidebarConfig: SidebarConfig = {
           href: '/examples/basics/tasks',
         },
         {
-          title: 'Text direction & RTL support',
+          title: '文字方向与 RTL 支持',
           href: '/examples/basics/text-direction',
         },
       ],

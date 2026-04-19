@@ -1,0 +1,191 @@
+---
+title: 插入内容
+meta:
+  title: 插入内容 | Tiptap Server AI Toolkit
+  description: 构建一个服务器端工作流，用 AI 生成的内容替换当前所选内容。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+在服务器上使用 AI 生成的内容替换当前选区，构建一个工作流。
+
+<CodeDemo
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-insert-content-workflow"
+/>
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+<Callout title="先决条件" variant="info">
+  本指南假设你已经按照
+  [AI 代理聊天机器人指南](/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot)
+  中所示，为 Server AI Toolkit 配置了 JWT 身份验证。
+</Callout>
+
+<Callout title="在读和执行之间复用同一个会话" variant="info">
+  读取选区步骤会返回一个 `sessionId`。在执行请求中发送同一个 `sessionId`，
+  这样当 AI 读取选区后所选内容发生变化时，服务器就可以拒绝过期的编辑。
+</Callout>
+
+## 1. 从 AI 服务器读取当前选区
+
+insert-content 工作流首先从协作文档中读取被选中的内容。
+调用：
+
+- `POST /v3/ai/toolkit/read/read-selection`
+
+```ts
+const readResponse = await fetch(`${apiBaseUrl}/toolkit/read/read-selection`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+    range,
+    sessionId,
+    format: 'shorthand',
+    reviewOptions: {
+      mode: 'disabled',
+    },
+    experimental_documentOptions: {
+      documentId,
+      userId: 'ai-assistant',
+    },
+  }),
+})
+
+const readResult = await readResponse.json()
+
+if (readResult.output.isEmpty) {
+  throw new Error('No selection available for insert-content workflow')
+}
+```
+
+## 2. 获取工作流定义并构建提示词
+
+获取工作流定义和模式感知提示词，然后将它们组合到 system 提示词中。
+工作流定义来自：
+
+- `POST /v3/ai/toolkit/workflows/insert-content`
+
+```ts
+const workflowResponse = await fetch(`${apiBaseUrl}/toolkit/workflows/insert-content`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    format: 'shorthand',
+  }),
+})
+
+const workflow = await workflowResponse.json()
+
+const schemaResponse = await fetch(`${apiBaseUrl}/toolkit/schema-awareness-prompt`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+  }),
+})
+
+const { prompt: schemaAwarenessPrompt } = await schemaResponse.json()
+
+const result = streamText({
+  model,
+  system: `${workflow.systemPrompt}\n\n${schemaAwarenessPrompt}`,
+  prompt: JSON.stringify({
+    task,
+    replace: readResult.output.content,
+    context: readResult.output.prompt,
+  }),
+  output: Output.object({ schema: z.fromJSONSchema(workflow.outputSchema) }),
+})
+
+const workflowOutput = await result.output
+```
+
+使用 `format: 'shorthand'` 会让模型输出更紧凑，同时仍然会使用结构化输出模式对其进行校验。
+
+## 3. 执行工作流并获取插入范围
+
+将生成的简写字符串传递给执行端点。响应会包含新插入内容的范围。
+调用：
+
+- `POST /v3/ai/toolkit/execute-workflow/insert-content`
+
+```ts
+const executeResponse = await fetch(`${apiBaseUrl}/toolkit/execute-workflow/insert-content`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwtToken}`,
+    'X-App-Id': appId,
+  },
+  body: JSON.stringify({
+    schemaAwarenessData,
+    format: 'shorthand',
+    input: workflowOutput.content,
+    range,
+    sessionId: readResult.sessionId,
+    reviewOptions: {
+      mode: 'disabled',
+    },
+    experimental_documentOptions: {
+      documentId,
+      userId: 'ai-assistant',
+    },
+  }),
+})
+
+const executeResult = await executeResponse.json()
+```
+
+## 4. 在客户端恢复选区
+
+在协作文档更新之后，再次选中插入的内容，这样用户就可以继续使用新文本进行工作。
+
+```tsx
+const result: {
+  sessionId: string
+  range: { from: number; to: number } | null
+} = await response.json()
+
+if (result.range) {
+  editor.commands.focus()
+  editor.commands.setTextSelection(result.range)
+}
+```
+
+## 已跟踪的变更
+
+insert-content 工作流的“修订跟踪”支持即将推出。
+
+## 最终效果
+
+完成的演示会替换当前选区，并保持新内容仍处于选中状态：
+
+<CodeDemo
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-insert-content-workflow"
+/>
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 下一步
+
+- 阅读 [Server AI Toolkit REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)
+- 查看 [REST API 请求详情](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api#execute-the-insert-content-workflow)

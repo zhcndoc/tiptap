@@ -8,6 +8,25 @@ meta:
 
 # @tiptap-pro/ai-toolkit
 
+## 0.4.0
+
+### Minor Changes
+
+- b41d288: 为 AI Caret 扩展新增 `aiCaret:positionChanged` 事件。只要在流式传输或编辑操作期间更新 AI 光标位置，该事件就会触发，载荷为 `{ position: number }`——即 ProseMirror 文档位置。通过 `editor.on('aiCaret:positionChanged', handler)` 订阅以响应 AI 的书写位置，例如实现自动滚动。
+
+### Patch Changes
+
+- a8ac0a0: 改进 `tiptapReadSelection` 工具，使其使用更少的 tokens，并且不会导致 AI 将所选内容误认为选择所在节点的内容。
+- fd30961: 当 AI 想要替换整个文档时，通过比较文档的当前状态与 AI 上次读取文档时的状态，防止它覆盖用户的编辑内容。
+- 99f0fde: 用于校验 AI 不会覆盖用户更改的哈希函数更高效。
+
+## 0.3.10
+
+### Patch Changes
+
+- 61cfeb6: 避免在流式传输 AI 工具包更新时重建建议跟踪状态；当这些更新会立刻替换建议时，跳过不必要的重建。
+- fb9430c: 性能优化：在流式传输期间，当批处理里不会应用任何操作时，跳过不必要的计算。这使得校对工作流在流式传输时更加高效。
+
 ## 0.3.9
 
 ### Patch Changes
@@ -56,7 +75,7 @@ meta:
 
 ### 修复更新
 
-- edd30dc: 向分割视图添加 ResizeObserver，当容器宽度变化（例如侧边栏切换）时重新计算间隔高度，带有防抖和冷却以防止振荡。
+- edd30dc: 向分割视图添加 ResizeObserver，当容器宽度变化（例如侧边栏切换）时重新计算间隔高度，并带有防抖和冷却以防止振荡。
 
 ## 0.3.0
 

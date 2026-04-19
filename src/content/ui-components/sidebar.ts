@@ -39,7 +39,7 @@ export const sidebarConfig: SidebarConfig = {
               href: '/ui-components/install/astro',
             },
             {
-              title: 'Manual',
+              title: '手动安装',
               href: '/ui-components/install/manual',
             },
           ],
@@ -66,12 +66,12 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: '简单编辑器',
           href: '/ui-components/templates/simple-editor',
-          tags: ['MIT licensed'],
+          tags: ['MIT 许可证'],
         },
         {
-          title: 'Notion 编辑器',
+          title: '类 Notion 编辑器',
           href: '/ui-components/templates/notion-like-editor',
-          tags: ['Start'],
+          tags: ['Start 计划'],
         },
       ],
     },
@@ -141,15 +141,15 @@ export const sidebarConfig: SidebarConfig = {
               href: '/ui-components/components/duplicate-button',
             },
             {
-              title: 'Emoji 下拉菜单',
+              title: '表情符号下拉菜单',
               href: '/ui-components/components/emoji-dropdown-menu',
             },
             {
-              title: 'Emoji 菜单',
+              title: '表情符号菜单',
               href: '/ui-components/components/emoji-menu',
             },
             {
-              title: 'Emoji 触发按钮',
+              title: '表情符号触发按钮',
               href: '/ui-components/components/emoji-trigger-button',
             },
             {
@@ -205,11 +205,11 @@ export const sidebarConfig: SidebarConfig = {
               href: '/ui-components/components/reset-all-formatting-button',
             },
             {
-              title: 'Slash 触发按钮',
+              title: '斜杠命令触发按钮',
               href: '/ui-components/components/slash-command-trigger-button',
             },
             {
-              title: 'Slash 下拉菜单',
+              title: '斜杠下拉菜单',
               href: '/ui-components/components/slash-dropdown-menu',
             },
             {
