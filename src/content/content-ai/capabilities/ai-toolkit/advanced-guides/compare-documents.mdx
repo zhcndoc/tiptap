@@ -37,46 +37,46 @@ toolkit.startComparingDocuments({
 
 如果未提供 `otherDoc`，AI 工具包将从调用 `startComparingDocuments` 之时起，开始跟踪当前文档的变更，并显示变更前后的文档差异。
 
-差异会作为[建议](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions)显示在编辑器中。将以下 CSS 文件添加到您的应用中，可将建议格式化为红绿差异：
+差异会以 [建议](/content-ai/capabilities/ai-toolkit/api-reference/suggestions) 的形式显示在编辑器中。将以下 CSS 文件添加到您的应用中，以将建议格式化为红绿对比差异：
 
 ```css
-/* 插入文本高亮为绿色 */
+/* 将插入的文本高亮为绿色 */
 .tiptap-ai-suggestion,
 .tiptap-ai-suggestion > * {
   background-color: oklch(87.1% 0.15 154.449);
 }
 
-/* Lighter background for change groups (sub-changes carry the stronger highlight) */
+/* 变更组使用更浅的背景色（子变更保留更强的高亮） */
 .tiptap-ai-suggestion.tiptap-ai-suggestion--change-group,
 .tiptap-ai-suggestion.tiptap-ai-suggestion--change-group > *:not(.tiptap-ai-suggestion-sub-change) {
   background-color: oklch(0.962 0.044 156.743);
 }
 
-/* Highlight sub-changes within inline groups */
+/* 高亮行内组中的子变更 */
 .tiptap-ai-suggestion-sub-change {
   background-color: oklch(87.1% 0.15 154.449);
 }
 
-/* Highlight deleted text in red */
+/* 将删除的文本高亮为红色 */
 .tiptap-ai-suggestion-diff,
 .tiptap-ai-suggestion-diff > * {
   background-color: oklch(80.8% 0.114 19.571);
   color: oklch(0.396 0.141 25.723);
 }
 
-/* Lighter background for diff change groups (sub-changes carry the stronger highlight) */
+/* diff 变更组使用更浅的背景色（子变更保留更强的高亮） */
 .tiptap-ai-suggestion-diff.tiptap-ai-suggestion-diff--change-group,
 .tiptap-ai-suggestion-diff.tiptap-ai-suggestion-diff--change-group
   > *:not(.tiptap-ai-suggestion-diff-sub-change) {
   background-color: oklch(0.936 0.032 17.717);
 }
 
-/* Highlight sub-changes within the replacement diff widget */
+/* 高亮替换 diff 小部件中的子变更 */
 .tiptap-ai-suggestion-diff-sub-change {
   background-color: oklch(80.8% 0.114 19.571);
 }
 
-/* Render table row deletions correctly */
+/* 正确渲染表格行删除 */
 .tiptap-ai-suggestion-diff:has(tr) {
   display: contents;
 }
@@ -87,7 +87,14 @@ toolkit.startComparingDocuments({
 }
 ```
 
-调用 `getSuggestions` 获取文档间每个具体变更的列表，作为[建议](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions)存储。然后，可以调用 `acceptSuggestion` 或 `rejectSuggestion` 来单独接受或拒绝这些变更。
+比较文档时，变更会以建议的形式显示。若要接受或拒绝单个变更或一次性处理所有变更，请使用以下建议方法：
+
+- [`acceptSuggestion`](/content-ai/capabilities/ai-toolkit/api-reference/suggestions#acceptsuggestion)：接受特定变更
+- [`rejectSuggestion`](/content-ai/capabilities/ai-toolkit/api-reference/suggestions#rejectsuggestion)：拒绝特定变更
+- [`acceptAllSuggestions`](/content-ai/capabilities/ai-toolkit/api-reference/suggestions#acceptallsuggestions)：接受所有变更
+- [`rejectAllSuggestions`](/content-ai/capabilities/ai-toolkit/api-reference/suggestions#rejectallsuggestions)：拒绝所有变更
+
+调用 `getSuggestions` 可获取文档之间的变更列表，这些变更会以 [建议](/content-ai/capabilities/ai-toolkit/api-reference/suggestions) 的形式存储。
 
 ```ts
 // 获取所有变更（作为建议）

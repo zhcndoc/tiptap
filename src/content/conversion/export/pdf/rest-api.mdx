@@ -8,7 +8,7 @@ tags:
 meta:
     title: PDF REST API | Tiptap 转换
     description: 了解如何使用 Tiptap Conversion REST API v2 将 Tiptap JSON 文档导出为 PDF 格式。
-    category: Conversion
+    category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -97,35 +97,62 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 
 #### 页眉配置
 
-`headers` 对象允许您自定义导出 PDF 的页眉：
+`headers` 对象允许您自定义导出 PDF 文档的页眉。每个插槽（`default`、`first`、`even`）都接受以下任一形式：纯文本字符串、字符串化的 Tiptap JSONContent，或直接在 JSON 请求体中发送的 Tiptap JSONContent 对象。
 
-| 属性                  | 类型      | 描述                                                                                                                         |
-| --------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `evenAndOddHeaders`   | `boolean` | 是否对奇数页和偶数页使用不同的页眉                                                                                           |
-| `differentFirstPage`  | `boolean` | 是否对首页使用不同的页眉。为 `true` 时，首页使用 `first` 值替代 `default`                                                     |
-| `default`             | `string`  | 每页的标准默认页眉，或激活 `evenAndOddHeaders` 时奇数页的页眉。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于富文本格式。 |
-| `first`               | `string`  | 首页页眉。仅当 `differentFirstPage` 为 `true` 时有效。支持纯文本字符串或字符串化的 Tiptap JSONContent。                       |
-| `even`                | `string`  | 偶数页页眉，仅当 `evenAndOddHeaders` 启用时有效。支持纯文本字符串或字符串化的 Tiptap JSONContent。                            |
+| 属性                | 类型                  | 说明                                                                                                          |
+| ------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `evenAndOddHeaders` | `boolean`             | 是否为奇数页和偶数页使用不同的页眉                                                              |
+| `differentFirstPage` | `boolean`             | 是否在首页使用不同的页眉。当为 `true` 时，第一页将使用 `first` 值而不是 `default`。 |
+| `default`           | `string \| Object`    | 每一页的标准默认页眉，或在启用 `evenAndOddHeaders` 时奇数页的页眉。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
+| `first`             | `string \| Object`    | 首页页眉。仅在 `differentFirstPage` 设置为 `true` 时使用。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
+| `even`              | `string \| Object`    | 在启用 `evenAndOddHeaders` 选项时，偶数页的页眉。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
 
-<Callout title="纯文本 vs. Tiptap JSONContent">
-    每个页眉值可以是**纯文本字符串**（生成简单无样式页眉）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等富格式）。使用 JSONContent 时，请先用 `JSON.stringify()` 进行字符串化，然后再放入请求体。
+<Callout title="接受的插槽值">
+    每个页眉值都可以是以下三种形式之一：
+    - **纯文本字符串** —— 生成一个简单、无样式的页眉。
+    - **字符串化的 Tiptap JSONContent** —— 可启用富文本格式（粗体、斜体、链接等）。可使用 `JSON.stringify(yourHeaderDoc)` 生成。
+    - **Tiptap JSONContent 对象** —— 同样的富文本内容，作为嵌套 JSON 对象直接发送到请求体中（无需字符串化）。
+
+    对象会在插槽级别进行验证，并且必须包含 `type` 字段。无效的结构将返回 `400 Bad Request`。
 </Callout>
 
 #### 页脚配置
 
-`footers` 对象允许您自定义导出 PDF 的页脚：
+`footers` 对象允许您自定义导出 PDF 文档的页脚。插槽接受与页眉相同的三种形式。
 
-| 属性                  | 类型      | 描述                                                                                                                         |
-| --------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `evenAndOddFooters`   | `boolean` | 是否对奇数页和偶数页使用不同的页脚                                                                                           |
-| `differentFirstPage`  | `boolean` | 是否对首页使用不同的页脚。为 `true` 时，首页使用 `first` 值替代 `default`                                                     |
-| `default`             | `string`  | 每页的标准默认页脚，或激活 `evenAndOddFooters` 时奇数页的页脚。支持纯文本字符串或字符串化的 Tiptap JSONContent 用于富文本格式。 |
-| `first`               | `string`  | 首页页脚。仅当 `differentFirstPage` 为 `true` 时有效。支持纯文本字符串或字符串化的 Tiptap JSONContent。                       |
-| `even`                | `string`  | 偶数页页脚，仅当 `evenAndOddFooters` 启用时有效。支持纯文本字符串或字符串化的 Tiptap JSONContent。                            |
+| 属性                | 类型                  | 说明                                                                                                          |
+| ------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `evenAndOddFooters` | `boolean`             | 是否为奇数页和偶数页使用不同的页脚                                                              |
+| `differentFirstPage` | `boolean`             | 是否在首页使用不同的页脚。当为 `true` 时，第一页将使用 `first` 值而不是 `default`。 |
+| `default`           | `string \| Object`    | 每一页的标准默认页脚，或在启用 `evenAndOddFooters` 时奇数页的页脚。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
+| `first`             | `string \| Object`    | 首页页脚。仅在 `differentFirstPage` 设置为 `true` 时使用。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
+| `even`              | `string \| Object`    | 在启用 `evenAndOddFooters` 选项时，偶数页的页脚。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
 
-<Callout title="纯文本 vs. Tiptap JSONContent">
-    每个页脚值可以是**纯文本字符串**（生成简单无样式页脚）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等富格式）。使用 JSONContent 时，请先用 `JSON.stringify()` 进行字符串化，然后再放入请求体。
-</Callout>
+### 带页眉和页脚的示例
+
+```bash
+curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}",
+      "headers": {
+        "default": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [{ "type": "text", "text": "My Header" }]
+            }
+          ]
+        }
+      },
+      "footers": {
+        "default": "Company name, 2026"
+      }
+    }'
+```
 
 #### 自定义字体配置
 
@@ -190,10 +217,11 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 
 ### 错误响应
 
-| 状态码 | 错误码                       | 描述                                   |
-| ------ | ---------------------------- | -------------------------------------- |
-| 400    | `NO_DOCUMENT_PROVIDED`       | 请求体中未提供文档                     |
-| 422    | `FAILED_TO_PARSE_DOCX_FILE`  | 解析 JSON 输入失败                     |
-| 422    | `FAILED_TO_EXPORT_PDF_FILE`  | 导出中间格式 PDF 失败                 |
-| 403    | `CUSTOM_FONTS_NOT_AVAILABLE` | 自定义字体仅支持本地部署               |
-| 422    | `FAILED_TO_CONVERT_DOCX_TO_PDF` | 转换为 PDF 失败                      |
+| 状态 | 代码                            | 说明                          |
+| ------ | ------------------------------- | ------------------------------------ |
+| 400    | `NO_DOCUMENT_PROVIDED`          | 请求体中未提供文档 |
+| 400    | _(validation)_                  | `headers` / `footers` 插槽包含一个没有 `type` 字段的对象，或存在其他模式级别问题。响应体包含一个 ZodError，说明哪个字段验证失败。 |
+| 422    | `FAILED_TO_PARSE_DOCX_FILE`    | 解析 JSON 输入失败          |
+| 422    | `FAILED_TO_EXPORT_PDF_FILE`    | 导出中间格式失败 |
+| 403    | `CUSTOM_FONTS_NOT_AVAILABLE`   | 自定义字体仅在本地部署中可用 |
+| 422    | `FAILED_TO_CONVERT_DOCX_TO_PDF`| 转换为 PDF 失败             |

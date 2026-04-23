@@ -26,15 +26,18 @@ export async function POST(req: Request) {
   const { userRequest, selection } = await req.json()
 
   const result = streamText({
-    model: openai('gpt-5-mini'),
-    system: `你是一位能编辑富文本文档的专家作者。
-用户已经选中了文档的一部分。你将收到所选内容的当前
-HTML 格式及用户的请求。请根据用户请求重写该选区内容。
-生成新内容的 HTML 代码。如果用户请求不明确或不涉及编辑文档，
-生成一段 HTML 代码，询问用户澄清请求。你的回复应仅包含
-HTML 代码，不要包含其他文字或解释，不要使用 Markdown，
-且 HTML 回复不应被反引号、Markdown 代码块或其他多余格式包裹。`,
-    prompt: `用户请求：
+    model: openai('gpt-5.4-mini'),
+    system: `You are an expert writer that can edit rich text documents.
+The user has selected part of the document. You will receive the current
+content of the selection (in HTML format) and the user's request. Re-write
+the content of the selection to meet the user's request. Generate the HTML
+code for the new content of the selection. If the user's request is not 
+clear or does not relate to editing the document, generate HTML code where
+you ask the user to clarify the request. Your response should only contain
+the HTML code, no other text or explanation, no Markdown, and your HTML 
+response should not be wrapped in backticks, Markdown code blocks, or other
+extra formatting.`,
+    prompt: `User request:
 """
 ${userRequest}
 """
@@ -93,7 +96,7 @@ await toolkit.streamHtml(readableStream, {
 })
 ```
 
-Learn more about review options in the [review changes guide](/content-ai/capabilities/ai-toolkit/agents/review-changes) and in the [API reference](/content-ai/capabilities/ai-toolkit/api-reference/edit-the-document#streamhtml) of the `streamHtml` method.
+在[审核更改指南](/content-ai/capabilities/ai-toolkit/agents/review-changes)以及 `streamHtml` 方法的[API 参考](/content-ai/capabilities/ai-toolkit/api-reference/edit-the-document#streamhtml)中了解更多关于审核选项的信息。
 
 ## 实现自动补全
 

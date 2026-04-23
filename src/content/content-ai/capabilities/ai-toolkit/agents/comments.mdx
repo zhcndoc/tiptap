@@ -32,7 +32,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ```ts
 // app/api/chat/route.ts
-import { anthropic } from '@ai-sdk/anthropic'
+import { openai } from '@ai-sdk/openai'
 import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
 import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
 
@@ -40,14 +40,14 @@ export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
   const agent = new ToolLoopAgent({
-    model: anthropic('claude-haiku-4-5'),
+    model: openai('gpt-5.4-mini'),
     instructions: 'You are an assistant that can add comments to a rich text document.',
     tools: toolDefinitions({
       tools: {
-        // Enable tools to read and edit comments
+        // 启用用于读取和编辑评论的工具
         getThreads: true,
         editThreads: true,
-        // (Optional) Prevent AI from editing document content
+        // （可选）阻止 AI 编辑文档内容
         tiptapEdit: false,
       },
     }),
@@ -82,7 +82,7 @@ export function CommentsAiChatbot({ editor }) {
     "请在最后一段的第一句添加一条评论，内容为“做得好”",
   )
 
-  // Fix issue: https://github.com/vercel/ai/issues/8148
+  // 修复问题：https://github.com/vercel/ai/issues/8148
   const editorRef = useRef(editor)
   editorRef.current = editor
 
@@ -94,7 +94,7 @@ export function CommentsAiChatbot({ editor }) {
 
       const { toolName, input, toolCallId } = toolCall
 
-      // Execute the tool using AI toolkit
+      // 使用 AI 工具包执行该工具
       const toolkit = getAiToolkit(editor)
       const result = toolkit.executeTool({
         toolName,
@@ -156,10 +156,10 @@ AI 也可以被指示执行特定操作。借助[工具定义](/content-ai/capab
 
 了解更多提示工程相关内容，请参见[AI 工程指南](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-engineering)。
 
-## Combine comments with tracked changes
+## 将评论与跟踪更改结合使用
 
-Want to make document edits and associate them with comments? See the [tracked changes guide](/content-ai/capabilities/ai-toolkit/agents/tracked-changes) to learn how to combine AI-generated tracked changes with comment threads that explain each change.
+想要进行文档编辑并将其与评论关联起来吗？请参阅[带评论的跟踪更改指南](/content-ai/capabilities/ai-toolkit/agents/review-changes/tracked-changes-with-comments)，了解如何将 AI 生成的跟踪更改与解释每项更改的评论线程结合使用。
 
-## Roadmap
+## 路线图
 
 在未来版本中，我们计划支持将评论流式写入编辑器，以提升用户体验。同时，我们也在探索改进令牌用量、速度和开发者体验的方法。

@@ -50,22 +50,36 @@ export const sidebarConfig: SidebarConfig = {
                 {
                   title: '审核变更',
                   href: '/content-ai/capabilities/ai-toolkit/agents/review-changes',
-                },
-                {
-                  title: '合理的变更',
-                  href: '/content-ai/capabilities/ai-toolkit/agents/justified-changes',
+                  children: [
+                    {
+                      title: 'Tracked changes',
+                      href: '/content-ai/capabilities/ai-toolkit/agents/review-changes/tracked-changes',
+                    },
+                    {
+                      title: 'Tracked changes with comments',
+                      href: '/content-ai/capabilities/ai-toolkit/agents/review-changes/tracked-changes-with-comments',
+                    },
+                    {
+                      title: 'Suggestions',
+                      href: '/content-ai/capabilities/ai-toolkit/agents/review-changes/suggestions',
+                    },
+                    {
+                      title: 'Suggestions with comments',
+                      href: '/content-ai/capabilities/ai-toolkit/agents/review-changes/suggestions-with-comments',
+                    },
+                    {
+                      title: 'Style suggestions',
+                      href: '/content-ai/capabilities/ai-toolkit/agents/review-changes/style-suggestions',
+                    },
+                  ],
                 },
                 {
                   title: '流媒体',
                   href: '/content-ai/capabilities/ai-toolkit/agents/streaming',
                 },
                 {
-                  title: '添加评论',
+                  title: 'Comments',
                   href: '/content-ai/capabilities/ai-toolkit/agents/comments',
-                },
-                {
-                  title: '修订记录',
-                  href: '/content-ai/capabilities/ai-toolkit/agents/tracked-changes',
                 },
                 {
                   title: '多文档',
@@ -150,14 +164,6 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/concepts',
                 },
                 {
-                  title: '建议',
-                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions',
-                },
-                {
-                  title: '样式建议',
-                  href: '/content-ai/capabilities/ai-toolkit/advanced-guides/style-suggestions',
-                },
-                {
                   title: 'AI 工程',
                   href: '/content-ai/capabilities/ai-toolkit/advanced-guides/ai-engineering',
                 },
@@ -234,8 +240,8 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/api-reference/review-options',
                 },
                 {
-                  title: '显示建议',
-                  href: '/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions',
+                  title: 'Suggestions',
+                  href: '/content-ai/capabilities/ai-toolkit/api-reference/suggestions',
                 },
                 {
                   title: '差异对比工具',

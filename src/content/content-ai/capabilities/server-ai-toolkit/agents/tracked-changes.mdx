@@ -1,9 +1,9 @@
 ---
-title: Track Changes
+title: 追踪更改
 meta:
-  title: Track Changes | Tiptap Server AI Toolkit
-  description: Display server-side AI edits as track changes that can be individually accepted or rejected.
-  category: Content AI
+  title: 追踪更改 | Tiptap Server AI 工具包
+  description: 将服务器端 AI 编辑显示为可单独接受或拒绝的修订更改。
+  category: 内容 AI
 sidebars:
   hideSecondary: true
 ---
@@ -11,15 +11,7 @@ sidebars:
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-<Callout title="实验性 API" variant="warning">
-  本指南使用了 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展，该扩展尚处于实验阶段，未来版本可能会发生变化。
-</Callout>
-
-<Callout title="从 AI 代理聊天机器人指南延续" variant="info">
-  本指南延续了 [AI 代理聊天机器人指南](/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot)。请先阅读该指南。
-</Callout>
-
-将服务器端 AI 编辑显示为追踪变更（tracked changes），这样用户可以逐个查看、接受或拒绝这些变更。这会将 Server AI Toolkit 与 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展集成在一起。
+将服务器端 AI 编辑显示为追踪变更，以便用户可以逐个审查并接受或拒绝它们。这会将 Server AI Toolkit 与 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展集成在一起。
 
 <CodeDemo
   isLarge
@@ -29,6 +21,16 @@ import { CodeDemo } from '@/components/CodeDemo'
 />
 
 请参阅 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+<Callout title="实验性功能" variant="warning">
+  [Tracked Changes](/tracked-changes/getting-started/overview) 扩展目前处于 Alpha
+  阶段。
+</Callout>
+
+<Callout title="AI agent chatbot 指南的后续内容" variant="info">
+  本指南接续 [AI agent chatbot
+  指南](/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot)。请先阅读它。
+</Callout>
 
 ## 工作原理
 
@@ -46,13 +48,11 @@ import { CodeDemo } from '@/components/CodeDemo'
 在调用 `execute-tool` 时传入 `reviewOptions`：
 
 ```ts
+import { getAuthHeaders } from '@/lib/server-ai-toolkit/get-auth-headers'
+
 const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${jwtToken}`,
-    'X-App-Id': appId,
-  },
+  headers: getAuthHeaders(),
   body: JSON.stringify({
     toolName: 'tiptapEdit',
     input: toolCallInput,
@@ -136,11 +136,7 @@ export default function Page() {
 ```ts
 const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${jwtToken}`,
-    'X-App-Id': appId,
-  },
+  headers: getAuthHeaders(),
   body: JSON.stringify({
     schemaAwarenessData,
     tools: {
@@ -158,11 +154,7 @@ const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
 ```ts
 const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${jwtToken}`,
-    'X-App-Id': appId,
-  },
+  headers: getAuthHeaders(),
   body: JSON.stringify({
     toolName: 'tiptapEdit',
     input: toolCallInput,

@@ -20,17 +20,19 @@ import { Callout } from '@/components/ui/Callout'
 
 查看 GitHub 上的[源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
-<Callout title="Comments workflows require Tiptap Cloud" variant="info">
+<Callout title="评论工作流需要 Tiptap Cloud" variant="info">
   线程工作流会读取并写入存储在 Tiptap 文档服务器（Tiptap Document Server）上的评论，因此你必须
   使用 `experimental_documentOptions.documentId`。
 </Callout>
 
-<Callout title="Reuse the document read session for thread edits" variant="info">
+<Callout title="将文档读取会话复用于线程编辑" variant="info">
   `read-document` 会返回一个 `sessionId`。在执行请求中发送相同的 `sessionId`，这样服务器才能
   拒绝针对 AI 在用户修改内容之前已读取过的内容执行的线程操作。
 </Callout>
 
-## 1. 从 AI 服务器读取文档及现有线程
+开始之前，请按照[授权指南](/content-ai/capabilities/server-ai-toolkit/install#set-up-authorization)完成身份验证设置。
+
+## 1. 从 AI Server 读取文档和现有线程
 
 评论工作流需要当前的文档内容和现有的线程列表。调用：
 
@@ -38,13 +40,11 @@ import { Callout } from '@/components/ui/Callout'
 - `POST /v3/ai/toolkit/read/threads`
 
 ```ts
+import { getAuthHeaders } from '@/lib/server-ai-toolkit/get-auth-headers'
+
 const documentResponse = await fetch(`${apiBaseUrl}/toolkit/read/read-document`, {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${jwtToken}`,
-    'X-App-Id': appId,
-  },
+  headers: getAuthHeaders(),
   body: JSON.stringify({
     schemaAwarenessData,
     format: 'shorthand',
@@ -63,11 +63,7 @@ const documentReadResult = await documentResponse.json()
 
 const threadsResponse = await fetch(`${apiBaseUrl}/toolkit/read/threads`, {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${jwtToken}`,
-    'X-App-Id': appId,
-  },
+  headers: getAuthHeaders(),
   body: JSON.stringify({
     schemaAwarenessData,
     format: 'shorthand',
@@ -83,16 +79,12 @@ const threadsReadResult = await threadsResponse.json()
 
 ## 2. 生成线程操作
 
-从 AI 服务器获取工作流定义，并让模型返回线程操作。
+从 AI Server 获取工作流定义，并让模型返回线程操作。
 
 ```ts
 const workflowResponse = await fetch(`${apiBaseUrl}/toolkit/workflows/threads`, {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${jwtToken}`,
-    'X-App-Id': appId,
-  },
+  headers: getAuthHeaders(),
   body: JSON.stringify({
     format: 'shorthand',
   }),
@@ -102,11 +94,7 @@ const workflow = await workflowResponse.json()
 
 const schemaResponse = await fetch(`${apiBaseUrl}/toolkit/schema-awareness-prompt`, {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${jwtToken}`,
-    'X-App-Id': appId,
-  },
+  headers: getAuthHeaders(),
   body: JSON.stringify({
     schemaAwarenessData,
   }),
@@ -137,11 +125,7 @@ const output = await result.output
 
 const executeResponse = await fetch(`${apiBaseUrl}/toolkit/execute-workflow/threads`, {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${jwtToken}`,
-    'X-App-Id': appId,
-  },
+  headers: getAuthHeaders(),
   body: JSON.stringify({
     schemaAwarenessData,
     format: 'shorthand',

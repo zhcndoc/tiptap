@@ -28,7 +28,12 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
   本指南是对[AI 代理聊天机器人指南](/content-ai/capabilities/ai-toolkit/guides/ai-agent-chatbot)的延续。请先阅读该指南。
 </Callout>
 
-<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/selection-awareness" />
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/selection-awareness"
+/>
 
 查看[GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
@@ -104,11 +109,24 @@ toolkit.setActiveSelection(null)
 toolkit.setActiveSelection({ from: 10, to: 20 })
 ```
 
+## 推荐的模型与推理力度配置
+
+`readSelection` 工具会告知 AI 选中的内容，但不会强制它只能编辑该选区。因此，AI 模型可能会编辑周围的段落，而不只是选中的内容。
+
+在我们的测试中，我们发现启用了推理的模型（例如将推理力度设为 `low` 的 `gpt-5.4-mini`）在被明确要求时，更能将编辑范围限制在选区内。
+
+另一种方案是改为实现[插入内容工作流](/content-ai/capabilities/ai-toolkit/workflows/insert-content)。此工作流可用于限制可编辑区域，因此 AI 可以严格只重写选区。
+
 ## 最终效果
 
 通过添加额外的 CSS 样式，效果是一个简洁而精致的 AI 聊天机器人，能够编辑选中的内容：
 
-<CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/selection-awareness" />
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/selection-awareness"
+/>
 
 查看[GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
 

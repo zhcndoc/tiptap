@@ -250,4 +250,46 @@ export default function Page() {
 
 ## 下一步
 
-将工具流式传输与变更预览结合，获得最佳用户体验。请参阅[变更审查指南](/content-ai/capabilities/ai-toolkit/guides/review-changes)，了解如何让用户预览并批准变更后再应用。
+您可以添加 `AiCaret` 扩展，以显示一个光标，指示 AI 在流式传输期间正在何处插入内容。这会为用户提供实时的视觉反馈。
+
+```tsx
+import { AiCaret, AiToolkit, getAiToolkit } from '@tiptap-pro/ai-toolkit'
+
+const editor = useEditor({
+  extensions: [StarterKit, AiToolkit, AiCaret],
+})
+```
+
+有关配置选项和 CSS 样式，请参阅 [AI Caret 指南](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret)。
+
+## 显示审阅界面
+
+在审阅界面中显示更改，以便用户接受或拒绝这些更改。
+
+有两种实现方式：
+
+- 使用 [**Tracked Changes**](/tracked-changes/getting-started/overview) 扩展来渲染审阅界面。更改会作为文档的一部分保留，并对其他用户可见。
+- **AI Toolkit 建议**：一种基于装饰的界面，具有临时性，仅对当前文档用户可见。
+
+通过设置 `reviewOptions` 参数来配置审阅界面。每次调用 `streamTool` 方法时，此参数都应保持相同的值。
+
+```ts
+toolkit.streamTool({
+  // ... 其他选项
+
+  // 使用 Tracked Changes 显示审阅界面
+  reviewOptions: { mode: 'trackedChanges' },
+
+  // 使用 AI Toolkit 建议显示审阅界面
+  reviewOptions: { mode: 'review' },
+})
+```
+
+要了解更多关于审阅界面的信息，请参阅[审阅更改](/content-ai/capabilities/ai-toolkit/agents/review-changes)指南。
+
+有关如何将 AI Toolkit 流式传输与审阅界面结合使用的示例，请参阅 [AI Toolkit 演示](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 下一步
+
+- [审阅更改指南](/content-ai/capabilities/ai-toolkit/agents/review-changes)：让用户在更改应用之前预览并批准更改。
+- [AI Caret](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret)：在 AI 正在插入内容的位置显示光标。

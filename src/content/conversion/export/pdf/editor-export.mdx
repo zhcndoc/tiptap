@@ -8,7 +8,7 @@ tags:
 meta:
     title: 导出 PDF | Tiptap 转换
     description: 了解如何使用文档中的导出 PDF 扩展将 Tiptap 编辑器内容导出为 PDF 文件。
-    category: Conversion
+    category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -76,44 +76,71 @@ const editor = new Editor({
 })
 ```
 
-| Parameter        | Type                     | Description                                    | Default                               |
-| ---------------- | ------------------------ | ---------------------------------------------- | ------------------------------------- |
-| `endpoint`       | `string`                 | 用于转换的 Tiptap API 端点                     | `'https://api.tiptap.dev/v2/convert'` |
-| `token`          | `string`                 | 用于认证的 Tiptap JWT                           | `''`                                  |
-| `appId`          | `string`                 | 用于认证的 Tiptap 应用 ID                        | `''`                                  |
-| `styleOverrides` | `Record<string, string>` | 应用于导出的样式覆盖                            | `undefined`                           |
-| `headers`        | `HeaderConfig`           | 导出文档的页眉配置                              | `undefined`                           |
-| `footers`        | `FooterConfig`           | 导出文档的页脚配置                              | `undefined`                           |
-| `pageSize`       | `PageSize`               | 页面大小配置                                   | `undefined`                           |
-| `pageMargins`    | `PageMargins`            | 页面边距配置                                   | `undefined`                           |
-| `customNodes`    | `CustomNodeDefinition[]` | 用于基于 DOCX 转换的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`） | `undefined` |
-| `customFonts`    | `CustomFont[]`           | 为 PDF 导出提供的自定义字体文件（仅限本地部署）                 | `undefined`             |
-| `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调函数                     | 如果未提供则抛出错误                    |
+| 参数             | 类型                     | 描述                                                   | 默认值                                  |
+| ---------------- | ------------------------ | ------------------------------------------------------ | --------------------------------------- |
+| `endpoint`       | `string`                 | 用于转换的 Tiptap API 端点                              | `'https://api.tiptap.dev/v2/convert'` |
+| `token`          | `string`                 | 用于身份验证的 Tiptap JWT                              | `''`                                  |
+| `appId`          | `string`                 | 用于身份验证的 Tiptap App ID                           | `''`                                  |
+| `styleOverrides` | `Record<string, string>` | 要应用于导出的样式覆盖                                 | `undefined`                           |
+| `headers`        | `HeaderConfig`           | 导出文档的页眉配置                                     | `undefined`                           |
+| `footers`        | `FooterConfig`           | 导出文档的页脚配置                                     | `undefined`                           |
+| `pageSize`       | `PageSize`               | 页面尺寸配置                                           | `undefined`                           |
+| `pageMargins`    | `PageMargins`            | 页面边距配置                                           | `undefined`                           |
+| `customNodes`    | `CustomNodeDefinition[]` | 用于基于 DOCX 的转换的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`） | `undefined` |
+| `customFonts`    | `CustomFont[]`           | 为 PDF 导出提供的自定义字体文件（仅限本地部署）         | `undefined`             |
+| `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调                                | 若未提供则抛出错误 |
+| `onExportError`  | `(error: Error) => void` | 可选回调，在导出流程被拒绝时触发（动态导入失败、DOCX 转换失败、网络错误、非 OK 响应）。如果省略，则通过 `console.error` 记录错误。 | `undefined`          |
+
+### 页眉和页脚插槽值
+
+每个页眉和页脚插槽（`default`、`first`、`even`）都接受五种形态中的任意一种——请选择最符合您数据的形式。前三种仅使用 `@tiptap-pro/extension-export-pdf` 即可；后两种还需要安装 `@tiptap-pro/extension-export-docx`（它们会走 DOCX 优先的导出路径，并且是延迟加载的，因此不会影响仅使用 PDF 的消费者）。
+
+| 形态                                        | 示例                                         | 说明                                                                                           |
+| ------------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 纯文本                                      | `'Company name, 2026'`                      | 无样式页眉/页脚。                                                                              |
+| 字符串化的 Tiptap JSONContent               | `JSON.stringify(myHeaderDoc)`               | 预先序列化的 Tiptap 节点。保留富文本格式。                                                     |
+| Tiptap JSONContent 对象                     | `{ type: 'doc', content: [/* … */] }`       | 直接传入的富文本 Tiptap 节点——无需字符串化。                                                   |
+| `docx` 的 `Header` / `Footer` 实例         | `new Docx.Header({ children: [/* … */] })`  | 完整的 DOCX 级控制。需要 DOCX 扩展。                                                           |
+| 返回 `Header` / `Footer` 的异步工厂函数      | `() => convertHeader({ node })`             | 在导出时按需构建。典型用途：`convertHeader` / `convertFooter`。需要 DOCX 扩展。               |
+
+Tiptap JSONContent 对象**必须**包含 `type` 字段——这是扩展在运行时用来区分 Tiptap 节点和 `docx` 实例的判别条件。不包含 `type` 且又不是 `Header` / `Footer` 实例的对象，会被 `console.warn` 丢弃并提示出错值，不会传递给 DOCX 序列化器。
+
+在 TypeScript 中，这些形态会收敛为两个别名（`type` 要求已编码在 `TiptapNodeContent` 中）：
+
+```ts
+import type { JSONContent } from '@tiptap/core'
+import type { Footer, Header } from 'docx'
+
+type TiptapNodeContent = JSONContent & { type: string }
+
+type HeaderSlotValue = string | TiptapNodeContent | Header | (() => Promise<Header>)
+type FooterSlotValue = string | TiptapNodeContent | Footer | (() => Promise<Footer>)
+```
 
 ### HeaderConfig
 
-| 属性                 | 类型      | 描述                                                                                                 |
-| -------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
-| `evenAndOddHeaders`  | `boolean` | 是否为奇数页和偶数页使用不同的页眉                                                                   |
-| `differentFirstPage` | `boolean` | 是否在首页使用不同的页眉。当为 `true` 时，首页使用 `first` 的值代替 `default`。                             |
-| `default`            | `string`  | 每页的标准默认页眉，或当启用 `evenAndOddHeaders` 时为奇数页的页眉。可接受纯文本字符串或字符串化的 Tiptap JSONContent（用于富格式）。 |
-| `first`              | `string`  | 首页的页眉，仅当 `differentFirstPage` 设置为 `true` 时生效。可接受纯文本字符串或字符串化的 Tiptap JSONContent（用于富格式）。   |
-| `even`               | `string`  | 偶数页的页眉，当启用 `evenAndOddHeaders` 选项时生效。可接受纯文本字符串或字符串化的 Tiptap JSONContent（用于富格式）。         |
+| 属性                 | 类型              | 描述                                                                                          |
+| -------------------- | ----------------- | --------------------------------------------------------------------------------------------- |
+| `evenAndOddHeaders`  | `boolean`         | 是否为奇数页和偶数页使用不同的页眉。                                                           |
+| `differentFirstPage` | `boolean`         | 是否在第一页使用不同的页眉。为 `true` 时，第一页使用 `first` 值而不是 `default`。            |
+| `default`            | `HeaderSlotValue` | 每一页的标准默认页眉；当 `evenAndOddHeaders` 启用时，则为奇数页页眉。                          |
+| `first`              | `HeaderSlotValue` | 第一句页眉。仅在 `differentFirstPage` 为 `true` 时使用。                                       |
+| `even`               | `HeaderSlotValue` | 偶数页页眉。仅在 `evenAndOddHeaders` 为 `true` 时使用。                                       |
 
 ### FooterConfig
 
-| 属性                 | 类型      | 描述                                                                                                 |
-| -------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
-| `evenAndOddFooters`  | `boolean` | 是否为奇数页和偶数页使用不同的页脚                                                                   |
-| `differentFirstPage` | `boolean` | 是否在首页使用不同的页脚。当为 `true` 时，首页使用 `first` 的值代替 `default`。                             |
-| `default`            | `string`  | 每页的标准默认页脚，或当启用 `evenAndOddFooters` 时为奇数页的页脚。可接受纯文本字符串或字符串化的 Tiptap JSONContent（用于富格式）。 |
-| `first`              | `string`  | 首页的页脚，仅当 `differentFirstPage` 设置为 `true` 时生效。可接受纯文本字符串或字符串化的 Tiptap JSONContent（用于富格式）。   |
-| `even`               | `string`  | 偶数页的页脚，当启用 `evenAndOddFooters` 选项时生效。可接受纯文本字符串或字符串化的 Tiptap JSONContent（用于富格式）。         |
+| 属性                 | 类型              | 描述                                                                                          |
+| -------------------- | ----------------- | --------------------------------------------------------------------------------------------- |
+| `evenAndOddFooters`  | `boolean`         | 是否为奇数页和偶数页使用不同的页脚。                                                           |
+| `differentFirstPage` | `boolean`         | 是否在第一页使用不同的页脚。为 `true` 时，第一页使用 `first` 值而不是 `default`。            |
+| `default`            | `FooterSlotValue` | 每一页的标准默认页脚；当 `evenAndOddFooters` 启用时，则为奇数页页脚。                          |
+| `first`              | `FooterSlotValue` | 第一句页脚。仅在 `differentFirstPage` 为 `true` 时使用。                                       |
+| `even`               | `FooterSlotValue` | 偶数页页脚。仅在 `evenAndOddFooters` 为 `true` 时使用。                                       |
 
 ### PageSize
 
 | 属性    | 类型     | 描述                                                                                              | 默认值    |
-| ------- | -------- | ------------------------------------------------------------------------------------------------ | -------- |
+| ------- | -------- | -------------------------------------------------------------------------------------------------- | -------- |
 | `width` | `string` | 页面宽度。必须是正数且紧跟有效单位（cm、in、pt、pc、mm、px）。                                  | `"21cm"` |
 | `height`| `string` | 页面高度。必须是正数且紧跟有效单位（cm、in、pt、pc、mm、px）。                                  | `"29.7cm"` |
 
@@ -133,7 +160,7 @@ const editor = new Editor({
 </Callout>
 
 | 属性          | 类型     | 描述                                            |
-| ------------- | -------- | ------------------------------------------------ |
+| ------------- | -------- | ----------------------------------------------- |
 | `url`         | `string` | 指向 `.ttf` 或 `.woff2` 字体文件的 HTTPS 直接链接 |
 | `fontFamily`  | `string` | 文档中使用的字体族名称                             |
 
@@ -155,17 +182,18 @@ exportPdf: (options?: ExportPdfCommandOptions) => ReturnType
 
 | Property           | Type                      | Description                                                                           |
 | ------------------ | ------------------------- | ------------------------------------------------------------------------------------- |
-| `endpoint`         | `string`                  | 针对该次导出覆盖 API 端点                                                             |
-| `token`            | `string`                  | 针对该次导出覆盖 JWT 令牌                                                             |
-| `appId`            | `string`                  | 针对该次导出覆盖 App ID                                                               |
-| `styleOverrides`   | `Record<string, string>`  | 针对该次导出覆盖样式覆盖                                                              |
-| `headers`          | `HeaderConfig`            | 针对该次导出覆盖页眉配置                                                              |
-| `footers`          | `FooterConfig`            | 针对该次导出覆盖页脚配置                                                              |
-| `pageSize`         | `PageSize`                | 针对该次导出覆盖页面大小                                                              |
-| `pageMargins`      | `PageMargins`             | 针对该次导出覆盖页面边距                                                              |
-| `customNodes`      | `CustomNodeDefinition[]`  | 针对该次导出覆盖自定义节点定义                                                        |
-| `customFonts`      | `CustomFont[]`            | 针对该次导出覆盖自定义字体（仅本地部署）                                              |
-| `onCompleteExport` | `(result: Blob) => void`  | 针对该次导出覆盖回调函数                                                              |
+| `endpoint`         | `string`                  | 覆盖此特定导出的 API 端点                                                             |
+| `token`            | `string`                  | 覆盖此特定导出的 JWT 令牌                                                             |
+| `appId`            | `string`                  | 覆盖此特定导出的 App ID                                                               |
+| `styleOverrides`   | `Record<string, string>`  | 覆盖此特定导出的样式覆盖                                                              |
+| `headers`          | `HeaderConfig`            | 覆盖此特定导出的页眉配置                                                              |
+| `footers`          | `FooterConfig`            | 覆盖此特定导出的页脚配置                                                              |
+| `pageSize`         | `PageSize`                | 覆盖此特定导出的页面尺寸                                                              |
+| `pageMargins`      | `PageMargins`             | 覆盖此特定导出的页面边距                                                              |
+| `customNodes`      | `CustomNodeDefinition[]`  | 覆盖此特定导出的自定义节点定义                                                        |
+| `customFonts`      | `CustomFont[]`            | 覆盖此特定导出的自定义字体（仅限本地部署）                                             |
+| `onCompleteExport` | `(result: Blob) => void`  | 覆盖此特定导出的回调                                                                  |
+| `onExportError`    | `(error: Error) => void`  | 覆盖此特定导出的错误处理程序                                                          |
 
 ```js
 import { ExportPdf } from '@tiptap-pro/extension-export-pdf'
@@ -177,7 +205,7 @@ const editor = new Editor({
       token: 'YOUR_TOKEN',
       appId: 'YOUR_APP_ID',
       onCompleteExport(result) {
-        // 下载 PDF 文件
+        // 下载导出的 PDF 文件
         const url = URL.createObjectURL(result)
         const a = document.createElement('a')
 
@@ -199,7 +227,7 @@ editor.chain().exportPdf().run()
 editor.chain().exportPdf({
   pageSize: { width: '8.5in', height: '11in' },
   onCompleteExport(result) {
-    // 针对该导出自定义处理
+    // 针对此次导出进行自定义处理
     const url = URL.createObjectURL(result)
     window.open(url)
   },
@@ -235,7 +263,7 @@ ExportPdf.configure({
     },
   ],
   onCompleteExport(result) {
-    // Handle the exported PDF
+    // 处理导出的 PDF
   },
 })
 ```

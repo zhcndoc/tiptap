@@ -165,4 +165,29 @@ function Component() {
 
 出于技术原因，节点视图预计会同步渲染。Tiptap 会为每个节点视图创建新元素并在其中挂载你的 React 组件。这可能会很昂贵，特别是如果你在编辑器中有多个节点视图的实例。
 
-我们尽可能地在我们的端进行优化，但是如果你发现渲染节点视图会造成性能问题，可以考虑使用普通的 HTML 元素或其他方法在你的节点视图中渲染内容。
+我们已经尽可能在这一侧进行了优化，但如果你发现渲染节点视图导致了性能问题，可以考虑使用普通的 HTML 元素，或者采用其他方式在节点视图中渲染内容。
+
+## 避免 React 中的 `flushSync` 警告
+
+当在 React 中使用 Tiptap 时，你可能会在控制台中看到 `flushSync was called from inside a lifecycle method` 警告。
+
+Tiptap 会同步分发事务。当你在 Tiptap 的 [回调或事件处理器](/editor/api/events) 中直接更新 React 状态时，React 可能正处于渲染周期中，这会触发此警告，以防止 React 渲染期间的性能问题。
+
+要修复此问题，请找到触发警告的代码，并将其包裹在 `queueMicrotask` 中。这样会安排更新在当前同步执行结束后立即运行，从而避免与 React 的渲染周期发生冲突。
+
+```tsx
+import { useState } from 'react'
+import { useEditor } from '@tiptap/react'
+
+function Component() {
+  const [state, setState] = useState([])
+
+  const editor = useEditor({
+    onUpdate() {
+      queueMicrotask(() => setState('new state'))
+    },
+  })
+
+  // ...
+}
+```

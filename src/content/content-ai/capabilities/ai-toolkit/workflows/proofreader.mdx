@@ -77,7 +77,7 @@ export async function POST(req: Request) {
   const workflow = createProofreaderWorkflow()
 
   const result = streamText({
-    model: openai('gpt-5-mini'),
+    model: openai('gpt-5.4-mini'),
     // 系统提示
     system: workflow.systemPrompt,
     // 用户消息
@@ -87,12 +87,6 @@ export async function POST(req: Request) {
       context: 'This is a formal business document',
     }),
     output: Output.object({ schema: workflow.zodOutputSchema }),
-    // 如果使用 gpt-5-mini，设置 reasoningEffort 为 minimal 以提升响应速度。
-    providerOptions: {
-      openai: {
-        reasoningEffort: 'minimal',
-      },
-    },
   })
 
   return result.toTextStreamResponse()
@@ -246,46 +240,34 @@ toolkit.proofreaderWorkflow({
 
 ## 显示审阅界面
 
-配置 [review options](/content-ai/capabilities/ai-toolkit/api-reference/review-options)，显示校对建议，允许用户接受或拒绝。
+在审阅界面中显示更改，方便用户接受或拒绝。
+
+有两种方式：
+
+- 使用 [**Tracked Changes**](/tracked-changes/getting-started/overview) 扩展来渲染审阅界面。更改会作为文档的一部分持久保存，并对其他用户可见。
+- **AI Toolkit 建议**：一种基于装饰的界面，具有临时性，仅对当前文档用户可见。
+
+通过设置 `reviewOptions` 参数来配置审阅界面。更改将以建议的形式显示，用户可以接受或拒绝。
 
 ```tsx
-toolkit.proofreaderWorkflow({
-  operations,
-  workflowId,
-  // 以预览模式显示建议
-  reviewOptions: { mode: 'preview' },
-  hasFinished: true,
-})
+await toolkit.proofreaderWorkflow({
+  // ... 其他选项
 
-// 接受所有建议
-toolkit.acceptAllSuggestions()
-```
+  // 使用 Tracked Changes 显示审阅界面
+  reviewOptions: { mode: 'trackedChanges' },
 
-如果需要在应用工作流程后获取每个操作的执行状态，请读取 `result.operationResults`。
-
-## 以修订记录形式审阅更改
-
-如果安装了 [修订记录](/tracked-changes/getting-started/overview) 扩展，`proofreaderWorkflow` 可以将更正应用为修订记录，而不是预览建议。
-
-```tsx
-toolkit.proofreaderWorkflow({
-  operations,
-  workflowId,
-  hasFinished: true,
-  reviewOptions: {
-    mode: 'trackedChanges',
-    trackedChangesOptions: {
-      userId: 'ai-proofreader',
-    },
-  },
+  // 使用 AI Toolkit 建议显示审阅界面
+  reviewOptions: { mode: 'review' },
 })
 ```
 
-请参阅 [建议](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions) 指南以了解更多关于建议的信息。
+请参阅 [审阅更改](/content-ai/capabilities/ai-toolkit/agents/review-changes) 指南，了解有关审阅界面的更多信息。
+
+请查看 [AI Toolkit 演示](https://github.com/ueberdosis/ai-toolkit-demos)，了解如何将 AI Toolkit 工作流程与审阅界面结合使用的示例。
 
 ## 相关指南
 
-- [`tiptapRead` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapread)
-- [`tiptapReadChunks` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapreadchunks)
-- [`proofreaderWorkflow` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#proofreaderworkflow)
-- [显示建议](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions)：了解如何审阅文档并在编辑器中显示建议。
+- [API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapread) of the `tiptapRead` method
+- [API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#tiptapreadchunks) of the `tiptapReadChunks` method
+- [API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#proofreaderworkflow) of the `proofreaderWorkflow` method
+- [建议](/content-ai/capabilities/ai-toolkit/agents/review-changes)：了解如何审阅文档并在编辑器中显示建议。

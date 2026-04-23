@@ -4,7 +4,7 @@ tags:
   - type: team
 meta:
   category: 编辑器
-  title: Paste Handler 扩展 | Tiptap 编辑器文档
+  title: 粘贴处理程序扩展 | Tiptap 编辑器文档
   description: 在 Tiptap 编辑器中自动清理和规范化来自 Microsoft Excel、Word 和 Google Docs 的粘贴内容。
 extension:
   name: 粘贴处理程序
@@ -74,4 +74,12 @@ const editor = new Editor({
 <Callout title="错误处理" variant="info">
   如果任何转换失败，扩展会优雅地回退到原始粘贴的 HTML，以确保粘贴功能始终可用。
 </Callout>
+
+## 已知限制
+
+### Safari 剪贴板会移除表格单元格样式
+
+当在 Safari 中从 SharePoint Excel（或类似来源）复制表格单元格并粘贴到编辑器时，单元格内的格式（如粗体、斜体、颜色和链接）会丢失。Safari 会将一个简化后的 HTML 负载写入剪贴板，其中只包含表格结构和单元格文本——样式信息在到达编辑器之前就已被移除。
+
+这是 WebKit 层面的行为，无法由粘贴处理器恢复。在 Safari 中粘贴到其他编辑器时也会出现相同结果（例如 SharePoint Word）。从基于 Chromium 的浏览器或 Firefox 复制则不受影响。
 

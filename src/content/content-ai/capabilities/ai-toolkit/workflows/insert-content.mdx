@@ -80,7 +80,7 @@ export async function POST(req: Request) {
   const workflow = createInsertContentWorkflow()
 
   const result = streamText({
-    model: openai('gpt-5-mini'),
+    model: openai('gpt-5.4-mini'),
     // 系统提示
     system: workflow.systemPrompt,
     // 用户消息，包含任务和要替换的内容，格式为 JSON 对象。
@@ -88,12 +88,6 @@ export async function POST(req: Request) {
       task,
       replace,
     }),
-    // 如果使用 gpt-5-mini，将推理努力设置为最小，以提升响应速度。
-    providerOptions: {
-      openai: {
-        reasoningEffort: 'minimal',
-      },
-    },
   })
 
   return result.toTextStreamResponse()
@@ -213,26 +207,41 @@ const editor = useEditor({
 
 请参阅 [AI 光标指南](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret) 了解配置选项和 CSS 样式。
 
-## 显示审核界面
+## 禁用流式传输
 
-为了让用户审核插入的内容，请配置[审核选项](/content-ai/capabilities/ai-toolkit/api-reference/review-options)。更改将作为建议显示，用户可以接受或拒绝。
+如果您想在不进行流式传输的情况下将内容插入文档，请使用 `insertHtml` 方法。该方法与 `streamHtml` 具有相同的选项，只是它会以完整的 HTML 内容作为参数一次性调用。请参阅 [API 参考](/content-ai/capabilities/ai-toolkit/api-reference/edit-the-document#inserthtml)。
+
+## 显示审阅界面
+
+在审阅界面中显示更改，以便用户接受或拒绝它们。
+
+有两种实现方式：
+
+- 使用 [**Tracked Changes**](/tracked-changes/getting-started/overview) 扩展来渲染审阅界面。更改会作为文档的一部分保留，并对其他用户可见。
+- **AI Toolkit 建议**：一种基于装饰的界面，具有临时性，仅对当前文档用户可见。
+
+通过设置 `reviewOptions` 参数来配置审阅界面。更改将显示为建议，用户可以接受或拒绝。
 
 ```tsx
 await toolkit.streamHtml(readableStream, {
-  position: selectionPosition,
+  // ... 其他选项
+
+  // 使用 Tracked Changes 显示审阅界面
+  reviewOptions: { mode: 'trackedChanges' },
+
+  // 使用 AI Toolkit 建议显示审阅界面
   reviewOptions: { mode: 'review' },
 })
-
-// 接受所有建议
-toolkit.acceptAllSuggestions()
 ```
 
-参见[显示建议](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions)指南，了解有关建议的更多内容。
+请参阅 [审阅更改](/content-ai/capabilities/ai-toolkit/agents/review-changes) 指南了解有关审阅界面的更多信息。
+
+请参阅 [AI Toolkit 演示](https://github.com/ueberdosis/ai-toolkit-demos) 以了解如何在审阅界面中使用 AI Toolkit 工作流程的示例。
 
 ## 下一步
 
-- [`createInsertContentWorkflow` 函数的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#createinsertcontentworkflow)
-- [`getHtmlRange` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#gethtmlrange)
-- [`streamHtml` 方法的 API 参考](/content-ai/capabilities/ai-toolkit/api-reference/edit-the-document#streamhtml)
-- [显示建议](/content-ai/capabilities/ai-toolkit/advanced-guides/suggestions)：了解如何审查文档并在编辑器中显示建议。
-- [AI 光标](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret)：显示 AI 正在插入内容的位置光标。
+- `createInsertContentWorkflow` 函数的 [API 参考](/content-ai/capabilities/ai-toolkit/api-reference/workflows#createinsertcontentworkflow)
+- `getHtmlRange` 方法的 [API 参考](/content-ai/capabilities/ai-toolkit/api-reference/read-the-document#gethtmlrange)
+- `streamHtml` 方法的 [API 参考](/content-ai/capabilities/ai-toolkit/api-reference/edit-the-document#streamhtml)
+- [建议](/content-ai/capabilities/ai-toolkit/agents/review-changes)：了解如何审阅文档并在编辑器中显示建议。
+- [AI 光标](/content-ai/capabilities/ai-toolkit/advanced-guides/ai-caret)：显示 AI 正在插入内容的位置的光标。

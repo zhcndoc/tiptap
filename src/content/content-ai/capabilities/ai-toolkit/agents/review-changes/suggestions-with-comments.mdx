@@ -1,16 +1,17 @@
 ---
-title: 有理有据的修改
+title: Suggestions with comments
 meta:
-  title: 有理有据的修改 | Tiptap 内容 AI
-  description: 使用浮动工具提示显示 AI 生成的每个修改的理由。
-  category: 内容 AI
+  title: Suggestions with comments | Tiptap Content AI
+  description: Show AI-generated justifications for each change using floating tooltips.
+  category: Content AI
 ---
 
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-<Callout title="延续审阅修改指南" variant="info">
-  本指南是对[审阅修改指南](/content-ai/capabilities/ai-toolkit/agents/review-changes)的延续。请先阅读该指南。
+<Callout title="Continuation from the suggestions guide" variant="info">
+  This guide continues the [suggestions
+  guide](/content-ai/capabilities/ai-toolkit/agents/review-changes/suggestions). Read it first.
 </Callout>
 
 AI 工具包可以指示 AI 在对文档所做的每个修改中包含理由。这允许你向用户展示*为什么*要做出某项修改，而不仅仅是*修改了什么*。
@@ -60,7 +61,7 @@ const result = toolkit.executeTool({
       renderDecorations(options) {
         const decorations = [...options.defaultRenderDecorations()]
 
-        // 添加接受和拒绝按钮（与审阅修改指南相同）
+        // Add Accept and Reject buttons (same as the suggestions guide)
         // ...
 
         // 选中且存在理由时显示工具提示

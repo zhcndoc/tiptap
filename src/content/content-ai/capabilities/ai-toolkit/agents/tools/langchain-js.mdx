@@ -24,7 +24,7 @@ npm install @tiptap-pro/ai-toolkit-langchain
 import { ChatOpenAI } from '@langchain/openai'
 import { toolDefinitions } from '@tiptap-pro/ai-toolkit-langchain'
 
-const llm = new ChatOpenAI({ model: 'gpt-5' })
+const llm = new ChatOpenAI({ model: 'gpt-5.4-mini' })
 const llmWithTools = llm.bindTools(toolDefinitions())
 ```
 
@@ -36,7 +36,7 @@ import { toolDefinitions } from '@tiptap-pro/ai-toolkit-langchain'
 import { DynamicStructuredTool } from '@langchain/core/tools'
 import { z } from 'zod'
 
-const llm = new ChatOpenAI({ model: 'gpt-5' })
+const llm = new ChatOpenAI({ model: 'gpt-5.4-mini' })
 
 const customTools = [
   new DynamicStructuredTool({
@@ -63,11 +63,11 @@ const llmWithTools = llm.bindTools([...toolDefinitions(), ...customTools])
 #### 参数 (`ToolDefinitionsOptions`)
 
 - `tools?`: `EnabledTools` - 通过将值设置为 `true`（启用）或 `false`（禁用）来启用或禁用特定工具。
-  - `tiptapRead?`: `boolean` - 启用/禁用 `tiptapRead` 工具（默认: `true`）
-  - `tiptapEdit?`: `boolean` - 启用/禁用 `tiptapEdit` 工具（默认: `true`）
-  - `tiptapReadSelection?`: `boolean` - 启用/禁用 `tiptapReadSelection` 工具（默认: `true`）
-  - `getThreads?`: `boolean` - 启用/禁用 `getThreads` 工具（默认: `false`）
-  - `editThreads?`: `boolean` - 启用/禁用 `editThreads` 工具（默认: `false`）
+  - `tiptapRead?`: `boolean` - 启用/禁用 `tiptapRead` 工具（默认：`true`）
+  - `tiptapEdit?`: `boolean` - 启用/禁用 `tiptapEdit` 工具（默认：`true`）
+  - `tiptapReadSelection?`: `boolean` - 启用/禁用 `tiptapReadSelection` 工具（默认：`true`）
+  - `getThreads?`: `boolean` - 启用/禁用 `getThreads` 工具（默认：`false`）
+  - `editThreads?`: `boolean` - 启用/禁用 `editThreads` 工具（默认：`false`）
 
 #### 返回值
 

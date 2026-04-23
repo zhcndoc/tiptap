@@ -94,3 +94,27 @@ AiCaret.configure({
   },
 })
 ```
+
+## 事件
+
+`AiCaret` 扩展会通过 Tiptap 的事件 API 触发事件。你可以订阅这些事件，以响应光标的移动——例如，用自定义 UI 行为跟随 AI 的写作位置。
+
+### 可用事件
+
+| 事件                      | 描述                                                                                     | 载荷                   |
+| ------------------------- | ---------------------------------------------------------------------------------------- | ---------------------- |
+| `aiCaret:positionChanged` | 在流式传输或编辑操作期间，每当 AI 光标位置更新时触发。                                     | `{ position: number }` |
+
+`position` 值是一个 ProseMirror 文档位置，指向 AI 光标当前所在的位置。
+
+### 订阅事件
+
+使用 `editor.on` 监听事件，并在不再需要时使用 `editor.off` 取消订阅。
+
+```tsx
+editor.on('aiCaret:positionChanged', ({ position }) => {
+  console.log('AI 光标移动到了位置', position)
+})
+```
+
+`aiCaret:positionChanged` 事件在流式传输期间可能会频繁触发——每个流式块都会触发一次。如果你的处理函数会执行开销较大的工作，建议使用 `requestAnimationFrame` 或像 `lodash.throttle` 这样的工具进行节流。

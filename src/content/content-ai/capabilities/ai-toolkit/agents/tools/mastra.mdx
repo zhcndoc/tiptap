@@ -26,9 +26,9 @@ import { openai } from '@ai-sdk/openai'
 import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
 
 const agent = new Agent({
-  name: 'Tiptap AI 代理',
-  instructions: '你是一个可以读取和编辑 Tiptap 文档的 AI 助手。',
-  model: openai('gpt-4o-mini'),
+  name: 'Tiptap AI Agent',
+  instructions: 'You are an AI assistant that can read and edit Tiptap documents.',
+  model: openai('gpt-5.4-mini'),
   tools: toolDefinitions(),
 })
 
@@ -62,8 +62,8 @@ const weatherTool = createTool({
 const agent = new Agent({
   name: '带天气功能的 Tiptap AI 代理',
   instructions:
-    '你是一个可以读取和编辑 Tiptap 文档并获取天气信息的 AI 助手。',
-  model: openai('gpt-4o-mini'),
+    'You are an AI assistant that can read and edit Tiptap documents and get weather information.',
+  model: openai('gpt-5.4-mini'),
   tools: {
     // AI 工具包中的工具定义
     ...toolDefinitions(),

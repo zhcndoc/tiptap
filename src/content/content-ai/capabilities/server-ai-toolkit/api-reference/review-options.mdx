@@ -1,21 +1,19 @@
 ---
-title: Review options
+title: 审阅选项
 meta:
-  title: Review options | Tiptap Server AI Toolkit
-  description: Configure tracked changes review behavior for Server AI Toolkit tool execution.
-  category: Content AI
+  title: 审阅选项 | Tiptap Server AI Toolkit
+  description: 为 Server AI Toolkit 的工具执行配置跟踪更改的审阅行为。
+  category: 内容 AI
 ---
 
 Server AI Toolkit 的 `execute-tool` 端点接受 `reviewOptions` 属性。使用它来控制 `tiptapEdit` 如何写入可审核的更改，而不是直接修改文档。
 
 ```ts
+import { getAuthHeaders } from '@/lib/server-ai-toolkit/get-auth-headers'
+
 const response = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${jwtToken}`,
-    'X-App-Id': appId,
-  },
+  headers: getAuthHeaders(),
   body: JSON.stringify({
     toolName: 'tiptapEdit',
     input: toolCallInput,
@@ -49,7 +47,7 @@ const response = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
 
 ### 直接编辑
 
-跳过审核模式并立即应用编辑：
+跳过审阅模式并立即应用编辑：
 
 ```ts
 reviewOptions: {

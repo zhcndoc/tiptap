@@ -90,7 +90,7 @@ Pages.configure({
 editor.commands.setHeader('Updated Header')
 ```
 
-## Header 配置
+## 页眉配置
 
 ### 默认页眉
 
@@ -296,17 +296,64 @@ Pages.configure({
 
 ### 激活的编辑器状态
 
-当用户双击页眉或页脚进行编辑时，扩展通过存储暴露当前激活的编辑器。这允许你构建自定义工具栏以配合页眉/页脚编辑器。
+当用户双击页眉或页脚进行编辑时，扩展会通过存储暴露当前激活的编辑器。这使你能够构建与页眉/页脚编辑器配合使用的自定义工具栏。
 
 **存储属性：**
 
-- `activeEditor` – 当前打开的页眉或页脚编辑器的 Tiptap 实例（或 `null`）
+- `activeEditor` – 当前打开的页眉或页脚编辑器对应的 Tiptap Editor 实例（或 `null`）
 - `activeEditorType` – `'header'`、`'footer'` 或 `null`
-- `activePageNumber` – 当前正在编辑的页码（或 `null`）
+- `activePageNumber` – 正在编辑的页码（或 `null`）
+- `headerEditorOn` / `headerEditorOff` – 订阅/取消订阅页眉覆盖层内部 Tiptap 编辑器上的事件
+- `footerEditorOn` / `footerEditorOff` – 订阅/取消订阅页脚覆盖层内部 Tiptap 编辑器上的事件
+
+该扩展还会监听页眉和页脚内部编辑器发出的 `focus` 事件。当用户聚焦到已打开的页眉或页脚编辑器时，`activeEditor`、`activeEditorType` 和 `activePageNumber` 会从当前激活的覆盖层中刷新。
+
+### 监听页眉/页脚编辑器事件
+
+页眉和页脚各自拥有独立的编辑器。你可以通过 `editor.storage.pages` 订阅这些编辑器的事件。
+
+```tsx
+import { useEffect, useState } from 'react'
+
+function HeaderFooterStatus({ editor }) {
+  const [activeEditorType, setActiveEditorType] = useState(null)
+  const [activePageNumber, setActivePageNumber] = useState(null)
+
+  useEffect(() => {
+    if (!editor) return
+
+    const syncActiveEditorState = () => {
+      const { activeEditorType, activePageNumber } = editor.storage.pages
+      setActiveEditorType(activeEditorType)
+      setActivePageNumber(activePageNumber)
+    }
+
+    editor.storage.pages.headerEditorOn?.('focus', syncActiveEditorState)
+    editor.storage.pages.footerEditorOn?.('focus', syncActiveEditorState)
+
+    return () => {
+      editor.storage.pages.headerEditorOff?.('focus', syncActiveEditorState)
+      editor.storage.pages.footerEditorOff?.('focus', syncActiveEditorState)
+    }
+  }, [editor])
+
+  if (!activeEditorType || !activePageNumber) {
+    return <span>Editing document</span>
+  }
+
+  return (
+    <span>
+      Editing {activeEditorType} on page {activePageNumber}
+    </span>
+  )
+}
+```
+
+你也可以将相同的辅助方法用于其他 Tiptap 编辑器事件，例如 `update`、`selectionUpdate`、`blur` 或 `transaction`。
 
 ### 构建自定义工具栏
 
-下面是一个 React 组件示例，提供一个统一的工具栏，用于主编辑器和页眉/页脚编辑器：
+下面是一个 React 组件示例，它为主编辑器和页眉/页脚编辑器提供一个统一的工具栏：
 
 ```tsx
 import { useEditor, useEditorState, EditorContent } from '@tiptap/react'
@@ -315,6 +362,7 @@ import { useEffect, useState } from 'react'
 function DocumentEditor() {
   const [headerFooterEditor, setHeaderFooterEditor] = useState(null)
   const [activeEditorType, setActiveEditorType] = useState(null)
+  const [activePageNumber, setActivePageNumber] = useState(null)
 
   const editor = useEditor({
     extensions: [
@@ -330,14 +378,22 @@ function DocumentEditor() {
   useEffect(() => {
     if (!editor) return
 
-    const handleUpdate = () => {
-      const { activeEditor, activeEditorType } = editor.storage.pages
+    const syncActiveHeaderFooterEditor = () => {
+      const { activeEditor, activeEditorType, activePageNumber } = editor.storage.pages
       setHeaderFooterEditor(activeEditor)
       setActiveEditorType(activeEditorType)
+      setActivePageNumber(activePageNumber)
     }
 
-    editor.on('update', handleUpdate)
-    return () => editor.off('update', handleUpdate)
+    editor.on('update', syncActiveHeaderFooterEditor)
+    editor.storage.pages.headerEditorOn?.('focus', syncActiveHeaderFooterEditor)
+    editor.storage.pages.footerEditorOn?.('focus', syncActiveHeaderFooterEditor)
+
+    return () => {
+      editor.off('update', syncActiveHeaderFooterEditor)
+      editor.storage.pages.headerEditorOff?.('focus', syncActiveHeaderFooterEditor)
+      editor.storage.pages.footerEditorOff?.('focus', syncActiveHeaderFooterEditor)
+    }
   }, [editor])
 
   // 使用激活的编辑器（页眉/页脚或主编辑器）
@@ -353,7 +409,12 @@ function DocumentEditor() {
   return (
     <div>
       <div className="toolbar">
-        <span>正在编辑：{activeEditorType || '文档'}</span>
+        <span>
+          Editing:{' '}
+          {activeEditorType && activePageNumber
+            ? `${activeEditorType} on page ${activePageNumber}`
+            : 'Document'}
+        </span>
         <button
           className={isBoldActive ? 'is-active' : ''}
           onClick={() => activeEditor?.chain().focus().toggleBold().run()}
@@ -613,7 +674,7 @@ editor.commands.setHeaderAccentColor('#3b82f6')
 editor.commands.setFooterAccentColor('#ef4444')
 ```
 
-<Callout title="CSS color values" variant="info">
+<Callout title="CSS 颜色值" variant="info">
   强调色选项支持任何有效的 CSS 颜色值，包括十六进制（`#3b82f6`）、rgb（`rgb(59,
   130, 246)`）、hsl（`hsl(217, 91%, 60%)`）、oklch 或 CSS 变量（`var(--primary-color)`）。
 </Callout>

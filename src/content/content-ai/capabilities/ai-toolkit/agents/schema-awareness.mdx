@@ -115,17 +115,11 @@ export async function POST(req: Request) {
     await req.json()
 
   const agent = new ToolLoopAgent({
-    model: openai('gpt-5-mini'),
-    // 在系统提示末尾添加模式感知字符串
-    instructions: `你是一名可以编辑富文本文档的助手。
+    model: openai('gpt-5.4-mini'),
+    // 将模式感知字符串添加到系统提示末尾
+    instructions: `You are an assistant that can edit rich text documents.
 ${schemaAwareness}`,
     tools: toolDefinitions(),
-    // 设置推理复杂度为“minimal”，以加快响应速度
-    providerOptions: {
-      openai: {
-        reasoningEffort: 'minimal',
-      },
-    },
   })
 
   return createAgentUIStreamResponse({

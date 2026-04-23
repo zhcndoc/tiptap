@@ -27,8 +27,8 @@ import { toolDefinitions } from '@tiptap-pro/ai-toolkit-openai'
 const openai = new OpenAI()
 
 const response = await openai.responses.create({
-  model: 'gpt-5',
-  input: [{ role: 'user', content: '帮我编辑这份文档' }],
+  model: 'gpt-5.4-mini',
+  input: [{ role: 'user', content: 'Help me edit this document' }],
   tools: toolDefinitions(),
 })
 ```
@@ -60,8 +60,8 @@ const customTools = [
 ]
 
 const response = await openai.responses.create({
-  model: 'gpt-5',
-  input: [{ role: 'user', content: '天气如何，同时帮我编辑这份文档' }],
+  model: 'gpt-5.4-mini',
+  input: [{ role: 'user', content: 'What is the weather like and help me edit this document' }],
   tools: [...toolDefinitions(), ...customTools],
 })
 ```
@@ -83,7 +83,7 @@ const response = await openai.responses.create({
 
 #### 返回值
 
-包含启用的工具定义的数组，可用于 [OpenAI 的 responses API](https://platform.openai.com/docs/api-reference/responses)。完整工具列表请参见 [可用工具](/content-ai/capabilities/ai-toolkit/tools/available-tools) 页面。
+包含已启用工具定义的数组，可用于 [OpenAI 的 responses API](https://platform.openai.com/docs/api-reference/responses)。完整工具列表请参见 [可用工具](/content-ai/capabilities/ai-toolkit/tools/available-tools) 页面。
 
 ### `completionsApiToolDefinitions`
 
@@ -100,4 +100,4 @@ const response = await openai.responses.create({
 
 #### 返回值
 
-包含启用的工具定义的数组，可用于 [OpenAI 的 completions API](https://platform.openai.com/docs/api-reference/completions)。完整工具列表请参见 [可用工具](/content-ai/capabilities/ai-toolkit/tools/available-tools) 页面。
+包含已启用工具定义的数组，可用于 [OpenAI 的 completions API](https://platform.openai.com/docs/api-reference/completions)。完整工具列表请参见 [可用工具](/content-ai/capabilities/ai-toolkit/tools/available-tools) 页面。

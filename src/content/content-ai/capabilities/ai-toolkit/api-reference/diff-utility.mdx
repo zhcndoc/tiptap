@@ -1,9 +1,9 @@
 ---
 title: Diff 实用工具
 meta:
-  title: Diff 实用工具 | Tiptap Content AI
+  title: Diff 实用工具 | Tiptap 内容 AI
   description: 以编程方式计算两个文档之间的变化。
-  category: Content AI
+  category: 内容 AI
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -97,10 +97,10 @@ const inlineChanges = diffUtility({
 
 ### 参数 (`StartComparingDocumentsOptions`)
 
-- `otherDoc?` (`Node`)：用于比较的文档。它是一个[ProseMirror Node 对象](https://prosemirror.net/docs/ref/#model.Node)。如果省略，则默认使用当前文档的快照。
-- `displayOptions?` (`DisplayOptions`)：控制如何将差异呈现为建议。[查看可用选项](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#the-suggestion-object)。
-- `debounceTimeout?` (`number`)：重新计算 diff 之前等待的毫秒数。较低的值可使应用响应更快，但可能会导致大型文档的性能问题。默认值：`500`
-- `diffUtilityOptions?` ([`ExternalDiffUtilityOptions`](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility#parameters-diffutilityoptions))：用于使用 diff 实用工具比较文档的选项。[查看可用选项](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility#parameters-diffutilityoptions)。
+- `otherDoc?` (`Node`)：要进行比较的文档。它是一个 [ProseMirror Node 对象](https://prosemirror.net/docs/ref/#model.Node)。如果省略，默认使用当前文档的快照
+- `displayOptions?` (`DisplayOptions`)：控制差异如何以建议的形式呈现。[查看可用选项](/content-ai/capabilities/ai-toolkit/api-reference/suggestions#the-suggestion-object)。
+- `debounceTimeout?` (`number`)：重新计算 diff 之前等待的毫秒数。较低的值会让应用看起来更响应，但在大型文档中可能会导致性能问题。默认值：`500`
+- `diffUtilityOptions?` ([`ExternalDiffUtilityOptions`](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility#parameters-diffutilityoptions))：使用 diff 实用工具比较文档时的选项。[查看可用选项](/content-ai/capabilities/ai-toolkit/api-reference/diff-utility#parameters-diffutilityoptions)。
 
 ### 返回值
 
@@ -134,9 +134,9 @@ toolkit.stopComparingDocuments()
 
 在比较文档时，变更以建议的形式显示。要接受或拒绝单个变更或一次性处理所有变更，请使用以下建议方法：
 
-- [`acceptSuggestion`](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#acceptsuggestion)：接受特定变更
-- [`rejectSuggestion`](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#rejectsuggestion)：拒绝特定变更
-- [`acceptAllSuggestions`](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#acceptallsuggestions)：接受所有变更
-- [`rejectAllSuggestions`](/content-ai/capabilities/ai-toolkit/api-reference/display-suggestions#rejectallsuggestions)：拒绝所有变更
+- [`acceptSuggestion`](/content-ai/capabilities/ai-toolkit/api-reference/suggestions#acceptsuggestion)：接受特定变更
+- [`rejectSuggestion`](/content-ai/capabilities/ai-toolkit/api-reference/suggestions#rejectsuggestion)：拒绝特定变更
+- [`acceptAllSuggestions`](/content-ai/capabilities/ai-toolkit/api-reference/suggestions#acceptallsuggestions)：接受所有变更
+- [`rejectAllSuggestions`](/content-ai/capabilities/ai-toolkit/api-reference/suggestions#rejectallsuggestions)：拒绝所有变更
 
 使用示例见[比较文档指南](/content-ai/capabilities/ai-toolkit/advanced-guides/compare-documents)。

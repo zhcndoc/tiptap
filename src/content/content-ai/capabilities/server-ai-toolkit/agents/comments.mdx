@@ -1,7 +1,7 @@
 ---
-title: Server 评论
+title: 服务器评论
 meta:
-  title: Server 评论 | Tiptap 服务器 AI 工具包
+  title: 服务器评论 | Tiptap 服务器 AI 工具包
   description: 使用服务器 AI 工具包，启用服务器端 AI 代理读取和编辑 Tiptap 文档中的评论。
   category: 内容 AI
 sidebars:
@@ -17,12 +17,8 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
-<Callout title="实验性功能" variant="warning">
-  此功能处于实验阶段，API 未来版本可能会发生变化。
-</Callout>
-
-<Callout title="AI 代理聊天机器人指南的延续" variant="info">
-  本指南是[AI 代理聊天机器人指南](/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot)的延续，请先阅读该指南。
+<Callout title="继续阅读 AI 代理聊天机器人指南" variant="info">
+  本指南接续 [AI 代理聊天机器人指南](/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot)。请先阅读它。
 </Callout>
 
 ## 启用评论工具
@@ -30,13 +26,11 @@ import { CodeDemo } from '@/components/CodeDemo'
 要启用评论工具，获取服务器 AI 工具包 API 的工具定义时，传递 `getThreads` 和 `editThreads` 选项。
 
 ```ts
+import { getAuthHeaders } from '@/lib/server-ai-toolkit/get-auth-headers'
+
 const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${jwtToken}`,
-    'X-App-Id': appId,
-  },
+  headers: getAuthHeaders(),
   body: JSON.stringify({
     schemaAwarenessData,
     tools: {
@@ -55,14 +49,7 @@ const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
 
 评论工具需要一个 **Tiptap Cloud 文档**，因为线程和评论存储在 Tiptap 文档服务器上。使用 `experimental_documentOptions` 时，**不需要传递 `document` 字段** —— AI 服务器会自动从文档服务器获取。
 
-### JWT 要求
-
-您的 JWT 必须包含文档服务器的凭证作为声明：
-
-- `experimental_document_server_id` (`string`): Tiptap Cloud 文档服务器 ID  
-- `experimental_document_server_management_api_secret` (`string`): 文档服务器的管理员 API 密钥
-
-### 请求体
+### Request body
 
 在请求体中包含 `experimental_documentOptions`：
 
@@ -71,37 +58,19 @@ const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
 
 可选包含 `experimental_commentsOptions` 以添加元数据：
 
-- `threadData` (`Record<string, unknown>`, optional): 当由 `editThreads` 工具创建新线程时附加到新线程的元数据。
-- `commentData` (`Record<string, unknown>`, optional): 当由 `editThreads` 工具创建新评论时附加到新评论的元数据。
+- `threadData` (`Record<string, unknown>`, 可选): 当由 `editThreads` 工具创建新线程时附加到新线程的元数据。
+- `commentData` (`Record<string, unknown>`, 可选): 当由 `editThreads` 工具创建新评论时附加到新评论的元数据。
 
 ```ts
-// JWT 必须包含文档服务器凭证
-import jwt from 'jsonwebtoken'
-
-const jwtToken = jwt.sign(
-  {
-    // Document Server credentials (required for comment tools)
-    experimental_document_server_id: 'your-document-server-id',
-    experimental_document_server_management_api_secret:
-      'your-document-server-management-api-secret',
-  },
-  TIPTAP_CLOUD_AI_SECRET,
-  { expiresIn: '1h' },
-)
-
 const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${jwtToken}`,
-    'X-App-Id': appId,
-  },
+  headers: getAuthHeaders(),
   body: JSON.stringify({
     toolName: 'editThreads',
     input: {},
     schemaAwarenessData,
     sessionId,
-    // Reference the Tiptap Cloud document
+    // 引用 Tiptap Cloud 文档
     experimental_documentOptions: {
       documentId: '123',
       userId: 'ai-assistant',

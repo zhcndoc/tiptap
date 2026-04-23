@@ -10,14 +10,14 @@ import { Callout } from '@/components/ui/Callout'
 
 Server AI Toolkit 为 **工具** 和 **工作流** 都提供 REST API 端点。
 
-<Callout title="Postman collection" variant="info">
+<Callout title="Postman 集合" variant="info">
   浏览用于 Server AI Toolkit REST API 的{' '}
   <a
     href="https://www.postman.com/tiptap-platform/tiptap-workspace/collection/42722929-6a366c4c-10e4-4674-93c3-da35b70357a7?action=share&source=copy-link&creator=42722929"
     target="_blank"
     rel="noopener noreferrer"
   >
-    Postman collection
+    Postman 集合
   </a>{' '}
   。
 </Callout>
@@ -44,6 +44,8 @@ const JWT_TOKEN = jwt.sign(
 )
 ```
 
+有关更多信息，请参阅 [授权指南](/content-ai/capabilities/server-ai-toolkit/install#set-up-authorization)。
+
 ### Document Server 凭据
 
 当你希望 Server AI Toolkit 自动获取并保存 Tiptap Cloud 文档时，请在 JWT 声明中包含这些 claims：
@@ -59,7 +61,7 @@ const JWT_TOKEN = jwt.sign(
 https://api.tiptap.dev
 ```
 
-在下面的示例中，请求写作 `BASE_URL/v3/ai/...`。
+在下面的示例中，请求形式为 `BASE_URL/v3/ai/...`。
 
 **使用 Tiptap Cloud 文档（推荐）** — 在请求体中包含带有 `documentId` 的 `experimental_documentOptions`。服务器将自动从 Tiptap Document Server 获取文档、处理文档，并保存回修改。此方式要求你的 JWT 声明中包含 Document Server 凭据（见上文【Document Server 凭据】）。
 
@@ -253,7 +255,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/read/read-document' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* schema awareness data */ },
+    "schemaAwarenessData": { /* 模式感知数据 */ },
     "format": "shorthand",
     "reviewOptions": {
       "mode": "disabled"
@@ -310,7 +312,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/read/read-selection' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* schema awareness data */ },
+    "schemaAwarenessData": { /* 模式感知数据 */ },
     "range": { "from": 10, "to": 42 },
     "format": "shorthand",
     "experimental_documentOptions": {
@@ -349,7 +351,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/read/threads' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* schema awareness data */ },
+    "schemaAwarenessData": { /* 模式感知数据 */ },
     "format": "shorthand",
     "experimental_documentOptions": {
       "documentId": "your-document-id",
@@ -394,7 +396,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/insert-content' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* schema awareness data */ },
+    "schemaAwarenessData": { /* 模式感知数据 */ },
     "input": "This is the replacement content.",
     "range": { "from": 10, "to": 42 },
     "format": "shorthand",
@@ -444,7 +446,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/tiptap-edit' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* schema awareness data */ },
+    "schemaAwarenessData": { /* 模式感知数据 */ },
     "input": {
       "operations": [
         {
@@ -473,7 +475,7 @@ POST /v3/ai/toolkit/execute-workflow/proofreader
 
 请求体：
 
-- `input` (`object`, 必填): Proofreader 操作
+- `input` (`object`, 必填): 校对器操作
 - `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
 - `format` (`'shorthand'`, 必填)
 - `sessionId?` (`string | null`, 可选)
@@ -499,7 +501,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/proofreader' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* schema awareness data */ },
+    "schemaAwarenessData": { /* 模式感知数据 */ },
     "input": {
       "operations": []
     },
@@ -546,7 +548,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/threads' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* schema awareness data */ },
+    "schemaAwarenessData": { /* 模式感知数据 */ },
     "input": {
       "operations": [
         {
@@ -572,7 +574,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/threads' \
   }'
 ```
 
-## 架构感知提示（Schema awareness prompt）
+## 架构感知提示（架构感知提示）
 
 ```txt
 POST /v3/ai/toolkit/schema-awareness-prompt
@@ -593,14 +595,14 @@ POST /v3/ai/toolkit/schema-awareness-prompt
 
 该 API 使用标准的 HTTP 错误代码：
 
-- `400 Bad Request`：无效的请求体、无效的格式、缺少文档源，或缺少 Document
+- `400 错误请求`：无效的请求体、无效的格式、缺少文档源，或缺少 Document
   服务器凭证
-- `401 Unauthorized`：缺少或无效的 JWT 或应用程序 ID
-- `404 Not Found`：未知的端点或工具
-- `422 Unprocessable Entity`：验证失败
-- `429 Too Many Requests`：重复请求或触发了速率限制保护
-- `500 Internal Server Error`：意外的服务器错误
-- `502 Bad Gateway`：无法加载或保存 Tiptap Cloud 文档
+- `401 未授权`：缺少或无效的 JWT 或应用程序 ID
+- `404 未找到`：未知的端点或工具
+- `422 无法处理的实体`：验证失败
+- `429 请求过多`：重复请求或触发了速率限制保护
+- `500 内部服务器错误`：意外的服务器错误
+- `502 错误网关`：无法加载或保存 Tiptap Cloud 文档
 
 ## 相关页面
 

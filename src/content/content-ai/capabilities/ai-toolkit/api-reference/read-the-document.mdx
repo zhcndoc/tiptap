@@ -295,10 +295,10 @@ const smallerChunks = toolkit.getJsonChunks({ chunkSize: 1000 })
 
 ### 参数
 
-- `range?` (`Range`): 读取范围。默认为整个文档。
+- `range?` (`Range`): 要读取的范围。默认为整个文档。
   - `from` (`number`): 起始位置
   - `to` (`number`): 结束位置
-- `selectableNodeTypes?` (`string[]`): 需要始终带有哈希（即使不是顶层节点）的节点类型名称数组。默认所有块级节点类型都可包含哈希。若设置为 `[]`，则仅顶层节点带有哈希。
+- `ignoreSuggestions?` (`boolean`): 当为 `true` 时，不应用预览建议，文档将按原样读取。默认为 `false`。
 
 ### 返回值 (`TiptapReadResult`)
 
