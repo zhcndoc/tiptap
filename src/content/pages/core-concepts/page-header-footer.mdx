@@ -13,6 +13,11 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 你可以调整页面布局的一些方面，以更好地满足你的需求。主要选项有 `header`、`footer`、`headerHeight` 和 `footerHeight`。
 
+<Callout title="Imported from DOCX" variant="hint">
+  当你导入 `.docx` 文件并使用 [DOCX 导入
+  扩展](/conversion/import/docx/editor-extension#headers--footers) 时，文档中的页眉和页脚会自动应用到 Pages 中——包括首页不同以及奇偶页不同的变体。无需额外配置。
+</Callout>
+
 <CodeDemo isPro path="/Extensions/PagesHeaderFooter" />
 
 ## 页眉内容
@@ -123,7 +128,28 @@ Pages.configure({
 })
 ```
 
-### 初始配置（HTML）
+**编辑器命令：**
+
+```js
+// 覆盖页眉上边距
+editor.commands.setHeaderTopMargin(40)
+
+// 清除覆盖并回退到当前格式的默认值
+//（该格式顶部边距的 50%）
+editor.commands.resetHeaderTopMargin()
+```
+
+<Callout title="Input validation" variant="info">
+    `setHeaderTopMargin` 会拒绝负值和 `NaN`——在这些情况下，该命令会返回 `false` 并记录警告。
+</Callout>
+
+## 页脚配置
+
+### 默认页脚
+
+`footer` 选项设置每页页脚区域显示的内容。
+
+**初始配置：**
 
 ```js
 Pages.configure({
@@ -154,20 +180,22 @@ Pages.configure({
 })
 ```
 
-## 页脚高度
-
-- 控制每页底部页脚区域的高度。
-- 默认值：`50`（像素）
-
-### 初始配置
+**编辑器命令：**
 
 ```js
-Pages.configure({
-  footerHeight: 80, // 让页脚区域更高
-})
+// 覆盖页脚下边距
+editor.commands.setFooterBottomMargin(40)
+
+// 清除覆盖并回退到当前格式的默认值
+//（该格式底部边距的 50%）
+editor.commands.resetFooterBottomMargin()
 ```
 
-### 编辑器页脚高度命令
+<Callout title="Input validation" variant="info">
+    `setFooterBottomMargin` 会拒绝负值和 `NaN`——在这些情况下，该命令会返回 `false` 并记录警告。
+</Callout>
+
+## 首页不同
 
 ```js
 editor.commands.setFooterHeight(30) // 更小的页脚！
@@ -262,37 +290,19 @@ Pages.configure({
 
 ### 自定义扩展
 
-默认情况下，页眉/页脚编辑器使用 `StarterKit`。你可以提供自定义扩展，启用如图片、表格、文本对齐等额外功能：
+页眉/页脚编辑器使用与你在主编辑器中配置的相同扩展。为了匹配 schema（这样相同的 mark、节点和表格行为都能在页眉和页脚中工作），请通过 `headerFooterExtensions` 传入 `ConvertKit` 和 `TableKit`：
 
-```js
-import { Extension } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
-import Image from '@tiptap/extension-image'
-import Table from '@tiptap/extension-table'
-import TableRow from '@tiptap/extension-table-row'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
-import TextAlign from '@tiptap/extension-text-align'
+```ts
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+import { TableKit } from '@tiptap-pro/extension-pages-tablekit'
 
 Pages.configure({
-  header: '我的页眉',
-  headerFooterExtensions: [
-    StarterKit,
-    Image,
-    Table.configure({
-      resizable: true,
-    }),
-    TableRow,
-    TableCell,
-    TableHeader,
-    TextAlign.configure({
-      types: ['heading', 'paragraph'],
-    }),
-  ],
+  header: 'My header',
+  headerFooterExtensions: [ConvertKit.configure({ table: false }), TableKit],
 })
 ```
 
-任何 Tiptap 扩展都可以通过 `headerFooterExtensions` 选项添加到页眉/页脚编辑器中。
+任何 Tiptap 扩展都可以通过 `headerFooterExtensions` 选项添加到页眉/页脚编辑器中。与主编辑器的扩展栈保持一致，可以让文档及其页眉页脚之间的 schema、键盘快捷键和渲染效果保持统一。
 
 ### 激活的编辑器状态
 
@@ -338,12 +348,12 @@ function HeaderFooterStatus({ editor }) {
   }, [editor])
 
   if (!activeEditorType || !activePageNumber) {
-    return <span>Editing document</span>
+    return <span>正在编辑文档</span>
   }
 
   return (
     <span>
-      Editing {activeEditorType} on page {activePageNumber}
+      正在编辑第 {activePageNumber} 页的 {activeEditorType}
     </span>
   )
 }
@@ -366,7 +376,8 @@ function DocumentEditor() {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      ConvertKit.configure({ table: false }),
+      TableKit,
       Pages.configure({
         header: '文档页眉',
         footer: '第 {page} 页',
@@ -633,7 +644,7 @@ Pages.configure({
 
 - **光标颜色** — 编辑器中的文本光标颜色
 - **工具栏边框** — 编辑工具栏的顶部边框（页眉）或底部边框（页脚）
-- **标签背景** — “Header” 或 “Footer” 标签背景色
+- **标签背景** — “页眉” 或 “页脚” 标签背景色
 
 ### 配置
 
@@ -652,8 +663,8 @@ Pages.configure({
 
 ```js
 Pages.configure({
-  header: 'My Header',
-  footer: 'Page {page}',
+  header: '我的页眉',
+  footer: '第 {page} 页',
   headerAccentColor: '#3b82f6', // 页眉的蓝色
   footerAccentColor: '#10b981', // 页脚的绿色
 })
@@ -691,7 +702,7 @@ editor.commands.setFooterAccentColor('#ef4444')
 
 ### 协作功能
 
-页眉和页脚不支持协作编辑。页眉和页脚的编辑器是独立的 Tiptap 实例，与主文档的协作会话无关。
+页眉和页脚编辑器会与主文档一起参与协作。请像为任何 Pages 编辑器一样设置协作提供器——无需额外连接即可让页眉和页脚进入同一会话。完整设置流程请参见 [向 Pages 添加协作](/pages/guides/collaboration-with-pages)。
 
 页眉/页脚编辑器使用内置样式，但你可通过 `accentColor`、`headerAccentColor` 和 `footerAccentColor` 选项自定义强调色。
 
@@ -719,25 +730,27 @@ editor.commands.setFooterAccentColor('#ef4444')
 
 页眉和页脚编辑不支持协作同步。它们分别是独立的 Tiptap 实例，与主文档的协作会话无关。
 
-| 命令                        | 参数                         | 描述                                               |
-| --------------------------- | ---------------------------- | -------------------------------------------------- |
-| `setHeader`                 | `header: PagesHeaderFooter`  | 设置默认页眉内容                                   |
-| `setFooter`                 | `footer: PagesHeaderFooter`  | 设置默认页脚内容                                   |
-| `setHeaderTopMargin`        | `margin: number`             | 设置页眉顶部边距（像素）                           |
-| `setFooterBottomMargin`     | `margin: number`             | 设置页脚底部边距（像素）                           |
-| `setDifferentFirstPage`     | `enabled: boolean`           | 切换首页不同（页眉+页脚）                          |
-| `setHeaderFirstPage`        | `header: PagesHeaderFooter`  | 设置首页页眉内容                                   |
-| `setFooterFirstPage`        | `footer: PagesHeaderFooter`  | 设置首页页脚内容                                   |
-| `setDifferentOddEven`       | `enabled: boolean`           | 切换奇偶页不同（页眉+页脚）                        |
-| `setHeaderOdd`              | `header: PagesHeaderFooter`  | 设置奇数页页眉内容                                 |
-| `setHeaderEven`             | `header: PagesHeaderFooter`  | 设置偶数页页眉内容                                 |
-| `setFooterOdd`              | `footer: PagesHeaderFooter`  | 设置奇数页页脚内容                                 |
-| `setFooterEven`             | `footer: PagesHeaderFooter`  | 设置偶数页页脚内容                                 |
-| `openHeaderEditor`          | `{ pageNumber: number }`     | 打开指定页（从 1 开始）的页眉编辑器               |
-| `openFooterEditor`          | `{ pageNumber: number }`     | 打开指定页（从 1 开始）的页脚编辑器               |
-| `closeHeaderFooterEditors`  | 无                           | 关闭当前打开的页眉或页脚编辑器                     |
-| `closeHeaderEditor`         | 无                           | 关闭页眉编辑器（如果已打开）                       |
-| `closeFooterEditor`         | 无                           | 关闭页脚编辑器（如果已打开）                       |
-| `setAccentColor`            | `color: string`              | 设置页眉/页脚编辑器覆盖层的强调色                  |
-| `setHeaderAccentColor`      | `color: string`              | 设置页眉编辑器覆盖层的强调色                        |
-| `setFooterAccentColor`      | `color: string`              | 设置页脚编辑器覆盖层的强调色                        |
+| Command                    | Parameters                  | Description                                        |
+| -------------------------- | --------------------------- | -------------------------------------------------- |
+| `setHeader`                | `header: PagesHeaderFooter` | 设置默认页眉内容                         |
+| `setFooter`                | `footer: PagesHeaderFooter` | 设置默认页脚内容                         |
+| `setHeaderTopMargin`       | `margin: number`            | 设置页眉顶部边距（像素）。拒绝负值和 `NaN`。 |
+| `resetHeaderTopMargin`     | none                        | 清除页眉顶部边距覆盖；回退到当前格式的默认值（格式顶部边距的 50%）。 |
+| `setFooterBottomMargin`    | `margin: number`            | 设置页脚底部边距（像素）。拒绝负值和 `NaN`。 |
+| `resetFooterBottomMargin`  | none                        | 清除页脚底部边距覆盖；回退到当前格式的默认值（格式底部边距的 50%）。 |
+| `setDifferentFirstPage`    | `enabled: boolean`          | 切换首页不同（页眉 + 页脚）      |
+| `setHeaderFirstPage`       | `header: PagesHeaderFooter` | 设置首页页眉内容                      |
+| `setFooterFirstPage`      | `footer: PagesHeaderFooter` | 设置首页页脚内容                      |
+| `setDifferentOddEven`      | `enabled: boolean`          | 切换奇偶页不同（页眉 + 页脚）  |
+| `setHeaderOdd`             | `header: PagesHeaderFooter` | 设置奇数页页眉内容                       |
+| `setHeaderEven`            | `header: PagesHeaderFooter` | 设置偶数页页眉内容                      |
+| `setFooterOdd`             | `footer: PagesHeaderFooter` | 设置奇数页页脚内容                       |
+| `setFooterEven`            | `footer: PagesHeaderFooter` | 设置偶数页页脚内容                      |
+| `openHeaderEditor`         | `{ pageNumber: number }`    | 为特定页面打开页眉编辑器（从 1 开始编号） |
+| `openFooterEditor`         | `{ pageNumber: number }`    | 为特定页面打开页脚编辑器（从 1 开始编号） |
+| `closeHeaderFooterEditors` | none                        | 关闭当前打开的页眉/页脚编辑器       |
+| `closeHeaderEditor`        | none                        | 如果页眉编辑器已打开，则将其关闭                    |
+| `closeFooterEditor`        | none                        | 如果页脚编辑器已打开，则将其关闭                    |
+| `setAccentColor`           | `color: string`             | 为两个编辑器覆盖层设置强调色          |
+| `setHeaderAccentColor`     | `color: string`             | 为页眉编辑器覆盖层设置强调色         |
+| `setFooterAccentColor`     | `color: string`             | 为页脚编辑器覆盖层设置强调色         |

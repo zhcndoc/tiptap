@@ -1,0 +1,159 @@
+---
+title: 调试与检查转换输出
+tags:
+  - type: beta
+meta:
+  title: 调试转换输出 | Tiptap 转换
+  description: 如何使用详细模式、检查中间 JSON，并诊断为什么导入的内容没有在你的编辑器中渲染。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+本指南涵盖了我们在遇到异常时自己会使用的工具和模式——导入失败、内容未按预期渲染、Conversion 服务返回 HTTP 错误，或者分页编辑器突然停止响应。它按你真正卡住时会搜索的内容来组织。
+
+## 详细导入日志
+
+DOCX 导入扩展提供了一个 `verbose` 选项，用于控制转换服务在返回转换后内容时附带多少诊断信息。该值是一个位掩码：将各级别的数值相加即可组合。
+
+| 值   | 级别    | 你将获得的内容                               |
+| ---- | ------- | -------------------------------------------- |
+| `1`  | `info`  | 信息消息                                     |
+| `2`  | `warn`  | 警告（例如无法上传的图片）                   |
+| `4`  | `error` | 错误                                         |
+| `7`  | all     | `info` + `warn` + `error`                    |
+
+```ts
+ImportDocx.configure({
+  appId: 'YOUR_APP_ID',
+  token: 'YOUR_JWT',
+  verbose: 7, // info + warn + error
+})
+```
+
+当设置了 `verbose` 时，响应结构会在 `content` 旁边增加一个 `logs` 字段：
+
+```json
+{
+  "content": {
+    /* Tiptap JSON */
+  },
+  "logs": {
+    "info": [],
+    "warn": [
+      {
+        "message": "媒体文件中未找到图片文件",
+        "fileName": "image1.gif",
+        "availableMediaFiles": []
+      }
+    ],
+    "error": [
+      {
+        "message": "图片上传失败：通用错误",
+        "fileName": "image1.gif",
+        "url": "https://your-image-upload-endpoint.com",
+        "error": "无法连接。计算机是否能够访问该 URL？",
+        "context": "uploadImage general error"
+      }
+    ]
+  }
+}
+```
+
+这些日志会和内容一起出现在 `onImport` 回调的 `context` 中。调试时请打印它们；在生产环境中关闭 `verbose`，除非你正在主动排查问题。
+
+## 在插入前检查转换后的内容
+
+要理解转换器实际生成了什么，最快的方法是从 `onImport` 回调中记录 `context.content`：
+
+```ts
+editor
+  .chain()
+  .import({
+    file,
+    onImport(context) {
+      console.log('导入的内容：', JSON.stringify(context.content, null, 2))
+      context.setEditorContent()
+    },
+  })
+  .run()
+```
+
+`context.content` 中的每个节点都包含其类型和属性。如果某个功能渲染异常，先看这里对应的节点——它会告诉你转换器是丢弃了该功能、将其映射为其他节点，还是传递了你编辑器 schema 不会渲染的属性。
+
+## 确认编辑器的扩展
+
+当导入内容未能渲染时，最常见的原因是编辑器的 schema 中缺少某个扩展。运行时读取已注册的扩展：
+
+```ts
+console.log(editor.extensionManager.extensions.map((e) => e.name))
+```
+
+如果你使用的是 `ConvertKit`，你应该能看到 paragraph、heading、image、table 扩展，以及标准 marks。如果缺少某些内容，请检查你是否真的注册了 ConvertKit，并且没有在 `ConvertKit.configure({…})` 中不小心把你需要的插槽传成 `false`。
+
+## 常见 HTTP 响应
+
+发送到服务的转换请求会返回少量几种响应之一。每种响应都有明确的原因和明确的处理方式。
+
+| 状态   | 含义                                                                                                   | 处理方式                                                                                                                   |
+| ------ | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `401`  | 缺少或无效的 JWT。                                                                                     | 在服务端重新生成 token。确认 `appId` 与 token 对应的应用一致。                                                             |
+| `403`  | 该操作不允许用于你的应用。最常见的是：你的方案不包含某种格式，或者在云方案下使用 `customFonts`。       | 查看 [定价页面](https://tiptap.dev/pricing) 了解方案支持的格式。PDF 中的自定义字体需要 Enterprise 方案或本地部署。       |
+| `5xx`  | 临时性的服务端错误。                                                                                   | 使用指数退避重试。如果问题持续存在，请提交支持工单。                                                                      |
+
+请围绕这三种情况来设计错误处理；你不需要逐个细分场景进行逻辑分支。
+
+## Pages 无限循环场景
+
+当 Pages 编辑器停止响应时，这就是**首先要检查的事情**。编辑器变得无响应、滚动停止、CPU 飙升，并且 Pages 的控制台警告反复出现。
+
+**原因。** 一个不可拆分的块（表格行、figure、定位容器、大多数 BFC 元素）比页面还高。Pages 无法把它放到任何地方——它既不能放进当前页，也放不进下一页——所以布局会不断把它向前移动，永远无法稳定下来。
+
+**解决办法应在内容侧处理，而不是在扩展配置中处理：**
+
+1. 使用 `max-height: var(--page-max-height)` 限制出问题块的高度。
+2. 将过高的内容拆分成更小、相邻的块（长表格 → 多个更小的表格；高 figure → 更小的 figure）。
+3. 对于从 DOCX 导入的表格，在行内容有界的情况下，将 `heightRule: "atLeast"` 改为 `"exact"`。
+4. 如果你的内容是在比目标页面更大的纸张上创作的，请选择更大的页面格式。
+
+深入说明请参见 [限制页面](/pages/core-concepts/limitations#oversized-non-splittable-blocks-cause-an-infinite-layout-loop)，表格相关处理请参见 [PagesTableKit 已知问题](/pages/guides/pages-tablekit#known-issues)。
+
+<Callout title="将警告视为信号" variant="warning">
+  生产代码如果导入用户提供的 DOCX，应显式处理 Pages 警告：拒绝该文档并告知用户，或者在插入前以程序方式拆分过高的行。不要只依赖警告本身来保证编辑器可用。
+</Callout>
+
+## 确认 Pages 自动应用了导入的页眉和页脚
+
+当你将 DOCX 导入到已注册 Pages 扩展的编辑器中时，Word 文档中的页眉和页脚内容会被自动应用。要确认这一点，请读取已发布的存储：
+
+```ts
+const { pages } = editor.storage
+console.log({
+  default: pages.headerHTML,
+  firstPage: pages.headerFirstPageHTML,
+  oddPages: pages.headerOddHTML,
+  evenPages: pages.headerEvenHTML,
+})
+```
+
+对应的 `footer*HTML` 属性用于页脚。在导入器填充它们，或者用户打开内联编辑器并编辑内容之前，每个属性都为 `null`。
+
+如果在一次你确认包含页眉和页脚的 DOCX 导入后，这些值仍然是 `null`，通常有两个可能原因：
+
+- **Pages 扩展未注册。** 只有在存在 Pages 时，ImportDocx 才会自动应用。
+- **DOCX 实际上没有携带页眉和页脚**——Word 可能会存储模板但不提交它们。打开上面的 `verbose` 输出，查看转换器提取了什么。
+
+## schema 不匹配警告
+
+当导入内容使用了你的编辑器不渲染的节点类型时，ProseMirror 会警告未知节点，并回退为丢弃或重写它。你有两个方向可以处理：
+
+1. **添加缺失的扩展。** ConvertKit 覆盖了大多数情况；如果你禁用了某个插槽，或者正在运行自定义 kit，请把该扩展加回来。
+2. **将不支持的节点映射为你支持的节点。** ImportDocx 接受 `prosemirrorNodes` 和 `prosemirrorMarks` 选项，用于在导入过程中重写节点类型。参见 [自定义节点映射](/conversion/import/docx/custom-node-mapping) 和 [自定义 mark 映射](/conversion/import/docx/custom-mark-mapping)。
+
+对于在你的 schema 中没有等价物的节点（例如脚注引用），请参见 [自定义扩展指南](/conversion/getting-started/guides/custom-extensions)。
+
+## 下一步
+
+- [端到端演练](/conversion/getting-started/guides/end-to-end-walkthrough) — 从开始到结束的 DOCX 往返
+- [自定义扩展](/conversion/getting-started/guides/custom-extensions) — 渲染 ConvertKit 未覆盖的导入属性
+- [功能支持矩阵](/conversion/getting-started/feature-support-matrix) — 按功能查看哪些可以往返，哪些不可以

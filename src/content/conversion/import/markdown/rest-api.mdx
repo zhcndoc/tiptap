@@ -78,7 +78,7 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/markdown" \
           "content": [
             {
               "type": "text",
-              "text": "Hello from Markdown!"
+              "text": "来自 Markdown 的 Hello！"
             }
           ]
         }
@@ -95,9 +95,35 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/markdown" \
 
 ### 错误响应
 
-| 状态码 | 错误代码                        | 描述                          |
-| ------ | ------------------------------- | ----------------------------- |
-| 400    | `NO_FILE_PROVIDED`              | 未提供文件                    |
-| 400    | `INVALID_FILE_TYPE`             | 文件不是 `.md` 或 `.markdown` |
-| 422    | `FAILED_TO_GET_FILE_ARRAY_BUFFER` | 读取文件缓冲区失败            |
-| 500    | `FAILED_TO_CONVERT_MARKDOWN_TO_TIPTAP_JSON` | Markdown 转换为 JSON 失败     |
+| Status | Code                                    | Description                          |
+| ------ | --------------------------------------- | ------------------------------------ |
+| 400    | `NO_FILE_PROVIDED`                      | 未提供文件                 |
+| 400    | `INVALID_FILE_TYPE`                     | 文件不是 `.md` 或 `.markdown`     |
+| 422    | `FAILED_TO_GET_FILE_ARRAY_BUFFER`       | 读取文件缓冲区失败           |
+| 500    | `FAILED_TO_CONVERT_MARKDOWN_TO_TIPTAP_JSON` | 无法将 Markdown 转换为 JSON |
+
+## 支持与限制
+
+Markdown 导入会通过 v2 云 API 将 Markdown 文本解析为 Tiptap JSON。该端点支持标准 CommonMark 和 GFM 表格。可选 Tiptap 扩展中使用的自定义语法（下划线、高亮、数学）不会被导入服务解析，也不会出现在返回的 JSON 中。
+
+| **功能** | **支持情况** |
+|---|---|
+| **文本内容** | ✓ 段落、标题（1–6）、硬换行 |
+| **行内格式** | ✓ 粗体、斜体、删除线、行内代码 |
+| **块级元素** | ✓ 引用块、代码块（带语言的围栏代码块）、水平线 |
+| **列表** | ✓ 无序列表、有序列表、任务列表、嵌套列表 |
+| **表格** | ✓ 基本竖线语法表格（单行表头，无合并单元格） |
+| **链接** | ✓ 带文本和 URL 的超链接 |
+| **图片** | ✓ 带替代文本的图片引用 |
+| **下划线** | ✗ 服务器未注册自定义 `++text++` 语法 |
+| **高亮** | ✗ 服务器未注册自定义 `==text==` 语法 |
+| **文本颜色 / 字体** | ✗ 没有用于颜色、字体族或字体大小的 Markdown 语法 |
+| **文本对齐** | ✗ 没有 Markdown 语法 |
+| **间距 / 缩进** | ✗ 没有 Markdown 语法 |
+| **合并单元格** | ✗ Markdown 表格不支持 colspan 或 rowspan |
+| **页眉与页脚** | ✗ Markdown 中没有对应概念 |
+| **页面布局** | ✗ 没有分页、分节或页面大小 |
+| **数学公式** | ✗ 服务器未注册 `$...$` 语法 |
+| **脚注与尾注** | ✗ CommonMark 不支持 |
+
+有关完整的 DOCX 功能对比，请参阅 [支持的功能](/conversion/getting-started/feature-support-matrix) 矩阵。

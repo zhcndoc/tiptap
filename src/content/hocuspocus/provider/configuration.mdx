@@ -12,13 +12,14 @@ meta:
 
 | 设置                | 描述                                                                                                               | 默认值                              |
 |---------------------|-------------------------------------------------------------------------------------------------------------------|-------------------------------------|
-| `url`               | Hocuspocus/WebSocket 服务器的 URL。                                                                               | `''`                                |
-| `websocketProvider` | HocuspocusProviderWebsocket 的一个实例，适用于在多个提供者之间共享同一个 socket。                                   | `new HocuspocusProviderWebsocket()` |
+| `url`               | Hocuspocus/WebSocket 服务器的 URL。                                                                                | `''`                                |
+| `websocketProvider` | HocuspocusProviderWebsocket 的一个实例，如果你想在多个提供者之间共享一个 socket。                                 | `new HocuspocusProviderWebsocket()` |
 | `name`              | 文档的名称。                                                                                                       | `''`                                |
-| `document`          | 实际的 Y.js 文档。可选，默认会创建一个新文档，可通过 provider.document 访问。                                         | `new Y.Doc()`                       |
-| `token`             | 发送给服务器的认证令牌（支持字符串、函数和 Promise）。                                                              | `''`                                |
-| `awareness`         | Awareness 对象，默认附加到传入的 Y.js 文档。                                                                       | `new Awareness()`                   |
+| `document`          | 实际的 Y.js 文档。可选，默认会创建一个新文档，并可通过 provider.document 访问。                                     | `new Y.Doc()`                       |
+| `token`             | 将传递给服务器的身份验证令牌（支持字符串、函数和 Promises）。                                                      | `''`                                |
+| `awareness`         | Awareness 对象，默认会附加到传入的 Y.js 文档上。                                                                  | `new Awareness()`                   |
 | `forceSyncInterval` | 每隔 x 毫秒向服务器请求更新。                                                                                       | `false`                             |
+| `sessionAwareness`  | 在每条消息的文档名中嵌入唯一的 `sessionId`，从而允许在同一个 WebSocket 上使用多个具有相同文档名的提供者。连接到 v3 服务器时请保持为 `false`。需要 v4 服务器。 | `false`                             |
 
 ### HocuspocusProviderWebsocket
 

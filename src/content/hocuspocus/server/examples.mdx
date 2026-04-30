@@ -23,44 +23,60 @@ npx @hocuspocus/cli --s3 --s3-bucket my-documents
 
 ### Express
 
-Hocuspocus 可以与任何底层使用 `ws` 的 WebSocket 实现一起使用。当你不调用 Hocuspocus 的 `listen()` 方法时，它不会自己启动 WebSocket 服务器，而是依赖你手动调用其 [`handleConnection()` 方法](/hocuspocus/server/usage)。
+当你没有在 Hocuspocus 上调用 `listen()` 时，它本身不会启动 WebSocket 服务器——你需要负责调用它的 [`handleConnection()` 方法](/hocuspocus/server/usage)，并将消息/关闭事件转发给返回的 `ClientConnection`。
 
-要在 [Express](https://expressjs.com) 中使用 Hocuspocus，你需要使用 `express-ws` 包给 Express 应用添加 WebSocket 端点。然后添加新的 WebSocket 路由，并使用 Hocuspocus 的 `handleConnection()` 方法完成剩余工作。
+自 v4 起，Hocuspocus 基于 [crossws](https://github.com/unjs/crossws) 构建，因此同样的集成模式可用于 Express、Koa、原生 `node:http` 以及其他 Node 框架——在服务器的 `upgrade` 事件上挂载 `crossws` 的 Node 适配器，并将其连接到 Hocuspocus：
 
-```js
+```ts
+import { Logger } from '@hocuspocus/extension-logger'
+import { Hocuspocus, type WebSocketLike } from '@hocuspocus/server'
+import { createServer } from 'node:http'
+import crossws from 'crossws/adapters/node'
 import express from 'express'
-import expressWebsockets from 'express-ws'
-import { Hocuspocus } from '@hocuspocus/server'
 
-// 配置 Hocuspocus
 const hocuspocus = new Hocuspocus({
-  // ...
+  extensions: [new Logger()],
 })
 
-// 使用 express-ws 扩展设置你的 express 实例
-const { app } = expressWebsockets(express());
+const app = express()
 
-// 一个基础的 http 路由
-app.get("/", (request, response) => {
-  response.send("Hello World!");
-});
+app.get('/', (request, response) => {
+  response.send('你好，世界！')
+})
 
-// 添加一个用于 Hocuspocus 的 websocket 路由
-// 你可以像在 onConnect 钩子中一样设置上下文数据
-// 并传递给 handleConnection 方法。
-app.ws("/collaboration", (websocket, request) => {
-  const context = {
-    user: {
-      id: 1234,
-      name: 'Jane',
+const server = createServer(app)
+
+const ws = crossws({
+  hooks: {
+    open(peer) {
+      const clientConnection = hocuspocus.handleConnection(
+        peer.websocket as unknown as WebSocketLike,
+        peer.request as Request,
+        { user_id: 1234 },
+      )
+      ;(peer as any)._hocuspocus = clientConnection
     },
-  }
-
-  hocuspocus.handleConnection(websocket, request, context)
+    message(peer, message) {
+      ;(peer as any)._hocuspocus?.handleMessage(message.uint8Array())
+    },
+    close(peer, event) {
+      ;(peer as any)._hocuspocus?.handleClose({
+        code: event.code,
+        reason: event.reason,
+      })
+    },
+    error(peer, error) {
+      console.error('peer 的 WebSocket 错误：', peer.id)
+      console.error(error)
+    },
+  },
 })
 
-// 启动服务器
-app.listen(1234, () => console.log("Listening on http://127.0.0.1:1234"));
+server.on('upgrade', (request, socket, head) => {
+  ws.handleUpgrade(request, socket, head)
+})
+
+server.listen(1234, () => console.log('正在 http://127.0.0.1:1234 上监听'))
 ```
 
 重要提示！一些扩展会使用 `onRequest`、`onUpgrade` 和 `onListen` 钩子，这些钩子在此场景下不会被触发。
@@ -77,81 +93,205 @@ import { Hocuspocus } from '@hocuspocus/server'
 import { serve } from "@hono/node-server";
 import { createNodeWebSocket } from "@hono/node-ws";
 
-// 配置 Hocuspocus
 const hocuspocus = new Hocuspocus({
   // …
 })
 
-// 设置 Hono 服务器
-const app = new Hono();
+const app = new Hono()
 
-// Node.js 专用
-const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
+const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app })
 
-// 在 Hono 服务器中挂载 Hocuspocus
 app.get(
-  '/hocuspocus',
-  upgradeWebSocket((c) => ({
-    onOpen(_evt, ws) {
-      hocuspocus.handleConnection(ws.raw, c.req.raw as any)
-    },
-  })),
+  '/',
+  upgradeWebSocket((c) => {
+    let clientConnection
+    return {
+      onOpen(_evt, ws) {
+        ws.raw.binaryType = 'arraybuffer'
+        clientConnection = hocuspocus.handleConnection(ws.raw, c.req.raw, {})
+      },
+      onMessage(evt) {
+        clientConnection?.handleMessage(new Uint8Array(evt.data))
+      },
+      onClose() {
+        clientConnection?.handleClose()
+      },
+    }
+  }),
 )
 
-// 启动服务器
-const server = serve({
-  fetch: app.fetch,
-  port: 8787,
-}, (info) => {
-  hocuspocus.hooks('onListen', {
-    instance: hocuspocus,
-    configuration: hocuspocus.configuration,
-    port: info.port
-  })
-});
+const server = serve(
+  {
+    fetch: app.fetch,
+    port: 8000,
+  },
+  (info) => {
+    hocuspocus.hooks('onListen', {
+      instance: hocuspocus,
+      configuration: hocuspocus.configuration,
+      port: info.port,
+    })
+  },
+)
 
-// 设置 WebSocket 支持（Node.js 专用）
-injectWebSocket(server);
+injectWebSocket(server)
 ```
 
 重要提示！一些扩展会使用 `onUpgrade` 和 `onRequest` 钩子，这些钩子在此场景下不会被触发。
 
+### Bun
+
+自 v4 起，Hocuspocus 在底层使用 [crossws](https://github.com/unjs/crossws)，因此它也能在 Node.js 之外运行。在 Bun 上，直接实例化 `Hocuspocus`，并将 `crossws` 连接到 `Bun.serve`：
+
+```ts
+import { Logger } from "@hocuspocus/extension-logger";
+import { Hocuspocus } from "@hocuspocus/server";
+import crossws from "crossws/adapters/bun";
+
+const hocuspocus = new Hocuspocus({
+	extensions: [new Logger()],
+});
+
+const ws = crossws({
+	hooks: {
+		open(peer) {
+			// 使用 peer 方法而不是 peer.websocket，以避免
+			// Bun 对 ServerWebSocket 的 Proxy `this` 绑定问题
+			const wsLike = {
+				get readyState() {
+					return peer.websocket.readyState ?? 3; // 3 = 已关闭
+				},
+				send(data: any) {
+					peer.send(data);
+				},
+				close(code?: number, reason?: string) {
+					peer.close(code, reason);
+				},
+			};
+			const clientConnection = hocuspocus.handleConnection(
+				wsLike,
+				peer.request as Request,
+			);
+			(peer as any)._hocuspocus = clientConnection;
+		},
+		message(peer, message) {
+			(peer as any)._hocuspocus?.handleMessage(message.uint8Array());
+		},
+		close(peer, event) {
+			(peer as any)._hocuspocus?.handleClose({
+				code: event.code,
+				reason: event.reason,
+			});
+		},
+		error(peer, error) {
+			console.error("peer 的 WebSocket 错误：", peer.id);
+			console.error(error);
+		},
+	},
+});
+
+Bun.serve({
+	port: 8000,
+	websocket: ws.websocket,
+	fetch(request, server) {
+		if (request.headers.get("upgrade") === "websocket") {
+			return ws.handleUpgrade(request, server);
+		}
+
+		return new Response("欢迎使用 Hocuspocus！");
+	},
+});
+```
+
+### Deno
+
+Deno 提供了 `Deno.upgradeWebSocket()` 和标准的 `WebSocket` 事件，这些都可以很自然地映射到 `handleConnection()`：
+
+```ts
+import { Hocuspocus } from "@hocuspocus/server"
+
+const hocuspocus = new Hocuspocus({
+  name: "collaboration",
+})
+
+Deno.serve((req) => {
+  if (req.headers.get("upgrade") !== "websocket") {
+    return new Response(null, { status: 501 })
+  }
+
+  const { socket, response } = Deno.upgradeWebSocket(req)
+  socket.binaryType = "arraybuffer"
+
+  const clientConnection = hocuspocus.handleConnection(socket, req)
+
+  socket.addEventListener("message", (event) => {
+    clientConnection.handleMessage(new Uint8Array(event.data))
+  })
+
+  socket.addEventListener("close", (event) => {
+    clientConnection.handleClose({ code: event.code, reason: event.reason })
+  })
+
+  return response
+})
+```
+
+具体的实现细节取决于你的运行时环境，但基本构件是相同的：将 WebSocket、`Request` 和可选上下文传递给 `handleConnection()`，然后把传入的消息和关闭事件分发给返回的 `ClientConnection`。
+
 ### Koa
 
-```js
-import Koa from 'koa'
-import websocket from 'koa-easy-ws'
-import { Hocuspocus } from '@hocuspocus/server'
-import { Logger } from '@hocuspocus/extension-logger'
+与上面的 Express 示例类似，v4 的方案是在底层 HTTP 服务器上使用 `crossws` Node 适配器：
 
-// 配置 Hocuspocus
+```ts
+import { Logger } from '@hocuspocus/extension-logger'
+import { Hocuspocus, type WebSocketLike } from '@hocuspocus/server'
+import { createServer } from 'node:http'
+import crossws from 'crossws/adapters/node'
+import Koa from 'koa'
+
 const hocuspocus = new Hocuspocus({
-  // …
+  extensions: [new Logger()],
 })
 
 const app = new Koa()
 
-// 使用 koa-easy-ws 扩展设置你的 koa 实例
-app.use(websocket());
-
-// 添加用于 Hocuspocus 的 websocket 路由
-// 你可以像在 onConnect 钩子中一样设置上下文数据
-// 并传递给 handleConnection 方法。
-app.use(async (ctx, next) => {
-  const ws = await ctx.ws()
-
-  hocuspocus.handleConnection(
-    ws,
-    ctx.request,
-    // 额外数据（可选）
-    {
-      user_id: 1234,
-    },
-  )
+app.use(async (ctx) => {
+  ctx.body = '你好，世界！'
 })
 
-// 启动服务器
-app.listen(1234);
+const server = createServer(app.callback())
+
+const ws = crossws({
+  hooks: {
+    open(peer) {
+      const clientConnection = hocuspocus.handleConnection(
+        peer.websocket as unknown as WebSocketLike,
+        peer.request as Request,
+        { user_id: 1234 },
+      )
+      ;(peer as any)._hocuspocus = clientConnection
+    },
+    message(peer, message) {
+      ;(peer as any)._hocuspocus?.handleMessage(message.uint8Array())
+    },
+    close(peer, event) {
+      ;(peer as any)._hocuspocus?.handleClose({
+        code: event.code,
+        reason: event.reason,
+      })
+    },
+    error(peer, error) {
+      console.error('peer 的 WebSocket 错误：', peer.id)
+      console.error(error)
+    },
+  },
+})
+
+server.on('upgrade', (request, socket, head) => {
+  ws.handleUpgrade(request, socket, head)
+})
+
+server.listen(1234)
 ```
 
 重要提示！一些扩展会使用 `onRequest`、`onUpgrade` 和 `onListen` 钩子，这些钩子在此场景下不会被触发。
@@ -232,7 +372,8 @@ const hocusServer = new Server({
   ...
   onAuthenticate(data) {
         return new Promise((resolve, reject) => {
-            const headers = data.requestHeaders;
+            // 在 v4 中，requestHeaders 是一个 web 标准的 Headers 对象
+            const headers = Object.fromEntries(data.requestHeaders.entries());
             headers["X-CSRF-TOKEN"] = data.token;
             axios.get(
                 process.env.APP_URL + '/api/hocus',

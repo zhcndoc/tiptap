@@ -47,7 +47,7 @@ curl --output document.md -X POST "https://api.tiptap.dev/v2/convert/export/mark
     -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
-      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from Tiptap!\"}]}]}"
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"来自 Tiptap 的你好！\"}]}]}"
     }'
 ```
 
@@ -79,8 +79,34 @@ curl --output document.md -X POST "https://api.tiptap.dev/v2/convert/export/mark
 
 ### 错误响应
 
-| 状态码 | 错误码                         | 描述                                   |
-| ------ | ------------------------------ | ------------------------------------ |
-| 400    | `NO_DOCUMENT_PROVIDED`          | 请求体中未提供文档                     |
-| 422    | `FAILED_TO_PARSE_JSON_INPUT`   | 解析 JSON 输入失败                     |
-| 422    | `FAILED_TO_PARSE_MARKDOWN_FILE` | 导出 Markdown 失败                     |
+| Status | Code                              | Description                          |
+| ------ | --------------------------------- | ------------------------------------ |
+| 400    | `NO_DOCUMENT_PROVIDED`            | 未在正文中提供文档 |
+| 422    | `FAILED_TO_PARSE_JSON_INPUT`     | 无法解析 JSON 输入 |
+| 422    | `FAILED_TO_PARSE_MARKDOWN_FILE`  | 无法导出 Markdown |
+
+## 支持与限制
+
+REST API 使用与编辑器扩展相同的 Markdown 转换，因此支持的功能集完全一致。Markdown 导出会将 Tiptap 内容转换为兼容 CommonMark 的 Markdown。与 DOCX 不同，Markdown 没有富样式、页面布局或复杂表格格式的概念。
+
+| **功能** | **支持** |
+|---|---|
+| **文本内容** | ✓ 段落、标题（1–6）、硬换行 |
+| **行内格式** | ✓ 加粗、斜体、删除线、行内代码 |
+| **块元素** | ✓ 引用块、代码块（带语言的围栏代码块）、水平分割线 |
+| **列表** | ✓ 无序列表、有序列表、任务列表、嵌套列表 |
+| **表格** | ✓ 基本的管道语法表格（单列表头行，不支持合并单元格） |
+| **链接** | ✓ 带文本和 URL 的超链接 |
+| **图片** | ✓ 带替代文本的图片引用（无尺寸） |
+| **下划线** | ✓ 自定义语法（`++text++`，非标准） |
+| **高亮** | ✓ 自定义语法（`==text==`，非标准） |
+| **文本颜色 / 字体** | ✗ 没有颜色、字体族或字体大小的 Markdown 语法 |
+| **文本对齐** | ✗ 没有 Markdown 语法 |
+| **间距 / 缩进** | ✗ 没有 Markdown 语法 |
+| **合并单元格** | ✗ Markdown 表格不支持 colspan 或 rowspan |
+| **页眉与页脚** | ✗ Markdown 中没有这个概念 |
+| **页面布局** | ✗ 没有分页、分节或页面大小 |
+| **数学公式** | ~ 取决于扩展（如果配置了数学扩展，则使用 `$...$` 语法） |
+| **脚注与尾注** | ✗ CommonMark 不支持 |
+
+有关完整的 DOCX 功能对比，请查看[支持的功能](/conversion/getting-started/feature-support-matrix)矩阵。

@@ -1,26 +1,75 @@
 ---
 title: 限制
 meta:
-  title: 限制 | Tiptap Pages 文档
-  description: 了解 Tiptap Pages 扩展的当前限制和已知问题。
+  title: 局限性 | Tiptap Pages 文档
+  description: Tiptap Pages 扩展的已知局限性及其解决方法。
   category: Pages
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-虽然 Pages 扩展功能强大，但目前有一些限制需要注意：
+Pages 扩展有少量明确的限制。下面每一条都是有意为之——不是 bug——而且大多数都有文档化的变通方案。
 
-- **表格** 需要从此包中导入 `Table` 扩展，而不是从我们的开源库中导入 `Table` 扩展。
-- **无法对单页进行独立样式设置**（所有页面共享相同的布局和外观）。
-- **无页面模板**（每个页面使用相同结构）。
-- **无直接打印/导出集成**（不支持浏览器打印，但你可以依赖我们的 [转换扩展或端点](/conversion/import-export/docx)）。
-- **不可拆分的内容块**：分页系统使用 CSS 浮动定位元素以绕过页面间隙。创建了 [块格式化上下文 (BFC)](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_display/Block_formatting_context) 的内容块（如表格、图形或某些样式容器）无法跨页拆分。如果此类块太大无法放入单页，则会破坏分页布局。**解决方案：**
-  - **设置最大高度：** 对较大的不可拆分块应用 `max-height`，确保它们适合单页。你可以使用 `--page-max-height` CSS 属性以确保元素不超过页面边界。
-  - **手动拆分节点：** 对需要跨多页的内容，手动拆分成更小的节点。请注意，此方法会引入结构变动，可能影响文档的语义结构。
-- **无运行时依赖**：所有逻辑均自包含于扩展中。
+## 过大的不可拆分块会导致无限布局循环
 
-<Callout title="帮我们改进！" variant="info">
-  如果你需要尚未支持的功能，请告诉我们！你的反馈帮助我们优先开发新功能。
+这是在采用 Pages 之前最重要的一项限制，务必了解。
+
+### 会发生什么
+
+Tiptap Pages 会在自然断点处分割内容，让内容跨页排版。它有一种内容是**无法**拆分的：建立了 [块格式化上下文（BFC）](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_display/Block_formatting_context) 的块——最典型的是**表格行**，但也包括图形、定位容器，以及许多带样式的容器（任何使用 `display: inline-block`、`overflow: hidden`、某些 `contain` 值或浮动的元素）。当页面流遇到这类块且它无法放入当前页时，唯一能做的就是把整个块移到下一页。
+
+### 为什么这会变成严重故障
+
+如果该块比页面本身还高，把它向后移动并没有帮助——它在下一页仍然放不下。布局会不断尝试将它继续往后推，一页又一页，始终无法达到稳定状态。结果就是无限布局循环，编辑器也会失去响应。这是让 Pages 变得无法使用的最常见方式。
+
+### 为什么我们不会自动恢复
+
+这是 Pages 当前在页面之间划分内容方式的硬性限制，不是一个我们打算悄悄绕过的 bug。我们无法在不让布局静默丢失内容的情况下提供一个优雅的“放弃”点。未来我们可能会在一个主要版本中重新审视底层方案；目前，请将过大的 BFC 块视为开发者需要负责处理的问题。
+
+### 需要注意什么
+
+最常见的是：
+
+- `heightRule: "atLeast"` 允许其高度增长到超过页面的表格行。
+- 从 DOCX 导入、且原作者使用的纸张远大于编辑器页面格式的表格。
+- 单元格内嵌套表格，导致外层行高超过页面。
+- 内容本身比页面内容区域还大的图形或定位容器。
+
+### 如何避免
+
+1. **限制高度。** 对不可拆分的块应用 `max-height`。Pages 扩展会将可用内容高度暴露为一个 CSS 变量：使用 `max-height: var(--page-max-height)` 来确保任何块都能放在单页内。
+2. **手动拆分内容。** 如果某个块需要跨多页显示，请在编辑时将其拆成多个相邻的小块——例如将长表格拆成多个较小的表格、将高图片拆成更小的图片、将嵌套表格改为扁平表格。
+3. **约束 `atLeast` 行。** 对于从 DOCX 导入的表格，如果行内容是有上限的，优先使用 `heightRule: "exact"`；内容不受限制的 `atLeast` 行最容易触发问题。
+4. **选择与内容匹配的页面格式。** 为 Tabloid 编写的文档无法在 A5 上正确排版；请选择内容区域大于你最高不可拆分块的页面格式。
+
+### 如何检测
+
+当 Pages 扩展在循环完全失控之前检测到这种情况时，会在控制台输出警告。开发期间请注意查看。导入用户提供 DOCX 的生产代码应将该警告视为信号：要么拒绝该文档，要么在插入前以程序方式拆分过高的行。
+
+关于此限制在表格上的专门处理方式，请参阅 [PagesTableKit 的已知问题](/pages/guides/pages-tablekit#known-issues)。
+
+## 表格需要 PagesTableKit，而不是开源 Table 扩展
+
+在 Pages 中使用任何表格时，请使用来自 `@tiptap-pro/extension-pages-tablekit` 的 `TableKit`。开源的 `@tiptap/extension-table` 和 ConvertKit 内置的 `ConvertTableKit` 都不适合分页——基于它们构建的表格会溢出页面边界并破坏布局。设置方法请参阅 [在 Pages 中使用 TableKit](/pages/guides/table-with-pages)，更深入的说明请参阅 [PagesTableKit](/pages/guides/pages-tablekit)。
+
+## 不支持按页样式
+
+所有页面共享相同的布局和视觉样式。不支持页面专属的 CSS 规则或背景。
+
+## 不支持页面模板
+
+每一页都使用相同的结构。不支持多栏布局、交替页面模板以及逐页自定义。
+
+## 不支持浏览器打印集成
+
+Pages 不实现浏览器打印对话框。若要生成可直接打印的输出，请使用 Tiptap Conversion 扩展和 REST 端点——参阅 [Conversion 概览](/conversion/getting-started/overview)，或者查看端到端设置指南 [从零到可打印](/pages/guides/zero-to-print-ready)。
+
+## 不能禁用页眉和页脚编辑
+
+双击页眉或页脚总会打开内联编辑器。你可以通过 `onDblClickHeaderPreventClose` / `onDblClickFooterPreventClose` 回调拦截“关闭”行为，但不能阻止编辑器一开始被打开。
+
+<Callout title="帮助我们确定优先级" variant="info">
+  如果你需要的功能尚未支持，请告诉我们。你的反馈有助于我们确定优先级。
   <a href="https://tiptap-suite.notion.site/1b601ffa3ebc80a281a8ea0b03b19bdd">
     与 Tiptap 分享你的使用案例
   </a>

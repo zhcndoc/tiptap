@@ -30,18 +30,19 @@ const response = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
 
 ## `ReviewOptions`
 
-- `mode?` (`'disabled' | 'trackedChanges'`)：控制编辑是直接应用还是作为可追踪更改写入。默认值：`'disabled'`
-  - `'disabled'`：编辑将直接应用到文档。
-  - `'trackedChanges'`：编辑将使用 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展编码为可追踪更改，以便用户可以接受或拒绝单个更改。
-- `trackedChangesOptions?` (`{ userId: string, userMetadata?: Record<string, unknown> | null }`)：`trackedChanges` 模式的作者元数据。`userId` 用于标识建议的作者，`userMetadata` 用于存储附加的作者信息，例如显示名称。
-- `diffUtilityOptions?` (`object`)：用于从修改前后的文档状态重构可追踪更改的高级选项。
-  - `simplifyChanges?` (`boolean`)：在生成可追踪更改之前简化附近的更改。
-  - `ignoreAttributes?` (`string[]`)：在差异对比时忽略特定的节点属性。
-  - `ignoreMarks?` (`string[]`)：在差异对比时忽略特定的标记。
-  - `changeMergeDistance?` (`number | null`)：在指定距离内合并附近的更改。
-  - `mode?` (`'inline' | 'block' | 'smart'`)：生成可追踪更改时使用的差异策略。
-  - `groupInlineChanges?` (`number`)：将位于此距离内的内联编辑进行分组。
-  - `expandBlockChanges?` (`string[]`)：应作为块更改展开的节点类型。
+- `mode?` (`'disabled' | 'trackedChanges'`): 控制编辑是直接应用，还是写入为跟踪更改。默认值：`'disabled'`
+  - `'disabled'`：编辑会直接应用到文档中。
+  - `'trackedChanges'`：编辑会使用 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展编码为跟踪更改，以便用户可以接受或拒绝单独的更改。
+- `trackedChangesOptions?` (`{ userId: string, userMetadata?: Record<string, unknown> | null }`): `trackedChanges` 模式的作者元数据。`userId` 用于标识建议的作者。省略时默认为 `'AI'`。`userMetadata` 存储额外的作者信息，例如显示名称。默认值为 `null`。
+- `useDiffUtility?` (`boolean`): 是否使用 diff 工具来重建跟踪更改。为 `true` 时，会通过细粒度 diff 计算更改。为 `false` 或未提供时，会直接应用范围级别的跟踪更改。
+- `diffUtilityOptions?` (`object`): 用于从修改前/后的文档状态重建跟踪更改的高级选项。
+  - `simplifyChanges?` (`boolean`, default: `true`): 在生成跟踪更改之前简化附近的更改。
+  - `ignoreAttributes?` (`string[]`, default: `['id', 'data-thread-id', '_hash']`): 在 diff 过程中忽略特定的节点属性。
+  - `ignoreMarks?` (`string[]`, default: `['inlineThread']`): 在 diff 过程中忽略特定的标记。
+  - `changeMergeDistance?` (`number | null`, default: auto-calculated): 在此距离内合并附近的更改。设为 `null` 可禁用合并。
+  - `mode?` (`'inline' | 'block' | 'smart'`, default: `'smart'`): 生成跟踪更改时使用的 diff 策略。
+  - `groupInlineChanges?` (`number`, default: `1`): 将此距离内的行内编辑分组。
+  - `expandBlockChanges?` (`string[]`, default: `['listItem']`): 应作为块级更改展开的节点类型。
 
 ## 典型配置
 

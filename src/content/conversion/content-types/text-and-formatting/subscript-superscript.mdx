@@ -1,0 +1,79 @@
+---
+title: 下标和上标
+tags:
+  - type: beta
+meta:
+  title: 下标和上标 | Tiptap 转换
+  description: 了解下标和上标标记如何在 DOCX 和 Tiptap 之间转换，包括当前的导出限制。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+从 DOCX 导入时，下标和上标标记会在编辑器中正确渲染，但在导出时不会被保留。像 H₂O 这样的内容会正确导入并显示，但导出后会变成普通的 H2O。
+
+## 你需要什么
+
+- **扩展：** [ConvertKit](/conversion/import/docx/convertkit) — `Subscript` 和 `Superscript` 已捆绑并默认启用。
+- **配置：** 除了注册 ConvertKit 外，不需要其他配置。
+
+## 支持概览
+
+| | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| 下标 | 支持 | 通过 ConvertKit 支持 | 不支持 |
+| 上标 | 支持 | 通过 ConvertKit 支持 | 不支持 |
+
+## 导入
+
+使用 [编辑器扩展](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入下标和上标。两者会产生完全相同的输出。
+
+转换服务会读取 `<w:vertAlign>` 的运行属性，并生成相应的标记：
+
+| Word 元素 | Tiptap 标记 |
+| --- | --- |
+| `<w:vertAlign val="subscript">` | `subscript` |
+| `<w:vertAlign val="superscript">` | `superscript` |
+
+化学式（H₂O、CO₂）、数学符号（x²、E=mc²）以及脚注引用都会正确导入。
+
+## 编辑器渲染
+
+[ConvertKit](/conversion/import/docx/convertkit) 同时捆绑了 [`Subscript`](/editor/extensions/marks/subscript) 和 [`Superscript`](/editor/extensions/marks/superscript)，并默认启用它们——无需单独安装。
+
+```ts
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+
+const editor = new Editor({
+  extensions: [ConvertKit],
+})
+```
+
+下标会渲染为 `<sub>`，上标会渲染为 `<sup>`。键盘快捷键：下标为 Cmd+，上标为 Cmd+.。
+
+如果你不想使用其中之一，可以通过 ConvertKit 的配置将其禁用：
+
+```ts
+ConvertKit.configure({
+  subscript: false,   // 禁用下标
+  superscript: false, // 禁用上标
+})
+```
+
+<Callout title="禁用其中任意一个都会丢失导入的标记" variant="info">
+  当你设置 `subscript: false` 或 `superscript: false` 时，从导入的 DOCX 中得到的对应类型标记
+  将不会被编辑器 schema 识别。有关如何管理未识别标记，请参阅
+  [无效 schema 指南](/guides/invalid-schema)。
+</Callout>
+
+## 导出
+
+无论是 [编辑器扩展](/conversion/export/docx/editor-extension) 还是 [REST API](/conversion/export/docx/rest-api) 都不会导出下标或上标标记。
+
+<Callout title="下标和上标不会被导出" variant="danger">
+  DOCX 导出转换器不处理 `subscript` 或 `superscript` 标记。它们不会在导出过程中转换。像 H₂O 这样的内容在导出的文档中会显示为普通的 H2O。这会影响化学式、数学符号、脚注引用，以及任何其他使用上下标文本的场景。
+</Callout>
+
+在编辑器中应用的下标和上标可以正常显示。这个限制只会影响导出为 DOCX。
+
+数学或 LaTeX 表达式中的下标和上标会走单独的代码路径（使用 OOXML 数学元素 `m:sSub` 和 `m:sSup`），不受此限制影响。

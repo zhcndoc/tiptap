@@ -738,11 +738,11 @@ export const sidebarConfig: SidebarConfig = {
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/set-node',
-                  title: 'setNode',
+                  title: '设置节点',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/set-text-direction',
-                  title: 'setTextDirection',
+                  title: '设置文本方向',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/split-block',
@@ -770,11 +770,11 @@ export const sidebarConfig: SidebarConfig = {
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/unset-mark',
-                  title: 'unsetMark',
+                  title: '取消标记',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/unset-text-direction',
-                  title: 'unsetTextDirection',
+                  title: '取消文本方向',
                 },
                 {
                   href: '/editor/api/commands/nodes-and-marks/update-attributes',

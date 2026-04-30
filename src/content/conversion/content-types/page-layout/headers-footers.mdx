@@ -1,0 +1,123 @@
+---
+title: 页眉和页脚
+tags:
+  - type: beta
+meta:
+  title: 页眉和页脚 | Tiptap 转换
+  description: 文档页眉和页脚在 DOCX 转换流程中如何处理，包括导入限制和导出配置。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+Word 中的页眉和页脚会在每一页的顶部和底部显示重复内容。导入 API 会从 DOCX 文件中提取页眉和页脚内容，并且当安装了 [Pages 扩展](/pages/getting-started/overview) 时，该扩展可以自动应用它们。导出扩展会将它们写回 DOCX。
+
+## 你需要什么
+
+- **扩展：** 导入使用 `@tiptap-pro/extension-import-docx`，导出使用 `@tiptap-pro/extension-export-docx`
+- **用于编辑器渲染：** 用于页眉/页脚编辑和自动应用已导入页眉/页脚的 [`Pages`](/pages/getting-started/overview) 扩展
+
+## 支持概览
+
+| 功能 | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| 默认页眉/页脚 | 支持 | 支持（[Pages](/pages/getting-started/overview)） | 支持 |
+| 首页不同 | 支持 | 支持 | 支持 |
+| 奇偶页不同 | 支持 | 支持 | 支持 |
+| 页码占位符 | 不会从 DOCX 转换（PAGE/NUMPAGES 字段会以其缓存的显示值导入，例如字面文本 `1`） | 支持（`{page}`、`{total}` 在渲染时由 Pages 扩展替换） | 支持。纯文本页眉和页脚中的 `{page}` 和 `{total}` 标记会作为动态 DOCX `PAGE` / `NUMPAGES` 字段输出，因此 Word 会渲染实际页码和总页数。 |
+| 页眉/页脚中的富文本 | 支持 | 支持 | 支持 |
+
+## 导入
+
+可使用 [编辑器扩展](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入页眉和页脚。两者返回相同的页眉/页脚数据。当安装了 [Pages 扩展](/pages/getting-started/overview) 时，该扩展还会自动将页眉和页脚应用到编辑器中。REST API 会返回原始数据供你自行处理。
+
+DOCX 导入服务会从源文档中提取页眉和页脚内容。响应中最多包含六个有内容的字段（外加两个始终为 null 的占位字段），覆盖默认、首页，以及页眉和页脚的奇偶页变体。
+
+当使用带有 [Pages 扩展](/pages/getting-started/overview) 的编辑器扩展时，导入的页眉和页脚会通过 `setEditorContent()` 自动应用到编辑器中。如果没有 Pages 扩展，页眉/页脚数据仍可在 `onImport` 回调中获取，以便手动处理。
+
+### 可用字段
+
+| 字段 | 描述 |
+| --- | --- |
+| `header` | 默认页眉内容 |
+| `footer` | 默认页脚内容 |
+| `headerFirstPage` | 首页页眉（当 Word 中启用“首页不同”时） |
+| `footerFirstPage` | 首页页脚 |
+| `headerOdd` | 始终为 `null`（见下方说明） |
+| `footerOdd` | 始终为 `null`（见下方说明） |
+| `headerEven` | 偶数页页眉 |
+| `footerEven` | 偶数页页脚 |
+
+每个字段都包含有效的 Tiptap JSON；如果源文档不包含该变体，则为 `null`。
+
+<Callout variant="info" title="奇数页页眉会出现在默认字段中">
+  Word 的 OOXML 模型使用三种页眉类型：`default`、`first` 和 `even`。当 Word 中启用了“奇偶页不同”时，**默认**页眉就是奇数页上显示的内容。API 也遵循这一点：
+
+  - `header` / `footer` 保存 **默认**（奇数页）内容。
+  - `headerEven` / `footerEven` 保存偶数页内容。
+  - `headerFirstPage` / `footerFirstPage` 保存首页内容。
+  - `headerOdd` / `footerOdd` 始终为 `null`。它们只是为了响应结构对称而存在的字段。
+
+  若要获取奇数页页眉，请读取 `context.header`（而不是 `context.headerOdd`）。如果源文档只引用了首页和偶数页页眉，而没有默认页眉，则响应中不会包含奇数页内容：导入器无法凭空生成源文档未包含的内容。
+</Callout>
+
+<Callout variant="info" title="需要 Pages 扩展才能自动应用">
+  没有 Pages 扩展时，导入扩展仍会在回调中返回页眉/页脚数据，但无法自动将它们应用到编辑器。你可以通过 `onImport` 回调访问这些数据，并在自己的代码中处理它们。
+</Callout>
+
+<Callout variant="warning" title="页眉中的页码字段会作为静态文本导入">
+  Word 会将页码（以及其他字段代码，如 `DATE`、`AUTHOR`、`NUMPAGES`）存储为 `<w:fldChar>` / `<w:instrText>` 序列，其缓存显示值就是文档上次打开时的内容。导入器会将该缓存值作为纯文本捕获。比如，在 Word 中显示为 `Page 5 of 12` 的页眉，导入后会变成字面字符串 `Page 5 of 12`，而不是 Pages 扩展会重新计算的动态 `Page {page} of {total}` 模板。若要在导入后在编辑器中获得动态页码，请将导入的静态文本替换为 Pages 扩展模板（例如通过 `editor.commands.setHeader('Page {page} of {total}')`），或在 `onImport` 回调中对 `context.header` 进行后处理。
+</Callout>
+
+## 编辑器
+
+[Pages 扩展](/pages/getting-started/overview) 提供了完整的页眉和页脚支持，并支持分页布局。完整的设置和配置请参见 [页面页眉和页脚指南](/pages/core-concepts/page-header-footer)。
+
+Pages 扩展支持三种与 Word 行为一致的页眉/页脚模式：
+
+- **默认：** 每一页使用同一个页眉和页脚
+- **首页不同：** 首页使用独立的页眉/页脚
+- **奇偶页不同：** 奇数页和偶数页使用不同的页眉/页脚
+
+页码通过占位符渲染：`{page}` 表示当前页，`{total}` 表示总页数。Pages 扩展会在编辑器中渲染每一页时替换它们，而 DOCX 导出现在会将它们作为动态 `PAGE` / `NUMPAGES` 字段输出，因此导出的文档在 Word 中会显示真实页码。详见下方的 [导出](#export) 部分。
+
+导入后，用户可以双击已导入的页眉或页脚进行编辑。Pages 扩展通过 `editor.storage.pages` 暴露当前激活的浮层编辑器，并提供 `headerEditorOn` / `headerEditorOff`（以及 `footerEditorOn` / `footerEditorOff`）事件订阅辅助方法，适用于同步工具栏或响应焦点变化。有关详情，请参见页面页眉和页脚指南中的 [Active editor state](/pages/core-concepts/page-header-footer#active-editor-state)。
+
+## 导出
+
+可使用 [编辑器扩展](/conversion/export/docx/editor-extension) 或 [REST API](/conversion/export/docx/rest-api) 导出页眉和页脚。两者都支持默认、首页和奇偶页变体。该扩展接受 `docx.js` 的 Header/Footer 对象，或自动从 Pages 扩展中提取。REST API 接受纯文本字符串或字符串化的 Tiptap JSON。
+
+对于 PDF 导出而言，该扩展还支持更丰富的槽位值集合（纯文本、字符串化的 JSONContent、JSONContent 对象、`docx.Header`/`Footer` 实例，以及按需构建页眉的异步工厂函数）。完整表格请参见 [PDF 页眉和页脚指南](/conversion/export/pdf/headers-footers)。
+
+当导出扩展与 Pages 扩展同时安装时，页眉/页脚内容会自动从 Pages 扩展存储中提取，无需额外配置。
+
+如果没有 Pages 扩展，你可以通过导出选项手动提供页眉和页脚：
+
+```ts
+import { Docx } from '@tiptap-pro/extension-export-docx'
+
+ExportDocx.configure({
+  headers: {
+    default: new Docx.Header({
+      children: [new Docx.Paragraph({ text: '我的文档' })],
+    }),
+  },
+  footers: {
+    default: new Docx.Footer({
+      children: [new Docx.Paragraph({ text: '机密' })],
+    }),
+  },
+})
+```
+
+导出支持页眉和页脚的 `default`、`first` 和 `even` 变体。当提供相应变体时，`differentFirstPage` 和 `evenAndOddHeaders` 标志会自动设置。
+
+显式提供的页眉/页脚选项会覆盖从 Pages 扩展中自动提取的内容。
+
+<Callout variant="info" title="`{page}` 和 `{total}` 会渲染为动态 DOCX 页码字段">
+  当纯文本页眉或页脚包含 `{page}` 或 `{total}` 时，导出会将每个标记转换为 DOCX 侧的动态 `PAGE` / `NUMPAGES` 字段，因此 Word 显示的是实际的当前页码和总页数，而不是字面上的标记字符串。无论是从 Pages 扩展自动提取的页眉/页脚，还是通过 `headers` / `footers` 选项传入的纯文本页眉/页脚，都会这样处理。对于更复杂的构造（例如除了裸标记之外还要实现 `"Page X of Y"` 这类格式），你仍然可以手动提供 `Docx.Header` / `Docx.Footer` 实例，并使用 `Docx.PageNumber.CURRENT` / `Docx.PageNumber.TOTAL_PAGES`。
+</Callout>
+
+### 可往返保留的内容
+
+当安装了 Pages 扩展时，页眉和页脚可以在完整的“导入到导出”往返流程中保留下来。导入扩展会提取并应用页眉/页脚内容，导出扩展会将其写回 DOCX。通过 Pages 扩展在编辑器中创建的内容，或通过导出配置提供的内容，也会在导出的 DOCX 中正确显示。

@@ -1,0 +1,50 @@
+---
+title: 脚注和尾注
+tags:
+  - type: beta
+meta:
+  title: 脚注和尾注 | Tiptap 转换
+  description: 在 DOCX 转换流程中如何处理脚注和尾注，包括导入提取和当前限制。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+DOCX 导入服务会从导入的文档中提取脚注和尾注内容。不过，这些数据只能通过 [REST API](/conversion/import/docx/rest-api) 获取。[编辑器扩展](/conversion/import/docx/editor-extension) 不会在 `onImport` 回调中展示脚注或尾注。当前没有用于渲染脚注的编辑器扩展，并且也不支持导出。
+
+## 支持概览
+
+| | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| 脚注 | 仅 REST API（扩展回调中不包含） | 无扩展 | 开发中 |
+| 尾注 | 仅 REST API（扩展回调中不包含） | 无扩展 | 开发中 |
+
+## 导入
+
+脚注和尾注数据只能通过 [REST API](/conversion/import/docx/rest-api) 获取。[编辑器扩展](/conversion/import/docx/editor-extension) 会调用相同的 API，但不会在 `onImport` 回调中包含这些数据。
+
+REST API 会从 DOCX 中提取脚注和尾注，并在响应中将它们作为 `footnotes` 和 `endnotes` 字段返回，以 note ID 为键。正文中的内联引用会表示为带有 `noteId` 属性的 `footnoteReference` 和 `endnoteReference` 节点。
+
+<Callout variant="warning" title="扩展不会展示脚注/尾注数据">
+  要访问脚注和尾注数据，请直接使用 [REST API](/conversion/import/docx/rest-api)。正文中的 `footnoteReference` 和 `endnoteReference` 节点需要一个 [自定义扩展](/editor/extensions/custom-extensions/extend-existing) 才能在编辑器中渲染。有关策略，请参阅 [无效 schema 指南](/guides/invalid-schema)。
+</Callout>
+
+如果你直接使用 REST API，每个脚注和尾注的值都是一个 Tiptap JSON 文档（`{ type: "doc", content: [...] }`）。如何使用这些数据取决于你自己。可选方案包括：将注释作为编号列表追加到文档末尾、在自定义侧边栏中渲染，或者将其存储起来以便后续使用。
+
+## 编辑器
+
+Tiptap 或 Tiptap Pro 中都没有脚注或尾注扩展。编辑器 schema 没有内置的节点或标记类型可以表示脚注引用或脚注内容。
+
+要在编辑器中渲染脚注，你需要构建一个自定义扩展，用于处理 `footnoteReference` 和 `endnoteReference` 节点类型，并提供一个用于显示注释内容的 UI。
+
+## 导出
+
+无论是 [编辑器扩展](/conversion/export/docx/editor-extension) 还是 [REST API](/conversion/export/docx/rest-api) 都不会导出脚注或尾注。目前没有办法在导出的 DOCX 文件中生成脚注或尾注。
+
+## 解决方案
+
+如果你的工作流需要在编辑器和导出文档中包含类似脚注的内容，可以考虑以下替代方案：
+
+- **行内括注**：将脚注内容转换为正文中的括号文本。这可以在完整往返过程中保留。
+- **尾注区段**：在文档末尾使用普通段落和编号文本，手动维护一个“注释”区段。
+- **自定义处理**：使用导入回调提取脚注数据，将其与文档一起存储，并在自定义导出步骤中再将其注入回去。

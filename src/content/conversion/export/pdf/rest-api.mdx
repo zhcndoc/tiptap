@@ -108,10 +108,10 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 | `even`              | `string \| Object`    | 在启用 `evenAndOddHeaders` 选项时，偶数页的页眉。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
 
 <Callout title="接受的插槽值">
-    每个页眉值都可以是以下三种形式之一：
-    - **纯文本字符串** —— 生成一个简单、无样式的页眉。
-    - **字符串化的 Tiptap JSONContent** —— 可启用富文本格式（粗体、斜体、链接等）。可使用 `JSON.stringify(yourHeaderDoc)` 生成。
-    - **Tiptap JSONContent 对象** —— 同样的富文本内容，作为嵌套 JSON 对象直接发送到请求体中（无需字符串化）。
+    Each header value may be one of three shapes:
+    - A **plain text string.** Produces a simple unstyled header.
+    - A **stringified Tiptap JSONContent.** Enables rich formatting (bold, italic, links, etc.). Produce it with `JSON.stringify(yourHeaderDoc)`.
+    - A **Tiptap JSONContent object.** The same rich content, sent as a nested JSON object inside the request body (no stringification needed).
 
     对象会在插槽级别进行验证，并且必须包含 `type` 字段。无效的结构将返回 `400 Bad Request`。
 </Callout>

@@ -11,7 +11,9 @@ Hocuspocus 提供了钩子来扩展其功能并将其集成到现有应用程序
 
 钩子接受一个钩子负载作为第一个参数。负载是一个包含可以使用和操作的数据的对象，允许你基于这个简单机制构建复杂的东西，比如[扩展](/hocuspocus/guides/custom-extensions)。
 
-钩子必须返回一个[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)；最简单的方法就是将函数标记为 `async`（Node.js 版本必须是 14+）。这样，你就可以执行 API 请求、运行数据库查询、触发 webhook 或进行任何你需要的操作，以将其集成到你的应用程序中。
+钩子需要返回一个 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)；最简单的方法是将函数标记为 `async`（自 v4 起需要 Node.js 22+）。通过这种方式，你可以执行诸如 API 请求、数据库查询、触发 webhook 等操作，或做任何你需要做的事情，以便将其集成到你的应用程序中。
+
+自 v4 起，钩子负载使用 Web 标准的 `Request` 和 `Headers` 对象，而不是 Node.js 的 `IncomingMessage` 和 `IncomingHttpHeaders`。读取请求头时应使用 `requestHeaders.get('authorization')`，而不是 `requestHeaders['authorization']`。`onUpgrade` 和 `onRequest` 钩子是例外——它们仍然使用 Node.js 类型，因为它们是在 WebSocket 升级之前的 HTTP 层面上运行的。
 
 ## 生命周期
 
@@ -81,7 +83,6 @@ server.listen();
 传递给 `beforeHandleMessage` 钩子的 `data` 对象包含以下属性：
 
 ```js
-import { IncomingHttpHeaders } from "http";
 import { URLSearchParams } from "url";
 import { Doc } from "yjs";
 import { CloseEvent } from "@hocuspocus/common";
@@ -92,7 +93,7 @@ const data = {
   document: Doc,
   documentName: string,
   instance: Hocuspocus,
-  requestHeaders: IncomingHttpHeaders,
+  requestHeaders: Headers,
   requestParameters: URLSearchParams,
   update: Uint8Array,
   socketId: string,
@@ -113,7 +114,7 @@ const server = new Server({
   beforeHandleMessage(data) {
     if (data.context.tokenExpiresAt <= new Date()) {
       const error: CloseEvent = {
-        reason: "Token expired",
+        reason: "令牌已过期",
       };
 
       throw error;
@@ -153,18 +154,18 @@ server.listen();
 传递给 `onAuthenticate` 钩子的 `data` 对象包含以下属性：
 
 ```js
-import { IncomingHttpHeaders, IncomingMessage } from "http";
 import { URLSearchParams } from "url";
 import { Doc } from "yjs";
 
 const data = {
   documentName: string,
   instance: Hocuspocus,
-  requestHeaders: IncomingHttpHeaders,
+  requestHeaders: Headers,
   requestParameters: URLSearchParams,
-  request: IncomingMessage,
+  request: Request,
   socketId: string,
   token: string,
+  providerVersion: string | undefined,
   connection: {
     readOnly: boolean,
   },
@@ -218,7 +219,7 @@ const data = {
   document: Doc,
   documentName: string,
   instance: Hocuspocus,
-  requestHeaders: IncomingHttpHeaders,
+  requestHeaders: Headers,
   requestParameters: URLSearchParams,
   socketId: string,
   token: string,
@@ -280,27 +281,27 @@ connection.requestToken();
 传递给 `onAwarenessUpdate` 钩子的 `data` 对象包含以下属性：
 
 ```js
-import { IncomingHttpHeaders } from 'http'
-import { URLSearchParams } from 'url'
 import { Awareness } from 'y-protocols/awareness'
+import type { Connection, TransactionOrigin } from '@hocuspocus/server'
 
 const data = {
-  clientsCount: number,
-  context: any,
   document: Document,
   documentName: string,
   instance: Hocuspocus,
-  requestHeaders: IncomingHttpHeaders,
-  requestParameters: URLSearchParams,
   update: Uint8Array,
-  socketId: string,
   added: number[],
   updated: number[],
   removed: number[],
   awareness: Awareness,
   states: { clientId: number, [key: string | number]: any }[],
+  // Awareness 更新的结构化来源（自 v4 起）
+  transactionOrigin: TransactionOrigin,
+  // 可选：触发此更新的连接（自 v4 起）
+  connection?: Connection,
 }
 ```
+
+自 v4 起，该负载已简化。特定连接字段（`context`、`requestHeaders`、`requestParameters`、`socketId`）已被移除。请通过可选的 `connection` 访问它们（例如 `connection?.context`）。
 
 **示例**
 
@@ -328,9 +329,9 @@ const provider = new HocuspocusProvider({
 传递给 `onChange` 钩子的 `data` 对象包含以下属性：
 
 ```js
-import { IncomingHttpHeaders } from "http";
 import { URLSearchParams } from "url";
 import { Doc } from "yjs";
+import type { TransactionOrigin } from "@hocuspocus/server";
 
 const data = {
   clientsCount: number,
@@ -338,10 +339,12 @@ const data = {
   document: Doc,
   documentName: string,
   instance: Hocuspocus,
-  requestHeaders: IncomingHttpHeaders,
+  requestHeaders: Headers,
   requestParameters: URLSearchParams,
   update: Uint8Array,
   socketId: string,
+  // 结构化来源（自 v4 起）— 使用 isTransactionOrigin() 并基于 .source 进行分支
+  transactionOrigin: TransactionOrigin,
 };
 ```
 
@@ -436,17 +439,17 @@ server.listen();
 传递给 `onConnect` 钩子的 `data` 包含以下属性：
 
 ```js
-import { IncomingHttpHeaders } from "http";
 import { URLSearchParams } from "url";
 import { Doc } from "yjs";
 
 const data = {
   documentName: string,
   instance: Hocuspocus,
-  request: IncomingMessage,
-  requestHeaders: IncomingHttpHeaders,
+  request: Request,
+  requestHeaders: Headers,
   requestParameters: URLSearchParams,
   socketId: string,
+  providerVersion: string | undefined,
   connection: {
     readOnly: boolean,
   },
@@ -506,7 +509,6 @@ server.listen();
 传递给 `onDisconnect` 钩子的 `data` 包含：
 
 ```js
-import { IncomingHttpHeaders } from "http";
 import { URLSearchParams } from "url";
 import { Doc } from "yjs";
 
@@ -516,7 +518,7 @@ const data = {
   document: Document,
   documentName: string,
   instance: Hocuspocus,
-  requestHeaders: IncomingHttpHeaders,
+  requestHeaders: Headers,
   requestParameters: URLSearchParams,
   socketId: string,
 };
@@ -598,7 +600,7 @@ const ydoc = TiptapTransformer.toYdoc(
 
 若要导入 HTML，需要先[转为 Tiptap 兼容的 JSON](https://tiptap.dev/api/utilities/html/#generate-json-from-html)。
 
-无论来源如何，我们期望你从 `onLoadDocument` 钩子返回一个 Y.js 文档。
+但我们期望你从 `onLoadDocument` 钩子返回一个 Y.js 文档（或者自 v4 起返回原始的 `Uint8Array` Yjs 更新），无论它来自何处。
 
 ```js
 import { Server } from '@hocuspocus/server'
@@ -615,7 +617,18 @@ const server = new Server({
 server.listen()
 ```
 
-**推荐：获取 Y.js 文档**
+自 v4 起，你也可以直接返回原始的 `Uint8Array` 格式 Yjs 更新，这对存储扩展很方便：
+
+```js
+const server = new Server({
+  async onLoadDocument({ documentName }) {
+    const update = await loadUpdateFromStorage(documentName)
+    return update // Uint8Array
+  },
+})
+```
+
+**获取你的 Y.js 文档（推荐）**
 
 你可以用多种方式存储 Y.js 文档（及历史）。通常，你应使用 `onStoreDocument` 钩子，它被防抖并且几秒内会多次调用，用于存储修改文档。该钩子提供当前的 Y.js 文档，由你决定将其存至何处。放心，我们为你提供便捷的方式。
 
@@ -633,7 +646,7 @@ const data = {
   document: Doc,
   documentName: string,
   instance: Hocuspocus,
-  requestHeaders: IncomingHttpHeaders,
+  requestHeaders: Headers,
   requestParameters: URLSearchParams,
   socketId: string,
 };
@@ -659,7 +672,7 @@ const data = {
   document: Doc,
   documentName: string,
   instance: Hocuspocus,
-  requestHeaders: IncomingHttpHeaders,
+  requestHeaders: Headers,
   requestParameters: URLSearchParams,
   socketId: string,
 };
@@ -719,26 +732,31 @@ server.listen();
 
 最简单的实现方式是继承 `extension-database` 扩展并实现 `fetch()` 和 `store()` 方法，正如 `extension-sqlite` 中的做法。你也可以直接用钩子实现，只要确保在存储时正确应用/编码 yDoc 状态。
 
-**钩子负载**
+自 v4 起，`onStoreDocument` 会在任何文档变更时触发——不再仅限于 WebSocket 来源。由于该钩子现在也可能由不与特定连接绑定的来源触发（例如直接连接、Redis 复制），因此其负载已重新组织。如果钩子抛出异常，文档会保留在内存中并重试以避免数据丢失，且 `Server.destroy()` 会在关闭时刷新所有待处理的防抖存储。
+
+如果你想让某个本地修改跳过存储钩子，可以在打开直接连接时为 `LocalTransactionOrigin` 设置 `skipStoreHooks`。扩展也可以抛出 `SkipFurtherHooksError`（来自 `@hocuspocus/common`），以表明持久化已经处理完毕，后续钩子应被跳过。
+
+**Hook 负载**
 
 传递给 `onStoreDocument` 钩子的 `data` 包含：
 
 ```js
-import { IncomingHttpHeaders } from "http";
-import { URLSearchParams } from "url";
 import { Doc } from "yjs";
+import type { TransactionOrigin } from "@hocuspocus/server";
 
 const data = {
   clientsCount: number,
-  context: any,
   document: Doc,
   documentName: string,
   instance: Hocuspocus,
-  requestHeaders: IncomingHttpHeaders,
-  requestParameters: URLSearchParams,
-  socketId: string,
+  // 触发该钩子的最后一个连接的上下文（在 v3 中名为 `context`）
+  lastContext: any,
+  // 最后一次事务的结构化来源（在 v3 中名为 `transactionOrigin`）
+  lastTransactionOrigin: TransactionOrigin,
 };
 ```
+
+在 v3 中，该负载还包含 `context`、`requestHeaders`、`requestParameters`、`socketId` 和 `transactionOrigin`。在 v4 中，这些字段已被移除或重命名——如有需要，请通过 `lastContext` 访问与连接相关的数据。
 
 ### onUpgrade
 

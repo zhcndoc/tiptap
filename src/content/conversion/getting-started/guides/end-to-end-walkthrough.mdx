@@ -1,0 +1,212 @@
+---
+title: '端到端演练：导入、编辑、导出'
+tags:
+  - type: beta
+meta:
+  title: 端到端演练 | Tiptap Conversion
+  description: 完整 DOCX 往返流程的分步演练——导入，在 Tiptap 中编辑，导出回 DOCX，并（可选）在分页编辑器中渲染。
+  category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+本指南将带你从一个空项目开始，端到端完成可用的 DOCX 导入和导出。我们将使用 ConvertKit 配置编辑器，接入一个文件输入，通过 Conversion 服务上传 DOCX，并将文档再导出回 DOCX。如果你想要分页式编辑器，第 6 步还会展示如何在此基础上叠加 [Pages 扩展](/pages/getting-started/overview)。
+
+## 前置条件
+
+- 一个带有 [Pro 方案或试用](https://cloud.tiptap.dev/v2?trial=true) 的 Tiptap 账户。
+- 可访问 [Tiptap 的私有 npm 仓库](/guides/pro-extensions)。
+- 来自 [Convert 设置页面](https://cloud.tiptap.dev/v2/cloud/convert) 的 **App ID** 和 **secret key**。
+
+## 1. 安装 Conversion 技术栈
+
+```bash
+npm install @tiptap-pro/extension-convert-kit \
+            @tiptap-pro/extension-import-docx \
+            @tiptap-pro/extension-export-docx
+```
+
+<Callout title="为什么总是用 ConvertKit" variant="info">
+  ConvertKit 是 Conversion 的标准编辑器套件。它注册了 DOCX 感知的 schema —
+  段落间距、图片裁剪、表格单元格格式 — 导入服务会生成这些内容，而导出服务会消费这些内容。
+  不要用 `StarterKit` 替代；否则在往返转换时，这些属性会丢失。
+</Callout>
+
+## 2. 使用 ConvertKit 设置编辑器
+
+```ts
+import { Editor } from '@tiptap/core'
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+import { ImportDocx } from '@tiptap-pro/extension-import-docx'
+import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+
+const editor = new Editor({
+  element: document.querySelector('#editor'),
+  extensions: [
+    ConvertKit,
+    ImportDocx.configure({
+      appId: 'YOUR_APP_ID',
+      token: 'YOUR_JWT', // 在服务端生成
+    }),
+    ExportDocx.configure({
+      onCompleteExport: (result) => {
+        // 第 5 步会在这里补充
+      },
+    }),
+  ],
+})
+```
+
+<Callout title="生成 JWT" variant="warning">
+  始终在你的服务器上生成 JWT。不要把 secret key 嵌入浏览器代码中。有关 token 形状的细节，请参阅
+  [Conversion 安装指南](/conversion/getting-started/install)。
+</Callout>
+
+## 3. 接入 DOCX 导入
+
+在页面上添加一个文件输入，并将选中的文件传给编辑器的 `import` 命令：
+
+```html
+<input type="file" id="docx-input" accept=".docx" />
+```
+
+```ts
+const input = document.querySelector<HTMLInputElement>('#docx-input')!
+
+input.addEventListener('change', () => {
+  const file = input.files?.[0]
+  if (!file) return
+
+  editor.chain().focus().importDocx({ file }).run()
+})
+```
+
+这就是完整流程。转换服务接收 DOCX，返回 Tiptap JSON，编辑器使用 ConvertKit 的 schema 将其渲染出来。
+
+## 4. 自行处理导入结果
+
+默认导入会替换编辑器内容。若要校验、转换或展示错误，可以传入 `onImport` 回调：
+
+```ts
+editor
+  .chain()
+  .focus()
+  .importDocx({
+    file,
+    onImport(context) {
+      if (context.error) {
+        console.error('导入失败：', context.error)
+        return
+      }
+
+      // 在这里检查或转换 `context.content`。若要原样使用它，请调用 setEditorContent()。
+      // 若要替换为你自己的转换结果，请使用 editor.commands.setContent()。
+      context.setEditorContent()
+    },
+  })
+  .run()
+```
+
+`content` 对象是普通的 Tiptap JSON。记录它是最快了解转换器实际产出的方式——当某个功能渲染异常时尤其有用。
+
+## 5. 配置 DOCX 导出
+
+在 `onCompleteExport` 回调中补上下载触发逻辑：
+
+```ts
+ExportDocx.configure({
+  onCompleteExport: (result) => {
+    const blob = new Blob([result], {
+      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'document.docx'
+    a.click()
+    URL.revokeObjectURL(url)
+  },
+  exportType: 'blob', // 默认值；这里显式写出以便更清楚
+})
+```
+
+从按钮触发导出：
+
+```ts
+document.querySelector('#export')!.addEventListener('click', () => {
+  editor.commands.exportDocx()
+})
+```
+
+DOCX 导出是**客户端执行**的：不需要 JWT、不需要 App ID、也不需要 API 调用。转换发生在扩展本身内部。
+
+<Callout title="往返转换不会逐字节完全一致" variant="info">
+  一些功能（上下标标记、段落行高、浮动表格）目前往返转换并不完美。
+  请查看完整的 [功能支持矩阵](/conversion/getting-started/feature-support-matrix)。
+  不要指望 DOCX → 编辑 → DOCX 的循环会生成与原文件逐字节完全一致的结果。
+</Callout>
+
+## 6. （可选）添加 Pages 以实现分页渲染
+
+如果你希望编辑器看起来像真正的文档——有分页边界、页眉页脚、页面格式——可以在同一套配置上继续添加 [Pages 扩展](/pages/getting-started/overview) 和 PagesTableKit：
+
+```bash
+npm install @tiptap-pro/extension-pages-tablekit @tiptap-pro/extension-pages
+```
+
+```ts
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+import { TableKit }   from '@tiptap-pro/extension-pages-tablekit'
+import { Pages }      from '@tiptap-pro/extension-pages'
+import { ImportDocx } from '@tiptap-pro/extension-import-docx'
+import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+
+const editor = new Editor({
+  extensions: [
+    ConvertKit.configure({ table: false }), // 禁用 ConvertKit 自带的表格
+    TableKit,                                // 改用适合分页的表格
+    Pages.configure({
+      pageFormat: 'A4',
+      header: '我的文档',
+      footer: '第 {page} 页，共 {total} 页',
+    }),
+    ImportDocx.configure({ appId: 'YOUR_APP_ID', token: 'YOUR_JWT' }),
+    ExportDocx.configure({ onCompleteExport: /* ... */ }),
+  ],
+})
+```
+
+与第 2 步的差异：
+
+- 禁用 ConvertKit 的表格（`{ table: false }`）；ConvertKit 内置的表格不适合分页。
+- 添加来自 `extension-pages-tablekit` 的 `TableKit`。
+- 添加 `Pages.configure({...})`。
+
+现在导入的文档会按其页眉、页脚和页面格式进行渲染。导出路径保持不变——`editor.commands.exportDocx()` 仍然有效，导出的 DOCX 会保留 Pages 覆盖层中的页眉和页脚。
+
+<Callout title="Pages 的重要限制" variant="warning">
+  在发布前请阅读 [Pages
+  限制说明](/pages/core-concepts/limitations#oversized-non-splittable-blocks-cause-an-infinite-layout-loop)
+  页面。比页面还高的表格和其他不可拆分块可能会让布局进入无限循环。
+</Callout>
+
+## 预期结果
+
+- **导入始终通过服务完成。** 即使是很小的 DOCX，也会发送到 Conversion 服务进行解析。该服务需要 `appId` 和 JWT。
+- **导出是本地完成的。** DOCX 导出在浏览器中运行；不需要认证，也不会发起网络请求。
+- **往返漂移是真实存在的。** 对于矩阵中无法往返转换的功能（如下标标记、行高），要提前规划——要么在编辑器 schema 中避免使用这些功能，要么接受这种差异。
+
+## 不要期望
+
+- **OCR 或扫描版 PDF 处理。** Conversion 处理的是结构化文档，不是页面位图输入。
+- **此方案中的实时协作。** 如果你需要多人编辑，请搭配 Tiptap Collaboration 产品——在与 Pages 结合时，请参阅 [向 Pages 添加协作](/pages/guides/collaboration-with-pages)。
+- **异步任务控制。** 该服务对每个请求都是同步响应。对于非常大的文档，请自行在你的系统中规划超时。
+
+## 下一步
+
+- [ConvertKit 参考](/conversion/import/docx/convertkit) — 你注册的 schema
+- [导入 DOCX](/conversion/import/docx/editor-extension) — 导入扩展的完整 API
+- [导出 DOCX](/conversion/export/docx/editor-extension) — 导出扩展的完整 API
+- [功能支持矩阵](/conversion/getting-started/feature-support-matrix) — 哪些可以往返转换，哪些不可以
+- [Pages 概览](/pages/getting-started/overview) — 分页式编辑器布局
+- [调试](/conversion/getting-started/guides/debugging) — 诊断导入失败、schema 不匹配和 HTTP 错误

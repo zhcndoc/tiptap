@@ -33,15 +33,15 @@ PDF 导出完全支持分页符。PDF 导出在底层使用 DOCX 转换，其中
 
 将 PageBreak 扩展与 PDF 导出扩展一起注册。编辑器内容中的分页符将在导出时自动转换。
 
-```js
+```ts
 import { Editor } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
 import { ExportPdf } from '@tiptap-pro/extension-export-pdf'
 import { PageBreak } from '@tiptap-pro/extension-pagebreak'
 
 const editor = new Editor({
   extensions: [
-    StarterKit,
+    ConvertKit,
     PageBreak,
     ExportPdf.configure({
       appId: 'your-app-id',
@@ -62,6 +62,6 @@ const editor = new Editor({
 
 ## 了解更多
 
-- [PageBreak 扩展参考](/pages/core-concepts/page-break-node)了解完整的选项、命令和键盘快捷键
-- [DOCX 导入中的分页符](/conversion/import/docx/page-breaks)了解导入支持
-- [PDF 导出指南](/conversion/export/pdf/editor-export)了解常规导出设置
+- [PageBreak extension reference](/pages/core-concepts/page-break-node) 获取完整选项、命令和键盘快捷键
+- [DOCX 导入中的分页符](/conversion/import/docx/page-breaks) 获取导入支持
+- [PDF 导出指南](/conversion/export/pdf/editor-extension) 获取通用导出设置

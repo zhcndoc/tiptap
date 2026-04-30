@@ -43,7 +43,7 @@ tags:
 
 ```js
 shouldShow: ({ editor, range, query, text, transaction }) => {
-  return isChangeOrigin(transaction)
+  return !isChangeOrigin(transaction)
 }
 ```
 
@@ -51,13 +51,13 @@ shouldShow: ({ editor, range, query, text, transaction }) => {
 
 ### shouldResetDismissed
 
-Controls when a dismissed suggestion becomes active again after the user closes it with Escape or `exitSuggestion()`.
+控制用户通过 Escape 或 `exitSuggestion()` 关闭后，何时让已关闭的建议再次变为活动状态。
 
-By default, the utility keeps the dismissed suggestion closed while the user stays in the same trigger context. With `allowSpaces: true`, that dismissed context can span spaces until the cursor leaves it.
+默认情况下，只要用户停留在同一个触发上下文中，该工具会保持已关闭的建议处于关闭状态。使用 `allowSpaces: true` 时，该已关闭上下文可以跨越空格，直到光标离开它为止。
 
-Use `shouldResetDismissed` if you need to decide yourself when that dismissed context should be cleared.
+如果你需要自行决定何时清除该已关闭上下文，请使用 `shouldResetDismissed`。
 
-The callback is not called for every transaction. It is only evaluated on transactions where the suggestion plugin finds a valid match, the match passes `allow` and `shouldShow`, and there is a dismissed suggestion state to potentially clear.
+该回调不会在每次事务中都被调用。它只会在以下事务上进行评估：建议插件找到有效匹配、匹配通过 `allow` 和 `shouldShow`，并且存在可能需要清除的已关闭建议状态。
 
 ```js
 Suggestion({
@@ -173,12 +173,12 @@ import { isChangeOrigin } from '@tiptap/extension-collaboration'
 Suggestion({
   // …
   shouldShow: ({ transaction }) => {
-    return isChangeOrigin(transaction)
+    return !isChangeOrigin(transaction)
   },
 })
 ```
 
-通过返回 `isChangeOrigin(props.transaction)`，建议仅在当前用户发起更改时激活。
+通过返回 `!isChangeOrigin(props.transaction)`，只有当前用户发起更改时，建议才会被激活。
 
 ## 源代码
 

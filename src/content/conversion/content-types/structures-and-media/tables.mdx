@@ -1,0 +1,141 @@
+---
+title: 表格
+tags:
+  - type: beta
+meta:
+  title: 表格 | Tiptap 转换
+  description: 表格、合并单元格、标题行、列宽和单元格样式如何在 DOCX 和 Tiptap 之间转换。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+Tables 使用 `table`、`tableRow`、`tableCell` 和 `tableHeader` 节点类型在 DOCX 和 Tiptap 之间转换。基础结构、colspan 和列宽都可以无损往返。表头行导入正确，但导出时不会保留。单元格级样式在导出时会丢失。
+
+## 你需要了解的内容
+
+适合的表格扩展取决于你是否也使用 Pages 扩展，以及你是否需要 DOCX 特定的单元格格式（背景色、边框、垂直对齐、行高）。
+
+- **推荐（支持 DOCX，且不分页）：** [`ConvertKit`](/conversion/import/docx/convertkit)。它内置的 `ConvertTableKit` 提供 `Table`、`TableRow`、`TableCell`、`TableHeader`，并预先配置了 DOCX 属性（`width`、`indent`、`height`、`heightRule`、`background`、`verticalAlign`、各边边框）。
+- **支持 DOCX 且分页：** [`@tiptap-pro/extension-pages-tablekit`](/pages/guides/pages-tablekit)。它的表格扩展内部继承了 ConvertKit 的扩展，因此相同的 DOCX 单元格属性（背景色、垂直对齐、各边边框、高度、高度规则）都能透传，并通过 CSS Grid 渲染，这样表格就可以跨页断开。请使用这一套，而不是额外再加上 ConvertKit 的表格覆盖；组合方式请参见 [PagesTableKit 指南](/pages/guides/pages-tablekit) 中的 “Scenario B”。
+- **最小配置（不需要 DOCX 单元格格式）：** [`@tiptap/extension-table`](/editor/extensions/nodes/table)（开源 TableKit，不在 StarterKit 中）。它只渲染基础表格结构；单元格背景、边框、垂直对齐和行高会在 schema 校验时被去除。
+
+这三种配置都会注册相同的节点名（`table`、`tableRow`、`tableCell`、`tableHeader`），因此导入 JSON 的结构是一样的。区别在于哪些属性会被编辑器 schema 保留下来。一次不要同时安装多个表格栈。
+
+## 支持概览
+
+下表中的编辑器列默认假设使用 ConvertKit（或继承了 ConvertKit 表格覆盖的 PagesTableKit）。在最小配置下，所有标记为“Supported”的单元格级和行级属性都会变成 “Attributes dropped by schema”。
+
+<Callout title="context.content 中有属性，但渲染时没有显示？" variant="info">
+  如果你在导入后检查 `context.content`，并且看到单元格和行上有 `background`、`borderTopWidth`、`height`、`heightRule` 等属性，但编辑器渲染出来只是普通表格，没有这些样式，那么你很可能直接使用了 `@tiptap/extension-table`。请切换到 [ConvertKit](/conversion/import/docx/convertkit)（如果你也使用 Pages 扩展，则切换到 PagesTableKit）；只有它们的表格扩展会在 schema 中声明这些属性。
+</Callout>
+
+| 功能 | 导入 | 编辑器（使用 ConvertKit 时） | 导出 | 说明 |
+| --- | --- | --- | --- | --- |
+| 基础表格 | Supported | Supported | Supported | DOCX 输出中为固定布局 |
+| 表头行 | 仅在源 DOCX 在行的 `<w:trPr>` 中显式包含 `<w:tblHeader/>` 标记时检测到 | 渲染为 `tableHeader` 节点 | 不保留 | 只是在视觉上把第一行格式化为表头（加粗、底色），但没有应用“Repeat as header row”属性的 Word 用户，导入后不会得到 `tableHeader` 节点 |
+| colspan | Supported | Supported | Supported | 完整往返 |
+| rowspan | Supported | Supported | Supported | 会在处理单元格前对所有行进行预扫描，以构建完整的 rowspan 映射 |
+| 列宽 | Supported | Supported | Supported | 导入时以像素数组形式存储在 `colwidth` 中，导出时转换为 twips |
+| 单元格背景色 | Supported | Supported | 每个单元格不保留 | 导入时捕获 `background`，导出时不读取。可通过 `tableCellOverrides.shading` 设置一个全局颜色 |
+| 单元格边框 | Supported | Supported（按边分别支持 `borderTop/Bottom/Left/Right` × `Width/Style/Color`） | 不保留 | 边框属性会在导入时捕获，导出时不读取 |
+| 单元格垂直对齐 | Supported | Supported | 不保留 | 导入时捕获 `verticalAlign`（`top`、`middle`、`bottom`），导出时不读取 |
+| 行高 | Supported | Supported（`exact` 通过 `.cell-content` 包装器裁切；`atLeast` 会增长） | 不保留 | 导入时捕获 `height` 和 `heightRule`，导出时不读取 |
+| 全局表格样式 | N/A | N/A | Supported | 通过 `tableOverrides` 和 `tableCellOverrides` 实现 |
+
+## 导入
+
+使用 [编辑器扩展](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入表格。两者生成的输出完全相同。
+
+转换服务会读取 DOCX 表格，并生成 `table`、`tableRow`、`tableCell` 或 `tableHeader` 节点。列宽会以像素值数组的形式存储在 `colwidth` 属性中。单元格背景色、边框和垂直对齐会作为单元格属性捕获。行高和高度规则会作为行属性捕获。
+
+只有当源 DOCX 在该行的 `<w:trPr>` 内显式包含 `<w:tblHeader/>` 时，某一行才会被输出为 `tableHeader`。这就是 Word 在用户为表格启用“Repeat as header row at the top of each page”时写入的标记。仅在视觉上被格式化为表头（加粗、底色、字体更大）但没有该属性的文档，导入后会作为普通 `tableCell` 行。若要在应用侧把第一行标记为表头，可以在 `setEditorContent()` 之前，于 `onImport` 回调中遍历导入的 JSON，并将每个单元格的 `type` 从 `tableCell` 改为 `tableHeader`。
+
+使用 colspan 合并的单元格可以可靠转换。rowspan 也完全支持。转换器会在处理单元格之前对所有行进行预扫描，以构建完整的 rowspan 映射，从而正确解析 Word 的 `vMerge` “continue” 标记。
+
+如果你的编辑器 schema 不包含表格节点，导入的表格内容会被丢弃。有关处理策略，请参见 [无效 schema 指南](/guides/invalid-schema)。
+
+## 编辑器渲染
+
+ConvertKit 的 `ConvertTableKit` 是推荐的 DOCX 导入表格渲染器：它在基础表格栈之上扩展了 DOCX 特定的单元格和行属性（背景色、边框、垂直对齐、高度、高度规则），并配置 `cellMinWidth: 1`，这样 DOCX spacer 列（1–15 px 的窄列，用于布局）就不会被放大成可见空隙。完整属性集请参见 [ConvertKit 页面](/conversion/import/docx/convertkit)。
+
+安装符合你需求的配置：
+
+```bash
+# 推荐：ConvertKit（支持 DOCX，不分页）
+npm install @tiptap-pro/extension-convert-kit
+
+# 通过 Pages 扩展实现分页
+npm install @tiptap-pro/extension-pages-tablekit @tiptap-pro/extension-convert-kit
+
+# 最小配置：只保留结构，不保留 DOCX 单元格格式
+npm install @tiptap/extension-table
+```
+
+```ts
+// 推荐（ConvertKit 内置的 ConvertTableKit，无需单独导入）
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+
+new Editor({ extensions: [ConvertKit] })
+```
+
+```ts
+// 通过分页：禁用 ConvertKit 的表格栈，让 PagesTableKit 接管
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+import { TableKit } from '@tiptap-pro/extension-pages-tablekit'
+
+new Editor({
+  extensions: [
+    ConvertKit.configure({ table: false }),
+    TableKit,
+  ],
+})
+```
+
+```ts
+// 最小配置（仅基础结构；单元格和行级 DOCX 属性会被丢弃）
+import StarterKit from '@tiptap/starter-kit'
+import { TableKit } from '@tiptap/extension-table'
+
+new Editor({
+  extensions: [StarterKit, TableKit],
+})
+```
+
+表格会渲染为 HTML `<table>`、`<tr>`、`<td>`（使用 ConvertKit 时则是 `<td><div class="cell-content">`）以及 `<th>` 元素。若在 Table 扩展上设置了 `resizable: true`，则支持列宽调整。导入时的 `colwidth` 属性会控制初始列宽。
+
+## 导出
+
+使用 [编辑器扩展](/conversion/export/docx/editor-extension) 或 [REST API](/conversion/export/docx/rest-api) 导出表格。该扩展支持 [`tableOverrides` 和 `tableCellOverrides`](/conversion/export/docx/styles#element-overrides) 作为全局表格样式默认值。REST API 不接受这些覆盖配置。
+
+导出器会生成固定布局的 DOCX 表格。它会读取 `colwidth` 属性并将像素值转换为 twips。如果没有设置 `colwidth`，各列会在可用页面宽度内平均分配。
+
+表头行不会被保留。导出器会用 `new TableRow({ children: cells })` 以完全相同的方式创建所有行，并且不会根据 `tableHeader` 节点类型在 DOCX 行上设置 `tableHeader: true`。表头行语义会在输出中丢失。合并单元格（colspan 和 rowspan）可以正确导出。
+
+<Callout title="单元格级样式不会被导出" variant="warning">
+  单元格背景色（`background`）和按单元格设置的边框在导出时不会被读取。所有单元格都会获得默认的单线边框。如果你需要在输出中使用自定义表格样式，请在编辑器扩展上使用 [`tableOverrides` 和 `tableCellOverrides`](/conversion/export/docx/styles#element-overrides) 来设置全局默认值。REST API 不提供这些覆盖配置。
+</Callout>
+
+### 覆盖系统
+
+导出扩展接受两个用于全局表格样式的选项：
+
+```ts
+ExportDocx.configure({
+  tableOverrides: {
+    borders: {
+      top: { style: 'single', size: 4, color: '000000' },
+      bottom: { style: 'single', size: 4, color: '000000' },
+      left: { style: 'single', size: 4, color: '000000' },
+      right: { style: 'single', size: 4, color: '000000' },
+      insideHorizontal: { style: 'single', size: 4, color: '000000' },
+      insideVertical: { style: 'single', size: 4, color: '000000' },
+    },
+  },
+  tableCellOverrides: {
+    shading: { fill: 'F5F5F5' },
+  },
+})
+```
+
+这些覆盖会全局应用于导出文档中的所有表格。不支持在导出时对单个单元格进行样式设置。

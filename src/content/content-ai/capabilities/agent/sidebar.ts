@@ -51,11 +51,11 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/agent/custom-llms/get-started/vercel-ai-sdk',
                 },
                 {
-                  title: 'OpenAI Completions',
+                  title: 'OpenAI 补全',
                   href: '/content-ai/capabilities/agent/custom-llms/get-started/openai-chat-completions',
                 },
                 {
-                  title: 'OpenAI Responses',
+                  title: 'OpenAI 响应',
                   href: '/content-ai/capabilities/agent/custom-llms/get-started/openai-responses',
                 },
                 {
@@ -81,11 +81,11 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/agent/custom-llms/server-side-tools/vercel-ai-sdk',
                 },
                 {
-                  title: 'OpenAI Completions',
+                  title: 'OpenAI 补全',
                   href: '/content-ai/capabilities/agent/custom-llms/server-side-tools/openai-chat-completions',
                 },
                 {
-                  title: 'OpenAI Responses',
+                  title: 'OpenAI 响应',
                   href: '/content-ai/capabilities/agent/custom-llms/server-side-tools/openai-responses',
                 },
                 {
@@ -162,11 +162,11 @@ export const sidebarConfig: SidebarConfig = {
       title: '审核更改',
       children: [
         {
-          title: '使用 AI Changes',
+          title: '使用 AI 变更',
           href: '/content-ai/capabilities/agent/review/ai-changes',
         },
         {
-          title: '使用 AI Suggestion',
+          title: '使用 AI 建议',
           href: '/content-ai/capabilities/agent/review/ai-suggestion',
         },
       ],

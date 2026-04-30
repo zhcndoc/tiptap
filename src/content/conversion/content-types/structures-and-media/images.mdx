@@ -1,0 +1,100 @@
+---
+title: 图像
+tags:
+  - type: beta
+meta:
+  title: 图像 | Tiptap 转换
+  description: 在从 DOCX 导入、在编辑器中渲染以及导出回 DOCX 时，图像是如何处理的。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+DOCX 文档中的图片会在导入时被提取，在编辑器中渲染，并在导出时重新嵌入。Image 扩展不包含在 StarterKit 中，必须单独安装。
+
+## 你需要的内容
+
+- **扩展（推荐）：** [`ConvertKit`](/conversion/import/docx/convertkit)。它自定义的 Image 在基础 Image 扩展之上声明了 `cropTop`、`cropBottom`、`cropLeft`、`cropRight`，因此 DOCX 的裁剪元数据可以在 schema 验证后保留下来。
+- **扩展（最小配置）：** `@tiptap/extension-image`（不在 StarterKit 中）。基础扩展会渲染 `src`、`alt`、`title`、`width`、`height`。在这种配置下，DOCX 的裁剪属性会在 schema 验证时被丢弃。
+- **配置：** 无论你使用哪种扩展配置，都需要通过导入扩展上的 `imageUploadConfig` 或 REST API 请求配置一个图片上传端点。
+
+<Callout title="导入时需要 imageUploadConfig" variant="warning">
+  导入 DOCX 时，图片会作为二进制 blob 从文件中提取出来。如果没有 `imageUploadConfig`，生成的 `src` 值将无法解析，图片会显示损坏。你必须提供一个上传端点，这样转换器才能为每张图片发送 POST 请求，并用真实 URL 替换内部引用。
+</Callout>
+
+## 支持概览
+
+| 功能 | 导入 | 编辑器 | 导出 | 说明 |
+| --- | --- | --- | --- | --- |
+| 行内图片 | 支持 | 支持 | 支持 | 导入时需要 imageUploadConfig |
+| 浮动/环绕图片 | 部分支持 | 不支持 | 不支持 | 锚定图片会被转换，但不会跟踪环绕类型。所有图片都会变成行内图片。背景/水印图片（`behindDoc`）会被跳过。 |
+| 图片尺寸 | 支持 | 支持 | 支持 | 宽度和高度会从 EMU 值中提取，并作为像素属性传递到图片节点上。导出时读取 width/height 属性。 |
+| Alt 文本 | 支持 | 支持 | 支持 | 会在导入时提取 `wp:docPr` 中的 `descr` 和 `title`。编辑器节点中的 alt 在导出时会映射为 DOCX 的 alt 文本。 |
+| 格式（PNG、JPEG、GIF、BMP、SVG） | 支持 | 支持 | 支持 | |
+| EMF/WMF | 支持（导入） | 取决于浏览器 | 不支持（导出） | Windows 矢量格式可能无法完整往返 |
+| 图片裁剪 | 支持 | ConvertKit 保留属性；视觉裁剪需要 CSS | 不支持 | `cropTop`、`cropBottom`、`cropLeft`、`cropRight` 会作为属性提取（百分比值） |
+| 图片大小调整 | 不适用 | 支持 | 支持 | 调整后的尺寸可正确导出 |
+
+## 导入
+
+使用 [editor extension](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入图片。两者都接受 `imageUploadConfig` 并产生相同的输出。转换服务会在两条路径上处理图片上传。
+
+当导入 DOCX 时，每张嵌入图片都会作为 blob 从 zip 压缩包中提取出来。如果你提供了 `imageUploadConfig`，转换器会将每个 blob 通过 POST 发送到你的上传端点，并用服务器返回的 URL 替换内部引用。
+
+```ts
+ImportDocx.configure({
+  appId: 'your-app-id',
+  token: 'your-jwt',
+  imageUploadConfig: {
+    url: 'https://your-api.example.com/upload',
+  },
+})
+```
+
+如果没有这项配置，导入后的图片将具有无法解析的 `src` 值。
+
+如果源图片在 Word 中应用了裁剪，裁剪值会被提取为 `cropTop`、`cropBottom`、`cropLeft` 和 `cropRight` 属性（0 到 100 的百分比值）。[ConvertKit](/conversion/import/docx/convertkit) 的自定义 Image 接受这些属性，并将它们以 `data-crop-top`、`data-crop-bottom`、`data-crop-left`、`data-crop-right` 的形式输出到渲染的 `<img>` 元素上。该包不提供将这些数据属性转换为可视裁剪效果的 CSS。若要实现实际裁剪，请添加读取这些属性的 CSS（例如使用 `clip-path`，或者使用带有 `overflow: hidden` 的包装器并配合负的 `object-position`）。如果不使用 ConvertKit，这些值会在 schema 验证时被丢弃。裁剪值不会在导出时保留。
+
+<Callout title="浮动图片不完全受支持" variant="info">
+  DOCX 文档通常包含带有文本环绕的图片（方形、紧密、置于文字后方）。锚定图片会在导入时转换，但不会跟踪环绕类型。无论其原始位置如何，所有图片都会作为行内节点插入。背景图或水印图片（`behindDoc`）会被完全跳过。
+</Callout>
+
+## 编辑器渲染
+
+[`Image`](/editor/extensions/nodes/image) 扩展会添加一个带有 `src`、`alt`、`title`、`width` 和 `height` 属性的 `image` 节点。它会渲染为标准的 `<img>` 标签。StarterKit 中不包含它。
+
+```bash
+npm install @tiptap/extension-image
+```
+
+```ts
+import Image from '@tiptap/extension-image'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    Image.configure({ inline: true }),
+  ],
+})
+```
+
+要启用拖拽调整大小的控制柄，请传入 `resize` 选项：
+
+```ts
+Image.configure({
+  inline: true,
+  resize: { enabled: true },
+})
+```
+
+如果没有 Image 扩展，导入的图片节点将无法被 schema 识别。有关处理策略，请参见 [invalid schema guide](/guides/invalid-schema)。
+
+## 导出
+
+使用 [editor extension](/conversion/export/docx/editor-extension) 或 [REST API](/conversion/export/docx/rest-api) 导出图片。该扩展支持 [`imageOverrides`](/conversion/export/docx/styles#element-overrides)，用于自定义输出中的图片默认值。REST API 不接受图片覆盖配置。
+
+导出时，会获取每个图片节点的 `src` URL，并将二进制数据嵌入到 DOCX 中。支持的导出格式：PNG、JPG、JPEG、GIF、BMP 和 SVG。
+
+如果节点具有 `width` 和 `height` 属性（以像素为单位），这些值会转换为 point（1px = 0.75pt）。如果没有设置尺寸，导出器会自动检测固有尺寸。如果检测失败，图片默认尺寸为 800x400 像素。
+
+图片节点上的 `alt` 属性会映射到 DOCX 图片的 alt 文本字段。

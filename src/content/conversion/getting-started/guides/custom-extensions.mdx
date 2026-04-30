@@ -1,0 +1,176 @@
+---
+title: 为转换构建自定义扩展
+tags:
+  - type: beta
+meta:
+  title: 转换的自定义扩展 | Tiptap Conversion
+  description: 如何构建一个自定义 Tiptap 扩展来渲染没有官方扩展的已转换内容，并将其连接起来以实现往返导出。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+ConvertKit 覆盖了大多数 DOCX 内容的 schema。当转换器生成了 ConvertKit 无法渲染的节点或属性——例如自定义 mark、冷门属性，或领域特定的块——你需要使用标准的 Tiptap `extend()` 模式自行接入。本指南展示了两个实际示例：扩展现有扩展以呈现被丢弃的属性，以及添加一个自定义节点并将导入内容路由到其中。
+
+## 心智模型
+
+转换服务会尽可能从源文档中提取所有内容，并输出带有对应节点、marks 和属性的 Tiptap JSON。ConvertKit 会注册可以渲染其中大部分内容的扩展，但并不是全部。当缺少某些内容时，你有三个手段：
+
+1. **扩展现有扩展**，以渲染转换器生成而 ConvertKit 没有渲染的属性。
+2. **向你的 schema 添加自定义节点或 mark**，并告诉导入器将某种 DOCX 结构映射到它。
+3. **告诉导出器如何序列化**你的自定义节点回 DOCX，这样往返转换才能正常工作。
+
+通常情况下，你会将 1 用于缺失的行内属性，而将 2 + 3 一起用于新的块级结构。
+
+## 实际示例 1：渲染导入的字母间距
+
+转换器会将字符间距提取为带有 `letterSpacing` 属性的 `textStyle` mark。ConvertKit 注册了 `TextStyle`（通过其捆绑的 `TextStyleKit`），但并未将 `letterSpacing` 声明为其属性之一——因此该值存在于 JSON 中，却从未进入渲染后的 DOM。
+
+扩展 `TextStyle` 以声明该属性，并将其作为内联 CSS 输出：
+
+```ts
+import { Extension } from '@tiptap/core'
+import { TextStyle } from '@tiptap/extension-text-style'
+
+const TextStyleWithLetterSpacing = TextStyle.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      letterSpacing: {
+        default: null,
+        parseHTML: (element) => element.style.letterSpacing || null,
+        renderHTML: (attributes) => {
+          if (!attributes.letterSpacing) return {}
+          return { style: `letter-spacing: ${attributes.letterSpacing}` }
+        },
+      },
+    }
+  },
+})
+```
+
+禁用 ConvertKit 自带的 `textStyleKit` 槽位，并注册扩展后的版本：
+
+```ts
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+
+const editor = new Editor({
+  extensions: [
+    ConvertKit.configure({ textStyleKit: false }),
+    TextStyleWithLetterSpacing,
+    // ... 你的其他扩展
+  ],
+})
+```
+
+导入的带有字母间距的文档现在会以应用了该间距的方式渲染出来。对于转换器提取了但 ConvertKit 默认没有呈现的任何属性，这种模式都适用——请参见[功能支持矩阵](/conversion/getting-started/feature-support-matrix)的其余部分。
+
+<Callout title="何时扩展而不是替换" variant="info">
+  扩展现有扩展可以保留其余行为，并允许你展开
+  <code>...this.parent?.()</code> 属性。完全替换它（从零开始使用你自己的 Mark）
+  意味着你需要重新实现 ConvertKit 依赖的解析规则以支持往返转换——通常并不
+  值得。
+</Callout>
+
+## 实际示例 2：自定义 callout 块
+
+假设你的编辑器有一个 `callout` 节点——一个带有图标和颜色的样式化块——并且你希望导入的 DOCX blockquote 映射到它，而不是默认的 `blockquote`。分三步：定义自定义节点、将导入映射到它，以及定义导出回 DOCX。
+
+### 定义节点
+
+```ts
+import { Node, mergeAttributes } from '@tiptap/core'
+
+const Callout = Node.create({
+  name: 'callout',
+  group: 'block',
+  content: 'block+',
+  defining: true,
+
+  addAttributes() {
+    return {
+      tone: { default: 'info' },
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'aside[data-callout]' }]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['aside', mergeAttributes(HTMLAttributes, { 'data-callout': '' }), 0]
+  },
+})
+```
+
+### 在导入时将 DOCX blockquote 映射到 callout
+
+`ImportDocx` 接受一个 `prosemirrorNodes` 映射，用于在导入期间重写传入的节点类型。告诉它将 blockquote 发送到你的 `callout` 节点：
+
+```ts
+import { ImportDocx } from '@tiptap-pro/extension-import-docx'
+
+ImportDocx.configure({
+  appId: 'YOUR_APP_ID',
+  token: 'YOUR_JWT',
+  prosemirrorNodes: {
+    blockquote: 'callout',
+  },
+})
+```
+
+导入的 DOCX blockquote 现在会以 `callout` 节点的形式进入编辑器，并保留它们携带的任何行内内容。
+
+### 在导出时将 callout 序列化回 DOCX
+
+为了让导出实现往返转换，`ExportDocx` 需要知道如何写出你的自定义节点。传入一个 `customNodes` 条目，其 `type` 与 Tiptap 节点名称匹配，并且其 `render(node)` 函数返回一个（或多个）`docx` 库对象：
+
+```ts
+import { Paragraph, TextRun } from 'docx'
+import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+
+ExportDocx.configure({
+  customNodes: [
+    {
+      type: 'callout', // 与 Tiptap 节点名称匹配
+      render: (node) => {
+        // 为了示例简洁，这里将 callout 的文本内容扁平化处理。
+        // 对于更丰富的 callout，可以遍历 node.content 并输出多个 Paragraph
+        // （返回一个 Paragraph[]），或者返回更符合你设计的其他结构。
+        const text = (node.content ?? [])
+          .flatMap((child) => child.content ?? [])
+          .map((leaf) => leaf.text ?? '')
+          .join('')
+
+        return new Paragraph({
+          children: [new TextRun({ text, bold: true })],
+        })
+      },
+    },
+  ],
+  onCompleteExport: (result) => {
+    /* ... */
+  },
+})
+```
+
+`render` 函数会使用 Tiptap 节点进行调用，并且必须返回以下之一：`Paragraph`、`Paragraph[]`、`Table`、`TextRun`、`ExternalHyperlink` 或 `null`（返回 `null` 会在导出中移除该节点）。完整 API 和更复杂的示例请参见[自定义节点导出](/conversion/export/docx/custom-nodes)。
+
+## 预期结果
+
+- 一旦你超出 ConvertKit 的范围，自定义 mark/node 的工作就由你负责。我们提供钩子；渲染和序列化逻辑则取决于应用。
+- 你可以通过在 `ConvertKit.configure({…})` 中将对应槽位设为 `false`，逐个替换 ConvertKit 捆绑的扩展。
+- 为了保证往返一致性，导入映射和导出序列化应当是对称的。如果你在导入时将 blockquote → callout，那么在导出时也要定义 callout 如何写回 DOCX。
+
+## 不要期待
+
+- 一个 schema 迁移工具。没有自动方式将现有已存内容从旧节点类型升级到你的新自定义节点——那需要你编写一次性转换。
+- 超出转换器当前能力的转换侧属性提取。如果源 DOCX 包含转换器未解析的功能（例如多栏节属性、某些 SmartArt 图形），无论编辑器端如何扩展都无法把它显现出来。
+
+## 下一步
+
+- [自定义节点映射](/conversion/import/docx/custom-node-mapping) — `prosemirrorNodes` 的完整参考
+- [自定义 mark 映射](/conversion/import/docx/custom-mark-mapping) — `prosemirrorMarks` 的完整参考
+- [自定义节点导出](/conversion/export/docx/custom-nodes) — 导出端 `customNodes` 的完整参考
+- [设置转换内容样式](/conversion/getting-started/guides/styling-converted-content) — 为导入内容叠加 CSS 的模式
+- [调试](/conversion/getting-started/guides/debugging) — 诊断 schema 不匹配和详细导入日志

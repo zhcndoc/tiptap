@@ -19,35 +19,45 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ---
 
-## 1. 安装 TableKit 扩展
+## 1. 安装 Pages 技术栈
 
-与 Pages 兼容的 TableKit 扩展作为一个单独的包提供。
+表格、ConvertKit（编辑器的 schema）以及 Pages 本身都作为独立包发布。请安装这三个包：
 
 ```bash
-npm install @tiptap-pro/extension-pages-tablekit
+npm install @tiptap-pro/extension-convert-kit \
+            @tiptap-pro/extension-pages-tablekit \
+            @tiptap-pro/extension-pages
 ```
 
-## 2. 导入并将表格添加到你的编辑器
+## 2. 将 ConvertKit、TableKit 和 Pages 添加到你的编辑器
 
-```js
+```ts
 import { Editor } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
-import { Pages } from '@tiptap-pro/extension-pages'
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
 import { TableKit } from '@tiptap-pro/extension-pages-tablekit'
+import { Pages } from '@tiptap-pro/extension-pages'
 
 const editor = new Editor({
   extensions: [
-    StarterKit,
+    ConvertKit.configure({ table: false }),
+    TableKit,
     Pages.configure({
       /* ... */
     }),
-    TableKit,
   ],
 })
 ```
 
+<Callout title="为什么要禁用 ConvertKit 的表格" variant="info">
+  ConvertKit 自带一套表格功能（支持 DOCX，但不适用于分页）。PagesTableKit 的
+  `TableKit` 是适用于分页的替代方案，并且接受与 ConvertKit 表格相同的 DOCX 单元格属性。
+  禁用一个，注册另一个。
+</Callout>
+
 <Callout title="最佳实践" variant="info">
-  在使用 Pages 时，始终使用来自 <code>@tiptap-pro/extension-pages-tablekit</code> 的 TableKit 扩展。不要使用开源的 TableKit 扩展，因为它与 Pages 扩展生成的布局不兼容。
+  在使用 Pages 时，始终使用来自 <code>@tiptap-pro/extension-pages-tablekit</code> 的
+  `TableKit` 扩展。不要使用开源的 <code>@tiptap/extension-table</code> 或 ConvertKit 内置的
+  表格——它们都与 Pages 扩展生成的布局不兼容。
 </Callout>
 
 ## 3. 表格功能
@@ -55,8 +65,10 @@ const editor = new Editor({
 - 暴露的 TableKit 扩展工作方式和行为与开源版本完全相同，也可以扩展以满足你的需求。
 - 表格会正确分页并能随着文档一同导出为 DOCX。
 
-<Callout title="扩展 Page 的 TableKit 扩展" variant="default">
-  在扩展来自 <code>@tiptap-pro/extension-pages-tablekit</code> 的 TableKit 扩展时要小心，因为它的布局被大幅修改了，你可能会破坏表格拆分逻辑。
+<Callout title="扩展 Pages 的 TableKit 扩展" variant="default">
+  从{' '}
+  <code>@tiptap-pro/extension-pages-tablekit</code> 扩展 TableKit 时要小心，因为其布局经过了大幅修改，
+  你有可能破坏表格拆分逻辑。
 </Callout>
 
 ## 4. 下一步

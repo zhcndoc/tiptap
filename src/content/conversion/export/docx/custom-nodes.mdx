@@ -1,0 +1,138 @@
+---
+title: 使用 .docx 导入和导出自定义节点
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.13.0
+meta:
+    title: DOCX 中的自定义节点 | Tiptap 转换
+    description: 了解如何使用导出扩展将自定义节点导出到 DOCX（Word）文件。
+    category: 转换
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import CustomNodeConversionGuide from '../_shared/_custom-node-conversion-guide.mdx'
+
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账号中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行操作，先对 Tiptap 的私有 npm 注册表进行身份验证。
+    </RequirementItem>
+</Requirements>
+
+`@tiptap-pro/extension-export-docx` 和 `@tiptap-pro/extension-import-docx` 扩展的最大优点之一是能够定义您 Tiptap 模式中的自定义节点应如何在 DOCX 中呈现。
+
+这使您能够在导出的 Word 文件中保留特定于应用程序的内容。
+
+## 导出自定义节点到 .docx
+
+<CodeDemo isPro path="/Extensions/ExportDocxCustomNode" />
+
+调用 `editor.exportDocx()` 时，可以在 `ExportDocxOptions` 参数中传递一个自定义节点定义数组。每个定义指定节点类型和渲染函数。
+
+<CustomNodeConversionGuide />
+
+### 定义自定义节点渲染函数
+
+我们将定义在导出文档中，`Hintbox` 自定义节点应如何渲染：
+
+```ts
+// 导入 ExportDocx 扩展
+import {
+  convertTextNode,
+  Docx,
+  ExportDocx,
+  lineHeightToDocx,
+  pixelsToHalfPoints,
+  pointsToTwips,
+} from '@tiptap-pro/extension-export-docx'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    ExportDocx.configure({
+      onCompleteExport: result => {
+        setIsLoading(false)
+        const blob = new Blob([result], {
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'export.docx'
+        a.click()
+        URL.revokeObjectURL(url)
+      },
+      exportType: 'blob',
+      customNodes: [
+        {
+          type: 'hintbox',
+          render: node => {
+            // 在这里我们定义自定义 Hintbox 节点在 DOCX 中的渲染方式。
+            // 根据文档，我们应该返回一个 DOCX 节点
+            // 这要么是一个段落，要么是一个段落的数组，或者是一个表格。
+            return new Docx.Paragraph({
+              children: node.content.map(content => convertTextNode(content)),
+              style: 'Hintbox', // 在这里我们将自定义样式应用于段落节点。
+            })
+            },
+        },
+      ], // 自定义节点
+      styleOverrides: {
+        paragraphStyles: [
+          // 在这里我们定义自定义 Hintbox 节点的样式。
+          {
+            id: 'Hintbox',
+            name: 'Hintbox',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: false,
+            run: {
+              font: 'Aptos Light',
+              size: pixelsToHalfPoints(16),
+            },
+            paragraph: {
+              spacing: {
+                before: pointsToTwips(12),
+                after: pointsToTwips(12),
+                line: lineHeightToDocx(1),
+              },
+              border: {
+                // DOCX 颜色为十六进制，不带前导 #
+                top: { style: Docx.BorderStyle.SINGLE, size: 1, color: 'b8d8ff', space: 5 },
+                bottom: { style: Docx.BorderStyle.SINGLE, size: 1, color: 'b8d8ff', space: 5 },
+                right: { style: Docx.BorderStyle.SINGLE, size: 1, color: 'b8d8ff', space: 5 },
+                left: { style: Docx.BorderStyle.SINGLE, size: 1, color: 'b8d8ff', space: 5 },
+              },
+              shading: {
+                type: Docx.ShadingType.SOLID,
+                color: 'e6f3ff',
+              },
+            },
+          },
+        ],
+      }, // 样式覆盖
+    }),
+    // 其他扩展 ...
+  ],
+  // 其他编辑器设置 ...
+})
+```
+
+然后，在应用程序的后续阶段，您可以将编辑器内容导出为 `DOCX` 文件：
+
+```ts
+editor
+  .chain()
+  .exportDocx()
+  .run()
+```
+
+您可以在 `render` 函数中使用 `Docx` 库类（`Paragraph`、`TextRun`、`Table` 等）构建任何支持的 `DOCX` 元素，这些类是通过从 `@tiptap-pro/extension-export-docx` 包的 `Docx` 导入提供的。

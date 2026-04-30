@@ -33,15 +33,15 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 同时注册 PageBreak 扩展和 ODT 导出扩展。编辑器内容中的分页符将在导出时自动转换。
 
-```js
+```ts
 import { Editor } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
 import { ExportOdt } from '@tiptap-pro/extension-export-odt'
 import { PageBreak } from '@tiptap-pro/extension-pagebreak'
 
 const editor = new Editor({
   extensions: [
-    StarterKit,
+    ConvertKit,
     PageBreak,
     ExportOdt.configure({
       appId: 'your-app-id',
@@ -62,6 +62,6 @@ const editor = new Editor({
 
 ## 了解更多
 
-- [PageBreak 扩展参考](/pages/core-concepts/page-break-node)，包含完整的选项、命令和键盘快捷键
-- [DOCX 导入中的分页符](/conversion/import/docx/page-breaks)，了解导入支持
-- [ODT 导出指南](/conversion/export/odt/editor-export)，了解通用导出设置
+- [PageBreak 扩展参考](/pages/core-concepts/page-break-node)了解完整选项、命令和键盘快捷键
+- [DOCX 导入中的分页符](/conversion/import/docx/page-breaks)了解导入支持
+- [ODT 导出指南](/conversion/export/odt/editor-extension)了解通用导出设置

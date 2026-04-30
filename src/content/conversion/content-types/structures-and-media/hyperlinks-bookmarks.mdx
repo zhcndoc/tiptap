@@ -1,0 +1,74 @@
+---
+title: 超链接和书签
+tags:
+  - type: beta
+meta:
+  title: 超链接和书签 | Tiptap 转换
+  description: 在整个 DOCX 转换流程中，如何处理超链接、电子邮件链接和内部书签。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+超链接在 DOCX 和 Tiptap 之间会作为带有 `href` 属性的 `link` 标记进行转换。外部 URL 和电子邮件链接可以顺利往返。内部书签仅部分保留。
+
+## 你需要什么
+
+- **扩展：** `StarterKit`（包含 `Link` 扩展）
+- **配置：** 无需配置。外部链接开箱即用。
+
+## 支持概览
+
+| | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| 外部超链接 (http/https) | 支持 | 支持（StarterKit） | 支持 |
+| 电子邮件链接 (mailto:) | 支持 | 支持 | 支持 |
+| 内部锚点链接 | 不支持（文本保留，链接丢失） | 不适用（未导入链接） | 导出为外部超链接 |
+| 书签目标 | 被丢弃 | 不支持 | 不支持 |
+| 链接中的行内格式 | 支持 | 支持 | 支持 |
+
+## 导入
+
+使用 [编辑器扩展](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入超链接。两者产生相同的输出。
+
+转换服务会检测 `<w:hyperlink>` 元素，并生成带有 `link` 标记的文本节点。外部链接通过文档的关系文件进行解析。内部书签样式的超链接（使用 `w:anchor` 而不是 `r:id`）不会被导入。文本内容会保留，但不会应用链接，因为导入器只读取 `r:id` 属性。
+
+```json
+{
+  "type": "text",
+  "text": "访问 Tiptap 网站",
+  "marks": [
+    { "type": "link", "attrs": { "href": "https://tiptap.dev" } }
+  ]
+}
+```
+
+<Callout variant="info" title="导入时会保留超链接中的行内格式">
+  当 DOCX 超链接包含多个具有不同格式的 run（例如，一个加粗的单词后跟一个普通单词）时，导入器会分别遍历每个 `w:r`。诸如粗体和斜体等按 run 的格式会与链接标记一起保留。
+</Callout>
+
+<Callout variant="info" title="不支持内部锚点链接和书签">
+  Word 书签（`<w:bookmarkStart>` 和 `<w:bookmarkEnd>`）不会被转换。内部锚点超链接（使用 `w:anchor` 而不是 `r:id`）也不会被导入。文本内容会保留，但不会应用链接，因为导入器只通过 `r:id` 解析关系。
+</Callout>
+
+## 编辑器渲染
+
+[`Link`](/editor/extensions/marks/link) 扩展已包含在 `StarterKit` 中。无需单独安装。
+
+它会将链接标记渲染为带有 `href` 属性的 `<a>` 标签。
+
+该扩展会自动添加 `target`（默认 `_blank`）和 `rel`（默认 `noopener noreferrer nofollow`）属性。这些属性不会从 DOCX 导入中带入，也不会包含在 DOCX 导出中。
+
+## 导出
+
+使用 [编辑器扩展](/conversion/export/docx/editor-extension) 或 [REST API](/conversion/export/docx/rest-api) 导出超链接。两者对链接的处理相同。
+
+导出转换器会将链接文本包裹在 DOCX `ExternalHyperlink` 元素中，并应用 Hyperlink 样式。`href` 会成为 DOCX 包中的一个外部关系。
+
+所有链接都会导出为外部超链接，包括 `mailto:` 地址。内部锚点引用（`#section-name`）会按原样导出，但在 Word 中不会作为内部导航生效，因为导出不会生成书签目标或 `InternalHyperlink` 元素。
+
+### 哪些内容可以往返
+
+带有纯链接文本的外部超链接可以完整通过导入、编辑、导出流程。`href` 和可见文本都会保留。导出的链接使用 DOCX Hyperlink 样式（通常是蓝色带下划线的文本）。
+
+会发生变化的是：编辑器添加的 `target` 和 `rel` 属性不会带入 DOCX。

@@ -1,0 +1,152 @@
+---
+title: 支持的功能
+tags:
+  - type: beta
+meta:
+  title: 支持的功能 | Tiptap 转换
+  description: 查看在 Tiptap 转换流水线中，哪些文档功能支持导入、编辑器渲染和导出。
+  category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+下表展示了每种文档功能在转换流水线的三个阶段中的表现：
+
+1. **导入** 将 DOCX 内容转换为 Tiptap JSON。
+2. **编辑器** 在浏览器中渲染该 JSON。每种节点和标记类型都需要匹配的 Tiptap 扩展才能正确显示。
+3. **导出** 将编辑器内容转换回 DOCX 文件。
+
+某项功能可能在一个阶段受支持，而在另一个阶段不受支持。例如，下标文本会被正确导入和渲染，但导出扩展尚未将其写回 DOCX。
+
+导入和导出各自都有两种集成路径：一种是 [编辑器扩展](/conversion/import/docx/editor-extension)，另一种是 [REST API](/conversion/import/docx/rest-api)。对于大多数功能，这两种路径会产生相同的结果。对于存在差异的地方（脚注、页眉/页脚、导出自定义），相关安装页面会说明具体细节。
+
+<Callout variant="info" title="编辑器列默认假设使用 ConvertKit">
+  下表中的编辑器列默认假设推荐配置：已安装 [ConvertKit](/conversion/import/docx/convertkit) 作为编辑器的扩展套件。ConvertKit 是基础功能的超集（相当于 StarterKit 的节点，加上针对 Paragraph、Heading、Image 以及表格栈的 DOCX 感知覆盖）。如果没有 ConvertKit，段落间距和缩进、图片裁剪以及表格单元格格式仍会被提取到 JSON 中，但会被编辑器的 schema 丢弃。若编辑器支持取决于其他因素（Pages、某个自定义扩展），该行会注明依赖项。
+</Callout>
+
+## 其他格式
+
+这些表格专门描述 DOCX 流水线，因为 DOCX 是所有其他导出所基于的参考格式。[PDF](/conversion/export/pdf/editor-extension)、[ODT](/conversion/export/odt/editor-extension)、[EPUB](/conversion/export/epub/editor-extension) 和 [DOC](/conversion/export/doc/editor-extension) 都是先生成一个 DOCX 文件，然后通过云服务将其转换为目标格式。凡是在 DOCX 导出中可用的功能，通常也会延续到其他格式，不过每种格式都可能引入自己的限制。详情请参见相应格式页面。
+
+[Markdown](/conversion/export/markdown/editor-extension) 走的是完全独立的转换路径，并支持另一组功能。相关内容记录在其单独的页面中。
+
+## 行内格式
+
+| 功能 | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| [粗体](/conversion/content-types/text-and-formatting/bold-italic-underline-strike) | ✓ | ✓ | ✓ |
+| [斜体](/conversion/content-types/text-and-formatting/bold-italic-underline-strike) | ✓ | ✓ | ✓ |
+| [下划线](/conversion/content-types/text-and-formatting/bold-italic-underline-strike) | ✓ | ✓ | ✓ |
+| [删除线](/conversion/content-types/text-and-formatting/bold-italic-underline-strike) | ✓ | ✓ | ✓ |
+| [下标](/conversion/content-types/text-and-formatting/subscript-superscript) | ✓ | ✓ | ✕ |
+| [上标](/conversion/content-types/text-and-formatting/subscript-superscript) | ✓ | ✓ | ✕ |
+| 行内代码 | ✓ | ✓ | ✓ |
+| [文本颜色](/conversion/content-types/text-and-formatting/text-color-highlight) | ✓ | ✓ | ✓ |
+| [高亮](/conversion/content-types/text-and-formatting/text-color-highlight) | ✓ | ✓ | ✓ |
+| [字体族](/conversion/content-types/text-and-formatting/font-family-size) | ✓ | ✓ | ✓ |
+| [字号](/conversion/content-types/text-and-formatting/font-family-size) | ✓ | ✓ | ✓ |
+| [超链接](/conversion/content-types/structures-and-media/hyperlinks-bookmarks) | ✓ | ✓ | ✓ |
+| [制表符](/conversion/content-types/text-and-formatting/tabs) | ~ | ~ | ✕ |
+| [内部书签](/conversion/content-types/structures-and-media/hyperlinks-bookmarks) | ~ | ~ | ✕ |
+
+## 块级元素
+
+| 功能 | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| [段落](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✓ |
+| [标题 1 到 6](/conversion/content-types/text-and-formatting/headings) | ✓ | ✓ | ✓ |
+| [引用块](/conversion/content-types/structures-and-media/block-elements) | ✓ | ✓ | ✓ |
+| [代码块](/conversion/content-types/structures-and-media/block-elements) | ✕ | ✓ | ✕ |
+| [水平线](/conversion/content-types/structures-and-media/block-elements) | ✓ | ✓ | ✓ |
+| [手动换行](/conversion/content-types/structures-and-media/block-elements) | ✓ | ✓ | ✓ |
+
+## 文本和段落样式
+
+导入服务会从 DOCX 源中提取段落级样式属性，例如间距、缩进和行高。ConvertKit 的自定义 Paragraph 和 Heading 会自动渲染这些样式。对于文档命名样式目录（Heading 1、Normal、Quote 等）中的排版样式，请使用实验性的 [CSS 注入](/conversion/import/docx/css-injection) 功能，它会将样式目录提取为带作用域的 CSS 规则。
+
+| 功能 | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| [文本对齐](/conversion/content-types/text-and-formatting/text-alignment) | ✓ | ✓ | ✓ |
+| [行距](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✕*** |
+| [段落间距](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✕ |
+| [缩进](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✕ |
+| [字间距](/conversion/content-types/text-and-formatting/font-family-size) | ✓ | ✕* | ✕ |
+| [段落边框](/conversion/content-types/text-and-formatting/paragraphs) | ✕ | ✕ | ✕ |
+| [Word 样式](/conversion/content-types/structures-and-media/word-styles) | ~ | ~** | ~ |
+
+**\*** 字间距会被提取为 `textStyle.letterSpacing`，但没有内置扩展来渲染它。若要渲染导入的字间距，请 [扩展 TextStyle](/conversion/getting-started/guides/styling-converted-content#extending-extensions-for-unsupported-attributes)。<br />
+**\*\*** Word 的命名样式排版默认不会应用。请使用 [CSS 注入](/conversion/import/docx/css-injection) 将其提取为带作用域的 CSS。<br />
+**\*\*\*** 行高会作为段落节点属性导入，并在使用 ConvertKit 的编辑器中正确渲染。但 DOCX 导出时读取的是 `textStyle` 标记中的行高，因此无法完整往返：导入的值会保留在编辑器中，但在导出时被丢弃。
+
+## 列表
+
+| 功能 | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| [项目符号列表](/conversion/content-types/text-and-formatting/lists) | ✓ | ✓ | ✓ |
+| [有序列表](/conversion/content-types/text-and-formatting/lists) | ✓ | ✓ | ✓ |
+| [有序列表编号格式](/conversion/content-types/text-and-formatting/lists) | ~ | ✓ | ✕ |
+| [嵌套列表](/conversion/content-types/text-and-formatting/lists) | ✓ | ✓ | ✓ |
+| [任务列表](/conversion/content-types/text-and-formatting/lists) | ✕ | ✓ | ✕ |
+
+## 表格
+
+单元格级和行级属性（背景、边框、垂直对齐、行高）需要 ConvertKit 的 `ConvertTableKit`，该套件默认包含。若使用独立的 `@tiptap/extension-table`，这些属性仍会被提取到 JSON 中，但会被编辑器的 schema 丢弃。若要通过 [Pages 扩展](/pages/getting-started/overview) 实现分页布局，请改用 [PagesTableKit](/pages/guides/pages-tablekit)；其表格扩展在内部继承了 ConvertKit 的扩展，因此相同的 DOCX 单元格属性也会继续传递。有关具体组成，请参见 [表格内容参考](/conversion/content-types/structures-and-media/tables)。
+
+| 功能 | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| [基础表格](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [合并单元格（colspan）](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [合并单元格（rowspan）](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [表头行](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✕ |
+| [列宽](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [单元格背景](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✕ |
+| [单元格边框](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✕ |
+| [单元格垂直对齐](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✕ |
+| [行高](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✕ |
+
+## 媒体
+
+| 功能 | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| [行内图片](/conversion/content-types/structures-and-media/images) | ✓ | ✓ | ✓ |
+| [浮动图片](/conversion/content-types/structures-and-media/images) | ~ | ✕ | ✕ |
+| [图片尺寸](/conversion/content-types/structures-and-media/images) | ✓ | ✓ | ✓ |
+| [图片裁剪](/conversion/content-types/structures-and-media/images) | ✓ | ~* | ✕ |
+| [数学和公式](/conversion/content-types/structures-and-media/math-equations) | ✕ | ✓ | ✓ |
+
+**\*** ConvertKit 的自定义 Image 会声明 `cropTop`/`cropBottom`/`cropLeft`/`cropRight`，并将它们作为 `data-crop-*` 属性输出。若要实现视觉裁剪，请添加 CSS，将这些数据属性转换为 `clip-path` 或 `object-position`。
+
+## 页面布局
+
+| 功能 | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| [分页符](/conversion/content-types/page-layout/page-breaks) | ✓ | ~ | ✓ |
+| [页眉和页脚](/conversion/content-types/page-layout/headers-footers) | ✓* | ✓ | ✓ |
+| [节](/conversion/content-types/page-layout/page-structure) | ~ | ✕ | ✕ |
+| [页面大小和边距](/conversion/content-types/page-layout/page-structure) | ✕ | ✓ | ✓ |
+| [页码](/conversion/content-types/page-layout/page-structure) | ✕ | ✓ | ~ |
+| [脚注](/conversion/content-types/structures-and-media/footnotes-endnotes) | ✓* | ✕ | ✕ |
+| [尾注](/conversion/content-types/structures-and-media/footnotes-endnotes) | ✓* | ✕ | ✕ |
+
+**\*** 导入行为在不同集成路径之间有所不同。[REST API](/conversion/import/docx/rest-api) 会在响应中将脚注、尾注以及页眉/页脚作为独立字段返回。[编辑器扩展](/conversion/import/docx/editor-extension) 会通过 Pages 扩展自动应用页眉和页脚，但不会暴露脚注或尾注数据。详情请参见安装页面。
+
+<Callout variant="info" title="页面布局需要 Pages 扩展">
+  页眉、页脚、分页符以及分页布局都需要 [Pages 扩展](/pages/getting-started/overview) 才能在编辑器中渲染。没有它，即使转换服务生成了这些内容，也没有地方可供显示。
+</Callout>
+
+## 不支持
+
+这些功能在导入期间不会被转换，或者仅有限转换。
+
+| 功能 | 状态 |
+| --- | --- |
+| 注释和批注 | 未转换。comments 扩展存在，但未连接到转换。 |
+| 跟踪更改和修订 | 未转换。tracked changes 扩展存在，但未连接到转换。 |
+| 目录 | 作为 `tableOfContents` 节点导入（标题和标题范围）。需要一个[自定义扩展](/editor/extensions/custom-extensions/extend-existing)才能在编辑器中渲染它。现有的[目录扩展](/editor/extensions/functionality/table-of-contents)是一个用于构建侧边栏导航的无头工具，而不是文档块渲染器。未导出。 |
+| 文本框 | 未转换。文本框中的内容不会被提取。 |
+| 形状、SmartArt、WordArt | 未转换。导入期间不会提取这些元素。 |
+| 域代码（DATE、AUTHOR、PAGE、MERGEFIELD） | 缓存的显示值会作为纯文本保留（例如，显示“April 10, 2026”的 DATE 域会作为文本“April 10, 2026”导入）。域代码本身不会被转换，因此其值会变为静态且不会更新。 |
+| 文档元数据（作者、标题、关键词） | 未转换。元数据不包含在 JSON 输出中。 |
+| 表单域和内容控件 | 未转换。行内结构化文档标记（SDT）会保留其文本内容，但控件元数据会被丢弃。 |
+| 隐藏文本 | 标记为隐藏的文本片段（`w:vanish`）会从导入输出中排除。 |
+| 从右到左的文本方向 | DOCX `<w:bidi>`（段落方向）和 `<w:rtl>`（文本段方向）在导入时不会解析，也不会在导出时写入。以阿拉伯语、希伯来语、波斯语、乌尔都语以及其他 RTL 语言编写的文档，会以编辑器的 CSS 方向渲染（默认 LTR）。今天可在编辑器根节点上设置 `dir="rtl"`，或在应用层检测语言来处理。详情参见[文本对齐](/conversion/content-types/text-and-formatting/text-alignment)。 |

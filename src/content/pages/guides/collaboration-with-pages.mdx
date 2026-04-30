@@ -21,75 +21,80 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ## 1. 需求
 
-- 支持协作的 Tiptap Pro 订阅计划
-- 访问 Tiptap Cloud 或您自己的协作后端
-- `@tiptap-pro/extension-pages` 包
-- `@tiptap-pro/provider-collab` 包（或您自己的提供者）
+- 支持协作的 Tiptap Pro 套餐
+- 可访问 Tiptap Cloud 或您自己的协作后端
+- Pages 栈：`@tiptap-pro/extension-convert-kit`、`@tiptap-pro/extension-pages-tablekit`、`@tiptap-pro/extension-pages`
+- 协作提供者：`@tiptap-pro/provider`（或您自己的实现），以及 `@tiptap/extension-collaboration` 和 `yjs`
 
 ## 2. 安装所需包
 
 ```bash
-npm install @tiptap-pro/extension-pages @tiptap-pro/provider @tiptap/extension-collaboration
+npm install @tiptap-pro/extension-convert-kit \
+            @tiptap-pro/extension-pages-tablekit \
+            @tiptap-pro/extension-pages \
+            @tiptap-pro/provider \
+            @tiptap/extension-collaboration \
+            yjs
 ```
 
 ## 3. 设置您的协作提供者
 
-```js
+```ts
 import { TiptapCollabProvider } from '@tiptap-pro/provider'
-import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 
-const doc = new Y.Doc() // 初始化 Y.Doc 用于共享编辑
+const doc = new Y.Doc()
 
 const provider = new TiptapCollabProvider({
-  name: 'document.name', // 用于同步的唯一文档标识符。这是您的文档名称。
-  appId: 'your-app-id', // 来自 Cloud 仪表板的文档服务器 ID，或针对本地部署使用 `baseURL`
-  token: 'your-jwt', // 您的 JWT
+  name: 'document.name', // 用于同步的唯一文档标识符
+  appId: 'your-app-id', // 来自 Cloud 控制台的文档服务器 ID，或在本地部署时使用 `baseURL`
+  token: 'your-jwt', // 由您的服务器生成的 JWT
   document: doc,
 })
 ```
 
-## 4. 配置您的编辑器，启用 Pages 和协作功能
+## 4. 使用 Pages 栈和协作配置您的编辑器
 
-```js
+```ts
 import { Editor } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+import { TableKit } from '@tiptap-pro/extension-pages-tablekit'
 import { Pages } from '@tiptap-pro/extension-pages'
-import { TiptapCollabProvider } from '@tiptap-pro/provider'
 import Collaboration from '@tiptap/extension-collaboration'
-import * as Y from 'yjs'
-
-const doc = new Y.Doc() // 初始化 Y.Doc 用于共享编辑
-
-const provider = new TiptapCollabProvider({
-  name: 'document.name', // 用于同步的唯一文档标识符。这是您的文档名称。
-  appId: 'your-app-id', // 来自 Cloud 仪表板的文档服务器 ID，或针对本地部署使用 `baseURL`
-  token: 'your-jwt', // 您的 JWT
-  document: doc,
-})
 
 const editor = new Editor({
   extensions: [
-    StarterKit,
+    ConvertKit.configure({ table: false }),
+    TableKit,
     Pages.configure({
       pageFormat: 'A4',
-      header: '我的项目',
+      header: 'My Project',
       footer: '第 {page} 页，共 {total} 页',
+      // 将主编辑器的栈镜像到 header/footer 覆盖层中，以便
+      // 其 schema、marks 和 tables 在那里表现一致。
+      headerFooterExtensions: [ConvertKit.configure({ table: false }), TableKit],
     }),
     Collaboration.configure({
-      document: doc, // 配置 Y.Doc 以支持协作
+      document: doc,
     }),
   ],
 })
 ```
 
-## 5. 提示以获得更流畅的体验
+<Callout title="页眉和页脚属于同一个会话" variant="info">
+  页眉和页脚编辑器会与主文档一起协作。无需额外的提供者配置；在编辑器上设置 <code>Collaboration</code> 就会将它们一并纳入。有关详细信息，请参见
+  [页面页眉和页脚](/pages/core-concepts/page-header-footer#collaboration)。
+</Callout>
 
-- 确保您的提供者在编辑前已连接
-- 在 UI 中处理连接错误和用户在线状态
-- 可结合其他协作扩展实现评论、光标等功能
+## 5. 流畅体验的小贴士
+
+- 确保在编辑前提供者已连接
+- 在您的 UI 中处理连接错误和用户存在状态
+- 可与其他协作扩展结合使用，例如评论、光标等
+- 传递给 `headerFooterExtensions` 的扩展应与主编辑器使用的相同，这样文档及其页眉页脚之间的 schema 才能保持一致
 
 ## 6. 后续步骤
 
-- 了解更多布局控制，请查看 [Pages 选项](/pages/core-concepts/options)
-- 查看 [Tiptap 协作文档](https://tiptap.dev/collaboration) 了解高级用法
+- 浏览 [Pages 选项](/pages/core-concepts/options) 以获得更多布局控制
+- 查看 [页面页眉和页脚](/pages/core-concepts/page-header-footer) 以了解在页眉和页脚中进行实时编辑
+- 查看 [Tiptap 协作文档](https://tiptap.dev/collaboration) 以了解高级用法

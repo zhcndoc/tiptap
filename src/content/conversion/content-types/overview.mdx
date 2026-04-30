@@ -1,0 +1,65 @@
+---
+title: 内容参考
+meta:
+  title: 内容参考 | Tiptap 转换
+  description: 关于每个文档元素在 DOCX 导入、编辑器渲染以及导出流程中的行为的详细按功能文档。
+  category: 转换
+tags:
+  - type: beta
+sidebars:
+  hideSecondary: true
+---
+
+import Link from '@/components/Link'
+import { Card } from '@/components/ui/Card'
+import { Pilcrow, Heading1, AlignCenter, Bold, Subscript, Palette, Type, List, IndentIncrease, Table2, ImageIcon, Link2, SquareCode, Sigma, FootprintsIcon, BookType, PanelTop, SeparatorHorizontal, Columns3 } from 'lucide-react'
+
+每个文档功能在导入、编辑器渲染和导出过程中表现都不同。这些页面会准确说明每个阶段发生了什么、你需要哪些扩展，以及可以期待什么。
+
+如需快速了解哪些功能受支持、哪些不受支持，请参阅 [Supported features](/conversion/getting-started/feature-support-matrix) 矩阵。
+
+export const ContentCard = ({ href, icon: Icon, title, description }) => (
+  <Card isClickable asChild>
+    <Link href={href}>
+      <div className="flex items-center justify-between gap-2 mb-5">
+        <Icon className="w-3.5 h-3.5" />
+      </div>
+      <div className="font-semibold text-black leading-[140%]">{title}</div>
+      <div className="mt-2 leading-[140%] text-grayAlpha-600">{description}</div>
+    </Link>
+  </Card>
+)
+
+## 文本和格式
+
+<div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4 xl:gap-5">
+  <ContentCard href="/conversion/content-types/text-and-formatting/paragraphs" icon={Pilcrow} title="段落" description="整个转换流程中的文本内容、间距、缩进和行高。" />
+  <ContentCard href="/conversion/content-types/text-and-formatting/headings" icon={Heading1} title="标题" description="1 到 9 级标题、标题和副标题样式，以及样式解析。" />
+  <ContentCard href="/conversion/content-types/text-and-formatting/text-alignment" icon={AlignCenter} title="文本对齐" description="段落和标题的左对齐、居中、右对齐和两端对齐。" />
+  <ContentCard href="/conversion/content-types/text-and-formatting/bold-italic-underline-strike" icon={Bold} title="加粗、斜体、下划线、删除线" description="来自 Word run 属性的行内文本标记及其往返行为。" />
+  <ContentCard href="/conversion/content-types/text-and-formatting/subscript-superscript" icon={Subscript} title="下标和上标" description="用于公式和符号的垂直对齐标记。支持导入，不支持导出。" />
+  <ContentCard href="/conversion/content-types/text-and-formatting/text-color-highlight" icon={Palette} title="文本颜色和高亮" description="文本颜色、字符底纹和带多色支持的高亮标记。" />
+  <ContentCard href="/conversion/content-types/text-and-formatting/font-family-size" icon={Type} title="字体族和字号" description="从 Word run 属性中提取字体，以及像素到半磅的转换。" />
+  <ContentCard href="/conversion/content-types/text-and-formatting/lists" icon={List} title="列表" description="项目符号列表、编号列表、嵌套、编号格式和任务列表。" />
+  <ContentCard href="/conversion/content-types/text-and-formatting/tabs" icon={IndentIncrease} title="制表符" description="制表符在导入时会转换为空格。制表位位置不会被保留。" />
+</div>
+
+## 结构和媒体
+
+<div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4 xl:gap-5">
+  <ContentCard href="/conversion/content-types/structures-and-media/tables" icon={Table2} title="表格" description="表格结构、合并单元格、列宽、单元格背景和边框。" />
+  <ContentCard href="/conversion/content-types/structures-and-media/images" icon={ImageIcon} title="图片" description="行内和浮动图片、尺寸、替代文本以及上传流程。" />
+  <ContentCard href="/conversion/content-types/structures-and-media/hyperlinks-bookmarks" icon={Link2} title="超链接和书签" description="外部链接、邮件链接、内部锚点和书签目标。" />
+  <ContentCard href="/conversion/content-types/structures-and-media/block-elements" icon={SquareCode} title="块级元素" description="引用块、代码块、水平分割线和硬换行。" />
+  <ContentCard href="/conversion/content-types/structures-and-media/math-equations" icon={Sigma} title="数学和公式" description="编辑器中的 LaTeX 数学和 DOCX 中的 OMML。支持导出，不支持导入。" />
+  <ContentCard href="/conversion/content-types/structures-and-media/footnotes-endnotes" icon={FootprintsIcon} title="脚注和尾注" description="可通过 REST API 提取，但不会在编辑器扩展回调中显示。" />
+  <ContentCard href="/conversion/content-types/structures-and-media/word-styles" icon={BookType} title="Word 样式" description="Word 段落和字符样式如何映射到 Tiptap 节点和标记。" />
+</div>
+
+## 页面布局
+
+<div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4 xl:gap-5">
+  <ContentCard href="/conversion/content-types/page-layout/headers-footers" icon={PanelTop} title="页眉和页脚" description="跨导入和导出的默认、首页以及奇偶页变体。" />
+  <ContentCard href="/conversion/content-types/page-layout/page-breaks" icon={SeparatorHorizontal} title="分页符" description="唯一一种能在整个流程中完全往返的页面结构元素。" />
+  <ContentCard href="/conversion/content-types/page-layout/page-structure" icon={Columns3} title="页面结构" description="页面大小、页边距、分节、分栏和页码。" />
+</div>

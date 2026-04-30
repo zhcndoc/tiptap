@@ -13,28 +13,31 @@ sidebars:
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-PageKit 是一个便捷的扩展，它将 Pages、Table 和 PageBreak 扩展打包在一起。它可以让你一次性配置这三个扩展，用于构建一个支持分页、具备表格功能且支持分页符的编辑器。
+PageKit 是一个便捷扩展，它将 `Pages`、分页安全的 `TableKit` 和 `PageBreak` 封装到一次注册中，让你可以在一个地方统一配置它们。默认情况下，**只注册 Pages 和 PageBreak** —— `TableKit` 需要显式启用：传入任意 options 对象（例如 `table: {}`）即可启用它。PageKit **不包含** `ConvertKit` —— ConvertKit 是一个需要单独安装的包，你可以将它与 PageKit 配合使用。
 
 <CodeDemo isPro path="/Extensions/PagesPageKit" />
 
 ---
 
-## 1. 安装 PageKit 扩展
+## 1. 安装 ConvertKit 和 PageKit
+
+PageKit 打包了三个与 Pages 相关的扩展，但你仍然需要单独安装 `ConvertKit`，以提供编辑器所需的节点和标记 schema。
 
 ```bash
-npm install @tiptap-pro/extension-pages-pagekit
+npm install @tiptap-pro/extension-convert-kit \
+            @tiptap-pro/extension-pages-pagekit
 ```
 
-## 2. 导入并使用 PageKit
+## 2. 将 ConvertKit 和 PageKit 添加到你的编辑器中
 
-```js
+```ts
 import { Editor } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
 import { PageKit } from '@tiptap-pro/extension-pages-pagekit'
 
 const editor = new Editor({
   extensions: [
-    StarterKit,
+    ConvertKit.configure({ table: false }),
     PageKit.configure({
       pages: {
         pageFormat: 'A4',
@@ -42,28 +45,38 @@ const editor = new Editor({
         footer: '第 {page} 页，共 {total} 页',
       },
       table: {
-        // 表格选项（可选）
-        resizable: true,
+        // 启用 PageKit 内置的 TableKit。传入 `{}` 可使用默认值，或者在此处传递
+        // TableKitOptions。没有这个键（或设置为 `false`）时，表格不会被注册。
+        table: { resizable: true }, // 传递给底层的 Table 扩展
       },
       pagebreak: {
-        // 在此处设置 PageBreak 选项（可选）
-        label: '分页符',
+        // 传递给 PageBreak（可选）
+        label: 'Page break',
       },
     }),
   ],
 })
 ```
 
+<Callout title="为什么会禁用 ConvertKit 的表格" variant="info">
+  当启用 PageKit 的 `table` 插槽时，它会注册来自
+  <code>@tiptap-pro/extension-pages-tablekit</code> 的分页安全 `TableKit`。ConvertKit 自带其表格栈
+  （支持 DOCX，但不具备分页安全性），因此我们在这里将其禁用，并让 PageKit 的表格接管。
+  ConvertKit 的表格和 PageKit 的表格接受相同的 DOCX 单元格属性，因此导入的内容
+  无论使用哪一种都能正确渲染。
+</Callout>
+
 <Callout title="工作原理" variant="info">
-  PageKit 会为你配置 Pages、Table 和 PageBreak 扩展。在 <code>pages</code> 下传递 Pages 选项，
-  在 <code>table</code> 下传递 Table 选项，并在 <code>pagebreak</code> 下传递 PageBreak 选项。
+  PageKit 会为你配置 Pages、TableKit 和 PageBreak 扩展。将你的 Pages 选项
+  放在 <code>pages</code> 下，将 Table 选项放在 <code>table</code> 下，将 PageBreak 选项放在
+  <code>pagebreak</code> 下。
 </Callout>
 
 ## 禁用 PageBreak
 
 如果你不需要显式的分页符，可以禁用 PageBreak 扩展：
 
-```js
+```ts
 PageKit.configure({
   pages: { pageFormat: 'A4' },
   pagebreak: false, // 禁用 PageBreak
@@ -72,10 +85,10 @@ PageKit.configure({
 
 ## 3. 何时使用 PageKit？
 
-- 当你同时需要分页和表格支持时，PageKit 是最快速的设置方式。
-- 如果你需要对 Table 或 Pages 进行深入定制，建议分别导入并单独配置它们。
+- 如果你想同时获得分页和表格功能，使用 PageKit 可以最快完成设置。
+- 如果你需要深度自定义 TableKit 或 Pages，请改为分别导入并配置它们。有关未打包的设置，请参阅 [PagesTableKit 指南](/pages/guides/pages-tablekit)。
 
 ## 4. 后续步骤
 
-- 探索更多布局控制选项，请查看 [Pages 选项](/pages/core-concepts/options)。
-- 查阅 [带表格的分页指南](/pages/guides/table-with-pages)，了解手动设置和扩展技巧。
+- 浏览 [Pages 选项](/pages/core-concepts/options)，以获得更多布局控制。
+- 查看 [Pages with tables 指南](/pages/guides/table-with-pages)，了解未打包的表格设置。

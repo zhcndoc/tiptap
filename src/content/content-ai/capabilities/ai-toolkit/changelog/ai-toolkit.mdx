@@ -8,6 +8,30 @@ meta:
 
 # @tiptap-pro/ai-toolkit
 
+## 0.6.1
+
+### Patch Changes
+
+- 46deb98: 修复流式预览建议在多个流式 tick 中累积的问题。
+
+## 0.6.0
+
+### Minor Changes
+
+- 425d7bc: `acceptSuggestion` 现在会返回一个 `range` 属性，其中包含文档中插入内容的范围。当建议无法应用时，该范围为 `null`。
+- a9134a5: 新增实验性的 `findContentRange` 方法，可通过 `_hash` 和/或精确的 HTML 内容定位 ProseMirror 范围。
+
+## 0.5.0
+
+### Minor Changes
+
+- 81a6803: 为插入内容工作流添加修订跟踪支持
+- f41bb00: 为 tiptapRead 方法添加 ignoreSuggestions 选项
+
+### Patch Changes
+
+- 81a6803: 当插入内容工作流生成新建议时，保留其他建议。
+
 ## 0.4.0
 
 ### Minor Changes
@@ -120,9 +144,9 @@ meta:
   在使用带有修订跟踪的 AI 工具包时添加流式传输支持。当流式传输带有修订跟踪的内容时，流式传输支持不显示“打字效果”。相反，它按操作基础流式传输内容。
 
   **Breaking changes:**
-  - The `tiptapEdit` tool output now includes the `operationResults` property instead of `successful` and `failed`.
-  - `tiptapEditWorkflow` now returns `operationResults` instead of `successful` and `failed`.
-  - `proofreaderWorkflow` now returns `operationResults` instead of `operations`.
+  - `tiptapEdit` 工具输出现在包含 `operationResults` 属性，而不是 `successful` 和 `failed`。
+  - `tiptapEditWorkflow` 现在返回 `operationResults` 而不是 `successful` 和 `failed`。
+  - `proofreaderWorkflow` 现在返回 `operationResults` 而不是 `operations`。
 
 - ecc8c58: 添加并排修订跟踪审查的分割视图
 
@@ -286,15 +310,13 @@ meta:
 
 ### 重大更新
 
-- **破坏性变更**：新增默认差异模式 `smart`，智能适配块级与内联内容。改动永不会跨块边界，适用于结构化文档编辑，生成清晰差异结果。
-- **破坏性变更**：将 `detailed` 差异模式重命名为 `inline`。
-- **破坏性变更**：在 `ReviewOptions` 中，用布尔类型 `useDiffUtility` 替代 `diffMode` 属性。`useDiffUtility: true` 替代 `diffMode: 'detailed'`，`useDiffUtility: false` 替代 `diffMode: 'full'`。
-- **破坏性变更**：默认将 `changeMergeDistance` 设置为 `10`。
-- **破坏性变更**：将 `displayOptions.showAsDiff` 重命名为 `displayOptions.showReplacement`。
-- **破坏性变更**：移除 `displayOptions.diffPosition`。
-- **破坏性变更**：将 `displayOptions.diffAttributes` 重命名为 `displayOptions.replacementAttributes`。
-- **破坏性变更**：类型 `DiffUtilityConfig` 重命名为 `ExternalDiffUtilityOptions`。
-- **破坏性变更**：所有方法与选项中的 `diffUtilityConfig` 属性统一更名为 `diffUtilityOptions`。
+- **Breaking**: 添加新的 `smart` 差异模式，并将其设为默认。该差异模式可智能适配块级和行内内容。改动不会跨越块边界，从而为结构性文档变更生成更干净的差异。
+- **Breaking**: 将 `detailed` 差异模式重命名为 `inline`。
+- **Breaking**: 将 `ReviewOptions` 中的 `diffMode` 属性替换为 `useDiffUtility`（`boolean`）。将 `diffMode: 'detailed'` 改为 `useDiffUtility: true`，将 `diffMode: 'full'` 改为 `useDiffUtility: false`。
+- **Breaking**: 将默认的 `changeMergeDistance` 设置为 `10`。
+- **Breaking**: 将 `displayOptions.showAsDiff` 重命名为 `displayOptions.showReplacement`。
+- **Breaking**: 移除 `displayOptions.diffPosition`。
+- **Breaking**: 将 `displayOptions.diffAttributes` 重命名为 `displayOptions.replacementAttributes`。
 
 ### 弃用提示
 
@@ -302,12 +324,12 @@ meta:
 
 ### 小幅更新
 
-- 提升内联差异模式的性能。
-- 修复差异工具在新增和删除内容均以空格结尾时的 Bug。
-- 在 `diffUtility` 和 `diffUtilityOptions` 中新增 `groupInlineChanges`，用于控制何时将内联改动合并为单一建议。
-- 在 `displayOptions` 中新增 `showSubChanges`、`subChangeAttributes` 和 `replacementSubChangeAttributes`，支持自定义分组内联改动的显示。
-- 在 `Suggestion` 类型中新增字段 `isInlineGroup`，表示分组内联改动。
-- 校对工作流（`proofreaderWorkflow`）默认不对内联改动分组，可通过 `reviewOptions.diffUtilityOptions.groupInlineChanges` 覆盖。
+- 改进行内差异模式的性能。
+- 修复差异工具中添加内容和删除内容都会以空格结尾的 bug。
+- 为 `diffUtilityOptions`（`ExternalDiffUtilityOptions`）添加 `groupInlineChanges`，用于控制何时将行内编辑分组为一个建议。
+- 添加 `displayOptions.showSubChanges`、`displayOptions.subChangeAttributes` 和 `displayOptions.replacementSubChangeAttributes`，用于自定义分组后的行内更改。
+- 为分组后的行内更改在 `Suggestion` 中添加 `isInlineGroup`。
+- 在 `proofreaderWorkflow` 中，行内更改默认不再分组。需要时可通过 `reviewOptions.diffUtilityOptions.groupInlineChanges` 覆盖。
 
 ## 3.0.0-alpha.74
 
@@ -587,12 +609,12 @@ meta:
 
 ### 重大更新
 
-- 使用 `diffUtilityOptions` 替代 `changeMergeDistance` 参数，提供更丰富的文档比较工具定制选项。
+- Replace `changeMergeDistance` option with `diffUtilityConfig`, to provide more customization options for the document comparison utility.
 
 ### 小幅更新
 
-- 在 `setSuggestions` 的 `compareDocuments` 格式中新增 `diffUtilityOptions` 选项，允许配置文档比较工具。
-- 在 `Suggestion` 类型的 `displayOptions` 中新增 `diffAttributes` 选项，用于自定义差异装饰属性。
+- Add `diffUtilityConfig` option to `compareDocuments` format in `setSuggestions` method. This allows configuring the document comparison utility.
+- Add `diffAttributes` option to `displayOptions` of `Suggestion` type to allow customizing the attributes of the diff decoration.
 
 ## 3.0.0-alpha.40
 
@@ -653,10 +675,10 @@ meta:
 
 ### 小幅更新
 
-- 为 `diffUtility`、`startComparingDocuments`、`setSuggestions`（`compareDocuments` 格式）、`setHtmlSuggestions` 及所有编辑方法的 `reviewOptions` 添加参数 `changeMergeDistance`，支持合并相近改动，限定最大间距内合并。
-- 为 `setHtmlSuggestions` 新增 `reviewOptions` 参数，支持用户定制建议显示（如 `diffPosition`、`showAsDiff`、自定义 `renderDecorations`）和元数据，使用模式与其他编辑方法保持一致。
-- 修正当 `setHtmlSuggestions` 无 `range` 参数时偏移计算错误，确保建议高亮准确，修复位置偏差 -1 的 Bug。
-- 修正 `setHtmlSuggestions` 默认 `diffPosition` 为 `'after'`，支持通过 `reviewOptions.displayOptions.diffPosition` 配置。
+- 为 `diffUtility`、`startComparingDocuments`、`setSuggestions`（compareDocuments 格式）、`setHtmlSuggestions` 和所有编辑方法的 `reviewOptions` 新增 `changeMergeDistance` 选项。通过指定需要合并的更改之间的最大距离（以文档位置计），可在比较文档时合并相邻更改为单个更改。
+- 为 `setHtmlSuggestions` 方法新增 `reviewOptions` 参数。现在用户可以像其他编辑方法一样，自定义建议显示选项（如 `diffPosition`、`showReplacement`、自定义 `renderDecorations`）并添加自定义元数据。
+- 修正 `setHtmlSuggestions` 中的范围偏移计算。现在在未提供 `range` 参数时，建议会正确高亮精确文本，修复了位置被错误向前偏移 -1 的问题。
+- 修正 `setHtmlSuggestions` 的默认 `diffPosition`，改为使用 'after' 而不是 'before'，并可通过 `reviewOptions.displayOptions.diffPosition` 进行配置。
 
 ## 3.0.0-alpha.33
 

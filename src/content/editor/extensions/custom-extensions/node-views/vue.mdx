@@ -123,7 +123,17 @@ this.updateAttributes({
 
 `NodeViewWrapper` 和 `NodeViewContent` 组件会渲染 `<div>`（内联节点为 `<span>`），但你也可以修改这个行为。例如 `<node-view-content as="p">` 只要是块级标签就可以，默认会渲染为 `<p>`。但有个限制：标签在运行时不能更改。
 
-## 所有可用的 props
+## 在文本选择时更新 `selected`
+
+默认情况下，只有当节点本身通过 `NodeSelection` 被选中时，`selected` prop 才会变成 `true`。这对原子节点效果很好，但当光标只是放在一个包含文本内容的节点内部时，它不会触发。如果你希望 `selected` 在这种情况下也能反映出来，请在 `VueNodeViewRenderer` 上启用 `selectedOnTextSelection` 选项：
+
+```js
+return VueNodeViewRenderer(Component, { selectedOnTextSelection: true })
+```
+
+启用这个选项后，只要 `TextSelection` 完全位于节点范围内，`selected` 也会变成 `true`——例如，当光标放在节点内容中的某个位置时。只与节点部分重叠的选区不算作已选中。
+
+## 所有可用 props
 
 对于高级用例，我们会传递更多 props 给你的组件。
 
@@ -141,7 +151,7 @@ this.updateAttributes({
 
 ### selected
 
-当当前节点视图被选中（`NodeSelection`）时为 `true`。
+当当前节点视图存在 `NodeSelection` 时为 `true`。如果启用了 [`selectedOnTextSelection`](#在文本选择时更新-selected) 选项，并且 `TextSelection` 完全位于节点内部时，也为 `true`。
 
 ### extension
 
@@ -190,7 +200,9 @@ this.updateAttributes({
         type: Array,
       },
 
-      // 如果此节点视图被选中，则为 `true`
+      // 当前节点视图存在 `NodeSelection` 时为 `true`，或者
+      // 在启用 `selectedOnTextSelection` 选项且 `TextSelection`
+      // 完全位于节点内部时为 `true`
       selected: {
         type: Boolean,
       },

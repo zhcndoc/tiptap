@@ -226,17 +226,29 @@ const editor = useEditor({
 await toolkit.streamHtml(readableStream, {
   // ... 其他选项
 
-  // 使用 Tracked Changes 显示审阅界面
-  reviewOptions: { mode: 'trackedChanges' },
+  reviewOptions: {
+    // 使用 Tracked Changes 显示审阅界面
+    mode: 'trackedChanges',
 
-  // 使用 AI Toolkit 建议显示审阅界面
-  reviewOptions: { mode: 'review' },
+    // 在将更改插入文档之前预览更改，
+    // 使用 AI Toolkit 建议
+    mode: 'preview',
+
+    // 使用 AI Toolkit 建议显示审阅界面
+    mode: 'review',
+  },
 })
 ```
 
 请参阅 [审阅更改](/content-ai/capabilities/ai-toolkit/agents/review-changes) 指南了解有关审阅界面的更多信息。
 
-请参阅 [AI Toolkit 演示](https://github.com/ueberdosis/ai-toolkit-demos) 以了解如何在审阅界面中使用 AI Toolkit 工作流程的示例。
+<CodeDemo
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/insert-content-workflow-preview"
+/>
+
+查看 [AI Toolkit 演示](https://github.com/ueberdosis/ai-toolkit-demos) 了解如何在审阅界面中使用 AI Toolkit 工作流程的示例。
 
 ## 下一步
 

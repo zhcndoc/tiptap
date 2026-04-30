@@ -3,9 +3,9 @@ tags:
   - type: editor
 title: 旧版 DOCX 导入与导出
 meta:
-    title: 旧版 DOCX | Tiptap 编辑器文档
-    description: 了解如何配置旧版导入和导出扩展及 REST API 端点。更多内容请查看文档。
-    category: Editor
+  title: 旧版 DOCX | Tiptap 转换
+  description: 查看如何配置旧版导入和导出扩展以及 REST API 端点。更多内容请参阅文档。
+  category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -16,12 +16,24 @@ Tiptap 原始的 `extension-import` 和 `extension-export` 包提供了可靠的
 
 它们将于 2025 年晚些时候正式退役，并由新的 [Tiptap 转换](/conversion/getting-started/overview) 扩展和服务取代。
 
+<Callout title="从旧版扩展迁移" variant="hint">
+  有关迁移到特定格式的 Conversion 扩展和 `/v2/` REST 端点的分步说明，请参阅 [迁移指南](/conversion/legacy/migration-guide)。
+</Callout>
+
+<Callout title="默认端点已不再托管" variant="warning">
+  旧版 `extension-import` 和 `extension-export` 包会将 `endpoint` 选项默认设为
+  `/v1/convert`，但 Conversion 服务已不再托管该端点。现有集成必须显式传入
+  `endpoint: 'https://api.tiptap.dev/v2/convert'`（并接受下文所述的响应结构差异），
+  或迁移到特定格式的 Conversion 扩展。
+</Callout>
+
 以下指南重点介绍如何配置旧版扩展。
 
 ## 导入旧版扩展
 
-<Callout title="旧版导入扩展即将废弃" variant="warning">
-    **extension-import** 包将于 2025 年晚些时候停止支持。请规划迁移至我们的[新版解决方案](/conversion/getting-started/overview)或其他端点，以确保服务不中断。
+<Callout title="旧版导入扩展（已弃用）" variant="warning">
+  **extension-import** 包已弃用，不会再获得新功能；在移除旧版端点之前，我们会提前 90 天通知。
+  请迁移到我们的[更新方案](/conversion/getting-started/overview)，以确保服务不中断。
 </Callout>
 
 ```js
@@ -91,12 +103,12 @@ editor
 
 ### 导入选项
 
-| 名称                      | 类型        | 默认值       | 描述                                                                                                                                                                                           |
-| ------------------------- | ----------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `appId`                   | `string`    | `undefined`  | 从转换设置页面获取的 Convert App ID：[https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings)                                                                      |
-| `token`                   | `string`    | `undefined`  | 通过服务端密钥生成的 JWT 令牌                                                                                                                                                                   |
-| `imageUploadCallbackUrl`  | `string`    | `undefined`  | 图片上传的 URL，若未提供，文档内的图片将被移除，[查看更多信息](/collaboration/documents/conversion#image-uploading)                                                                               |
-| `experimentalDocxImport`  | `boolean`  | `false`      | 启用实验性的 DOCX 导入功能，更好地保留内容样式（实验性功能，此 API 在 alpha 期间可能不稳定），仅适用于上传的 DOCX 文件                                                                         |
+| Name                     | Type       | Default     | Description                                                                                                                                                                                     |
+| ------------------------ | ---------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `appId`                  | `string`   | `undefined` | 转换应用的 ID，来自转换设置页面：[https://cloud.tiptap.dev/convert-settings](https://cloud.tiptap.dev/convert-settings)                                                       |
+| `token`                  | `string`   | `undefined` | 通过你的服务器生成的 JWT                                                                                   |
+| `imageUploadCallbackUrl` | `string`   | `undefined` | 用于上传图片的 URL；如果未提供，图片将从文档中移除                                                                                                         |
+| `experimentalDocxImport` | `boolean ` | `false`     | 启用实验性的 DOCX 导入，以更好地保留内容样式（实验性功能，此 API 在 alpha 阶段可能并不完全稳定），仅适用于上传的 DOCX 文件 |
 
 ### 命令
 
@@ -132,8 +144,9 @@ editor
 
 ## 导出旧版扩展
 
-<Callout title="旧版导出扩展即将废弃" variant="warning">
-    **extension-export** 包将于 2025 年晚些时候停止支持。我们强烈建议迁移至更新的[导出扩展](/conversion/getting-started/overview)，享受更好的自定义功能和持续支持。
+<Callout title="旧版导出扩展（已弃用）" variant="warning">
+  **extension-export** 包已弃用，不会再获得新功能；在移除旧版端点之前，我们会提前 90 天通知。
+  我们强烈建议迁移到更新后的 [导出扩展](/conversion/getting-started/overview)，它提供了更好的自定义能力和持续支持。
 </Callout>
 
 ```js
@@ -231,8 +244,12 @@ editor.chain().export({
 
 ## 旧版 REST API
 
-<Callout title="旧版 /v1/ 转换 REST API 即将废弃" variant="warning">
-    **/v1/ 文档转换 REST API** 将于 2025 年晚些时候停止支持。请迁移至新版 [API 端点](/conversion/getting-started/overview) 以获得持续更新和维护，或查阅我们的 [Postman 集合](https://www.postman.com/docking-module-explorer-14290287/workspace/tiptap-collaboration-public/collection/33042171-cc186a66-df41-4df8-9c6e-e91b20deffe5?action=share&creator=32651125) 获取最新资源。
+<Callout title="旧版 /v1/ 转换 REST API（已弃用）" variant="warning">
+  **/v1/ 文档转换 REST API** 已弃用，不会再获得新功能；在移除旧版端点之前，我们会提前 90 天通知。
+  如需持续更新和维护，请迁移到更新后的 [API 端点](/conversion/getting-started/overview)，或查看我们的
+  [Postman
+  集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60)
+  以获取最新资源。
 </Callout>
 
 旧版文档转换 API 支持 DOCX、ODT 和 Markdown 与 Tiptap JSON 格式之间的转换。
@@ -252,10 +269,10 @@ editor.chain().export({
 
 #### 请求体
 
-| 名称                    | 类型     | 描述                                                                                  |
-| ----------------------- | -------- | ------------------------------------------------------------------------------------- |
-| `file`                  | `File`   | 要转换的文件                                                                         |
-| `imageUploadCallbackUrl`| `string` | 上传文档中遇到的图片的回调端点，[查看详情](#image-uploading)                           |
+| Name                     | Type     | Description                                                                               |
+| ------------------------ | -------- | ----------------------------------------------------------------------------------------- |
+| `file`                   | `File`   | 要转换的文件                                                                       |
+| `imageUploadCallbackUrl` | `string` | 上传文档中遇到的图片的回调端点 |
 
 #### 查询参数
 
@@ -264,10 +281,10 @@ editor.chain().export({
 | 名称             | 默认值          | 描述                                                                |
 | ---------------- | --------------- | ------------------------------------------------------------------- |
 | `paragraph`      | `paragraph`     | 用于段落转换的 ProseMirror 类型                                     |
-| `heading`        | `heading`       | 用于标题转换的 ProseMirror 类型                                     |
+| `heading`        | `heading`        | 用于标题转换的 ProseMirror 类型                                     |
 | `blockquote`     | `blockquote`    | 用于引用块转换的 ProseMirror 类型                                   |
-| `codeblock`      | `codeblock`     | 用于代码块转换的 ProseMirror 类型                                   |
-| `bulletlist`     | `bulletlist`    | 用于无序列表转换的 ProseMirror 类型                                 |
+| `codeblock`      | `codeblock`      | 用于代码块转换的 ProseMirror 类型                                   |
+| `bulletlist`     | `bulletlist`     | 用于无序列表转换的 ProseMirror 类型                                 |
 | `orderedlist`    | `orderedlist`   | 用于有序列表转换的 ProseMirror 类型                                 |
 | `listitem`       | `listitem`      | 用于列表项转换的 ProseMirror 类型                                   |
 | `hardbreak`      | `hardbreak`     | 用于硬换行转换的 ProseMirror 类型                                   |
@@ -299,10 +316,10 @@ editor.chain().export({
 
 #### 请求体
 
-| 名称                    | 类型     | 描述                                                                                  |
-| ----------------------- | -------- | ------------------------------------------------------------------------------------- |
-| `file`                  | `File`   | 要转换的文件                                                                         |
-| `imageUploadCallbackUrl`| `string` | 上传文档中遇到的图片的回调端点，[查看详情](#image-uploading)                           |
+| Name                     | Type     | Description                                                                               |
+| ------------------------ | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `file`                   | `File`   | 要转换的文件                                                                       |
+| `imageUploadCallbackUrl` | `string` | 上传文档中遇到的图片的回调端点 |
 
 #### 查询参数
 
@@ -311,9 +328,9 @@ editor.chain().export({
 | 名称             | 默认值          | 描述                                                                |
 | ---------------- | --------------- | ------------------------------------------------------------------- |
 | `paragraph`      | `paragraph`     | 用于段落转换的 ProseMirror 类型                                     |
-| `heading`        | `heading`       | 用于标题转换的 ProseMirror 类型                                     |
+| `heading`        | `heading`        | 用于标题转换的 ProseMirror 类型                                     |
 | `blockquote`     | `blockquote`    | 用于引用块转换的 ProseMirror 类型                                   |
-| `codeblock`      | `codeblock`     | 用于代码块转换的 ProseMirror 类型                                   |
+| `codeblock`      | `codeblock`      | 用于代码块转换的 ProseMirror 类型                                   |
 | `bulletlist`     | `bulletlist`    | 用于无序列表转换的 ProseMirror 类型                                 |
 | `orderedlist`    | `orderedlist`   | 用于有序列表转换的 ProseMirror 类型                                 |
 | `listitem`       | `listitem`      | 用于列表项转换的 ProseMirror 类型                                   |
@@ -361,7 +378,7 @@ editor.chain().export({
 | `paragraph`      | `paragraph`   | 用于段落转换的 ProseMirror 类型                                     |
 | `heading`        | `heading`     | 用于标题转换的 ProseMirror 类型                                     |
 | `blockquote`     | `blockquote`  | 用于引用块转换的 ProseMirror 类型                                   |
-| `codeblock`      | `codeblock`   | 用于代码块转换的 ProseMirror 类型                                   |
+| `codeblock`      | `codeblock`     | 用于代码块转换的 ProseMirror 类型                                   |
 | `bulletlist`     | `bulletlist`  | 用于无序列表转换的 ProseMirror 类型                                 |
 | `orderedlist`    | `orderedlist` | 用于有序列表转换的 ProseMirror 类型                                 |
 | `listitem`       | `listitem`    | 用于列表项转换的 ProseMirror 类型                                   |

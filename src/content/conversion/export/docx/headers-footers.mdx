@@ -8,7 +8,7 @@ tags:
 meta:
     title: 使用页眉和页脚扩展您的 DOCX 导出功能 | Tiptap 转换
     description: 学习如何使用页眉和页脚扩展您的 DOCX 导出
-    category: Conversion
+    category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -458,7 +458,50 @@ async function getDocumentStats() {
 
 ## 页码
 
-页码功能需要使用手动的 `Docx` 命名空间方式。`convertHeader` 和 `convertFooter` 辅助函数目前不支持 `Docx.PageNumber` 功能。必须直接使用 `new Docx.Header()` 或 `new Docx.Footer()` 来访问页码功能。
+导出支持两种方式来生成实时页码字段：
+
+1. **普通文本页眉和页脚中的 `{page}` / `{total}` 标记**——可与从 [Pages 扩展](/pages/getting-started/overview) 中提取的内容自动配合使用，也可与传递给 `headers` / `footers` 的普通文本字符串一起使用。导出会将每个标记转换为实时的 `PAGE` / `NUMPAGES` 字段，因此 Word 会渲染出实际的当前页码和总页数。
+2. **`Docx.PageNumber` API**——当你使用 `new Docx.Header()` / `new Docx.Footer()` 手动构建页眉/页脚内容时，或者当你需要在字段周围加入超出纯标记之外的格式时，这是必需的。`convertHeader` / `convertFooter` 辅助函数目前不会处理 `Docx.PageNumber` 引用——请直接传入 `Docx` 实例。
+
+### 通过 `{page}` / `{total}` 标记显示页码
+
+任何普通文本页眉或页脚（包括通过 Pages 扩展自动提取的内容，例如 `editor.commands.setHeader('Page {page} of {total}')`）在导出的 DOCX 中都会渲染为实时页码字段：
+
+```javascript
+import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+
+const editor = new Editor({
+  extensions: [
+    // ... 其他扩展
+    ExportDocx.configure({
+      onCompleteExport: result => {
+        const blob = new Blob([result], {
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'export.docx'
+        a.click()
+        URL.revokeObjectURL(url)
+      },
+      // 普通文本页眉/页脚——`{page}` 和 `{total}` 会在导出时转换为
+      // 实时的 `PAGE` / `NUMPAGES` 字段。
+      headers: {
+        default: 'Confidential — Page {page} of {total}',
+      },
+      footers: {
+        default: 'Page {page} of {total}',
+      },
+    }),
+  ],
+])
+
+// 触发导出
+editor.commands.exportDocx()
+```
+
+当页眉/页脚是从 Pages 扩展中自动提取时，也会自动执行相同的转换，因此通过 `editor.commands.setFooter('Page {page} of {total}')` 设置的页脚在导出时会包含实时页码，无需任何额外配置。
 
 ### 基本页码
 
@@ -470,7 +513,7 @@ const editor = new Editor({
     // ... 其他扩展
     ExportDocx.configure({
       onCompleteExport: result => {
-        // handle export result
+        // 处理导出结果
         const blob = new Blob([result], {
           type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         })
@@ -509,9 +552,9 @@ const editor = new Editor({
       },
     }),
   ],
-})
+])
 
-// trigger export
+// 触发导出
 editor.commands.exportDocx()
 ```
 
@@ -525,7 +568,7 @@ const editor = new Editor({
     // ... 其他扩展
     ExportDocx.configure({
       onCompleteExport: result => {
-        // handle export result
+        // 处理导出结果
         const blob = new Blob([result], {
           type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         })
@@ -557,8 +600,8 @@ const editor = new Editor({
       },
     }),
   ],
-})
+])
 
-// trigger export
+// 触发导出
 editor.commands.exportDocx()
 ```

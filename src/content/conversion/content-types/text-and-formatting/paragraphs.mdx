@@ -1,0 +1,122 @@
+---
+title: 段落
+tags:
+  - type: beta
+meta:
+  title: 段落 | Tiptap 转换
+  description: Word 段落在 DOCX 转换流程中的处理方式，包括哪些格式会在导入、渲染和导出过程中保留。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+段落是任何文档中最基础的内容类型。在 Word 中，它们携带诸如间距、缩进、边框和对齐等格式。在 Tiptap 中，它们映射到 `paragraph` 节点，而 [`ConvertKit`](/conversion/import/docx/convertkit) 会自动注册该节点——并使用一个自定义变体，展示导入器生成的、与 DOCX 感知相关的属性。
+
+## 你需要什么
+
+- **扩展：** [`ConvertKit`](/conversion/import/docx/convertkit)。其自定义 Paragraph 会渲染所有导入的属性（间距、缩进、行高、字体大小、上下文间距），并且内置的 `TextAlign` 已预配置为 `['paragraph', 'heading']`。
+- **配置：** 无需配置。
+
+<Callout title="段落格式需要 ConvertKit 的自定义 Paragraph" variant="hint">
+  文本内容和对齐在任何 paragraph 节点中都能往返保留。段落级的间距、缩进、行高和上下文间距会在导入期间被提取，并由 ConvertKit 的自定义 Paragraph 以内联 CSS 的形式渲染。如果你把 ConvertKit 的 Paragraph 换成标准版本（或禁用该插槽），这些属性会保留在 JSON 中，但在 `setEditorContent()` 时会被剥离。[转换后内容的样式](/conversion/getting-started/guides/styling-converted-content) 指南介绍了如何扩展 schema 以支持更多属性。到目前为止，这些段落级属性在导出时都不会往返保留；请参阅下面的支持概览。
+</Callout>
+
+## 支持概览
+
+| | 导入 | 编辑器（使用 ConvertKit） | 导出 |
+| --- | --- | --- | --- |
+| 文本内容 | 支持 | 支持 | 支持 |
+| 文本对齐 | 支持 | 支持（TextAlign） | 支持 |
+| 行高 | 支持（paragraph 属性） | 支持（`line-height: <value>`） | 不会保留（导出时从 `textStyle` mark 读取行高，而导入器不会生成它） |
+| 段落间距（前/后） | 支持（`spacingBefore`、`spacingAfter` 属性） | 支持（`margin-top` / `margin-bottom`） | 不会保留 |
+| 缩进 | 支持（`indent`、`firstLineIndent` 属性） | 支持（`padding-left` / `text-indent`） | 不会保留 |
+| 上下文间距 | 支持（`contextualSpacing` 属性） | 支持（`data-contextual-spacing` + 注入的 CSS 规则） | 不会保留 |
+
+## 导入
+
+使用 [编辑器扩展](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入段落。两者都会产生相同的段落输出。
+
+当导入 DOCX 文件时，每个 Word 段落都会变成一个 `paragraph` 节点。转换服务会读取 Word 标记中的属性，并将它们映射到节点属性。
+
+一个基础段落对应的 JSON 如下：
+
+```json
+{
+  "type": "paragraph",
+  "attrs": {
+    "textAlign": "left"
+  },
+  "content": [
+    {
+      "type": "text",
+      "text": "这是一个段落。"
+    }
+  ]
+}
+```
+
+### 会保留什么
+
+- 所有文本内容和行内格式（粗体、斜体、链接及其他 mark）
+- 当段落在 Word 中具有显式对齐时，文本对齐会被保留
+
+### 会丢失什么
+
+转换服务会从 Word 源中提取段落级属性，例如 `spacingBefore`、`spacingAfter`、`lineHeight`、`indent`、`firstLineIndent` 和 `contextualSpacing`。ConvertKit 的自定义 Paragraph 会将它们全部渲染为内联 CSS。如果你将其替换为标准 Paragraph（或通过 `ConvertKit.configure({ paragraph: false })` 禁用该插槽），这些值会保留在原始 JSON 中，但在内容加载到编辑器时会被剥离。无论哪种设置，段落级边框和背景颜色在导入期间都不会被提取。
+
+## 编辑器渲染
+
+[`Paragraph`](/editor/extensions/nodes/paragraph) 扩展由 [`ConvertKit`](/conversion/import/docx/convertkit) 注册，并将每个段落渲染为一个 `<p>` 元素。ConvertKit 会替换为一个自定义 Paragraph，用于添加与 DOCX 感知相关的属性；如果你禁用该插槽，则使用标准 Paragraph 作为回退。
+
+### 文本对齐是内置的
+
+ConvertKit 还会注册 `TextAlign`，并将其预配置为 `['paragraph', 'heading']`，因此来自 Word 的 `textAlign` 属性无需额外设置即可渲染。如果你禁用了内置的 `textAlign` 插槽，该属性会保留在 JSON 中，但不会被应用——请参阅[无效 schema 指南](/guides/invalid-schema)。
+
+### 与 Word 的视觉差异
+
+编辑器渲染段落时使用的是你的 CSS 样式，而不是 Word 的文档样式。Word 的“Normal”样式通常包含特定的字体、字号和间距值，这些都不会带到编辑器中。结构和文本内容会被保留。视觉外观由你通过编辑器的 CSS 来控制。有关如何处理这一点，请参阅[转换后内容的样式](/conversion/getting-started/guides/styling-converted-content)指南。
+
+## 导出
+
+使用 [编辑器扩展](/conversion/export/docx/editor-extension) 或 [REST API](/conversion/export/docx/rest-api) 导出段落。该扩展支持 [`paragraphOverrides` 和 `textRunOverrides`](/conversion/export/docx/styles#element-overrides)，可对段落和文本运行的默认值进行细粒度控制。REST API 不接受元素覆盖。若要通过 REST API 自定义段落样式，请使用 [`styleOverrides`](/conversion/export/docx/styles) 重新定义“Normal”文档样式。
+
+在 DOCX 导出期间，每个 `paragraph` 节点都会被写为一个 Word 段落，并应用“Normal”样式。默认的 Normal 样式使用 Aptos 11pt 字体、段后 10pt 间距以及 1.15 倍行高。
+
+### 会往返保留什么
+
+- 所有文本内容和行内 mark
+- 文本对齐会从段落节点属性中读取，并映射到 Word 对齐方式
+- 行高会从 `textStyle` marks 中读取（如果存在）。注意，导入时行高会存储为段落属性，而导出时会从 textStyle marks 中读取。它们位于不同的位置，需要自定义 schema 工作来桥接。
+
+### 不会导出的内容
+
+所有其他段落属性（外边距、边框、缩进、背景色）在导出时都不会被读取，无论它们是否存在于 JSON 中。
+
+### 自定义导出样式
+
+你可以在导出配置中使用 `styleOverrides` 来覆盖默认段落样式：
+
+```ts
+ExportDocx.configure({
+  styleOverrides: {
+    paragraphStyles: [
+      {
+        id: 'Normal',
+        name: 'Normal',
+        run: {
+          font: 'Calibri',
+          size: 24,        // 半磅（24 = 12pt）
+        },
+        paragraph: {
+          spacing: {
+            after: 200,    // twips
+            line: 276,     // 一行的 1/240（276 = 1.15 倍行高）
+          },
+        },
+      },
+    ],
+  },
+})
+```
+
+这让你可以为导出文档中的所有段落控制字体、字号、间距以及其他 Word 级属性。

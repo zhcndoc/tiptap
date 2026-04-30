@@ -1,0 +1,77 @@
+---
+title: 文本对齐
+tags:
+  - type: beta
+meta:
+  title: 文本对齐 | Tiptap 转换
+  description: 文本对齐如何在 DOCX 和 Tiptap 之间转换，以及如何配置 TextAlign 扩展以实现干净的往返转换。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+文本对齐是一个段落级属性，可在 DOCX 与编辑器之间往返保留。配置 TextAlign 扩展后，对齐会在导入、编辑和导出过程中保持不变。
+
+## 你需要什么
+
+- **扩展：** [`ConvertKit`](/conversion/import/docx/convertkit) — 捆绑了 `TextAlign`，并将其预配置为 `types: ['paragraph', 'heading']`。
+- **配置：** 无需配置。
+- **就是这样。** 使用标准的 ConvertKit 设置即可端到端支持对齐。
+
+## 支持概览
+
+| | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| 左对齐 | 支持 | 支持 | 支持 |
+| 居中 | 支持 | 支持 | 支持 |
+| 右对齐 | 支持 | 支持 | 支持 |
+| 两端对齐 | 支持 | 支持 | 支持 |
+
+## 导入
+
+使用 [编辑器扩展](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入文本对齐。两者会生成完全相同的输出。
+
+转换服务会读取每个 DOCX 段落中的 `<w:jc>` 元素，并将其映射到对应 Tiptap 节点上的 `textAlign` 属性。
+
+| Word `<w:jc>` 值 | Tiptap `textAlign` |
+| --- | --- |
+| `left` | `left` |
+| `center` | `center` |
+| `right` | `right` |
+| `both` | `justify` |
+| `start` | `start`（原样传递，TextAlign 可能无法识别） |
+| `end` | `end`（原样传递，TextAlign 可能无法识别） |
+
+`textAlign` 属性会同时设置在 `paragraph` 和 `heading` 节点上。
+
+<Callout title="不支持从右到左的文本方向" variant="warning">
+  导入器不会解析 DOCX 段落方向（`<w:bidi>`）和 run 方向（`<w:rtl>`）。使用阿拉伯语、希伯来语、波斯语、乌尔都语或其他 RTL 语言编写的文档，会按照 Tiptap 的 CSS 方向渲染（默认是 LTR），而不管源文档是如何编写的。导出器也不会将方向写回，因此以 LTR 编辑的文档导出后仍然是 LTR。若要处理 RTL 内容，目前可以在编辑器根元素的 CSS 中设置 `dir="rtl"`，或在应用层检测语言并自行应用方向。
+</Callout>
+
+## 编辑器渲染
+
+[`TextAlign`](/editor/extensions/functionality/text-align) 扩展会将 `textAlign` 作为全局属性添加到你指定的节点类型上。它会在 HTML 元素上渲染为行内 `style="text-align: ..."`。ConvertKit 使用 `types: ['paragraph', 'heading']` 对其进行注册，因此导入的对齐效果可以开箱即用地渲染出来：
+
+```ts
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+
+new Editor({ extensions: [ConvertKit] })
+```
+
+如果你需要不同的类型（例如表格单元格），可以覆盖该插槽：
+
+```ts
+ConvertKit.configure({
+  textAlign: { types: ['paragraph', 'heading', 'tableCell'] },
+})
+```
+
+<Callout title="禁用 textAlign 会丢失该属性" variant="warning">
+  如果你设置 `ConvertKit.configure({ textAlign: false })`，那么导入中的 `textAlign` 属性不会被 schema 识别，也不会被应用。不会抛出错误。有关此行为的更多信息，请参阅 [无效 schema 指南](/guides/invalid-schema)。
+</Callout>
+
+## 导出
+
+使用 [编辑器扩展](/conversion/export/docx/editor-extension) 或 [REST API](/conversion/export/docx/rest-api) 导出文本对齐。两者会以相同方式处理文本对齐。
+
+导出器会读取每个段落和标题中的 `node.attrs.textAlign`，并将其映射回 DOCX 的对齐类型。不需要额外配置。如果导入和编辑器配置正确，导出会自动跟随生效。

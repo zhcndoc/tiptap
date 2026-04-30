@@ -1,0 +1,75 @@
+---
+title: 文本颜色和高亮
+tags:
+  - type: beta
+meta:
+  title: 文本颜色和高亮 | Tiptap 转换
+  description: DOCX 和 Tiptap 之间如何转换文本颜色和高亮/背景颜色。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+文本颜色和高亮会在 Word 的颜色模型与 Tiptap 的 `textStyle` 和 `highlight` 标记之间相互转换。在安装了正确的扩展后，两者都可以往返转换。
+
+## 你需要什么
+
+- **扩展：** [`ConvertKit`](/conversion/import/docx/convertkit) — 其捆绑的 `TextStyleKit` 提供 `Color`（以及 `BackgroundColor`），并且 ConvertKit 已预配置注册了带有 `multicolor: true` 的 `Highlight`。
+- **配置：** 无需配置。
+
+```ts
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+
+new Editor({ extensions: [ConvertKit] })
+```
+
+<Callout title="multicolor: true 很重要" variant="warning">
+  如果 `Highlight` 没有设置 `multicolor: true`，则只支持单一的通用高亮，所有导入的高亮都会折叠为默认的黄色。ConvertKit 会自动应用它；如果你覆盖了 `highlight` 插槽，请保留这个标志。
+</Callout>
+
+## 支持概览
+
+| | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| 文本颜色 | 支持（`textStyle` 标记） | 支持（TextStyle + Color） | 支持（规范化为十六进制） |
+| 高亮 | 支持（`highlight` 标记） | 支持（Highlight，multicolor） | 支持（命名颜色或十六进制） |
+| 底纹（`<w:shd>`） | 支持（映射到 `highlight`） | 支持 | 支持（纯色底纹） |
+| 主题颜色 | 不支持（不转换） | 不适用 | 不适用 |
+
+## 导入
+
+可使用 [编辑器扩展](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入文本颜色和高亮。两者会生成完全相同的输出。
+
+转换服务会将 Word 的颜色元素映射为 Tiptap 标记：
+
+| Word 元素 | Tiptap 标记 | 属性 |
+| --- | --- | --- |
+| `<w:color val="FF0000">` | `textStyle` | `{ color: "#FF0000" }` |
+| `<w:highlight val="yellow">` | `highlight` | `{ color: "yellow" }` |
+| `<w:shd val="clear" fill="00FFFF">` | `highlight` | `{ color: "#00FFFF" }` |
+
+`<w:highlight>` 和 `<w:shd>` 都会生成相同的 `highlight` 标记。开发者无需区分它们。
+
+<Callout title="主题颜色不会被导入" variant="warning">
+  Word 主题颜色（例如 `<w:color>` 上的 `accent1`、`accent2` 或 `themeColor` 属性）在导入时不会转换。如果某个文本片段只使用了 `val="auto"` 的主题颜色，那么该颜色不会包含在输出中。只有 `<w:color val="...">` 中明确指定的十六进制颜色值会被保留。
+</Callout>
+
+## 编辑器渲染
+
+[`Color`](/editor/extensions/marks/color) 扩展为 [`TextStyle`](/editor/extensions/marks/text-style) 添加颜色支持，而 [`Highlight`](/editor/extensions/marks/highlight) 扩展负责处理背景色。ConvertKit 将两者都打包在一起：`TextStyleKit` 提供 `TextStyle` + `Color` + `BackgroundColor`，并且 `Highlight` 已预配置注册为 `multicolor: true`。
+
+文本颜色会以 `<span>` 元素上的行内 `style="color: ..."` 形式渲染。高亮会以带有 `background-color` 样式的 `<mark>` 元素渲染。
+
+如果你禁用 `ConvertKit.configure({ textStyleKit: false })`，导入的文本颜色属性将不会被 schema 识别。`highlight: false` 也是同理。有关如何处理无法识别的标记和属性，请参阅[无效 schema 指南](/guides/invalid-schema)。
+
+## 导出
+
+可使用 [编辑器扩展](/conversion/export/docx/editor-extension) 或 [REST API](/conversion/export/docx/rest-api) 导出文本颜色和高亮。两者对颜色和高亮的处理方式完全一致。
+
+导出时，颜色值会规范化为 6 位十六进制。支持以下输入格式：
+
+- 带井号的十六进制：`#FF0000`、`#F00`、`#FF0000AA`
+- RGB/RGBA：`rgb(255, 0, 0)`、`rgba(255, 0, 0, 0.5)`
+- 命名的 CSS 颜色：`red`、`blue`、`green`、`yellow`、`cyan`、`purple`，以及其他 14 种
+
+高亮会导出为命名的 Word 高亮颜色（当颜色匹配 Word 枚举值，如 `yellow` 或 `cyan` 时），或者导出为带有十六进制填充值的纯色字符底纹。如果 `highlight` 标记没有颜色属性，则默认使用黄色。

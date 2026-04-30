@@ -1,0 +1,80 @@
+---
+title: 字体族和大小
+tags:
+  - type: beta
+meta:
+  title: 字体族和大小 | Tiptap 转换
+  description: 字体族和字体大小如何在 DOCX 和 Tiptap 之间转换，包括单位转换和字体回退处理。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+字体系列和字体大小是通过 `textStyle` 标记传递的行内文本样式属性。它们遵循与[文本颜色和高亮](/conversion/content-types/text-and-formatting/text-color-highlight)相同的模式：TextStyle 是基础，具体扩展在其之上叠加。
+
+## 你需要什么
+
+- **扩展：** [`ConvertKit`](/conversion/import/docx/convertkit)。其捆绑的 `TextStyleKit` 在一个扩展中提供 `TextStyle`、`Color`、`BackgroundColor`、`FontFamily`、`FontSize` 和 `LineHeight`。
+- **配置：** 不需要。
+
+```ts
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+
+new Editor({ extensions: [ConvertKit] })
+```
+
+<Callout title="不要使用已弃用的独立字体大小包" variant="warning">
+  不要单独安装 `@tiptap/extension-font-size`，也不要零散引入 `@tiptap/extension-font-family` 和 `@tiptap/extension-font-size`——所有内容都位于 `TextStyleKit` 中，而 ConvertKit 会自动注册它。
+</Callout>
+
+## 支持概览
+
+| | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| 字体系列 | 支持（`textStyle.fontFamily`） | 支持（FontFamily） | 支持（仅第一个字体） |
+| 字体大小 | 支持（`textStyle.fontSize`，单位为 px） | 支持（FontSize） | 支持（转换为半磅） |
+| 字母间距 | 支持（`textStyle.letterSpacing`，单位为 px） | 需要扩展 TextStyle（未捆绑在 ConvertKit / TextStyleKit 中） | 不支持 |
+
+## 导入
+
+使用[编辑器扩展](/conversion/import/docx/editor-extension)或 [REST API](/conversion/import/docx/rest-api) 导入字体系列和大小。两者会产生完全相同的输出。
+
+转换服务会读取 `<w:rFonts>` 中的 `w:ascii` 属性，如果 `w:ascii` 不存在，则回退到 `w:hAnsi`。原始属性值会按原样存储到 `textStyle.fontFamily` 中（例如，`"Courier New"`）。
+
+字体大小来自半磅单位的 `<w:sz>`，并会转换为像素：
+
+```
+pixels = halfPoints * 0.5 * (96 / 72)
+```
+
+结果会通过 `Math.round()` 四舍五入到最接近的整数像素。标准尺寸如 12pt（16px）、14pt（19px）和 18pt（24px）都能顺利转换。结果会存储为 `textStyle.fontSize`（例如，`"16px"`）。
+
+字母间距也会从文本运行上的 `<w:spacing>` 中提取（从 twips 转换为像素），并存储为 `textStyle.letterSpacing`。无论是 ConvertKit 自带的 `TextStyleKit` 还是 [CSS 注入](/conversion/import/docx/css-injection) 都不会渲染此属性。字母间距是“已提取但默认不渲染”的典型案例。要让它在编辑器中可见，请为 `TextStyle` 扩展一个 `letterSpacing` 属性，并在 `renderHTML` 中输出 `style="letter-spacing: ..."`。[转换内容的样式设置](/conversion/getting-started/guides/styling-converted-content#extending-extensions-for-unsupported-attributes) 指南中有可直接复制的示例。导出时不会保留字母间距。
+
+## 编辑器渲染
+
+[`FontFamily`](/editor/extensions/marks/font-family) 和 [`FontSize`](/editor/extensions/marks/font-size) 都依赖于 [`TextStyle`](/editor/extensions/marks/text-style)。这三者都捆绑在 `TextStyleKit` 中，而 ConvertKit 会自动注册它：
+
+```bash
+npm install @tiptap-pro/extension-convert-kit
+```
+
+字体系列会在 `<span>` 元素上渲染为 `style="font-family: ..."`，字体大小会渲染为 `style="font-size: ..."`。如果你禁用 `ConvertKit.configure({ textStyleKit: false })`，导入中的这些属性将不会被 schema 识别。有关如何处理这一点，请参阅[无效 schema 指南](/guides/invalid-schema)。
+
+## 导出
+
+使用[编辑器扩展](/conversion/export/docx/editor-extension)或 [REST API](/conversion/export/docx/rest-api) 导出字体系列和大小。两者对字体系列和大小的处理方式完全相同。
+
+导出时，字体系列值会被清理：引号会被去除，并且在逗号分隔的值中只使用第一个字体。由于导入会生成单一字体名称，往返后的值会保持不变。
+
+<Callout title="字体回退列表会被折叠" variant="info">
+  DOCX 不支持类似 CSS 的字体回退列表。如果你的编辑器内容中手动设置了诸如 `"Arial, Helvetica, sans-serif"` 这样的值，导出器会选择第一个字体名称（`Arial`），并丢弃其余部分。从 DOCX 导入的值本来就是单一字体名称，因此不会受到影响。
+</Callout>
+
+字体大小会从像素转换回半磅：
+
+```
+halfPoints = pixels * 1.5
+```
+
+只要原始半磅值能转换为精确的整数像素，从 DOCX 导入的值在导出时就会生成相同的半磅值。当 `Math.round()` 在导入过程中改变了像素值时（例如，14pt 会变成 18.67px，四舍五入后变为 19px），导出的半磅值将与原始值不同（19px 导出为 28.5 半磅，而不是原始的 28）。非数字字体大小值（如果有）会被跳过，并在控制台发出警告。

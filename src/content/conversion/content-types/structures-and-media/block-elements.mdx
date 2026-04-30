@@ -1,0 +1,77 @@
+---
+title: 块级元素
+tags:
+  - type: beta
+meta:
+  title: 块级元素 | Tiptap 转换
+  description: 引用块、代码块、水平线、硬换行和分页符在 DOCX 转换流程中如何处理。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+块级元素定义文档的结构布局：引用段落、预格式化代码、视觉分隔线和换行。所有这些都包含在 StarterKit 中。不同环节的支持情况各不相同。
+
+## 你需要什么
+
+- **扩展：** `StarterKit`（包含 `Blockquote`、`CodeBlock`、`HorizontalRule` 和 `HardBreak`）
+- **配置：** 无需配置。分页符需要单独的扩展，并在其[单独页面](/conversion/content-types/page-layout/page-breaks)中介绍。
+- **集成路径：** 通过[编辑器扩展](/conversion/import/docx/editor-extension)和 [REST API](/conversion/import/docx/rest-api) 导入与导出的工作方式完全相同。
+
+## 支持概览
+
+| | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| 引用段落 | 支持 | 支持（StarterKit） | 支持 |
+| 代码块 | 不支持 | 支持（StarterKit） | 不支持（会被丢弃） |
+| 水平分隔线 | 支持 | 支持（StarterKit） | 支持 |
+| 硬换行 | 支持 | 支持（StarterKit） | 支持 |
+| 分页符 | 见 [分页符](/conversion/content-types/page-layout/page-breaks) | | |
+
+## 引用段落
+
+在 Word 中，引用段落是使用“Quote”样式的段落（大小写不敏感匹配）。
+
+导入时会生成一个 `blockquote` 节点，包裹一个或多个 `paragraph` 子节点。引号内的行内格式会被保留。
+
+导出时会将使用“Quote”样式的段落写回 DOCX。引用段落可正确往返转换。
+
+**扩展：** [`Blockquote`](/editor/extensions/nodes/blockquote)（StarterKit） | **快捷键：** Cmd+Shift+B
+
+## 代码块
+
+DOCX 导入不会将任何 Word 样式映射为 `codeBlock` 节点。代码块可通过 StarterKit 在编辑器中使用，但在转换流程中不支持导入或导出。
+
+<Callout variant="warning" title="代码块不支持 DOCX 转换">
+  代码块既不会从 DOCX 导入，也不会导出到 DOCX。导出时，`codeBlock` 节点不会被转换。如果你的工作流需要代码块的往返转换，请在导入和导出扩展上都注册自定义节点处理器。
+</Callout>
+
+**扩展：** [`CodeBlock`](/editor/extensions/nodes/code-block)（StarterKit） | **快捷键：** Cmd+Alt+C
+
+## 水平分隔线
+
+Word 中的水平分隔线通常是 VML 形状（带有 `o:hr` 属性的 `v:rect`，以及 `v:line` 元素）。导入会检测这些内容并创建 `horizontalRule` 节点。
+
+导出会使用 VML 形状生成有效的 Word 水平分隔线。水平分隔线可正确往返转换。
+
+**扩展：** [`HorizontalRule`](/editor/extensions/nodes/horizontal-rule)（StarterKit） | **输入规则：** `---`、`___`、`***`
+
+## 硬换行
+
+硬换行（Shift+Enter）会在同一段落内创建新的一行。在 Word 中这对应一个 `<w:br/>` 元素。硬换行可正确往返转换。
+
+**扩展：** [`HardBreak`](/editor/extensions/nodes/hard-break)（StarterKit） | **快捷键：** Shift+Enter
+
+## 分页符
+
+分页符已移至页面布局下的[分页符](/conversion/content-types/page-layout/page-breaks)页面。
+
+## 导出
+
+| 元素 | DOCX 输出 |
+| --- | --- |
+| 引用段落 | 带有“Quote”样式的段落 |
+| 代码块 | 不导出 |
+| 水平分隔线 | VML 水平分隔线形状 |
+| 硬换行 | 文本运行中的 `<w:br/>` |
+| 分页符 | 见 [分页符](/conversion/content-types/page-layout/page-breaks) |

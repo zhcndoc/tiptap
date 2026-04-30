@@ -13,47 +13,47 @@ sidebars:
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-本指南将带你从头开始设置 Tiptap 编辑器，添加 Pages 扩展以实现分页和类似打印的布局，以及启用 DOCX 导出和导入，构建一个专业的打印就绪工作流。
+本指南将带你从零开始搭建一个 Tiptap 编辑器，使用 Pages 扩展实现分页、类似印刷的版式，并支持 DOCX 导入导出，以便构建专业、可直接印刷的工作流。
 
 <CodeDemo isPro path="/Extensions/PagesImportExportDocx" />
 
 ---
 
-## 1. 安装 Tiptap 和核心依赖
+## 1. 安装 Pages 技术栈
 
-首先，安装核心 Tiptap 包：
-
-```bash
-npm install @tiptap/core @tiptap/starter-kit
-```
-
-## 2. 添加 Pages 扩展
-
-从 Tiptap Pro 注册表中安装 Pages 扩展：
+安装这三个始终会一起使用的 Pro 包，当你使用 Pages 构建时需要它们：
 
 ```bash
-npm install @tiptap-pro/extension-pages
+npm install @tiptap-pro/extension-convert-kit \
+            @tiptap-pro/extension-pages-tablekit \
+            @tiptap-pro/extension-pages
 ```
 
-> **提示：** 确保你有访问 Tiptap Pro 注册表的权限。有关设置，请参阅 [Pro 扩展指南](/guides/pro-extensions)。
+<Callout title="为什么是这三个包" variant="info">
+  `@tiptap-pro/extension-convert-kit` 提供编辑器的节点和标记 schema（段落、
+  标题、列表、图片、标记）。`@tiptap-pro/extension-pages-tablekit` 提供分页安全的
+  表格——这是必须的，因为 ConvertKit 内置的表格并不是为分页而设计的。
+  `@tiptap-pro/extension-pages` 提供页面布局本身。请确保你已经先完成对
+  Tiptap 私有 npm registry 的身份验证；有关设置，请参阅 [Pro Extensions 指南](/guides/pro-extensions)。
+</Callout>
 
-## 3. 使用 Pages 设置你的编辑器
+## 2. 使用 Pages 设置你的编辑器
 
-```js
+```ts
 import { Editor } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+import { TableKit } from '@tiptap-pro/extension-pages-tablekit'
 import { Pages } from '@tiptap-pro/extension-pages'
 
 const editor = new Editor({
   extensions: [
-    StarterKit,
+    ConvertKit.configure({ table: false }),
+    TableKit,
     Pages.configure({
       pageFormat: 'A4',
-      headerHeight: 60,
-      footerHeight: 60,
       pageGap: 40,
-      header: 'My Project',
-      footer: 'Page {page} of {total}',
+      header: '我的项目',
+      footer: '第 {page} 页，共 {total} 页',
       pageGapBackground: '#f8f8f8',
     }),
   ],
@@ -61,10 +61,12 @@ const editor = new Editor({
 ```
 
 <Callout title="最佳实践" variant="info">
-  早期在设置中使用 Pages 扩展，确保你的文档结构和布局从一开始就是一致的。
+  尽早在你的设置中添加 Pages，这样文档结构和布局从一开始就是一致的。
+  你之后可以通过命令更改页面格式、页眉和页脚；但如果某个文档在创建时没有考虑分页，
+  再补加 Pages 会更困难。
 </Callout>
 
-## 4. 添加 DOCX 导出功能
+## 3. 添加 DOCX 导出能力
 
 安装 DOCX 导出扩展：
 
@@ -74,12 +76,13 @@ npm install @tiptap-pro/extension-export-docx
 
 将其添加到你的编辑器：
 
-```js
+```ts
 import { ExportDocx } from '@tiptap-pro/extension-export-docx'
 
 const editor = new Editor({
   extensions: [
-    StarterKit,
+    ConvertKit.configure({ table: false }),
+    TableKit,
     Pages.configure({
       /* ... */
     }),
@@ -88,93 +91,95 @@ const editor = new Editor({
 })
 ```
 
-### 4a. 配置 DOCX 导出（可选，但推荐）
+### 3a. 配置 DOCX 导出
 
-你可以配置 DOCX 导出扩展来控制导出行为，处理结果，甚至覆盖样式。
+DOCX 导出扩展完全在浏览器中运行——没有 JWT，没有 App ID，也没有服务器调用。你需要通过一个 `onCompleteExport` 回调来配置它，该回调会接收结果：
 
-```js
+```ts
 import { ExportDocx } from '@tiptap-pro/extension-export-docx'
 
-const editor = new Editor({
-  extensions: [
-    StarterKit,
-    Pages.configure({
-      /* ... */
-    }),
-    ExportDocx.configure({
-      // 这个回调是必需的！它接收导出的文件 (Blob、字符串等)
-      onCompleteExport: (result) => {
-        // 例如，在浏览器中触发下载：
-        const blob = new Blob([result], {
-          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = 'document.docx'
-        a.click()
-        URL.revokeObjectURL(url)
-      },
-      // 可选：选择导出类型（'blob'、'string' 等）
-      exportType: 'blob',
-      // 可选：覆盖 DOCX 样式
-      styleOverrides: {
-        // 详见 DOCX 导出文档的完整样式选项
-      },
-      // 可选：如果你使用自定义 Tiptap 节点，可添加自定义节点转换器
-      customNodes: [],
-    }),
-  ],
+ExportDocx.configure({
+  // 必需。导出的文件会通过这个回调传递。
+  onCompleteExport: (result) => {
+    const blob = new Blob([result], {
+      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'document.docx'
+    a.click()
+    URL.revokeObjectURL(url)
+  },
+  // 可选：'blob'（默认）、'buffer'、'string' 等。
+  exportType: 'blob',
+  // 可选：覆盖段落、标题、表格样式等。
+  styleOverrides: {},
+  // 可选：为你添加的任何自定义 Tiptap 节点定义 DOCX 序列化。
+  customNodes: [],
 })
 ```
 
-<Callout title="提示">
-  <code>onCompleteExport</code> 回调是必需的。这是你处理导出文件的地方（例如，下载、上传等）。
+<Callout title="必需项" variant="warning">
+  `onCompleteExport` 是必需的。导出不会直接返回结果；它会把结果交给你的
+  回调，由你来下载、上传或处理。
 </Callout>
 
-## 5. 导出你的文档
+## 4. 导出你的文档
 
-你现在可以将分页、打印就绪的文档导出为 DOCX：
+从编辑器的命令链触发导出：
 
-```js
+```ts
 editor.commands.exportDocx()
 ```
 
-<Callout title="提示">
-  DOCX 导出扩展与 Pages 扩展无缝协作。请注意，Pages 扩展与 Microsoft Word DOCX 文件之间并非完美的 1:1 映射，因为渲染引擎完全不同。
+<Callout title="往返并不完全字节一致" variant="info">
+  DOCX 导出是忠实的，但不是无损的。有少数特性（下标/上标标记、段落
+  行高、浮动表格）在往返转换时并不完美。完整列表请参阅 [功能支持
+  矩阵](/conversion/getting-started/feature-support-matrix)。
 </Callout>
 
-## 6. 将 DOCX 文件导入到你的编辑器
+## 5. 将 DOCX 文件导入到你的编辑器中
 
-你也可以使用 ImportDocx 扩展直接导入 DOCX 文件到分页编辑器。这让用户可以加载 Word 文档并继续编辑，同时享有完整分页支持。
+添加导入扩展，这样用户就可以把 Word 文档加载到分页编辑器中：
 
-```js
+```bash
+npm install @tiptap-pro/extension-import-docx
+```
+
+```ts
 import { ImportDocx } from '@tiptap-pro/extension-import-docx'
 
 const editor = new Editor({
   extensions: [
-    // ... 其他扩展 ...
+    ConvertKit.configure({ table: false }),
+    TableKit,
+    Pages.configure({
+      /* ... */
+    }),
+    ExportDocx.configure({
+      /* ... */
+    }),
     ImportDocx.configure({
-      appId: 'your-app-id', // 你的 Convert 应用 ID
-      token: 'your-jwt', // 你的认证令牌
-      // 可选：自定义设置的端点与图片上传URL
-      // endpoint: 'https://your-api-endpoint',
-      // imageUploadConfig: { url: 'https://your-upload-endpoint' },
+      appId: 'YOUR_APP_ID', // 你的 Convert App ID
+      token: 'YOUR_JWT', // 由你的服务器生成的 JWT
+      // 可选：导入服务应将文档中提取出的图片上传到哪里
+      // imageUploadConfig: { url: 'https://your-server.com/upload-image' },
     }),
   ],
 })
 ```
 
-触发导入使用：
+要触发导入，请从 `<input type="file" />` 传入一个 `File`：
 
-```js
+```ts
 editor
   .chain()
   .importDocx({
-    file, // 来自 <input type="file" /> 的 File 对象
+    file,
     onImport(context) {
       if (context.error) {
-        // 处理错误
+        // 处理失败（提示、日志、重试等）
         return
       }
       context.setEditorContent(context.content)
@@ -183,18 +188,22 @@ editor
   .run()
 ```
 
-<Callout title="提示">
-  你需要有效的 <code>appId</code> 和 <code>token</code> 才能使用 ImportDocx 扩展。有关设置，请参阅 [Pro 扩展指南](/guides/pro-extensions)。
+当导入的文档包含页眉和页脚时，Pages 扩展会自动识别它们——它们会在每个渲染页面的顶部和底部显示，无需额外配置。
+
+<Callout title="在哪里获取你的 App ID 和 JWT" variant="hint">
+  有关凭据设置，请参阅 [转换安装指南](/conversion/getting-started/install)。JWT 必须在服务器端生成；切勿将你的密钥嵌入浏览器中。
 </Callout>
 
 ---
 
 ## 接下来的步骤
 
-- 探索更多的 [Pages 选项](/pages/core-concepts/options)，以微调你的布局。
-- 使用 Pages 扩展中包含的 Table 扩展添加 [表格](/pages/core-concepts/limitations#tables)，以获得最佳兼容性。
-- 结合其他 Tiptap Pro 扩展，实现功能丰富的编辑器。
+- [Pages 选项](/pages/core-concepts/options) — Pages 暴露的每个选项
+- [页面页眉和页脚](/pages/core-concepts/page-header-footer) — 不同的首页、奇偶页、通过程序打开/关闭编辑器
+- [PagesTableKit](/pages/guides/pages-tablekit) — 详细介绍分页安全表格，包括最重要的已知限制
+- [限制](/pages/core-concepts/limitations) — 不可拆分内容、Pages 不做什么，以及如何处理每种情况
 
-<Callout title="需要帮助？">
-  查看其余文档，或联系我们的支持团队，获取更高级的工作流帮助！
+<Callout title="需要帮助吗？">
+  如果你遇到意料之外的问题，请联系支持团队，或者查看文档的其他部分以了解
+  高级工作流。
 </Callout>

@@ -5,12 +5,12 @@ tags:
   - type: 测试版
 meta:
   title: 安装 Pages | Tiptap Pages 文档
-  description: 在 Tiptap 中安装 Pages 扩展，为您的编辑器和应用添加协作页面管理功能。更多内容请参阅文档！
+  description: 在 Tiptap 中安装 Pages 扩展，为你的编辑器添加页面式布局。在文档中了解更多！
   category: Pages
 ---
 
+import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
-import { Link } from '@/components/Link'
 
 按照本指南安装并配置 Pages 扩展。
 
@@ -20,33 +20,67 @@ import { Link } from '@/components/Link'
     [Tiptap 计划](https://cloud.tiptap.dev/v2/billing)。
   </RequirementItem>
   <RequirementItem label="2. 访问私有注册表">
-    Pages 扩展发布在 Tiptap 的私有 npm 注册表中。请按照[设置指南](/guides/pro-extensions)认证以访问 Tiptap 的私有 npm 注册表。
+    Pages 扩展发布在 Tiptap 的私有 npm 注册表中。请按照[设置指南](/guides/pro-extensions)完成对 Tiptap 私有 npm 注册表的身份验证。
   </RequirementItem>
   <RequirementItem label="3. 安装扩展">
     使用 npm 或您偏好的包管理工具从私有注册表安装该扩展。
   </RequirementItem>
 </Requirements>
 
-## 安装 Pages 扩展
+## 安装 Pages 及其配套包
+
+Pages 扩展**不**自带 node 和 mark schema。要使用它，您还需要安装：
+
+- **`@tiptap-pro/extension-convert-kit`** — 适用于任何 Pages 或 Conversion 工作流的标准编辑器套件。ConvertKit 注册了一个支持 DOCX 的 schema（段落、标题、列表、图片、marks），可同时渲染手动创建的内容以及通过 Tiptap Conversion 导入的内容。
+- **`@tiptap-pro/extension-pages-tablekit`** — 支持分页安全的表格。之所以需要它，是因为 ConvertKit 内置的表格并不适合分页；在 Pages 中使用它们会导致布局断裂。
+
+请从私有注册表安装这三个 Pro 包：
 
 ```bash
-npm install @tiptap-pro/extension-pages@1.0.0-alpha.16.2
+npm install @tiptap-pro/extension-convert-kit \
+            @tiptap-pro/extension-pages-tablekit \
+            @tiptap-pro/extension-pages
 ```
+
+<Callout title="为什么 ConvertKit 和 TableKit 是分开安装的" variant="info">
+  `@tiptap-pro/extension-pages` 和 `@tiptap-pro/extension-pages-pagekit` 都不会重新导出
+  ConvertKit。它们是可以组合在一起的独立包。如果您之后采用
+  [PageKit](/pages/guides/pagekit-usage)，ConvertKit 仍然需要作为单独的安装项与之一起使用。
+</Callout>
 
 ## 集成 Pages 扩展
 
-安装 `pages` 扩展后，通过将 `Pages` 扩展添加到编辑器的 `extensions` 数组中，在编辑器中注册该扩展。
+在编辑器中注册这三个扩展，并禁用 ConvertKit 的表格栈，让 PagesTableKit 的 `TableKit` 接管：
 
-```js
+```ts
+import { Editor } from '@tiptap/core'
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+import { TableKit } from '@tiptap-pro/extension-pages-tablekit'
 import { Pages } from '@tiptap-pro/extension-pages'
 
 const editor = new Editor({
-  ...
   extensions: [
-    ...,
-    Pages,
-  ]
+    ConvertKit.configure({ table: false }),
+    TableKit,
+    Pages.configure({
+      pageFormat: 'A4',
+      header: '我的文档',
+      footer: '第 {page} 页，共 {total} 页',
+    }),
+  ],
 })
 ```
 
-根据您的使用场景，您可能需要配置协作提供者或其他选项。请参考完整文档以获取高级配置说明。
+`pageFormat`、`header` 和 `footer` 这三个选项是您最先会接触到的。完整列表请参见 [API 参考](/pages/core-concepts/options)，或者查看[页面页眉和页脚](/pages/core-concepts/page-header-footer)，了解首页、奇偶页以及富内容页眉/页脚的设置方式。
+
+## 身份验证
+
+Pages 本身不会发起任何网络请求，也不需要任何凭证。一旦您在 Pages 之上再添加 Tiptap Conversion（DOCX 导入、PDF 导出等），就需要 JWT 和 App ID。有关凭证设置，请参见 [Conversion 安装指南](/conversion/getting-started/install)；其中的配置可直接沿用，无需修改。
+
+## 后续步骤
+
+- [Pages 选项](/pages/core-concepts/options) — 完整配置参考
+- [页面页眉和页脚](/pages/core-concepts/page-header-footer) — 不同首页、奇偶页和实时编辑
+- [PagesTableKit](/pages/guides/pages-tablekit) — 详细介绍支持分页安全的表格
+- [从零到可打印](/pages/guides/zero-to-print-ready) — 带有 DOCX 导入和导出的分页编辑器
+- [限制](/pages/core-concepts/limitations) — Pages 无法做到的事情，包括最重要的需要避免的陷阱

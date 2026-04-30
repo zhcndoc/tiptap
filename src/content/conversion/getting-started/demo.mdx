@@ -1,0 +1,50 @@
+---
+title: 实时演示
+tags:
+  - type: beta
+meta:
+  title: 实时演示 | Tiptap 转换
+  description: 在实时 Tiptap 编辑器中试用 DOCX 导入和导出。上传你自己的文档，或者探索预加载的内容。
+  category: 转换
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+这个演示展示了核心的 DOCX 往返流程：导入 Word 文档，在配置了基础格式扩展的 Tiptap 编辑器中编辑，然后再导出回 DOCX。它涵盖文本格式、标题、列表、表格和图片，但不包括分页布局或多格式导出。
+
+<CodeDemo isPro path="/Extensions/ExportImportDocx" isLarge />
+
+## 这个演示包含什么
+
+此演示配置了 DOCX 转换所需的核心扩展：
+
+- **文本格式：** 粗体、斜体、下划线、删除线、文本颜色、高亮和字体系列
+- **块结构：** 标题（H1-H3）、无序列表和有序列表、引用块、水平分割线
+- **表格：** 基础表格支持，包含表头行
+- **图片：** 内联图片（通过 URL）
+- **文本对齐：** 左对齐、居中、右对齐、两端对齐
+- **分页符：** 作为可视分隔线导入（不包含分页布局）
+
+你也可以使用“Use DOCX Template”按钮加载一个示例文档，查看一个无需上传自己文件的预置示例。
+
+## 这个演示不包含什么
+
+这是一个专注于 DOCX 往返流程的演示。它不涵盖转换管道支持的所有功能：
+
+- **不包含分页布局：** 未包含 [Pages extension](/pages/getting-started/overview)，因此没有可视页面、页眉、页脚或页码。分页符会作为分隔线导入，但不会让内容在页面之间流动。
+- **仅限 DOCX：** 该演示导出为 DOCX。其他格式（[PDF](/conversion/export/pdf/editor-extension)、[ODT](/conversion/export/odt/editor-extension)、[EPUB](/conversion/export/epub/editor-extension)、[DOC](/conversion/export/doc/editor-extension)、[Markdown](/conversion/export/markdown/editor-extension)）可通过单独的扩展提供。
+- **默认导出样式：** 导出使用 Tiptap 的默认样式（Aptos 11pt，标准标题尺寸）。未配置自定义 `styleOverrides`。有关如何自定义，请参见 [Styling converted content](/conversion/getting-started/guides/styling-converted-content)。
+- **工具栏受限：** 颜色和字体选项是硬编码预设。生产环境中的编辑器通常会包含完整的颜色选择器和字体选择器。
+
+<Callout variant="hint" title="完整扩展列表">
+  如需渲染所有可导入 DOCX 内容所需的完整扩展集，请参见 [ConvertKit](/conversion/import/docx/convertkit) 页面。
+</Callout>
+
+## 应该关注什么
+
+当你导入文档时，将编辑器输出与原始文档进行比较：
+
+- **文本格式** 会被保留：粗体、斜体、下划线、删除线、文本颜色、高亮、字体系列和字号在往返过程中都会保留。
+- **文档结构** 会被保留：标题保持其层级，列表保留其嵌套结构，表格保留其布局，包括合并单元格和列宽。
+- **变化之处：** 段落级样式，如间距、缩进和 Word 主题颜色，不会在编辑器中渲染。导出的 DOCX 使用的是 Tiptap 的默认样式，而不是原始文档的样式。有关如何控制视觉外观，请参见 [Styling converted content](/conversion/getting-started/guides/styling-converted-content)。

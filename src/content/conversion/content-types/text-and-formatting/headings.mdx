@@ -1,0 +1,149 @@
+---
+title: 标题
+tags:
+  - type: beta
+meta:
+  title: 标题 | Tiptap 转换
+  description: 标题（1 到 9 级）在 DOCX 转换流程中的处理方式，包括导入、编辑器渲染和导出。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+在 Word 中，标题是应用了标题样式的段落（Heading 1 到 Heading 9）。Tiptap 将它们表示为带有 `level` 属性的 `heading` 节点。
+
+## 你需要什么
+
+- **扩展：** [`ConvertKit`](/conversion/import/docx/convertkit)。其自定义 Heading 与自定义 Paragraph 保持一致：间距、缩进、行高、字号以及上下文间距都会渲染为内联 CSS。`TextAlign` 已内置并预先配置为 `['paragraph', 'heading']`。
+- **配置：** 不需要。
+
+<Callout title="标题级别可往返；视觉样式需要 ConvertKit 或 CSS 注入" variant="hint">
+  标题级别（1 到 6）和对齐方式在任何设置下都可以往返。每个标题的属性（间距、缩进、行高、标题标记上的字号）通过 ConvertKit 的自定义 Heading 渲染。来自 Word 样式目录的命名样式排版（例如“Heading 1 is Aptos Light 16pt blue”）是另一个独立问题：编辑器使用你的 CSS 渲染标题，而不是 Word 的主题。要通过作用域 CSS 带入样式目录，请使用实验性的 [CSS 注入](/conversion/import/docx/css-injection) 功能。
+</Callout>
+
+## 支持概览
+
+| | 导入 | 编辑器（使用 ConvertKit） | 导出 |
+| --- | --- | --- | --- |
+| 标题级别 1 到 6 | 支持 | 支持 | 支持 |
+| Title 和 Subtitle 样式 | 作为段落导入（带有来自样式链继承的字体和间距） | 渲染为视觉上类似标题的段落 | 导出为段落 |
+| 标题级别 7 到 9 | 生成 `level: 7`、`8` 或 `9` 的 heading 节点 | 渲染为 `<h1>`，因为标准 Heading 扩展的 `levels` 选项只允许 1–6；级别会保留在 JSON attrs 中，但标签会被强制转换。配置 `Heading.configure({ levels: [1,2,3,4,5,6,7,8,9] })`（或覆盖 ConvertKit 的 `heading` 插槽）可渲染实际标签。 | 默认导出为 `<h1>`（除非你的编辑器 schema 接受更高级别） |
+| 自定义标题样式 | 解析为最接近的标准级别 | 样式名丢失 | 应用通用标题样式 |
+| 文本对齐 | 支持 | 支持（TextAlign） | 支持 |
+| 行内格式 | 支持 | 支持 | 支持 |
+| 标题编号 | 转换为 indent 属性 | 渲染缩进（`padding-left`）；不会生成编号符号 | 不保留 |
+| 每个标题的间距/缩进/行高/字号 | 转换为属性 | 支持 | 应用导出默认值 |
+| 命名样式排版（主题） | 可通过 [CSS 注入](/conversion/import/docx/css-injection) 获取样式目录 | 通过注入的 CSS 渲染 | 应用导出默认值 |
+
+## 导入
+
+可使用 [编辑器扩展](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入标题。两者会生成相同的标题输出。
+
+转换服务会检测 Word 标题样式，其规范名称匹配 `Heading 1` 到 `Heading 9`（不区分大小写，带不带空格都可以），并生成带相应级别的 `heading` 节点。自定义样式名称会被丢弃；只保留解析后的级别。
+
+**Title 和 Subtitle 不会映射为标题。** 导入器的标题检测只匹配 `Heading N` 模式，因此在 Word 中样式为 `Title` 或 `Subtitle` 的段落会作为 `paragraph` 节点导入。这些样式的字体、字号和间距会通过 `basedOn` 链传递为行级标记（`textStyle.fontSize`、`textStyle.fontFamily` 等）以及段落级属性，所以导入结果即使不是标题节点，看起来也会像标题。输出中不会保留原始样式名，因此开发者仅凭 JSON 无法判断哪些段落原本是 `Title`，哪些是 `Normal`。如果你的应用中 `h1`/`h2` 语义对 Title/Subtitle 很重要，目前的变通方法是在导入前预处理 DOCX 文件（例如用 docx 编辑器）并将这些样式重命名为 `Heading 1` 和 `Heading 2`。
+
+转换服务输出的标题节点结构如下：
+
+```json
+{
+  "type": "heading",
+  "attrs": {
+    "level": 2,
+    "textAlign": "center"
+  },
+  "content": [
+    {
+      "type": "text",
+      "text": "My Heading",
+      "marks": [
+        { "type": "bold", "attrs": {} }
+      ]
+    }
+  ]
+}
+```
+
+<Callout variant="warning" title="标题级别 7–9 会渲染为 h1">
+  Word 支持标题级别 1 到 9，导入转换器也能识别全部九个级别。`Heading` 扩展的默认 `levels` 选项是 `[1,2,3,4,5,6]`，当节点级别超出允许列表时，其 `renderHTML` 会回退到 `levels[0]`（即 `1`）。因此，导入的 7、8、9 级标题在编辑器中默认会渲染为 `<h1>`。级别值会保留在节点的 JSON `attrs.level` 中，所以数据不会丢失；只是渲染标签被强制转换了。若要渲染实际的 `<h7>`–`<h9>` 标签（或你想要的任何标签映射），请将完整范围传给 `Heading.configure`：
+
+```ts
+ConvertKit.configure({
+  heading: { levels: [1, 2, 3, 4, 5, 6, 7, 8, 9] },
+})
+```
+</Callout>
+
+### 保留内容
+
+- 标题级别（JSON 中为 1 到 9；除非扩展 `levels` 选项，否则 7 到 9 会渲染为 `<h1>`）
+- 标题内部的行内格式（粗体、斜体、颜色以及作为子文本节点标记的字体）
+- 文本对齐（作为 `textAlign` 属性）
+- 段前/段后间距（作为 `spacingBefore` 和 `spacingAfter` 属性；由 ConvertKit 的自定义 Heading 渲染为 `margin-top` / `margin-bottom`）
+
+### 丢失内容
+
+标准 `Heading` 扩展的 schema 只定义了 `level`。安装 ConvertKit 后，自定义 Heading 还会渲染 `spacingBefore`、`spacingAfter`、`lineHeight`、`fontSize`、`indent`、`firstLineIndent` 和 `contextualSpacing`。没有 ConvertKit 时，这些属性在 `setEditorContent()` 时会被剥离。
+
+无论编辑器如何设置，以下内容都会丢失：
+
+- **每个标题的边框和背景。** 导入器不会提取。
+- **Word 的命名样式排版。** 你编辑器中的 Heading 1 会按你的 CSS 定义的 `<h1>` 显示，而不是像 Word 的“Heading 1”主题样式。要带入样式目录，请使用 [CSS 注入](/conversion/import/docx/css-injection)。
+- **标题编号符号。** Word 编号（例如“1.2.3”）会在标题上生成一个 `indent` 属性。ConvertKit 会渲染缩进，但编号前缀本身既不会由导入器生成，也不会由编辑器生成。
+
+关于处理不符合你 schema 的内容，请参阅 [无效 schema 指南](/guides/invalid-schema)；关于在需要 ConvertKit 不支持的属性时如何扩展扩展，请参阅 [样式化转换内容](/conversion/getting-started/guides/styling-converted-content) 指南。
+
+## 编辑器渲染
+
+[`Heading`](/editor/extensions/nodes/heading) 扩展由 [`ConvertKit`](/conversion/import/docx/convertkit) 注册，并根据 `level` 属性将标题节点渲染为 `<h1>` 到 `<h6>` HTML 标签。ConvertKit 会替换为自定义 Heading，使其暴露 DOCX 感知属性（间距、缩进、行高、字号、上下文间距）。
+
+### 文本对齐已内置
+
+ConvertKit 也会注册 `TextAlign`，并将其预配置为 `['paragraph', 'heading']`，因此从导入的 DOCX 标题中得到的 `textAlign` 属性会自动渲染。如果你禁用了内置的 `textAlign` 插槽，该属性会保留在 JSON 中，但不会被应用——参见 [无效 schema 指南](/guides/invalid-schema)。
+
+### 与 Word 的视觉差异
+
+编辑器使用你的 CSS 样式渲染标题，而不是 Word 的主题样式。Word 中的 Heading 2（通常是 Aptos Light、13pt、蓝色）在编辑器中会看起来不同，除非你将 `h2` 样式调整得一致。结构会保留。视觉外观由你通过编辑器的 CSS 来控制。参见 [样式化转换内容](/conversion/getting-started/guides/styling-converted-content) 指南了解如何处理。
+
+## 导出
+
+可使用 [编辑器扩展](/conversion/export/docx/editor-extension) 或 [REST API](/conversion/export/docx/rest-api) 导出标题。该扩展支持 [`paragraphOverrides` 和 `textRunOverrides`](/conversion/export/docx/styles#element-overrides)，可精细控制标题段落和文本运行的默认样式。REST API 不接受元素覆盖。若要通过 REST API 自定义标题样式，请使用 [`styleOverrides`](/conversion/export/docx/styles) 重新定义标题文档样式。
+
+导出转换器会接收 `heading` 节点，并生成带相应标题样式的 DOCX 段落。文本对齐（`left`、`center`、`right`、`justify`）会被正确导出。
+
+**级别映射：** `level: 1` → Word Heading 1，`level: 2` → Word Heading 2，依此类推直到 level 6。
+
+### 自定义导出的标题样式
+
+导出会对每个标题级别应用带有明确偏好的默认样式：Aptos Light 字体、蓝色（#2E74B5）以及按级别区分的字号。如果你正在为企业模板或品牌导出文档，这些默认值很可能不符合你的需求。可通过 `styleOverrides` 自定义：
+
+```ts
+ExportDocx.configure({
+  styleOverrides: {
+    paragraphStyles: [
+      {
+        id: 'Heading1',
+        name: 'Heading 1',
+        run: {
+          font: 'Arial',
+          size: 32,        // 半磅值（32 = 16pt）
+          bold: true,
+          color: '000000',
+        },
+        paragraph: {
+          spacing: {
+            before: 240,   // twips（240 = 12pt）
+            after: 120,    // twips（120 = 6pt）
+          },
+        },
+      },
+    ],
+  },
+})
+```
+
+### 可往返保留的内容
+
+一个居中对齐、内部含有加粗和彩色文本的 Heading 2，在完整的导入 → 编辑 → 导出流程中可以保留下来。标题级别、对齐方式和行内格式都会保留。
+
+变化之处在于：导出的标题会使用导出的默认样式（或覆盖后的样式），而不是原始 DOCX 的主题样式。字体、字号、间距和颜色由导出配置决定，不会从原始文档中带过来。

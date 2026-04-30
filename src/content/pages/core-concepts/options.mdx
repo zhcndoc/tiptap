@@ -1,118 +1,296 @@
 ---
 title: 页扩展 API 参考
 meta:
-  title: API 参考 | Tiptap 页扩展
-  description: Tiptap 页扩展选项的 API 参考。
-  category: 页
+  title: API 参考 | Tiptap Pages
+  description: Tiptap Pages 扩展的 API 参考——选项、命令和存储。
+  category: Pages
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-```js
-interface PagesOptions {
-  /**
-   * 页面格式，决定页面尺寸和边距。
-   * 可以是内置格式名称或自定义页面格式对象。
-   * 内置格式：A4、A3、A5、Letter、Legal、Tabloid
-   * @default 'A4'
-   */
-  pageFormat: 'A4' | 'A3' | 'A5' | 'Letter' | 'Legal' | 'Tabloid' | PageFormat
+本页面是 Pages 扩展的 **options**、**commands** 和 **storage** 的权威参考。有关面向任务的演练，请参见 [Page format](/pages/core-concepts/page-format)、[Page header and footer](/pages/core-concepts/page-header-footer)、[Page gap](/pages/core-concepts/page-gap)、[Page break node](/pages/core-concepts/page-break-node) 和 [Zoom](/pages/core-concepts/zoom)。
 
-  /**
-   * 页面页眉高度，单位像素。
-   * @default 50
-   */
-  headerHeight?: number
+## Options interface
 
-  /**
-   * 页面页脚高度，单位像素。
-   * @default 50
-   */
-  footerHeight?: number
+```ts
+import type { Extensions, JSONContent } from '@tiptap/core'
 
-  /**
-   * 页面间距，单位像素。
-   * @default 50
-   */
-  pageGap?: number
+type PagesHeaderFooter = string | JSONContent
 
-  /**
-   * 每页的页眉内容，可以是字符串（支持占位符）或函数。
-   * @default ''
-   */
-  header?: string | ((page: number, total: number) => string)
+type BuiltInPageFormat = 'A4' | 'A3' | 'A5' | 'Letter' | 'Legal' | 'Tabloid'
 
-  /**
-   * 每页的页脚内容，可以是字符串（支持占位符）或函数。
-   * @default ''
-   */
-  footer?: string | ((page: number, total: number) => string)
-
-  /**
-   * 页面间距区域的背景颜色。
-   * @default undefined
-   */
-  pageGapBackground?: string
-
-  /**
-   * 页面格式变化时调用的回调函数。
-   * 接收新的页面格式作为参数。
-   * @default () => {}
-   */
-  onPageFormatChange?: (pageFormat: PageFormat) => void
-
-  /**
-   * 用于视觉缩放的初始缩放级别。限制在 [0.25, 4]。
-   * @default 1
-   */
-  zoom?: number
-
-  /**
-   * 缩放级别变化时调用的回调函数。
-   * 接收新的缩放级别作为参数。
-   */
-  onZoomChange?: (zoom: number) => void
+interface CustomPageFormat {
+  id: string
+  width: number // 像素
+  height: number // 像素
+  margins: {
+    top: number
+    right: number
+    bottom: number
+    left: number
+  }
 }
 
-interface PageFormat {
-  name: string
-  width: number    // 宽度，单位像素
-  height: number   // 高度，单位像素
-  margins: {
-    top: number    // 上边距，单位像素
-    right: number  // 右边距，单位像素
-    bottom: number // 下边距，单位像素
-    left: number   // 左边距，单位像素
-  }
+type PageFormat = BuiltInPageFormat | CustomPageFormat
+
+interface PagesOptions {
+  /** 内置格式名称或自定义页面格式对象。默认：'A4'。 */
+  pageFormat: PageFormat
+
+  /** 初始缩放级别。限制在 [0.25, 4]。默认：1。 */
+  zoom?: number
+
+  /** 默认页眉内容。接受纯字符串、HTML 字符串或 Tiptap JSONContent。
+   *  支持 `{page}` 和 `{total}` 占位符。默认：''。 */
+  header: string | JSONContent
+
+  /** 默认页脚内容。与 `header` 结构相同。默认：''。 */
+  footer: string | JSONContent
+
+  /** 从页面顶部到页眉内容开始位置的距离（像素）。
+   *  默认为页面上边距的 50%。 */
+  headerTopMargin?: number
+
+  /** 从页脚内容底部到页面底部的距离（像素）。
+   *  默认为页面下边距的 50%。 */
+  footerBottomMargin?: number
+
+  /** 页面之间的视觉间距（像素）。默认：50。 */
+  pageGap?: number
+
+  /** 显示在页面之间区域中的 CSS 颜色。默认：'#ffffff'。 */
+  pageGapBackground?: string
+
+  /** 应用于页眉和页脚编辑器覆盖层的强调色。默认：'#6366f1'。 */
+  accentColor?: string
+
+  /** 仅用于页眉覆盖层的强调色。默认为 `accentColor` 的值。 */
+  headerAccentColor?: string
+
+  /** 仅用于页脚覆盖层的强调色。默认为 `accentColor` 的值。 */
+  footerAccentColor?: string
+
+  /** 启用首页使用不同的页眉和页脚（Word 的“首页不同”）。
+   *  默认：false。 */
+  differentFirstPage?: boolean
+
+  /** 首页页眉内容。默认：''。 */
+  headerFirstPage?: PagesHeaderFooter
+
+  /** 首页页脚内容。默认：''。 */
+  footerFirstPage?: PagesHeaderFooter
+
+  /** 启用奇数页与偶数页使用不同的页眉和页脚（Word 的“奇偶页不同”）。
+   *  默认：false。 */
+  differentOddEven?: boolean
+
+  /** 奇数页页眉内容。默认：''。 */
+  headerOdd?: PagesHeaderFooter
+
+  /** 偶数页页眉内容。默认：''。 */
+  headerEven?: PagesHeaderFooter
+
+  /** 奇数页页脚内容。默认：''。 */
+  footerOdd?: PagesHeaderFooter
+
+  /** 偶数页页脚内容。默认：''。 */
+  footerEven?: PagesHeaderFooter
+
+  /** 独立启用与 `differentFirstPage` 无关的不同首页页脚。
+   *  调用 `setDifferentFirstPage(true)` 时会自动设置。 */
+  differentFirstPageFooter?: boolean
+
+  /** 独立启用与 `differentOddEven` 无关的不同奇偶页页脚。
+   *  调用 `setDifferentOddEven(true)` 时会自动设置。 */
+  differentOddEvenFooter?: boolean
+
+  /** 注册到内部页眉/页脚编辑器上的扩展。
+   *  默认为 StarterKit；请镜像主编辑器的扩展栈以保持 schema 对齐。 */
+  headerFooterExtensions?: Extensions
+
+  /** 当 `setPageFormat()` 成功，或 configure() 应用了新格式时调用。 */
+  onPageFormatChange?: (pageFormat: PageFormat) => void
+
+  /** 当 `setZoom()` 更改缩放级别时调用。 */
+  onZoomChange?: (zoom: number) => void
+
+  /** 可选——如果用户双击编辑器外部，返回 true 以保持当前活动的页眉或页脚编辑器打开。
+   *  同时适用于两者。 */
+  onDblClickHeaderFooterPreventClose?: (event: MouseEvent) => boolean
+
+  /** 类似 `onDblClickHeaderFooterPreventClose`，但仅适用于页眉覆盖层。
+   *  当两者都设置时，优先于回退项。 */
+  onDblClickHeaderPreventClose?: (event: MouseEvent) => boolean
+
+  /** 类似 `onDblClickHeaderFooterPreventClose`，但仅适用于页脚覆盖层。
+   *  当两者都设置时，优先于回退项。 */
+  onDblClickFooterPreventClose?: (event: MouseEvent) => boolean
 }
 ```
 
-| 选项                 | 类型 / 值                | 默认值      | 描述                                                                                         |
-| -------------------- | ---------------------- | ----------- | ------------------------------------------------------------------------------------------ |
-| `pageFormat`         | `string \| PageFormat` | `'A4'`      | 内置格式名称或自定义页面格式对象                                                              |
-| `headerHeight`       | `number` (px)          | `50`        | 页眉高度，单位像素                                                                          |
-| `footerHeight`       | `number` (px)          | `50`        | 页脚高度，单位像素                                                                          |
-| `pageGap`            | `number` (px)          | `50`        | 页面之间的间距，单位像素                                                                      |
-| `header`             | `string \| fn`         | `''`        | 页眉内容；字符串（支持 `{page}`/`{total}`）或 `(pageNumber, totalPages) => string` |
-| `footer`             | `string \| fn`         | `'{page}'`  | 页脚内容；字符串（支持 `{page}`/`{total}`）或 `(pageNumber, totalPages) => string` |
-| `pageGapBackground`  | `string` (CSS color)   | `undefined` | 页面间距区域的背景颜色                                                                      |
-| `onPageFormatChange` | `fn`                   | `() => {}`  | 页面格式变化时的回调；接收新的 PageFormat                                                     |
-| `zoom`               | `number`               | `1`         | 初始缩放级别（0.25–4）。参见 [缩放](/pages/core-concepts/zoom)                         |
-| `onZoomChange`       | `fn`                   | `undefined` | 缩放变化时的回调；接收新的缩放级别                                                            |
+## Options reference
+
+### Layout
+
+| Option              | Type         | Default     | Notes                                                              |
+| ------------------- | ------------ | ----------- | ------------------------------------------------------------------ |
+| `pageFormat`        | `PageFormat` | `'A4'`      | 有关内置格式，请参见 [Page format](/pages/core-concepts/page-format)。 |
+| `zoom`              | `number`     | `1`         | 限制在 `[0.25, 4]`。参见 [Zoom](/pages/core-concepts/zoom)。     |
+| `pageGap`           | `number`     | `50`        | 像素。仅用于视觉显示——不影响导出。                      |
+| `pageGapBackground` | `string`     | `'#ffffff'` | 任意 CSS 颜色值。                                               |
+
+### Headers and footers
+
+页眉/页脚选项的完整参考位于 [Page header and footer](/pages/core-concepts/page-header-footer#complete-options-reference)。下表概述了表面层；有关首页、奇偶页、内容类型以及编辑器覆盖层行为，请点击链接查看。
+
+| Option                               | Type                             | Default              | Description                                               |
+| ------------------------------------ | -------------------------------- | -------------------- | --------------------------------------------------------- |
+| `header`                             | `PagesHeaderFooter`              | `''`                 | 默认页眉内容                                    |
+| `footer`                             | `PagesHeaderFooter`              | `''`                 | 默认页脚内容                                    |
+| `headerTopMargin`                    | `number`                         | 页上边距的 50%    | 从页面顶部到页眉内容的距离（px）             |
+| `footerBottomMargin`                 | `number`                         | 页下边距的 50% | 从页脚内容到页面底部的距离（px）          |
+| `differentFirstPage`                 | `boolean`                        | `false`              | 首页页眉和页脚与其余页面不同         |
+| `headerFirstPage`                    | `PagesHeaderFooter`              | `''`                 | 首页页眉内容                                 |
+| `footerFirstPage`                    | `PagesHeaderFooter`              | `''`                 | 首页页脚内容                                 |
+| `differentOddEven`                   | `boolean`                        | `false`              | 奇数页和偶数页使用不同的页眉和页脚         |
+| `headerOdd`                          | `PagesHeaderFooter`              | `''`                 | 奇数页页眉内容                                  |
+| `headerEven`                         | `PagesHeaderFooter`              | `''`                 | 偶数页页眉内容                                 |
+| `footerOdd`                          | `PagesHeaderFooter`              | `''`                 | 奇数页页脚内容                                  |
+| `footerEven`                         | `PagesHeaderFooter`              | `''`                 | 偶数页页脚内容                                 |
+| `headerFooterExtensions`             | `Extensions`                     | `StarterKit`         | 用于内部页眉/页脚编辑器的扩展            |
+| `onDblClickHeaderFooterPreventClose` | `(event: MouseEvent) => boolean` | `undefined`          | 双击外部时防止关闭（页眉 + 页脚） |
+| `onDblClickHeaderPreventClose`       | `(event: MouseEvent) => boolean` | `undefined`          | 双击外部时防止关闭（仅页眉）     |
+| `onDblClickFooterPreventClose`       | `(event: MouseEvent) => boolean` | `undefined`          | 双击外部时防止关闭（仅页脚）        |
+| `accentColor`                        | `string`                         | `'#6366f1'`          | 两个覆盖层的强调色                            |
+| `headerAccentColor`                  | `string`                         | `accentColor` value  | 仅页眉覆盖层的强调色                  |
+| `footerAccentColor`                  | `string`                         | `accentColor` value  | 仅页脚覆盖层的强调色                  |
+
+### Callbacks
+
+| Option               | Type                           | Description                                                          |
+| -------------------- | ------------------------------ | -------------------------------------------------------------------- |
+| `onPageFormatChange` | `(format: PageFormat) => void` | 当通过 configure 或 `setPageFormat` 更改页面格式时触发。 |
+| `onZoomChange`       | `(zoom: number) => void`       | 当通过 `setZoom` 更改缩放级别时触发。                     |
+
+## Commands reference
+
+有关每个命令的深入说明，请参见链接的 core-concepts 页面。
+
+### Layout commands
+
+| Command                | Parameters               | Description                                              |
+| ---------------------- | ------------------------ | -------------------------------------------------------- |
+| `setPageFormat`        | `pageFormat: PageFormat` | 更改页面格式。触发 `onPageFormatChange`。      |
+| `setZoom`              | `zoom: number`           | 设置缩放（限制在 `[0.25, 4]`）。触发 `onZoomChange`。 |
+| `setPageGap`           | `pageGap: number`        | 设置页面间距（px）。必须为正数。        |
+| `setPageGapBackground` | `color: string`          | 设置页面间距背景颜色（任意 CSS 颜色值）。 |
+
+### Header / footer commands
+
+完整参考也位于 [Page header and footer](/pages/core-concepts/page-header-footer#commands-reference)。
+
+| Command                       | Parameters                  | Description                                         |
+| ----------------------------- | --------------------------- | --------------------------------------------------- |
+| `setHeader`                   | `header: PagesHeaderFooter` | 设置默认页眉内容                      |
+| `setFooter`                   | `footer: PagesHeaderFooter` | 设置默认页脚内容                      |
+| `setHeaderTopMargin`          | `margin: number`            | 设置页眉上边距（px）                          |
+| `setFooterBottomMargin`       | `margin: number`            | 设置页脚下边距（px）                       |
+| `setDifferentFirstPage`       | `enabled: boolean`          | 切换不同的首页页眉 _和_ 页脚     |
+| `setDifferentFirstPageFooter` | `enabled: boolean`          | 独立切换不同的首页页脚    |
+| `setHeaderFirstPage`          | `header: PagesHeaderFooter` | 设置首页页眉内容                       |
+| `setFooterFirstPage`          | `footer: PagesHeaderFooter` | 设置首页页脚内容                       |
+| `setDifferentOddEven`         | `enabled: boolean`          | 切换不同的奇数/偶数页页眉 _和_ 页脚     |
+| `setDifferentOddEvenFooter`   | `enabled: boolean`          | 独立切换不同的奇数/偶数页页脚     |
+| `setHeaderOdd`                | `header: PagesHeaderFooter` | 设置奇数页页眉内容                        |
+| `setHeaderEven`               | `header: PagesHeaderFooter` | 设置偶数页页眉内容                       |
+| `setFooterOdd`               | `footer: PagesHeaderFooter` | 设置奇数页页脚内容                        |
+| `setFooterEven`               | `footer: PagesHeaderFooter` | 设置偶数页页脚内容                       |
+| `openHeaderEditor`            | `{ pageNumber: number }`    | 为特定页面打开页眉编辑器（从 1 开始编号）。 |
+| `openFooterEditor`            | `{ pageNumber: number }`    | 为特定页面打开页脚编辑器（从 1 开始编号）。 |
+| `closeHeaderFooterEditors`    | none                        | 关闭当前打开的页眉/页脚编辑器        |
+| `closeHeaderEditor`           | none                        | 如果页眉编辑器已打开，则关闭它                     |
+| `closeFooterEditor`           | none                        | 如果页脚编辑器已打开，则关闭它                     |
+| `setAccentColor`              | `color: string`             | 设置两个编辑器覆盖层的强调色           |
+| `setHeaderAccentColor`        | `color: string`             | 仅设置页眉覆盖层的强调色        |
+| `setFooterAccentColor`        | `color: string`             | 仅设置页脚覆盖层的强调色        |
+
+## 存储引用
+
+从 `editor.storage.pages` 中读取这些内容。标记为 **只读** 的属性不应直接写入——请使用对应的命令。
+
+### 布局
+
+| 属性                         | 类型                              | 描述                                           |
+| ---------------------------- | --------------------------------- | ---------------------------------------------- |
+| `pageFormat`                 | `PageFormat`                      | 当前页面格式                                   |
+| `zoom`                       | `number`                          | 当前缩放级别（只读——使用 `setZoom`）           |
+| `getZoom`                    | `() => number`                    | 获取当前缩放级别的便捷方法                      |
+| `pageGap`                    | `number`                          | 当前页面之间的间距（px）                        |
+| `pageGapBackground`          | `string`                          | 当前页面间距背景颜色                            |
+| `getCurrentPage`             | `() => number \| null`            | 光标所在的 1 起始页码                            |
+| `getDistanceToNextPagebreak` | `(pos: number) => number \| null` | 从 `pos` 到下一处分页符的像素距离                |
+| `getDistanceToPrevPagebreak` | `(pos: number) => number \| null` | 从 `pos` 到上一处分页符的像素距离                |
+
+### 页眉和页脚（渲染后的 HTML 和 JSON）
+
+当用户通过覆盖层编辑页眉或页脚后，渲染后的 HTML 和底层的 Tiptap JSON 都会暴露在存储中。导出为 DOCX 时，请使用 JSON 形式进行序列化。HTML 属性始终是字符串（在任何编辑之前默认为 `''`）。JSON 属性在用户首次通过覆盖层编辑对应的页眉或页脚之前为 `null`。
+
+| 属性                   | 类型                            | 描述                                  |
+| ---------------------- | ------------------------------- | ------------------------------------- |
+| `headerHTML`           | `string`                        | 默认页眉渲染后的 HTML                 |
+| `headerJSON`           | `Record<string, any> \| null`   | 默认页眉的 Tiptap JSON                |
+| `headerFirstPageHTML`  | `string`                        | 首页页眉渲染后的 HTML                 |
+| `headerFirstPageJSON`  | `Record<string, any> \| null`   | 首页页眉的 Tiptap JSON                |
+| `headerOddHTML`        | `string`                        | 奇数页页眉渲染后的 HTML               |
+| `headerOddJSON`        | `Record<string, any> \| null`   | 奇数页页眉的 Tiptap JSON              |
+| `headerEvenHTML`       | `string`                        | 偶数页页眉渲染后的 HTML               |
+| `headerEvenJSON`       | `Record<string, any> \| null`   | 偶数页页眉的 Tiptap JSON              |
+| `footerHTML`           | `string`                        | 默认页脚渲染后的 HTML                 |
+| `footerJSON`           | `Record<string, any> \| null`   | 默认页脚的 Tiptap JSON                |
+| `footerFirstPageHTML`  | `string`                        | 首页页脚渲染后的 HTML                 |
+| `footerFirstPageJSON`  | `Record<string, any> \| null`   | 首页页脚的 Tiptap JSON                |
+| `footerOddHTML`        | `string`                        | 奇数页页脚渲染后的 HTML               |
+| `footerOddJSON`        | `Record<string, any> \| null`   | 奇数页页脚的 Tiptap JSON              |
+| `footerEvenHTML`       | `string`                        | 偶数页页脚渲染后的 HTML               |
+| `footerEvenJSON`       | `Record<string, any> \| null`   | 偶数页页脚的 Tiptap JSON              |
+| `differentFirstPage`   | `boolean`             | 首页是否不同                          |
+| `differentOddEven`     | `boolean`             | 奇偶页是否不同                        |
+| `differentFirstPageFooter` | `boolean`          | 首页页脚是否不同（独立标志）          |
+| `differentOddEvenFooter`   | `boolean`          | 奇偶页脚是否不同（独立标志）          |
+| `accentColor`          | `string`              | 当前强调色（两者）                    |
+| `headerAccentColor`    | `string`              | 当前页眉强调色                        |
+| `footerAccentColor`    | `string`              | 当前页脚强调色                        |
+
+### 活动的内部编辑器状态
+
+当页眉或页脚覆盖层打开时，这些属性会反映当前处于活动状态的是哪一个。适用于构建跟随当前聚焦编辑器的工具栏——完整的工具栏示例请参见 [页面页眉和页脚](/pages/core-concepts/page-header-footer#active-editor-state)。
+
+| 属性               | 类型                           | 描述                                                          |
+| ------------------ | ------------------------------ | ------------------------------------------------------------- |
+| `activeEditor`     | `Editor \| null`               | 当前活动的页眉/页脚编辑器实例，或 `null`                    |
+| `activeEditorType` | `'header' \| 'footer' \| null` | 哪种覆盖层处于活动状态                                         |
+| `activePageNumber` | `number \| null`               | 正在编辑的页码                                                 |
+| `headerEditorOn`   | `Editor['on'] \| null`         | 预绑定的页眉覆盖层内部编辑器事件订阅函数                       |
+| `headerEditorOff`  | `Editor['off'] \| null`        | 预绑定的页眉覆盖层内部编辑器取消订阅函数                       |
+| `footerEditorOn`   | `Editor['on'] \| null`         | 预绑定的页脚覆盖层内部编辑器事件订阅函数                       |
+| `footerEditorOff`  | `Editor['off'] \| null`        | 预绑定的页脚覆盖层内部编辑器取消订阅函数                       |
 
 ## 示例用法
 
-### 使用内置格式的基本配置
+### 内置格式
 
-```js
+```ts
+import { Editor } from '@tiptap/core'
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+import { TableKit } from '@tiptap-pro/extension-pages-tablekit'
 import { Pages } from '@tiptap-pro/extension-pages'
 
 const editor = new Editor({
   extensions: [
+    ConvertKit.configure({ table: false }),
+    TableKit,
     Pages.configure({
       pageFormat: 'A4',
-      headerHeight: 60,
-      footerHeight: 40,
       pageGap: 40,
       header: '我的项目',
       footer: '第 {page} 页，共 {total} 页',
@@ -122,97 +300,34 @@ const editor = new Editor({
 })
 ```
 
-### 自定义页面格式配置
+### 自定义格式和运行时更改
 
-```js
-import { Pages } from '@tiptap-pro/extension-pages'
+```ts
+import { cmToPixels } from '@tiptap-pro/extension-pages'
 
-const editor = new Editor({
-  extensions: [
-    Pages.configure({
-      pageFormat: {
-        name: '自定义格式',
-        width: 600,
-        height: 800,
-        margins: {
-          top: 40,
-          right: 30,
-          bottom: 40,
-          left: 30,
-        },
-      },
-      header: '自定义文档',
-      footer: '{page} / {total}',
-      onPageFormatChange: (pageFormat) => {
-        console.log('页面格式已更改:', pageFormat.name)
-        // 保存用户偏好，更新界面等操作
-      },
-    }),
-  ],
+Pages.configure({
+  pageFormat: {
+    id: 'custom-page-format',
+    width: cmToPixels(22.94),
+    height: cmToPixels(35.18),
+    margins: {
+      top: cmToPixels(2.54),
+      right: cmToPixels(2.54),
+      bottom: cmToPixels(2.54),
+      left: cmToPixels(2.54),
+    },
+  },
+  onPageFormatChange: (pageFormat) => {
+    console.log('页面格式已更改：', pageFormat.id)
+  },
 })
-```
 
-## 可用命令
-
-Pages 扩展提供以下命令：
-
-| 命令            | 参数                     | 描述                                                                               |
-| --------------- | ------------------------ | ------------------------------------------------------------------------------------------ |
-| `setPageFormat` | `pageFormat: PageFormat` | 以编程方式更改页面格式                                                                  |
-| `setZoom`       | `zoom: number`           | 设置缩放级别（限制在 0.25–4）。参见 [缩放](/pages/core-concepts/zoom) |
-
-### 命令用法
-
-```js
-// 切换到内置格式
+// 稍后切换
 editor.commands.setPageFormat('Letter')
-
-// 切换到自定义格式
-editor.commands.setPageFormat({
-  id: 'wide-page-format',
-  width: 1000, // 像素
-  height: 700, // 像素
-  margins: { top: 20, right: 20, bottom: 20, left: 20 } // 像素
-})
 ```
 
-<Callout title="注意">
-  <code>header</code> 和 <code>footer</code> 选项可以接受字符串（带有 <code>\{page\}</code> 和 <code>\{total\}</code> 占位符）或函数 <code>(page, total) =&gt; string</code>，用于动态内容。
+<Callout title="页眉和页脚模板标记">
+  `header` 和 `footer` 都接受标记 <code>{`{page}`}</code>（当前 1 起始页码）和
+  <code>{`{total}`}</code>（总页数）。它们会在渲染时替换，并可用于纯
+  字符串、HTML 字符串以及 JSONContent。
 </Callout>
-
-## 页眉和页脚编辑器存储
-
-当页眉或页脚编辑器覆盖层打开时，Pages 扩展会通过 `editor.storage.pages` 暴露当前活动的内部编辑器。这对于自定义工具栏、状态 UI，以及监听页眉或页脚覆盖层中的编辑器事件非常有用。
-
-| 存储属性           | 类型                           | 描述                                                            |
-| ------------------ | ------------------------------ | ---------------------------------------------------------------------- |
-| `activeEditor`     | `Editor \| null`               | 当前活动的页眉/页脚内部编辑器；如果没有活动覆盖层，则为 `null` |
-| `activeEditorType` | `'header' \| 'footer' \| null` | 当前活动的内部编辑器属于页眉还是页脚                                |
-| `activePageNumber` | `number \| null`               | 当前页眉/页脚编辑器对应的页码                                        |
-| `headerEditorOn`   | `Editor['on'] \| null`         | 绑定到页眉内部编辑器的事件订阅辅助函数                                |
-| `headerEditorOff`  | `Editor['off'] \| null`        | 绑定到页眉内部编辑器的事件取消订阅辅助函数                            |
-| `footerEditorOn`   | `Editor['on'] \| null`         | 绑定到页脚内部编辑器的事件订阅辅助函数                                |
-| `footerEditorOff`  | `Editor['off'] \| null`        | 绑定到页脚内部编辑器的事件取消订阅辅助函数                            |
-
-`headerEditorOn` / `headerEditorOff` 和 `footerEditorOn` / `footerEditorOff` 辅助函数可让你订阅页眉和页脚编辑器的事件。这对于响应聚焦、选区更新或内容变更等事件非常有用。
-
-```tsx
-useEffect(() => {
-  if (!editor) return
-
-  const handleFocus = () => {
-    const { activeEditorType, activePageNumber } = editor.storage.pages
-    console.log('正在编辑', activeEditorType, activePageNumber)
-  }
-
-  editor.storage.pages.headerEditorOn?.('focus', handleFocus)
-  editor.storage.pages.footerEditorOn?.('focus', handleFocus)
-
-  return () => {
-    editor.storage.pages.headerEditorOff?.('focus', handleFocus)
-    editor.storage.pages.footerEditorOff?.('focus', handleFocus)
-  }
-}, [editor])
-```
-
-有关完整的工具栏示例，请参见 [页眉和页脚](/pages/core-concepts/page-header-footer#active-editor-state)。

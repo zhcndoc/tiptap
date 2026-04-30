@@ -1,0 +1,88 @@
+---
+title: 页面结构
+tags:
+  - type: beta
+meta:
+  title: 页面结构 | Tiptap 转换
+  description: 在整个 DOCX 转换流程中，如何处理分页、分节、页面大小、页边距和页码。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+页面结构涵盖控制内容如何跨页面流动的元素：分页符、节、页面大小、页边距和页码。分页符可在管道中完整往返。其他页面结构属性仅部分支持。
+
+## 你需要了解的内容
+
+- **扩展：** `@tiptap-pro/extension-pagebreak`（不在 StarterKit 中）以及用于分页布局的 [`Pages`](/pages/getting-started/overview)
+- **导出选项：** 导出扩展或 REST API 上的 `pageSize` 和 `pageMargins`
+- **集成路径：** 通过 [编辑器扩展](/conversion/import/docx/editor-extension) 和 [REST API](/conversion/import/docx/rest-api) 导入与导出都以相同方式工作。两种导出路径都接受 `pageSize` 和 `pageMargins`。
+
+## 支持概览
+
+| 功能 | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| 分页符 | 支持 | 支持（PageBreak） | 支持 |
+| 页面大小 | 不支持 | 支持（[Pages](/pages/getting-started/overview)） | 支持（可配置） |
+| 页边距 | 不支持 | 支持（Pages） | 支持（可配置） |
+| 节 | 部分支持（会提取并应用列配置） | 不支持 | 仅单个节 |
+| 页码 | 不支持 | 支持（通过页眉/页脚） | 通过页眉/页脚内容 |
+| 栏 | 导入时支持（会创建 columns/column 节点） | 不支持 | 不支持 |
+
+## 分页符
+
+分页符可在管道中完整往返。详见专门的[分页符](/conversion/content-types/page-layout/page-breaks)页面。
+
+## 页面大小和页边距
+
+DOCX 中的页面大小和页边距不会被导入。解析器会从节属性中读取它们，但 Tiptap 渲染器会丢弃这些信息。
+
+[Pages 扩展](/pages/getting-started/overview)提供带可配置页面大小和页边距的分页布局。配置详情请参见[页面格式指南](/pages/core-concepts/page-format)。
+
+导出扩展接受 `pageSize` 和 `pageMargins` 选项：
+
+```ts
+ExportDocx.configure({
+  pageSize: {
+    width: '21.0cm',
+    height: '29.7cm',
+  },
+  pageMargins: {
+    top: '2.54cm',
+    bottom: '2.54cm',
+    left: '3.17cm',
+    right: '3.17cm',
+  },
+})
+```
+
+这些值支持 CSS 风格单位：`cm`、`in`、`pt`、`pc`、`mm`、`px`。默认值会生成带标准 Word 页边距的 A4 页面。
+
+<Callout variant="info" title="Pages 与导出之间不会自动同步">
+  导出扩展不会自动从 Pages 扩展读取页面大小或页边距。如果你的编辑器使用自定义页面格式，请在导出配置中传入匹配的值。
+</Callout>
+
+## 节
+
+Word 文档可以有多个节，每个节都有自己的页面布局属性（大小、方向、页边距、栏、页眉/页脚）。转换管道对节的支持是部分的：
+
+- **导入：** 节边界用于检测多栏布局。多栏节会被包装为 `columns`/`column` Tiptap 节点。其他节级属性（大小、方向、页边距）会被解析，但不会应用。
+- **编辑器：** Tiptap 没有节的概念，但栏节点可以原生渲染。
+- **导出：** 生成单个节。无法创建纵向/横向混排或多节文档。
+
+## 页码
+
+Word 中的页码是位于页眉和页脚中的域代码（`PAGE`、`NUMPAGES`）。虽然页眉和页脚会被导入（见[页眉和页脚](/conversion/content-types/page-layout/headers-footers)），但页码字段不会被转换，因为导入管道不会解析 DOCX 域代码。
+
+Pages 扩展支持在页眉和页脚内容中使用页码占位符（`{page}`、`{total}`）。
+
+## 可往返内容
+
+| 功能 | 可往返？ | 说明 |
+| --- | --- | --- |
+| 分页符 | 是 | 需要 `@tiptap-pro/extension-pagebreak` |
+| 页面大小 | 否 | 编辑器（Pages）和导出需分别配置 |
+| 页边距 | 否 | 编辑器（Pages）和导出需分别配置 |
+| 节 | 部分 | 栏配置会保留；其他节属性不会 |
+| 页码 | 否 | 通过 Pages 扩展的页眉/页脚重新添加 |
+| 栏 | 部分 | 导入会创建栏节点；导出尚不会将其写回 |

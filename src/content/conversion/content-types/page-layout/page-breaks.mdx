@@ -1,0 +1,62 @@
+---
+title: 分页符
+tags:
+  - type: beta
+meta:
+  title: 分页符 | Tiptap 转换
+  description: 分页符在 DOCX 转换流程中的处理方式，包括导入、编辑器渲染和导出。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+分页符是唯一一种能在 DOCX 与编辑器之间完全往返转换的页面结构元素。导入会创建 `pageBreak` 节点，导出会将其写回为 DOCX 分页符。
+
+## 你需要什么
+
+- **扩展：** `@tiptap-pro/extension-pagebreak`（不在 StarterKit 中）
+- **可选：** [Pages 扩展](/pages/getting-started/overview)，用于分页布局，使分页符将内容推到下一个可视页面
+
+## 支持概览
+
+| | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| 分页符 | 支持 | 支持（需要 PageBreak 扩展） | 支持 |
+
+## 导入
+
+使用 [编辑器扩展](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入分页符。两者会生成完全相同的输出。
+
+导入会检测 DOCX 中的 `<w:br w:type="page"/>` 元素，并生成 `pageBreak` 节点。当分页符与文本内容一起出现在段落中时，文本会先作为段落输出，随后是一个单独的 `pageBreak` 节点。独立的分页符（仅包含分页符的段落）会生成单个 `pageBreak` 节点。
+
+软分页符（`<w:lastRenderedPageBreak/>`）是 Word 渲染器提供的布局提示，不会被导入。只有显式分页符才会被转换。
+
+```json
+{
+  "type": "pageBreak"
+}
+```
+
+<Callout variant="info" title="需要 PageBreak 扩展">
+  `pageBreak` 节点类型不是 StarterKit 的一部分。如果没有 [PageBreak 扩展](/pages/core-concepts/page-break-node)，导入的分页符节点需要通过 [自定义扩展](/editor/extensions/custom-extensions/extend-existing) 才能渲染。有关策略，请参见 [无效 schema 指南](/guides/invalid-schema)。
+</Callout>
+
+## 编辑器渲染
+
+[`PageBreak`](/pages/core-concepts/page-break-node) 扩展会在编辑器中渲染分页符节点。其行为取决于是否同时安装了 Pages 扩展：
+
+**没有 Pages：** 分页符会渲染为一个视觉上的虚线分隔条，中间带有“Page break”标签。它只作为视觉提示，不提供分页布局。
+
+**有 Pages：** 分页符会填满当前页面剩余空间，并将后续内容推到下一页。这与 Word 的行为一致。
+
+有关完整配置详情，请参见 [PageBreak 节点指南](/pages/core-concepts/page-break-node)。
+
+## 导出
+
+使用 [编辑器扩展](/conversion/export/docx/editor-extension) 或 [REST API](/conversion/export/docx/rest-api) 导出分页符。两者对分页符的处理方式相同。
+
+每个 `pageBreak` 节点都会导出为一个包含 `<w:br w:type="page"/>` 的 DOCX 段落。不需要额外配置。
+
+## 可往返转换的内容
+
+当安装了 PageBreak 扩展时，分页符可以正确往返转换。导入会生成 `pageBreak` 节点，编辑器会保留它们，导出会将它们写回 DOCX。

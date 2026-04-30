@@ -1,0 +1,36 @@
+---
+title: 导出自定义样式到 PDF
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.3.0
+meta:
+    title: 将样式导出为 PDF | Tiptap 转换
+    description: 学习如何使用 Export PDF 扩展将 Tiptap JSON 的自定义样式导出为 PDF。
+    category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import ExportStylesGuide from '../_shared/_export-styles-guide.mdx'
+
+<EnterpriseCalloutAuto variant="pdf" renderMode="sidebar" disableWaitlist />
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅起始套餐](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 从私有仓库安装">
+        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)登录 Tiptap 私有 npm 仓库进行身份验证。
+    </RequirementItem>
+</Requirements>
+
+导出 PDF 时，您可以定义将应用于导出文档的自定义样式。当您希望文档保持统一的视觉风格时，这将非常有用。
+
+<Callout title="需要 Export DOCX 扩展" variant="warning">
+  PDF 导出的样式覆盖功能需要 `@tiptap-pro/extension-export-docx` 扩展在您的编辑器中安装并配置。PDF 导出在底层会先生成 DOCX，再将其转换为 PDF。如果没有该扩展，`styleOverrides` 和元素覆盖选项将不会生效。
+</Callout>
+
+<ExportStylesGuide />

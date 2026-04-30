@@ -12,28 +12,56 @@ meta:
 
 ## 设置
 
-| 设置           | 描述                                                                                                                               | 默认值           |
-|---------------|--------------------------------------------------------------------------------------------------------------------------------------|-----------------|
-| `name`        | 实例的名称，用于日志记录。                                                                                                           |                 |
-| `port`        | 服务器监听的端口。                                                                                                                   | `80`            |
-| `timeout`     | 连接健康检查的时间间隔，单位为毫秒。                                                                                                | `30000 (= 30秒)` |
-| `debounce`    | 对 `onStoreDocument` 钩子的调用进行防抖，时间单位为毫秒。否则每次更新都会被持久化。                                                    | `2000 (= 2秒)`   |
-| `maxDebounce` | 确保至少在给定时间（毫秒）内调用一次 `onStoreDocument`。                                                                            | `10000 (= 10秒)` |
-| `quiet`       | 默认情况下，服务器会显示启动屏幕。如果传入 `false`，服务器将安静启动。                                                               | `false`         |
+| Setting            | Description                                                                                                                          | Default value   |
+|--------------------|--------------------------------------------------------------------------------------------------------------------------------------|-----------------|
+| `name`             | 实例名称，用于日志记录。                                                                                                              |                 |
+| `port`             | 服务器应监听的端口。                                                                                                                  | `80`            |
+| `timeout`          | 连接健康检查间隔，单位为毫秒。在 v4 中已从 30 秒增加到 60 秒。                                                                          | `60000 (= 60s)` |
+| `debounce`         | 在指定时间内对 onStoreDocument hook 的调用进行防抖。否则每次更新都会被持久化。                                                       | `2000 (= 2s)`   |
+| `maxDebounce`      | 确保在给定时间（毫秒）内至少调用一次 onStoreDocument。                                                                                | `10000 (= 10s)` |
+| `quiet`            | 默认情况下，服务器会显示启动界面。如果传入 false，服务器将静默启动。                                                                   | `false`         |
+| `websocketOptions` | 传递给底层 WebSocket 服务器的选项（例如 `{ maxPayload: 1024 * 1024 }`）。在 v4 中已移入配置对象内部。                                  | `{}`            |
 
 ## 使用示例
 
 ```js
-import { Server } from "@hocuspocus/server";
+import { Server } from '@hocuspocus/server'
 
 const server = new Server({
-  name: "hocuspocus-fra1-01",
+  name: 'hocuspocus-fra1-01',
   port: 1234,
-  timeout: 30000,
+  timeout: 60000,
   debounce: 5000,
   maxDebounce: 30000,
   quiet: true,
-});
+  websocketOptions: { maxPayload: 1024 * 1024 },
+})
 
-server.listen();
+server.listen()
 ```
+
+## 通用 Context 类型
+
+从 v4 开始，服务器接受一个通用的 `Context` 类型参数，以便在所有 hooks 中实现端到端的类型安全：
+
+```ts
+import { Server } from '@hocuspocus/server'
+
+interface MyContext {
+  userId: string
+  permissions: string[]
+}
+
+const server = new Server<MyContext>({
+  async onAuthenticate({ token }) {
+    // 返回值的类型为 MyContext
+    return { userId: '123', permissions: ['read', 'write'] }
+  },
+  async onChange({ context }) {
+    // context.userId 的类型为 string
+    console.log(context.userId)
+  },
+})
+```
+
+该通用类型默认是 `any`，因此没有显式类型标注的现有代码仍然可以正常工作。

@@ -107,3 +107,25 @@ const editor = new Editor({
   ],
 })
 ```
+
+### RTL 智能引号
+
+`openDoubleQuote`、`closeDoubleQuote`、`openSingleQuote` 和 `closeSingleQuote` 规则通过 `doubleQuotes` 和 `singleQuotes` 选项支持感知 RTL 的引号字符。
+
+显式的 `rtl` 配置优先于 `textDirection`。如果未提供显式配置，则扩展会回退到 `editor.options.textDirection === 'rtl'`。否则，将使用默认的 LTR 引号。
+
+> **注意：** 为了避免混合方向文本中的歧义，刻意不使用基于内容的自动方向检测。
+
+```js
+import { Editor } from '@tiptap/core'
+import Typography from '@tiptap/extension-typography'
+
+const editor = new Editor({
+  extensions: [
+    Typography.configure({
+      doubleQuotes: { rtl: { open: '”', close: '“' } },
+      singleQuotes: { rtl: { open: '’', close: '‘' } },
+    }),
+  ],
+})
+```

@@ -29,7 +29,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 ## 页眉和页脚槽位值
 
-每个页眉和页脚槽位（`default`、`first`、`even`）都接受以下形态之一。您可以在各个槽位之间自由混用并搭配——选择最符合您数据的那一种。
+每个页眉和页脚槽位（`default`、`first`、`even`）都接受以下形态之一。可在各槽位间自由混用和匹配；选择最符合您数据的那一种。
 
 | 形态                             | 示例                                             | 说明                                                                                                      |
 | -------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
@@ -39,7 +39,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 | `docx` `Header` / `Footer`        | `new Docx.Header({ children: [/* … */] })`       | 对段落和运行项提供完整的 DOCX 级别控制。需要 `@tiptap-pro/extension-export-docx`。                         |
 | 返回 `Header` / `Footer` 的异步工厂 | `() => convertHeader({ node })`       | 在执行导出时按需构建。典型用法：使用 DOCX 扩展中的 `convertHeader` / `convertFooter`。                     |
 
-Tiptap JSONContent 对象**必须**包含一个 `type` 字段——该扩展在运行时会使用它来区分 Tiptap 节点和 `docx` 实例。没有 `type` 且又不是 `Header` / `Footer` 实例的对象，会被丢弃并通过 `console.warn` 提示其具体值；它们绝不会被转发到 DOCX 序列化器。
+Tiptap JSONContent 对象**必须**包含一个 `type` 字段。该扩展在运行时使用它来区分 Tiptap 节点和 `docx` 实例。不包含 `type` 且又不是 `Header` / `Footer` 实例的对象会被丢弃，并通过 `console.warn` 提示有问题的值；它们绝不会被转发到 DOCX 序列化器。
 
 在 TypeScript 中，这些会收敛为两个别名（`type` 要求被编码在 `TiptapNodeContent` 中）：
 
@@ -53,7 +53,7 @@ type HeaderSlotValue = string | TiptapNodeContent | Header | (() => Promise<Head
 type FooterSlotValue = string | TiptapNodeContent | Footer | (() => Promise<Footer>)
 ```
 
-前面三种形态可直接与 `@tiptap-pro/extension-export-pdf` 一起使用。`Header` / `Footer` 实例和异步工厂形态则需要安装 `@tiptap-pro/extension-export-docx`——它们会走优先 DOCX 的导出路径，并按需加载，因此不会影响仅使用 PDF 的消费者。
+前三种形态可直接与 `@tiptap-pro/extension-export-pdf` 一起使用。`Header` / `Footer` 实例以及异步工厂形态需要安装 `@tiptap-pro/extension-export-docx`；它们会走优先使用 DOCX 的导出路径，并按需加载，因此不会影响仅使用 PDF 的消费者。
 
 ## 页眉配置
 
@@ -144,7 +144,7 @@ ExportPdf.configure({
 
 ## 通过 Tiptap JSONContent 提供富文本页眉
 
-您可以直接在任意槽位上传入一个 Tiptap JSONContent 节点——当您已经在内存中拥有该节点，并且不想手动构建 `Docx.Header` 时，这会非常有用：
+直接在任意槽位上传入一个 Tiptap JSONContent 节点。如果您已经在内存中拥有该节点，并且不想手动构建一个 `Docx.Header`，这会很有用：
 
 ```js
 ExportPdf.configure({
@@ -158,7 +158,7 @@ ExportPdf.configure({
           type: 'paragraph',
           content: [
             { type: 'text', marks: [{ type: 'bold' }], text: 'My Document' },
-            { type: 'text', text: ' — Confidential' },
+            { type: 'text', text: ' · Confidential' },
           ],
         },
       ],
@@ -186,7 +186,7 @@ ExportPdf.configure({
         }),
       ],
     }),
-    // 异步工厂 —— 按需将 Tiptap 节点转换为 Docx.Header
+    // 异步工厂：按需将 Tiptap 节点转换为 Docx.Header
     first: () =>
       convertHeader({
         node: {

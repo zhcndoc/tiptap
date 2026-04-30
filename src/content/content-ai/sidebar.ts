@@ -52,23 +52,23 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/agents/review-changes',
                   children: [
                     {
-                      title: 'Tracked changes',
+                      title: '修订记录',
                       href: '/content-ai/capabilities/ai-toolkit/agents/review-changes/tracked-changes',
                     },
                     {
-                      title: 'Tracked changes with comments',
+                      title: '带评论的修订记录',
                       href: '/content-ai/capabilities/ai-toolkit/agents/review-changes/tracked-changes-with-comments',
                     },
                     {
-                      title: 'Suggestions',
+                      title: '建议',
                       href: '/content-ai/capabilities/ai-toolkit/agents/review-changes/suggestions',
                     },
                     {
-                      title: 'Suggestions with comments',
+                      title: '带评论的建议',
                       href: '/content-ai/capabilities/ai-toolkit/agents/review-changes/suggestions-with-comments',
                     },
                     {
-                      title: 'Style suggestions',
+                      title: '样式建议',
                       href: '/content-ai/capabilities/ai-toolkit/agents/review-changes/style-suggestions',
                     },
                   ],
@@ -78,7 +78,7 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/agents/streaming',
                 },
                 {
-                  title: 'Comments',
+                  title: '评论',
                   href: '/content-ai/capabilities/ai-toolkit/agents/comments',
                 },
                 {
@@ -240,7 +240,7 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/api-reference/review-options',
                 },
                 {
-                  title: 'Suggestions',
+                  title: '建议',
                   href: '/content-ai/capabilities/ai-toolkit/api-reference/suggestions',
                 },
                 {

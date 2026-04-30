@@ -1,0 +1,281 @@
+---
+title: 设置转换后的内容样式
+tags:
+  - type: beta
+meta:
+  title: 转换后的内容样式 | Tiptap Conversion
+  description: 为什么导入的文档在编辑器中看起来不同，以及如何通过 CSS、扩展配置和自定义属性来控制转换内容的视觉外观。
+  category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+当你将 DOCX 文件导入编辑器时，文档结构会被保留，但视觉外观会发生变化。本指南将解释原因、可用的样式信息，以及如何控制它。
+
+有关各阶段支持哪些功能的快速概览，请参阅 [Supported features](/conversion/getting-started/feature-support-matrix) 矩阵。有关每个功能的详细信息，包括提取了哪些属性以及需要哪些扩展，请参阅 [Content reference](/conversion/content-types/overview) 页面。
+
+## 为什么 Word 的样式不会被传递
+
+Tiptap 是无头的。它会转换文档结构（节点、标记、属性），但不会应用 Word 的视觉主题。Word 文档使用分层样式系统：文档主题、命名样式定义（例如 “Heading 2”），以及对单个文本片段的直接格式覆盖。转换服务会翻译结构含义（“这是一个 Heading 2”），但不会翻译视觉呈现（“Heading 2 是 Aptos Light 13pt 蓝色”）。
+
+你的编辑器使用你的 CSS 来渲染内容。编辑器中的 `<h2>` 会按照你的样式表对 `h2` 的定义来显示，而不是按照 Word 对 “Heading 2” 的定义来显示。
+
+## 保留了哪些样式
+
+转换服务会从 DOCX 中提取两类样式信息：
+
+### 行内格式（文本节点上的标记）
+
+这些会作为单个文本节点上的标记存储，并由标准 Tiptap 扩展**自动渲染**为 `<span>` 元素上的行内 `style` 属性：
+
+| 样式 | 标记属性 | 需要的扩展 | HTML 输出 |
+| --- | --- | --- | --- |
+| 文本颜色 | `textStyle.color` | Color | `style="color: #FF0000"` |
+| 字体族 | `textStyle.fontFamily` | FontFamily | `style="font-family: Courier New"` |
+| 字体大小 | `textStyle.fontSize` | FontSize | `style="font-size: 14px"` |
+| 背景色 | `textStyle.backgroundColor` | BackgroundColor | `style="background-color: #FFFF00"` |
+| 高亮 | `highlight.color` | Highlight（`multicolor: true`） | `<mark style="background-color: yellow">` |
+| 字符间距 | `textStyle.letterSpacing` | [需要扩展 TextStyle](#extending-extensions-for-unsupported-attributes) | `style="letter-spacing: 2px"` |
+| 加粗、斜体、下划线、删除线 | 独立标记 | ConvertKit（内置） | `<strong>`, `<em>`, `<u>`, `<s>` |
+
+行高不在这个表中，因为 Word 将行距存储在段落上，而不是存储在文本片段上。导入器总是把它作为段落节点属性输出——见下面的块级格式部分。
+
+如果你安装了这些扩展（推荐集合见 [ConvertKit](/conversion/import/docx/convertkit)），行内格式将自动渲染，无需额外的 CSS。
+
+### 块级格式（段落和标题节点上的属性）
+
+这些会作为 `paragraph` 和 `heading` 节点上的属性存储。是否渲染取决于你安装了哪些扩展。
+
+| 样式 | 节点属性 | 格式 | 使用标准扩展 | 使用 [ConvertKit](/conversion/import/docx/convertkit) |
+| --- | --- | --- | --- | --- |
+| 文本对齐 | `textAlign` | `"left"`, `"center"`, `"right"`, `"justify"` | 需要 `TextAlign` | 已渲染（已包含 TextAlign） |
+| 段前间距 | `spacingBefore` | 数值（像素） | 不渲染 | `margin-top: Npx` |
+| 段后间距 | `spacingAfter` | 数值（像素） | 不渲染 | `margin-bottom: Npx` |
+| 左缩进 | `indent` | 数值（像素） | 不渲染 | `padding-left: Npx` |
+| 首行缩进 | `firstLineIndent` | 数值（像素） | 不渲染 | `text-indent: Npx` |
+| 行高 | `lineHeight` | 字符串（例如 `"1.5"`、`"24px"`） | 不渲染 | `line-height: <value>` |
+| 字体大小（段落标记） | `fontSize` | 字符串（例如 `"11pt"`） | 不渲染（由标记级 `textStyle.fontSize` 通过 `FontSize` 渲染） | `font-size: <value>`（用于空白段落） |
+| 上下文间距 | `contextualSpacing` | 布尔值 | 不渲染 | `data-contextual-spacing="true"` + 注入的 CSS 规则，用于抑制相邻上下文间距段落之间的外边距 |
+
+<Callout variant="warning" title="Schema validation strips unrecognized attributes">
+  当你调用 `setEditorContent()` 时，ProseMirror 会根据编辑器的 schema 校验内容。未在节点规范中定义的属性会被移除。`context.content` 中的原始 JSON 仍然包含所有属性，但一旦内容加载进编辑器后，它们就会丢失。要保留这些属性，请安装 [ConvertKit](/conversion/import/docx/convertkit)（它会为上面所有属性扩展 schema），或者自行扩展节点 schema。
+</Callout>
+
+## 通过编辑器样式尽量还原 Word
+
+即使不能保留每个段落属性，你仍然可以通过 CSS 让外观接近 Word。
+
+### 基础标题样式
+
+Word 的默认标题样式使用特定的字体、字号和颜色。你可以在编辑器中这样近似：
+
+```css
+.tiptap h1 {
+  font-family: 'Aptos Light', sans-serif;
+  font-size: 16pt;
+  font-weight: bold;
+  color: #2E74B5;
+  margin-top: 12pt;
+  margin-bottom: 6pt;
+  line-height: 1.15;
+}
+
+.tiptap h2 {
+  font-family: 'Aptos Light', sans-serif;
+  font-size: 14pt;
+  font-weight: bold;
+  color: #2E74B5;
+  margin-top: 12pt;
+  margin-bottom: 6pt;
+  line-height: 1.15;
+}
+
+.tiptap h3 {
+  font-family: 'Aptos', sans-serif;
+  font-size: 13pt;
+  font-weight: bold;
+  color: #2E74B5;
+  margin-top: 12pt;
+  margin-bottom: 6pt;
+  line-height: 1.15;
+}
+```
+
+### 正文文本
+
+Word 的默认 “Normal” 样式使用 Aptos 11pt，段后间距为 10pt，行高为 1.15：
+
+```css
+.tiptap p {
+  font-family: 'Aptos', sans-serif;
+  font-size: 11pt;
+  margin-top: 0;
+  margin-bottom: 10pt;
+  line-height: 1.15;
+}
+```
+
+### 表格
+
+Word 表格通常有细边框且没有单元格内边距。编辑器的默认表格样式可能不同：
+
+```css
+.tiptap table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.tiptap td,
+.tiptap th {
+  border: 1px solid #d0d0d0;
+  padding: 4px 8px;
+  vertical-align: top;
+}
+
+.tiptap th {
+  font-weight: bold;
+  background-color: #f5f5f5;
+}
+```
+
+### 列表
+
+Word 为嵌套列表使用特定的缩进。在 CSS 中可这样匹配：
+
+```css
+.tiptap ul,
+.tiptap ol {
+  padding-left: 24px;
+  margin-top: 0;
+  margin-bottom: 2pt;
+}
+
+.tiptap li {
+  line-height: 1.15;
+}
+
+.tiptap li > ul,
+.tiptap li > ol {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+```
+
+## 使导出样式与编辑器样式保持一致
+
+导出扩展在写入 DOCX 文件时会应用自己的默认样式。这些默认值（Normal 使用 Aptos 11pt，以及特定的标题字号和颜色）可能与用户在编辑器中看到的内容不一致。为了让导入、编辑和导出之间的外观保持一致，请将编辑器 CSS 与导出的 `styleOverrides` 对齐：
+
+```ts
+ExportDocx.configure({
+  styleOverrides: {
+    paragraphStyles: [
+      {
+        id: 'Normal',
+        name: 'Normal',
+        run: { font: 'Aptos', size: 22 }, // 11pt，单位为半磅
+        paragraph: {
+          spacing: { after: 200, line: 276 }, // 段后 10pt，行高 1.15
+        },
+      },
+      {
+        id: 'Heading1',
+        name: 'Heading 1',
+        basedOn: 'Normal',
+        next: 'Normal',
+        run: { font: 'Aptos Light', size: 32, bold: true, color: '2E74B5' },
+        paragraph: {
+          spacing: { before: 240, after: 120, line: 276 },
+        },
+      },
+    ],
+  },
+})
+```
+
+如果你在编辑器 CSS 中使用了不同的字体或字号，请同步更新导出的 `styleOverrides`，以便导出的 DOCX 反映用户在编辑时所看到的样式。
+
+## 为不支持的属性扩展扩展
+
+[ConvertKit](/conversion/import/docx/convertkit) 已经为 Convert API 生成的 DOCX 特定属性扩展了 `Paragraph`、`Heading`、`Image` 以及表格栈。如果你使用 ConvertKit，上表中的段落和标题属性会自动渲染；你不需要自己编写扩展。
+
+下面的模式适用于 ConvertKit 未覆盖的属性（典型情况是 `textStyle.letterSpacing`，Convert API 会提取它，但没有内置扩展来渲染），或者适用于选择不使用 ConvertKit、需要自己实现的编辑器。
+
+<Callout title="Roadmap" variant="hint">
+  将剩余的文本样式属性（从 `letterSpacing` 开始）纳入 ConvertKit
+  内置的 `TextStyleKit` 是路线图中的计划，因此你会在未来的
+  版本中开箱即用。在那之前，如下所示自行扩展 `TextStyle`
+  可以让你今天就获得相同的渲染效果，而无需等待上游改动。
+</Callout>
+
+```ts
+import { TextStyle } from '@tiptap/extension-text-style'
+
+const TextStyleWithLetterSpacing = TextStyle.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      letterSpacing: {
+        default: null,
+        parseHTML: (element) => element.style.letterSpacing || null,
+        renderHTML: (attributes) => {
+          if (!attributes.letterSpacing) return {}
+          return { style: `letter-spacing: ${attributes.letterSpacing}` }
+        },
+      },
+    }
+  },
+})
+```
+
+然后禁用内置的 `TextStyle`，并将你扩展后的版本与 ConvertKit 一起添加：
+
+```ts
+ConvertKit.configure({
+  textStyleKit: { textStyle: false },
+}),
+TextStyleWithLetterSpacing,
+```
+
+同样的模式也适用于转换器输出的任何其他属性，只要没有扩展来渲染它。关于扩展现有扩展的完整机制，请参阅 [custom extensions guide](/editor/extensions/custom-extensions/extend-existing)。
+
+## 在加载前拦截内容
+
+如果你想在内容进入编辑器之前转换或提取样式数据，请使用 `onImport` 回调，而不是自动的 `setEditorContent()`：
+
+```ts
+editor.chain().importDocx({
+  file,
+  onImport(context) {
+    if (context.error) {
+      console.error(context.error)
+      return
+    }
+
+    // context.content 包含带有所有属性的原始 JSON
+    // 你可以在这里检查、转换或提取样式数据
+    const doc = context.content
+
+    // 示例：记录所有段落间距值
+    function walkNodes(nodes) {
+      for (const node of nodes) {
+        if (node.type === 'paragraph' && node.attrs) {
+          console.log('间距:', node.attrs.spacingBefore, node.attrs.spacingAfter)
+        }
+        if (node.content) walkNodes(node.content)
+      }
+    }
+    walkNodes(doc.content || [])
+
+    // 然后加载到编辑器中（这会触发 schema 校验）
+    context.setEditorContent()
+  },
+}).run()
+```
+
+## 自动样式导入
+
+如果你不想手动编写 CSS 来近似模拟 Word 的外观，那么实验性的 [CSS 注入](/conversion/import/docx/css-injection) 功能会提取导入文档中命名样式目录（`Heading1`、`Normal`、`Quote` 等），并将其作为 CSS 对象返回，或者将其作为作用域限定的 `<style>` 标签注入到页面中。这样得到的效果更接近源文档在 Word 中的显示方式，而无需为每个文档手动编写 CSS。
+
+CSS 注入覆盖了 16 个选择器（块级：`p`、`h1`–`h6`、`blockquote`、`ul li`、`ol li`；行内：`strong`、`em`、`u`、`s`、`a`、`code`）以及 11 个排版属性（`fontSize`、`color`、`fontFamily`、`fontWeight`、`fontStyle`、`textDecoration`、`backgroundColor`、`textAlign`、`marginTop`、`marginBottom`、`lineHeight`）。单个 run 上的行内覆盖以及任意选择器是有意不在范围内的；完整的注意事项列表请参见该页面。
+
+这两个功能可以组合使用：ConvertKit 会确保导入的节点属性在编辑器的 schema 中得以保留并正确渲染，而 CSS 注入会将文档的排版目录作为级联 CSS 一并带入。前面本指南中的手写 CSS 方法在这两种功能都无法满足需求时仍然很有用。

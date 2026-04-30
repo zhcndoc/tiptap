@@ -72,9 +72,9 @@ https://api.tiptap.dev
 
 `experimental_documentOptions` 具有以下结构：
 
-- `documentId` (`string`, 必填): Tiptap Cloud 文档标识符。
-- `userId?` (`string | null`, 可选): 标识 AI 执行的编辑归属。
-- `field?` (`string | null`, 可选): 指定文档内的特定协作字段（Y.js XML 片段）。省略或 `null` 时默认值为 `"default"`。当你的文档在同一个 `documentId` 下存储多个可编辑字段（例如独立的标题和正文）时，请使用此项。
+- `documentId` (`string`, required): Tiptap Cloud 文档标识符。
+- `userId?` (`string | null`, optional): 归因于 AI 执行编辑操作的用户标识。
+- `field?` (`string | null`, optional, default: `"default"`): 当省略或为 `null` 时，定位文档中的特定协作字段（Y.js XML 片段）。当你的文档在同一个 `documentId` 下存储多个可编辑字段时——例如标题和正文分开存储——请使用此项。
 
 使用 Tiptap Cloud 文档的示例：
 
@@ -141,10 +141,10 @@ POST /v3/ai/toolkit/tools
 
 请求体：
 
-- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
-- `tools?` (`object`, 可选): 启用或禁用各个单独的工具
-- `operationMeta?` (`string | null`, 可选)
-- `format?` (`'json' | 'shorthand'`, 可选)
+- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `tools?` (`object`, optional): 启用或禁用各个工具
+- `operationMeta?` (`string | null`, optional, default: `""`)
+- `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
 
 响应：
 
@@ -164,15 +164,15 @@ POST /v3/ai/toolkit/execute-tool
 
 请求体：
 
-- `toolName` (`string`, 必填)
-- `input` (`unknown`, 必填)
-- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
-- `sessionId?` (`string | null`, 可选): 复用上一次读取或工具执行的 session，以启用对过期读取的保护。
-- `format?` (`'json' | 'shorthand'`, 可选)
-- `chunkSize?` (`number`, 可选)
-- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), 可选)
-- `experimental_commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`, 可选): 在与线程相关的工具执行过程中创建的新线程和评论所附带的元数据。
-- 且必须满足以下条件之一：
+- `toolName` (`string`, required)
+- `input` (`unknown`, required)
+- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `sessionId?` (`string | null`, optional): 复用来自先前读取或工具执行的会话，以启用防止读取过期内容的保护。
+- `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
+- `chunkSize?` (`number`, optional, default: `32000`)
+- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
+- `experimental_commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`, optional): 附加到在线程相关工具执行期间创建的新线程和评论的元数据。
+- exactly one of:
   - `document`
   - `experimental_documentOptions`
 
@@ -196,7 +196,7 @@ POST /v3/ai/toolkit/execute-tool
 
 请求体：
 
-- `format` (`'json' | 'shorthand'`, 必填)
+- `format?` (`'json' | 'shorthand'`, optional, default: `'json'`). `proofreader` 工作流仅接受 `'shorthand'`。
 
 响应：
 
@@ -227,13 +227,13 @@ POST /v3/ai/toolkit/read/read-document
 
 请求体：
 
-- `range?` (`{ from: number, to: number }`, 可选): 省略时默认读取整个文档。
-- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
-- `format` (`'json' | 'shorthand'`, 必填)
-- `sessionId?` (`string | null`, 可选)
-- `chunkSize?` (`number`, 可选)
-- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), 可选)
-- 且必须满足以下条件之一：
+- `range?` (`{ from: number, to: number }`, optional, default: entire document)
+- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
+- `sessionId?` (`string | null`, optional)
+- `chunkSize?` (`number`, optional, default: `32000`)
+- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
+- exactly one of:
   - `document`
   - `experimental_documentOptions`
 
@@ -279,13 +279,13 @@ POST /v3/ai/toolkit/read/read-selection
 
 请求体：
 
-- `range` (`{ from: number, to: number }`, 必填)
-- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
-- `format` (`'json' | 'shorthand'`, 必填)
-- `sessionId?` (`string | null`, 可选)
-- `chunkSize?` (`number`, 可选)
-- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), 可选)
-- 且必须满足以下条件之一：
+- `range` (`{ from: number, to: number }`, required)
+- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
+- `sessionId?` (`string | null`, optional)
+- `chunkSize?` (`number`, optional, default: `32000`)
+- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
+- exactly one of:
   - `document`
   - `experimental_documentOptions`
 
@@ -368,14 +368,14 @@ POST /v3/ai/toolkit/execute-workflow/insert-content
 
 请求体：
 
-- `input` (`unknown`, 必填): 生成的 insert-content 载荷
-- `range?` (`{ from: number, to: number }`, 可选)
-- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
-- `format` (`'json' | 'shorthand'`, 必填)
-- `sessionId?` (`string | null`, 可选)
-- `chunkSize?` (`number`, 可选)
-- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), 可选)
-- 且必须满足以下条件之一：
+- `input` (`unknown`, required): 生成的 insert-content 载荷
+- `range?` (`{ from: number, to: number }`, optional)
+- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
+- `sessionId?` (`string | null`, optional)
+- `chunkSize?` (`number`, optional, default: `32000`)
+- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
+- exactly one of:
   - `document`
   - `experimental_documentOptions`
 
@@ -418,13 +418,13 @@ POST /v3/ai/toolkit/execute-workflow/tiptap-edit
 
 请求体：
 
-- `input` (`object`, 必填): 编辑工作流操作
-- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
-- `format` (`'json' | 'shorthand'`, 必填)
-- `sessionId?` (`string | null`, 可选)
-- `chunkSize?` (`number`, 可选)
-- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), 可选)
-- 且必须满足以下条件之一：
+- `input` (`object`, required): Edit workflow operations
+- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
+- `sessionId?` (`string | null`, optional)
+- `chunkSize?` (`number`, optional, default: `32000`)
+- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
+- exactly one of:
   - `document`
   - `experimental_documentOptions`
 
@@ -475,13 +475,13 @@ POST /v3/ai/toolkit/execute-workflow/proofreader
 
 请求体：
 
-- `input` (`object`, 必填): 校对器操作
-- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
-- `format` (`'shorthand'`, 必填)
-- `sessionId?` (`string | null`, 可选)
-- `chunkSize?` (`number`, 可选)
-- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), 可选)
-- 且必须满足以下条件之一：
+- `input` (`object`, required): Proofreader operations
+- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `format` (`'shorthand'`, required)
+- `sessionId?` (`string | null`, optional)
+- `chunkSize?` (`number`, optional, default: `32000`)
+- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
+- exactly one of:
   - `document`
   - `experimental_documentOptions`
 
@@ -526,11 +526,11 @@ POST /v3/ai/toolkit/execute-workflow/threads
 
 请求体：
 
-- `input` (`object`, 必填): 线程操作
-- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
-- `format` (`'json' | 'shorthand'`, 必填)
-- `experimental_documentOptions` (`{ documentId: string, userId?: string, field?: string | null }`, 必填)
-- `experimental_commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`, 可选): 工作流创建的新线程和评论所附带的元数据。
+- `input` (`object`, required): 线程操作
+- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
+- `experimental_documentOptions` (`{ documentId: string, userId?: string, field?: string | null }`, required)
+- `experimental_commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`, optional): 工作流创建的新线程和评论所附加的元数据。
 
 响应：
 

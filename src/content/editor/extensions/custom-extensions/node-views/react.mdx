@@ -130,20 +130,30 @@ export default Node.create({
 })
 ```
 
+## 在文本选择时更新 `selected`
+
+默认情况下，只有当节点本身通过 `NodeSelection` 被选中时，`selected` prop 才会变为 `true`。这对原子节点很有效，但当光标仅仅放在具有文本内容的节点内部时，并不会触发。如果您希望 `selected` 也反映这种情况，请在 `ReactNodeViewRenderer` 上启用 `selectedOnTextSelection` 选项：
+
+```js
+return ReactNodeViewRenderer(Component, { selectedOnTextSelection: true })
+```
+
+启用此选项后，只要 `TextSelection` 完全位于节点范围内，`selected` 也会为 `true`——例如，当光标放在节点内容内部的某个位置时。仅与节点部分重叠的选区不被视为已选中。
+
 ## 所有可用的 props
 
 以下是您可以期待的 props 完整列表：
 
-| Prop               | 描述                                               |
-| ------------------ | -------------------------------------------------- |
-| editor             | 编辑器实例                                         |
-| node               | 当前节点                                           |
-| decorations        | 装饰数组                                           |
-| selected           | 当当前节点视图有 `NodeSelection` 时为 `true`     |
-| extension          | 访问节点扩展，例如获取选项                         |
-| getPos()           | 获取当前节点的文档位置                             |
-| updateAttributes() | 更新当前节点的属性                                 |
-| deleteNode()       | 删除当前节点                                       |
+| Prop               | Description                                                     |
+| ------------------ | --------------------------------------------------------------- |
+| editor             | 编辑器实例                                             |
+| node               | 当前节点                                                |
+| decorations        | 一个装饰数组                                         |
+| selected           | 当当前节点视图中存在 `NodeSelection` 时为 `true`。当 [`selectedOnTextSelection`](#在文本选择时更新-selected) 启用时，`TextSelection` 完全位于节点内部时也为 `true`。 |
+| extension          | 访问节点扩展，例如用于获取选项        |
+| getPos()           | 获取当前节点在文档中的位置                   |
+| updateAttributes() | 更新当前节点的属性                           |
+| deleteNode()       | 删除当前节点                                         |
 
 ## 拖动
 

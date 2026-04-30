@@ -106,9 +106,9 @@ function Component() {
     editor,
     // 每当编辑器状态变化时，都会调用此函数
     selector: ({ editor }: { editor: Editor }) => ({
-      // 仅在粗体或斜体状态变化时重新渲染
-      isBold: editorInstance.isActive('bold'),
-      isItalic: editorInstance.isActive('italic'),
+      // 只有当粗体或斜体状态变化时才会重新渲染
+      isBold: editor.isActive('bold'),
+      isItalic: editor.isActive('italic'),
     }),
   })
 
