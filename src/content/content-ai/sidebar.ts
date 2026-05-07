@@ -29,7 +29,7 @@ export const sidebarConfig: SidebarConfig = {
           title: 'AI 工具包',
           href: '/content-ai/capabilities/ai-toolkit',
           tags: ['附加组件'],
-          beta: true,
+          releaseTag: "beta",
           children: [
             {
               title: '概述',
@@ -289,7 +289,7 @@ export const sidebarConfig: SidebarConfig = {
           title: '服务端 AI 工具包',
           href: '/content-ai/capabilities/server-ai-toolkit',
           tags: ['附加组件'],
-          beta: true,
+          releaseTag: "alpha",
           children: [
             {
               title: '概述',

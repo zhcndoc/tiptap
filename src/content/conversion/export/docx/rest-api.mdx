@@ -14,6 +14,7 @@ meta:
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
 
 <EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
 
@@ -28,7 +29,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 DOCX 导出 API 会将 Tiptap JSON 文档转换为 `.docx`（Microsoft Word）文件。它使用与 [编辑器扩展](/conversion/export/docx/editor-extension) 相同的转换库，并为标准内容生成等效的 DOCX 输出。
 
-REST API 支持 [样式覆盖](/conversion/export/docx/styles)、页面尺寸和边距，以及页眉/页脚。它不支持自定义节点渲染、元素覆盖（`paragraphOverrides`、`textRunOverrides` 等），也不支持任何需要 JavaScript 函数的选项。如果您需要这些功能，请使用 [编辑器扩展](/conversion/export/docx/editor-extension)，它也可在服务端运行。
+该 REST API 支持 [样式覆盖](/conversion/export/docx/styles)、页面尺寸和边距、页眉/页脚，以及元素级覆盖（`tableOverrides`、`paragraphOverrides`、`textRunOverrides`、`tableCellOverrides`、`imageOverrides`）。它不支持自定义节点渲染，也不支持任何需要 JavaScript 函数的选项。如果您需要这些能力，请使用 [编辑器扩展](/conversion/export/docx/editor-extension)，它也适用于服务器端。
 
 <Callout title="查看 Postman 集合" variant="hint">
     您也可以前往我们的[Postman
@@ -43,8 +44,8 @@ REST API 支持 [样式覆盖](/conversion/export/docx/styles)、页面尺寸和
 `/v2/convert/export/docx` 端点将 Tiptap 文档转换为 `DOCX` 格式。用户可以向此端点 `POST` 文档，并使用多种参数自定义转换过程中不同文档元素的处理方式。
 
 
-<Callout title="支持自定义导出" variant="info">
-    `/v2/convert/export/docx` 端点不支持自定义节点转换或元素覆盖（`paragraphOverrides`、`textRunOverrides`、`tableOverrides`、`tableCellOverrides`、`imageOverrides`），因为这些需要无法序列化的 JavaScript 函数。它支持[自定义样式覆盖](/conversion/export/docx/styles)、页面尺寸/边距以及页眉/页脚。如果您需要自定义节点转换或元素覆盖，请使用[编辑器扩展](/conversion/export/docx/editor-extension)或[服务端导出指南](/conversion/export/docx/editor-extension#server-side-export)。
+<Callout title="导出自定义支持" variant="info">
+    `/v2/convert/export/docx` 端点接受 [样式覆盖](/conversion/export/docx/styles)、页面尺寸/边距、页眉/页脚，以及五种元素级覆盖（`tableOverrides`、`paragraphOverrides`、`textRunOverrides`、`tableCellOverrides`、`imageOverrides`）。它不支持自定义节点转换，因为这些功能需要无法序列化的 JavaScript 函数。对于自定义节点转换，请使用 [编辑器扩展](/conversion/export/docx/editor-extension) 或 [服务器端导出指南](/conversion/export/docx/editor-extension#server-side-export)。
 </Callout>
 
 ### 示例（cURL）
@@ -68,20 +69,25 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 | 名称              | 说明                                                                                                                                   |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `Authorization` | 用于验证请求的 JWT 令牌。例如：`Bearer your-jwt-token`                                                                                 |
-| `X-App-Id`      | 来自 Convert 设置页面的 Convert App-ID：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert)           |
+| `X-App-Id`      | 来自 Convert 设置页面的 Convert 应用 ID：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert)           |
 | `Content-Type`  | 必须为 `application/json`                                                                                                              |
 
 ### 请求体
 
-| 名称                  | 类型      | 说明                        | 默认值       |
-| --------------------- | --------- | --------------------------- | ------------ |
-| `doc`                 | `String`  | Tiptap 的 JSON              | `N/A`        |
-| `exportType`          | `string`  | 期望的导出类型              | `blob`       |
-| `styleOverrides`      | `Object`  | 样式覆盖                    | `{}`         |
-| `pageSize`            | `Object`  | 页面尺寸配置                | `undefined`  |
-| `pageMargins`         | `Object`  | 页面边距配置                | `undefined`  |
-| `headers`             | `Object`  | 页面页眉配置                | `undefined`  |
-| `footers`             | `Object`  | 页面页脚配置                | `undefined`  |
+| 名称                     | 类型     | 说明                                                        | 默认值      |
+| ------------------------ | -------- | ----------------------------------------------------------- | ----------- |
+| `doc`                    | `String` | Tiptap 的 JSON                                              | `N/A`       |
+| `exportType`             | `string` | 期望的导出类型                                              | `blob`      |
+| `styleOverrides`         | `Object` | 样式覆盖                                                    | `{}`        |
+| `pageSize`               | `Object` | 页面尺寸配置                                                | `undefined` |
+| `pageMargins`            | `Object` | 页面边距配置                                                | `undefined` |
+| `headers`                | `Object` | 页眉配置                                                    | `undefined` |
+| `footers`                | `Object` | 页脚配置                                                    | `undefined` |
+| `tableOverrides`         | `Object` | 表格级渲染覆盖                                              | `undefined` |
+| `paragraphOverrides`     | `Object` | 段落级渲染覆盖                                              | `undefined` |
+| `textRunOverrides`       | `Object` | 文本运行级渲染覆盖                                          | `undefined` |
+| `tableCellOverrides`     | `Object` | 表格单元格渲染覆盖                                          | `undefined` |
+| `imageOverrides`         | `Object` | 图片渲染覆盖                                                | `undefined` |
 
 #### 页面尺寸配置
 
@@ -189,6 +195,46 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"带自定义页脚的文档\"}]}]}",
       "exportType": "blob",
       "footers": {"evenAndOddFooters": true, "default": "默认页脚", "first": "首页页脚", "even": "偶数页页脚"}
+    }'
+```
+
+### 元素覆盖
+
+<ElementOverridesRestApi />
+
+#### 组合多个元素覆盖的示例 cURL
+
+```bash
+curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Doc with element-level overrides\"}]}]}",
+      "tableOverrides": {
+        "borders": {
+          "top": { "style": "none" },
+          "bottom": { "style": "none" },
+          "left": { "style": "none" },
+          "right": { "style": "none" },
+          "insideHorizontal": { "style": "none" },
+          "insideVertical": { "style": "none" }
+        }
+      },
+      "paragraphOverrides": {
+        "spacing": { "before": 200, "after": 200 }
+      },
+      "textRunOverrides": {
+        "font": "Arial",
+        "size": 24
+      },
+      "tableCellOverrides": {
+        "shading": { "fill": "F0F0F0", "type": "clear" },
+        "verticalAlign": "center"
+      },
+      "imageOverrides": {
+        "transformation": { "width": 400, "height": 300 }
+      }
     }'
 ```
 

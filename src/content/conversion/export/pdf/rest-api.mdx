@@ -14,6 +14,7 @@ meta:
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
 
 <EnterpriseCalloutAuto variant="pdf" renderMode="sidebar" disableWaitlist />
 
@@ -64,16 +65,21 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 
 ### 请求体
 
-| 名称             | 类型       | 描述                                    | 默认值      |
-| ---------------- | ---------- | --------------------------------------- | ----------- |
-| `doc`            | `String`   | 以字符串形式传递的 Tiptap JSON 文档     | `N/A`       |
-| `exportType`     | `string`   | 期望的导出类型                          | `blob`      |
-| `styleOverrides` | `Object`   | 样式覆盖                              | `{}`        |
-| `pageSize`       | `Object`   | 页面大小配置                          | `undefined` |
-| `pageMargins`    | `Object`   | 页面边距配置                          | `undefined` |
-| `headers`        | `Object`   | 页面页眉配置                          | `undefined` |
-| `footers`        | `Object`   | 页面页脚配置                          | `undefined` |
-| `customFonts`    | `Array`    | 自定义字体文件配置（仅限本地部署）          | `undefined` |
+| Name                 | Type     | Description                                                            | Default     |
+| -------------------- | -------- | ---------------------------------------------------------------------- | ----------- |
+| `doc`                | `String` | 以字符串形式表示的 Tiptap JSON 文档                                      | `N/A`       |
+| `exportType`         | `string` | 预期的导出类型                                                         | `blob`      |
+| `styleOverrides`     | `Object` | 样式覆盖                                                              | `{}`        |
+| `pageSize`           | `Object` | 页面大小配置                                                            | `undefined` |
+| `pageMargins`        | `Object` | 页面边距配置                                                            | `undefined` |
+| `headers`            | `Object` | 页眉配置                                                              | `undefined` |
+| `footers`            | `Object` | 页脚配置                                                              | `undefined` |
+| `customFonts`        | `Array`  | 要提供的自定义字体文件（仅限本地部署）                                      | `undefined` |
+| `tableOverrides`     | `Object` | 传递给 DOCX 步骤的表格级渲染覆盖                                           | `undefined` |
+| `paragraphOverrides` | `Object` | 传递给 DOCX 步骤的段落级渲染覆盖                                           | `undefined` |
+| `textRunOverrides`   | `Object` | 传递给 DOCX 步骤的文本运行级渲染覆盖                                         | `undefined` |
+| `tableCellOverrides` | `Object` | 传递给 DOCX 步骤的表格单元格级渲染覆盖                                       | `undefined` |
+| `imageOverrides`     | `Object` | 传递给 DOCX 步骤的图像渲染覆盖                                             | `undefined` |
 
 #### 页面大小配置
 
@@ -108,10 +114,10 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 | `even`              | `string \| Object`    | 在启用 `evenAndOddHeaders` 选项时，偶数页的页眉。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
 
 <Callout title="接受的插槽值">
-    Each header value may be one of three shapes:
-    - A **plain text string.** Produces a simple unstyled header.
-    - A **stringified Tiptap JSONContent.** Enables rich formatting (bold, italic, links, etc.). Produce it with `JSON.stringify(yourHeaderDoc)`.
-    - A **Tiptap JSONContent object.** The same rich content, sent as a nested JSON object inside the request body (no stringification needed).
+    每个页眉值可以是以下三种形式之一：
+    - **纯文本字符串。** 生成一个简单、无样式的页眉。
+    - **字符串化的 Tiptap JSONContent。** 支持丰富格式（粗体、斜体、链接等）。可使用 `JSON.stringify(yourHeaderDoc)` 生成。
+    - **Tiptap JSONContent 对象。** 同样的富内容，以嵌套 JSON 对象的形式在请求体中发送（无需字符串化）。
 
     对象会在插槽级别进行验证，并且必须包含 `type` 字段。无效的结构将返回 `400 Bad Request`。
 </Callout>
@@ -185,6 +191,31 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
     }'
 ```
 
+### 元素覆盖
+
+PDF 生成会经过 DOCX 管道，因此在发送 Tiptap JSON 时，`/export/docx` 接受的同样五种元素覆盖也同样适用于这里。通过 `docxFile` 上传预先生成的 DOCX 时，它们**不会生效**。
+
+<ElementOverridesRestApi />
+
+#### 结合多个元素覆盖的 cURL 示例
+
+```bash
+curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"PDF with element-level overrides\"}]}]}",
+      "paragraphOverrides": {
+        "spacing": { "before": 200, "after": 200 }
+      },
+      "textRunOverrides": {
+        "font": "Arial",
+        "size": 24
+      }
+    }'
+```
+
 ### 自定义页面布局示例
 
 ```bash
@@ -221,7 +252,7 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 | ------ | ------------------------------- | ------------------------------------ |
 | 400    | `NO_DOCUMENT_PROVIDED`          | 请求体中未提供文档 |
 | 400    | _(validation)_                  | `headers` / `footers` 插槽包含一个没有 `type` 字段的对象，或存在其他模式级别问题。响应体包含一个 ZodError，说明哪个字段验证失败。 |
-| 422    | `FAILED_TO_PARSE_DOCX_FILE`    | 解析 JSON 输入失败          |
-| 422    | `FAILED_TO_EXPORT_PDF_FILE`    | 导出中间格式失败 |
+| 422    | `FAILED_TO_PARSE_DOCX_FILE`    | 无法解析 JSON 输入          |
+| 422    | `FAILED_TO_EXPORT_PDF_FILE`    | 无法导出中间格式文件 |
 | 403    | `CUSTOM_FONTS_NOT_AVAILABLE`   | 自定义字体仅在本地部署中可用 |
 | 422    | `FAILED_TO_CONVERT_DOCX_TO_PDF`| 转换为 PDF 失败             |

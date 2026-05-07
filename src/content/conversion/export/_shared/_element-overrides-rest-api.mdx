@@ -1,0 +1,80 @@
+import { Callout } from '@/components/ui/Callout'
+
+五种元素覆盖对象可让你调整各个 DOCX 元素
+（表格、段落、文本运行、表格单元格、图片）的渲染方式。每个
+覆盖项都会作为基础默认值传递给底层的 DOCX 转换库；来自文档的按节点值在计算后仍然优先。
+
+<Callout title="不进行深度合并" variant="info">
+    覆盖项中的嵌套对象（例如 `borders`、`margins`、`transformation`）会被**完全替换**，而不是进行深度合并。自定义边框某一侧时，请提供你需要的每一侧，以免未定义值漏入。
+</Callout>
+
+#### `tableOverrides`
+
+应用于每个表格的默认值。最有用的属性：
+
+| Property               | Type      | Description                                                                                                              |
+| ---------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `borders`              | `Object`  | 各边定义：`top`、`bottom`、`left`、`right`、`insideHorizontal`、`insideVertical`。每项都接受 `{ style, size, color }`。 |
+| `margins`              | `Object`  | 默认单元格边距 `{ top, bottom, left, right }`（以二十分之一磅为单位）。                                              |
+| `width`                | `Object`  | 表格宽度 `{ size, type }`，其中 `type` 为 `"pct"`、`"dxa"` 或 `"auto"`。                                              |
+| `layout`               | `string`  | `"fixed"` 或 `"autofit"`。                                                                                                |
+| `alignment`            | `string`  | `"left" \| "center" \| "right" \| "start" \| "end"`。                                                                     |
+| `cantSplit`            | `boolean` | 防止表格跨页拆分。                                                                           |
+| `visuallyRightToLeft`  | `boolean` | 使表格从右到左渲染。                                                                                          |
+
+#### `paragraphOverrides`
+
+应用于每个段落的默认值。最有用的属性：
+
+| Property            | Type      | Description                                                                                              |
+| ------------------- | --------- | -------------------------------------------------------------------------------------------------------- |
+| `spacing`           | `Object`  | `{ before, after, line, lineRule }`，单位为二十分之一磅。`line` 会被计算出的行高覆盖。 |
+| `alignment`         | `string`  | `"left" \| "center" \| "right" \| "justified" \| "start" \| "end"`。                                      |
+| `indent`            | `Object`  | `{ left, right, firstLine, hanging, start, end }`，单位为二十分之一磅。                              |
+| `keepNext`          | `boolean` | 将此段落与下一段保持在一起。                                                                   |
+| `keepLines`         | `boolean` | 保持段落中的所有行在一起。                                                                |
+| `pageBreakBefore`   | `boolean` | 在段落前插入分页符。                                                                |
+| `bidirectional`     | `boolean` | 将段落从右到左渲染。                                                                          |
+| `style`             | `string`  | 指向 `styleOverrides` 中定义的段落样式 id 的引用。                                           |
+
+#### `textRunOverrides`
+
+应用于每个文本运行的默认值。按标记格式设置（粗体、斜体、颜色
+……）仍会覆盖这些值。最有用的属性：
+
+| Property        | Type      | Description                                                            |
+| --------------- | --------- | ---------------------------------------------------------------------- |
+| `font`          | `string`  | 字体族名称。                                                      |
+| `size`          | `number`  | 字体大小，单位为半磅（`24` = 12pt）。                                |
+| `bold`          | `boolean` | 默认以粗体渲染。                                                |
+| `italics`       | `boolean` | 默认以斜体渲染。                                              |
+| `underline`     | `Object`  | `{ type, color }` — 例如 `{ type: "single", color: "auto" }`。          |
+| `strike`        | `boolean` | 删除线。                                                         |
+| `color`         | `string`  | 不含前导 `#` 的十六进制颜色（`"FF0000"`）。                        |
+| `highlight`     | `string`  | 预定义的高亮颜色名称（`"yellow"`、`"green"`、……）。            |
+| `superScript`   | `boolean` | 以上标形式渲染。                                                 |
+| `subScript`     | `boolean` | 以下标形式渲染。                                                   |
+
+#### `tableCellOverrides`
+
+应用于每个表格单元格的默认值。最有用的属性：
+
+| Property        | Type      | Description                                                              |
+| --------------- | --------- | ------------------------------------------------------------------------ |
+| `shading`       | `Object`  | `{ fill, type, color }` — 例如 `{ fill: "F0F0F0", type: "clear" }`。       |
+| `verticalAlign` | `string`  | `"top" \| "center" \| "bottom"`。                                         |
+| `borders`       | `Object`  | 各边单元格边框定义，形状与 `tableOverrides.borders` 相同。 |
+| `margins`       | `Object`  | 单元格内边距 `{ top, bottom, left, right }`，单位为二十分之一磅。     |
+| `width`         | `Object`  | 单元格宽度 `{ size, type }`。                                             |
+
+#### `imageOverrides`
+
+应用于每张图片的默认值。根据文档计算出的图片尺寸
+（固有大小或用户调整后的值）在存在时仍然优先。最有用的
+属性：
+
+| Property         | Type      | Description                                                                       |
+| ---------------- | --------- | --------------------------------------------------------------------------------- |
+| `transformation` | `Object`  | `{ width, height, rotation?, flip? }` — 以 96 dpi 计算的像素。                          |
+| `altText`        | `Object`  | `{ title, description, name }`。                                                   |
+| `floating`       | `Object`  | 浮动定位选项（锚点、对齐、偏移、环绕）。                    |

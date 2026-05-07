@@ -13,7 +13,7 @@ import { Callout } from '@/components/ui/Callout'
 - 已更改文档的范围
 - 应该在该范围内插入的新内容。此内容可以采用不同格式，如 HTML、JSON 或纯文本。对于同一范围也可以有多个替换选项，用户可以选择使用哪一个。
 
-- [Suggestions 指南](/content-ai/capabilities/ai-toolkit/agents/review-changes)
+- [建议指南](/content-ai/capabilities/ai-toolkit/agents/review-changes)
 - [样式建议](/content-ai/capabilities/ai-toolkit/agents/review-changes/style-suggestions)
 
 `Suggestion` 代表对编辑器中内容范围的提议更改，通常由 AI 代理生成。它允许预览、审核和应用更改，并且可以包含多个替换选项。
@@ -36,7 +36,7 @@ import { Callout } from '@/components/ui/Callout'
     - `metadata?` (`Record<string, any>`): 该替换选项的可选额外元数据（例如，来源，类别）。
 - `displayOptions?` (`DisplayOptions`): 可选的显示设置，用于控制建议如何在编辑器 UI 中呈现。
   - `showAsDiff?` (`boolean`): 是否以差异小部件形式显示替代内容。默认：`true`。
-  - `diffPosition?` (`'before' | 'after'`): 如何相对于建议显示差异。默认：`'before'`。
+  - `diffPosition?` (`'before' | 'after'`): 如何相对于建议显示差异。默认：`before`。
   - `attributes?` (`Record<string, any>`): 添加到呈现元素的属性
   - `diffAttributes?` (`Record<string, any>`): 额外添加到建议差异装饰的 HTML 属性
   - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 自定义渲染函数。默认渲染为差异显示。
@@ -124,7 +124,7 @@ const selectedSuggestion = toolkit.getSelectedSuggestion()
 - `doc` (`Node`): 用于比较的文档
 - `displayOptions?` (`DisplayOptions<{ suggestion: Suggestion }>`): 自定义渲染选项
   - `showAsDiff?` (`boolean`): 是否以差异小部件显示替代内容，默认：`true`。
-  - `diffPosition?` (`'before' | 'after'`): 相对于建议显示差异的位置，默认：`'before'`。
+  - `diffPosition?` (`'before' | 'after'`): 相对于建议显示差异的位置，默认：`before`。
   - `attributes?` (`Record<string, any>`): 添加到渲染元素的属性
   - `diffAttributes?` (`Record<string, any>`): 额外添加到建议差异装饰的 HTML 属性
   - `renderDecorations?` (`RenderDecorations<{ suggestion: Suggestion }>`): 自定义渲染函数，默认呈现为差异。
@@ -203,10 +203,11 @@ result.aiFeedback.events
 
 返回一个对象，包含：
 
-- `aiFeedback` (`{ events: SuggestionFeedbackEvent[] }`): AI 反馈，包含所有已接受建议的事件。每个事件包括：
+- `aiFeedback` (`{ events: SuggestionFeedbackEvent[] }`): AI 反馈，包含所有已接受建议的事件。每个事件包含：
   - `delete` (`string`): 被删除（或将被删除）的 HTML 内容
   - `insert` (`string`): 被插入（或将被插入）的 HTML 内容或文本
-  - `accepted` (`boolean`): 用户是否接受该建议（`true`）或拒绝（`false`）
+  - `accepted` (`boolean`): 该建议是否被用户接受（`true`）或拒绝（`false`）
+- `range` (`Range | null`): 文档中最后一个建议被插入的位置范围。
 
 该反馈可用于告知 AI 用户接受了哪些更改。
 
@@ -305,7 +306,7 @@ toolkit.removeSuggestion('suggestion-1')
 
 ## `setHtmlSuggestions`
 
-通过比较纠正后的 HTML 与当前文档内容，加载 AI 驱动的建议。此方法适合集成返回纠正文本文本或 HTML 的 AI 接口。
+通过比较纠正后的 HTML 与当前文档内容，加载 AI 驱动的建议。此方法适合集成返回纠正文本或 HTML 的 AI 接口。
 
 支持两种输入格式：
 

@@ -24,17 +24,17 @@ new Editor({ extensions: [ConvertKit] })
 ```
 
 <Callout title="multicolor: true 很重要" variant="warning">
-  如果 `Highlight` 没有设置 `multicolor: true`，则只支持单一的通用高亮，所有导入的高亮都会折叠为默认的黄色。ConvertKit 会自动应用它；如果你覆盖了 `highlight` 插槽，请保留这个标志。
+  如果 `Highlight` 没有设置 `multicolor: true`，就只会支持单一的通用高亮，并且所有导入的高亮都会折叠为默认的黄色。ConvertKit 会自动应用该配置；如果你覆盖了 `highlight` 插槽，请保留这个标志。
 </Callout>
 
 ## 支持概览
 
-| | 导入 | 编辑器 | 导出 |
-| --- | --- | --- | --- |
-| 文本颜色 | 支持（`textStyle` 标记） | 支持（TextStyle + Color） | 支持（规范化为十六进制） |
-| 高亮 | 支持（`highlight` 标记） | 支持（Highlight，multicolor） | 支持（命名颜色或十六进制） |
-| 底纹（`<w:shd>`） | 支持（映射到 `highlight`） | 支持 | 支持（纯色底纹） |
-| 主题颜色 | 不支持（不转换） | 不适用 | 不适用 |
+|                     | 导入                            | 编辑器                          | 导出                          |
+| ------------------- | ------------------------------- | --------------------------------- | ----------------------------- |
+| 文本颜色            | 支持（`textStyle` 标记）        | 支持（TextStyle + Color）        | 支持（规范化为十六进制）       |
+| 高亮                | 支持（`highlight` 标记）        | 支持（Highlight，multicolor）    | 支持（命名颜色或十六进制）     |
+| 底纹（`<w:shd>`）   | 支持（映射到 `highlight`）      | 支持                             | 支持（纯色底纹）               |
+| 主题颜色            | 不支持（不会转换）              | 不适用                           | 不适用                         |
 
 ## 导入
 
@@ -42,10 +42,10 @@ new Editor({ extensions: [ConvertKit] })
 
 转换服务会将 Word 的颜色元素映射为 Tiptap 标记：
 
-| Word 元素 | Tiptap 标记 | 属性 |
-| --- | --- | --- |
-| `<w:color val="FF0000">` | `textStyle` | `{ color: "#FF0000" }` |
-| `<w:highlight val="yellow">` | `highlight` | `{ color: "yellow" }` |
+| Word 元素                            | Tiptap 标记 | 属性                   |
+| ----------------------------------- | ----------- | ---------------------- |
+| `<w:color val="FF0000">`            | `textStyle` | `{ color: "#FF0000" }` |
+| `<w:highlight val="yellow">`        | `highlight` | `{ color: "yellow" }`  |
 | `<w:shd val="clear" fill="00FFFF">` | `highlight` | `{ color: "#00FFFF" }` |
 
 `<w:highlight>` 和 `<w:shd>` 都会生成相同的 `highlight` 标记。开发者无需区分它们。
@@ -56,7 +56,7 @@ new Editor({ extensions: [ConvertKit] })
 
 ## 编辑器渲染
 
-[`Color`](/editor/extensions/marks/color) 扩展为 [`TextStyle`](/editor/extensions/marks/text-style) 添加颜色支持，而 [`Highlight`](/editor/extensions/marks/highlight) 扩展负责处理背景色。ConvertKit 将两者都打包在一起：`TextStyleKit` 提供 `TextStyle` + `Color` + `BackgroundColor`，并且 `Highlight` 已预配置注册为 `multicolor: true`。
+[`Color`](/editor/extensions/functionality/color) 扩展为 [`TextStyle`](/editor/extensions/marks/text-style) 添加颜色支持，而 [`Highlight`](/editor/extensions/marks/highlight) 扩展负责处理背景颜色。ConvertKit 同时打包了这两者：`TextStyleKit` 提供 `TextStyle` + `Color` + `BackgroundColor`，并且 `Highlight` 已预先配置为 `multicolor: true`。
 
 文本颜色会以 `<span>` 元素上的行内 `style="color: ..."` 形式渲染。高亮会以带有 `background-color` 样式的 `<mark>` 元素渲染。
 

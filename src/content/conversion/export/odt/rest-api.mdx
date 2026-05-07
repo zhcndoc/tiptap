@@ -7,13 +7,14 @@ tags:
     label: v2.12.0
 meta:
     title: ODT REST API | Tiptap 转换
-    description: 了解如何使用 Tiptap Conversion REST API v2 将 Tiptap JSON 文档导出为 ODT（OpenDocument 文本）格式。
+    description: 了解如何使用 Tiptap 转换 REST API v2 将 Tiptap JSON 文档导出为 ODT（OpenDocument 文本）格式。
     category: Conversion
 ---
 
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
 
 <EnterpriseCalloutAuto variant="odt" renderMode="sidebar" disableWaitlist />
 
@@ -65,15 +66,20 @@ curl --output document.odt -X POST "https://api.tiptap.dev/v2/convert/export/odt
 
 ### 请求体参数
 
-| 名称              | 类型       | 描述                        | 默认值       |
-| ---------------- | ---------- | --------------------------- | ----------- |
-| `doc`            | `String`   | 以字符串形式传递的 Tiptap JSON 文档 | `N/A`       |
-| `exportType`     | `string`   | 期望的导出类型               | `blob`      |
-| `styleOverrides` | `Object`   | 样式覆盖                    | `{}`        |
-| `pageSize`       | `Object`   | 页面尺寸配置                | `undefined` |
-| `pageMargins`    | `Object`   | 页面边距配置                | `undefined` |
-| `headers`        | `Object`   | 页面页眉配置                | `undefined` |
-| `footers`        | `Object`   | 页面页脚配置                | `undefined` |
+| 名称                 | 类型     | 描述                                                            | 默认值      |
+| -------------------- | -------- | ---------------------------------------------------------------------- | ----------- |
+| `doc`                | `String` | 以字符串形式表示的 Tiptap JSON 文档                                       | `N/A`       |
+| `exportType`         | `string` | 预期的导出类型                                               | `blob`      |
+| `styleOverrides`     | `Object` | 样式覆盖                                                        | `{}`        |
+| `pageSize`           | `Object` | 页面尺寸配置                                                | `undefined` |
+| `pageMargins`        | `Object` | 页面边距配置                                             | `undefined` |
+| `headers`            | `Object` | 页眉配置                                              | `undefined` |
+| `footers`            | `Object` | 页脚配置                                              | `undefined` |
+| `tableOverrides`     | `Object` | 传递给 DOCX 步骤的表格级渲染覆盖             | `undefined` |
+| `paragraphOverrides` | `Object` | 传递给 DOCX 步骤的段落级渲染覆盖         | `undefined` |
+| `textRunOverrides`   | `Object` | 传递给 DOCX 步骤的文本运行渲染覆盖                | `undefined` |
+| `tableCellOverrides` | `Object` | 传递给 DOCX 步骤的表格单元格渲染覆盖              | `undefined` |
+| `imageOverrides`     | `Object` | 传递给 DOCX 步骤的图片渲染覆盖                   | `undefined` |
 
 #### 页面尺寸配置
 
@@ -127,7 +133,32 @@ curl --output document.odt -X POST "https://api.tiptap.dev/v2/convert/export/odt
     每个页脚值可以是**纯文本字符串**（生成简单无样式页脚）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，发送请求体前请用 `JSON.stringify()` 对象进行字符串化。
 </Callout>
 
-### 自定义页面布局示例
+### 元素覆盖
+
+ODT 生成会经过 DOCX 流水线，因此在发送 Tiptap JSON 时，`/export/docx` 接受的相同五种元素覆盖也同样适用于这里。通过 `docxFile` 上传预构建的 DOCX 时，它们**不会生效**。
+
+<ElementOverridesRestApi />
+
+#### 组合多个元素覆盖的示例 cURL
+
+```bash
+curl --output document.odt -X POST "https://api.tiptap.dev/v2/convert/export/odt" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"ODT with element-level overrides\"}]}]}",
+      "paragraphOverrides": {
+        "spacing": { "before": 200, "after": 200 }
+      },
+      "textRunOverrides": {
+        "font": "Arial",
+        "size": 24
+      }
+    }'
+```
+
+### 带自定义页面布局的示例
 
 ```bash
 curl --output document.odt -X POST "https://api.tiptap.dev/v2/convert/export/odt" \

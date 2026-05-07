@@ -4,13 +4,13 @@ tags:
   - type: beta
 meta:
   title: 下标和上标 | Tiptap 转换
-  description: 了解下标和上标标记如何在 DOCX 和 Tiptap 之间转换，包括当前的导出限制。
+  description: 下标和上标标记如何在 DOCX 和 Tiptap 之间往返转换。
   category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-从 DOCX 导入时，下标和上标标记会在编辑器中正确渲染，但在导出时不会被保留。像 H₂O 这样的内容会正确导入并显示，但导出后会变成普通的 H2O。
+Subscript 和 superscript 标记可在 DOCX 与 Tiptap 之间往返转换。像 H₂O 这样的内容可以导入、在编辑器中渲染，并在导出回 DOCX 时保留格式。
 
 ## 你需要什么
 
@@ -21,8 +21,8 @@ import { Callout } from '@/components/ui/Callout'
 
 | | 导入 | 编辑器 | 导出 |
 | --- | --- | --- | --- |
-| 下标 | 支持 | 通过 ConvertKit 支持 | 不支持 |
-| 上标 | 支持 | 通过 ConvertKit 支持 | 不支持 |
+| Subscript | Supported | Supported via ConvertKit | Supported |
+| Superscript | Supported | Supported via ConvertKit | Supported |
 
 ## 导入
 
@@ -68,12 +68,13 @@ ConvertKit.configure({
 
 ## 导出
 
-无论是 [编辑器扩展](/conversion/export/docx/editor-extension) 还是 [REST API](/conversion/export/docx/rest-api) 都不会导出下标或上标标记。
+[编辑器扩展](/conversion/export/docx/editor-extension) 和 [REST API](/conversion/export/docx/rest-api) 都会将 subscript 和 superscript 标记导出回 DOCX 的运行属性：
 
-<Callout title="下标和上标不会被导出" variant="danger">
-  DOCX 导出转换器不处理 `subscript` 或 `superscript` 标记。它们不会在导出过程中转换。像 H₂O 这样的内容在导出的文档中会显示为普通的 H2O。这会影响化学式、数学符号、脚注引用，以及任何其他使用上下标文本的场景。
-</Callout>
+| Tiptap 标记 | Word 元素 |
+| --- | --- |
+| `subscript` | `<w:vertAlign val="subscript">` |
+| `superscript` | `<w:vertAlign val="superscript">` |
 
-在编辑器中应用的下标和上标可以正常显示。这个限制只会影响导出为 DOCX。
+化学式（H₂O、CO₂）、数学符号（x²、E=mc²）以及脚注引用都可以无损往返转换。
 
-数学或 LaTeX 表达式中的下标和上标会走单独的代码路径（使用 OOXML 数学元素 `m:sSub` 和 `m:sSup`），不受此限制影响。
+数学或 LaTeX 表达式中的下标和上标会遵循单独的代码路径（使用 OOXML 数学元素 `m:sSub` 和 `m:sSup`）。

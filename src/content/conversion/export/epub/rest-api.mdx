@@ -14,6 +14,7 @@ meta:
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
 
 <EnterpriseCalloutAuto variant="epub" renderMode="sidebar" disableWaitlist />
 
@@ -64,15 +65,20 @@ curl --output document.epub -X POST "https://api.tiptap.dev/v2/convert/export/ep
 
 ### 请求体参数
 
-| 名称             | 类型      | 描述                                 | 默认值      |
-| ---------------- | --------- | ---------------------------------- | ---------- |
-| `doc`            | `String`  | Tiptap JSON 文档，字符串格式          | `N/A`      |
-| `exportType`     | `string`  | 期望的导出类型                       | `blob`     |
-| `styleOverrides` | `Object`  | 样式覆盖配置                       | `{}`       |
-| `pageSize`       | `Object`  | 页面尺寸配置                       | `undefined`|
-| `pageMargins`    | `Object`  | 页面边距配置                       | `undefined`|
-| `headers`        | `Object`  | 页面页眉配置                       | `undefined`|
-| `footers`        | `Object`  | 页面页脚配置                       | `undefined`|
+| Name                 | Type     | Description                                                            | Default     |
+| -------------------- | -------- | ---------------------------------------------------------------------- | ----------- |
+| `doc`                | `String` | Tiptap JSON 文档字符串                                                    | `N/A`       |
+| `exportType`         | `string` | 预期的导出类型                                                        | `blob`      |
+| `styleOverrides`     | `Object` | 样式覆盖                                                        | `{}`        |
+| `pageSize`           | `Object` | 页面尺寸配置                                                | `undefined` |
+| `pageMargins`        | `Object` | 页面边距配置                                             | `undefined` |
+| `headers`            | `Object` | 页眉配置                                              | `undefined` |
+| `footers`            | `Object` | 页脚配置                                              | `undefined` |
+| `tableOverrides`     | `Object` | 转发到 DOCX 步骤的表级渲染覆盖             | `undefined` |
+| `paragraphOverrides` | `Object` | 转发到 DOCX 步骤的段落级渲染覆盖         | `undefined` |
+| `textRunOverrides`   | `Object` | 转发到 DOCX 步骤的文本运行渲染覆盖                | `undefined` |
+| `tableCellOverrides` | `Object` | 转发到 DOCX 步骤的表格单元格渲染覆盖              | `undefined` |
+| `imageOverrides`     | `Object` | 转发到 DOCX 步骤的图像渲染覆盖                   | `undefined` |
 
 #### 页面尺寸配置
 
@@ -126,7 +132,33 @@ curl --output document.epub -X POST "https://api.tiptap.dev/v2/convert/export/ep
     每个页脚值可以是**纯文本字符串**（生成简单无样式页脚），也可以是**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，请先用 `JSON.stringify()` 转换成字符串再发送。
 </Callout>
 
-### 自定义页面布局示例
+### Element Overrides
+
+EPUB 生成通过 DOCX 管道完成，因此当发送 Tiptap JSON 时，`/export/docx` 接受的同样五个元素覆盖也同样适用于这里。
+当通过 `docxFile` 上传预生成的 DOCX 时，它们**没有任何效果**。
+
+<ElementOverridesRestApi />
+
+#### Example cURL combining multiple element overrides
+
+```bash
+curl --output document.epub -X POST "https://api.tiptap.dev/v2/convert/export/epub" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"EPUB with element-level overrides\"}]}]}",
+      "paragraphOverrides": {
+        "spacing": { "before": 200, "after": 200 }
+      },
+      "textRunOverrides": {
+        "font": "Arial",
+        "size": 24
+      }
+    }'
+```
+
+### Example with custom page layout
 
 ```bash
 curl --output document.epub -X POST "https://api.tiptap.dev/v2/convert/export/epub" \

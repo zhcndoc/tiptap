@@ -5,7 +5,7 @@ tags:
 meta:
   title: 支持的功能 | Tiptap 转换
   description: 查看在 Tiptap 转换流水线中，哪些文档功能支持导入、编辑器渲染和导出。
-  category: Conversion
+  category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -16,7 +16,7 @@ import { Callout } from '@/components/ui/Callout'
 2. **编辑器** 在浏览器中渲染该 JSON。每种节点和标记类型都需要匹配的 Tiptap 扩展才能正确显示。
 3. **导出** 将编辑器内容转换回 DOCX 文件。
 
-某项功能可能在一个阶段受支持，而在另一个阶段不受支持。例如，下标文本会被正确导入和渲染，但导出扩展尚未将其写回 DOCX。
+某项功能可能在某个阶段受支持，但在另一个阶段不受支持。例如，制表符会被导入并在编辑器中渲染，但导出扩展目前还不会将其写回 DOCX。
 
 导入和导出各自都有两种集成路径：一种是 [编辑器扩展](/conversion/import/docx/editor-extension)，另一种是 [REST API](/conversion/import/docx/rest-api)。对于大多数功能，这两种路径会产生相同的结果。对于存在差异的地方（脚注、页眉/页脚、导出自定义），相关安装页面会说明具体细节。
 
@@ -38,8 +38,8 @@ import { Callout } from '@/components/ui/Callout'
 | [斜体](/conversion/content-types/text-and-formatting/bold-italic-underline-strike) | ✓ | ✓ | ✓ |
 | [下划线](/conversion/content-types/text-and-formatting/bold-italic-underline-strike) | ✓ | ✓ | ✓ |
 | [删除线](/conversion/content-types/text-and-formatting/bold-italic-underline-strike) | ✓ | ✓ | ✓ |
-| [下标](/conversion/content-types/text-and-formatting/subscript-superscript) | ✓ | ✓ | ✕ |
-| [上标](/conversion/content-types/text-and-formatting/subscript-superscript) | ✓ | ✓ | ✕ |
+| [下标](/conversion/content-types/text-and-formatting/subscript-superscript) | ✓ | ✓ | ✓ |
+| [上标](/conversion/content-types/text-and-formatting/subscript-superscript) | ✓ | ✓ | ✓ |
 | 行内代码 | ✓ | ✓ | ✓ |
 | [文本颜色](/conversion/content-types/text-and-formatting/text-color-highlight) | ✓ | ✓ | ✓ |
 | [高亮](/conversion/content-types/text-and-formatting/text-color-highlight) | ✓ | ✓ | ✓ |

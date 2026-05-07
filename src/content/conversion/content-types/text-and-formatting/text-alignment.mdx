@@ -20,12 +20,12 @@ import { Callout } from '@/components/ui/Callout'
 
 ## 支持概览
 
-| | 导入 | 编辑器 | 导出 |
-| --- | --- | --- | --- |
-| 左对齐 | 支持 | 支持 | 支持 |
-| 居中 | 支持 | 支持 | 支持 |
-| 右对齐 | 支持 | 支持 | 支持 |
-| 两端对齐 | 支持 | 支持 | 支持 |
+|         | 导入    | 编辑器    | 导出    |
+| ------- | ------- | --------- | ------- |
+| 左对齐  | 支持    | 支持      | 支持    |
+| 居中    | 支持    | 支持      | 支持    |
+| 右对齐  | 支持    | 支持      | 支持    |
+| 两端对齐 | 支持    | 支持      | 支持    |
 
 ## 导入
 
@@ -33,14 +33,14 @@ import { Callout } from '@/components/ui/Callout'
 
 转换服务会读取每个 DOCX 段落中的 `<w:jc>` 元素，并将其映射到对应 Tiptap 节点上的 `textAlign` 属性。
 
-| Word `<w:jc>` 值 | Tiptap `textAlign` |
-| --- | --- |
-| `left` | `left` |
-| `center` | `center` |
-| `right` | `right` |
-| `both` | `justify` |
-| `start` | `start`（原样传递，TextAlign 可能无法识别） |
-| `end` | `end`（原样传递，TextAlign 可能无法识别） |
+| Word `<w:jc>` 值 | Tiptap `textAlign`                                           |
+| ---------------- | ------------------------------------------------------------ |
+| `left`           | `left`                                                       |
+| `center`         | `center`                                                     |
+| `right`          | `right`                                                      |
+| `both`           | `justify`                                                    |
+| `start`          | `start`（原样传递，TextAlign 可能无法识别）                  |
+| `end`            | `end`（原样传递，TextAlign 可能无法识别）                    |
 
 `textAlign` 属性会同时设置在 `paragraph` 和 `heading` 节点上。
 
@@ -50,7 +50,7 @@ import { Callout } from '@/components/ui/Callout'
 
 ## 编辑器渲染
 
-[`TextAlign`](/editor/extensions/functionality/text-align) 扩展会将 `textAlign` 作为全局属性添加到你指定的节点类型上。它会在 HTML 元素上渲染为行内 `style="text-align: ..."`。ConvertKit 使用 `types: ['paragraph', 'heading']` 对其进行注册，因此导入的对齐效果可以开箱即用地渲染出来：
+[`TextAlign`](/editor/extensions/functionality/textalign) 扩展会在你指定的节点类型上添加全局属性 `textAlign`。它会在 HTML 元素上渲染为内联 `style="text-align: ..."`。ConvertKit 已将其注册为 `types: ['paragraph', 'heading']`，因此导入的对齐可以开箱即用地渲染出来：
 
 ```ts
 import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
@@ -58,7 +58,7 @@ import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
 new Editor({ extensions: [ConvertKit] })
 ```
 
-如果你需要不同的类型（例如表格单元格），可以覆盖该插槽：
+如果你需要不同的类型（例如表格单元格），可以覆盖该配置：
 
 ```ts
 ConvertKit.configure({

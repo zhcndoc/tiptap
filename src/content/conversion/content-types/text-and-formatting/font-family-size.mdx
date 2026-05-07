@@ -24,16 +24,18 @@ new Editor({ extensions: [ConvertKit] })
 ```
 
 <Callout title="不要使用已弃用的独立字体大小包" variant="warning">
-  不要单独安装 `@tiptap/extension-font-size`，也不要零散引入 `@tiptap/extension-font-family` 和 `@tiptap/extension-font-size`——所有内容都位于 `TextStyleKit` 中，而 ConvertKit 会自动注册它。
+  不要单独安装 `@tiptap/extension-font-size`，也不要按需分别引入
+  `@tiptap/extension-font-family` 和 `@tiptap/extension-font-size`——所有内容都位于
+  `TextStyleKit` 中，而 ConvertKit 会自动注册它。
 </Callout>
 
 ## 支持概览
 
-| | 导入 | 编辑器 | 导出 |
-| --- | --- | --- | --- |
-| 字体系列 | 支持（`textStyle.fontFamily`） | 支持（FontFamily） | 支持（仅第一个字体） |
-| 字体大小 | 支持（`textStyle.fontSize`，单位为 px） | 支持（FontSize） | 支持（转换为半磅） |
-| 字母间距 | 支持（`textStyle.letterSpacing`，单位为 px） | 需要扩展 TextStyle（未捆绑在 ConvertKit / TextStyleKit 中） | 不支持 |
+|                | 导入                                        | 编辑器                                                                | 导出                               |
+| -------------- | ------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------- |
+| 字体系列       | 支持（`textStyle.fontFamily`）              | 支持（FontFamily）                                                    | 支持（仅第一个字体）               |
+| 字体大小       | 支持（像素中的 `textStyle.fontSize`）       | 支持（FontSize）                                                      | 支持（转换为半磅）                 |
+| 字母间距       | 支持（像素中的 `textStyle.letterSpacing`）  | 需要扩展 TextStyle（未捆绑在 ConvertKit / TextStyleKit 中）          | 不支持                             |
 
 ## 导入
 
@@ -53,7 +55,7 @@ pixels = halfPoints * 0.5 * (96 / 72)
 
 ## 编辑器渲染
 
-[`FontFamily`](/editor/extensions/marks/font-family) 和 [`FontSize`](/editor/extensions/marks/font-size) 都依赖于 [`TextStyle`](/editor/extensions/marks/text-style)。这三者都捆绑在 `TextStyleKit` 中，而 ConvertKit 会自动注册它：
+[`FontFamily`](/editor/extensions/functionality/fontfamily) 和 [`FontSize`](/editor/extensions/functionality/fontsize) 都依赖于 [`TextStyle`](/editor/extensions/marks/text-style)。这三者都捆绑在 `TextStyleKit` 中，而 ConvertKit 会自动注册它：
 
 ```bash
 npm install @tiptap-pro/extension-convert-kit
@@ -65,10 +67,12 @@ npm install @tiptap-pro/extension-convert-kit
 
 使用[编辑器扩展](/conversion/export/docx/editor-extension)或 [REST API](/conversion/export/docx/rest-api) 导出字体系列和大小。两者对字体系列和大小的处理方式完全相同。
 
-导出时，字体系列值会被清理：引号会被去除，并且在逗号分隔的值中只使用第一个字体。由于导入会生成单一字体名称，往返后的值会保持不变。
+导出时，字体系列值会被清理：引号会被去除，并且在逗号分隔的值中只使用第一个字体。由于导入会生成单一字体名称，往返后的值将保持不变。
 
 <Callout title="字体回退列表会被折叠" variant="info">
-  DOCX 不支持类似 CSS 的字体回退列表。如果你的编辑器内容中手动设置了诸如 `"Arial, Helvetica, sans-serif"` 这样的值，导出器会选择第一个字体名称（`Arial`），并丢弃其余部分。从 DOCX 导入的值本来就是单一字体名称，因此不会受到影响。
+  DOCX 不支持 CSS 风格的字体回退列表。如果你的编辑器内容包含手动设置的值，例如
+  `"Arial, Helvetica, sans-serif"`，导出器会取第一个字体名称（`Arial`）并丢弃其余部分。
+  从 DOCX 导入的值本身已经是单一字体名称，因此不会受到影响。
 </Callout>
 
 字体大小会从像素转换回半磅：

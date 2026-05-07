@@ -102,6 +102,38 @@ TrackedChanges.configure({
 
 当你的应用程序具有装饰性或特定于集成的标记且绝不应出现在追踪变更中时，使用此选项。
 
+## 表格支持
+
+该扩展会追踪表格内的结构性变更，包括行、单元格和列操作。
+
+**单元格选择删除** — 当用户通过 `CellSelection` 删除单元格时（即选中多个单元格后按删除键），每个被选中的单元格都会提升为节点级删除建议，而不是立即被移除。所选中的所有单元格共享相同的 `suggestionId`，因此它们会在建议列表中显示为一个分组变更。
+
+**列删除** — 删除某一列时，会生成一个覆盖该列所有单元格的单个分组建议，而不是每个单元格各生成一个建议。
+
+**接受和拒绝** — 接受或拒绝表格建议时，会正确处理底层的表格节点结构，防止在操作涉及列节点时出错。
+
+要启用表格追踪，请将表格扩展与 Tracked Changes 一起引入：
+
+```js
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { TableHeader } from '@tiptap/extension-table-header'
+import { TrackedChanges } from '@tiptap-pro/extension-tracked-changes'
+
+const editor = new Editor({
+  extensions: [
+    Table.configure({ resizable: true }),
+    TableRow,
+    TableCell,
+    TableHeader,
+    TrackedChanges.configure({ enabled: true, userId: 'user-123' }),
+  ],
+})
+```
+
+无需额外配置——一旦两个扩展都处于激活状态，表格变更就会自动被追踪。
+
 ## 原子节点追踪
 
 扩展会自动追踪对原子节点（如图片、水平线和其他非文本内容）的更改。这些节点不能拥有标记，因此扩展使用节点属性（`suggestionId`、`suggestionType`、`suggestionUserId`、`suggestionCreatedAt`、`suggestionUserMetadata`）代替。这一过程是透明的——原子节点会在相同的建议查询中出现，并且可以像其他建议一样被接受或拒绝。

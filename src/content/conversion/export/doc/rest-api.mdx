@@ -14,6 +14,7 @@ meta:
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
 
 <EnterpriseCalloutAuto variant="doc" renderMode="sidebar" disableWaitlist />
 
@@ -68,15 +69,20 @@ curl --output document.doc -X POST "https://api.tiptap.dev/v2/convert/export/doc
 
 ### 请求体
 
-| 名称              | 类型      | 描述                                        | 默认值       |
-| ----------------- | --------- | ------------------------------------------- | ------------ |
-| `doc`             | `String`  | 以字符串形式的 Tiptap JSON 文档              | `N/A`        |
-| `exportType`      | `string`  | 预期导出类型                                | `blob`       |
-| `styleOverrides`  | `Object`  | 样式覆盖                                    | `{}`         |
-| `pageSize`        | `Object`  | 页面尺寸配置                                | `undefined`  |
-| `pageMargins`     | `Object`  | 页面边距配置                                | `undefined`  |
-| `headers`         | `Object`  | 页面页眉配置                                | `undefined`  |
-| `footers`         | `Object`  | 页面页脚配置                                | `undefined`  |
+| 名称                 | 类型     | 描述                                                            | 默认值      |
+| -------------------- | -------- | ---------------------------------------------------------------------- | ----------- |
+| `doc`                | `String` | 作为字符串的 Tiptap JSON 文档                                       | `N/A`       |
+| `exportType`         | `string` | 预期的导出类型                                               | `blob`      |
+| `styleOverrides`     | `Object` | 样式覆盖                                                        | `{}`        |
+| `pageSize`           | `Object` | 页面尺寸配置                                                | `undefined` |
+| `pageMargins`        | `Object` | 页面边距配置                                             | `undefined` |
+| `headers`            | `Object` | 页眉配置                                              | `undefined` |
+| `footers`            | `Object` | 页脚配置                                              | `undefined` |
+| `tableOverrides`     | `Object` | 传递给 DOCX 步骤的表格级渲染覆盖             | `undefined` |
+| `paragraphOverrides` | `Object` | 传递给 DOCX 步骤的段落级渲染覆盖         | `undefined` |
+| `textRunOverrides`   | `Object` | 传递给 DOCX 步骤的文本运行级渲染覆盖                | `undefined` |
+| `tableCellOverrides` | `Object` | 传递给 DOCX 步骤的表格单元格级渲染覆盖              | `undefined` |
+| `imageOverrides`     | `Object` | 传递给 DOCX 步骤的图像渲染覆盖                   | `undefined` |
 
 #### 页面尺寸配置
 
@@ -129,6 +135,31 @@ curl --output document.doc -X POST "https://api.tiptap.dev/v2/convert/export/doc
 <Callout title="纯文本 vs. Tiptap JSONContent">
     每个页脚值可以是**纯文本字符串**（生成简单无样式的页脚）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，请先用 `JSON.stringify()` 序列化对象，再放入请求体中。
 </Callout>
+
+### 元素覆盖
+
+DOC 生成会经过 DOCX 管线，因此在发送 Tiptap JSON 时，`/export/docx` 支持的那五种相同元素覆盖也同样适用于这里。通过 `docxFile` 上传预先生成的 DOCX 时，它们**不会生效**。
+
+<ElementOverridesRestApi />
+
+#### 结合多个元素覆盖的 cURL 示例
+
+```bash
+curl --output document.doc -X POST "https://api.tiptap.dev/v2/convert/export/doc" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"DOC with element-level overrides\"}]}]}",
+      "paragraphOverrides": {
+        "spacing": { "before": 200, "after": 200 }
+      },
+      "textRunOverrides": {
+        "font": "Arial",
+        "size": 24
+      }
+    }'
+```
 
 ### 自定义页面布局示例
 

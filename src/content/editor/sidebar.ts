@@ -262,7 +262,7 @@ export const sidebarConfig: SidebarConfig = {
               href: '/editor/extensions/functionality/ai-toolkit',
               title: 'AI 工具包',
               tags: ['附加组件'],
-              beta: true,
+              releaseTag: "beta",
             },
             {
               href: '/editor/extensions/functionality/bubble-menu',
@@ -292,7 +292,7 @@ export const sidebarConfig: SidebarConfig = {
               href: '/editor/extensions/functionality/comments',
               title: '评论',
               tags: ['Start 计划'],
-              beta: true,
+              releaseTag: "beta",
             },
             {
               href: '/editor/extensions/functionality/drag-handle',
@@ -314,7 +314,7 @@ export const sidebarConfig: SidebarConfig = {
               href: '/editor/extensions/functionality/export',
               title: '导出',
               tags: ['Start 计划'],
-              beta: true,
+              releaseTag: "beta",
             },
             {
               href: '/editor/extensions/functionality/filehandler',
@@ -360,7 +360,7 @@ export const sidebarConfig: SidebarConfig = {
               href: '/editor/extensions/functionality/import',
               title: '导入',
               tags: ['Start 计划'],
-              beta: true,
+              releaseTag: "beta",
             },
             {
               href: '/editor/extensions/functionality/pages',
