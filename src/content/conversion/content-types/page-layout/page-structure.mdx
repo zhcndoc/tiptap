@@ -25,8 +25,8 @@ import { Callout } from '@/components/ui/Callout'
 | 分页符 | 支持 | 支持（PageBreak） | 支持 |
 | 页面大小 | 不支持 | 支持（[Pages](/pages/getting-started/overview)） | 支持（可配置） |
 | 页边距 | 不支持 | 支持（Pages） | 支持（可配置） |
-| 节 | 部分支持（会提取并应用列配置） | 不支持 | 仅单个节 |
-| 页码 | 不支持 | 支持（通过页眉/页脚） | 通过页眉/页脚内容 |
+| 节 | 部分支持（会提取并应用栏配置） | 不支持 | 仅单节 |
+| 页码 | 支持（PAGE/NUMPAGES → `{page}`/`{numpages}` 标记，见[下文](#page-numbers)） | 支持（通过页眉/页脚） | 仅编辑器扩展：页眉/页脚中的 `{page}`/`{total}` 标记会输出实时的 `PAGE`/`NUMPAGES` 域。REST API 导出会输出字面文本。 |
 | 栏 | 导入时支持（会创建 columns/column 节点） | 不支持 | 不支持 |
 
 ## 分页符
@@ -72,17 +72,17 @@ Word 文档可以有多个节，每个节都有自己的页面布局属性（大
 
 ## 页码
 
-Word 中的页码是位于页眉和页脚中的域代码（`PAGE`、`NUMPAGES`）。虽然页眉和页脚会被导入（见[页眉和页脚](/conversion/content-types/page-layout/headers-footers)），但页码字段不会被转换，因为导入管道不会解析 DOCX 域代码。
+Word 中的页码是页眉和页脚中的域代码（`PAGE`、`NUMPAGES`）。当安装了 Pages 扩展时，导入会将这些内容转换为规范文本标记——`PAGE` 对应 `{page}`，`NUMPAGES` 对应 `{numpages}`——（或者你显式启用：在 [编辑器命令](/conversion/import/docx/editor-extension#page-number-fields) 中设置 `placeholders: true`（或 `{ page?, total? }`），或在 [REST API](/conversion/import/docx/rest-api#page-number-fields) 中使用 `placeholders={}` 表单字段）。导出时，[编辑器扩展](/conversion/export/docx/editor-extension)会将页眉/页脚内容中的 `{page}` / `{total}` 标记输出为实时的 `PAGE` / `NUMPAGES` 域，因此 Word 会在打印或重新分页时重新计算。REST API 导出也会进行同样的转换；传入 `placeholders: false` 可将这些标记保留为字面文本。
 
-Pages 扩展支持在页眉和页脚内容中使用页码占位符（`{page}`、`{total}`）。
+Pages 扩展默认识别 `{page}` 和 `{total}`；它**不**识别 `{numpages}`。若要让 Word 的 `NUMPAGES` 域在导入后于编辑器预览中实时渲染，请配置 `Pages.configure({ placeholders: { total: 'numpages' } })`。参见 [DOCX 导入 → page-number fields](/conversion/import/docx/editor-extension#page-number-fields)。
 
 ## 可往返内容
 
 | 功能 | 可往返？ | 说明 |
 | --- | --- | --- |
 | 分页符 | 是 | 需要 `@tiptap-pro/extension-pagebreak` |
-| 页面大小 | 否 | 编辑器（Pages）和导出需分别配置 |
-| 页边距 | 否 | 编辑器（Pages）和导出需分别配置 |
-| 节 | 部分 | 栏配置会保留；其他节属性不会 |
-| 页码 | 否 | 通过 Pages 扩展的页眉/页脚重新添加 |
-| 栏 | 部分 | 导入会创建栏节点；导出尚不会将其写回 |
+| 页面大小 | 否 | 需分别为编辑器（Pages）和导出进行配置 |
+| 页边距 | 否 | 需分别为编辑器（Pages）和导出进行配置 |
+| 节 | 部分 | 栏配置可以保留；其他节属性不会保留 |
+| 页码 | 是（编辑器扩展导出） | Word `PAGE` / `NUMPAGES` ↔ `{page}` / `{numpages}`（Pages 中 total 的规范名称是 `{total}`；配置 `placeholders: { total: 'numpages' }` 可实现桥接）。通过 REST API 重新导出不会转换这些标记——请使用编辑器扩展进行往返。 |
+| 栏 | 部分 | 导入会创建栏节点；导出目前不会写回它们 |

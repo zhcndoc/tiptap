@@ -8,6 +8,7 @@ meta:
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <Requirements>
@@ -15,15 +16,17 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
     通过购买付费的 Server AI Toolkit 附加组件获取 Server AI Toolkit 的访问权限。{' '}
     <a href="https://tiptap.dev/contact-sales?form=server-ai-toolkit">联系我们的团队</a>。
   </RequirementItem>
-  <RequirementItem label="2. 访问私有注册表">
-    Server AI Toolkit 包发布在 Tiptap 的私有 npm 注册表中。请按照 [设置指南](/guides/pro-extensions) 认证登录 Tiptap 私有 npm 注册表。
+  <RequirementItem label="2. 安装该包">
+    Server AI Toolkit 包是开源的。使用 npm 或你偏好的包管理器，从公共 npm 仓库安装它。
   </RequirementItem>
-  <RequirementItem label="3. 安装包">
-    使用 npm 或您喜欢的包管理器从私有注册表安装该包。
+  <RequirementItem label="3. 对服务进行身份验证">
+    配置你的 Content AI 凭据以访问 Server AI Toolkit 服务。
   </RequirementItem>
 </Requirements>
 
-构建一个简单的 AI 代理聊天机器人，可以读取和编辑 Tiptap 文档。
+<EnterpriseCalloutAuto variant="server-ai-toolkit" renderMode="sidebar" />
+
+构建一个简单的 AI agent 聊天机器人，它可以读取和编辑 Tiptap 文档。
 
 <CodeDemo
   isLarge
@@ -48,11 +51,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 npx create-next-app@latest server-ai-agent-chatbot
 ```
 
-<Callout title="Pro 包" variant="hint">
-  Server AI Toolkit 和 Collaboration 是 pro 包。在安装之前，你需要先设置 [访问 Tiptap 的私有 NPM 注册表](/guides/pro-extensions)。
-</Callout>
-
-安装核心 Tiptap 包、协作扩展以及用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
+安装核心 Tiptap 包、协作扩展，以及用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
 
 ```bash
 npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-collaboration @tiptap-pro/provider ai @ai-sdk/react @ai-sdk/openai zod uuid yjs jsonwebtoken
@@ -61,7 +60,7 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-collaboration @t
 安装 Server AI Toolkit 包：
 
 ```bash
-npm install @tiptap-pro/server-ai-toolkit
+npm install @tiptap/server-ai-toolkit
 ```
 
 安装 jsonwebtoken 的 TypeScript 类型：
@@ -95,7 +94,7 @@ OPENAI_API_KEY=your-openai-key # AI SDK 会自动读取该值
 
 #### 获取工具定义
 
-此函数从 Server AI Toolkit API 获取可用工具定义。
+此函数会从 Server AI Toolkit API 获取提示词和可用的工具定义。
 
 ```ts
 // lib/server-ai-toolkit/get-tool-definitions.ts
@@ -105,20 +104,21 @@ import { getAuthHeaders } from './get-auth-headers'
 /**
  * 从 Server AI Toolkit API 获取工具定义
  */
-export async function getToolDefinitions(schemaAwarenessData: unknown): Promise<
-  {
+export async function getToolDefinitions(editorContext: unknown): Promise<{
+  prompt: string
+  tools: {
     name: string
     description: string
     inputSchema: z.core.JSONSchema.JSONSchema
   }[]
-> {
+}> {
   const apiBaseUrl = process.env.TIPTAP_CLOUD_AI_API_URL || 'https://api.tiptap.dev'
 
   const response = await fetch(`${apiBaseUrl}/v3/ai/toolkit/tools`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({
-      schemaAwarenessData,
+      editorContext,
     }),
   })
 
@@ -127,38 +127,7 @@ export async function getToolDefinitions(schemaAwarenessData: unknown): Promise<
   }
   const responseData = await response.json()
 
-  return responseData.tools
-}
-```
-
-#### 获取 schema 识别提示
-
-_Schema 识别_ 是 Server AI Toolkit 让你的 LLM 理解文档结构的能力。使用此函数，你可以生成该识别内容的格式化字符串，包含在提示中以向模型描述文档。
-
-```ts
-// lib/server-ai-toolkit/get-schema-awareness-prompt.ts
-import { getAuthHeaders } from './get-auth-headers'
-
-/**
- * 从 Server AI Toolkit API 获取 schema 识别提示
- */
-export async function getSchemaAwarenessPrompt(schemaAwarenessData: unknown): Promise<string> {
-  const apiBaseUrl = process.env.TIPTAP_CLOUD_AI_API_URL || 'https://api.tiptap.dev'
-
-  const response = await fetch(`${apiBaseUrl}/v3/ai/toolkit/schema-awareness-prompt`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({
-      schemaAwarenessData,
-    }),
-  })
-
-  if (!response.ok) {
-    throw new Error(`获取 schema 识别提示失败：${response.statusText}`)
-  }
-
-  const result: { prompt: string } = await response.json()
-  return result.prompt
+  return responseData
 }
 ```
 
@@ -168,7 +137,7 @@ export async function getSchemaAwarenessPrompt(schemaAwarenessData: unknown): Pr
 
 #### 执行工具
 
-此函数通过 Server AI Toolkit API 执行指定工具。它将工具名称、输入参数、文档 ID 和 schema 识别数据发送给 API。服务器会借助 JWT 中的凭证自动从 Tiptap Cloud 获取和保存文档。
+此函数通过 Server AI Toolkit API 执行工具。它会将工具名称、输入参数、文档 ID 和编辑器上下文数据发送到 API。服务器会自动使用 JWT 中的凭据获取并保存 Tiptap Cloud 文档。
 
 ```ts
 // lib/server-ai-toolkit/execute-tool.ts
@@ -181,9 +150,8 @@ export async function executeTool(
   toolName: string,
   input: unknown,
   documentId: string,
-  schemaAwarenessData: unknown,
-  options: { sessionId?: string } = {},
-): Promise<{ output: unknown; docChanged: boolean; sessionId: string }> {
+  editorContext: unknown,
+): Promise<{ output: unknown; toolResult: unknown; docChanged: boolean; document: object | null }> {
   const apiBaseUrl = process.env.TIPTAP_CLOUD_AI_API_URL || 'https://api.tiptap.dev'
 
   const response = await fetch(`${apiBaseUrl}/v3/ai/toolkit/execute-tool`, {
@@ -192,9 +160,8 @@ export async function executeTool(
     body: JSON.stringify({
       toolName,
       input,
-      sessionId: options.sessionId,
       experimental_documentOptions: { documentId },
-      schemaAwarenessData,
+      editorContext,
     }),
   })
 
@@ -206,13 +173,6 @@ export async function executeTool(
 }
 ```
 
-<Callout title="在聊天轮次之间持久化会话" variant="info">
-  将最新的 `sessionId` 存储在对话历史中，并在后续的工具调用中重用它。这样服务器就能拒绝过时的编辑，而不会覆盖更新的用户更改。
-</Callout>
-
-可以使用一个小型辅助函数，例如 [`lib/server-ai-toolkit/session-id.ts`](https://github.com/ueberdosis/ai-toolkit-demos/blob/main/src/lib/server-ai-toolkit/session-id.ts)，
-从对话历史中读取最新的 `sessionId`。
-
 现在创建主 API 路由：
 
 ```ts
@@ -221,30 +181,21 @@ import { openai } from '@ai-sdk/openai'
 import { createAgentUIStreamResponse, ToolLoopAgent, tool } from 'ai'
 import z from 'zod'
 import { executeTool } from '@/lib/server-ai-toolkit/execute-tool'
-import { getSchemaAwarenessPrompt } from '@/lib/server-ai-toolkit/get-schema-awareness-prompt'
 import { getToolDefinitions } from '@/lib/server-ai-toolkit/get-tool-definitions'
-import {
-  getSessionIdFromConversationHistory,
-  type ServerAiToolkitMessage,
-} from '@/lib/server-ai-toolkit/session-id'
 
 export async function POST(req: Request) {
   const {
     messages,
-    schemaAwarenessData,
+    editorContext,
     documentId,
   }: {
-    messages: ServerAiToolkitMessage[]
-    schemaAwarenessData: unknown
+    messages: unknown[]
+    editorContext: unknown
     documentId: string
   } = await req.json()
-  let sessionId = getSessionIdFromConversationHistory(messages)
 
-  // 从 Server AI Toolkit API 获取工具定义
-  const toolDefinitions = await getToolDefinitions(schemaAwarenessData)
-
-  // 从 Server AI Toolkit API 获取 schema 识别提示
-  const schemaAwarenessPrompt = await getSchemaAwarenessPrompt(schemaAwarenessData)
+  // 从 Server AI Toolkit API 获取提示词和工具定义
+  const { prompt, tools: toolDefinitions } = await getToolDefinitions(editorContext)
 
   // 将 API 工具定义转换为 AI SDK 工具格式
   const tools = Object.fromEntries(
@@ -255,10 +206,7 @@ export async function POST(req: Request) {
         inputSchema: z.fromJSONSchema(toolDef.inputSchema),
         execute: async (input) => {
           try {
-            const result = await executeTool(toolDef.name, input, documentId, schemaAwarenessData, {
-              sessionId,
-            })
-            sessionId = result.sessionId
+            const result = await executeTool(toolDef.name, input, documentId, editorContext)
             return result.output
           } catch (error) {
             console.error(`执行工具 ${toolDef.name} 失败:`, error)
@@ -279,14 +227,12 @@ Before calling any tools, summarize you're going to do (in a sentence or less), 
 Rule: In your responses, do not provide any details of the tool calls.
 Rule: In your responses, do not provide any details of the HTML content of the document.
 
-${schemaAwarenessPrompt}`,
+${prompt}`,
     tools,
   })
 
   return createAgentUIStreamResponse({
     agent,
-    messageMetadata: ({ part }) =>
-      part.type === 'finish' && sessionId ? { sessionId } : undefined,
     uiMessages: messages,
   })
 }
@@ -341,7 +287,7 @@ import { Collaboration } from '@tiptap/extension-collaboration'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { TiptapCollabProvider } from '@tiptap-pro/provider'
-import { ServerAiToolkit, getSchemaAwarenessData } from '@tiptap-pro/server-ai-toolkit'
+import { ServerAiToolkit, getEditorContext } from '@tiptap/server-ai-toolkit'
 import { DefaultChatTransport } from 'ai'
 import { useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
@@ -394,7 +340,7 @@ export default function Page() {
     }
   }, [documentId, doc, editor])
 
-  const schemaAwarenessData = editor ? getSchemaAwarenessData(editor) : null
+  const editorContext = editor ? getEditorContext(editor) : null
 
   const { messages, sendMessage } = useChat({
     transport: new DefaultChatTransport({
@@ -428,7 +374,7 @@ export default function Page() {
         onSubmit={(e) => {
           e.preventDefault()
           if (input.trim()) {
-            sendMessage({ text: input }, { body: { schemaAwarenessData } })
+            sendMessage({ text: input }, { body: { editorContext } })
             setInput('')
           }
         }}

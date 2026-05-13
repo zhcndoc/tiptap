@@ -56,6 +56,7 @@ type Suggestion = {
   type: SuggestionType
   userId: string
   createdAt: string
+  updatedAt: string
   userMetadata: Record<string, unknown> | null
   from: number
   to: number
@@ -72,10 +73,13 @@ type Suggestion = {
 }
 ```
 
+- `createdAt` — 建议首次创建时的 ISO 8601 时间戳
+- `updatedAt` — 建议最近一次编辑的 ISO 8601 时间戳。对于早于该字段的旧数据，会回退使用 `createdAt`。
+
 对于 `replace` 建议：
-- `text` 包含 **新**（插入的）文本
-- `replacedText` 包含 **旧**（删除的）文本
-- `deletionRange` 和 `insertionRange` 给出每部分的确切位置
+- `text` 包含**新的**（插入的）文本
+- `replacedText` 包含**旧的**（删除的）文本
+- `deletionRange` 和 `insertionRange` 提供每个部分的精确位置
 - `from` 和 `to` 覆盖两部分的完整范围
 
 对于 `markChange` 建议：
@@ -99,6 +103,7 @@ type SuggestionMarkAttrs = {
   type: SuggestionMarkType
   userId: string
   createdAt: string
+  updatedAt: string
   userMetadata: Record<string, unknown> | null
   markChanges?: SuggestionMarkChange[] | null
 }
@@ -144,7 +149,6 @@ type TrackedChangesOptions = {
   enabled: boolean
   userId: string
   userMetadata?: Record<string, unknown> | null
-  suggestionGroupingTimeout: number
   ignoredTrackingMarks: string[]
   onSuggestionCreate?: (suggestion: Suggestion) => void
   onSuggestionAccept?: (id: string) => void

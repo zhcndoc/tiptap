@@ -32,7 +32,7 @@ const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
   method: 'POST',
   headers: getAuthHeaders(),
   body: JSON.stringify({
-    schemaAwarenessData,
+    editorContext,
     tools: {
       // 禁用 tiptap 编辑工具，使 AI 不能编辑文档，
       // 只能添加评论
@@ -49,7 +49,7 @@ const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
 
 评论工具需要一个 **Tiptap Cloud 文档**，因为线程和评论存储在 Tiptap 文档服务器上。使用 `experimental_documentOptions` 时，**不需要传递 `document` 字段** —— AI 服务器会自动从文档服务器获取。
 
-### Request body
+### 请求体
 
 在请求体中包含 `experimental_documentOptions`：
 
@@ -68,8 +68,7 @@ const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
   body: JSON.stringify({
     toolName: 'editThreads',
     input: {},
-    schemaAwarenessData,
-    sessionId,
+    editorContext,
     // 引用 Tiptap Cloud 文档
     experimental_documentOptions: {
       documentId: '123',

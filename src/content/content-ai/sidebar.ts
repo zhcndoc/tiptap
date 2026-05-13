@@ -29,7 +29,7 @@ export const sidebarConfig: SidebarConfig = {
           title: 'AI 工具包',
           href: '/content-ai/capabilities/ai-toolkit',
           tags: ['附加组件'],
-          releaseTag: "beta",
+          releaseTag: 'beta',
           children: [
             {
               title: '概述',
@@ -289,7 +289,7 @@ export const sidebarConfig: SidebarConfig = {
           title: '服务端 AI 工具包',
           href: '/content-ai/capabilities/server-ai-toolkit',
           tags: ['附加组件'],
-          releaseTag: "alpha",
+          releaseTag: 'alpha',
           children: [
             {
               title: '概述',
@@ -356,8 +356,8 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/server-ai-toolkit/api-reference',
               children: [
                 {
-                  title: '模式感知',
-                  href: '/content-ai/capabilities/server-ai-toolkit/api-reference/schema-awareness',
+                  title: 'Editor context',
+                  href: '/content-ai/capabilities/server-ai-toolkit/api-reference/editor-context',
                 },
                 {
                   title: '审阅选项',
@@ -384,14 +384,8 @@ export const sidebarConfig: SidebarConfig = {
               ],
             },
             {
-              title: '更新日志',
-              href: '/content-ai/capabilities/server-ai-toolkit/changelog',
-              children: [
-                {
-                  title: '服务端 AI 工具包',
-                  href: '/content-ai/capabilities/server-ai-toolkit/changelog/server-ai-toolkit',
-                },
-              ],
+              title: 'Changelog',
+              href: '/resources/changelog/server-ai-toolkit',
             },
           ],
         },

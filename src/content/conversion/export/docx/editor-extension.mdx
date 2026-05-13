@@ -11,6 +11,7 @@ meta:
   category: 转换
 ---
 
+import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
@@ -104,6 +105,10 @@ const editor = new Editor({
 | tableCellOverrides    | 所有表格单元格的基础默认值（也会应用于页眉/页脚单元格）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                   | `{}`        |
 | imageOverrides        | 图像属性覆盖（也会应用于页眉/页脚中的图像）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                      | `{}`        |
 | headerFooterOverrides | 仅作用于页眉/页脚内容的按字段覆盖——会在页眉和页脚中完全替换与正文范围内对应项匹配的覆盖。仅适用于从 [Pages 扩展](/pages/getting-started/overview) 自动提取的页眉/页脚。[查看 `headerFooterOverrides`](/conversion/export/docx/styles#headerfooteroverrides) | `undefined` |
+
+<Callout title="页码占位符名称在 Pages 中配置，不在这里配置">
+    `ExportDocx` 中没有 `placeholders` 选项。要重命名内置的 `{page}` / `{total}` 标记，或禁用替换，请在 [Pages 扩展](/pages/core-concepts/page-header-footer#renaming-or-disabling-placeholders) 中配置——导出会遵循相同的标记名称，因此编辑器预览和导出的 `.docx` 会保持一致。
+</Callout>
 
 ## 导出 DOCX 文件
 
@@ -207,7 +212,7 @@ handleExportDocxBuffer()
 上面的示例完全在浏览器中运行，通过 ExportDocx 扩展生成一个 DOCX Blob，因为我们没有覆盖它，而 `exportType` 的默认值就是这个。然后我们以编程方式下载该文件。您可以调整这段逻辑，例如，将 blob 发送到服务器而不是下载。
 
 | 参数        | 描述                                                                                                                                                                                                                                                                                                                                                                                     |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ---------------- | ------------------------------- |
 | onCompleteExport | 转换完成后，我们将获得转换结果 `result`，它将作为回调函数的主要且唯一参数；在本例中，它是一个 `Blob`，因为我们在 `options` 参数中的 `exportType` 已声明希望使用此类型。然后您可以按自己喜欢的方式处理它，例如触发文件下载，就像我们在上面的示例中展示的那样。 |
 | exportType       | 我们使用默认的 `blob`，因此转换返回一个 `Blob`。                                                                                                                                                                                                                                                                                                                                              |
 | customNodes      | 由于我们没有提供任何自定义节点，因此不会提供任何自定义节点映射。                                                                                                                                                                                                                                                                                                           |

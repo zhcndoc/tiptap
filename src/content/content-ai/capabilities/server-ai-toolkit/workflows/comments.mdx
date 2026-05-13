@@ -25,11 +25,6 @@ import { Callout } from '@/components/ui/Callout'
   使用 `experimental_documentOptions.documentId`。
 </Callout>
 
-<Callout title="将文档读取会话复用于线程编辑" variant="info">
-  `read-document` 会返回一个 `sessionId`。在执行请求中发送相同的 `sessionId`，这样服务器才能
-  拒绝针对 AI 在用户修改内容之前已读取过的内容执行的线程操作。
-</Callout>
-
 开始之前，请按照[授权指南](/content-ai/capabilities/server-ai-toolkit/install#set-up-authorization)完成身份验证设置。
 
 ## 1. 从 AI Server 读取文档和现有线程
@@ -46,9 +41,8 @@ const documentResponse = await fetch(`${apiBaseUrl}/toolkit/read/read-document`,
   method: 'POST',
   headers: getAuthHeaders(),
   body: JSON.stringify({
-    schemaAwarenessData,
+    editorContext,
     format: 'shorthand',
-    sessionId,
     reviewOptions: {
       mode: 'disabled',
     },
@@ -65,7 +59,7 @@ const threadsResponse = await fetch(`${apiBaseUrl}/toolkit/read/threads`, {
   method: 'POST',
   headers: getAuthHeaders(),
   body: JSON.stringify({
-    schemaAwarenessData,
+    editorContext,
     format: 'shorthand',
     experimental_documentOptions: {
       documentId,
@@ -92,19 +86,19 @@ const workflowResponse = await fetch(`${apiBaseUrl}/toolkit/workflows/threads`, 
 
 const workflow = await workflowResponse.json()
 
-const schemaResponse = await fetch(`${apiBaseUrl}/toolkit/schema-awareness-prompt`, {
+const toolkitResponse = await fetch(`${apiBaseUrl}/toolkit/tools`, {
   method: 'POST',
   headers: getAuthHeaders(),
   body: JSON.stringify({
-    schemaAwarenessData,
+    editorContext,
   }),
 })
 
-const { prompt: schemaAwarenessPrompt } = await schemaResponse.json()
+const { prompt: toolkitPrompt } = await toolkitResponse.json()
 
 const result = streamText({
   model,
-  system: `${workflow.systemPrompt}\n\n${schemaAwarenessPrompt}`,
+  system: `${workflow.systemPrompt}\n\n${toolkitPrompt}`,
   prompt: JSON.stringify({
     content: documentReadResult.output.content,
     threads: threadsReadResult.output.threads ?? [],
@@ -127,10 +121,9 @@ const executeResponse = await fetch(`${apiBaseUrl}/toolkit/execute-workflow/thre
   method: 'POST',
   headers: getAuthHeaders(),
   body: JSON.stringify({
-    schemaAwarenessData,
+    editorContext,
     format: 'shorthand',
     input: output,
-    sessionId: documentReadResult.sessionId,
     experimental_documentOptions: {
       documentId,
       userId: 'ai-assistant',
@@ -157,14 +150,10 @@ const response = await fetch('/api/server-comments-workflow', {
   },
   body: JSON.stringify({
     documentId,
-    schemaAwarenessData: getSchemaAwarenessData(editor),
+    editorContext: getEditorContext(editor),
     task,
-    sessionId,
   }),
 })
-
-const result: { sessionId: string } = await response.json()
-setSessionId(result.sessionId)
 ```
 
 ## 最终结果

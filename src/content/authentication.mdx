@@ -1,0 +1,327 @@
+---
+title: 认证
+meta:
+  title: 认证 | Tiptap 文档
+  description: 使用 JWT 对 Tiptap 服务（AI、Convert、Documents）进行身份验证。涵盖声明、签名密钥、权限和安全最佳实践的参考。
+  category: 认证
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+<Callout title="按需提供" variant="info">
+  这种统一身份验证模型目前正在逐步推出，仅对部分环境启用。如果你希望提前体验，请发送邮件至 [humans@tiptap.dev](mailto:humans@tiptap.dev)。在你的环境迁移完成之前，请继续使用现有的按服务身份验证方式，适用于 [Collaboration](/collaboration/getting-started/authenticate)、[Conversion](/conversion/getting-started/install) 和 [Content AI](/content-ai/capabilities/generation/install)。
+</Callout>
+
+Tiptap 服务使用 JWT（JSON Web Tokens）进行身份验证和授权。你在自己的服务器上生成并签名令牌，然后将它们传递给 Tiptap 服务。每个令牌都会标识你的环境、列出它可以访问的服务，以及它被授权在你的资源上执行的操作。
+
+## 它是如何工作的
+
+1. 你在 Tiptap 控制台中创建一个非对称密钥对。
+2. 你的服务器使用私钥签名 JWT。
+3. 你的客户端在连接到 Tiptap 服务（AI、Convert、Documents）时传递该 JWT。
+4. Tiptap 使用公钥验证令牌签名并检查你的订阅。
+
+## 为什么需要新的身份验证模型？
+
+新模型用一个单一、统一的 JWT 取代了按服务分散的令牌，这个 JWT 承载了请求所需了解的全部信息：它可以访问哪些服务、允许执行什么操作，以及可作用于哪些资源。结果是集成面更小、默认安全性更强，并且控制粒度更细。
+
+- **一个令牌，多个服务。** 一个 JWT 通过 `aud` 声明即可授权 AI、Convert 和 Documents 的任意组合。
+- **跨服务工作流。** AI 服务可以在相同令牌下对你的文档执行操作，无需服务间的额外对接。
+- **权限写在令牌里。** 通过 `action`、`resource` 和可选约束精确声明允许的内容，而不是依赖粗粒度的服务级作用域。
+- **零停机密钥轮换。** 每个环境可同时运行多个有效密钥对，并且无需切换窗口即可退役旧密钥。
+
+## 声明参考
+
+每个 JWT 都必须包含以下注册声明：
+
+| 声明 | 类型 | 必需 | 描述 |
+|-------|------|------|-------------|
+| `iss` | `string` | 是 | 你的环境哈希 ID（来自 Tiptap 控制台） |
+| `aud` | `string \| string[]` | 是 | 该令牌可以访问哪些服务：`"AI"`、`"Convert"`、`"Documents"` |
+| `iat` | `number` | 否 | 签发时间戳（Unix epoch 秒） |
+| `exp` | `number` | 是 | 过期时间戳（Unix epoch 秒） |
+| `sub` | `string` | 否 | 用户标识符（用于审计轨迹和追踪） |
+| `permissions` | `Permission[]` | 否 | 此令牌被允许执行的操作。不填写则不授予任何特定操作。 |
+
+## 签名令牌
+
+### 非对称密钥对（ES256）— 默认
+
+当你在控制台创建密钥时，会收到一个 ECDSA 私钥（P-256）。你使用私钥对令牌签名。Tiptap 仅存储公钥，并用它来验证令牌。你的私钥不会离开你的服务器。
+
+```typescript
+import { SignJWT, importPKCS8 } from 'jose'
+
+const privateKey = await importPKCS8(process.env.TIPTAP_PRIVATE_KEY, 'ES256')
+
+const jwt = await new SignJWT({
+  permissions: [
+    { action: 'Documents:Read', resource: '*' },
+  ],
+})
+  .setProtectedHeader({ alg: 'ES256' })
+  .setIssuer('your-environment-hash-id')
+  .setAudience(['Documents'])
+  .setIssuedAt()
+  .setExpirationTime('30m')
+  .sign(privateKey)
+```
+
+### 其他语言
+
+JWT 是一个标准的 [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519) 令牌。任何支持 ES256 的 JWT 库都可以签名令牌。无论使用哪种语言，载荷结构都相同。
+
+**Python**（PyJWT，ES256 需要 `pyjwt[crypto]`）：
+
+```python
+import jwt, time
+
+with open("private_key.pem", "rb") as f:
+    private_key = f.read()
+
+payload = {
+    "iss": "your-environment-hash-id",
+    "aud": ["AI", "Documents"],
+    "iat": int(time.time()),
+    "exp": int(time.time()) + 1800,
+    "permissions": [
+        {"action": "Documents:Read", "resource": "*"}
+    ]
+}
+
+token = jwt.encode(payload, private_key, algorithm="ES256")
+```
+
+**PHP**（firebase/php-jwt）：
+
+```php
+use Firebase\JWT\JWT;
+
+$privateKey = file_get_contents('private_key.pem');
+
+$payload = [
+    'iss' => 'your-environment-hash-id',
+    'aud' => ['AI', 'Documents'],
+    'iat' => time(),
+    'exp' => time() + 1800,
+    'permissions' => [
+        ['action' => 'Documents:Read', 'resource' => '*'],
+    ],
+];
+
+$token = JWT::encode($payload, $privateKey, 'ES256');
+```
+
+## 权限
+
+权限定义了令牌被允许执行的操作。虽然它们是可选的，但没有权限的令牌仍可完成请求的身份验证，但不会授予任何特定操作。
+
+每个权限都有一个 **action** 和一个 **resource**（两者都是必需的），以及可选的 **constraints**：
+
+```json
+{
+  "permissions": [
+    {
+      "action": "Documents:Read",
+      "resource": "*",
+      "constraints": { "prefix": "team1_" }
+    }
+  ]
+}
+```
+
+### 操作
+
+操作遵循 `Service:Operation` 格式。每个 Tiptap 服务定义了自己的操作：
+
+| 服务 | 操作 |
+|---------|---------|
+| Documents | `Documents:Read`、`Documents:Write`、`Documents:Comment` |
+| Documents REST API | `Documents:Api:All` 授予对 Document Server 的 REST API 的完全访问权限。|
+| Convert | `Convert:Import:Docx`、`Convert:Export:Docx`、`Convert:Import:Markdown`、`Convert:Export:Markdown`、`Convert:Export:Doc`、`Convert:Export:Odt`、`Convert:Export:Epub`、`Convert:Export:Pdf`、`Convert:Fonts` |
+| AI | `AI:Generation`、`AI:Toolkit` |
+
+`Documents:Write` 隐含 `Documents:Read` 和 `Documents:Comment`——授予写入权限会自动授予另外两项，因此你无需单独列出它们。
+
+`Documents:Api:All` 授予对 Document Server 的 REST API 的完全访问权限。它与其他 `Documents:*` 操作是分开的，后者授权通过协作连接进行文档操作。
+
+`Convert:*` 操作按文件格式 **和** 操作类型（`Import` 与 `Export`）进行作用域限定。令牌只需要它实际使用到的操作——例如，一个只导出 PDF 的令牌只需要 `Convert:Export:Pdf`。目前只有 DOCX 和 Markdown 支持双向；Doc、ODT、EPUB 和 PDF 仅支持导出。`Convert:Fonts` 不受作用域限制，并适用于 `/fonts/*` 路由。
+
+`AI:Generation` 覆盖文本和图像生成、建议、代理以及音频/语音端点。`AI:Toolkit` 覆盖工具包端点。两者都不会隐含另一个。AI 操作目前不按资源划分作用域，因此在 AI 权限中使用 `"resource": "*"`。
+
+操作不区分大小写——`"Documents:Read"` 和 `"documents:read"` 等价。资源和约束值（`prefix`、`suffix`、`in`）仍然区分大小写，因为它们可能引用具有外部意义的标识符。请为你自己的代码选择一致的大小写风格。
+
+### 资源
+
+每个权限的 `resource` 字段都是**必需**的。它控制该权限适用于哪些资源：
+
+| 值 | 含义 | 示例 |
+|-------|---------|---------|
+| `"*"` | **通配符**——匹配所有内容 | `{ "action": "Documents:Read", "resource": "*" }` |
+| `"*"` + constraints | **受筛选的通配符**——匹配通过约束条件的资源 | `{ "action": "Documents:Read", "resource": "*", "constraints": { "prefix": "team_" } }` |
+| `"doc_42"` | **指定资源**——仅匹配这一确切资源 | `{ "action": "Documents:Write", "resource": "doc_42" }` |
+
+关键规则：
+
+- 使用 `"*"` 表示通配符访问。没有约束的通配符会匹配**所有内容**。
+- 指定资源只匹配那个确切的资源。
+
+### 约束
+
+约束在资源匹配的基础上增加更细粒度的过滤。当你想允许访问某类资源，而不是逐个列出时，它们很有用。
+
+```json
+{
+  "action": "Documents:Read",
+  "resource": "*",
+  "constraints": { "prefix": "team1_" }
+}
+```
+
+这会授予对名称以 `"team1_"` 开头的任何文档的读取权限。
+
+**可用的约束字段：**
+
+| 字段 | 类型 | 描述 |
+|-------|------|-------------|
+| `prefix` | `string` | 资源名称必须以该值开头 |
+| `suffix` | `string` | 资源名称必须以该值结尾 |
+| `in` | `string[]` | 资源名称必须是这些确切值之一 |
+
+**在单个约束内组合字段** 使用 AND 逻辑（都必须通过）：
+
+```json
+{ "prefix": "team1_", "suffix": "_published" }
+```
+
+匹配 `"team1_report_published"`，但不匹配 `"team1_report_draft"`。
+
+**约束数组** 使用 OR 逻辑（任意一个通过即可）：
+
+```json
+[
+  { "prefix": "team1_" },
+  { "prefix": "team2_" }
+]
+```
+
+匹配 `"team1_doc"` 或 `"team2_doc"`。
+
+**规则：**
+
+- `constraints` 字段不能为空。每个约束至少要声明 `prefix`、`suffix` 或 `in` 中的一项，并且约束数组必须至少包含一项。若表示“不过滤”，则完全省略该字段。
+- `in` 不能与 `prefix` 或 `suffix` 同时出现在同一个约束对象中。请改为在数组中使用单独的约束。
+- `prefix` 和 `suffix` 必须是非空字符串。
+- `in` 必须是非空字符串数组。
+
+## 示例
+
+### 对所有服务的完全访问权限
+
+```json
+{
+  "iss": "env_abc123",
+  "aud": ["AI", "Convert", "Documents"],
+  "iat": 1722344565,
+  "exp": 1722344865,
+  "permissions": [
+    { "action": "AI:Generation", "resource": "*" },
+    { "action": "AI:Toolkit", "resource": "*" },
+    { "action": "Documents:Write", "resource": "*" },
+    { "action": "Convert:Import:Docx", "resource": "*" },
+    { "action": "Convert:Export:Docx", "resource": "*" },
+    { "action": "Convert:Import:Markdown", "resource": "*" },
+    { "action": "Convert:Export:Markdown", "resource": "*" },
+    { "action": "Convert:Export:Doc", "resource": "*" },
+    { "action": "Convert:Export:Odt", "resource": "*" },
+    { "action": "Convert:Export:Epub", "resource": "*" },
+    { "action": "Convert:Export:Pdf", "resource": "*" },
+    { "action": "Convert:Fonts", "resource": "*" }
+  ]
+}
+```
+
+`Documents:Write` 隐含覆盖读取和评论，因此只需要一个 Documents 条目。
+
+### 仅对特定文档的只读访问
+
+```json
+{
+  "permissions": [
+    {
+      "action": "Documents:Read",
+      "resource": "*",
+      "constraints": {
+        "in": ["document_a", "document_b"]
+      }
+    }
+  ]
+}
+```
+
+### 仅 AI 访问
+
+授予令牌所需的 AI 功能。下面的示例允许生成和工具包端点：
+
+```json
+{
+  "aud": ["AI"],
+  "permissions": [
+    { "action": "AI:Generation", "resource": "*" },
+    { "action": "AI:Toolkit", "resource": "*" }
+  ]
+}
+```
+
+### 文档转换
+
+仅授予令牌实际使用的格式/方向对。下面的示例导入 DOCX 并导出 PDF：
+
+```json
+{
+  "aud": ["Convert"],
+  "permissions": [
+    { "action": "Convert:Import:Docx", "resource": "*" },
+    { "action": "Convert:Export:Pdf", "resource": "*" }
+  ]
+}
+```
+
+### 按文档前缀划分作用域
+
+允许读取和评论属于特定团队的文档：
+
+```json
+{
+  "permissions": [
+    {
+      "action": "Documents:Read",
+      "resource": "*",
+      "constraints": { "prefix": "team-sales_" }
+    },
+    {
+      "action": "Documents:Comment",
+      "resource": "*",
+      "constraints": { "prefix": "team-sales_" }
+    }
+  ]
+}
+```
+
+### 对单个文档的写入权限
+
+```json
+{
+  "permissions": [
+    { "action": "Documents:Write", "resource": "meeting-notes-2024" }
+  ]
+}
+```
+
+## 安全最佳实践
+
+- **保持 token 短生命周期。** 将 `exp` 设置为 30 分钟或更短。为每个会话或连接生成一个新的 token。
+- **使用最小权限原则。** 仅包含 token 实际需要的权限和受众。仅用于 Convert 导出的 token 不应在其受众中包含 `"Documents"` 或 `"AI"`。
+- **切勿在客户端暴露你的私钥。** token 的生成必须在你的服务器上完成。将签名后的 JWT 发送给客户端，绝不要发送签名密钥。
+- **定期轮换密钥。** 创建一对新的密钥，更新服务器以使用新密钥进行签名，然后停用旧密钥。Tiptap 支持每个环境同时存在多个活动密钥对，以实现零停机轮换。
+- **设置 `sub` 以便审计。** 在 `sub` 中包含用户标识符有助于在日志和审计追踪中将操作追溯到特定用户。

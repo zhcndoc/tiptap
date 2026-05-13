@@ -1,0 +1,978 @@
+---
+title: 使用 JSON DSL 导出自定义节点
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.17.0
+meta:
+  title: DOCX 的自定义节点 DSL | Tiptap 转换
+  description: 用于描述 Tiptap 自定义节点应如何渲染为 DOCX 的可序列化 JSON 描述。可同时用于编辑器扩展和转换 REST API。
+  category: 转换
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
+
+<Callout variant="hint" title="Beta 功能">
+  DSL 正在逐步稳定，但在正式可用之前，仍可能会看到一些增量改进。如果你依赖它，请固定确切的包版本。线上的格式是有版本号的（`dslVersion: "1.0"`）；未来版本不会悄悄改变本文档的结构。
+</Callout>
+
+<Requirements>
+  <RequirementItem label="1. 激活试用或订阅">
+    在你的账户中开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Start
+    方案](https://cloud.tiptap.dev/v2/billing)。
+  </RequirementItem>
+  <RequirementItem label="2. 从私有仓库安装">
+    要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 完成对 Tiptap 私有 npm 仓库的身份验证。
+  </RequirementItem>
+  <RequirementItem label="3.（仅 REST）配置 Convert 应用">
+    要使用 Convert REST API，请从 [你的仪表盘](https://cloud.tiptap.dev/v2/cloud/convert) 获取你的 App ID 和 Convert secret。
+  </RequirementItem>
+</Requirements>
+
+[基于函数的自定义节点 API](/conversion/export/docx/custom-nodes) 允许你通过编写一个小型 JavaScript 函数，将任何自定义 Tiptap 节点渲染为 DOCX。这在编辑器扩展内部效果很好，但函数无法通过 HTTP 传输——因此，历史上 [DOCX REST API](/conversion/export/docx/rest-api) 根本没有办法渲染自定义节点。
+
+**`customNodeDsl`** 选项弥补了这一缺口。它是一种小型、可序列化的 JSON 语言，用于描述自定义节点应如何渲染为 DOCX。同一份 JSON 可在两个场景中使用：在浏览器中传给 `ExportDocx.configure({ customNodeDsl })`，或者在 REST 请求体中作为 `customNodeDsl` 字段传入。
+
+<CodeDemo isPro path="/Extensions/ExportDocxCustomNodeDsl" />
+
+---
+
+## 何时使用它
+
+| 你想要……                                                                                           | 使用                                                                      |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| 在浏览器中调用 `editor.exportDocx()` 时渲染自定义节点，并且拥有完整的 JavaScript 灵活性。 | [函数 API](/conversion/export/docx/custom-nodes)（`customNodes`）。 |
+| 在调用 `POST /v2/convert/export/docx` 时渲染自定义节点。                                         | **`customNodeDsl`**（本页）。                                          |
+| 在你的浏览器应用与服务端渲染之间共享相同的自定义节点导出逻辑。                | **`customNodeDsl`**（本页）。                                          |
+| 从两个场景渲染同一个自定义节点，并以单一来源为准。                                 | **`customNodeDsl`**（本页）。                                          |
+
+这两种 API 可以在编辑器扩展上共存。当同一种节点类型同时出现在 `customNodes` 和 `customNodeDsl` 中时，函数定义优先生效，并且每次导出调用只会输出一次 `console.warn`。现有基于函数的用户不会看到行为变化。
+
+<Callout variant="hint" title="用 TypeScript 编写？使用 builder">
+  本页文档说明的是 **JSON 线上的格式** —— 也就是在 convert REST 接口中传输内容的权威参考。如果你是在 TypeScript 代码库中编写规则，可以考虑使用 [DSL
+  builder](/conversion/export/docx/custom-nodes-dsl-builder)—— 一个流式、带类型的 API，会生成完全相同的 JSON，并在每个 prop 上提供自动补全以及编译期包含安全性。该 builder 通过 `@tiptap-pro/extension-export-docx/dsl` 子路径导入。
+</Callout>
+
+---
+
+## 第一个示例
+
+一个自定义的 `hintbox` 块节点，应在 DOCX 中渲染为带样式的段落：
+
+```ts
+import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+
+ExportDocx.configure({
+  customNodeDsl: {
+    dslVersion: '1.0',
+    nodes: [
+      {
+        type: 'hintbox',
+        nodeKind: 'block',
+        render: {
+          emit: {
+            element: 'Paragraph',
+            props: { style: 'Hintbox' },
+            children: { $children: { as: 'inline', marks: 'default' } },
+          },
+        },
+      },
+    ],
+  },
+})
+```
+
+通过 REST 使用同样的 JSON：
+
+```bash
+curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "X-App-Id: YOUR_APP_ID" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"hintbox\",\"content\":[{\"type\":\"text\",\"text\":\"hi\"}]}]}",
+      "exportType": "blob",
+      "customNodeDsl": {
+        "dslVersion": "1.0",
+        "nodes": [
+          {
+            "type": "hintbox",
+            "nodeKind": "block",
+            "render": {
+              "emit": {
+                "element": "Paragraph",
+                "props": { "style": "Hintbox" },
+                "children": { "$children": { "as": "inline", "marks": "default" } }
+              }
+            }
+          }
+        ]
+      }
+    }'
+```
+
+`Hintbox` 段落样式本身通过 [styleOverrides](/conversion/export/docx/styles) 声明，方式与你为函数 API 声明它时完全相同。
+
+---
+
+## 顶层文档
+
+```jsonc
+{
+  "dslVersion": "1.0",
+  "nodes": [
+    /* CustomNodeRule，… */
+  ],
+}
+```
+
+| 字段         | 类型               | 说明                                                                                                                            |
+| ------------ | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `dslVersion` | `"1.0"`            | 必填且必须是精确字面量。任何其他值都会以 `DOCX_DSL_UNKNOWN_VERSION` 拒绝。                                                       |
+| `nodes`      | `CustomNodeRule[]` | 必填。每个 ProseMirror 节点类型对应一条规则。最多 128 项。重复的 `type` 值会以 `DOCX_DSL_DUPLICATE_NODE_TYPE` 拒绝。 |
+
+以下根级键名 **为未来版本保留**，当前若出现将以 `DOCX_DSL_RESERVED_SHAPE` 拒绝，而不会被静默忽略：`requiresStyles`、`contributedStyles`、`externalRefs`、`limits`。这使未来的启用保持安全——今天能编译通过的载荷，明天也会以完全相同的方式继续编译通过。
+
+---
+
+## CustomNodeRule
+
+一条规则描述一个 ProseMirror 节点类型：
+
+```jsonc
+{
+  "type": "hintbox",
+  "nodeKind": "block",
+  "render": {
+    /* RenderProgram */
+  },
+}
+```
+
+| 字段       | 类型                            | 默认值  | 说明                                                                                        |
+| ---------- | ------------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
+| `type`     | `string`                        | required | 此规则匹配的 PM 节点类型（例如 `"hintbox"`、`"mention"`）。                                |
+| `nodeKind` | `"block" \| "inline" \| "auto"` | `"auto"` | 源 PM 节点声明的类型。`"auto"` 允许校验器从规则的 emit 形状推断。 |
+| `render`   | `RenderProgram \| null`         | required | 要渲染的内容。`null` 会删除匹配的 PM 节点及其**所有后代**。                     |
+
+若要让包裹节点不输出内容，同时让子节点正常渲染，请使用 `render: { emit: { "$children": { "as": "block" } } }`，而不是 `render: null`。
+
+---
+
+## RenderProgram
+
+```jsonc
+{
+  "emit": /* RenderNode | RenderNode[] | null */
+}
+```
+
+`RenderProgram` 至少必须声明一个 `emit`。如果既没有 `emit`，也没有（保留的）`contribute` 字段，则会以 `DOCX_DSL_INVALID_SHAPE` 拒绝。
+
+`emit: null` 会让这个 PM 节点不渲染任何内容，但**不会**删除后代。若要完全删除后代，请在规则本身上设置 `render: null`。
+
+---
+
+## RenderNodes
+
+`emit` 下的每一项（以及 `ElementNode` 的子节点）都是一个 `RenderNode`。共有七种形状，全部通过结构来区分——线上格式中没有 `kind` 标签：
+
+| 形状                     | 区分方式        | 含义                                                   |
+| ------------------------ | --------------- | --------------------------------------------------------- |
+| `null`                   | 字面量         | 此处不渲染任何内容。                                      |
+| array                    | 原生 JS 数组   | 隐式片段——按顺序渲染每一项。            |
+| `{ "element": …, … }`    | `element` 键   | 通过适配器注册表构建一个 docx.js 元素。         |
+| `{ "$children": { … } }` | `$children` 键 | 遍历 PM 节点的子内容，并分派每个子节点。 |
+| `{ "$text": …, … }`      | `$text` 键     | 用于输出单个文本运行的便捷写法。               |
+| `{ "$fragment": [ … ] }` | `$fragment` 键 | 显式的同级渲染节点片段。                |
+| `{ "$if": { … } }`       | `$if` 键       | 结构化条件判断。                                   |
+| `{ "$switch": { … } }`   | `$switch` 键   | 结构化多分支条件判断。                         |
+
+如果一个对象混用了两个以 `$` 开头的键（例如 `{ "$text": …, "$children": … }`），则会以 `DOCX_DSL_INVALID_SHAPE` 拒绝。只能选一个。
+
+### ElementNode
+
+最常见的形状——实例化一个 docx.js 元素：
+
+```jsonc
+{
+  "element": "Paragraph",
+  "props": { "style": "Hintbox" },
+  "children": { "$children": { "as": "inline", "marks": "default" } },
+  "applyMarks": "node",
+  "inheritOverrides": true,
+}
+```
+
+| 字段              | 类型                         | 默认值     | 说明                                                                                                                                                |
+| ------------------ | ---------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `element`          | `ElementName`                | required    | 允许的元素之一（见 [元素目录](#element-catalog)）。                                                                                 |
+| `props`            | `Record<string, ValueExpr>`  | `{}`        | 元素属性。每个值都可以是字面量或任意 [值表达式](#value-expressions)。未知的属性键会依据该元素的属性 schema 拒绝。 |
+| `children`         | `RenderNode \| RenderNode[]` | `undefined` | 子渲染节点。元素的适配器决定允许哪些内容（见 [包含关系](#containment)）。                                                      |
+| `applyMarks`       | `ApplyMarksPolicy`           | `undefined` | 仅对 inline 元素有效。将该规则自身 PM 节点上的 marks 合并到运行中。参见 [marks](#marks-system)。                                               |
+| `inheritOverrides` | `boolean`                    | `true`      | 当为 `false` 时，仅对该元素跳过全局 `*Overrides` 套件（例如 `paragraphOverrides`）。                                                       |
+
+### `$children`
+
+遍历 `node.content` 并通过标准转换器分派每个子节点：
+
+```jsonc
+{ "$children": { "as": "inline", "marks": "default" } }
+```
+
+| 字段                   | 类型                                                 | 默认值  | 说明                                                                                                                                                                                  |
+| ----------------------- | ---------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `as`                    | `"block" \| "inline" \| "table-row" \| "table-cell"` | required | 期望的子节点类型。会根据父元素的 `childKind` 进行校验。不匹配会以 `DOCX_DSL_INVALID_CONTEXT` 拒绝。                                                                  |
+| `marks`                 | `MarkPolicy`                                         | `"default"` | 仅在 `as: "inline"` 时有效。如何映射文本子节点上的 marks。参见 [marks](#marks-system)。                                                                                               |
+| `wrapInlineInParagraph` | `boolean`                                            | `false`     | 仅在 `as: "block"` 时有效。当为 `true` 时，连续的 inline 子节点会被缓冲到一个默认 `Paragraph` 中，而不是直接拒绝。对于需要接收仅 inline 内容的表格单元格很有用。 |
+
+### `$text`
+
+用于输出单个文本运行的便捷写法：
+
+```jsonc
+{ "$text": { "$ref": "node.attrs.label" }, "marks": "default", "default": "(未命名)" }
+```
+
+| 字段      | 类型                  | 默认值     | 说明                                                                |
+| --------- | --------------------- | ----------- | -------------------------------------------------------------------------- |
+| `$text`   | `ValueExpr`           | required    | 解析为字符串。非字符串会通过 `String()` 强制转换。              |
+| `marks`   | `"default" \| "none"` | `"default"` | `"default"` 会运行标准的 mark 流程；`"none"` 会跳过它。            |
+| `default` | `string`              | `undefined` | 当解析结果为 `""`、`null` 或 `undefined` 时使用的替代字符串。 |
+
+`{ "$text": e }` 且 `marks: "default"` 等价于 `{ "element": "TextRun", "props": { "text": e } }` 并应用标准 mark 流程——只是写起来更短。
+
+### `$fragment`
+
+显式的同级渲染节点片段。直接使用数组也能达到同样效果：
+
+```jsonc
+{ "$fragment": [ /* RenderNode，… */ ] }
+// —— 或者等价地 ——
+[ /* RenderNode，… */ ]
+```
+
+### `$if`
+
+结构化条件判断：
+
+```jsonc
+{
+  "$if": {
+    "test": { "$ref": "node.attrs.featured" },
+    "then": { "element": "Paragraph", "props": { "style": "Featured" } },
+    "else": null,
+  },
+}
+```
+
+| 字段  | 类型         | 默认值  | 说明                                                                                    |
+| ------ | ------------ | -------- | ---------------------------------------------------------------------------------------------- |
+| `test` | `ValueExpr`  | required | 会被强制转换为布尔值。`false`、`null`、`undefined`、`0`、`""` 为假值；其他值都为真值。 |
+| `then` | `RenderNode` | required | 当 `test` 为真值时渲染的分支。                                                         |
+| `else` | `RenderNode` | `null`   | 当 `test` 为假值时渲染的分支。                                                          |
+
+### `$switch`
+
+多分支条件判断。查找时会与 `cases` 的键进行精确匹配——不支持正则或通配符匹配：
+
+```jsonc
+{
+  "$switch": {
+    "on": { "$ref": "node.attrs.variant" },
+    "cases": {
+      "warning": { "element": "Paragraph", "props": { "style": "CalloutWarning" } },
+      "info": { "element": "Paragraph", "props": { "style": "CalloutInfo" } },
+    },
+    "default": { "element": "Paragraph", "props": { "style": "Callout" } },
+  },
+}
+```
+
+`on` 在运行时必须解析为字符串；非字符串会以 `DOCX_DSL_RUNTIME_TYPE_MISMATCH` 拒绝。`default` 是当没有任何 case 匹配时的回退；如果省略，则默认值为 `null`（不渲染任何内容）。
+
+`$switch` **也可作为值表达式使用**——参见 [值形式的 `$switch`](#value-form-switch)。
+
+---
+
+## 元素目录
+
+该 DSL 内置了一组固定的受支持元素。新增元素属于版本变更。未知名称会以 `DOCX_DSL_UNKNOWN_ELEMENT` 拒绝。
+
+| 元素                | 类型         | 允许出现在      | 子元素类型                | 备注                                                                                                                                                    |
+| ------------------- | ------------ | --------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Paragraph`         | `block`      | document, block | `inline`                | 标准文本块。                                                                                                                                     |
+| `TextRun`           | `inline`     | inline          | (leaf)                  | 标准文本片段。                                                                                                                                       |
+| `ExternalHyperlink` | `inline`     | inline          | `inline` (仅限 TextRun) | 将一个或多个 `TextRun` 包裹在超链接中。                                                                                                             |
+| `Table`             | `block`      | document, block | `table-row`             | 子元素填充到 `rows` 中，而不是 `children`。                                                                                                                |
+| `TableRow`          | `table-row`  | table-row       | `table-cell`            | 表格中的一行。                                                                                                                                      |
+| `TableCell`         | `table-cell` | table-cell      | `block`                 | 行中的一个单元格；包含块级内容。                                                                                                               |
+| `PageBreak`         | `block`      | document, block | (leaf)                  | 生成一个包含 docx 分页符运行的段落。若要在段落内插入行内分页符，请使用 `{ "element": "TextRun", "props": { "break": 1 } }`。 |
+
+`ImageRun` **不** 属于 v1。图像数据仅通过内置的 `image` PM 节点流转——你的 DSL 规则可以对其执行 `$children`，但 DSL 本身不会生成图像字节。这是 REST 表面上的安全保证。
+
+### 包含关系
+
+验证器会在编译时拒绝所有非法的父/子组合，并给出违规节点精确的 `dslPath`。
+
+| 父插槽 ↓ \ 子元素类型 → | block |               inline                | table-row | table-cell |
+| ---------------------------- | :---: | :---------------------------------: | :-------: | :--------: |
+| Document body                |   ✓   |                                     |           |            |
+| `Paragraph.children`         |       |                  ✓                  |           |            |
+| `ExternalHyperlink.children` |       |          ✓（仅限 TextRun）          |           |            |
+| `Table.rows`                 |       |                                     |     ✓     |            |
+| `TableRow.children`          |       |                                     |           |     ✓      |
+| `TableCell.children`         |   ✓   | （仅在 `wrapInlineInParagraph` 时） |           |            |
+
+不匹配示例：
+
+```jsonc
+{
+  "error": "Element \"Paragraph\" cannot appear in \"inline\" slot.",
+  "code": "DOCX_DSL_INVALID_CONTEXT",
+  "dslPath": "nodes[1].render.emit.children[0]",
+}
+```
+
+### 元素属性
+
+每个元素都会根据严格的 schema 验证其 `props`。未知键会以 `DOCX_DSL_INVALID_PROP` 拒绝。
+
+#### Paragraph
+
+```jsonc
+{
+  "style": "Hintbox",
+  "alignment": "left" | "center" | "right" | "justified" | "justify" | "both",
+  "heading": "heading1" | "heading2" | "heading3" | "heading4" | "heading5" | "heading6",
+  "spacing":  { "before": 120, "after": 120, "line": 240, "lineRule": "auto" | "exact" | "atLeast" },
+  "numbering":{ "reference": "bullet-list" | "ordered-list", "level": 0, "instance": 1 },
+  "indent":   { "left": 360, "right": 0, "firstLine": 360, "hanging": 0 },
+  "pageBreakBefore": false
+}
+```
+
+间距和缩进值使用 **twips**（1 twip = 1/20 磅）。如果你更想用更友好的单位，可以使用 `$unit` 辅助函数——`pointsToTwips`、`inchesToTwips` 等。
+
+#### TextRun
+
+```jsonc
+{
+  "text": "hello",
+  "bold": true,
+  "italics": true,
+  "underline": true,
+  "underline": { "type": "single" | "double" | "thick" | "dotted" | "dash" | "wave", "color": "4F46E5" },
+  "strike": true,
+  "doubleStrike": true,
+  "superScript": true,
+  "subScript": true,
+  "size": 24,
+  "color": "1F2937",
+  "font": "Inter",
+  "highlight": "yellow",
+  "shading": { "type": "solid" | "clear", "fill": "F3F4F6", "color": "1F2937" },
+  "break": 1,
+  "style": "InlineCode"
+}
+```
+
+`size` 使用 **half-points**（因此一个 12pt 的片段应为 `size: 24`）。`color`、shading 的 `fill` 和 `color`，以及 underline 的 `color` 都是 **不带 `#` 的 6 位十六进制字符串**（如果数据带有 `#` 前缀，请使用 `hexNoHash` 转换器或 `normalizeColor` 单元）。
+
+#### ExternalHyperlink
+
+```jsonc
+{ "link": "https://tiptap.dev" }
+```
+
+`link` 值是必需的，并且会校验是否以 `http`、`https`、`mailto`、`tel` 开头。其他协议会在编译时被拒绝。链接长度上限为 2048 个字符。
+
+`ExternalHyperlink` 至少需要一个 `TextRun` 子元素；空超链接会在运行时以 `DOCX_DSL_INVALID_CONTEXT` 拒绝。
+
+#### Table
+
+```jsonc
+{
+  "width":   { "size": 100, "type": "pct" | "auto" | "dxa" | "nil" },
+  "layout":  "fixed" | "autofit",
+  "columnWidths": [2400, 2400, 2400],
+  "margins": { "top": 100, "bottom": 100, "left": 120, "right": 120 },
+  "borders": {
+    "top":              { "style": "single", "size": 4, "color": "B8D8FF" },
+    "bottom":           { "style": "single", "size": 4, "color": "B8D8FF" },
+    "left":             { "style": "single", "size": 4, "color": "B8D8FF" },
+    "right":            { "style": "single", "size": 4, "color": "B8D8FF" },
+    "insideHorizontal": { "style": "single", "size": 4, "color": "B8D8FF" },
+    "insideVertical":   { "style": "single", "size": 4, "color": "B8D8FF" }
+  }
+}
+```
+
+`Table` 的子元素会填充到 docx.js 的 `rows` 参数中——你无需自己编写 `rows`。表格至少需要一行（空表会在运行时被拒绝）。
+
+#### TableRow
+
+```jsonc
+{
+  "tableHeader": false,
+  "cantSplit":   false,
+  "height":      { "value": 480, "rule": "auto" | "exact" | "atLeast" }
+}
+```
+
+一行至少需要一个单元格。
+
+#### TableCell
+
+```jsonc
+{
+  "width":         { "size": 50, "type": "pct" | "auto" | "dxa" | "nil" },
+  "columnSpan":    1,
+  "rowSpan":       1,
+  "shading":       { "type": "solid" | "clear", "fill": "FFF1CC", "color": "1F2937" },
+  "borders":       { "top": …, "bottom": …, "left": …, "right": … },
+  "margins":       { "top": 100, "bottom": 100, "left": 120, "right": 120 },
+  "verticalAlign": "top" | "center" | "bottom"
+}
+```
+
+#### PageBreak
+
+```jsonc
+{}
+```
+
+`PageBreak` 不接受任何 props。它会生成一个块级段落，其中包含一个 docx 分页符运行。
+
+---
+
+## 值表达式
+
+在任何接受 prop 值（或 `$text` 值、`$if.test`、`$switch.on` 等）的地方，你都可以传入字面量**或**下面这些带类型的值表达式之一。不是表达式的值——字符串、数字、布尔值、`null`、数组、普通对象——会原样透传。普通对象会递归遍历，因此像 `spacing` 这样的嵌套结构可以在任意叶子节点中携带表达式。
+
+表达式语言是**刻意保持精简**的。没有字符串拼接运算符（请使用 `$template`），没有数组索引（请使用精确的属性路径），没有 `eval`，也没有通用计算能力。下面这五种原语足以覆盖实际自定义节点渲染器的需求。
+
+### `$ref` — 读取 PM 节点属性
+
+```jsonc
+{
+  "$ref": "node.attrs.color",
+  "default": "4F46E5",
+  "transform": "hexNoHash",
+}
+```
+
+| 字段        | 类型                               | 默认值     | 描述                                                                                            |
+| ----------- | ---------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------ |
+| `$ref`      | `string`                           | 必填    | 点分路径。仅允许标识符片段（`/^[a-zA-Z_][a-zA-Z0-9_]*$/`）；不支持数组索引，不支持通配符。 |
+| `default`   | `ValueExpr`                        | `undefined` | 当路径解析为 `null` 或 `undefined` 时使用的替代值。                                            |
+| `transform` | `TransformName \| TransformName[]` | `undefined` | 在解析后应用的一个或多个白名单后处理器。                                      |
+
+允许的路径：
+
+| 路径               | 返回值                                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------------------- |
+| `node`             | 整个 PM 节点对象。                                                                      |
+| `node.type`        | PM 节点类型名称。                                                                         |
+| `node.attrs`       | 整个 attrs 对象。                                                                        |
+| `node.attrs.<key>` | 指定名称的属性（仅支持一层深度——`node.attrs.style.color` 在 v1 中**不**允许）。 |
+| `node.text`        | PM 节点的 `text` 字段（仅对文本节点有意义）。                                   |
+| `node.textContent` | 所有后代文本节点的拼接结果——等同于 ProseMirror 的 `node.textContent`。   |
+
+其他路径会被拒绝：
+
+- `node.content`、`node.marks` → `DOCX_DSL_INVALID_REF`（v1 中没有遍历模型）。
+- `loop.*`、`$parent`、`$siblings`、`$depth`、`$root` → `DOCX_DSL_RESERVED_SHAPE`（为未来版本保留）。
+- 路径中的任何位置出现 `__proto__`、`prototype`、`constructor` 片段 → `DOCX_DSL_INVALID_REF`（防止原型污染）。
+- 解析结果为函数值 → `DOCX_DSL_INVALID_REF`。
+
+### `$template` — 字符串插值
+
+```jsonc
+{ "$template": "@{node.attrs.label}" }
+```
+
+始终返回字符串。替换项使用 `{path}`（路径语法与 `$ref` 相同）。`{{` 和 `}}` 用于转义字面量大括号。解析后的长度上限为 `maxTemplateLength`（默认 2000）；超出时会在运行时以 `DOCX_DSL_RESOURCE_LIMIT` 拒绝。
+
+### `$op` — 类型化计算
+
+```jsonc
+{ "$op": "mul", "args": [{ "$ref": "node.attrs.size" }, 2] }
+```
+
+| 运算符                               | 参数个数          | 备注                                                            |
+| ---------------------------------- | -------------- | ---------------------------------------------------------------- |
+| `add`, `mul`                       | ≥ 2（可变参数） | 数值型。混用类型会被拒绝。                                   |
+| `sub`, `div`                       | 恰好 2      | 数值型。                                                         |
+| `eq`, `ne`, `lt`, `le`, `gt`, `ge` | 恰好 2      | 两侧必须是相同的原始类型（数字或字符串）。 |
+| `and`, `or`                        | ≥ 2            | 基于 truthiness 短路。                                  |
+| `not`                              | 恰好 1      | 布尔型。                                                         |
+| `coalesce`                         | ≥ 2            | 返回第一个非 `null`、非 `undefined` 的参数。          |
+
+没有 `concat` 运算符——字符串请使用 `$template`。没有隐式数值转换——`{ "$op": "add", "args": ["3", 1] }` 会以 `DOCX_DSL_RUNTIME_TYPE_MISMATCH` 拒绝。
+
+### `$unit` — 单位 / 类型转换辅助
+
+```jsonc
+{ "$unit": "pointsToTwips", "value": 12 }
+```
+
+连接到一组固定的辅助函数。结果类型与该辅助函数的签名一致。
+
+| 单元                      | 输入                                 | 输出                                   |
+| ------------------------- | ------------------------------------- | ---------------------------------------- |
+| `pixelsToHalfPoints`      | number (px)                           | number (half-points)                     |
+| `pixelsToPoints`          | number (px)                           | number (points)                          |
+| `pointsToHalfPoints`      | number (pt)                           | number (half-points)                     |
+| `pointsToTwips`           | number (pt)                           | number (twips)                           |
+| `lineHeightToDocx`        | number (multiplier)                   | number (docx line value)                 |
+| `universalMeasureToTwips` | string `"1.5cm"`/`"10pt"`/… or number | number (twips)                           |
+| `normalizeColor`          | string (any CSS color)                | 6-char hex string without `#`, or `null` |
+| `inchesToTwips`           | number (in)                           | number (twips)                           |
+| `cmToTwips`               | number (cm)                           | number (twips)                           |
+| `mmToTwips`               | number (mm)                           | number (twips)                           |
+
+这些与基于函数的 `customNodes` API 所使用的是同一组辅助函数，并向 DSL 作者开放，使线上格式与编辑器扩展的运行时语义完全一致。
+
+### 值形式的 `$switch`
+
+`$switch` **也** 可以作为值表达式使用——这在需要根据属性选择 prop 值时很有用：
+
+```jsonc
+{
+  "color": {
+    "$switch": {
+      "on": { "$ref": "node.attrs.variant" },
+      "cases": { "warning": "F59E0B", "info": "0EA5E9" },
+      "default": "1F2937",
+    },
+  },
+}
+```
+
+验证器会根据上下文来区分值形式和结构化 render-tree 形式。在 `props` 内部得到的是值表达式；在 `RenderNode` 插槽中得到的是结构化形式。
+
+### 转换器
+
+在 `$ref` 解析后应用（如果路径缺失，则应用到 `default`）：
+
+| 转换器                | 行为                                                                                              |
+| ------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `hexNoHash`              | 去掉前导 `#`；剩余部分必须匹配 `/^[0-9A-Fa-f]{6}$/`。拒绝非字符串或无效十六进制值。 |
+| `lower`, `upper`, `trim` | 标准字符串操作。拒绝非字符串。                                                              |
+| `parseIntStrict`         | `parseInt(value, 10)`；拒绝 `NaN`。                                                                 |
+| `parseFloatStrict`       | `parseFloat(value)`；拒绝 `NaN`。                                                                   |
+| `boolean`                | 严格：接受 `true`/`false`、`"true"`/`"false"`（大小写不敏感）。拒绝其他一切值。       |
+| `nullableString`         | 空字符串/仅空白字符串 → `null`；否则返回去除首尾空白后的字符串。                                           |
+
+`hexNoHash` **不是** CSS 颜色规范器（它不理解 `rgb()`、命名颜色、`#abc` 这种简写等）。如果你需要这些，请使用 `{ "$unit": "normalizeColor", "value": … }`。
+
+### Truthiness 规则
+
+对于 `$if.test` 以及布尔运算 `and` / `or` / `not` / `coalesce`：
+
+| 假值                                   | 真值          |
+| --------------------------------------- | --------------- |
+| `false`, `null`, `undefined`, `0`, `""` | 其他所有值 |
+
+除这些显式规则外，不存在隐式类型转换。
+
+---
+
+## 标记系统
+
+标记（`bold`、`italic`、`underline`、`strike`、`code`、`subscript`、`superscript`、`textStyle`、`highlight`、`link`）是 DOCX 大部分行级格式的来源。DSL 提供了两个标记钩子：
+
+1. **`MarkPolicy`** 用于 `$children` 和 `$text` —— 控制标准管道如何映射**文本子节点**上的标记。
+2. **`applyMarks`** 用于行内元素（`TextRun`、`ExternalHyperlink`）—— 控制**规则自身**的 PM 节点标记如何合并到输出的 run 上。
+
+### `MarkPolicy`（用于 `$children` / `$text`）
+
+```jsonc
+"marks": "default"           // 标准 Tiptap 标记映射（默认值）
+"marks": "none"              // 忽略所有标记
+"marks": "node"              // 使用规则自身的 PM 节点标记，而不是每个子节点的标记
+"marks": {
+  "mode": "default" | "node",
+  "overrides": {
+    "bold":   { "props": { "color": "DC2626" }, "replace": false },
+    "italic": { "replace": true }
+  },
+  "disable": ["highlight"]
+}
+```
+
+| 字段                       | 默认值                    | 描述                                                                                               |
+| -------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------- |
+| `mode`                      | 必填（对象形式时）         | `"default"` 运行标准标记管道；`"node"` 针对规则自身的 PM 节点标记运行。                                 |
+| `overrides[<mark>].props`   | `{}`                      | 当存在此标记时额外应用的 `TextRun` 属性。                                                           |
+| `overrides[<mark>].replace` | `false`                   | 当为 `true` 时，抑制此标记的标准映射，仅应用覆盖的 `props`。                                           |
+| `disable`                   | `[]`                      | 完全跳过的标记。它们的标准映射不会运行，且任何匹配的 `overrides` 条目都会被忽略。                          |
+
+`MarkPolicy: "default"` 是 `$children: { as: "inline" }` 和 `$text` 的默认值——与普通文本 run 接收到的标准管道相同。
+
+### `applyMarks`（用于行内元素）
+
+`applyMarks` 与 `MarkPolicy` 不同：它始终使用**规则自身**的 PM 节点标记（自定义节点自身上的标记），而不是子节点的标记。由于没有其他选择，因此唯一有效的 `mode` 是 `"node"`：
+
+```jsonc
+"applyMarks": "node"
+"applyMarks": {
+  "mode": "node",
+  "overrides": { "underline": { "props": { "color": "EA580C" } } },
+  "disable": ["highlight"]
+}
+```
+
+`'default'` 和 `'none'` 会在 `applyMarks` 上被刻意拒绝——它们只对子节点标记有意义。
+
+当省略 `applyMarks` 时，规则的 PM 节点标记会被**忽略**。大多数显式设置样式的行内自定义节点都希望采用这个默认行为——你自己设置颜色和字体，让外层标记自然失效。
+
+### 覆盖优先级
+
+当多个层级都想设置同一属性时，按以下顺序，越靠后的层级优先生效：
+
+```
+1. 基础 docx 默认值
+2. 由 cssStyles 派生的样式               （实验性的 cssStyles 选项）
+3. styleOverrides                         （命名的 DOCX 样式）
+4. 全局 *Overrides 选项                  （paragraphOverrides、textRunOverrides 等）
+5. 内置 Tiptap 节点/标记映射             （标准管道）
+6. DSL 子管道标记覆盖                    （MarkPolicy.overrides[<mark>]）
+7. 行内元素上的 DSL applyMarks 属性
+8. 显式的 DSL 元素属性
+```
+
+`ElementNode` 上的 `inheritOverrides: false` 会仅跳过该元素的第 4 层——当你想让某个提示框段落不受 `paragraphOverrides` 影响、但又不影响其他段落时非常有用。
+
+嵌套对象（`spacing`、`borders`、`shading`）在每一层都会被**替换**，而不是深度合并。如果你设置了 `spacing: { before: 120 }`，而底层的 `paragraphOverrides` 有 `spacing: { line: 240 }`，结果就只是 `{ before: 120 }`。这与现有扩展选项的约定一致。
+
+---
+
+## 组合起来看 —— 示例演示
+
+### Hintbox（块级，自定义样式，使用标准子节点）
+
+```jsonc
+{
+  "type": "hintbox",
+  "nodeKind": "block",
+  "render": {
+    "emit": {
+      "element": "Paragraph",
+      "props": { "style": "Hintbox" },
+      "children": { "$children": { "as": "inline", "marks": "default" } },
+    },
+  },
+}
+```
+
+配合 [`styleOverrides.paragraphStyles`](/conversion/export/docx/styles) 下的 `Hintbox` 段落条目一起使用。
+
+### Mention（行内，模板文本，标记继承）
+
+```jsonc
+{
+  "type": "mention",
+  "nodeKind": "inline",
+  "render": {
+    "emit": {
+      "element": "TextRun",
+      "props": {
+        "text": { "$template": "@{node.attrs.label}" },
+        "color": { "$ref": "node.attrs.color", "default": "4472C4", "transform": "hexNoHash" },
+      },
+      "applyMarks": "node",
+    },
+  },
+}
+```
+
+一个加粗的 mention 会渲染为 `new TextRun({ text: '@alice', color: '4472C4', bold: true })`。
+
+### Callout box（表格，条件样式，基于属性的底纹）
+
+```jsonc
+{
+  "type": "calloutBox",
+  "nodeKind": "block",
+  "render": {
+    "emit": {
+      "element": "Table",
+      "props": {
+        "width": { "size": 100, "type": "pct" },
+        "borders": {
+          "top": { "style": "single", "size": 4, "color": "B8D8FF" },
+          "bottom": { "style": "single", "size": 4, "color": "B8D8FF" },
+          "left": { "style": "single", "size": 4, "color": "B8D8FF" },
+          "right": { "style": "single", "size": 4, "color": "B8D8FF" },
+        },
+      },
+      "children": [
+        {
+          "element": "TableRow",
+          "children": [
+            {
+              "element": "TableCell",
+              "props": {
+                "shading": {
+                  "type": "clear",
+                  "fill": {
+                    "$unit": "normalizeColor",
+                    "value": { "$ref": "node.attrs.backgroundColor", "default": "E6F3FF" },
+                  },
+                },
+                "margins": {
+                  "top": { "$unit": "pointsToTwips", "value": 8 },
+                  "bottom": { "$unit": "pointsToTwips", "value": 8 },
+                  "left": { "$unit": "pointsToTwips", "value": 10 },
+                  "right": { "$unit": "pointsToTwips", "value": 10 },
+                },
+              },
+              "children": [
+                {
+                  "element": "Paragraph",
+                  "props": {
+                    "style": {
+                      "$switch": {
+                        "on": { "$ref": "node.attrs.variant" },
+                        "cases": { "warning": "CalloutWarning", "info": "CalloutInfo" },
+                        "default": "Callout",
+                      },
+                    },
+                  },
+                  "children": { "$children": { "as": "inline", "marks": "default" } },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+}
+```
+
+### 代码块（抑制冲突的子标记）
+
+```jsonc
+{
+  "type": "codeBlock",
+  "nodeKind": "block",
+  "render": {
+    "emit": {
+      "element": "Paragraph",
+      "props": { "style": "Code" },
+      "children": {
+        "$children": {
+          "as": "inline",
+          "marks": { "mode": "default", "disable": ["bold", "italic"] },
+        },
+      },
+    },
+  },
+}
+```
+
+### 自定义链接（带标记继承的行内超链接）
+
+```jsonc
+{
+  "type": "customLink",
+  "nodeKind": "inline",
+  "render": {
+    "emit": {
+      "element": "ExternalHyperlink",
+      "props": { "link": { "$ref": "node.attrs.href" } },
+      "children": [
+        {
+          "element": "TextRun",
+          "props": {
+            "text": { "$ref": "node.attrs.label" },
+            "style": "Hyperlink",
+          },
+          "applyMarks": "node",
+        },
+      ],
+    },
+  },
+}
+```
+
+---
+
+## 与函数 API 的冲突策略
+
+当编辑器扩展同时配置了 `customNodes` 和 `customNodeDsl` 时：
+
+| 场景                                              | 结果                                                                               |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| 两者中 `type` 相同                                  | 函数优先。每次导出调用、每个冲突类型都会发出一条 `console.warn`。                         |
+| 仅存在于 `customNodes`                              | 函数渲染。                                                                          |
+| 仅存在于 `customNodeDsl.nodes`                     | DSL 渲染。                                                                          |
+| 两者都不存在                                         | 保持现有的“找不到自定义节点”行为；该节点会被丢弃，并输出控制台错误。                    |
+| `customNodeDsl.nodes` 内部存在重复 `type`           | 编译错误：`DOCX_DSL_DUPLICATE_NODE_TYPE`。                                           |
+
+这就是契约：一个不懂 DSL 的用户升级包版本、无需改动代码，看到的输出应完全一致。添加 `customNodeDsl` 只会**新增**规则；它绝不会覆盖现有的基于函数的自定义节点。
+
+REST 接口完全不接受函数 API——只接受 `customNodeDsl`。
+
+---
+
+## 资源限制
+
+DSL 是通过公共 REST 接口传入的不可信 JSON。资源上限会在编译期和运行期强制执行。合法的自定义节点程序不应触发这些限制。
+
+| 限制                    | 默认值  | 描述                                                                           |
+| --------------------- | ------- | ------------------------------------------------------------------------------------- |
+| `maxRules`            | 128     | 单个 DSL 文档中节点规则的最大数量。                                                     |
+| `maxRenderDepth`      | 32      | 渲染树编译和运行时遍历期间的最大递归深度。                                               |
+| `maxRenderNodes`      | 1024    | 单个程序中编译后的渲染节点最大数量。                                                    |
+| `maxValueDepth`       | 16      | 值表达式内部的最大递归深度（`$ref` 默认值、`$op` 参数等）。                               |
+| `maxStringLength`     | 10 000  | 计算后字符串属性的最大长度。                                                             |
+| `maxTemplateLength`   | 2 000   | 替换后 `$template` 结果的最大长度。                                                      |
+| `maxOpArgs`           | 32      | 单个 `$op` 的最大参数数量。                                                             |
+| `maxTableRows`        | 1 024   | `Table` 可输出的 `TableRow` 子节点最大数量。                                              |
+| `maxTableCellsPerRow` | 64      | 单个 `TableRow` 可输出的 `TableCell` 子节点最大数量。                                     |
+
+### 在编辑器扩展中调整限制
+
+与 `customNodeDsl` 一起传入 `customNodeDslLimits?: Partial<CustomNodeDslLimits>`：
+
+```ts
+ExportDocx.configure({
+  customNodeDsl,
+  customNodeDslLimits: {
+    maxRules: 256,
+    maxRenderDepth: 48,
+  },
+})
+```
+
+传输格式本身**没有** `limits` 字段。保留的根键 `limits` 会被 `DOCX_DSL_RESERVED_SHAPE` 拒绝，因此服务器端管理的限制不会被客户端负载绕过。
+
+---
+
+## 错误
+
+每个错误都带有一个稳定的 `code` 和一个指向出错 JSON 的 `dslPath`。运行时错误还会附带 `nodePath`（指向 PM 文档中的路径）和 `nodeType`。
+
+```jsonc
+{
+  "error": "Expected TextRun.size to be number, got string.",
+  "code": "DOCX_DSL_INVALID_PROP",
+  "dslPath": "nodes[2].render.emit.props.size",
+  "nodePath": "doc.content[4].content[2]",
+  "nodeType": "mention",
+}
+```
+
+### 错误代码
+
+| Code                             | 何时                                                                                                                         |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `DOCX_DSL_UNKNOWN_VERSION`       | 存在 `dslVersion`，但不是 `"1.0"`。                                                                                          |
+| `DOCX_DSL_INVALID_SHAPE`         | JSON 不符合预期结构（缺少必需字段、类型错误）。                                                                              |
+| `DOCX_DSL_DUPLICATE_NODE_TYPE`   | `nodes` 中有两条规则声明了相同的 `type`。                                                                                     |
+| `DOCX_DSL_UNKNOWN_ELEMENT`       | `element` 不在 v1 目录中。                                                                                                   |
+| `DOCX_DSL_UNKNOWN_OPERATION`     | `$op` 不在封闭列表中。                                                                                                        |
+| `DOCX_DSL_RESERVED_SHAPE`        | 载荷中出现了为未来版本保留的键。                                                                                              |
+| `DOCX_DSL_INVALID_PROP`          | 元素属性不符合其 schema（未知键、类型错误）。                                                                                 |
+| `DOCX_DSL_INVALID_ENUM`          | 枚举属性接收到了封闭列表之外的值。                                                                                            |
+| `DOCX_DSL_INVALID_REF`           | `$ref` 路径格式错误、指向了允许的根之外，或命中了禁止的片段。                                                                 |
+| `DOCX_DSL_INVALID_TEMPLATE`      | `$template` 格式错误（例如括号不匹配）。                                                                                     |
+| `DOCX_DSL_INVALID_UNIT`          | `$unit` 名称不在封闭列表中。                                                                                                  |
+| `DOCX_DSL_INVALID_TRANSFORM`     | `transform` 名称不在封闭列表中。                                                                                              |
+| `DOCX_DSL_INVALID_CONTEXT`       | 某个 render 节点位于其元素类型不允许的槽位中（包含性违规）。                                                                  |
+| `DOCX_DSL_INVALID_OP_ARITY`      | 传给 `$op` 的参数数量错误。                                                                                                   |
+| `DOCX_DSL_RUNTIME_TYPE_MISMATCH` | 值表达式的结果在运行时与预期类型不匹配（例如 `$switch.on` 解析成了数字）。                                                    |
+| `DOCX_DSL_RESOURCE_LIMIT`        | 超过了可配置上限（深度、节点数、字符串长度等）。                                                                             |
+| `DOCX_DSL_RENDER_FAILED`         | 适配器 `instantiate` 步骤抛出异常——通常表示 docx.js 不兼容，并通过出错的 `dslPath` 暴露出来。 |
+
+### HTTP 状态映射（REST）
+
+| Class                                    | Status                                             |
+| ---------------------------------------- | -------------------------------------------------- |
+| 编译错误（被校验器捕获）                 | `400`                                              |
+| 运行时错误（渲染时捕获）                 | `422`                                              |
+| 编译阶段超出资源上限                     | `400`                                              |
+| 运行时超出资源上限                       | `422`                                              |
+| docx.js 本身失败（少见）                 | `422`（现有的 `FAILED_TO_EXPORT_DOCX_FILE` 路径） |
+
+### 行为矩阵（REST）
+
+| 场景                                                        | HTTP  | Body code                  |
+| ----------------------------------------------------------- | ----- | -------------------------- |
+| 没有 `customNodeDsl` 字段                                   | `200` | 不变的 DOCX 响应           |
+| `customNodeDsl` 有效，所有规则都能渲染                      | `200` | DOCX                       |
+| 缺少 `dslVersion`                                           | `400` | `DOCX_DSL_INVALID_SHAPE`   |
+| `dslVersion` 错误                                           | `400` | `DOCX_DSL_UNKNOWN_VERSION` |
+| `customNodeDsl.nodes` 超过 `maxRules`                       | `400` | `DOCX_DSL_RESOURCE_LIMIT`  |
+| 保留的根键（`requiresStyles` 等）                            | `400` | `DOCX_DSL_RESERVED_SHAPE`  |
+| 非法包含关系                                                | `400` | `DOCX_DSL_INVALID_CONTEXT` |
+| 未知元素名称                                                | `400` | `DOCX_DSL_UNKNOWN_ELEMENT` |
+| 非法 `$ref` 路径                                            | `400` | `DOCX_DSL_INVALID_REF`     |
+| 必需属性解析为 `undefined`，prop schema 拒绝                | `422` | `DOCX_DSL_INVALID_PROP`    |
+| 运行时超过深度上限                                          | `422` | `DOCX_DSL_RESOURCE_LIMIT`  |
+
+DSL 采用 **fail-fast**：任何错误都会中止导出，不会产生部分输出。静默的部分输出会生成无效 DOCX，其调试难度比显式错误更高。
+
+---
+
+## 安全模型
+
+REST 接口接受来自已认证客户端的任意 `customNodeDsl`。该 DSL 的设计保证：任何有效输入组合都无法触达 docx.js 内部、宿主文件系统或网络。
+
+| Threat                                                                     | Mitigation                                                                                                              |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 任意代码执行                                                               | 不使用 `eval`、`Function`、动态导入。采用封闭的 adapter / op / unit / transform 白名单。                               |
+| 访问 PM 节点之外的属性                                                     | `$ref` 解析器只遍历 `node.*`；不支持数组索引，不进行原型链遍历。                                                        |
+| 通过 `__proto__` / `prototype` / `constructor` 片段污染原型                | 路径片段守卫会拒绝它们，并返回 `DOCX_DSL_INVALID_REF`。                                                                 |
+| 通过深层嵌套导致 OOM                                                        | 在编译阶段及每次递归调用中强制执行 `maxRenderDepth: 32`。                                                                |
+| 通过大型载荷导致 OOM                                                       | `maxRules`、`maxRenderNodes`、`maxStringLength`、`maxTemplateLength` 上限。                                              |
+| 通过表格导致 OOM                                                           | `maxTableRows: 1024`、`maxTableCellsPerRow: 64`。                                                                        |
+| `$template` 解析中的二次时间复杂度                                          | 对解析后的长度设置 `maxTemplateLength` 上限；对操作参数列表设置 `maxOpArgs: 32`。                                       |
+| 生成损坏的 docx 输出                                                       | 按元素的 Zod prop schema 在编译期捕获大多数问题；运行时在调用 docx.js 构造函数前进行类型检查。                         |
+| 未经授权的媒体获取                                                         | DSL 中没有 `ImageRun.data` 字段；图像数据仅通过内置的 `image` PM 节点流入。                                             |
+| 恶意 URL                                                                   | `ExternalHyperlink.link` 白名单仅允许 `http`、`https`、`mailto`、`tel`。                                                |
+
+---
+
+## REST API 补充说明
+
+DSL 通过现有的 `POST /v2/convert/export/docx` 端点传输，作为现有 `styleOverrides`、`pageSize`、`pageMargins`、`headers` 和 `footers` 字段的同级字段。有关请求头、响应结构以及其余 body schema，请参见 [REST API reference](/conversion/export/docx/rest-api)。
+
+| Body field      | Type                                              | Default     | Description               |
+| --------------- | ------------------------------------------------- | ----------- | ------------------------- |
+| `customNodeDsl` | `Object` ([`CustomNodeDsl`](#top-level-document)) | `undefined` | 自定义节点渲染规则。        |
+
+当请求以 `multipart/form-data`（该端点的表单变体）传入时，`customNodeDsl` 会作为同名表单字段中的 **JSON 字符串化值** 发送，就像 `styleOverrides` 一样。服务会解析它并将结果转发到导出流水线。
+
+---
+
+## 故意未包含的内容
+
+这些是**明确的边界**，不是 bug：
+
+- **对数组属性的循环。** v1 中没有 `$each`。该形状被保留（`DOCX_DSL_RESERVED_SHAPE`），因此以后可以在不破坏任何当前已编译载荷的情况下添加它。在此之前，请通过父级（块）发出可变长度集合，并使用 `$children` 分发其条目。
+- **跨规则属性访问。** 子规则不能读取其父规则的 PM 节点。可行的例外是父规则上的 `$children: { as: "inline", marks: "node" }`，它会将父级的 marks 转发给子 run。
+- **自由形式表达式。** 该 DSL 不是图灵完备的，也不嵌入 Jexl / JSONata / `eval`。所有操作都有类型约束并带上限。
+- **图像数据来源。** 图像字节永远不来自 DSL；它们来自内置的 `image` PM 节点。
+- **文档级样式贡献。** DSL 描述的是 _nodes_ 如何渲染。命名样式仍然位于 [`styleOverrides`](/conversion/export/docx/styles) 中。保留的 `requiresStyles` 和 `contributedStyles` 根键标记了未来的接口。
+- **在不同版本之间编辑 `dslVersion` 载荷。** `dslVersion: "1.0"` 是精确字面量。未来的小版本将采用增量方式（新增可选字段、新增操作），并会原样接受 v1.0 载荷。大版本升级将需要显式迁移。
+
+---
+
+## 相关
+
+- [编辑器扩展自定义节点（函数 API）](/conversion/export/docx/custom-nodes) — 用于浏览器内自定义的 JavaScript 函数变体。
+- [样式覆盖](/conversion/export/docx/styles) — 声明命名的 DOCX 样式，如 `Hintbox`、`CalloutWarning`，供 DSL 规则按 id 引用。
+- [CSS 转 DOCX](/conversion/export/docx/css-to-docx) — 与 DSL 组合使用：`cssStyles` 层提供标题和段落样式，而 DSL 规则负责你的自定义节点类型。
+- [DOCX REST API](/conversion/export/docx/rest-api) — 底层端点的请求格式、请求头、响应和错误包。
+- [编辑器扩展概览](/conversion/export/docx/editor-extension) — `ExportDocx.configure` 的完整配置项。

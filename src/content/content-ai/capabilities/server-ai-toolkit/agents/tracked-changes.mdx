@@ -56,8 +56,7 @@ const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
   body: JSON.stringify({
     toolName: 'tiptapEdit',
     input: toolCallInput,
-    schemaAwarenessData,
-    sessionId,
+    editorContext,
     experimental_documentOptions: {
       documentId: 'your-document-id',
       userId: 'ai-assistant',
@@ -88,7 +87,7 @@ import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { TrackedChanges, findSuggestions } from '@tiptap-pro/extension-tracked-changes'
 import { TiptapCollabProvider } from '@tiptap-pro/provider'
-import { ServerAiToolkit, getSchemaAwarenessData } from '@tiptap-pro/server-ai-toolkit'
+import { ServerAiToolkit, getEditorContext } from '@tiptap/server-ai-toolkit'
 
 export default function Page() {
   const editor = useEditor({
@@ -131,14 +130,14 @@ export default function Page() {
 
 ### API 端点
 
-在获取工具定义时，将顶层的 `operationMeta` 选项传递给它，以向 `tiptapEdit` 操作添加 `meta` 字段。然后指示 AI 在该 `meta` 字段中提供理由。
+当获取工具定义时，请配置 `tiptapEdit` 工具，使其可以在操作中包含 `meta` 字段。然后指示 AI 在该 `meta` 字段中提供说明理由。
 
 ```ts
 const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
   method: 'POST',
   headers: getAuthHeaders(),
   body: JSON.stringify({
-    schemaAwarenessData,
+    editorContext,
     tools: {
       tiptapEdit: true,
     },
@@ -158,8 +157,7 @@ const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
   body: JSON.stringify({
     toolName: 'tiptapEdit',
     input: toolCallInput,
-    schemaAwarenessData,
-    sessionId,
+    editorContext,
     experimental_documentOptions: {
       documentId: 'your-document-id',
       userId: 'ai-assistant',
@@ -190,7 +188,7 @@ const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
 ```tsx
 import { CommentsKit } from '@tiptap-pro/extension-comments'
 import { TrackedChanges } from '@tiptap-pro/extension-tracked-changes'
-import { ServerAiToolkit } from '@tiptap-pro/server-ai-toolkit'
+import { ServerAiToolkit } from '@tiptap/server-ai-toolkit'
 
 const editor = useEditor({
   extensions: [

@@ -18,6 +18,11 @@ export const sidebarConfig: SidebarConfig = {
           href: '/resources/whats-new',
           title: '3.0 有哪些新功能',
         },
+        {
+          href: '/authentication',
+          title: 'Authentication',
+          tags: ['New'],
+        },
       ],
     },
     {

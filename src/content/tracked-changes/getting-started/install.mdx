@@ -78,18 +78,6 @@ TrackedChanges.configure({
 })
 ```
 
-### suggestionGroupingTimeout
-
-用于分组相邻建议的时间窗口（毫秒）。如果用户在此时间窗口内对同一区域进行连续编辑，建议将合并为一个。设置为 `0` 禁用分组。
-
-默认值：`2000`
-
-```js
-TrackedChanges.configure({
-  suggestionGroupingTimeout: 3000,
-})
-```
-
 ### onSuggestionCreate
 
 创建新建议时触发的回调。接收包含 id、type、userId、createdAt、from、to 和 text 的建议对象。
@@ -99,7 +87,7 @@ TrackedChanges.configure({
 ```js
 TrackedChanges.configure({
   onSuggestionCreate: (suggestion) => {
-    console.log('New suggestion created:', suggestion)
+    console.log('已创建新建议：', suggestion)
     // 更新你的界面，通知其他用户等。
   },
 })
@@ -114,7 +102,7 @@ TrackedChanges.configure({
 ```js
 TrackedChanges.configure({
   onSuggestionAccept: (id) => {
-    console.log('Suggestion accepted:', id)
+    console.log('建议已接受：', id)
   },
 })
 ```
@@ -128,7 +116,7 @@ TrackedChanges.configure({
 ```js
 TrackedChanges.configure({
   onSuggestionReject: (id) => {
-    console.log('Suggestion rejected:', id)
+    console.log('建议已拒绝：', id)
   },
 })
 ```

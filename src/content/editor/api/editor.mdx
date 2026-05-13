@@ -94,16 +94,38 @@ new Editor({
 })
 ```
 
+### coreExtensionOptions
+
+`coreExtensionOptions` 属性用于配置 Tiptap 内置的核心扩展。
+
+使用 `tabindex.value` 来设置编辑器元素上的 `tabindex` 属性。当 `value` 未定义时，可编辑编辑器默认使用 `tabindex="0"`，不可编辑编辑器不会获得 `tabindex` 属性。
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+
+new Editor({
+  content: `<p>示例文本</p>`,
+  extensions: [StarterKit],
+  editable: false,
+  coreExtensionOptions: {
+    tabindex: {
+      value: '-1',
+    },
+  },
+})
+```
+
 ### textDirection
 
-The `textDirection` property sets the text direction for all content in the editor. This is useful for right-to-left (RTL) languages like Arabic and Hebrew, or for bidirectional text content.
+`textDirection` 属性为编辑器中的所有内容设置文本方向。这对于阿拉伯语和希伯来语等从右到左（RTL）的语言，或双向文本内容非常有用。
 
-| Value       | Description                                                   |
-| ----------- | ------------------------------------------------------------- |
-| `'ltr'`     | Sets left-to-right direction for all content.                |
-| `'rtl'`     | Sets right-to-left direction for all content.                |
-| `'auto'`    | Automatically detects direction based on content.             |
-| `undefined` | No direction attribute is added (default).                    |
+| 值          | 描述                                                        |
+| ----------- | ----------------------------------------------------------- |
+| `'ltr'`     | 为所有内容设置从左到右方向。                                 |
+| `'rtl'`     | 为所有内容设置从右到左方向。                                 |
+| `'auto'`    | 根据内容自动检测方向。                                       |
+| `undefined` | 不添加方向属性（默认）。                                     |
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -116,7 +138,7 @@ new Editor({
 })
 ```
 
-You can also override direction for specific nodes using the `setTextDirection` and `unsetTextDirection` commands. See the [commands documentation](/editor/api/commands) for more details.
+您还可以使用 `setTextDirection` 和 `unsetTextDirection` 命令覆盖特定节点的方向。更多详情请参见 [命令文档](/editor/api/commands)。
 
 ### autofocus
 
@@ -235,9 +257,9 @@ new Editor({
 
 ### enableExtensionDispatchTransaction
 
-Whether to enable extension-level dispatching of transactions. If `false`, extensions cannot define their own `dispatchTransaction` hook.
+是否启用扩展级别的事务分发。如果为 `false`，扩展将无法定义其自己的 `dispatchTransaction` 钩子。
 
-- **Default**: `true`
+- **默认值**：`true`
 
 ```js
 new Editor({
@@ -333,7 +355,7 @@ editor.getJSON()
 
 | 参数    | 类型                                                                     | 描述                           |
 | ------- | ------------------------------------------------------------------------ | ------------------------------ |
-| options | blockSeparator?: string, textSerializers?: Record;string, TextSerializer | Options for the serialization. |
+| options | blockSeparator?: string, textSerializers?: Record;string, TextSerializer | 序列化选项。 |
 
 ```js
 // 给我纯文本！

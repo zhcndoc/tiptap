@@ -43,9 +43,8 @@ const readResponse = await fetch(`${apiBaseUrl}/toolkit/read/read-selection`, {
   method: 'POST',
   headers: getAuthHeaders(),
   body: JSON.stringify({
-    schemaAwarenessData,
+    editorContext,
     range,
-    sessionId,
     format: 'shorthand',
     reviewOptions: {
       mode: 'disabled',
@@ -66,8 +65,7 @@ if (readResult.output.isEmpty) {
 
 ## 2. 获取工作流定义并构建提示词
 
-获取工作流定义和模式感知提示词，然后将它们组合到 system 提示词中。
-工作流定义来自：
+获取工作流定义和编辑器上下文提示词，然后将它们合并到系统提示词中。工作流定义来自：
 
 - `POST /v3/ai/toolkit/workflows/insert-content`
 
@@ -82,19 +80,19 @@ const workflowResponse = await fetch(`${apiBaseUrl}/toolkit/workflows/insert-con
 
 const workflow = await workflowResponse.json()
 
-const schemaResponse = await fetch(`${apiBaseUrl}/toolkit/schema-awareness-prompt`, {
+const toolkitResponse = await fetch(`${apiBaseUrl}/toolkit/tools`, {
   method: 'POST',
   headers: getAuthHeaders(),
   body: JSON.stringify({
-    schemaAwarenessData,
+    editorContext,
   }),
 })
 
-const { prompt: schemaAwarenessPrompt } = await schemaResponse.json()
+const { prompt: toolkitPrompt } = await toolkitResponse.json()
 
 const result = streamText({
   model,
-  system: `${workflow.systemPrompt}\n\n${schemaAwarenessPrompt}`,
+  system: `${workflow.systemPrompt}\n\n${toolkitPrompt}`,
   prompt: JSON.stringify({
     task,
     replace: readResult.output.content,
@@ -120,11 +118,10 @@ const executeResponse = await fetch(`${apiBaseUrl}/toolkit/execute-workflow/inse
   method: 'POST',
   headers: getAuthHeaders(),
   body: JSON.stringify({
-    schemaAwarenessData,
+    editorContext,
     format: 'shorthand',
     input: workflowOutput.content,
     range,
-    sessionId: readResult.sessionId,
     reviewOptions: {
       mode: 'disabled',
     },
@@ -138,18 +135,12 @@ const executeResponse = await fetch(`${apiBaseUrl}/toolkit/execute-workflow/inse
 const executeResult = await executeResponse.json()
 ```
 
-<Callout title="在读取和执行之间复用同一个会话" variant="info">
-  读取选区这一步会返回一个 `sessionId`。在执行请求中传递同一个 `sessionId`，
-  这样如果 AI 读取之后选中的内容发生了变化，服务器就可以拒绝过时的编辑。
-</Callout>
-
 ## 4. 在客户端恢复选区
 
 在协作文档更新之后，再次选中插入的内容，这样用户就可以继续使用新文本进行工作。
 
 ```tsx
 const result: {
-  sessionId: string
   range: { from: number; to: number } | null
 } = await response.json()
 

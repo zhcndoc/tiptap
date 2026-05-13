@@ -465,7 +465,7 @@ async function getDocumentStats() {
 
 ### 通过 `{page}` / `{total}` 标记显示页码
 
-任何普通文本页眉或页脚（包括通过 Pages 扩展自动提取的内容，例如 `editor.commands.setHeader('Page {page} of {total}')`）在导出的 DOCX 中都会渲染为实时页码字段：
+任何普通文本页眉或页脚（包括通过 Pages 扩展自动提取的内容，例如 `editor.commands.setHeader('第 {page} 页，共 {total} 页')`）在导出的 DOCX 中都会渲染为实时页码字段：
 
 ```javascript
 import { ExportDocx } from '@tiptap-pro/extension-export-docx'
@@ -488,10 +488,10 @@ const editor = new Editor({
       // 普通文本页眉/页脚——`{page}` 和 `{total}` 会在导出时转换为
       // 实时的 `PAGE` / `NUMPAGES` 字段。
       headers: {
-        default: 'Confidential — Page {page} of {total}',
+        default: '机密 — 第 {page} 页，共 {total} 页',
       },
       footers: {
-        default: 'Page {page} of {total}',
+        default: '第 {page} 页，共 {total} 页',
       },
     }),
   ],
@@ -501,9 +501,26 @@ const editor = new Editor({
 editor.commands.exportDocx()
 ```
 
-当页眉/页脚是从 Pages 扩展中自动提取时，也会自动执行相同的转换，因此通过 `editor.commands.setFooter('Page {page} of {total}')` 设置的页脚在导出时会包含实时页码，无需任何额外配置。
+当页眉/页脚是从 Pages 扩展中自动提取时，也会自动执行相同的转换，因此通过 `editor.commands.setFooter('第 {page} 页，共 {total} 页')` 设置的页脚在导出时会包含实时页码，无需任何额外配置。
 
-### 基本页码
+### 自定义占位符名称
+
+如果你的编辑器通过 `Pages.configure({ placeholders: { total: 'pages' } })` 重命名了内置标记（参见 [Pages → 重命名占位符](/pages/core-concepts/page-header-footer#renaming-or-disabling-placeholders)），导出会遵循相同的标记名称——`{pages}` 会变成实时的 `NUMPAGES` 字段，而原始的 `{total}` 将不再被识别。`ExportDocx` 本身没有 `placeholders` 选项；在 Pages 上进行配置可以保持编辑器预览与导出的 `.docx` 一致。
+
+当直接调用 `convertHeader` / `convertFooter` 时（例如，在没有编辑器的服务端代码中），你可以显式传入 `placeholders`：
+
+```javascript
+import { convertFooter } from '@tiptap-pro/extension-export-docx'
+
+const footer = await convertFooter({
+  node: { type: 'paragraph', content: [{ type: 'text', text: '第 {page} 页，共 {pages} 页' }] },
+  placeholders: { total: 'pages' },
+})
+```
+
+传入 `placeholders: false` 可禁用替换，并将标记按字面文本输出。对于直接调用 `convertHeader` / `convertFooter`，如果完全省略 `placeholders`，也会禁用替换——需要你显式开启。
+
+### 基础页码
 
 ```javascript
 import { ExportDocx, Docx } from '@tiptap-pro/extension-export-docx'

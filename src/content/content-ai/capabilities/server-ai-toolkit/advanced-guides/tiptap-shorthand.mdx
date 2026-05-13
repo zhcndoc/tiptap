@@ -25,7 +25,7 @@ curl -X POST https://api.tiptap.dev/v3/ai/toolkit/tools \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
     "format": "shorthand",
-    "schemaAwarenessData": {}
+    "editorContext": {}
   }'
 ```
 
@@ -38,7 +38,7 @@ curl -X POST https://api.tiptap.dev/v3/ai/toolkit/tools \
 
 ## Tiptap 简写的工作原理
 
-`/v3/ai/toolkit/schema-awareness-prompt` 端点会返回一个提示词，告知 AI 文档的结构以及应以何种格式生成文档。这包括对 AI 应生成文档内容所使用格式的说明。该提示词会向 AI 模型讲解语言规则和语法。
+`/v3/ai/toolkit/tools` 端点会返回一个提示，告知 AI 文档的结构以及应以何种格式生成内容。其中还包括对 AI 应生成文档内容格式的说明。该提示会向 AI 模型讲解语言规则和语法。
 
 Tiptap 简写内容会被编码为一个文本字符串。与 Tiptap JSON 相比，无论是在字符数还是 token 数上，它都占用更少的空间。这在不更改 AI 模型的情况下，实现了速度提升和成本降低。
 

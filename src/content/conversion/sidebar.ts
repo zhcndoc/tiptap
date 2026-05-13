@@ -122,7 +122,17 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/conversion/export/docx/custom-nodes',
                 },
                 {
-                  title: '样式',
+                  title: 'Custom nodes DSL',
+                  href: '/conversion/export/docx/custom-nodes-dsl',
+                  tags: ['Beta'],
+                },
+                {
+                  title: 'Custom nodes DSL builder',
+                  href: '/conversion/export/docx/custom-nodes-dsl-builder',
+                  tags: ['Beta'],
+                },
+                {
+                  title: 'Styles',
                   href: '/conversion/export/docx/styles',
                 },
                 {

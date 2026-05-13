@@ -8,9 +8,9 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 
-本页面是 Pages 扩展的 **options**、**commands** 和 **storage** 的权威参考。有关面向任务的演练，请参见 [Page format](/pages/core-concepts/page-format)、[Page header and footer](/pages/core-concepts/page-header-footer)、[Page gap](/pages/core-concepts/page-gap)、[Page break node](/pages/core-concepts/page-break-node) 和 [Zoom](/pages/core-concepts/zoom)。
+本页面是 Pages 扩展的 **选项**、**命令** 和 **存储** 的权威参考。有关面向任务的演练，请参见 [Page format](/pages/core-concepts/page-format)、[Page header and footer](/pages/core-concepts/page-header-footer)、[Page gap](/pages/core-concepts/page-gap)、[Page break node](/pages/core-concepts/page-break-node) 和 [Zoom](/pages/core-concepts/zoom)。
 
-## Options interface
+## 选项接口
 
 ```ts
 import type { Extensions, JSONContent } from '@tiptap/core'
@@ -125,12 +125,16 @@ interface PagesOptions {
   /** 类似 `onDblClickHeaderFooterPreventClose`，但仅适用于页脚覆盖层。
    *  当两者都设置时，优先于回退项。 */
   onDblClickFooterPreventClose?: (event: MouseEvent) => boolean
+
+  /** 重命名内置的 `{page}` / `{total}` 占位符标记，或传入
+   *  `false` 以完全禁用替换。默认：undefined（按原样使用内置项）。 */
+  placeholders?: false | { page?: string; total?: string }
 }
 ```
 
-## Options reference
+## 选项参考
 
-### Layout
+### 布局
 
 | Option              | Type         | Default     | Notes                                                              |
 | ------------------- | ------------ | ----------- | ------------------------------------------------------------------ |
@@ -139,7 +143,7 @@ interface PagesOptions {
 | `pageGap`           | `number`     | `50`        | 像素。仅用于视觉显示——不影响导出。                      |
 | `pageGapBackground` | `string`     | `'#ffffff'` | 任意 CSS 颜色值。                                               |
 
-### Headers and footers
+### 页眉和页脚
 
 页眉/页脚选项的完整参考位于 [Page header and footer](/pages/core-concepts/page-header-footer#complete-options-reference)。下表概述了表面层；有关首页、奇偶页、内容类型以及编辑器覆盖层行为，请点击链接查看。
 
@@ -147,36 +151,37 @@ interface PagesOptions {
 | ------------------------------------ | -------------------------------- | -------------------- | --------------------------------------------------------- |
 | `header`                             | `PagesHeaderFooter`              | `''`                 | 默认页眉内容                                    |
 | `footer`                             | `PagesHeaderFooter`              | `''`                 | 默认页脚内容                                    |
-| `headerTopMargin`                    | `number`                         | 页上边距的 50%    | 从页面顶部到页眉内容的距离（px）             |
-| `footerBottomMargin`                 | `number`                         | 页下边距的 50% | 从页脚内容到页面底部的距离（px）          |
+| `headerTopMargin`                    | `number`                         | 上边距的 50%        | 从页面顶部到页眉内容的距离（px）             |
+| `footerBottomMargin`                 | `number`                         | 下边距的 50%        | 从页脚内容到底部的距离（px）          |
 | `differentFirstPage`                 | `boolean`                        | `false`              | 首页页眉和页脚与其余页面不同         |
 | `headerFirstPage`                    | `PagesHeaderFooter`              | `''`                 | 首页页眉内容                                 |
 | `footerFirstPage`                    | `PagesHeaderFooter`              | `''`                 | 首页页脚内容                                 |
-| `differentOddEven`                   | `boolean`                        | `false`              | 奇数页和偶数页使用不同的页眉和页脚         |
+| `differentOddEven`                   | `boolean`                        | `false`              | 奇偶页使用不同的页眉和页脚         |
 | `headerOdd`                          | `PagesHeaderFooter`              | `''`                 | 奇数页页眉内容                                  |
 | `headerEven`                         | `PagesHeaderFooter`              | `''`                 | 偶数页页眉内容                                 |
 | `footerOdd`                          | `PagesHeaderFooter`              | `''`                 | 奇数页页脚内容                                  |
 | `footerEven`                         | `PagesHeaderFooter`              | `''`                 | 偶数页页脚内容                                 |
-| `headerFooterExtensions`             | `Extensions`                     | `StarterKit`         | 用于内部页眉/页脚编辑器的扩展            |
-| `onDblClickHeaderFooterPreventClose` | `(event: MouseEvent) => boolean` | `undefined`          | 双击外部时防止关闭（页眉 + 页脚） |
-| `onDblClickHeaderPreventClose`       | `(event: MouseEvent) => boolean` | `undefined`          | 双击外部时防止关闭（仅页眉）     |
-| `onDblClickFooterPreventClose`       | `(event: MouseEvent) => boolean` | `undefined`          | 双击外部时防止关闭（仅页脚）        |
+| `headerFooterExtensions`             | `Extensions`                     | `StarterKit`         | 内部页眉/页脚编辑器的扩展            |
+| `onDblClickHeaderFooterPreventClose` | `(event: MouseEvent) => boolean` | `undefined`          | 防止在外部双击时关闭（页眉 + 页脚） |
+| `onDblClickHeaderPreventClose`       | `(event: MouseEvent) => boolean` | `undefined`          | 防止在外部双击时关闭（仅页眉）     |
+| `onDblClickFooterPreventClose`       | `(event: MouseEvent) => boolean` | `undefined`          | 防止在外部双击时关闭（仅页脚）     |
 | `accentColor`                        | `string`                         | `'#6366f1'`          | 两个覆盖层的强调色                            |
 | `headerAccentColor`                  | `string`                         | `accentColor` value  | 仅页眉覆盖层的强调色                  |
 | `footerAccentColor`                  | `string`                         | `accentColor` value  | 仅页脚覆盖层的强调色                  |
+| `placeholders`                       | `false \| { page?, total? }`     | `undefined`          | 重命名 `{page}` / `{total}` 标记，或用 `false` 禁用 |
 
-### Callbacks
+### 回调
 
 | Option               | Type                           | Description                                                          |
 | -------------------- | ------------------------------ | -------------------------------------------------------------------- |
 | `onPageFormatChange` | `(format: PageFormat) => void` | 当通过 configure 或 `setPageFormat` 更改页面格式时触发。 |
 | `onZoomChange`       | `(zoom: number) => void`       | 当通过 `setZoom` 更改缩放级别时触发。                     |
 
-## Commands reference
+## 命令参考
 
 有关每个命令的深入说明，请参见链接的 core-concepts 页面。
 
-### Layout commands
+### 布局命令
 
 | Command                | Parameters               | Description                                              |
 | ---------------------- | ------------------------ | -------------------------------------------------------- |
@@ -185,7 +190,7 @@ interface PagesOptions {
 | `setPageGap`           | `pageGap: number`        | 设置页面间距（px）。必须为正数。        |
 | `setPageGapBackground` | `color: string`          | 设置页面间距背景颜色（任意 CSS 颜色值）。 |
 
-### Header / footer commands
+### 页眉 / 页脚命令
 
 完整参考也位于 [Page header and footer](/pages/core-concepts/page-header-footer#commands-reference)。
 

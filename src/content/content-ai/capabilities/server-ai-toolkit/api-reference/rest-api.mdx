@@ -10,8 +10,15 @@ import { Callout } from '@/components/ui/Callout'
 
 Server AI Toolkit 为 **工具** 和 **工作流** 都提供 REST API 端点。
 
+<Callout title="向后兼容性" variant="warning">
+  之前的 API 名称，例如 `schemaAwarenessData`、`getSchemaAwarenessData`、
+  `/v3/ai/toolkit/tools` 和 `/v3/ai/toolkit/schema-awareness-prompt`，仍然可用于
+  向后兼容，但它们已被弃用。新集成请使用 `editorContext`、`getEditorContext` 和
+  `/v3/ai/toolkit/tools`。
+</Callout>
+
 <Callout title="Postman 集合" variant="info">
-  浏览用于 Server AI Toolkit REST API 的{' '}
+  浏览{' '}
   <a
     href="https://www.postman.com/tiptap-platform/tiptap-workspace/collection/42722929-6a366c4c-10e4-4674-93c3-da35b70357a7?action=share&source=copy-link&creator=42722929"
     target="_blank"
@@ -110,15 +117,9 @@ https://api.tiptap.dev
 }
 ```
 
-<Callout title="Threads 需要云端文档" variant="info">
+<Callout title="线程需要云端文档" variant="info">
   线程和评论端点始终需要 `experimental_documentOptions.documentId`。
 </Callout>
-
-## Session 机制
-
-读取端点会返回一个 `sessionId`，用于记录 AI 所看到的节点哈希和内容哈希。
-在后续的编辑请求中复用同一个 `sessionId`，以便服务器能拒绝过期的编辑，
-而不是覆盖更新过的用户更改。
 
 ## 格式
 
@@ -141,13 +142,16 @@ POST /v3/ai/toolkit/tools
 
 请求体：
 
-- `schemaAwarenessData` (`SchemaAwarenessData`, required)
-- `tools?` (`object`, optional): 启用或禁用各个工具
+- `editorContext` (`EditorContext`, required unless `schemaAwarenessData` is provided)
+- `schemaAwarenessData?` (`SchemaAwarenessData`, optional, deprecated): 请改用 `editorContext`。为向后兼容而支持。
+- `tools?` (`object`, optional): 启用或禁用单个工具
 - `operationMeta?` (`string | null`, optional, default: `""`)
+- `toolConfig?` (`object`, optional): 每个工具的配置对象
 - `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
 
 响应：
 
+- `prompt` (`string`): 将其添加到你的 AI 请求的系统提示中。它会向 AI 说明 Tiptap 文档如何工作、可包含哪些元素，以及文档格式如何运作。
 - `tools` (`array`)
   - `name` (`string`)
   - `description` (`string`)
@@ -166,24 +170,36 @@ POST /v3/ai/toolkit/execute-tool
 
 - `toolName` (`string`, required)
 - `input` (`unknown`, required)
-- `schemaAwarenessData` (`SchemaAwarenessData`, required)
-- `sessionId?` (`string | null`, optional): 复用来自先前读取或工具执行的会话，以启用防止读取过期内容的保护。
+- `editorContext` (`EditorContext`, required unless `schemaAwarenessData` is provided)
+- `schemaAwarenessData?` (`SchemaAwarenessData`, optional, deprecated): 请改用 `editorContext`。为向后兼容而支持。
+- `toolConfig?` (`unknown`, optional): 开发者提供的工具特定参数
 - `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
-- `chunkSize?` (`number`, optional, default: `32000`)
 - `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
-- `experimental_commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`, optional): 附加到在线程相关工具执行期间创建的新线程和评论的元数据。
+- `experimental_commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`, optional): 在线程相关工具执行期间创建的新线程和评论所附加的元数据。
 - exactly one of:
   - `document`
   - `experimental_documentOptions`
 
 响应：
 
-- `sessionId` (`string`)
 - `output` (`unknown`)
+- `toolResult` (`unknown`)
 - `docChanged` (`boolean`)
 - `document` (`object | null`)
 
+### 流式执行工具
+
+```txt
+POST /v3/ai/toolkit/stream-tool
+```
+
+流式执行工具。请求结构与 `POST /v3/ai/toolkit/execute-tool` 相同。流式响应格式仍在最终确定中。
+
 ## 工作流端点
+
+<Callout title="工作流端点" variant="info">
+  工作流端点会为现有集成保留。它们将在未来版本中移除。
+</Callout>
 
 ### 获取工作流定义
 
@@ -215,9 +231,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/workflows/edit' \
   }'
 ```
 
-保留返回的 `sessionId`，并在发起匹配的工作流执行请求时一并发送。
-
-### 为工作流读取文档内容
+### 读取工作流的文档内容
 
 ```txt
 POST /v3/ai/toolkit/read/read-document
@@ -228,9 +242,9 @@ POST /v3/ai/toolkit/read/read-document
 请求体：
 
 - `range?` (`{ from: number, to: number }`, optional, default: entire document)
-- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `editorContext` (`EditorContext`, required unless `schemaAwarenessData` is provided)
+- `schemaAwarenessData?` (`SchemaAwarenessData`, optional, deprecated): 请改用 `editorContext`。为向后兼容而支持。
 - `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
-- `sessionId?` (`string | null`, optional)
 - `chunkSize?` (`number`, optional, default: `32000`)
 - `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
 - exactly one of:
@@ -239,7 +253,6 @@ POST /v3/ai/toolkit/read/read-document
 
 响应：
 
-- `sessionId` (`string`)
 - `output`
   - `success` (`boolean`)
   - `content?` (`unknown`)
@@ -255,7 +268,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/read/read-document' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* 模式感知数据 */ },
+    "editorContext": { /* editor context data */ },
     "format": "shorthand",
     "reviewOptions": {
       "mode": "disabled"
@@ -267,9 +280,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/read/read-document' \
   }'
 ```
 
-保留返回的 `sessionId`，并在发起匹配的 insert-content 执行请求时一并发送。
-
-### 读取当前选择
+### 读取当前选区
 
 ```txt
 POST /v3/ai/toolkit/read/read-selection
@@ -280,9 +291,9 @@ POST /v3/ai/toolkit/read/read-selection
 请求体：
 
 - `range` (`{ from: number, to: number }`, required)
-- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `editorContext` (`EditorContext`, required unless `schemaAwarenessData` is provided)
+- `schemaAwarenessData?` (`SchemaAwarenessData`, optional, deprecated): 请改用 `editorContext`。为向后兼容而支持。
 - `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
-- `sessionId?` (`string | null`, optional)
 - `chunkSize?` (`number`, optional, default: `32000`)
 - `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
 - exactly one of:
@@ -291,7 +302,6 @@ POST /v3/ai/toolkit/read/read-selection
 
 响应：
 
-- `sessionId` (`string`)
 - `output`
   - 当选区为空时：
     - `isEmpty` (`true`)
@@ -312,7 +322,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/read/read-selection' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* 模式感知数据 */ },
+    "editorContext": { /* editor context data */ },
     "range": { "from": 10, "to": 42 },
     "format": "shorthand",
     "experimental_documentOptions": {
@@ -331,9 +341,10 @@ POST /v3/ai/toolkit/read/threads
 
 请求体：
 
-- `schemaAwarenessData` (`SchemaAwarenessData`, 必填)
-- `format` (`'json' | 'shorthand'`, 必填)
-- `experimental_documentOptions` (`{ documentId: string, userId?: string, field?: string | null }`, 必填)
+- `editorContext` (`EditorContext`, required unless `schemaAwarenessData` is provided)
+- `schemaAwarenessData?` (`SchemaAwarenessData`, optional, deprecated): 请改用 `editorContext`。为向后兼容而支持。
+- `format` (`'json' | 'shorthand'`, required)
+- `experimental_documentOptions` (`{ documentId: string, userId?: string, field?: string | null }`, required)
 
 响应：
 
@@ -351,7 +362,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/read/threads' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* 模式感知数据 */ },
+    "editorContext": { /* editor context data */ },
     "format": "shorthand",
     "experimental_documentOptions": {
       "documentId": "your-document-id",
@@ -370,9 +381,9 @@ POST /v3/ai/toolkit/execute-workflow/insert-content
 
 - `input` (`unknown`, required): 生成的 insert-content 载荷
 - `range?` (`{ from: number, to: number }`, optional)
-- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `editorContext` (`EditorContext`, required unless `schemaAwarenessData` is provided)
+- `schemaAwarenessData?` (`SchemaAwarenessData`, optional, deprecated): 请改用 `editorContext`。为向后兼容而支持。
 - `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
-- `sessionId?` (`string | null`, optional)
 - `chunkSize?` (`number`, optional, default: `32000`)
 - `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
 - exactly one of:
@@ -381,7 +392,6 @@ POST /v3/ai/toolkit/execute-workflow/insert-content
 
 响应：
 
-- `sessionId` (`string`)
 - `output`
   - `error?` (`string`)
   - `range?` (`{ from: number, to: number }`)
@@ -396,7 +406,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/insert-content' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* 模式感知数据 */ },
+    "editorContext": { /* editor context data */ },
     "input": "This is the replacement content.",
     "range": { "from": 10, "to": 42 },
     "format": "shorthand",
@@ -418,10 +428,10 @@ POST /v3/ai/toolkit/execute-workflow/tiptap-edit
 
 请求体：
 
-- `input` (`object`, required): Edit workflow operations
-- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `input` (`object`, required): Edit 工作流操作
+- `editorContext` (`EditorContext`, required unless `schemaAwarenessData` is provided)
+- `schemaAwarenessData?` (`SchemaAwarenessData`, optional, deprecated): 请改用 `editorContext`。为向后兼容而支持。
 - `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
-- `sessionId?` (`string | null`, optional)
 - `chunkSize?` (`number`, optional, default: `32000`)
 - `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
 - exactly one of:
@@ -430,7 +440,6 @@ POST /v3/ai/toolkit/execute-workflow/tiptap-edit
 
 响应：
 
-- `sessionId` (`string`)
 - `output`
   - `operationResults?` (`array`)
   - `reason?` (`'validationError' | 'unexpectedError'`)
@@ -446,7 +455,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/tiptap-edit' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* 模式感知数据 */ },
+    "editorContext": { /* editor context data */ },
     "input": {
       "operations": [
         {
@@ -475,10 +484,10 @@ POST /v3/ai/toolkit/execute-workflow/proofreader
 
 请求体：
 
-- `input` (`object`, required): Proofreader operations
-- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `input` (`object`, required): Proofreader 操作
+- `editorContext` (`EditorContext`, required unless `schemaAwarenessData` is provided)
+- `schemaAwarenessData?` (`SchemaAwarenessData`, optional, deprecated): 请改用 `editorContext`。为向后兼容而支持。
 - `format` (`'shorthand'`, required)
-- `sessionId?` (`string | null`, optional)
 - `chunkSize?` (`number`, optional, default: `32000`)
 - `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
 - exactly one of:
@@ -487,7 +496,6 @@ POST /v3/ai/toolkit/execute-workflow/proofreader
 
 响应：
 
-- `sessionId` (`string`)
 - `output`
   - `operationResults` (`array`)
 - `docChanged` (`boolean`)
@@ -501,7 +509,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/proofreader' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* 模式感知数据 */ },
+    "editorContext": { /* editor context data */ },
     "input": {
       "operations": []
     },
@@ -527,7 +535,8 @@ POST /v3/ai/toolkit/execute-workflow/threads
 请求体：
 
 - `input` (`object`, required): 线程操作
-- `schemaAwarenessData` (`SchemaAwarenessData`, required)
+- `editorContext` (`EditorContext`, required unless `schemaAwarenessData` is provided)
+- `schemaAwarenessData?` (`SchemaAwarenessData`, optional, deprecated): 请改用 `editorContext`。为向后兼容而支持。
 - `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
 - `experimental_documentOptions` (`{ documentId: string, userId?: string, field?: string | null }`, required)
 - `experimental_commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`, optional): 工作流创建的新线程和评论所附加的元数据。
@@ -548,7 +557,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/threads' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "schemaAwarenessData": { /* 模式感知数据 */ },
+    "editorContext": { /* editor context data */ },
     "input": {
       "operations": [
         {
@@ -574,29 +583,11 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/threads' \
   }'
 ```
 
-## 架构感知提示（架构感知提示）
-
-```txt
-POST /v3/ai/toolkit/schema-awareness-prompt
-```
-
-返回一个提示，用于描述所请求格式的编辑器架构。
-
-请求体：
-
-- `schemaAwarenessData`（`SchemaAwarenessData`，必填）
-- `format?`（`'json' | 'shorthand'`，可选）
-
-响应：
-
-- `prompt`（`string`）
-
 ## 错误处理
 
 该 API 使用标准的 HTTP 错误代码：
 
-- `400 错误请求`：无效的请求体、无效的格式、缺少文档源，或缺少 Document
-  服务器凭证
+- `400 错误请求`：无效的请求体、无效的格式、缺少文档源，或缺少 Document 服务器凭证
 - `401 未授权`：缺少或无效的 JWT 或应用程序 ID
 - `404 未找到`：未知的端点或工具
 - `422 无法处理的实体`：验证失败
@@ -606,5 +597,5 @@ POST /v3/ai/toolkit/schema-awareness-prompt
 
 ## 相关页面
 
-- [审查选项](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options)
-- [架构感知](/content-ai/capabilities/server-ai-toolkit/api-reference/schema-awareness)
+- [Review options](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options)
+- [Editor context](/content-ai/capabilities/server-ai-toolkit/api-reference/editor-context)

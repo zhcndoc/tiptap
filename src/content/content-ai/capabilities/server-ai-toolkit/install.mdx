@@ -6,8 +6,8 @@ meta:
   category: 内容 AI
 ---
 
-import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import { Requirements, RequirementItem } from '@/components/Requirements'
 import { Callout } from '@/components/ui/Callout'
 import Link from '@/components/Link'
 
@@ -17,11 +17,11 @@ import Link from '@/components/Link'
     <a href="https://tiptap.dev/contact-sales?form=server-ai-toolkit">联系我们的团队</a>
     来请求访问 Server AI 工具包。
   </RequirementItem>
-  <RequirementItem label="2. 访问私有注册表">
-    Server AI 工具包发布在 Tiptap 的私有 npm 注册表中。请按照 [设置指南](/guides/pro-extensions) 进行身份验证，访问 Tiptap 的私有 npm 注册表。
+  <RequirementItem label="2. 安装该包">
+    Server AI 工具包包是开源的。请使用 npm 或您偏好的包管理器从公共 npm 注册表安装。
   </RequirementItem>
-  <RequirementItem label="3. 安装包">
-    使用 npm 或您偏好的包管理器从私有注册表安装该包。
+  <RequirementItem label="3. 认证服务">
+    配置您的 Content AI 凭据以访问 Server AI 工具包服务。
   </RequirementItem>
 </Requirements>
 
@@ -29,37 +29,35 @@ import Link from '@/components/Link'
 
 首先，<a href="https://tiptap.dev/contact-sales?form=server-ai-toolkit">联系我们的团队</a> 以获取 Server AI 工具包的访问权限。
 
-获取访问权限后，按照 [私有注册表指南](/guides/pro-extensions) 配置您的包管理器。
-
-然后，安装该包：
+然后，安装开源的 Server AI 工具包包：
 
 ```bash
-npm install @tiptap-pro/server-ai-toolkit
+npm install @tiptap/server-ai-toolkit
 ```
 
-## 获取模式感知数据
+## 获取编辑器上下文
 
 首先，在编辑器中安装 `ServerAiToolkit` 扩展。这将修改您的编辑器架构，使您的文档与 Server AI 工具包兼容。
 
-要使用 Server AI 工具包 API，您需要从 Tiptap 编辑器获取架构感知数据。这些数据描述了文档结构，并帮助 AI 理解哪些内容是有效的。
+要使用 Server AI 工具包 API，请从您的 Tiptap 编辑器中获取编辑器上下文。这个 JSON 对象包含编辑器 schema 以及 AI 服务器理解有效文档内容所需的其他数据。
 
 ```tsx
 import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
-import { getSchemaAwarenessData, ServerAiToolkit } from '@tiptap-pro/server-ai-toolkit'
+import { getEditorContext, ServerAiToolkit } from '@tiptap/server-ai-toolkit'
 
 const editor = new Editor({
   extensions: [StarterKit, ServerAiToolkit],
 })
 
-// 从编辑器获取模式感知数据
-const schemaAwarenessData = getSchemaAwarenessData(editor)
+// 从编辑器获取编辑器上下文
+const editorContext = getEditorContext(editor)
 ```
 
-`getSchemaAwarenessData` 函数返回描述文档结构的模式感知数据，用于 Server AI 工具包 API。
+在您向 Server AI 工具包发送的每个请求中都传递 `editorContext`。
 
-<Callout title="保存模式感知数据" variant="info">
-  `getSchemaAwarenessData` 返回的模式感知数据是一个可序列化为 JSON 的对象，您可以将其存储在数据库中。无需每次都重新生成，仅在编辑器扩展或模式发生变化时更新即可。
+<Callout title="存储编辑器上下文" variant="info">
+  `getEditorContext` 返回的编辑器上下文是可 JSON 序列化的。您可以将其存储在数据库中，并且只在编辑器扩展或 schema 发生变化时更新它。
 </Callout>
 
 <Callout title="使用自定义节点？" variant="info">
@@ -67,7 +65,7 @@ const schemaAwarenessData = getSchemaAwarenessData(editor)
   [自定义节点指南](/content-ai/capabilities/server-ai-toolkit/advanced-guides/custom-nodes)。
 </Callout>
 
-更多详情，请参阅 [模式感知 API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/schema-awareness)。
+更多详情请参阅 [编辑器上下文 API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/editor-context)。
 
 ## 配置授权
 
@@ -161,7 +159,7 @@ const response = await fetch(`${apiBaseUrl}/v3/ai/toolkit/tools`, {
   method: 'POST',
   headers: getAuthHeaders(),
   body: JSON.stringify({
-    schemaAwarenessData,
+    editorContext,
   }),
 })
 

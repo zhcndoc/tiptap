@@ -4,7 +4,7 @@ tags:
   - type: beta
 meta:
   title: 页眉和页脚 | Tiptap 转换
-  description: 文档页眉和页脚在 DOCX 转换流程中如何处理，包括导入限制和导出配置。
+  description: DOCX 转换流程中如何处理文档页眉和页脚，包括导入限制和导出配置。
   category: 转换
 ---
 
@@ -21,11 +21,11 @@ Word 中的页眉和页脚会在每一页的顶部和底部显示重复内容。
 
 | 功能                         | 导入                                                                                                         | 编辑器                                                                            | 导出                                                                                                                                                                                       |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 默认页眉/页脚                | 支持                                                                                                         | 支持 ([Pages](/editor/extensions/functionality/pages))                       | 支持                                                                                                                                                                                    |
-| 首页不同                     | 支持                                                                                                         | 支持                                                                             | 支持                                                                                                                                                                                    |
-| 奇偶页不同                   | 支持                                                                                                         | 支持                                                                             | 支持                                                                                                                                                                                    |
-| 页码占位符                   | 不会从 DOCX 转换（PAGE/NUMPAGES 字段会按其缓存显示值导入，例如字面文本 `1`） | 支持（`{page}`、`{total}` 会在渲染时由 Pages 扩展替换） | 支持。纯文本页眉和页脚中的 `{page}` 和 `{total}` 标记会输出为动态 DOCX `PAGE` / `NUMPAGES` 字段，因此 Word 会显示实际页码和总页数。 |
-| 页眉/页脚中的富文本          | 支持                                                                                                         | 支持                                                                             | 支持                                                                                                                                                                                    |
+| 默认页眉/页脚        | 支持                                                                                                      | 支持 ([Pages](/editor/extensions/functionality/pages))                       | 支持                                                                                                                                                                                    |
+| 不同首页         | 支持                                                                                                      | 支持                                                                         | 支持                                                                                                                                                                                    |
+| 不同奇偶页     | 支持                                                                                                      | 支持                                                                         | 支持                                                                                                                                                                                    |
+| 页码占位符     | 支持。PAGE/NUMPAGES 字段会被转换为规范的 `{page}` / `{numpages}` 文本标记（安装了 Pages 时默认启用；传入 `placeholders: false` 则改为保留缓存显示值并作为纯文本）。 | 支持（`{page}`、`{total}` 会在渲染时由 Pages 扩展替换；可通过 `placeholders` 配置重命名）。 | 通过编辑器扩展支持：页眉/页脚中的 `{page}` / `{total}` 标记会作为实时的 `PAGE` / `NUMPAGES` 字段输出。REST API 目前不会转换这些标记——它们会按字面文本渲染。 |
+| 页眉/页脚中的富文本 | 支持                                                                                                      | 支持                                                                         | 支持                                                                                                                                                                                    |
 
 ## 导入
 
@@ -67,8 +67,8 @@ DOCX 导入服务会从源文档中提取页眉和页脚内容。响应中最多
   `onImport` 回调获取这些数据，并在自己的代码中处理它们。
 </Callout>
 
-<Callout variant="warning" title="页眉中的页码字段会作为静态文本导入">
-  Word 会将页码（以及其他字段代码，如 `DATE`、`AUTHOR`、`NUMPAGES`）存储为 `<w:fldChar>` / `<w:instrText>` 序列，其缓存显示值就是文档上次打开时的内容。导入器会将该缓存值作为纯文本捕获。比如，在 Word 中显示为 `Page 5 of 12` 的页眉，导入后会变成字面字符串 `Page 5 of 12`，而不是 Pages 扩展会重新计算的动态 `Page {page} of {total}` 模板。若要在导入后在编辑器中获得动态页码，请将导入的静态文本替换为 Pages 扩展模板（例如通过 `editor.commands.setHeader('Page {page} of {total}')`），或在 `onImport` 回调中对 `context.header` 进行后处理。
+<Callout variant="info" title="`PAGE` 和 `NUMPAGES` 字段会作为 `{page}` / `{numpages}` 标记导入">
+  Word 的 `PAGE` 和 `NUMPAGES` 字段代码在安装了 Pages 扩展时，默认会被翻译为规范的文本标记：`PAGE` 对应 `{page}`，`NUMPAGES` 对应 `{numpages}`。Pages 扩展会原生渲染 `{page}`，因此一个显示为 `Page 5 of 12` 的 Word 页眉会导入为 `Page {page} of {numpages}`，并立即显示实时页码。若要让 `{numpages}` 也实时渲染，请配置 `Pages.configure({ placeholders: { total: 'numpages' } })`。在 `importDocx` 命令中传入 `placeholders: false` 可禁用该翻译，并改为导入缓存显示值（例如字面量 `Page 5 of 12`）。其他字段代码如 `DATE` 和 `AUTHOR` 仍会按其缓存显示值导入。参见 [DOCX 导入 → 页码字段](/conversion/import/docx/editor-extension#page-number-fields)。
 </Callout>
 
 ## 编辑器
@@ -81,7 +81,7 @@ Pages 扩展支持三种与 Word 行为一致的页眉/页脚模式：
 - **首页不同：** 首页使用独立的页眉/页脚
 - **奇偶页不同：** 奇数页和偶数页使用不同的页眉/页脚
 
-页码通过占位符渲染：`{page}` 表示当前页，`{total}` 表示总页数。Pages 扩展会在编辑器中渲染每一页时替换它们，而 DOCX 导出现在会将它们作为动态 `PAGE` / `NUMPAGES` 字段输出，因此导出的文档在 Word 中会显示真实页码。详见下方的 [导出](#export) 部分。
+页码通过占位符渲染：`{page}` 表示当前页，`{total}` 表示总页数。Pages 扩展在编辑器中渲染每一页时会替换这些占位符，而 [`ExportDocx` 编辑器扩展](/conversion/export/docx/editor-extension) 在导出时会将它们作为实时的 `PAGE` / `NUMPAGES` 字段输出，因此导出的文档在 Word 中会显示真实页码。REST API 导出路径目前不会翻译这些标记——它们会按字面文本渲染。参见下方的 [导出](#export) 部分。
 
 导入后，用户可以双击已导入的页眉或页脚进行编辑。Pages 扩展通过 `editor.storage.pages` 暴露当前激活的浮层编辑器，并提供 `headerEditorOn` / `headerEditorOff`（以及 `footerEditorOn` / `footerEditorOff`）事件订阅辅助方法，适用于同步工具栏或响应焦点变化。有关详情，请参见页面页眉和页脚指南中的 [Active editor state](/pages/core-concepts/page-header-footer#active-editor-state)。
 
@@ -116,8 +116,15 @@ ExportDocx.configure({
 
 显式提供的页眉/页脚选项会覆盖从 Pages 扩展中自动提取的内容。
 
-<Callout variant="info" title="`{page}` 和 `{total}` 会渲染为动态 DOCX 页码字段">
-  当纯文本页眉或页脚包含 `{page}` 或 `{total}` 时，导出会将每个标记转换为 DOCX 端的动态 `PAGE` / `NUMPAGES` 字段，因此 Word 显示的是实际当前页码和总页数，而不是字面标记字符串。此行为适用于从 Pages 扩展自动提取的页眉和页脚，也适用于通过 `headers` / `footers` 选项传入的纯文本页眉和页脚。对于更复杂的构造（例如除了简单标记之外还要实现 `"第 X 页，共 Y 页"` 之类的格式），你仍然可以手动提供 `Docx.Header` / `Docx.Footer` 实例，并使用 `Docx.PageNumber.CURRENT` / `Docx.PageNumber.TOTAL_PAGES`。
+<Callout variant="info" title="`{page}` 和 `{total}` 会作为实时 DOCX 页码字段渲染">
+  当页眉或页脚包含 `{page}` 或 `{total}` 时，[`ExportDocx` 编辑器扩展](/conversion/export/docx/editor-extension)
+  会将每个标记作为实时的 `PAGE` / `NUMPAGES` 字段输出，因此 Word 会显示实际的当前页和
+  总页数，而不是字面量标记字符串。这适用于从 Pages 扩展自动提取的页眉和页脚，
+  也适用于传入 `placeholders` 选项的直接 `convertHeader` / `convertFooter` 调用。
+  [REST API](/conversion/export/docx/rest-api) 目前不会翻译这些标记——它们会按字面文本渲染。对于更复杂的构造
+  （例如超出裸标记的 `"Page X of Y"` 格式），你也可以手动提供
+  `Docx.Header` / `Docx.Footer` 实例，并使用 `Docx.PageNumber.CURRENT` /
+  `Docx.PageNumber.TOTAL_PAGES`。
 </Callout>
 
 ### 可往返保留的内容

@@ -12,31 +12,37 @@ import { Callout } from '@/components/ui/Callout'
   本指南是对 [AI 代理聊天机器人指南](/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot) 的延续。请先阅读该指南。
 </Callout>
 
-如果您的文档包含自定义节点或标记，请配置 schema 识别，以便 Server AI Toolkit 能够向您的 AI 模型正确描述它们。
+如果您的文档包含自定义节点或标记，请配置编辑器上下文，以便 Server AI
+Toolkit 能够向您的 AI 模型正确描述它们。
 
 <Callout title="为什么要配置自定义节点？" variant="default">
-  如果没有 schema 识别，AI 模型可能会生成编辑器不支持的内容，或者完全遗漏自定义元素。添加自定义节点元数据可以为模型提供足够的上下文，以便可靠地生成这些元素。
+  如果没有编辑器上下文，AI 模型可能会生成您的编辑器不支持的内容，或者
+  完全遗漏自定义元素。添加自定义节点元数据可为模型提供足够的上下文，
+  从而可靠地生成这些元素。
 </Callout>
 
-## 获取 schema 识别数据
+## 获取编辑器上下文数据
 
-首先从您的编辑器生成 schema 识别数据。Server AI Toolkit 使用此数据向 AI 模型描述您的文档结构。
+首先从您的编辑器生成编辑器上下文数据。Server AI Toolkit 使用这些数据向
+AI 模型描述您的文档结构。
 
 ```ts
 import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
-import { getSchemaAwarenessData } from '@tiptap-pro/server-ai-toolkit'
+import { getEditorContext, ServerAiToolkit } from '@tiptap/server-ai-toolkit'
 
 const editor = new Editor({
-  extensions: [StarterKit],
+  extensions: [StarterKit, ServerAiToolkit],
 })
 
-// 获取 schema 识别数据
-const schemaAwarenessData = getSchemaAwarenessData(editor)
+// 检索编辑器上下文数据
+const editorContext = getEditorContext(editor)
 ```
 
-<Callout title="存储 schema 识别数据" variant="info">
-  `getSchemaAwarenessData` 返回的 schema 识别数据是一个可 JSON 序列化的对象，您可以将其存储在数据库中。您不需要每次都生成它。当您的编辑器扩展或 schema 发生变化时更新它即可。
+<Callout title="存储编辑器上下文数据" variant="info">
+  `getEditorContext` 返回的编辑器上下文数据是一个可进行 JSON 序列化的对象，您可以
+  将其存储在数据库中。您无需每次都生成它。请在编辑器
+  扩展或模式发生变化时更新它。
 </Callout>
 
 ## 配置自定义节点
@@ -105,11 +111,13 @@ const CustomExtension = Node.create({
 - `description?`（`string`）：元素的英文解释，供 AI 模型使用
 - `attributes?`（`Record<string, z.ZodTypeAny>`）：元素可能拥有的属性，定义为 Zod 模式，将被转换成 JSON 模式
 
-<Callout title="官方 Tiptap 扩展的情况？" variant="info">
-  Server AI Toolkit 自动支持官方 Tiptap 扩展的 schema 识别，无需额外配置。您仍然可以通过扩展官方扩展并添加 `addJsonSchemaAwareness` 选项来重写默认的 schema 识别信息。
+<Callout title="官方 Tiptap 扩展呢？" variant="info">
+  官方 Tiptap 扩展的编辑器上下文已由 Server AI Toolkit 自动支持。
+  它们无需配置。您仍然可以通过扩展该扩展并添加 `addJsonSchemaAwareness`
+  选项来覆盖官方 Tiptap 扩展的默认编辑器上下文信息。
 </Callout>
 
 ## 后续步骤
 
-- [Schema 识别 API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/schema-awareness)
+- [编辑器上下文 API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/editor-context)
 - [REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)

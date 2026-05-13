@@ -1,0 +1,797 @@
+---
+title: 自定义节点 DSL 构建器（TypeScript）
+tags:
+  - type: start
+  - type: beta
+  - type: version
+    label: v0.18.0
+meta:
+  title: DOCX 自定义节点的 DSL 构建器 | Tiptap Conversion
+  description: 一个带类型、流畅的 TypeScript API，用于编写 DOCX 自定义节点 DSL。提供编译时包含安全性、每个属性的自动补全，以及与 REST API 消费的相同线缆格式。
+  category: Conversion
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
+
+<Callout variant="hint" title="Beta 功能">
+  构建器与 [JSON
+  DSL](/conversion/export/docx/custom-nodes-dsl) 一样，属于同一个 `customNodeDsl` 功能范畴。两者都以 `dslVersion: "1.0"` 发布，并生成完全相同的线格式输出。如果你依赖此功能，请固定精确的包版本。
+</Callout>
+
+<Requirements>
+  <RequirementItem label="1. 激活试用或订阅">
+    在你的账户中开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Start
+    计划](https://cloud.tiptap.dev/v2/billing)。
+  </RequirementItem>
+  <RequirementItem label="2. 从私有注册表安装">
+    按照 [设置指南](/guides/pro-extensions) 通过身份验证连接到 Tiptap 的私有 npm 注册表。
+  </RequirementItem>
+</Requirements>
+
+DSL 构建器是以 **TypeScript 友好** 的方式编写 [custom-nodes DSL](/conversion/export/docx/custom-nodes-dsl) 的方法。它是一个小巧、流式、不可变的 API，会编译成线格式所期望的 **相同 JSON**——每个链式方法都会返回一个新的构建器，而任意链上的 `.toJSON()` 都会生成 DSL 编译器可接受的字面量载荷。
+
+你将获得：
+
+- **每个元素属性都有自动补全。** `paragraph({ … })` 会提示 `style`、`alignment`、`spacing`、`border`、`shading`、…——正是 DSL 编译器所验证的字段集合。不再需要从文档里猜属性名。
+- **编译时包含关系安全。** `paragraph().children(childrenBlock())` 会报 TypeScript 错误：段落只接受行内子元素。`table().rows(paragraph())` 也会报错：`Table.rows` 需要 `TableRow` 构建器。错误在编辑时而不是运行时就会触发。
+- **必填属性检查。** `externalHyperlink({})` 会报 TypeScript 错误：线格式要求 `link` 属性，而构建器类型会强制这一点。
+- **线格式兼容性。** 输出与手写 JSON 完全一致。同一份载荷可在编辑器中、Node.js 服务端中，或作为 [Conversion REST API](/conversion/export/docx/rest-api) 中的 `customNodeDsl` 字段使用。
+
+<CodeDemo isPro path="/Extensions/ExportDocxCustomNodeDslBuilder" />
+
+---
+
+## 安装与导入
+
+该构建器通过子路径导入发布，位于 DOCX 导出流水线其余部分所在的同一包中：
+
+```bash
+npm i @tiptap-pro/extension-export-docx@^0.18.0
+```
+
+```ts
+// 主入口 — 运行时导出器和可配置扩展。
+import { ExportDocx, exportDocx } from '@tiptap-pro/extension-export-docx'
+
+// 构建器子路径 — 可被 tree-shake。那些从不接触 DSL 的用户
+// 不会为它付出成本。
+import {
+  docxNode,
+  paragraph,
+  textRun,
+  externalHyperlink,
+  table,
+  tableRow,
+  tableCell,
+  pageBreak,
+  childrenInline,
+  childrenBlock,
+  childrenTableRow,
+  childrenTableCell,
+  iff,
+  switch_,
+  fragment,
+  textOp,
+  ref,
+  template,
+  op,
+  unit,
+  switchValue,
+  marks,
+} from '@tiptap-pro/extension-export-docx/dsl'
+```
+
+该子路径别名可在 **Vite、Next.js、Webpack 5+、esbuild、Rollup，以及所有现代打包工具** 中使用。较旧的工具链可能需要一个显式支持 `exports` 字段的解析器。
+
+---
+
+## 何时使用构建器
+
+| 你是…                                                                   | 使用…                                                                                                   |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| 使用 TypeScript 编写 DOCX 规则，并希望拥有自动补全和重构支持。            | **构建器。**                                                                                           |
+| 将 DSL 作为 JSON 请求体发送到 `POST /v2/convert/export/docx`。          | [JSON DSL](/conversion/export/docx/custom-nodes-dsl) — 直接从 JSON 文件传入 `customNodeDsl`。 |
+| 位于编辑器扩展内部，并希望使用完整 JavaScript（闭包、IO 等）。            | 基于函数的 [custom-nodes API](/conversion/export/docx/custom-nodes)。                           |
+| 从配置服务动态加载规则。                                                 | JSON DSL（反序列化配置并直接传递）。                                                 |
+
+构建器会生成 JSON，因此你可以将两者结合使用：在设计时构建，将 `.toJSON()` 持久化到磁盘，再把 JSON 发送到服务器。或者在运行时读取 JSON 并直接传给 `exportDocx`。两个方向都没有锁定。
+
+---
+
+## 快速开始
+
+一个 12 行的 `hintbox` 规则，渲染为带样式的 DOCX 段落：
+
+```ts
+import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+import { childrenInline, docxNode, paragraph } from '@tiptap-pro/extension-export-docx/dsl'
+
+ExportDocx.configure({
+  customNodeDsl: {
+    dslVersion: '1.0',
+    nodes: [
+      docxNode('hintbox')
+        .block()
+        .emit(
+          paragraph({ style: 'Hintbox' }) //
+            .children(childrenInline({ marks: 'default' })),
+        )
+        .toJSON(),
+    ],
+  },
+})
+```
+
+这与 [JSON DSL 快速开始示例](/conversion/export/docx/custom-nodes-dsl#a-first-example) 的载荷完全相同——在线上传输的字节完全一致，只是编写层不同。
+
+---
+
+## 顶层构建器：`docxNode`
+
+`docxNode(type)` 会为一个 ProseMirror 节点类型创建一条规则。该链条必须以 **且仅以** `emit(...)`、`emitNothing()` 或 `drop()` 中的一种结束——在选择策略之前调用 `toJSON()` 会抛出异常。
+
+```ts
+docxNode('hintbox') // ┐
+  .block() //          │  可选 — 显式声明 nodeKind
+  .emit(paragraph()) //│  用什么来替代 PM 节点进行渲染
+  .toJSON() //         ┘  字面量的 CustomNodeRule JSON
+```
+
+| 方法             | 作用                                                                                                            |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `.block()`       | 将规则标记为块级（用于验证器的包含关系检查）。                                            |
+| `.inline()`      | 将规则标记为行内级。                                                                                    |
+| `.auto()`        | 让验证器根据 emit 形状推断类型（默认值）。                                                   |
+| `.emit(node)`    | 将匹配到的 PM 节点渲染为 `node`。可接受单个渲染节点构建器、字面量 `RenderNode`，或数组。 |
+| `.emitNothing()` | `emit: null` —— 不为该 PM 节点输出任何内容，但仍会遍历其后代。                                     |
+| `.drop()`        | `render: null` —— 删除匹配到的 PM 节点及其 **所有后代**。                                           |
+| `.toJSON()`      | 将该链条具体化为线格式的 `CustomNodeRule` JSON。                                                   |
+
+每个方法都会返回一个 **新的构建器**，因此可重复使用部分链条，而不会出现别名带来的意外：
+
+```ts
+const base = docxNode('mention').inline()
+const withColor = base.emit(textRun({ color: '4472C4' }))
+const dropped = base.drop()
+// `base` 保持不变。
+```
+
+---
+
+## 元素工厂
+
+v1 目录中的每个元素都有一个对应工厂。每个工厂都会返回一个可链式调用的构建器，其 `.toJSON()` 会生成线格式的 [`ElementNode`](/conversion/export/docx/custom-nodes-dsl#elementnode)。
+
+### `paragraph(props?)`
+
+接受行内子元素的块级元素。
+
+```ts
+paragraph({
+  style: 'Hintbox',
+  alignment: 'center',
+  spacing: { before: 240, after: 240, line: 240, lineRule: 'auto' },
+  border: {
+    top: { style: 'single', size: 4, color: 'B8D8FF', space: 5 },
+    bottom: { style: 'single', size: 4, color: 'B8D8FF', space: 5 },
+    left: { style: 'single', size: 4, color: 'B8D8FF', space: 5 },
+    right: { style: 'single', size: 4, color: 'B8D8FF', space: 5 },
+  },
+  shading: { type: 'clear', fill: 'E6F3FF' },
+}).children(childrenInline({ marks: 'default' }))
+```
+
+| 方法                     | 用途                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `.children(spec)`        | 设置行内子元素（`ChildrenInlineBuilder`、单个渲染节点构建器，或数组）。块级子元素会在编译时失败。 |
+| `.inheritOverrides(value)` | 当为 `false` 时，跳过该段落的全局 `paragraphOverrides` 组合。默认值为 `true`。                                      |
+| `.toJSON()`              | 线格式 `ElementNode`。                                                                                                         |
+
+规范映射： [Paragraph element prop schema](/conversion/export/docx/custom-nodes-dsl#paragraph)。
+
+`border` 和 `shading` 属性允许自定义节点在 DSL 元素上携带装饰性外观（如边框、提示框、hintbox），而无需单独命名的 `styleOverrides` 样式。另见下面的 [将装饰内联表达](#express-decoration-inline)。
+
+### `textRun(props?)`
+
+行内叶子节点 — 无 `children`。使用 `applyMarks` 继承该规则的 PM 节点 marks。
+
+```ts
+textRun({
+  text: template('@{node.attrs.label}'),
+  color: '4472C4',
+  size: 24, // 半磅
+  highlight: 'cyan',
+  style: 'Hyperlink', // 往返一致性标记
+}).applyMarks('node')
+```
+
+| 方法                     | 用途                                                                                                                                                                                                  |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.applyMarks(policy)`    | `'node'`（继承该规则的 PM 节点 marks）或一个 `marks('node')...` 构建器，用于更细粒度控制。这里明确拒绝使用 `'default'` 和 `'none'` — 见 [Mark policies](#mark-policies)。 |
+| `.inheritOverrides(value)` | 当为 `false` 时，跳过该 run 的 `textRunOverrides`。默认值为 `true`。                                                                                                                                  |
+| `.toJSON()`              | 线格式 `ElementNode`。                                                                                                                                                                           |
+
+规范映射： [TextRun element prop schema](/conversion/export/docx/custom-nodes-dsl#textrun)。
+
+### `externalHyperlink(props)`
+
+包裹一个或多个 `TextRun` 子元素的行内元素。`link` 属性在类型层级是 **必填** 的——`externalHyperlink({})` 会报 TypeScript 错误。
+
+```ts
+externalHyperlink({ link: ref('node.attrs.href') }).children([
+  textRun({ text: ref('node.attrs.label'), style: 'Hyperlink' }) //
+    .applyMarks('node'),
+])
+```
+
+链接值在运行时也会进行验证，必须以 `http`、`https`、`mailto` 或 `tel` 开头（长度上限为 2048 字符）。其他协议会在编译时以 `DOCX_DSL_INVALID_PROP` 报错拒绝。
+
+### `table(props?)` / `tableRow(props?)` / `tableCell(props?)`
+
+`table()` 通过 `.rows(...)` 接受 `TableRow` 构建器（或等价的 `.children([row, row, ...])`）。`tableRow()` 通过 `.children([cell, cell, ...])` 接受 `TableCell` 构建器。`tableCell()` 接受块级内容（段落、嵌套表格）或 `childrenBlock()`。
+
+```ts
+table({
+  width: { size: 100, type: 'pct' },
+  borders: {
+    top: { style: 'single', size: 4, color: 'B8D8FF' },
+    bottom: { style: 'single', size: 4, color: 'B8D8FF' },
+    left: { style: 'single', size: 4, color: 'B8D8FF' },
+    right: { style: 'single', size: 4, color: 'B8D8FF' },
+  },
+}).rows(
+  tableRow().children([
+    tableCell({
+      shading: { type: 'clear', fill: 'FFF1CC' },
+      verticalAlign: 'top',
+    }).children([paragraph().children(childrenInline({ marks: 'default' }))]),
+  ]),
+)
+```
+
+线格式会在内部将 `Table` 的子元素映射到 docx 的 `rows` 构造参数——你无需自己编写 `rows: ...`。
+
+### `pageBreak()`
+
+叶子工厂 — 输出一个包含 docx 分页符 run 的块级段落。若要在段落内部插入行内分页符，请改用 `textRun({ break: 1 })`。
+
+```ts
+docxNode('explicitPageBreak').block().emit(pageBreak()).toJSON()
+```
+
+---
+
+## 子项辅助器
+
+在元素的 `.children(...)` 中，你可以传入以下任一项：
+
+- 一个 **显式的渲染节点构建器数组**（`[paragraph(), table(), ...]`）。
+- 一个 **`childrenX()` 委托**，让运行时遍历 PM 节点的 `content` 数组，并通过标准转换器分发每个子节点。
+
+| 辅助器                  | 放置位置                                                     | 传输格式                                                          |
+| ----------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `childrenInline(opts?)` | `paragraph().children(...)`, `externalHyperlink().children(...)` | `{ "$children": { "as": "inline", "marks"?: ... } }`             |
+| `childrenBlock(opts?)`  | `tableCell().children(...)`                                  | `{ "$children": { "as": "block", "wrapInlineInParagraph"?: bool } }` |
+| `childrenTableRow()`    | `table().children(...)`（`.rows(...)` 的同义形式）            | `{ "$children": { "as": "table-row" } }`                          |
+| `childrenTableCell()`   | `tableRow().children(...)`                                   | `{ "$children": { "as": "table-cell" } }`                         |
+
+```ts
+// 行内标记策略 — 对每个文本子节点运行标准标记管线。
+paragraph({ style: 'Body' }).children(childrenInline({ marks: 'default' }))
+
+// 带行内包裹的块级委托 — 将松散的行内子节点缓冲到默认段落中，
+// 这样表格单元格始终只包含块级内容。
+tableCell().children(childrenBlock({ wrapInlineInParagraph: true }))
+```
+
+`childrenInline()` 接受一个 `marks` 选项，该选项可以是 `MarkPolicy`（`'default'`、`'none'`、`'node'`）或 `marks(...)` 构建器链 — 参见 [标记策略](#mark-policies)。
+
+---
+
+## 渲染树原语
+
+除了元素之外，还有四种渲染树形状可用于组合动态输出。
+
+### `iff({ test, then, else? })`
+
+结构化条件判断。`else` 默认值为 `null`（不输出任何内容）。
+
+```ts
+iff({
+  test: ref('node.attrs.featured'),
+  then: paragraph({ style: 'Featured' }).children(childrenInline({ marks: 'default' })),
+  else: paragraph().children(childrenInline({ marks: 'default' })),
+})
+```
+
+`test` 会使用 v1 的真值规则强制转换为布尔值——`false`、`null`、`undefined`、`0`、`""` 为假值，其余都为真值。
+
+### `switch_({ on, cases, default? })`
+
+多路条件判断。查找时会与 `cases` 的键进行精确匹配。`on` 在运行时必须解析为字符串。
+
+```ts
+switch_({
+  on: ref('node.attrs.variant'),
+  cases: {
+    warning: paragraph({ style: 'CalloutWarning' }),
+    info: paragraph({ style: 'CalloutInfo' }),
+  },
+  default: paragraph({ style: 'Callout' }),
+})
+```
+
+末尾下划线是因为 `switch` 在 JavaScript 中是保留字。另有一种用于选择属性值的 **值形式** `switchValue(...)` —— 参见下方的 [值表达式](#value-expressions)。
+
+### `fragment(...children)`
+
+输出多个同级渲染节点。传给元素 `.children([...])` 的裸数组也能完成同样的工作；`fragment` 适用于“分片”本身就是整个输出的情况。
+
+```ts
+docxNode('keyValue')
+  .block()
+  .emit(
+    fragment(
+      paragraph({ style: 'Key' }).children([textRun({ text: ref('node.attrs.key') })]),
+      paragraph({ style: 'Value' }).children(childrenInline({ marks: 'default' })),
+    ),
+  )
+  .toJSON()
+```
+
+### `textOp(value, opts?)`
+
+用于从一个值表达式输出单个文本运行的便捷写法。在 v1 中等价于 `{ element: 'TextRun', props: { text: value } }` 并应用标记策略——但书写更简洁。
+
+```ts
+textOp(template('@{node.attrs.label}'))
+textOp(ref('node.attrs.title'), { default: '(未命名)', marks: 'none' })
+```
+
+---
+
+## 值表达式
+
+凡是接受属性值（或 `$text`、`$if.test`、`$switch.on`、`$op.args`）的地方，你都可以传入字面量 **或** 下面这些带类型的表达式之一。
+
+### `ref(path, opts?)`
+
+从源 PM 节点读取一个值。允许的路径：`node`、`node.type`、`node.attrs`、`node.attrs.<key>`、`node.text`、`node.textContent`。其他路径会以 [`DOCX_DSL_INVALID_REF`](/conversion/export/docx/custom-nodes-dsl#error-codes) 报错拒绝。
+
+```ts
+ref('node.attrs.color')
+ref('node.attrs.color', { default: '4472C4', transform: 'hexNoHash' })
+ref('node.textContent')
+```
+
+`transform` 选项可以接受单个 `TransformName` 或数组。参见 JSON DSL 参考页中的 [转换表](/conversion/export/docx/custom-nodes-dsl#transforms)。
+
+### `template(s)`
+
+字符串插值——始终返回字符串。替换项使用 `{path}`（与 `ref` 相同的路径语法）；`{{` 和 `}}` 用于转义字面量花括号。
+
+```ts
+template('@{node.attrs.label}') //        →  '@alice'
+template('size: {node.attrs.size}px') //  →  'size: 24px'
+template('{{escaped}} braces') //          →  '{escaped} braces'
+```
+
+解析后的长度上限为 `maxTemplateLength`（默认 2 000）。超过上限会在运行时以 `DOCX_DSL_RESOURCE_LIMIT` 拒绝。
+
+### `op(name, ...args)`
+
+类型化计算。操作集合是封闭的，并且参数个数严格受限——参见 [op 参数个数表](/conversion/export/docx/custom-nodes-dsl#op---typed-compute)。
+
+```ts
+op('mul', ref('node.attrs.size'), 2)
+op('coalesce', ref('node.attrs.color'), ref('node.attrs.fallbackColor'), '000000')
+op('and', ref('node.attrs.visible'), op('not', ref('node.attrs.hidden')))
+```
+
+没有 `concat`——字符串请使用 `template(...)`。也没有隐式数值转换——`op('add', '3', 1)` 会被拒绝。
+
+### `unit(name, value)`
+
+连接到一个封闭列表的单位 / 转换辅助器，其底层使用的正是转换器内部的同一组函数。结果类型与该辅助器的签名一致。
+
+```ts
+unit('pixelsToHalfPoints', 16) //                          →  24（半磅）
+unit('pointsToTwips', 12) //                               →  240（twips）
+unit('normalizeColor', ref('node.attrs.backgroundColor')) //→  '4F46E5'
+```
+
+完整列表：[单位分发表](/conversion/export/docx/custom-nodes-dsl#unit---unit--coercion-helper)。
+
+### `switchValue({ on, cases, default? })`
+
+值形式的 `$switch`——通过字符串匹配来选择一个属性值（而不是渲染节点）。
+
+```ts
+paragraph({
+  style: switchValue({
+    on: ref('node.attrs.variant'),
+    cases: { warning: 'CalloutWarning', info: 'CalloutInfo' },
+    default: 'Callout',
+  }),
+})
+```
+
+校验器会根据周围上下文来区分值形式与渲染树形式：`switchValue` 只能用于属性值中，而 `switch_` 只能用于 `RenderNode` 插槽中。
+
+---
+
+## 标记策略
+
+`marks(mode)` 构建器会创建一个可链式调用的 [`MarkPolicy`](/conversion/export/docx/custom-nodes-dsl#marks-system) 对象。适用于你需要比字符串简写更精细控制的场景。
+
+```ts
+import { childrenInline, marks } from '@tiptap-pro/extension-export-docx/dsl'
+
+childrenInline({
+  marks: marks('default') //
+    .disable('bold', 'italic')
+    .overrides({
+      underline: { props: { color: 'EA580C' } },
+      highlight: { replace: true, props: { color: 'FFE066' } },
+    }),
+})
+```
+
+| 方法                                             | 用途                                                                                                                                          |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `marks(mode)`                                    | 开始构建器。`mode` 为 `'default'`（对子节点自身的标记应用标准管线）或 `'node'`（使用规则的 PM 节点标记）。 |
+| `.disable(...marks)`                             | 完全跳过这些标记。它们的标准映射不会运行，任何匹配的 `overrides` 条目也会被忽略。                                                               |
+| `.overrides({ markType: { props?, replace? } })` | 按标记进行调整。`replace: true` 会抑制该标记的标准映射；`props` 会在其基础上合并。                                                                 |
+| `.toJSON()`                                      | 生成传输格式的 `MarkPolicyObject`。容器辅助器会自动为你调用它。                                                                                |
+
+### `applyMarks` 的适用范围更窄
+
+`textRun().applyMarks(...)` 和 `externalHyperlink().applyMarks(...)` 只接受 **`'node'`** 或 `marks('node')...` 构建器——这里的传输格式会拒绝 `'default'` 和 `'none'`，因为它们只适用于子节点标记。
+
+构建器会在运行时强制执行这一点：将 `marks('default')` 传给 `applyMarks` 时会抛出有帮助的错误，而不是生成一个日后会导致 DSL 编译器失败的负载。
+
+```ts
+textRun().applyMarks('node') //                       ✓
+textRun().applyMarks(marks('node').disable('code')) // ✓
+textRun().applyMarks(marks('default')) //              ✗ 在构建时抛出
+```
+
+---
+
+## 类型系统保证
+
+构建器的 TypeScript 接口会在编辑期强制执行运行时本应捕获的每一条包含规则。以下全部都是编译错误：
+
+```ts
+// 段落只接受行内子节点。
+paragraph().children(childrenBlock())
+//                  ^^^^^^^^^^^^^^^^
+// Type 'ChildrenBlockBuilder' is not assignable to type 'ParagraphChildSpec'.
+
+// Table.rows 需要 TableRow 构建器。
+table().rows(paragraph())
+//           ^^^^^^^^^^^
+// Type 'ParagraphBuilder' is not assignable to type 'TableRowBuilder'.
+
+// TableRow 的子节点必须是 TableCell 构建器。
+tableRow().children([tableRow()])
+//                   ^^^^^^^^^^
+// Type 'TableRowBuilder' is not assignable to type 'TableCellBuilder'.
+
+// TableCell 的子节点是块级；会拒绝行内子节点委托。
+tableCell().children(childrenInline())
+//                   ^^^^^^^^^^^^^^^^
+
+// TextRun 是叶子节点——没有子节点。
+textRun({ text: 'hi' }).children
+//                       ^^^^^^^^
+// Property 'children' does not exist on type 'TextRunBuilder'.
+
+// externalHyperlink.link 是必需的。
+externalHyperlink({})
+//                ^^
+// Property 'link' is missing in type '{}' but required in type 'ExternalHyperlinkProps'.
+
+// applyMarks 拒绝 'default' / 'none'。
+textRun().applyMarks('default')
+//                   ^^^^^^^^^
+// Argument of type '"default"' is not assignable to parameter of type 'ApplyMarksPolicy | MarkPolicyBuilder'.
+```
+
+这些与运行时的 [`DOCX_DSL_INVALID_CONTEXT`](/conversion/export/docx/custom-nodes-dsl#error-codes) 规则一致——限制相同，只是更早暴露。
+
+## 内联表达装饰
+
+`styleOverrides` 的一种常见模式是：先声明一个带边框和底纹的命名 `Hintbox` 段落样式，然后在 DSL 规则中通过 `style: 'Hintbox'` 引用它。现在，`paragraph()` 构建器直接暴露了 `border` 和 `shading` 属性，因此装饰可以直接内联在元素上——不再需要 `styleOverrides` 块。
+
+命名样式标签仍然有作用：**往返一致性**。无论 `styles.xml` 中是否声明了 `Hintbox`，DOCX 写入器都会输出 `<w:pStyle w:val="Hintbox"/>`。导入端会读取该 pStyle，以重建匹配的自定义节点。
+
+```ts
+docxNode('hintbox')
+  .block()
+  .emit(
+    paragraph({
+      // 往返一致性标记。
+      style: 'Hintbox',
+      // 装饰在这里传递——不需要 styleOverrides。
+      spacing: { before: 240, after: 240 },
+      border: {
+        top: { style: 'single', size: 1, color: 'B8D8FF', space: 5 },
+        bottom: { style: 'single', size: 1, color: 'B8D8FF', space: 5 },
+        left: { style: 'single', size: 1, color: 'B8D8FF', space: 5 },
+        right: { style: 'single', size: 1, color: 'B8D8FF', space: 5 },
+      },
+      // `clear` 底纹让 `fill` 作为背景透出来。
+      // `solid` 会渲染 100% 的前景（默认 `auto` → 黑色）
+      // 并完全遮住 fill。见下方的 OOXML 陷阱。
+      shading: { type: 'clear', fill: 'E6F3FF' },
+    }).children(childrenInline({ marks: 'default' })),
+  )
+  .toJSON()
+```
+
+这与 [`cssStyles.extractFromDocument`](/conversion/export/docx/css-to-docx) 自然搭配——让 CSS 处理标题、正文字体、列表和其他通用选择器；让 DSL 处理任何绑定到自定义节点类型的内容。
+
+<Callout variant="warning" title="OOXML 陷阱 — `solid` 底纹会绘制前景">
+  在 OOXML 中，带有 `w:val="solid"` 的 `<w:shd>` 会以 100% 覆盖率绘制**前景**。`fill`
+  属性是*背景*（位于前景后面）。当 `color` 未设置时，前景默认为 `auto`，Word 会将其渲染为**黑色**——从而完全
+  遮住 `fill`。如果要设置段落背景色，请使用 **`type: 'clear'`**（空图案，`fill` 可透出）。在 JSON DSL 中也有同样的陷阱——
+  这是 OOXML 语义问题，不是构建器的 bug。
+</Callout>
+
+---
+
+## 示例详解
+
+以下五个示例与 [JSON DSL 参考页](/conversion/export/docx/custom-nodes-dsl#putting-it-together--worked-examples) 中出现的完全相同，这里通过构建器来编写。
+
+### Hintbox — 带内联装饰的块级段落
+
+```ts
+docxNode('hintbox')
+  .block()
+  .emit(
+    paragraph({
+      style: 'Hintbox',
+      spacing: { before: 240, after: 240 },
+      border: {
+        top: { style: 'single', size: 1, color: 'B8D8FF', space: 5 },
+        bottom: { style: 'single', size: 1, color: 'B8D8FF', space: 5 },
+        left: { style: 'single', size: 1, color: 'B8D8FF', space: 5 },
+        right: { style: 'single', size: 1, color: 'B8D8FF', space: 5 },
+      },
+      shading: { type: 'clear', fill: 'E6F3FF' },
+    }).children(childrenInline({ marks: 'default' })),
+  )
+  .toJSON()
+```
+
+### Mention — 带模板文本和继承标记的内联 TextRun
+
+```ts
+docxNode('mention')
+  .inline()
+  .emit(
+    textRun({
+      text: template('@{node.attrs.label}'),
+      color: ref('node.attrs.color', { default: '4472C4', transform: 'hexNoHash' }),
+    }).applyMarks('node'),
+  )
+  .toJSON()
+```
+
+加粗的 mention 会渲染为 `new TextRun({ text: '@alice', color: '4472C4', bold: true })`。
+
+### Callout — 单元格表格，带属性驱动的底纹和切换样式
+
+```ts
+docxNode('calloutBox')
+  .block()
+  .emit(
+    table({
+      width: { size: 100, type: 'pct' },
+      borders: {
+        top: { style: 'single', size: 4, color: 'B8D8FF' },
+        bottom: { style: 'single', size: 4, color: 'B8D8FF' },
+        left: { style: 'single', size: 4, color: 'B8D8FF' },
+        right: { style: 'single', size: 4, color: 'B8D8FF' },
+      },
+    }).rows(
+      tableRow().children([
+        tableCell({
+          shading: {
+            type: 'clear',
+            fill: unit('normalizeColor', ref('node.attrs.backgroundColor', { default: 'E6F3FF' })),
+          },
+          margins: {
+            top: unit('pointsToTwips', 8),
+            bottom: unit('pointsToTwips', 8),
+            left: unit('pointsToTwips', 10),
+            right: unit('pointsToTwips', 10),
+          },
+        }).children([
+          paragraph({
+            style: switchValue({
+              on: ref('node.attrs.variant'),
+              cases: { warning: 'CalloutWarning', info: 'CalloutInfo' },
+              default: 'Callout',
+            }),
+          }).children(childrenInline({ marks: 'default' })),
+        ]),
+      ]),
+    ),
+  )
+  .toJSON()
+```
+
+### Code block — 抑制冲突子级标记的段落
+
+```ts
+docxNode('codeBlock')
+  .block()
+  .emit(
+    paragraph({ style: 'Code' }).children(
+      childrenInline({ marks: marks('default').disable('bold', 'italic') }),
+    ),
+  )
+  .toJSON()
+```
+
+### 自定义链接 — 包裹 TextRun 的内联 ExternalHyperlink
+
+```ts
+docxNode('customLink')
+  .inline()
+  .emit(
+    externalHyperlink({ link: ref('node.attrs.href') }).children([
+      textRun({ text: ref('node.attrs.label'), style: 'Hyperlink' }) //
+        .applyMarks('node'),
+    ]),
+  )
+  .toJSON()
+```
+
+---
+
+## 并排对比：构建器 vs 手写 JSON
+
+构建器生成的 JSON 在传输层面是等价的。下面是同一个 hintbox 规则的两种写法：
+
+**构建器**
+
+```ts
+docxNode('hintbox')
+  .block()
+  .emit(
+    paragraph({ style: 'Hintbox' }) //
+      .children(childrenInline({ marks: 'default' })),
+  )
+  .toJSON()
+```
+
+**JSON**
+
+```jsonc
+{
+  "type": "hintbox",
+  "nodeKind": "block",
+  "render": {
+    "emit": {
+      "element": "Paragraph",
+      "props": { "style": "Hintbox" },
+      "children": { "$children": { "as": "inline", "marks": "default" } },
+    },
+  },
+}
+```
+
+`builder.toJSON()` 和手写对象是深度相等的——这一点已经通过包自身的对等性测试验证。请选择最适合你编写环境的方式；传输格式是相同的。
+
+---
+
+## 与 `cssStyles` 的组合
+
+该构建器与 [`cssStyles`](/conversion/export/docx/css-to-docx) 配合得很好，可以清晰地分离职责：
+
+- **CSS** 描述通用选择器样式——标题、段落、列表、引用块——这些本就存在于编辑器的样式表中。
+- **DSL** 描述自定义节点渲染——任何需要 Tiptap 节点类型、且无法用通用 CSS 选择器表达的内容。
+
+```ts
+ExportDocx.configure({
+  cssStyles: {
+    extractFromDocument: true, // 从当前样式表中提取 .tiptap 规则
+    baseFontSize: 16,
+  },
+  customNodeDsl: {
+    dslVersion: '1.0',
+    nodes: [
+      docxNode('hintbox')
+        .block()
+        .emit(
+          paragraph({
+            style: 'Hintbox', // 往返一致性
+            border: { top: { style: 'single', size: 1, color: 'B8D8FF', space: 5 } /* ... */ },
+            shading: { type: 'clear', fill: 'E6F3FF' },
+          }).children(childrenInline({ marks: 'default' })),
+        )
+        .toJSON(),
+    ],
+  },
+})
+```
+
+采用这种方式后，你可以完全移除 `styleOverrides` 块。随附的 `ExportDocxCustomNodeDslBuilder` 演示正是使用这一模式。
+
+---
+
+## 冲突策略和运行时错误
+
+该构建器只是一个轻量的编写层——[JSON DSL 参考页](/conversion/export/docx/custom-nodes-dsl#errors) 中描述的所有运行时约束都同样适用：
+
+- 当同一个 `type` 同时出现在两个 API 中时，基于函数的 [`customNodes`](/conversion/export/docx/custom-nodes) 会优先生效（每次导出调用中，每个冲突类型只记录一次警告）。
+- DSL 错误会返回带有 `code` + `dslPath` +（对于运行时错误）`nodePath` + `nodeType` 的 [结构化封装](/conversion/export/docx/custom-nodes-dsl#error-responses-rest)。
+- [资源上限](/conversion/export/docx/custom-nodes-dsl#resource-limits) 会在编译期和运行时强制执行——可通过 `exportDocx` 上的 `customNodeDslLimits` 以及 REST 接口上的 `DOCX_DSL_MAX_*` 环境变量进行调整。
+
+构建器额外增加了**一项**运行时检查：将 `marks('default')` 构建器传给 `applyMarks` 时，会抛出清晰的错误，而不是生成一个稍后会以 `DOCX_DSL_INVALID_SHAPE` 失败的负载。其余所有内容都会直接流向标准 DSL 编译器。
+
+---
+
+## TypeScript 参考
+
+所有构建器、辅助函数以及属性形状接口都从 `@tiptap-pro/extension-export-docx/dsl` 导出，供直接复用：
+
+```ts
+import type {
+  // 顶层规则
+  CustomNodeRuleBuilder,
+
+  // 元素构建器
+  ParagraphBuilder,
+  TextRunBuilder,
+  ExternalHyperlinkBuilder,
+  TableBuilder,
+  TableRowBuilder,
+  TableCellBuilder,
+
+  // 子节点辅助
+  ChildrenInlineBuilder,
+  ChildrenBlockBuilder,
+  ChildrenTableRowBuilder,
+  ChildrenTableCellBuilder,
+
+  // 渲染节点抽象
+  RenderNodeBuilder,
+
+  // 标记策略链
+  MarkPolicyBuilder,
+
+  // 各元素属性接口
+  ParagraphProps,
+  TextRunProps,
+  ExternalHyperlinkProps,
+  TableProps,
+  TableRowProps,
+  TableCellProps,
+
+  // 通用形状
+  BorderSide,
+  Prop,
+} from '@tiptap-pro/extension-export-docx/dsl'
+```
+
+`Prop<T>` 是一个辅助类型，使每个叶子节点都可以接受字面量值（`number`、`string` 等）或 `ValueExpr`（`ref(...)`、`template(...)`、`op(...)` 等）。
+
+---
+
+## 相关内容
+
+- [自定义节点 DSL（JSON 参考）](/conversion/export/docx/custom-nodes-dsl) — 对传输格式的完整规范性描述。构建器只是其语法糖；有关运行时语义、错误代码和资源限制，请查阅参考文档。
+- [基于函数的自定义节点](/conversion/export/docx/custom-nodes) — 仅用于浏览器内自定义的 JavaScript 回调变体。
+- [CSS 转 DOCX](/conversion/export/docx/css-to-docx) — 与构建器自然配合，用于通用样式与自定义样式的分离。
+- [样式覆盖](/conversion/export/docx/styles) — 手动命名样式声明。对于希望暴露给 Word 样式选择器的字符样式 / 段落样式仍然有用；但不再只是为了给自定义节点加装饰所必需。
+- [DOCX REST API](/conversion/export/docx/rest-api) — 相同的 `customNodeDsl` 负载，通过 HTTP 发送。

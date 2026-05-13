@@ -6,11 +6,12 @@ tags:
   - type: version
     label: v0.13.0
 meta:
-    title: DOCX 中的自定义节点 | Tiptap 转换
-    description: 了解如何使用导出扩展将自定义节点导出到 DOCX（Word）文件。
-    category: 转换
+  title: 将自定义节点导出为 DOCX | Tiptap Conversion
+  description: 了解如何使用 Export 扩展将自定义节点导出为 DOCX（Word）文件。
+  category: Conversion
 ---
 
+import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
@@ -19,19 +20,23 @@ import CustomNodeConversionGuide from '../_shared/_custom-node-conversion-guide.
 <EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
 
 <Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账号中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 从私有注册表安装">
-        要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 进行操作，先对 Tiptap 的私有 npm 注册表进行身份验证。
-    </RequirementItem>
+  <RequirementItem label="1. 激活试用或订阅">
+    在您的账户中开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Start 套餐](https://cloud.tiptap.dev/v2/billing)。
+  </RequirementItem>
+  <RequirementItem label="2. 从私有注册表安装">
+    要安装此 frontend 扩展，请按照 [设置指南](/guides/pro-extensions) 通过身份验证以访问 Tiptap 的私有 npm 注册表。
+  </RequirementItem>
 </Requirements>
 
 `@tiptap-pro/extension-export-docx` 和 `@tiptap-pro/extension-import-docx` 扩展的最大优点之一是能够定义您 Tiptap 模式中的自定义节点应如何在 DOCX 中呈现。
 
 这使您能够在导出的 Word 文件中保留特定于应用程序的内容。
 
-## 导出自定义节点到 .docx
+<Callout variant="hint" title="寻找 REST 兼容版本？">
+  函数无法通过 HTTP 序列化，因此本页上的函数 API 仅在编辑器扩展内部有效。对于一个基于 JSON、可通过 REST 传输并在两端运行的等价方案，请参见 [自定义节点 DSL](/conversion/export/docx/custom-nodes-dsl)。
+</Callout>
+
+## 将自定义节点导出为 .docx
 
 <CodeDemo isPro path="/Extensions/ExportDocxCustomNode" />
 
@@ -58,7 +63,7 @@ const editor = new Editor({
   extensions: [
     // 其他扩展 ...
     ExportDocx.configure({
-      onCompleteExport: result => {
+      onCompleteExport: (result) => {
         setIsLoading(false)
         const blob = new Blob([result], {
           type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -74,15 +79,15 @@ const editor = new Editor({
       customNodes: [
         {
           type: 'hintbox',
-          render: node => {
-            // 在这里我们定义自定义 Hintbox 节点在 DOCX 中的渲染方式。
-            // 根据文档，我们应该返回一个 DOCX 节点
-            // 这要么是一个段落，要么是一个段落的数组，或者是一个表格。
+          render: (node) => {
+            // 这里我们定义自定义 Hintbox 节点应如何在 DOCX 中渲染。
+            // 根据文档，我们应返回一个 Docx 节点，
+            // 它可以是 Paragraph、Paragraph 数组、Table、TextRun、ExternalHyperlink 或 null。
             return new Docx.Paragraph({
-              children: node.content.map(content => convertTextNode(content)),
-              style: 'Hintbox', // 在这里我们将自定义样式应用于段落节点。
+              children: node.content.map((content) => convertTextNode(content)),
+              style: 'Hintbox', // 这里我们将自定义样式应用到 Paragraph 节点。
             })
-            },
+          },
         },
       ], // 自定义节点
       styleOverrides: {
@@ -129,10 +134,7 @@ const editor = new Editor({
 然后，在应用程序的后续阶段，您可以将编辑器内容导出为 `DOCX` 文件：
 
 ```ts
-editor
-  .chain()
-  .exportDocx()
-  .run()
+editor.chain().exportDocx().run()
 ```
 
 您可以在 `render` 函数中使用 `Docx` 库类（`Paragraph`、`TextRun`、`Table` 等）构建任何支持的 `DOCX` 元素，这些类是通过从 `@tiptap-pro/extension-export-docx` 包的 `Docx` 导入提供的。
