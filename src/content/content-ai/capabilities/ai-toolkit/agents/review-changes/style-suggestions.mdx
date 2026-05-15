@@ -6,7 +6,7 @@ meta:
   category: 内容 AI
 ---
 
-When the AI makes changes to the document, you can display them as [suggestions](/content-ai/capabilities/ai-toolkit/api-reference/suggestions) in the editor. In this guide, you'll learn how to customize the suggestions' appearance by modifying their styles and displaying custom elements like menus inside them.
+当 AI 对文档进行更改时，您可以在编辑器中将这些更改显示为[建议](/content-ai/capabilities/ai-toolkit/api-reference/suggestions)。在本指南中，您将学习如何通过修改样式来自定义建议的外观，并在其中显示自定义元素（例如菜单）。
 
 ## 为建议添加 CSS 样式
 
@@ -17,7 +17,7 @@ When the AI makes changes to the document, you can display them as [suggestions]
 - `.tiptap-ai-suggestion--change-group`：当建议是多个更改组成的组而非单个更改时应用。
 - `.tiptap-ai-suggestion-sub-change`：应用于更改组中的单个子更改。
 - `.tiptap-ai-suggestion-diff`：应用于显示在建议范围旁边的差异部件。
-- `.tiptap-ai-suggestion-diff--selected`：当光标位于建议范围内，应用于差异部件。
+- `.tiptap-ai-suggestion-diff--selected`：当光标位于建议范围内时，应用于差异部件。
 - `.tiptap-ai-suggestion-diff--change-group`：当差异部件是多个更改组成的组而非单个更改时应用。
 - `.tiptap-ai-suggestion-diff-sub-change`：应用于差异更改组中的单个子更改。
 
@@ -29,7 +29,7 @@ When the AI makes changes to the document, you can display them as [suggestions]
 
 #### 预览模式
 
-Use these styles in [Preview mode](/content-ai/capabilities/ai-toolkit/agents/review-changes#two-types-of-suggestions), to preview changes before they are inserted into the document.
+在[预览模式](/content-ai/capabilities/ai-toolkit/agents/review-changes#two-types-of-suggestions)中使用这些样式，以便在更改插入文档之前预览它们。
 
 ```css
 /* 将删除文字高亮为红色 */
@@ -81,7 +81,7 @@ Use these styles in [Preview mode](/content-ai/capabilities/ai-toolkit/agents/re
 
 #### 审阅模式 / 文档比较
 
-Use these styles in [Review mode](/content-ai/capabilities/ai-toolkit/agents/review-changes#two-types-of-suggestions), to review changes after inserting them in the document.
+在[审阅模式](/content-ai/capabilities/ai-toolkit/agents/review-changes#two-types-of-suggestions)中使用这些样式，用于在文档中插入后审阅更改。
 
 显示由[文档比较](/content-ai/capabilities/ai-toolkit/advanced-guides/compare-documents)功能生成的建议时也使用这些样式。
 
@@ -133,7 +133,27 @@ Use these styles in [Review mode](/content-ai/capabilities/ai-toolkit/agents/rev
 }
 ```
 
-## 在建议内渲染 React 组件
+## 在建议预览中将自定义节点视图设为只读
+
+当建议预览渲染自定义节点视图时，这些节点视图会接收到标记它们属于 AI 工具包建议的装饰。使用 `isAiToolkitSuggestionNodeView` 来检测该状态，并禁用节点视图中的编辑控件。
+
+```tsx
+import { NodeViewWrapper } from '@tiptap/react'
+import { isAiToolkitSuggestionNodeView } from '@tiptap-pro/ai-toolkit'
+
+function MathBlockNodeView({ decorations }) {
+  const isAiToolkitSuggestion = isAiToolkitSuggestionNodeView(decorations)
+
+  return (
+    <NodeViewWrapper contentEditable={!isAiToolkitSuggestion}>
+      {!isAiToolkitSuggestion ? <button>Edit equation</button> : null}
+      {/* 在此处渲染节点视图内容。 */}
+    </NodeViewWrapper>
+  )
+}
+```
+
+## 在建议中渲染 React 组件
 
 您可以使用 `renderDecorations` 选项，结合[React 门户](https://react.dev/reference/react-dom/createPortal)，在建议内显示 React 组件。
 
@@ -288,4 +308,4 @@ return (
 
 ## 后续步骤
 
-- Learn more about suggestions in the [API reference](/content-ai/capabilities/ai-toolkit/api-reference/suggestions). See the `displayOptions` parameter for all the customization options.
+- 在[API 参考](/content-ai/capabilities/ai-toolkit/api-reference/suggestions)中了解更多有关建议的信息。请查看 `displayOptions` 参数以了解所有自定义选项。

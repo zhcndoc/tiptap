@@ -110,6 +110,35 @@ ExportDoc.configure({
   对 `pageMargins.header` 和 `pageMargins.footer` 的端到端支持，要求 Tiptap convert 服务版本能够接受这些字段，并且提供更新后的 `@tiptap-pro/extension-export-docx`。在较旧的 convert 服务版本中，这些值会被忽略，并使用 Word 的默认值。
 </Callout>
 
+## 页面背景色
+
+使用 `pageColor` 选项为导出的 DOC 的每一页设置背景色。
+
+### 支持的格式
+
+| 格式           | 示例                                                      |
+| -------------- | --------------------------------------------------------- |
+| Hex（6 位）    | `"#ff0000"`                                               |
+| Hex（3 位）    | `"#f00"`                                                  |
+| `rgb()`       | `"rgb(255, 0, 0)"`                                        |
+| `rgba()`      | `"rgba(255, 0, 0, 0.5)"`                                  |
+| 命名颜色       | 常见的 CSS 命名颜色（`"red"`、`"blue"`、`"green"`、…） |
+
+传入 `"transparent"`，或将 `pageColor` 留空以省略页面颜色。
+
+```js
+ExportDoc.configure({
+  token: 'YOUR_TOKEN',
+  appId: 'YOUR_APP_ID',
+  pageColor: '#fff8dc',
+})
+```
+
+<Callout title="Word 默认不会打印页面背景" variant="hint">
+  在 Microsoft Word 中，页面背景会显示在屏幕上，但在打印或导出为 PDF 时**不会**包含在内。要使其在打印输出或 PDF 导出中可见，读者必须在 Word 中启用
+  **文件 → 选项 → 显示 → 打印背景色和图像**。
+</Callout>
+
 ## 完整示例
 
 以下是一个完整示例，展示如何使用 DOC 导出扩展配置自定义页面布局：
@@ -135,6 +164,8 @@ const editor = new Editor({
         left: '2cm',
         right: '2cm',
       },
+      // 页面背景色
+      pageColor: '#fff8dc',
     }),
     // 其他扩展...
   ],

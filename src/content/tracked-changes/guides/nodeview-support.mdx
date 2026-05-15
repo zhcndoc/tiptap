@@ -1,0 +1,168 @@
+---
+title: 使用带跟踪更改的 NodeViews
+tags:
+  - type: addon
+meta:
+  title: NodeView 支持 | Tiptap 跟踪更改文档
+  description: 了解如何正确地将 NodeViews 与跟踪更改集成，以便为自定义组件启用建议跟踪。
+  category: 跟踪更改
+---
+
+NodeViews 允许你在编辑器中为特定的节点类型渲染自定义组件。将 NodeViews 与跟踪更改一起使用时，你需要确保建议元数据被正确传递到组件的 DOM 元素中。
+
+## 什么是 NodeViews？
+
+NodeViews 是自定义的 React、Vue 或原生 JavaScript 组件，它们会替换特定节点类型的默认渲染。它们通常用于：
+
+- 图片和媒体
+- 表格
+- 自定义块或卡片
+- 嵌入内容和交互式内容
+- 任何需要自定义渲染逻辑的节点类型
+
+## 为什么 NodeViews 需要特殊处理
+
+启用跟踪更改后，扩展会添加元数据来跟踪修改。对于文本内容，这会通过 mark 自动完成。然而，对于 NodeViews，建议元数据必须显式传递给你的组件。
+
+如果处理不当，建议属性将无法到达组件的 DOM，这意味着：
+- 建议不会被视觉高亮
+- 建议查询可能找不到你的 NodeView 更改
+- 建议跟踪将不完整
+
+## 问题：缺少建议属性
+
+跟踪更改会直接将建议元数据存储在节点的属性（`node.attrs`）上。你的 NodeView 需要将这些属性映射到 `data-suggestion-*` DOM 属性，以便跟踪系统能够找到它们。
+
+**错误示例（不会跟踪建议）：**
+
+```jsx
+function ImageNodeView({ node }) {
+  return (
+    <img src={node.attrs.src} alt={node.attrs.alt} />
+  )
+  // 问题：node.attrs 中的建议属性没有出现在 DOM 上——建议丢失
+}
+```
+
+## 解决方案：getSuggestionHTMLAttributes()
+
+`getSuggestionHTMLAttributes()` 工具会直接从实时的 ProseMirror `node` 中读取建议数据，并返回对应的 `data-suggestion-*` DOM 属性，可安全地展开到你的组件上。
+
+传入 `node`，不要传入 `HTMLAttributes`。`HTMLAttributes` 这个 NodeView 属性是在 NodeView 创建时计算一次的，之后不会更新，因此当建议状态变化时它会过时。`node` 属性始终反映当前状态。
+
+```jsx
+import { getSuggestionHTMLAttributes } from '@tiptap-pro/extension-tracked-changes'
+
+function ImageNodeView({ node }) {
+  const suggestionAttrs = getSuggestionHTMLAttributes(node)
+
+  return (
+    <img
+      src={node.attrs.src}
+      alt={node.attrs.alt}
+      {...suggestionAttrs}
+    />
+  )
+}
+```
+
+## 实现示例
+
+### 简单图片 NodeView
+
+```jsx
+import { getSuggestionHTMLAttributes } from '@tiptap-pro/extension-tracked-changes'
+
+function ImageNodeView({ node }) {
+  const suggestionAttrs = getSuggestionHTMLAttributes(node)
+
+  return (
+    <figure {...suggestionAttrs}>
+      <img
+        src={node.attrs.src}
+        alt={node.attrs.alt}
+        className="editor-image"
+      />
+      {node.attrs.caption && <figcaption>{node.attrs.caption}</figcaption>}
+    </figure>
+  )
+}
+```
+
+### 自定义块 NodeView
+
+```jsx
+import { getSuggestionHTMLAttributes } from '@tiptap-pro/extension-tracked-changes'
+
+function CustomBlockNodeView({ node }) {
+  const suggestionAttrs = getSuggestionHTMLAttributes(node)
+
+  return (
+    <div
+      {...suggestionAttrs}
+      className="custom-block"
+      style={{
+        backgroundColor: node.attrs.bgColor,
+        padding: '16px',
+      }}
+    >
+      <h3>{node.attrs.title}</h3>
+      <p>{node.attrs.description}</p>
+    </div>
+  )
+}
+```
+
+### 带 NodeView 的表格单元格
+
+```jsx
+import { getSuggestionHTMLAttributes } from '@tiptap-pro/extension-tracked-changes'
+
+function TableCellNodeView({ node }) {
+  const suggestionAttrs = getSuggestionHTMLAttributes(node)
+
+  return (
+    <td {...suggestionAttrs}>
+      {node.content}
+    </td>
+  )
+}
+```
+
+## 最佳实践
+
+**始终使用 `getSuggestionHTMLAttributes(node)`。** 直接从节点派生属性可确保它们随着建议状态变化而保持同步——例如，当建议被接受、拒绝，或通过协作收到远程更新时。
+
+**展开到根元素上。** 将建议属性放在 NodeView 最外层的 DOM 元素上，以便整个组件作为一个整体被跟踪。
+
+**不要将 `HTMLAttributes` 传给该工具。** `HTMLAttributes` 这个 NodeView 属性是 NodeView 首次创建时计算出的快照。后续渲染不会更新，因此在任何状态变化后，使用它都会产生过时的 `data-suggestion-*` 属性。
+
+**测试你的实现。** 实现 NodeView 后，验证以下内容：
+- 组件在有无建议时都能正确渲染
+- 建议能被视觉高亮（通过你的 CSS）
+- 接受/拒绝建议的功能按预期工作
+- [建议查询](/tracked-changes/api-reference/utilities) 能找到你的 NodeView 更改
+
+## 查询 NodeView 建议
+
+一旦正确集成，你就可以像查询文本建议一样查询 NodeView 上的建议：
+
+```js
+import { findSuggestions, getSuggestionAtSelection } from '@tiptap-pro/extension-tracked-changes'
+
+// 查找所有建议（包括 NodeViews 上的建议）
+const all = findSuggestions(editor)
+
+// 查找当前选区处的建议
+const current = getSuggestionAtSelection(editor)
+
+// 接受/拒绝 NodeViews 上的建议
+editor.commands.acceptSuggestion({ id: 'suggestion-123' })
+editor.commands.rejectSuggestion({ id: 'suggestion-123' })
+```
+
+## 另请参阅
+
+- [getSuggestionHTMLAttributes() API 参考](/tracked-changes/api-reference/utilities#getsuggestionsthtmlattributes)
+- [工具](/tracked-changes/api-reference/utilities)
+- [命令](/tracked-changes/api-reference/commands)

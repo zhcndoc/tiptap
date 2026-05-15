@@ -52,6 +52,10 @@ export const sidebarConfig: SidebarConfig = {
           title: '带评论的修订记录',
           href: '/tracked-changes/guides/comments-integration',
         },
+        {
+          title: 'Using NodeViews',
+          href: '/tracked-changes/guides/nodeview-support',
+        },
       ],
     },
     {

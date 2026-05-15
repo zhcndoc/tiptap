@@ -189,11 +189,12 @@ result.aiFeedback.events
 
 一次性应用所有活跃建议。
 
-此方法将所有建议范围内的内容替换为其第一个替换选项，应用后清空活跃建议列表。
+This method accepts all suggestions by replacing the content at each suggestion's range with the first replacement option. You can optionally filter which suggestions are accepted.
 
 该方法适用于常规建议以及来自 [比较文档](/content-ai/capabilities/ai-toolkit/api-reference/compare-documents) 功能的变更。
 
-### 参数
+- `options?` (`AcceptAllSuggestionsOptions`): Options for the `acceptAllSuggestions` method
+  - `filter?` (`(suggestion: Suggestion) => boolean`): A predicate that determines which suggestions are accepted
 
 无
 
@@ -217,6 +218,29 @@ result.aiFeedback.events
 // 一次性应用所有建议并获取反馈
 const result = toolkit.acceptAllSuggestions()
 result.aiFeedback.events
+```
+
+## `acceptSuggestions`
+
+通过 ID 接受多个建议。
+
+这是一个围绕 `acceptAllSuggestions` 的便捷封装，用于接受一组特定的活跃建议。
+
+### 参数
+
+- `ids` (`string[]`): 要接受的建议 ID
+
+### 返回值
+
+`AcceptSuggestionsResult`
+
+返回与 `acceptAllSuggestions` 相同的结果，包括 `aiFeedback` 和最后一个被接受建议的范围。
+
+### 示例
+
+```ts
+// 接受一组特定的建议
+const result = toolkit.acceptSuggestions(['suggestion-1', 'suggestion-2'])
 ```
 
 ## `rejectSuggestion`

@@ -8,7 +8,7 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 
-Server AI Toolkit 为 **工具** 和 **工作流** 都提供 REST API 端点。
+Server AI Toolkit 提供用于 AI 代理工具的 REST API 端点。
 
 <Callout title="向后兼容性" variant="warning">
   之前的 API 名称，例如 `schemaAwarenessData`、`getSchemaAwarenessData`、
@@ -72,7 +72,7 @@ https://api.tiptap.dev
 
 **使用 Tiptap Cloud 文档（推荐）** — 在请求体中包含带有 `documentId` 的 `experimental_documentOptions`。服务器将自动从 Tiptap Document Server 获取文档、处理文档，并保存回修改。此方式要求你的 JWT 声明中包含 Document Server 凭据（见上文【Document Server 凭据】）。
 
-大多数工具和工作流端点只接受一个文档来源：
+Tool endpoints exactly accept one document source:
 
 - `document`: 内联的 Tiptap JSON
 - `experimental_documentOptions`: 一个 Tiptap Cloud 文档引用
@@ -128,9 +128,7 @@ https://api.tiptap.dev
 - `"json"`: 标准 JSON 表示
 - `"shorthand"`: Tiptap Shorthand，一种用于提示和模型输出的高效 token 格式
 
-`proofreader` 当前仅支持 shorthand。
-
-## 工具端点
+## Tool endpoints
 
 ### 获取工具定义
 
@@ -195,10 +193,11 @@ POST /v3/ai/toolkit/stream-tool
 
 流式执行工具。请求结构与 `POST /v3/ai/toolkit/execute-tool` 相同。流式响应格式仍在最终确定中。
 
-## 工作流端点
+## Legacy workflow endpoints
 
-<Callout title="工作流端点" variant="info">
-  工作流端点会为现有集成保留。它们将在未来版本中移除。
+<Callout title="Workflow endpoints are deprecated" variant="warning">
+  Workflow endpoints are preserved for existing integrations. They will be removed in a future
+  release.
 </Callout>
 
 ### 获取工作流定义
@@ -563,7 +562,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/threads' \
         {
           "type": "createComment",
           "threadId": "thread-123",
-          "content": "Please clarify this point."
+          "content": "请澄清这一点。"
         }
       ]
     },
@@ -581,7 +580,6 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/threads' \
       }
     }
   }'
-```
 
 ## 错误处理
 

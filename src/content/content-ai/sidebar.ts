@@ -256,32 +256,6 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: '更新日志',
               href: '/content-ai/capabilities/ai-toolkit/changelog',
-              children: [
-                {
-                  title: 'AI 工具包',
-                  href: '/content-ai/capabilities/ai-toolkit/changelog/ai-toolkit',
-                },
-                {
-                  title: 'AI SDK 工具',
-                  href: '/content-ai/capabilities/ai-toolkit/changelog/ai-toolkit-ai-sdk',
-                },
-                {
-                  title: 'LangChain.js 工具',
-                  href: '/content-ai/capabilities/ai-toolkit/changelog/ai-toolkit-langchain',
-                },
-                {
-                  title: 'OpenAI 工具',
-                  href: '/content-ai/capabilities/ai-toolkit/changelog/ai-toolkit-openai',
-                },
-                {
-                  title: 'Anthropic 工具',
-                  href: '/content-ai/capabilities/ai-toolkit/changelog/ai-toolkit-anthropic',
-                },
-                {
-                  title: '工具定义',
-                  href: '/content-ai/capabilities/ai-toolkit/changelog/ai-toolkit-tool-definitions',
-                },
-              ],
             },
           ],
         },
@@ -316,10 +290,6 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/server-ai-toolkit/agents/comments',
                 },
                 {
-                  title: '选择感知',
-                  href: '/content-ai/capabilities/server-ai-toolkit/agents/selection-awareness',
-                },
-                {
                   title: '流式传输',
                   href: '/content-ai/capabilities/server-ai-toolkit/agents/streaming',
                 },
@@ -332,24 +302,6 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: '工作流',
               href: '/content-ai/capabilities/server-ai-toolkit/workflows',
-              children: [
-                {
-                  title: '插入内容',
-                  href: '/content-ai/capabilities/server-ai-toolkit/workflows/insert-content',
-                },
-                {
-                  title: '校对工具',
-                  href: '/content-ai/capabilities/server-ai-toolkit/workflows/proofreader',
-                },
-                {
-                  title: 'Tiptap 编辑',
-                  href: '/content-ai/capabilities/server-ai-toolkit/workflows/tiptap-edit',
-                },
-                {
-                  title: '评论',
-                  href: '/content-ai/capabilities/server-ai-toolkit/workflows/comments',
-                },
-              ],
             },
             {
               title: 'API 参考',

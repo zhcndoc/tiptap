@@ -278,3 +278,49 @@ import { getTimestamp } from '@tiptap-pro/extension-tracked-changes'
 const timestamp = getTimestamp()
 // 返回: '2024-01-30T12:34:56.789Z'
 ```
+
+## getSuggestionHTMLAttributes()
+
+从实时 ProseMirror 节点读取建议数据，并返回相应的 `data-suggestion-*` DOM 属性，可安全地展开到 NodeView 的根元素上。
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `node` | `Node` | 在你的 NodeView 组件中作为 `node` prop 接收的 ProseMirror 节点 |
+
+### 返回值
+
+`SuggestionHTMLAttributes` — 仅包含从 `node.attrs` 派生的 `data-suggestion-*` 属性的对象。值为 `null` 或 `undefined` 的键会被省略，因此非建议节点返回 `{}`。
+
+生成的属性如下：
+
+| 输出键 | 来源 (`node.attrs`) |
+| --- | --- |
+| `data-suggestion-id` | `suggestionId` |
+| `data-suggestion-type` | `suggestionType` |
+| `data-suggestion-user` | `suggestionUserId` |
+| `data-suggestion-created` | `suggestionCreatedAt` |
+| `data-suggestion-updated` | `suggestionUpdatedAt` |
+| `data-suggestion-user-metadata` | `suggestionUserMetadata`（JSON 序列化） |
+| `data-suggestion-nesting-delta` | `suggestionNestingDelta` |
+
+### 为什么是 `node`，不是 `HTMLAttributes`
+
+NodeView 中的 `HTMLAttributes` prop 在创建时计算一次后就不会更新。将其传给此工具会在建议状态变化时产生过期属性——例如，在远程协作更新之后，或者某个建议被接受或拒绝时。`node` prop 是响应式的真实数据源，并且会在每次渲染时更新，因此请始终传入 `node`。
+
+### 用法
+
+```jsx
+import { getSuggestionHTMLAttributes } from '@tiptap-pro/extension-tracked-changes'
+
+function MyNodeView({ node }) {
+  const suggestionAttrs = getSuggestionHTMLAttributes(node)
+
+  return (
+    <div {...suggestionAttrs}>
+      这里是你的内容
+    </div>
+  )
+}
+```
+
+有关将 NodeView 与 Tracked Changes 集成的详细指南，请参阅 [NodeView 支持指南](/tracked-changes/guides/nodeview-support)。

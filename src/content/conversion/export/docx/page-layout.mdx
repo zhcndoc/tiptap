@@ -154,6 +154,36 @@ ExportDocx.configure({
   具有优先级——如需覆盖自动推导的值，请显式设置 `header` 或 `footer`。
 </Callout>
 
+## 页面背景颜色
+
+使用 `pageColor` 选项为导出文档中的每一页设置背景颜色。
+
+### 接受的格式
+
+| 格式          | 示例                                                   |
+| ------------- | ------------------------------------------------------ |
+| 十六进制（6 位） | `"#ff0000"`、`"FF0000"`                                |
+| 十六进制（3 位） | `"#f00"`                                               |
+| `rgb()`       | `"rgb(255, 0, 0)"`                                     |
+| `rgba()`      | `"rgba(255, 0, 0, 0.5)"`                               |
+| 命名颜色      | 常见的 CSS 命名颜色（`"red"`、`"blue"`、`"green"` 等） |
+
+传入 `"transparent"` 或将 `pageColor` 留空可省略页面颜色。
+
+```js
+ExportDocx.configure({
+  onCompleteExport: (result) => {
+    // 处理导出的文件
+  },
+  pageColor: '#fff8dc', // 玉米丝风格的奶油色页面
+})
+```
+
+<Callout title="Word 默认不会打印页面背景" variant="hint">
+  在 Word 中，页面背景会显示在屏幕上，但在打印或导出为 PDF 时**不会**包含在内。要使其在打印输出或 PDF 导出中可见，读者必须在 Word 中启用 **文件 →
+  选项 → 显示 → 打印背景色和图像**。
+</Callout>
+
 ## 完整示例
 
 以下为一个完整示例，演示如何使用 DOCX Export 扩展配置自定义页面布局：
@@ -190,6 +220,8 @@ const editor = new Editor({
         left: '2cm',
         right: '2cm',
       },
+      // 页面背景颜色
+      pageColor: '#fff8dc',
     }),
     // 其他扩展...
   ],
@@ -256,6 +288,7 @@ editor.commands.exportDocx({
     left: '0.75in',
     right: '0.75in',
   },
+  pageColor: 'gray', // 覆盖此次导出的已配置页面颜色
 })
 ```
 

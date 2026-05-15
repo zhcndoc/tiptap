@@ -4,7 +4,7 @@ tags:
   - type: 团队
   - type: 测试版
 meta:
-  title: Pages | Tiptap Pages
+  title: 页面 | Tiptap Pages
   description: 将你的 Tiptap 编辑器转换为带有页眉、页脚、页面格式和缩放功能的分页文档式布局。
   category: 页面
 sidebars:
@@ -67,22 +67,22 @@ const editor = new Editor({
 
 ## 可用内容
 
-- 内置页面格式：A4、A3、A5、Letter、Legal、Tabloid；以及支持任意尺寸和边距的自定义格式。
+- 内置页面格式：A4、A3、A5、Letter、Legal、Tabloid；以及具有任意尺寸和边距的自定义格式。
 - 页眉和页脚内容可使用纯文本、HTML 或 Tiptap JSON，并支持 `{page}` / `{total}` 占位符。
-- 首页以及奇偶页可使用不同的页眉和页脚，类似 Word。
+- 第一页以及奇数页/偶数页可设置不同的页眉和页脚，就像 Word 一样。
 - 在专用覆盖层中实时编辑页眉和页脚。它们会与主文档一起参与协作——参见 [为 Pages 添加协作](/pages/guides/collaboration-with-pages)。
-- 程序化控制：打开或关闭指定页面的页眉/页脚编辑器，对页面格式变化做出响应，对缩放变化做出响应。
-- 通过 [PagesTableKit](/pages/guides/pages-tablekit) 实现分页安全的表格。表格会按比例缩小以适配页面，固定高度的行会被裁切，声明的宽度会被保留。
-- 与 Tiptap Conversion 往返兼容：导入的 DOCX 页眉和页脚会自动应用；导出的 DOCX、PDF、ODT、EPUB 会保留页眉、页脚和分页效果。
+- 程序化控制：为特定页面打开或关闭页眉/页脚编辑器，对页面格式变化做出响应，对缩放变化做出响应。
+- 可在配置时或运行时通过 `editableHeader` / `editableFooter` 选项以及 `setHeaderEditable` / `setFooterEditable` 命令，锁定或解锁每个覆盖层中的页眉/页脚编辑。
+- 通过 [PagesTableKit](/pages/guides/pages-tablekit) 实现分页安全表格。表格会按比例缩小以适配页面，固定高度的行会被裁切，声明的宽度会被保留。
+- 与 Tiptap Conversion 往返兼容：导入的 DOCX 页眉和页脚会自动应用；导出的 DOCX、PDF、ODT、EPUB 会保留页眉、页脚和分页信息。
 
 ## 不可用的内容
 
 这些是真实且已记录的限制——不是 bug。如果你的工作流依赖其中任何一项，请将其视为设计边界。
 
-- **无法拆分且大于一页的块会导致无限布局循环。** 这是在采用 Pages 之前最重要的一条限制。表格行、图形、定位容器以及大多数其他块格式化上下文（BFC）元素都无法跨页拆分——布局只能将整个块移动到下一页。如果该块比页面本身还高，它也无法放入下一页，而布局会不断尝试将其向前移动，且永远无法稳定。结果就是编辑器无响应。这是当前在页面之间拆分内容这一方法的硬性限制，不是短期路线图中的功能项。完整说明请参见 [限制](/pages/core-concepts/limitations#oversized-non-splittable-blocks-cause-an-infinite-layout-loop)，其中包括如何检测和预防。表格相关的具体情况请见 [PagesTableKit 的已知问题](/pages/guides/pages-tablekit#known-issues)。
-- **没有按页样式，也没有页面模板。** 每一页都使用相同的布局和视觉样式。
-- **不支持浏览器打印集成。** 请使用 [Conversion 扩展和 REST 端点](/conversion/getting-started/overview) 来生成可直接打印的输出。
-- **页眉和页脚编辑不能被禁用**（只能通过回调拦截其双击关闭行为）。
+- **无法拆分且大于一页的块会导致无限布局循环。** 在采用 Pages 之前，这是最重要的一项限制。表格行、图形、定位容器以及大多数其他块格式化上下文（BFC）元素都不能跨页拆分——布局只能将整个块移动到下一页。如果该块比页面本身还高，它仍然无法放下，布局会持续尝试将其向前移动并永远无法稳定。结果就是编辑器无响应。这是当前在页面之间拆分内容的方法所固有的硬性限制，不是短期路线图项目。完整说明请参见 [限制](/pages/core-concepts/limitations#oversized-non-splittable-blocks-cause-an-infinite-layout-loop)，其中包括如何检测和防止它。表格相关的特定情况见 [PagesTableKit 的已知问题](/pages/guides/pages-tablekit#known-issues)。
+- **不支持按页样式设置，也不支持页面模板。** 每一页都使用相同的布局和视觉样式。
+- **不支持浏览器打印集成。** 如需生成可直接打印的输出，请使用 [Conversion 扩展和 REST 端点](/conversion/getting-started/overview)。
 
 ## 预期情况
 

@@ -6,7 +6,7 @@ tags:
 meta:
   title: 安装 | Tiptap Conversion
   description: 设置凭据并安装转换扩展，用于导入和导出文档。
-  category: Conversion
+  category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -30,6 +30,68 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 3. 使用任意 JWT 工具（例如 [JWT Builder](https://jwt.io)）生成 JWT 以用于本地测试。在生产环境中，请始终在服务端生成 JWT，以确保密钥安全。
 
 在配置扩展或发起 REST API 调用时，你需要传入 JWT 和 App ID。有关详情，请参阅下方按格式划分的设置指南。
+
+## Tiptap Access Control（预览）
+
+<Callout title="通常不可用" variant="warning">
+  Tiptap Access Control 认证格式目前处于预览阶段，默认未启用。如需为你的环境申请访问权限，请发送邮件至 [humans@tiptap.dev](mailto:humans@tiptap.dev)。在启用之前，请继续使用上面描述的 App ID + JWT 流程——它会保持原样继续工作。
+</Callout>
+
+Tiptap Access Control 是一种新的认证格式，它用一个带有显式权限的已签名 JWT，替代了 `x-app-id` + 每次请求都要进行的 `convert/authenticate` 往返流程。这两种格式会并存：只有当 JWT 的 audience 声明为 `"Convert"` 时，服务才会将请求路由到新路径，因此现有集成无需任何改动即可继续工作。
+
+### 如何启用
+
+1. 发送邮件至 [humans@tiptap.dev](mailto:humans@tiptap.dev)，请求为你的 Tiptap Cloud 环境启用 Tiptap Access Control。我们会为你配置签名密钥，并在环境准备就绪时通知你。
+2. 生成 JWT 时，设置 `aud: "Convert"`，将你的环境 id 作为 `iss`，并使用 `permissions` 数组列出令牌被允许执行的操作（见下文）。
+3. 在 `Authorization: Bearer <jwt>` 请求头中发送 JWT。此路径不会读取 `x-app-id` 请求头。
+
+### 按格式、按方向的权限
+
+每种转换方向都有自己的操作权限，因此发放一个仅限定到某个功能所需操作的令牌，在新增新方向时也不会悄然扩大权限范围：
+
+| 操作                    | 授予权限                                            |
+| ----------------------- | --------------------------------------------------- |
+| `Convert:Import:Docx`     | 导入 DOCX                                      |
+| `Convert:Export:Docx`     | 导出 DOCX                                      |
+| `Convert:Import:Markdown` | 导入 Markdown                                  |
+| `Convert:Export:Markdown` | 导出 Markdown                                  |
+| `Convert:Export:Doc`      | 导出旧版 DOC                                  |
+| `Convert:Export:Odt`      | 导出 ODT                                       |
+| `Convert:Export:Epub`     | 导出 EPUB                                      |
+| `Convert:Export:Pdf`      | 导出 PDF                                       |
+| `Convert:Fonts`           | 管理字体缓存（`/fonts/*`）——仅限本地部署 |
+
+不带明确格式的旧路由（`POST /v2/import`、`POST /v2/export`）分别检查 `Convert:Import:Docx` 和 `Convert:Export:Docx`。
+
+### 示例令牌载荷
+
+```json
+{
+  "iss": "env_abc123",
+  "aud": "Convert",
+  "exp": 1777033105,
+  "permissions": [
+    { "action": "Convert:Import:Docx", "resource": "*" },
+    { "action": "Convert:Export:Docx", "resource": "*" },
+    { "action": "Convert:Export:Pdf",  "resource": "*" }
+  ]
+}
+```
+
+使用此令牌请求 `POST /v2/export/pdf` 会成功。`POST /v2/export/odt` 会返回 `permission_denied` 错误，指出缺少的操作权限。
+
+### 错误响应
+
+当令牌缺少所需权限时，服务会返回 `403 Forbidden`，内容如下：
+
+```json
+{
+  "message": "Token is missing permission Convert:Export:Pdf.",
+  "code": "permission_denied"
+}
+```
+
+如果环境的订阅根本不包含 Convert，则响应为 `403`，且 `code: feature_not_available`。上游云错误会被清晰映射：`429 rate_limited`、`503 service_unavailable`，以及 `401 token_expired` / `signature_invalid`，这样你的客户端就能区分无效令牌和临时性的云端问题。
 
 ## 安装包
 

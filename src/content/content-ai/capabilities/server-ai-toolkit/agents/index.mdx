@@ -50,18 +50,6 @@ AI 代理可以在服务器端与 Tiptap 文档交互，以完成复杂的任务
       赋予您的 AI 代理读取、撰写和编辑文档中评论的能力，全部在服务器端完成。
     </div>
   </Link>
-  <Link
-    href="/content-ai/capabilities/server-ai-toolkit/agents/selection-awareness"
-    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
-  >
-    <div className="flex items-center justify-between mb-2">
-      <h4 className="font-semibold text-black">Selection awareness</h4>
-      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">更多 →</span>
-    </div>
-    <div className="text-sm text-grayAlpha-700">
-      在代理决定如何编辑文档之前，读取当前编辑器的选区。
-    </div>
-  </Link>
 </div>
 
 ## 可用工具
@@ -72,6 +60,8 @@ AI 代理可以在服务器端与 Tiptap 文档交互，以完成复杂的任务
 
 ## AI 代理与工作流
 
-在 AI 代理中，AI 模型可以从一组工具中选择执行任务。相比之下，[工作流](/content-ai/capabilities/server-ai-toolkit/workflows) 只允许 AI 模型执行单一动作，比如生成编辑或重写文档。
+在 AI 代理中，AI 模型可以从一组工具中进行选择来执行任务。而在 [工作流](/content-ai/capabilities/server-ai-toolkit/workflows) 中，开发者则选择要调用的工具，并提供一套 AI 必须遵循的明确步骤。
 
-总体而言，工作流比 AI 代理工具更简单、更快速实现。然而，AI 代理更灵活，能够用来执行更复杂的任务。
+一般来说，工作流比 AI 代理工具更简单，也更容易实现。不过，AI 代理更加灵活，可用于执行更复杂的任务。
+
+面向单一用途服务器端自动化的 [工作流](/content-ai/capabilities/server-ai-toolkit/workflows) 将在 Server AI Toolkit 的后续版本中提供。
