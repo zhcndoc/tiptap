@@ -1,5 +1,5 @@
 ---
-title: Page Extension API 参考
+title: 页面扩展 API 参考
 meta:
   title: API 参考 | Tiptap Pages
   description: Tiptap Pages 扩展的 API 参考——选项、命令和存储。
@@ -115,8 +115,13 @@ interface PagesOptions {
   differentOddEvenFooter?: boolean
 
   /** 注册到内部页眉/页脚编辑器上的扩展。
-   *  默认为 StarterKit；请镜像主编辑器的扩展栈以保持 schema 对齐。 */
-  headerFooterExtensions?: Extensions
+   *
+   *  接受静态 `Extensions` 数组，或者接受一个回调函数：该函数会针对每个子类型（默认 / 首页 / 奇数页 / 偶数页 ×
+   *  页眉 / 页脚）接收一个 `HeaderFooterExtensionsContext`，并返回该子编辑器的扩展。使用
+   *  回调形式可针对每个子类型附加 `Collaboration` 到自动计算的 Y 字段上——参见为 Pages 添加协作。
+   *
+   *  默认值为 ConvertKit；请镜像主编辑器的扩展栈以保持 schema 对齐。 */
+  headerFooterExtensions?: Extensions | ((ctx: HeaderFooterExtensionsContext) => Extensions)
 
   /** 当 `setPageFormat()` 成功，或 configure() 应用了新格式时调用。 */
   onPageFormatChange?: (pageFormat: PageFormat) => void
@@ -161,19 +166,19 @@ interface PagesOptions {
 | ------------------------------------ | -------------------------------- | -------------------- | --------------------------------------------------------- |
 | `header`                             | `PagesHeaderFooter`              | `''`                 | 默认页眉内容                                    |
 | `footer`                             | `PagesHeaderFooter`              | `''`                 | 默认页脚内容                                    |
-| `headerTopMargin`                    | `number`                         | 页面上边距的 50%    | 页顶到页眉内容的距离（px）             |
-| `footerBottomMargin`                 | `number`                         | 页面下边距的 50%    | 页脚内容到底部的距离（px）          |
+| `headerTopMargin`                    | `number`                         | 上边距的 50%    | 从页面顶部到页眉内容的距离（px）             |
+| `footerBottomMargin`                 | `number`                         | 下边距的 50% | 从页脚内容到底部页面的距离（px）          |
 | `differentFirstPage`                 | `boolean`                        | `false`              | 首页页眉和页脚与其余页面不同         |
 | `headerFirstPage`                    | `PagesHeaderFooter`              | `''`                 | 首页页眉内容                                 |
 | `footerFirstPage`                    | `PagesHeaderFooter`              | `''`                 | 首页页脚内容                                 |
-| `differentOddEven`                   | `boolean`                        | `false`              | 奇数页和偶数页使用不同的页眉和页脚         |
+| `differentOddEven`                   | `boolean`                        | `false`              | 奇数页和偶数页具有不同的页眉和页脚         |
 | `headerOdd`                          | `PagesHeaderFooter`              | `''`                 | 奇数页页眉内容                                  |
 | `headerEven`                         | `PagesHeaderFooter`              | `''`                 | 偶数页页眉内容                                 |
 | `footerOdd`                          | `PagesHeaderFooter`              | `''`                 | 奇数页页脚内容                                  |
 | `footerEven`                         | `PagesHeaderFooter`              | `''`                 | 偶数页页脚内容                                 |
-| `editableHeader`                     | `boolean`                        | `true`               | 允许通过双击打开页眉覆盖层          |
-| `editableFooter`                     | `boolean`                        | `true`               | 允许通过双击打开页脚覆盖层          |
-| `headerFooterExtensions`             | `Extensions`                     | `StarterKit`         | 内部页眉/页脚编辑器的扩展            |
+| `editableHeader`                     | `boolean`                        | `true`               | 允许在双击时打开页眉覆盖层          |
+| `editableFooter`                     | `boolean`                        | `true`               | 允许在双击时打开页脚覆盖层          |
+| `headerFooterExtensions`             | `Extensions \| (ctx) => Extensions` | `ConvertKit`         | 内部页眉/页脚编辑器的扩展。传入回调可针对每个子类型附加 `Collaboration`（参见 [为 Pages 添加协作](/pages/guides/collaboration-with-pages)）。 |
 | `onDblClickHeaderFooterPreventClose` | `(event: MouseEvent) => boolean` | `undefined`          | 防止在外部双击时关闭（页眉 + 页脚） |
 | `onDblClickHeaderPreventClose`       | `(event: MouseEvent) => boolean` | `undefined`          | 防止在外部双击时关闭（仅页眉）     |
 | `onDblClickFooterPreventClose`       | `(event: MouseEvent) => boolean` | `undefined`          | 防止在外部双击时关闭（仅页脚）     |

@@ -7,15 +7,20 @@ meta:
 ---
 
 import { Link } from '@/components/Link'
+import { Callout } from '@/components/ui/Callout'
 
 AI Toolkit 让你可以在审阅 UI 中展示 AI 生成的更改，这样用户就可以接受或拒绝这些更改。
 
 有两种方法：
 
-- 使用 [**Tracked Changes**](/tracked-changes/getting-started/overview) 扩展来渲染审阅 UI。更改会作为文档的一部分持久保存，并对其他用户可见。
-- **AI Toolkit 建议**：一种基于装饰的 UI，具有临时性，只对当前文档用户可见。
+- 使用 [**Tracked Changes**](/tracked-changes/getting-started/overview) 扩展（一个独立产品）来渲染审阅 UI。更改会作为文档的一部分保留，并对其他用户可见。
+- **AI Toolkit 建议**：一种基于装饰的 UI，具有临时性，并且只对当前文档用户可见。
 
-## Tracked Changes
+## 与 Tracked Changes 配合使用
+
+<Callout title="独立产品" variant="info">
+  [Tracked Changes](/tracked-changes/getting-started/overview) 是 Tiptap 的一个独立产品，需单独购买。它默认处理用户编辑内容，并且在与 AI Toolkit 集成时可以审阅 AI 编辑内容。
+</Callout>
 
 AI Toolkit 与 [Tracked Changes 扩展](/tracked-changes/getting-started/overview) 集成，以显示审阅 UI。请按照以下指南开始使用：
 
@@ -25,7 +30,7 @@ AI Toolkit 与 [Tracked Changes 扩展](/tracked-changes/getting-started/overvie
     className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
   >
     <div className="flex items-center justify-between mb-2">
-      <h4 className="font-semibold text-black">Tracked changes</h4>
+      <h4 className="font-semibold text-black">与 Tracked Changes 配合使用</h4>
       <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">更多 &rarr;</span>
     </div>
     <div className="text-sm text-grayAlpha-700">
@@ -37,7 +42,7 @@ AI Toolkit 与 [Tracked Changes 扩展](/tracked-changes/getting-started/overvie
     className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
   >
     <div className="flex items-center justify-between mb-2">
-      <h4 className="font-semibold text-black">带有评论的 Tracked changes</h4>
+      <h4 className="font-semibold text-black">带有评论的 Tracked Changes</h4>
       <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">更多 &rarr;</span>
     </div>
     <div className="text-sm text-grayAlpha-700">

@@ -135,7 +135,7 @@ export async function POST(req: Request) {
     system: workflow.systemPrompt,
     prompt: JSON.stringify({
       task,
-      context: 'Additional background information related to the task',
+      context: '与任务相关的额外背景信息',
     }),
     output: Output.object({ schema: workflow.zodOutputSchema }),
   })
@@ -205,7 +205,6 @@ export default function Page() {
     toolkit.templateWorkflow({
       template,
       values: object as Record<string, unknown>,
-      position: 'document',
       hasFinished: !isLoading,
       workflowId,
     })
@@ -361,7 +360,6 @@ editor.commands.unsetTemplateAttributes()
 toolkit.templateWorkflow({
   template,
   values: object,
-  position: 'document',
   hasFinished: !isLoading,
   workflowId,
   preserveSlotAttr: true,
@@ -387,7 +385,6 @@ const toolkit = getAiToolkit(editor)
 toolkit.templateWorkflow({
   template: currentDoc,
   values: newValues,
-  position: 'document',
   preserveSlotAttr: true,
 })
 ```
@@ -423,7 +420,7 @@ for (const match of matches) {
 
 - `fieldType`：匹配是否来自 `_templateSlot`、`_templateIf` 或 `_templateAttributes`
 - `metadata`：`_templateFieldMetadata` 对象，或 `null`
-- `content`：匹配节点的內容（Tiptap JSON 格式），空节点则为 `null`
+- `content`：匹配节点的内容（Tiptap JSON 格式），空节点则为 `null`
 
 ## 控制哪些模板字段是必填的
 

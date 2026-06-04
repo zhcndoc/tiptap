@@ -138,15 +138,30 @@ import { Editor } from '@tiptap/core'
 import BubbleMenu from '@tiptap/extension-bubble-menu'
 
 new Editor({
+  element: document.querySelector('#editor'),
   extensions: [
+    StarterKit,
     BubbleMenu.configure({
-      element: document.querySelector('.menu'),
+      element: document.querySelector('#bubble-menu'),
     }),
   ],
+  content: '<p>Select some text to see the bubble menu.</p>',
 })
 ```
 
-### 与框架一起使用
+向您的 HTML 中添加一个菜单元素：
+
+```html
+<div id="bubble-menu" style="display: none; position: absolute;">
+  <button onclick="editor.chain().focus().toggleBold().run()">加粗</button>
+  <button onclick="editor.chain().focus().toggleItalic().run()">斜体</button>
+</div>
+<div id="editor"></div>
+```
+
+当选中文本时，Tiptap 会自动显示并定位菜单元素。
+
+## 与框架一起使用
 
 #### React
 
@@ -159,10 +174,10 @@ function MyBubbleMenu({ editor }) {
   return (
     <BubbleMenu editor={editor}>
       <button onClick={() => editor.chain().focus().toggleBold().run()}>
-        Bold
+        加粗
       </button>
       <button onClick={() => editor.chain().focus().toggleItalic().run()}>
-        Italic
+        斜体
       </button>
     </BubbleMenu>
   )
@@ -177,10 +192,10 @@ function MyBubbleMenu({ editor }) {
 <template>
   <BubbleMenu :editor="editor">
     <button @click="editor.chain().focus().toggleBold().run()">
-      Bold
+      加粗
     </button>
     <button @click="editor.chain().focus().toggleItalic().run()">
-      Italic
+      斜体
     </button>
   </BubbleMenu>
 </template>
@@ -258,7 +273,7 @@ new Editor({
 
 ### 强制更新气泡菜单位置
 
-If the bubble menu changes size after the initial render, its position will not be adjusted automatically. To fix this, you can force update the position by setting a `pluginKey` on the extension and emitting an `'updatePosition'` event with that key.
+如果气泡菜单在初始渲染后改变了大小，其位置不会自动调整。要解决此问题，您可以通过在扩展上设置 `pluginKey`，并使用该键发出 `'updatePosition'` 事件来强制更新位置。
 
 ```ts
 BubbleMenu.configure({
@@ -269,17 +284,17 @@ BubbleMenu.configure({
 editor.commands.setMeta('myBubbleMenu', 'updatePosition')
 ```
 
-To target a specific bubble menu, pass that menu's `pluginKey` instead.
+要针对特定的气泡菜单，请改为传递该菜单的 `pluginKey`。
 
 ```ts
 editor.commands.setMeta('bubbleMenuOne', 'updatePosition')
 ```
 
-If you use the React or Vue `BubbleMenu` component and want to trigger `updatePosition` externally, pass an explicit `pluginKey` prop to the component first. If you omit `pluginKey`, the component creates its own ProseMirror `PluginKey`, which external code cannot reliably reference later.
+如果您使用 React 或 Vue 的 `BubbleMenu` 组件，并希望在外部触发 `updatePosition`，请先为组件传入一个明确的 `pluginKey` 属性。如果省略 `pluginKey`，组件会创建自己的 ProseMirror `PluginKey`，外部代码之后无法可靠地引用它。
 
-### Programmatically show or hide the bubble menu
+### 以编程方式显示或隐藏气泡菜单
 
-You can programmatically show or hide the bubble menu by setting a `pluginKey` on the extension and dispatching a transaction with the `'show'` or `'hide'` meta value using that key.
+您可以通过在扩展上设置 `pluginKey`，并使用该键分发带有 `'show'` 或 `'hide'` 元值的事务，来以编程方式显示或隐藏气泡菜单。
 
 ```ts
 BubbleMenu.configure({
@@ -287,11 +302,11 @@ BubbleMenu.configure({
   element: document.querySelector('.menu'),
 })
 
-// Show the bubble menu
+// 显示气泡菜单
 editor.commands.setMeta('myBubbleMenu', 'show')
 
-// Hide the bubble menu
+// 隐藏气泡菜单
 editor.commands.setMeta('myBubbleMenu', 'hide')
 ```
 
-**Note:** dispatching `'show'` or `'hide'` will override the behavior defined in `shouldShow`.
+**注意：** 分发 `'show'` 或 `'hide'` 将覆盖 `shouldShow` 中定义的行为。

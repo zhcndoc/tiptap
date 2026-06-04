@@ -1,0 +1,238 @@
+---
+title: 可用工具
+meta:
+  title: 可用工具 | Tiptap Server AI 工具包
+  description: 允许 AI 代理在服务器上读取和编辑 Tiptap 文档的可用工具完整列表。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+Server AI Toolkit 通过 `POST /v3/ai/toolkit/tools` 暴露工具定义，并通过 `POST /v3/ai/toolkit/execute-tool` 执行工具调用。
+
+请参阅 [REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api) 了解端点定义。
+
+<Callout title="注意" variant="info">
+  目前，Server AI Toolkit API 以通用格式返回工具定义。请将它们转换为你的提供方或框架（OpenAI、Anthropic、Langchain）所需的格式。
+</Callout>
+
+每次调用 `POST /v3/ai/toolkit/execute-tool` 都需要以下参数：
+
+- `input`（必填）：由 AI 模型生成的工具输入。
+- `toolConfig?`（可选）：开发者提供的工具特定参数。
+
+响应包含以下字段：
+
+- `output`（`unknown`）：应由 AI 模型读取的工具响应。
+- `toolResult`（`unknown`，可选）：一种专为开发者解析而设计的工具响应格式。不供 AI 读取。
+
+以下是可用工具列表。
+
+## `tiptapRead`
+
+读取一段顶层文档节点。**它也会编辑文档**，以便为高效编辑做准备。
+
+### 工具配置（`toolConfig`）
+
+`null`
+
+### 工具输入（`toolInput`）
+
+- `from`（`number`）：要读取的第一个顶层节点的从零开始索引。
+
+### 工具输出（`toolOutput`）
+
+成功响应：
+
+- `success`（`true`）：表示读取请求成功。
+- `totalNodeCount`（`number`）：文档中的顶层节点总数。
+- `nodeRange`（`[number, number]`）：已读取的顶层节点范围。
+- `content`（`JSONContent[] | string`）：返回范围内的文档内容。当 `format` 为
+  `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 时，这是一个 Tiptap Shorthand
+  字符串。
+
+错误响应：
+
+- `success`（`false`）：表示读取请求失败。
+- `error`（`string`）：错误信息。
+- `totalNodeCount?`（`number`）：顶层节点总数。
+
+### 工具结果（`toolResult`）
+
+`null`
+
+## `tiptapEdit`
+
+通过替换目标、在目标前插入或在目标后插入来编辑文档节点。目标是来自 `tiptapRead` 的节点哈希，或者整个文档使用 `"doc"`。
+
+### 工具配置（`toolConfig`）
+
+`null`
+
+### 工具输入（`toolInput`）
+
+- `operations`（`array`）：按顺序应用的编辑操作。操作格式在工具定义中有说明。如果你是客户，请联系我们以获取有关操作格式的更多信息。
+
+### 工具输出（`toolOutput`）
+
+成功或部分成功响应：
+
+- `success`（`boolean`）：所有操作是否都已成功完成。
+- `operationResults`（`array`）：每个操作的结果。
+  - `success`（`boolean`）：操作是否成功完成。
+  - `target`（`string`）：操作所针对元素的字符串标识符。
+  - `error`（`string | null`）：失败原因；如果操作成功则为 `null`。
+
+错误响应：
+
+- `success`（`false`）：表示编辑请求失败。
+- `reason`（`'validationError' | 'unexpectedError'`）：错误类别。
+- `error`（`string`）：错误信息。
+
+### 工具结果（`toolResult`）
+
+`null`
+
+## `getThreads`
+
+读取已持久化的评论线程、其评论以及它们在文档中的位置。
+
+<Callout title="需要 Tiptap Cloud 文档" variant="warning">
+  此工具要求在请求体中包含 `experimental_documentOptions`，因为线程存储在 Tiptap Document Server 上。请传入一个引用你的 Tiptap Cloud 文档的 `documentId`。
+</Callout>
+
+### 工具配置（`toolConfig`）
+
+`null`
+
+### 工具输入（`toolInput`）
+
+- `from`（`number`）：要读取的第一个线程的从零开始索引。
+
+### 工具输出（`toolOutput`）
+
+成功响应：
+
+- `success`（`true`）：表示读取请求成功。
+- `totalThreadCount`（`number`）：文档中的线程总数。
+- `threadRange`（`[number, number]`）：已读取的线程范围，格式为 `[from, to)`。
+- `threads`（`array`）：返回的线程对象。
+  - `id`（`string`）：唯一的线程标识符。
+  - `nodeRange`（`[number, number] | null`）：线程所在的节点范围；如果线程未在文档中被标注，则为 `null`。
+  - `content`（`JSONContent[] | string | null`）：线程标注的内容。当 `format` 为
+    `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 时，这是一个 Tiptap
+    Shorthand 字符串。`null` 表示该线程未在文档中被标注。
+  - `comments`（`array`）：线程中的评论。
+    - `id`（`string`）：唯一的评论标识符。
+    - `content`（`string`）：评论文本。
+    - `userId`（`string`）：创建该评论的用户 ID。
+    - `createdAt`（`string`）：评论创建时的 ISO 时间戳。
+    - `updatedAt`（`string`）：评论最后更新时间的 ISO 时间戳。
+  - `resolvedAt?`（`string | null`）：线程被解决时的 ISO 时间戳；如果未解决，则为 `null`。
+  - `createdAt`（`string`）：线程创建时的 ISO 时间戳。
+  - `updatedAt`（`string`）：线程最后更新时间的 ISO 时间戳。
+  - `data?`（`Record<string, unknown>`）：公开的线程元数据。
+
+错误响应：
+
+- `success`（`false`）：表示读取请求失败。
+- `error`（`string`）：错误信息。
+- `totalThreadCount?`（`number`）：已持久化线程的总数（如果已知）。
+
+### 工具结果（`toolResult`）
+
+`null`
+
+## `editThreads`
+
+创建、更新、移除、解决或取消解决评论线程和评论。
+
+<Callout title="需要 Tiptap Cloud 文档" variant="warning">
+  此工具要求在请求体中包含 `experimental_documentOptions`，因为线程存储在 Tiptap Document Server 上。请传入一个引用你的 Tiptap Cloud 文档的 `documentId`。
+</Callout>
+
+### 工具配置（`toolConfig`）
+
+`null`
+
+若要为新生成的 AI 线程或评论附加元数据，请在 `execute-tool` 请求中传入 `experimental_commentsOptions`。
+
+### 工具输入（`toolInput`）
+
+- `operations`（`array`）：按顺序应用的线程操作。操作格式在工具定义中有说明。如果你是客户，请联系我们以获取有关操作格式的更多信息。
+
+### 工具输出（`toolOutput`）
+
+成功或部分成功响应：
+
+- `success`（`boolean`）：表示所有操作是否都已成功完成。
+- `operations`（`array`）：每个操作的结果。
+  - `type`（`string`）：已执行的操作类型。
+  - `success`（`boolean`）：操作是否成功完成。
+  - `message`（`string`）：可供人类阅读的操作结果。
+  - `threadId?`（`string`）：用于创建或引用线程的操作的线程 ID。
+
+错误响应：
+
+- `success`（`false`）：表示请求在处理操作之前就已失败。
+- `error`（`string`）：错误信息。
+
+### 工具结果（`toolResult`）
+
+`null`
+
+## `readDocument`
+
+读取整个文档的内容。
+
+### 工具配置（`toolConfig`）
+
+`null`
+
+### 工具输入（`toolInput`）
+
+`{}`
+
+### 工具输出（`toolOutput`）
+
+成功响应：
+
+- `success`（`true`）：表示文档已成功读取。
+- `content`（`JSONContent[] | string`）：整个有效文档内容。当 `format` 为 `json` 时，
+  这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 时，这是一个 Tiptap Shorthand 字符串。
+
+<Callout title="返回整个文档" variant="warning">
+  工具输出包含整个文档的内容，可能会超出上下文窗口。为避免这种情况，你必须自行管理上下文窗口。
+</Callout>
+
+### 工具结果（`toolResult`）
+
+与 `toolOutput` 形状相同。
+
+## `proofreader`
+
+对文档进行小幅编辑。适用于 AI 只进行一个或几个词的小修改的场景。例如，对文档进行校对或检查拼写错误。
+
+此工具仅支持 `format: "shorthand"`。
+
+### 工具配置（`toolConfig`）
+
+`null`
+
+### 工具输入（`toolInput`）
+
+- `operations`（`array`）：按顺序应用的校对操作。操作格式在工具定义中有说明。如果你是客户，请联系我们以获取有关操作格式的更多信息。
+
+### 工具输出（`toolOutput`）
+
+成功或部分成功响应：
+
+- `success`（`boolean`）：表示所有操作是否都已成功完成。
+- `operationResults`（`array`）：每个操作的结果。
+  - `target`（`string`）：操作所针对元素的字符串标识符。
+  - `success`（`boolean`）：操作是否成功完成。
+  - `error`（`string | null`）：失败原因；操作成功时为 `null`。
+
+### 工具结果（`toolResult`）
+
+`null`

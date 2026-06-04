@@ -66,15 +66,17 @@ renderToHTMLString({
 function renderToHTMLString(options: {
   extensions: Extension[]
   content: ProsemirrorNode | JSONContent
+  staticEditorOptions?: { textDirection?: 'ltr' | 'rtl' | 'auto' }
   options?: TiptapHTMLStaticRendererOptions
 }): string
 ```
 
 - `extensions`：用于渲染内容的 Tiptap 扩展数组。
 - `content`：要渲染的内容。可以是 Prosemirror Node 实例或 Prosemirror 文档的 JSON 表示。
-- `options`：带有附加选项的对象。
-- `options.nodeMapping`：将 Prosemirror 节点映射到 HTML 字符串的对象。
-- `options.markMapping`：将 Prosemirror 标记映射到 HTML 字符串的对象。
+- `staticEditorOptions`：可选的编辑器级选项，会影响渲染结果。目前支持 `textDirection`（`'ltr' | 'rtl' | 'auto'`），它与 `Editor` 上的 `textDirection` 编辑器选项一致，因此输出会包含预期的 `dir` 属性。
+- `options`：包含附加选项的对象。
+- `options.nodeMapping`：将 Prosemirror 节点映射为 HTML 字符串的对象。
+- `options.markMapping`：将 Prosemirror 标记映射为 HTML 字符串的对象。
 - `options.unhandledNode`：当遇到未处理的节点时调用的函数。
 - `options.unhandledMark`：当遇到未处理的标记时调用的函数。
 
@@ -118,15 +120,17 @@ renderToMarkdown({
 function renderToMarkdown(options: {
   extensions: Extension[]
   content: ProsemirrorNode | JSONContent
+  staticEditorOptions?: { textDirection?: 'ltr' | 'rtl' | 'auto' }
   options?: TiptapMarkdownStaticRendererOptions
 }): string
 ```
 
 - `extensions`：用于渲染内容的 Tiptap 扩展数组。
 - `content`：要渲染的内容。可以是 Prosemirror Node 实例或 Prosemirror 文档的 JSON 表示。
-- `options`：带有附加选项的对象。
-- `options.nodeMapping`：将 Prosemirror 节点映射到 markdown 字符串的对象。
-- `options.markMapping`：将 Prosemirror 标记映射到 markdown 字符串的对象。
+- `staticEditorOptions`：可选的编辑器级选项，会影响渲染结果。目前支持 `textDirection`（`'ltr' | 'rtl' | 'auto'`），它与 `Editor` 上的 `textDirection` 编辑器选项一致，因此输出会包含预期的 `dir` 属性。
+- `options`：包含附加选项的对象。
+- `options.nodeMapping`：将 Prosemirror 节点映射为 markdown 字符串的对象。
+- `options.markMapping`：将 Prosemirror 标记映射为 markdown 字符串的对象。
 - `options.unhandledNode`：当遇到未处理的节点时调用的函数。
 - `options.unhandledMark`：当遇到未处理的标记时调用的函数。
 
@@ -166,15 +170,17 @@ renderToReactElement({
 function renderToReactElement(options: {
   extensions: Extension[]
   content: ProsemirrorNode | JSONContent
+  staticEditorOptions?: { textDirection?: 'ltr' | 'rtl' | 'auto' }
   options?: TiptapReactStaticRendererOptions
 }): ReactElement
 ```
 
 - `extensions`：用于渲染内容的 Tiptap 扩展数组。
 - `content`：要渲染的内容。可以是 Prosemirror Node 实例或 Prosemirror 文档的 JSON 表示。
-- `options`：带有附加选项的对象。
-- `options.nodeMapping`：将 Prosemirror 节点映射到 React 组件的对象。
-- `options.markMapping`：将 Prosemirror 标记映射到 React 组件的对象。
+- `staticEditorOptions`：可选的编辑器级选项，会影响渲染结果。目前支持 `textDirection`（`'ltr' | 'rtl' | 'auto'`），它与 `Editor` 上的 `textDirection` 编辑器选项一致，因此输出会包含预期的 `dir` 属性。
+- `options`：包含附加选项的对象。
+- `options.nodeMapping`：将 Prosemirror 节点映射为 React 组件的对象。
+- `options.markMapping`：将 Prosemirror 标记映射为 React 组件的对象。
 - `options.unhandledNode`：当遇到未处理的节点时调用的函数。
 - `options.unhandledMark`：当遇到未处理的标记时调用的函数。
 
@@ -300,6 +306,33 @@ renderToReactElement({
 ```
 
 <CodeDemo path="/Examples/StaticRenderingAdvanced" />
+
+## 限制与解决方法
+
+静态渲染器会构建 schema 并运行每个扩展的 `renderHTML`，但不会实例化 `Editor`。因此：
+
+- `addProseMirrorPlugins`、`onCreate`、`onUpdate` 和事务钩子不会运行。
+- 通过这些机制分配属性的扩展——例如 `UniqueID`（`data-id`）和 `TableOfContents`（`id`、`data-toc-id`）——不会自动填充这些属性。
+
+对于这些情况，请在渲染之前预处理 JSON 文档：
+
+```ts
+import { generateUniqueIds } from '@tiptap/extension-unique-id'
+import { generateTocIds } from '@tiptap/extension-table-of-contents'
+import { renderToHTMLString } from '@tiptap/static-renderer/pm/html-string'
+
+let doc = sourceJson
+doc = generateUniqueIds(doc, extensions) // 如果使用 UniqueID
+doc = generateTocIds(doc, extensions)    // 如果使用 TableOfContents
+
+const html = renderToHTMLString({
+  content: doc,
+  extensions,
+  staticEditorOptions: { textDirection: 'auto' }, // 与 EditorOptions 的子集一致
+})
+```
+
+会影响输出的编辑器级选项可以通过 `staticEditorOptions` 对象传入（目前是 `textDirection`）。其他依赖运行时视图或事务流的编辑器选项不在适用范围内。
 
 ## 共享选项
 

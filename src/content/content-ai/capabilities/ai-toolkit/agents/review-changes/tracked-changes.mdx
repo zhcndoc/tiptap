@@ -1,32 +1,36 @@
 ---
-title: 追踪更改
+title: 使用修订痕迹
 meta:
-  title: Tracked changes | Tiptap Content AI
-  description: Display AI-generated changes as tracked changes that users can accept or reject individually.
-  category: Content AI
+  title: 使用修订痕迹 | Tiptap Content AI
+  description: 将 AI 生成的更改显示为修订痕迹，用户可以逐一接受或拒绝。
+  category: 内容 AI
 ---
 
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-<Callout title="Experimental" variant="warning">
-  The [Tracked Changes](/tracked-changes/getting-started/overview) extension is currently in Alpha phase.
+<Callout title="独立产品" variant="info">
+  [跟踪更改](/tracked-changes/getting-started/overview) 是一款与 AI Toolkit 分开的 Tiptap 产品，需单独购买。它默认处理用户编辑内容，并且在与 AI Toolkit 集成后也可以审核 AI 编辑内容。
+</Callout>
+
+<Callout title="实验性功能" variant="warning">
+  [跟踪更改](/tracked-changes/getting-started/overview) 扩展目前处于 Alpha 阶段。
 </Callout>
 
 <Callout title="继续自 AI 代理聊天机器人指南" variant="info">
   本指南是对 [AI 代理聊天机器人指南](/content-ai/capabilities/ai-toolkit/agents/ai-agent-chatbot) 的延续。请先阅读该指南。
 </Callout>
 
-显示 AI 生成的更改为修订模式，以便用户能够逐条审阅并接受或拒绝。此功能将 AI Toolkit 与 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展集成。
+将 AI 生成的更改显示为修订内容，这样你的用户就可以逐一审阅并接受或拒绝这些更改。本指南将展示如何将 AI Toolkit 连接到单独授权的 [跟踪更改](/tracked-changes/getting-started/overview) 扩展。
 
 
 <CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/tracked-changes" />
 
-See the [source code on GitHub](https://github.com/ueberdosis/ai-toolkit-demos).
+查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
-## Show tracked changes
+## 显示修订更改
 
-要以修订模式显示 AI 编辑，执行工具时将 `reviewOptions.mode` 设置为 `'trackedChanges'`。
+要以修订模式显示 AI 编辑内容，在执行工具时将 `reviewOptions.mode` 设置为 `'trackedChanges'`。
 
 ### API 端点
 
@@ -57,9 +61,9 @@ export async function POST(req: Request) {
 
 ### 客户端设置
 
-在客户端，添加 `TrackedChanges` 扩展，并向 `executeTool` 方法传递包含模式 `'trackedChanges'` 的 `reviewOptions`。
+在客户端，安装并添加 `TrackedChanges` 扩展，然后在 `executeTool` 方法中传入模式为 `'trackedChanges'` 的 `reviewOptions`。
 
-`TrackedChanges` 扩展必须配置为 `enabled: false` —— AI Toolkit 会在需要时自动启用它。
+在 AI 进行编辑时，必须将 `TrackedChanges` 扩展配置为 `enabled: false`。
 
 ```tsx
 import { useChat } from '@ai-sdk/react'
@@ -123,9 +127,9 @@ AI 编辑文档后，更改将以修订模式显示。用户可以使用 Tracked
 
 查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
-## Next steps
+## 后续步骤
 
-- Learn more about [review options](/content-ai/capabilities/ai-toolkit/api-reference/review-options) in the API reference.
-- Add real-time streaming with the [streaming guide](/content-ai/capabilities/ai-toolkit/agents/streaming).
-- Learn about the [Tracked Changes](/tracked-changes/getting-started/overview) extension for styling and configuration options.
-- Combine tracked changes with comments using the [tracked changes with comments](/content-ai/capabilities/ai-toolkit/agents/review-changes/tracked-changes-with-comments) guide.
+- 详细了解 API 参考中的 [审阅选项](/content-ai/capabilities/ai-toolkit/api-reference/review-options)。
+- 使用 [流式传输指南](/content-ai/capabilities/ai-toolkit/agents/streaming) 添加实时流式传输。
+- 了解 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展的样式和配置选项。
+- 使用 [带评论的修订更改](/content-ai/capabilities/ai-toolkit/agents/review-changes/tracked-changes-with-comments) 指南，将修订更改与评论结合使用。

@@ -136,7 +136,11 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/conversion/export/docx/styles',
                 },
                 {
-                  title: '页眉和页脚',
+                  title: 'Ordered list numbering',
+                  href: '/conversion/export/docx/ordered-list-numbering',
+                },
+                {
+                  title: 'Headers & footers',
                   href: '/conversion/export/docx/headers-footers',
                 },
                 {

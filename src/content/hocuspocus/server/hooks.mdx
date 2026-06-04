@@ -31,26 +31,27 @@ Hocuspocus 提供了钩子来扩展其功能并将其集成到现有应用程序
 
 ## 总结表
 
-| 钩子                      | 描述                                     | 链接                                                    |
-| ------------------------- |-----------------------------------------|---------------------------------------------------------|
-| `beforeHandleMessage`     | 在处理消息之前                          | [阅读更多](/hocuspocus/server/hooks#before-handle-message)      |
-| `onConnect`               | 建立连接时                              | [阅读更多](/hocuspocus/server/hooks#on-connect)                 |
-| `connected`               | 连接成功建立后                         | [阅读更多](/hocuspocus/server/hooks#connected)                  |
-| `onAuthenticate`          | 需要身份验证时                          | [阅读更多](/hocuspocus/server/hooks#on-authenticate)            |
-| `onAwarenessUpdate`       | 状态更新时                             | [阅读更多](/hocuspocus/server/hooks#on-awareness-update)        |
-| `onLoadDocument`          | 创建新文档期间                        | [阅读更多](/hocuspocus/server/hooks#on-load-document)           |
-| `afterLoadDocument`       | 文档创建完成后                        | [阅读更多](/hocuspocus/server/hooks#after-load-document)        |
-| `onChange`                | 文档发生变化时                        | [阅读更多](/hocuspocus/server/hooks#on-change)                  |
-| `onDisconnect`            | 连接关闭时                            | [阅读更多](/hocuspocus/server/hooks#on-disconnect)              |
-| `onListen`                | 服务器初始化时                        | [阅读更多](/hocuspocus/server/hooks#on-listen)                  |
-| `onDestroy`               | 服务器即将销毁时                     | [阅读更多](/hocuspocus/server/hooks#ondestroy)                 |
-| `onConfigure`             | 服务器配置完成时                     | [阅读更多](/hocuspocus/server/hooks#on-configure)               |
-| `onRequest`               | HTTP 请求到达时                      | [阅读更多](/hocuspocus/server/hooks#on-request)                 |
-| `onStoreDocument`         | 文档发生改变时                      | [阅读更多](/hocuspocus/server/hooks#on-store-document)          |
-| `onUpgrade`               | WebSocket 连接升级时                 | [阅读更多](/hocuspocus/server/hooks#on-upgrade)                 |
-| `onStateless`             | 收到无状态消息时                    | [阅读更多](/hocuspocus/server/hooks#on-stateless)               |
-| `beforeBroadcastStateless`| 广播无状态消息之前                  | [阅读更多](/hocuspocus/server/hooks#before-broadcast-stateless) |
-| `afterUnloadDocument`     | 文档在服务器关闭时                  | [阅读更多](/hocuspocus/server/hooks#after-unload-document)      |
+| Hook                       | 说明                                       | 链接                                                  |
+| -------------------------- |-------------------------------------------|-------------------------------------------------------|
+| `beforeHandleMessage`      | 处理消息之前                              | [阅读更多](/hocuspocus/server/hooks#before-handle-message)      |
+| `beforeHandleAwareness`    | 应用传入的 awareness 更新之前              | [阅读更多](/hocuspocus/server/hooks#before-handle-awareness)  |
+| `onConnect`                | 连接建立时                                | [阅读更多](/hocuspocus/server/hooks#on-connect)                 |
+| `connected`                | 连接建立后                                | [阅读更多](/hocuspocus/server/hooks#connected)                  |
+| `onAuthenticate`           | 需要身份验证时                            | [阅读更多](/hocuspocus/server/hooks#on-authenticate)            |
+| `onAwarenessUpdate`        | awareness 发生变化时                      | [阅读更多](/hocuspocus/server/hooks#on-awareness-update)        |
+| `onLoadDocument`           | 创建新文档期间                            | [阅读更多](/hocuspocus/server/hooks#on-load-document)           |
+| `afterLoadDocument`        | 文档创建后                                | [阅读更多](/hocuspocus/server/hooks#after-load-document)        |
+| `onChange`                 | 文档发生变化时                            | [阅读更多](/hocuspocus/server/hooks#on-change)                  |
+| `onDisconnect`             | 连接关闭时                                | [阅读更多](/hocuspocus/server/hooks#on-disconnect)              |
+| `onListen`                 | 服务器初始化时                            | [阅读更多](/hocuspocus/server/hooks#on-listen)                  |
+| `onDestroy`                | 服务器即将被销毁时                        | [阅读更多](/hocuspocus/server/hooks#ondestroy)                 |
+| `onConfigure`              | 服务器完成配置时                          | [阅读更多](/hocuspocus/server/hooks#on-configure)               |
+| `onRequest`                | 有 HTTP 请求进入时                         | [阅读更多](/hocuspocus/server/hooks#on-request)                 |
+| `onStoreDocument`          | 文档已更改时                              | [阅读更多](/hocuspocus/server/hooks#on-store-document)          |
+| `onUpgrade`                | WebSocket 连接升级时                      | [阅读更多](/hocuspocus/server/hooks#on-upgrade)                 |
+| `onStateless`              | 收到 Stateless 消息时                     | [阅读更多](/hocuspocus/server/hooks#on-stateless)               |
+| `beforeBroadcastStateless` | 广播无状态消息之前                        | [阅读更多](/hocuspocus/server/hooks#before-broadcast-stateless) |
+| `afterUnloadDocument`      | 文档关闭时                                | [阅读更多](/hocuspocus/server/hooks#after-unload-document)      |
 
 ## 使用示例
 
@@ -270,6 +271,85 @@ provider.sendToken();
 // 服务器向提供者请求令牌
 const connection = document.connections.values().next().value?.connection;
 connection.requestToken();
+```
+
+### beforeHandleAwareness
+
+`beforeHandleAwareness` 钩子会在服务器解码传入的 awareness 消息后、将其应用到文档的 awareness 状态之前调用。与在应用后观察 awareness 变化的 `onAwarenessUpdate` 不同，`beforeHandleAwareness` 允许你在消息进入文档的 awareness 或被广播给其他节点之前检查并重写更新内容。
+
+该钩子接收按客户端分组、已解码的 `states`，其类型是一个可变的 `Map`，以 Yjs 的 `clientId` 为键。你可以原地修改这个 Map 及其中的状态对象，以便：
+
+- 修改状态对象中的字段（例如，用服务器已验证的 `user` 覆盖客户端提供的值）。
+- 使用 `states.delete(clientId)` 从广播中移除某个节点。
+- 使用 `states.set(clientId, ...)` 添加或替换一个合成状态。
+
+发送给其他节点的编码更新会反映钩子链中所有钩子执行后的 Map 状态。抛出异常会拒绝整个更新——不会被应用，也不会被广播。
+
+多个扩展可以自然串联：每个扩展都会看到前一个扩展修改后的 Map，并可继续修改。扩展会先于配置层面的钩子执行。
+
+**钩子负载**
+
+传递给 `beforeHandleAwareness` 钩子的 `data` 具有以下属性：
+
+```js
+import { Awareness } from 'y-protocols/awareness'
+import type { Connection, TransactionOrigin } from '@hocuspocus/server'
+
+const data = {
+  awareness: Awareness,
+  clientsCount: number,
+  // 由 `onAuthenticate` 填充的连接上下文。若更新并非来自客户端连接，
+  // 则为 `undefined`（例如，通过 DirectConnection 进行的服务器内部写入）。
+  context: any | undefined,
+  document: Document,
+  documentName: string,
+  instance: Hocuspocus,
+  requestHeaders: Headers,
+  requestParameters: URLSearchParams,
+  socketId: string,
+  // 从传入更新中解码出的按客户端划分的 awareness 状态，按
+  // Yjs clientId 为键。原地修改此 Map 以重写更新。
+  states: Map<number, Record<string, any>>,
+  // 将传递给 applyAwarenessUpdate 的 TransactionOrigin。
+  // 使用 isTransactionOrigin() 来区分来源。
+  transactionOrigin: TransactionOrigin,
+  // 便捷快捷方式：当 transactionOrigin 是
+  // ConnectionTransactionOrigin 时为 `origin.connection`，否则为 undefined。
+  connection?: Connection,
+}
+```
+
+**示例：在客户端值之上覆盖服务器验证字段**
+
+```js
+import { Server } from '@hocuspocus/server'
+
+const server = new Server({
+  async beforeHandleAwareness({ states, context }) {
+    for (const state of states.values()) {
+      // 用服务器已知的信息覆盖客户端声称的内容。
+      state.user = context?.user ?? null
+    }
+  },
+})
+
+server.listen()
+```
+
+**示例：完全拒绝更新**
+
+```js
+import { Server } from '@hocuspocus/server'
+
+const server = new Server({
+  async beforeHandleAwareness({ context }) {
+    if (context?.readOnly) {
+      throw new Error('只读会话不允许 awareness 更新')
+    }
+  },
+})
+
+server.listen()
 ```
 
 ### onAwarenessUpdate
@@ -736,7 +816,7 @@ server.listen();
 
 如果你想让某个本地修改跳过存储钩子，可以在打开直接连接时为 `LocalTransactionOrigin` 设置 `skipStoreHooks`。扩展也可以抛出 `SkipFurtherHooksError`（来自 `@hocuspocus/common`），以表明持久化已经处理完毕，后续钩子应被跳过。
 
-**Hook 负载**
+**钩子负载**
 
 传递给 `onStoreDocument` 钩子的 `data` 包含：
 

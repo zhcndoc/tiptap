@@ -133,6 +133,18 @@ return VueNodeViewRenderer(Component, { selectedOnTextSelection: true })
 
 启用这个选项后，只要 `TextSelection` 完全位于节点范围内，`selected` 也会变成 `true`——例如，当光标放在节点内容中的某个位置时。只与节点部分重叠的选区不算作已选中。
 
+## 跟踪节点位置
+
+节点视图在装饰或位置变化但内容未变化时不会重新渲染。ProseMirror 会原生处理 `contentDOM` 上的装饰，而 `getPos()` 闭包在被调用时始终返回当前的位置——即使没有重新渲染也是如此。
+
+如果你的组件需要 `getPos()` 在渲染输出中保持响应式（例如，一个显示 `pos: 42` 的拖拽手柄），请启用 `trackNodeViewPosition`：
+
+```js
+return VueNodeViewRenderer(Component, { trackNodeViewPosition: true })
+```
+
+启用后，组件会在每次位置变化时重新渲染。请谨慎使用——频繁重新渲染可能会影响性能。
+
 ## 所有可用 props
 
 对于高级用例，我们会传递更多 props 给你的组件。

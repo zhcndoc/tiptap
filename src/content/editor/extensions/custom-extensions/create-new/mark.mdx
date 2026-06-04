@@ -253,3 +253,31 @@ const CustomMark = Mark.create({
   code: true,
 })
 ```
+
+### `clearable`
+
+默认情况下，可以使用 `unsetAllMarks` 命令移除标记。你可以将 `clearable` 设置为 `false`，以保护标记不被 `unsetAllMarks` 移除。`unsetMark` 命令不受影响——只有 `unsetAllMarks` 会遵守此选项。
+
+你也可以使用回调函数，根据编辑器状态动态判断是否可以清除标记。
+
+```typescript
+const CustomMark = Mark.create({
+  name: 'customMark',
+
+  // 此标记不会被 unsetAllMarks 移除
+  clearable: false,
+})
+```
+
+```typescript
+const CustomMark = Mark.create({
+  name: 'customMark',
+
+  // 动态判断是否可以清除该标记
+  clearable: () => {
+    return editor.state.doc.textContent.length < 100
+  },
+})
+```
+
+默认为 `true`。

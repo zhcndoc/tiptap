@@ -34,34 +34,18 @@ editor.chain().focus().toggleBold().run()
 
 所有链式命令都是排队的。它们组合成一个单一的事务。这意味着内容仅更新一次，`update` 事件也仅触发一次。
 
-<Callout title="事务映射" variant="hint">
-  默认情况下，Prosemirror **不支持链式调用**，这意味着你需要通过 [**事务映射**](https://prosemirror.net/docs/ref/#transform.Mapping) 来更新链式命令之间的位置。
-</Callout>
-
-例如，你想在一个链中链接一个 **删除** 和 **插入** 命令，你需要在链命令中跟踪位置。以下是一个示例：
+例如，你可能希望将一个 **delete** 和一个 **insert** 命令链接在一起：
 
 ```js
-// 在此我们为编辑器添加两个自定义命令以演示两个事务步骤之间的事务映射
 addCommands() {
   return {
     delete: () => ({ tr }) => {
-      const { $from, $to } = tr.selection
-
-      // 这里我们使用 tr.mapping.map 来映射事务步骤之间的位置
-      const from = tr.mapping.map($from.pos)
-      const to = tr.mapping.map($to.pos)
-
-      tr.delete(from, to)
+      tr.delete(tr.selection.from, tr.selection.to)
 
       return true
     },
     insert: (content: string) => ({ tr }) => {
-      const { $from } = tr.selection
-
-      // 这里我们使用 tr.mapping.map 来映射事务步骤之间的位置
-      const pos = tr.mapping.map($from.pos)
-
-      tr.insertText(content, pos)
+      tr.insertText(content, tr.selection.from)
 
       return true
     },
@@ -69,7 +53,7 @@ addCommands() {
 }
 ```
 
-现在你可以执行以下操作，而不会导致 `insert` 将内容插入错误的位置：
+现在你可以将这两个命令链接起来：
 
 ```js
 editor.chain().delete().insert('foo').run()
@@ -217,7 +201,7 @@ export default () =>
 | `extendMarkRange()`     | 扩展文本选择至当前标记。                           |
 | `exitCode()`            | 退出代码块。                                      |
 | `joinBackward()`        | 将两个节点向后连接。                               |
-| `joinForward()`         | 将两个节点向前连接。                               |
+| `joinForward()`        | 将两个节点向前连接。                               |
 | `lift()`                | 移除现有包裹。                                    |
 | `liftEmptyBlock()`      | 如果为空，则提升块。                              |
 | `newlineInCode()`       | 在代码中添加换行符。                              |

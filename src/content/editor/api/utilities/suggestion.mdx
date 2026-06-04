@@ -94,6 +94,61 @@ Suggestion({
 
 默认：`false`
 
+### minQueryLength
+
+用户在触发字符之后必须输入的最少字符数，之后才会调用 `items()` 函数。
+
+在从 API 获取建议时很有用——它可以防止当查询太短、没有实际意义时发出不必要的网络请求。
+
+默认：`0`
+
+```js
+Suggestion({
+  minQueryLength: 2,
+  items: async ({ query, signal }) => {
+    // 仅在 query.length >= 2 时调用
+    const response = await fetch(`/api/search?q=${query}`, { signal })
+    return response.json()
+  },
+})
+```
+
+### debounce
+
+用户停止输入后，在调用 `items()` 之前需要等待的毫秒数。这可以防止每次按键都触发代价较高的操作（如 API 请求）。
+
+防抖计时器会在每次按键时重置，因此只有当用户暂停输入达到指定时长后，才会调用 `items()` 函数。
+
+默认：`0`（不防抖）
+
+```js
+Suggestion({
+  debounce: 300,
+  items: async ({ query }) => {
+    // 用户停止输入 300 毫秒后调用
+    return searchApi(query)
+  },
+})
+```
+
+### initialItems
+
+在建议弹窗打开时立即显示的项目数组，在异步 `items()` 调用完成之前显示。`items()` 完成后，其结果会替换初始项目。
+
+适用于在真实结果加载时显示最近使用或热门项目。
+
+```js
+Suggestion({
+  initialItems: ['Lea Thompson', 'Cyndi Lauper', 'Tom Cruise'],
+  items: async ({ query }) => {
+    // 解析后，这些内容会替换初始项目
+    return fetchSearchResults(query)
+  },
+})
+```
+
+默认：`undefined`
+
 ### decorationTag
 
 应为建议呈现的 HTML 标签。
@@ -104,19 +159,104 @@ Suggestion({
 
 应添加到建议的 CSS 类。
 
-默认: `'suggestion'`
+默认：`'suggestion'`
 
 ### decorationContent
 
 应在建议装饰中呈现的内容。
 
-默认: `''`
+默认：`''`
 
 ### decorationEmptyClass
 
 当建议为空时应添加的 CSS 类。
 
-默认: `'is-empty'`
+默认：`'is-empty'`
+
+### placement
+
+建议弹出窗口相对于光标或触发装饰的首选位置。使用 [Floating UI 的 placement 值](https://floating-ui.com/docs/computePosition#placement)。
+
+解析后的 placement 会传递给 `SuggestionProps.floatingUi.placement`，你可以在渲染回调中读取它。
+
+默认：`'bottom-start'`
+
+```js
+Suggestion({
+  placement: 'top-start',
+})
+```
+
+### offset
+
+将建议弹出窗口相对于其锚点在各轴上偏移指定像素数。这些值会传递给 Floating UI 的 [`offset` 中间件](https://floating-ui.com/docs/offset)。
+
+默认：`{}`
+
+```js
+Suggestion({
+  offset: { mainAxis: 8, crossAxis: 4 },
+})
+```
+
+### flip
+
+启用后，当首选方向没有足够空间时，弹窗会自动翻转到另一侧。这会切换 Floating UI 的 [`flip` 中间件](https://floating-ui.com/docs/flip)。
+
+默认：`true`
+
+```js
+Suggestion({
+  placement: 'top-start',
+  flip: false,
+})
+```
+
+### container
+
+一个 CSS 选择器字符串或 `HTMLElement`，用于定义建议弹出窗口的容器。设置它有助于处理滚动包含或 z-index 堆叠上下文。
+
+默认：`undefined`
+
+```js
+Suggestion({
+  container: '#my-editor-container',
+})
+```
+
+### floatingUi
+
+适用于默认选项无法提供足够控制的高级 Floating UI 配置。提供后，这些选项将优先于顶层的 `placement`、`offset` 和 `flip` 设置。
+
+```js
+import { flip, shift, size } from '@floating-ui/dom'
+
+Suggestion({
+  floatingUi: {
+    placement: 'top-start',
+    strategy: 'fixed',
+    middleware: [
+      flip({ padding: 8 }),
+      shift({ padding: 8 }),
+    ],
+  },
+})
+```
+
+所有属性都是可选的。完整类型如下：
+
+```ts
+type SuggestionFloatingUiOptions = {
+  placement?: 'top' | 'top-start' | 'top-end'
+    | 'bottom' | 'bottom-start' | 'bottom-end'
+    | 'right' | 'right-start' | 'right-end'
+    | 'left' | 'left-start' | 'left-end'
+  strategy?: 'absolute' | 'fixed'
+  middleware?: Middleware[]
+}
+```
+
+默认：`undefined`
 
 ### command
 
@@ -126,19 +266,45 @@ Suggestion({
 
 ### items
 
-传递一个过滤后的建议数组，可以是异步的。
+一个函数或异步函数，会根据用户输入返回过滤后的建议。该函数会接收一个 `AbortSignal`（`signal`），当用户继续输入时该信号会被中止（例如，新按键使当前请求失效）。可用它来取消正在进行的获取请求。
 
-默认：`({ editor, query }) => []`
+```js
+items: async ({ editor, query, signal }) => {
+  const response = await fetch(`/api/search?q=${query}`, { signal })
+  return response.json()
+}
+```
+
+默认：`({ editor, query, signal }) => []`
 
 ### render
 
-自动补全弹出窗口的渲染函数。
+用于自动补全弹窗的渲染函数。返回一个包含生命周期钩子（`onStart`、`onBeforeStart`、`onUpdate`、`onBeforeUpdate`、`onExit`、`onKeyDown`）的对象，这些钩子会接收一个 `SuggestionProps` 对象。
+
+当 `items()` 是异步函数时，传递给每个钩子的 `SuggestionProps` 对象还包含以下附加属性：
+
+```ts
+{
+  // ... 现有属性（editor、range、query、text、items、command、decorationNode、clientRect）...
+
+  /** 当异步 items() 调用正在进行时为 true，否则为 false */
+  loading: boolean
+
+  /** 从选项中传入并解析后的 Floating UI 配置 */
+  floatingUi: {
+    placement: SuggestionPlacement
+    strategy: 'absolute' | 'fixed'
+    middleware: Middleware[]
+    offset: { mainAxis?: number; crossAxis?: number }
+  }
+}
+```
 
 默认：`() => ({})`
 
 ### findSuggestionMatch
 
-可选参数，用于替换触发建议的编辑器内容内置正则匹配。  
+可选参数，用于替换编辑器内容中触发建议的内置正则匹配。  
 有关更多详细信息，请参见 [源代码](https://github.com/ueberdosis/tiptap/blob/main/packages/suggestion/src/findSuggestionMatch.ts#L18)。
 
 默认：`findSuggestionMatch(config: Trigger): SuggestionMatch`
@@ -161,7 +327,7 @@ exitSuggestion(editor.view, MySuggestionPluginKey)
 // exitSuggestion(editor.view, 'suggestion')
 ```
 
-## Collaboration
+## 协作
 
 当在协作环境中使用 Tiptap 时，你可能会注意到当某个用户触发建议（如提及）时，建议会对所有用户弹出。这是因为文档更改被同步到所有客户端，每个客户端的建议插件都会对该更改作出反应。
 

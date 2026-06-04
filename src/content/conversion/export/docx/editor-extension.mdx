@@ -42,7 +42,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 | 样式覆盖              | 支持                                                                                                                                                                                                                                                                       | 支持                      |
 | 页眉和页脚            | docx.js 对象，或从 Pages 中自动提取                                                                                                                                                                                                                                    | 纯文本或字符串化 JSON |
 
-\* REST API 当前不接受 `customNodes` 或任何元素覆盖字段。携带这些字段的请求会在验证期间被移除这些字段，并使用默认值继续导出。让这两个接口保持一致已列入路线图；在此之前，如果你需要自定义节点渲染或元素覆盖，请使用编辑器扩展。
+\* REST API 当前不接受 `customNodes` 或任何元素覆盖字段。携带这些字段的请求会在验证期间将这些字段移除，并使用默认值继续导出。让这两个接口保持一致已列入路线图；在此之前，如果你需要自定义节点渲染或元素覆盖，请使用编辑器扩展。
 
 对于只需要样式自定义的简单导出，请选择 REST API。当你需要自定义节点渲染、元素覆盖或对输出进行完全控制时，请使用编辑器扩展。
 
@@ -76,7 +76,7 @@ const editor = new Editor({
   extensions: [
     // 其他扩展 ...
     ExportDocx.configure({
-      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => void, // 必填
+      onCompleteExport: (result: string | Buffer<ArrayBufferLike> | Blob | Stream) => void, // 必需
       exportType: 'blob', // 可选。默认值：'blob'
       customNodes: [], // 可选。默认值：[]
       styleOverrides: {}, // 可选。默认值：{}
@@ -85,6 +85,7 @@ const editor = new Editor({
       tableOverrides: {}, // 可选。默认值：{}
       tableCellOverrides: {}, // 可选。默认值：{}
       imageOverrides: {}, // 可选。默认值：{}
+      numberingFormats: undefined, // 可选。默认值：undefined
       headerFooterOverrides: undefined, // 可选。默认值：undefined
     }),
     // 其他扩展 ...
@@ -93,26 +94,29 @@ const editor = new Editor({
 })
 ```
 
-| 参数                  | 描述                                                                                                                                                                                                                                                                                                                          | 默认值     |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
-| onCompleteExport      | 一个**必填**回调函数，用于接收导出的数据。之后你可以按需处理这些数据（例如，提示下载文件）                                                                                                                                                                                              | `N/A`       |
-| options               | 用于配置导出部分内容的对象：<br/><br/>**exportType**：方法返回的数据类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅限服务端）<br/>- **stream**：返回 Node.js `Stream`（仅限服务端）<br/>- **string**：返回 `String`<br/>- **blob**：返回 `Blob`             | `blob`      |
-| customNodes           | 自定义节点定义数组。如果你的内容包含自定义节点，请在此传入它们的定义，以确保正确转换                                                                                                                                                                                         | `[]`        |
-| styleOverrides        | 包含要应用于导出文档的自定义样式的对象。[查看导出样式](/conversion/export/docx/styles)                                                                                                                                                                                                                  | `{}`        |
-| paragraphOverrides    | 所有段落的基础默认值（也会应用于页眉/页脚内容）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                  | `{}`        |
-| textRunOverrides      | 所有文本运行的基础默认值（也会应用于页眉/页脚内容）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                   | `{}`        |
-| tableOverrides        | 表格级属性覆盖（也会应用于页眉/页脚表格）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                     | `{}`        |
-| tableCellOverrides    | 所有表格单元格的基础默认值（也会应用于页眉/页脚单元格）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                   | `{}`        |
-| imageOverrides        | 图像属性覆盖（也会应用于页眉/页脚中的图像）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                      | `{}`        |
-| headerFooterOverrides | 仅作用于页眉/页脚内容的按字段覆盖——会在页眉和页脚中完全替换与正文范围内对应项匹配的覆盖。仅适用于从 [Pages 扩展](/pages/getting-started/overview) 自动提取的页眉/页脚。[查看 `headerFooterOverrides`](/conversion/export/docx/styles#headerfooteroverrides) | `undefined` |
+| Parameter             | Description                                                                                                                                                                                                                                                                                                                                                                                                                        | Default     |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| onCompleteExport      | 一个**必需**的回调函数，用于接收导出的数据。然后你可以按需处理这些数据（例如，提示下载文件）                                                                                                                                                                                                                                                                                            | `N/A`       |
+| options               | 用于配置导出部分内容的对象：<br/><br/>**exportType**：方法返回的数据类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅限服务端）<br/>- **stream**：返回 Node.js `Stream`（仅限服务端）<br/>- **string**：返回 `String`<br/>- **blob**：返回 `Blob`                                                                                                           | `blob`      |
+| customNodes           | 自定义节点定义数组。如果你的内容包含自定义节点，请在此传入其定义，以确保它们被正确转换                                                                                                                                                                                                                                                                                       | `[]`        |
+| styleOverrides        | 一个应用于导出文档的自定义样式对象。[查看导出样式](/conversion/export/docx/styles)                                                                                                                                                                                                                                                                                                                | `{}`        |
+| paragraphOverrides    | 所有段落的基础默认值（同样应用于页眉/页脚内容）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                                                                                | `{}`        |
+| textRunOverrides      | 所有文本运行的基础默认值（同样应用于页眉/页脚内容）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                                                                                 | `{}`        |
+| tableOverrides        | 表格级属性覆盖（同样应用于页眉/页脚中的表格）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                                                                                   | `{}`        |
+| tableCellOverrides    | 所有表格单元格的基础默认值（同样应用于页眉/页脚单元格）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                                                                                 | `{}`        |
+| imageOverrides        | 图片属性覆盖（同样应用于页眉/页脚中的图片）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                                                                                    | `{}`        |
+| numberingFormats      | 多级有序列表编号格式定义的注册表。每个条目的 `id` 都与最外层 `<ol>` 上的 `numberingFormat` 属性匹配；未知/缺失的 id 会回退为普通的 `1. 2. 3.` 编号。请将它与 `@tiptap-pro/extension-convert-kit` 中的 `OrderedListNumbering` 和 `generateNumberingFormatCss` 配合使用。[查看有序列表编号](/conversion/export/docx/ordered-list-numbering) | `undefined` |
+| headerFooterOverrides | 仅作用于页眉/页脚内容的按字段覆盖 —— 会完全替换页眉和页脚中对应的全局正文覆盖。仅适用于从 [Pages 扩展](/pages/getting-started/overview) 自动提取的页眉/页脚。[查看 `headerFooterOverrides`](/conversion/export/docx/styles#headerfooteroverrides)                                                                                               | `undefined` |
 
-<Callout title="页码占位符名称在 Pages 中配置，不在这里配置">
-    `ExportDocx` 中没有 `placeholders` 选项。要重命名内置的 `{page}` / `{total}` 标记，或禁用替换，请在 [Pages 扩展](/pages/core-concepts/page-header-footer#renaming-or-disabling-placeholders) 中配置——导出会遵循相同的标记名称，因此编辑器预览和导出的 `.docx` 会保持一致。
+<Callout title="页码令牌名称在 Pages 中配置，不在这里配置">
+  `ExportDocx` 上没有 `placeholders` 选项。要重命名内置的 `{page}` / `{total}`
+  令牌或禁用替换，请在 [Pages
+  扩展](/pages/core-concepts/page-header-footer#renaming-or-disabling-placeholders) 中进行配置 — 导出会遵循相同的令牌名称，因此编辑器预览和导出的 `.docx` 会保持一致。
 </Callout>
 
 ## 导出 DOCX 文件
 
-安装扩展后，您可以将编辑器的内容转换为 `.docx`。
+安装扩展后，您可以将编辑器中的内容转换为 `.docx`。
 
 在深入了解示例之前，我们先看一下编辑器命令中可用的 `exportDocx` 方法签名：
 
@@ -136,18 +140,19 @@ exportDocx: (options?: ExportDocxOptions) =>
 
 `exportDocx` 方法接受一个可选的 `ExportDocxOptions`（`object`）作为参数，包含以下属性，您可以用它们来_覆盖_您通过 `ExportDocx.configure` 方法配置的内容：
 
-| 参数                  | 描述                                                                                                                                                                                                                                                                                                                          | 默认值     |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
-| onCompleteExport      | 一个**必需的**回调函数（如果您没有在配置扩展调用中定义它），用于接收导出的数据。然后您可以根据需要处理这些数据（例如，提示下载文件）                                                                                                                                                                                                       | `N/A`       |
-| options               | 用于配置导出部分内容的对象：<br/><br/>**exportType**：方法返回的数据类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅服务器端）<br/>- **stream**：返回 Node.js `Stream`（仅服务器端）<br/>- **string**：返回 `String`<br/>- **blob**：返回 `Blob`             | `blob`      |
-| customNodes           | 自定义节点定义数组。如果您的内容包含自定义节点，请在此处传入它们的定义，以确保它们被正确转换                                                                                                                                                                                                                                                   | `[]`        |
-| styleOverrides        | 用于应用到导出文档的自定义样式对象。[查看导出样式](/conversion/export/docx/styles)                                                                                                                                                                                                                                                            | `{}`        |
-| paragraphOverrides    | 所有段落的基础默认值（也应用于页眉/页脚内容）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                                | `{}`        |
-| textRunOverrides      | 所有文本运行的基础默认值（也应用于页眉/页脚内容）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                             | `{}`        |
-| tableOverrides        | 表格级属性覆盖（也应用于页眉/页脚表格）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                                       | `{}`        |
-| tableCellOverrides    | 所有表格单元格的基础默认值（也应用于页眉/页脚单元格）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                       | `{}`        |
-| imageOverrides        | 图片属性覆盖（也应用于页眉/页脚中的图片）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                                   | `{}`        |
-| headerFooterOverrides | 仅作用于页眉/页脚内容的字段级覆盖——在页眉和页脚中完全替换匹配的全局正文覆盖。仅适用于从 [Pages 扩展](/pages/getting-started/overview) 自动提取的页眉/页脚。[查看 `headerFooterOverrides`](/conversion/export/docx/styles#headerfooteroverrides) | `undefined` |
+| 参数                  | 描述                                                                                                                                                                                                                                                                                                                                                                                                                        | 默认值       |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| onCompleteExport      | 一个**必需**的回调函数（如果您没有在扩展的 configure 调用中定义它），用于接收导出的数据。之后您可以按需处理这些数据（例如，提示下载文件）                                                                                                                                                                                                                                                                                | `N/A`       |
+| options               | 一个用于配置导出部分内容的对象：<br/><br/>**exportType**：方法返回的数据类型：<br/>- **buffer**：返回 Node.js `Buffer`（仅限服务端）<br/>- **stream**：返回 Node.js `Stream`（仅限服务端）<br/>- **string**：返回 `String`<br/>- **blob**：返回 `Blob`                                                                                                           | `blob`      |
+| customNodes           | 自定义节点定义数组。如果您的内容包含自定义节点，请在此处传入它们的定义，以确保它们被正确转换                                                                                                                                                                                                                                                                                       | `[]`        |
+| styleOverrides        | 一个用于应用到导出文档中的自定义样式对象。[查看导出样式](/conversion/export/docx/styles)                                                                                                                                                                                                                                                                                                                | `{}`        |
+| paragraphOverrides    | 所有段落的基础默认值（也会应用到页眉/页脚内容）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                                                                                | `{}`        |
+| textRunOverrides      | 所有文本片段的基础默认值（也会应用到页眉/页脚内容）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                                                                                 | `{}`        |
+| tableOverrides        | 表格级属性覆盖（也会应用到页眉/页脚表格）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                                                                                   | `{}`        |
+| tableCellOverrides    | 所有表格单元格的基础默认值（也会应用到页眉/页脚单元格）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                                                                                 | `{}`        |
+| imageOverrides        | 图像属性覆盖（也会应用到页眉/页脚中的图像）。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                                                                                                                                                                    | `{}`        |
+| numberingFormats      | 多级有序列表编号格式定义的注册表。每个条目的 `id` 都与最外层 `<ol>` 上的 `numberingFormat` 属性相匹配；未知或缺失的 id 会回退为普通的 `1. 2. 3.` 编号。可将其与 `@tiptap-pro/extension-convert-kit` 中的 `OrderedListNumbering` 和 `generateNumberingFormatCss` 搭配使用。[查看有序列表编号](/conversion/export/docx/ordered-list-numbering) | `undefined` |
+| headerFooterOverrides | 仅作用于页眉/页脚内容的按字段覆盖——会完全替换页眉和页脚中的对应整篇文档范围覆盖。仅适用于从 [Pages 扩展](/pages/getting-started/overview) 自动提取的页眉/页脚。[查看 `headerFooterOverrides`](/conversion/export/docx/styles#headerfooteroverrides)                                                                                               | `undefined` |
 
 ```js
 // 导入 ExportDocx 扩展
@@ -211,10 +216,10 @@ handleExportDocxBuffer()
 
 上面的示例完全在浏览器中运行，通过 ExportDocx 扩展生成一个 DOCX Blob，因为我们没有覆盖它，而 `exportType` 的默认值就是这个。然后我们以编程方式下载该文件。您可以调整这段逻辑，例如，将 blob 发送到服务器而不是下载。
 
-| 参数        | 描述                                                                                                                                                                                                                                                                                                                                                                                     |
+| 参数              | 描述                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------- | ------------------------------- |
-| onCompleteExport | 转换完成后，我们将获得转换结果 `result`，它将作为回调函数的主要且唯一参数；在本例中，它是一个 `Blob`，因为我们在 `options` 参数中的 `exportType` 已声明希望使用此类型。然后您可以按自己喜欢的方式处理它，例如触发文件下载，就像我们在上面的示例中展示的那样。 |
-| exportType       | 我们使用默认的 `blob`，因此转换返回一个 `Blob`。                                                                                                                                                                                                                                                                                                                                              |
+| onCompleteExport | 转换完成后，我们会获得转换结果 `result`，它将作为回调函数的主要且唯一参数；在本例中，它是一个 `Blob`，因为我们在 `options` 参数中的 `exportType` 已声明希望使用此类型。然后您可以按自己喜欢的方式处理它，例如触发文件下载，就像我们在上面的示例中展示的那样。 |
+| exportType       | 我们使用默认的 `blob`，因此转换会返回一个 `Blob`。                                                                                                                                                                                                                                                                                                                                              |
 | customNodes      | 由于我们没有提供任何自定义节点，因此不会提供任何自定义节点映射。                                                                                                                                                                                                                                                                                                           |
 | styleOverrides   | 我们不会提供任何样式覆盖，因此会根据 Microsoft Word 默认值中的一些常见指导原则设置一个默认的 `DOCX` 样式，并将其应用于导出的文档。                                                                                                                                                                                            |
 
@@ -257,7 +262,7 @@ async function exportDocx({
 }: ExportDocxOptions) {}
 ```
 
-`exportDocx` 函数会返回一个已准备好并转换为任意格式的 `docx` 文档，这取决于。
+`exportDocx` 函数会返回一个已准备好并转换为任意格式的 `docx` 文档，这取决于所选择的导出类型。
 
 这里有一个在服务端使用 `Express` 和 `@tiptap-pro/extension-export-docx` 的简单示例：
 

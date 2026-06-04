@@ -169,7 +169,19 @@ function SuggestionItem({ suggestion, onAccept, onReject }) {
 }
 ```
 
-根据你的 UI 对组件进行样式设置。下面是一个最小化的 CSS 起点：
+使用 `suggestion.text` 显示每位作者单独贡献的内容——这对审阅面板来说是合适的默认值。当另一位作者在此建议中嵌套了编辑时，`suggestion.fullText` 会与 `suggestion.text` 不同，并包含包括嵌套文本在内的完整范围。你可以将其作为提示显示：
+
+```jsx
+{suggestion.fullText !== suggestion.text && (
+  <span className="suggestion-item__stacked-hint">
+    with stacked edits: "{suggestion.fullText}"
+  </span>
+)}
+```
+
+查看 [`text` vs `fullText`](/tracked-changes/api-reference/types#text-vs-fulltext) 和 [nested suggestions](/tracked-changes/usage/advanced-usage#nested-and-stacked-suggestions) 以了解完整行为。
+
+为组件设置样式以匹配你的界面。下面是一个最小的 CSS 起点：
 
 ```css
 .editor-layout {

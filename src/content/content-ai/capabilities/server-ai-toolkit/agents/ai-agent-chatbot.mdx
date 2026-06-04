@@ -26,7 +26,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 <EnterpriseCalloutAuto variant="server-ai-toolkit" renderMode="sidebar" />
 
-构建一个简单的 AI agent 聊天机器人，它可以读取和编辑 Tiptap 文档。
+构建一个简单的 AI 代理聊天机器人，它可以读取和编辑 Tiptap 文档。
 
 <CodeDemo
   isLarge
@@ -80,7 +80,7 @@ npm install --save-dev @types/jsonwebtoken
   （`createJwtToken` 和 `getAuthHeaders`）。
 </Callout>
 
-你还需要一个 OpenAI API 密钥；如果使用 Tiptap Cloud 协作，还需要为 Document Server 配置 `TIPTAP_CLOUD_SECRET`。请将这些变量与 [授权指南](/content-ai/capabilities/server-ai-toolkit/install#set-up-authorization) 中的变量一起添加到你的 `.env` 文件中：
+你还需要一个 OpenAI API 密钥；如果使用 Tiptap Cloud 协作，还需要为文档服务器配置 `TIPTAP_CLOUD_SECRET`。请将这些变量与 [授权指南](/content-ai/capabilities/server-ai-toolkit/install#set-up-authorization) 中的变量一起添加到你的 `.env` 文件中：
 
 ```sh
 # .env（除了 Server AI Toolkit 变量之外）
@@ -391,11 +391,7 @@ export default function Page() {
   此实现使用 `documentId` 代替直接传递文档。文档状态通过 Tiptap Cloud 的 REST API 在服务器端管理，确保工具多次执行时状态一致。客户端则使用 Tiptap Collaboration 进行实时同步。
 </Callout>
 
-<Callout title="另一种方式：直接提供文档" variant="info">
-  你也可以不使用 Tiptap Cloud 文档，而是在 execute-tool 请求体中传递 `document` 字段（而不是 `experimental_documentOptions`），自行提供和管理文档。采用这种方式时，你需要在每次工具执行前获取文档，并在 `result.docChanged` 为 `true` 时保存更新后的文档。请参阅 [REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)。
-</Callout>
-
-## 最终效果
+## 最终结果
 
 配合额外的 CSS 样式，效果是一个简单但精致的 AI 聊天机器人应用，使用 Server AI Toolkit 进行文档编辑：
 
@@ -408,7 +404,49 @@ export default function Page() {
 
 查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
-## 后续步骤
+## 替代方案：直接提供文档
+
+你可以不用 Tiptap Cloud 文档，而是在 execute-tool 请求体中传入一个 `document` 字段（而不是 `experimental_documentOptions`），由你自己提供并管理文档。
+
+采用这种方式时，你需要在每次工具执行前获取文档，并在 `docChanged` 为 `true` 时将更新后的文档保存回去。
+
+```ts
+import { loadDocument, saveDocument } from './db'
+
+const document = await loadDocument()
+const response = await fetch(`${apiBaseUrl}/v3/ai/toolkit/execute-tool`, {
+  method: 'POST',
+  headers: getAuthHeaders(),
+  body: JSON.stringify({
+    toolName,
+    input,
+    experimental_documentOptions: { documentId },
+    editorContext,
+  }),
+})
+
+if (!response.ok) {
+  throw new Error(`Tool execution failed: ${response.statusText}`)
+}
+
+const body = await response.json()
+
+// 如果工具执行修改了文档，则存储该文档
+if (body.docChanged && body.document) {
+  await saveDocument(body.document)
+}
+```
+
+<Callout title="tiptapRead 工具可以修改文档" variant="info">
+  `tiptapRead` 工具可以对文档进行编辑，以便为后续的读取操作做准备。
+  因此，如果 `docChanged` 属性为 `true`，你应该在执行 `tiptapRead` 工具后更新文档。
+</Callout>
+
+在 `document` 字段中以内联方式提供文档有几个限制。首先，不支持 [Tiptap 评论](/comments/getting-started/overview)，因为它们存储在 Tiptap Cloud 文档中。此外，变更无法关联到某个特定用户，也没有与 [版本历史](/collaboration/documents/snapshot) 的内置集成。
+
+更多信息请参阅 [REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api) 中关于 `document` 字段的说明。
+
+## 下一步
 
 - 允许您的 AI 通过 [自定义节点指南](/content-ai/capabilities/server-ai-toolkit/advanced-guides/custom-nodes) 生成自定义元素
 - 在 [智能体部分](/content-ai/capabilities/server-ai-toolkit/agents) 了解更多可用工具

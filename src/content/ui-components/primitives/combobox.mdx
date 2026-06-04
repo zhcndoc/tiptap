@@ -32,6 +32,7 @@ npx @tiptap/cli@latest add combobox
 ## 用法
 
 ```tsx
+import React from 'react'
 import {
   ComboboxProvider,
   Combobox,
@@ -40,23 +41,25 @@ import {
   ComboboxItem,
 } from '@/components/tiptap-ui-primitive/combobox'
 
+const ALL_OPTIONS = ['苹果', '香蕉', '樱桃', '枣']
+
 export default function MyComponent() {
   const [value, setValue] = React.useState('')
-  const [selectedValue, setSelectedValue] = React.useState('')
+
+  const matches = ALL_OPTIONS.filter((opt) =>
+    opt.toLowerCase().startsWith(value.toLowerCase())
+  )
 
   return (
-    <ComboboxProvider value={selectedValue} setValue={setSelectedValue}>
-      <Combobox
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        placeholder="搜索选项..."
-      />
+    <ComboboxProvider value={value} setValue={setValue}>
+      <Combobox placeholder="搜索选项..." />
       <ComboboxPopover>
         <ComboboxList>
-          <ComboboxItem value="apple">苹果</ComboboxItem>
-          <ComboboxItem value="banana">香蕉</ComboboxItem>
-          <ComboboxItem value="cherry">樱桃</ComboboxItem>
-          <ComboboxItem value="date">枣</ComboboxItem>
+          {matches.map((opt) => (
+            <ComboboxItem key={opt} value={opt}>
+              {opt}
+            </ComboboxItem>
+          ))}
         </ComboboxList>
       </ComboboxPopover>
     </ComboboxProvider>

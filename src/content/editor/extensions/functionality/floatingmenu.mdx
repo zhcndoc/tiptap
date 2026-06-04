@@ -125,15 +125,30 @@ import { Editor } from '@tiptap/core'
 import FloatingMenu from '@tiptap/extension-floating-menu'
 
 new Editor({
+  element: document.querySelector('#editor'),
   extensions: [
+    StarterKit,
     FloatingMenu.configure({
-      element: document.querySelector('.menu'),
+      element: document.querySelector('#floating-menu'),
     }),
   ],
+  content: '<p>Click on an empty line to see the floating menu.</p>',
 })
 ```
 
-## 框架中的使用
+向您的 HTML 中添加一个菜单元素：
+
+```html
+<div id="floating-menu" style="display: none; position: absolute;">
+  <button onclick="editor.chain().focus().toggleHeading({ level: 1 }).run()">H1</button>
+  <button onclick="editor.chain().focus().toggleBulletList().run()">List</button>
+</div>
+<div id="editor"></div>
+```
+
+当光标位于空行上时，Tiptap 会自动显示并定位菜单元素。
+
+## 使用框架
 
 ### React
 
@@ -245,7 +260,7 @@ new Editor({
 
 ### 强制更新浮动菜单位置
 
-If the floating menu changes size after the initial render, its position will not be adjusted automatically. To fix this, you can force update the position by setting a `pluginKey` on the extension and emitting an `'updatePosition'` event with that key.
+如果浮动菜单在初始渲染后大小发生变化，其位置不会自动调整。要修复此问题，您可以在扩展上设置一个 `pluginKey`，并使用该键发送一个 `'updatePosition'` 事件来强制更新位置。
 
 ```ts
 FloatingMenu.configure({
@@ -256,7 +271,7 @@ FloatingMenu.configure({
 editor.commands.setMeta('myFloatingMenu', 'updatePosition')
 ```
 
-To target a specific floating menu, emit an `'updatePosition'` event via transaction metadata and use that menu's `pluginKey`:
+要定位到特定的浮动菜单，请通过事务元数据发送一个 `'updatePosition'` 事件，并使用该菜单的 `pluginKey`：
 
 ```ts
 FloatingMenu.configure({
@@ -265,24 +280,24 @@ FloatingMenu.configure({
 })
 ```
 
-For example, if you have multiple floating menus:
+例如，如果您有多个浮动菜单：
 
 ```ts
 editor.commands.setMeta('floatingMenuOne', 'updatePosition')
 ```
 
-If you use the React or Vue `FloatingMenu` component and want to trigger `updatePosition` externally, pass an explicit `pluginKey` prop to the component first. If you omit `pluginKey`, the component creates its own ProseMirror `PluginKey`, which external code cannot reliably reference later.
+如果您使用 React 或 Vue 的 `FloatingMenu` 组件，并希望在外部触发 `updatePosition`，请先向组件传递一个明确的 `pluginKey` prop。若省略 `pluginKey`，组件会创建自己的 ProseMirror `PluginKey`，外部代码之后就无法可靠地引用它。
 
-### Programmatically show or hide the floating menu
+### 以编程方式显示或隐藏浮动菜单
 
-You can programmatically show or hide the floating menu by setting a `pluginKey` on the extension and dispatching a transaction with the `'show'` or `'hide'` meta value using that key.
+您可以通过在扩展上设置一个 `pluginKey`，并使用该键派发带有 `'show'` 或 `'hide'` 元数据值的事务，以编程方式显示或隐藏浮动菜单。
 
 ```ts
-// Show the floating menu
+// 显示浮动菜单
 editor.commands.setMeta('myFloatingMenu', 'show')
 
-// Hide the floating menu
+// 隐藏浮动菜单
 editor.commands.setMeta('myFloatingMenu', 'hide')
 ```
 
-**Note:** dispatching `'show'` or `'hide'` will override the behavior defined in `shouldShow`.
+**注意：** 派发 `'show'` 或 `'hide'` 会覆盖 `shouldShow` 中定义的行为。

@@ -140,6 +140,18 @@ return ReactNodeViewRenderer(Component, { selectedOnTextSelection: true })
 
 启用此选项后，只要 `TextSelection` 完全位于节点范围内，`selected` 也会为 `true`——例如，当光标放在节点内容内部的某个位置时。仅与节点部分重叠的选区不被视为已选中。
 
+## 跟踪节点位置
+
+当装饰或位置发生变化但内容未变化时，节点视图不会重新渲染。ProseMirror 会在 `contentDOM` 上原生处理装饰，而 `getPos()` 闭包在调用时始终返回当前位置——即使没有重新渲染。
+
+如果您的组件需要 `getPos()` 在渲染输出中保持响应式（例如显示 `pos: 42` 的拖动手柄），请启用 `trackNodeViewPosition`：
+
+```js
+return ReactNodeViewRenderer(Component, { trackNodeViewPosition: true })
+```
+
+启用后，组件会在每次位置变化时重新渲染。请谨慎使用——频繁重新渲染可能会影响性能。
+
 ## 所有可用的 props
 
 以下是您可以期待的 props 完整列表：

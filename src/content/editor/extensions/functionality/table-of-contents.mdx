@@ -235,4 +235,47 @@ editor.storage.tableOfContents.scrollPosition
 }
 ```
 
-这应该为您提供足够的灵活性，以渲染您自己的目录。
+这应该能为您提供足够的灵活性来渲染您自己的目录。
+
+## 服务端锚点 ID 工具
+
+`generateTocIds` 函数允许您在服务端为 Tiptap 文档分配锚点 ID（`id` 和 `data-toc-id`），而无需创建 `Editor` 实例。当您想静态渲染文档时——例如使用 `@tiptap/static-renderer`——这非常有用，同时还能获得与 `TableOfContents` 插件在实时编辑器中生成的相同锚点属性。
+
+### 参数
+
+- **`doc`** (`JSONContent`): 一个要添加锚点 ID 的 Tiptap JSON 文档
+- **`extensions`** (`Extensions`): 要使用的扩展。必须包含 `TableOfContents` 扩展。要自定义 ID 的生成方式或哪些节点类型被视为锚点，请将 `getId` 或 `anchorTypes` 等选项传递给 `TableOfContents` 扩展。
+
+### 返回类型
+
+返回一个新的 Tiptap 文档（一个 `JSONContent` 对象），其中为缺失 ID 或存在重复 ID 的锚点类型节点分配了 `id` 和 `data-toc-id` 属性。
+
+### 示例
+
+```js
+import { generateTocIds, TableOfContents } from '@tiptap/extension-table-of-contents'
+import { StarterKit } from '@tiptap/starter-kit'
+
+const doc = {
+  type: 'doc',
+  content: [
+    { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Introduction' }] },
+    { type: 'paragraph', content: [{ type: 'text', text: 'A paragraph.' }] },
+    { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Details' }] },
+  ],
+}
+
+const newDoc = generateTocIds(doc, [StarterKit, TableOfContents("")]
+
+// 结果：
+// {
+//   type: 'doc',
+//   content: [
+//     { type: 'heading', attrs: { level: 1, id: 'd4590f81-52e8-45ec-b317-2e9a805b03e3', 'data-toc-id': 'd4590f81-52e8-45ec-b317-2e9a805b03e3' }, content: [...] },
+//     { type: 'paragraph', content: [...] },
+//     { type: 'heading', attrs: { level: 2, id: 'c88f9b5f-7b91-442f-b4d9-ee0d04104827', 'data-toc-id': 'c88f9b5f-7b91-442f-b4d9-ee0d04104827' }, content: [...] }
+//   ]
+// }
+```
+
+该函数会自动获取 `TableOfContents` 扩展中的配置，包括 `anchorTypes` 和 `getId`。

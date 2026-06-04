@@ -4,7 +4,7 @@ tags:
   - type: alpha
 meta:
   title: Pages 协作 | Tiptap Pages 文档
-  description: 了解如何使用 Pages 扩展为您的分页编辑器添加实时协作功能。
+  description: 了解如何为你的分页编辑器添加实时协作——包括页眉、页脚、四种子类型（默认、首页、奇偶页），以及文档级页面几何信息，如格式和边距——使用 Pages 扩展。
   category: Pages
 sidebars:
   hideSecondary: true
@@ -13,9 +13,19 @@ sidebars:
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-您可以通过将 Pages 扩展与协作提供者（例如 TiptapCollabProvider）结合使用，在分页编辑器中启用实时协作。
+Pages 开箱即支持在**主文档正文**、**每个页眉/页脚子编辑器**以及**文档级页面几何**（页面格式、页面间距、页眉/页脚边距覆盖）上的实时协作。每种页眉/页脚子类型——默认、首页、奇数页、偶数页——都有自己独立的 Y 字段，因此多个用户可以同时编辑，并看到远程更改实时传播到打开的编辑器以及渲染在每一页上的页面级预览中。在一个客户端上切换页面格式或拖动边距滑块，会同步更新所有已连接客户端的布局。
 
 <CodeDemo isPro path="/Extensions/PagesCollaboration" />
+
+---
+
+## 工作原理
+
+当在父编辑器上配置了 `@tiptap/extension-collaboration` 时，Pages 扩展会通过 `headerFooterExtensions` 回调将 `Y.Doc` 交给你，以便你为每个页眉/页脚子编辑器附加一个 `Collaboration` 扩展。该包不会捆绑 `yjs` 或 `@tiptap/extension-collaboration` —— 这些依赖由你的应用自行提供，并通过回调进行挂载。
+
+每个页眉/页脚子类型（默认、首页、奇数页、偶数页——页眉和页脚各自如此）都独立协作。配置切换项 `differentFirstPage` / `differentOddEven` 以及文档级页面几何（`pageFormat`、`pageGap`、`headerTopMargin`、`footerBottomMargin`）都会自动在客户端之间同步——在一个客户端上切换标志或更改格式，会在一帧内反映到其他客户端。即使没有打开覆盖层，远程编辑也会传播到每个客户端的页面级预览中。
+
+如果你还在父编辑器上配置了 `@tiptap/extension-collaboration-caret`（Tiptap v2 中的 `CollaborationCursor`），那么远程光标和用户标签会出现在主文档正文中。回调上下文会通过 `ctx.cursor` 暴露 provider 和本地用户，但请注意下面的警告——推荐的设置只在主编辑器上启用 awareness，而不要在子编辑器上启用。
 
 ---
 
@@ -47,7 +57,7 @@ const doc = new Y.Doc()
 
 const provider = new TiptapCollabProvider({
   name: 'document.name', // 用于同步的唯一文档标识符
-  appId: 'your-app-id', // 来自 Cloud 控制台的文档服务器 ID，或在本地部署时使用 `baseURL`
+  appId: 'your-app-id', // 来自 Cloud 仪表盘，或在本地部署时使用 `baseURL`
   token: 'your-jwt', // 由您的服务器生成的 JWT
   document: doc,
 })
@@ -55,12 +65,14 @@ const provider = new TiptapCollabProvider({
 
 ## 4. 使用 Pages 栈和协作配置您的编辑器
 
+使用 `headerFooterExtensions` 的**回调形式**。Pages 会针对每个子类型（`default`、`first`、`odd`、`even` × `header`、`footer`）调用一次回调，并传入一个上下文，用于描述协作是否启用，以及该子编辑器应绑定到哪个 Y 字段。返回该子类型的扩展，其中当 `ctx.isCollaborative` 为 true 时包含一个 `Collaboration` 扩展。
+
 ```ts
 import { Editor } from '@tiptap/core'
+import Collaboration from '@tiptap/extension-collaboration'
 import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
 import { TableKit } from '@tiptap-pro/extension-pages-tablekit'
 import { Pages } from '@tiptap-pro/extension-pages'
-import Collaboration from '@tiptap/extension-collaboration'
 
 const editor = new Editor({
   extensions: [
@@ -68,11 +80,27 @@ const editor = new Editor({
     TableKit,
     Pages.configure({
       pageFormat: 'A4',
-      header: 'My Project',
-      footer: '第 {page} 页，共 {total} 页',
-      // 将主编辑器的栈镜像到 header/footer 覆盖层中，以便
-      // 其 schema、marks 和 tables 在那里表现一致。
-      headerFooterExtensions: [ConvertKit.configure({ table: false }), TableKit],
+      // ⚠️ 不要在这里传入 `header` / `footer` 默认值——请参见下面的“预期行为”。
+      // 在启用协作时，Y 是页眉/页脚内容的唯一事实来源；默认值会与之竞争，
+      // 并且在远程清空后可能会重新出现。
+      headerFooterExtensions: ctx => {
+        // 将主编辑器的扩展栈复制到每个子编辑器中，使它们的 schema、
+        // marks 和表格行为保持一致。
+        const base = [ConvertKit.configure({ table: false }), TableKit]
+
+        if (!ctx.isCollaborative || !ctx.ydoc) {
+          // 父编辑器未启用协作——返回基础扩展栈。
+          return base
+        }
+
+        return [
+          ...base,
+          Collaboration.configure({
+            document: ctx.ydoc,
+            field: ctx.field,
+          }),
+        ]
+      },
     }),
     Collaboration.configure({
       document: doc,
@@ -81,20 +109,145 @@ const editor = new Editor({
 })
 ```
 
-<Callout title="页眉和页脚属于同一个会话" variant="info">
-  页眉和页脚编辑器会与主文档一起协作。无需额外的提供者配置；在编辑器上设置 <code>Collaboration</code> 就会将它们一并纳入。有关详细信息，请参见
-  [页面页眉和页脚](/pages/core-concepts/page-header-footer#collaboration)。
+<Callout title="一个回调，八个子编辑器" variant="info">
+  你的回调会针对每个 `(editorType, subType)` 组合调用一次——总共八次。每次调用都会收到一个不同的 `ctx.field`，以便匹配的子编辑器与文档中的各自片段保持同步。当前未被编辑的子类型仍会在后台接收远程更新，因此页面级预览会在每个客户端上立即反映更改。
 </Callout>
 
-## 5. 流畅体验的小贴士
+### 使用 `CollaborationCaret` 添加 awareness
 
-- 确保在编辑前提供者已连接
-- 在您的 UI 中处理连接错误和用户存在状态
-- 可与其他协作扩展结合使用，例如评论、光标等
-- 传递给 `headerFooterExtensions` 的扩展应与主编辑器使用的相同，这样文档及其页眉页脚之间的 schema 才能保持一致
+安装 `@tiptap/extension-collaboration-caret`（Tiptap v2 中的 `@tiptap/extension-collaboration-cursor`），并将其附加到**主编辑器**。这样，远程光标和用户标签就会出现在主文档正文中：
 
-## 6. 后续步骤
+```ts
+import Collaboration from '@tiptap/extension-collaboration'
+import CollaborationCaret from '@tiptap/extension-collaboration-caret'
 
-- 浏览 [Pages 选项](/pages/core-concepts/options) 以获得更多布局控制
-- 查看 [页面页眉和页脚](/pages/core-concepts/page-header-footer) 以了解在页眉和页脚中进行实时编辑
-- 查看 [Tiptap 协作文档](https://tiptap.dev/collaboration) 以了解高级用法
+const localUser = { name: 'Alice', color: '#3b82f6' }
+
+const editor = new Editor({
+  extensions: [
+    ConvertKit.configure({ table: false }),
+    TableKit,
+    Pages.configure({
+      headerFooterExtensions: ctx => {
+        const base = [ConvertKit.configure({ table: false }), TableKit]
+        if (!ctx.isCollaborative || !ctx.ydoc) return base
+        // 仅同步内容——为何不在此处转发 CollaborationCaret，
+        // 请参见下面的说明框。
+        return [...base, Collaboration.configure({ document: ctx.ydoc, field: ctx.field })]
+      },
+    }),
+    Collaboration.configure({ document: doc }),
+    // 主文档正文上的 awareness。
+    CollaborationCaret.configure({ provider, user: localUser }),
+  ],
+})
+```
+
+<Callout title="为什么我们不把 CollaborationCaret 放到每个子编辑器上" variant="warning">
+  `y-prosemirror` 的 awareness 对每个客户端只有**一个光标槽位**。当一个 provider 同时服务主编辑器和 8 个页眉/页脚子编辑器时，每个 `yCursorPlugin` 实例都会写入同一个槽位，然后每个编辑器又会尝试将其他实例的位置按不同的 Y 字段进行解码。渲染回退会在整个页眉 / 页脚内容上绘制一条很宽的“选区”条，而不是细小的光标。
+
+  只在主编辑器上保留 `CollaborationCaret`。内容仍会在每个页眉/页脚子编辑器中干净地同步；只是当你在覆盖层中编辑时，看不到远程光标。`ctx.cursor` 值仍然会传递给回调，如果你想将其转发到单个规范子编辑器进行实验，也是可以的——但不要把它转发给全部八个。
+</Callout>
+
+---
+
+## 同步内容
+
+### 内容
+
+- **所有八个页眉/页脚子编辑器。** 默认 / 首页 / 奇数页 / 偶数页 × 页眉 / 页脚——每种子类型都会保持同步。
+- **每个客户端上的实时预览，即使覆盖层已关闭。** 当客户端 A 在页眉中输入时，客户端 B 渲染出的页面级页眉会在一帧内更新——B 不需要打开覆盖层也能看到变化。
+- **已清空的内容会保持清空。** 在一个客户端上删除所有页眉内容后，其他所有客户端渲染出来的页眉都会保持空白。
+- **远程内容增长时高度会自动调整。** 如果远程用户添加了足够多的行，使页眉超过当前预留空间，那么每个客户端的页面布局都会相应调整，以避免正文重叠。
+
+### 子类型切换
+
+- **`differentFirstPage`**（以及对应的 `differentFirstPageFooter`）在一个客户端上同时切换时，会在其他客户端上同步切换，符合 Microsoft Word “同时切换两者”的行为。
+- **`differentOddEven`**（以及对应的 `differentOddEvenFooter`）——同样如此。
+
+### 文档级页面几何
+
+- **`pageFormat`**——内置格式（`A4`、`Letter`、`Legal` 等）以及自定义 `PageFormat` 对象。
+- **`pageGap`**——页面之间的垂直间距。
+- **`headerTopMargin`**——页顶到页眉内容距离的显式覆盖。
+- **`footerBottomMargin`**——页脚到页面底部距离的显式覆盖。
+
+下面是一些实用示例：
+
+```ts
+// 在一个客户端上触发这些操作中的任意一个，都会传播到每个已连接客户端。
+editor.commands.setPageFormat('Letter')
+editor.commands.setPageGap(80)
+editor.commands.setHeaderTopMargin(40)
+editor.commands.setFooterBottomMargin(40)
+```
+
+`reset*` 边距命令传播的是**重置**，而不是格式默认值——`resetHeaderTopMargin()` 会在每个客户端上清除覆盖，因此它们都会回退到该格式自身的默认值（格式顶部边距的 50%）：
+
+```ts
+editor.commands.resetHeaderTopMargin()
+editor.commands.resetFooterBottomMargin()
+```
+
+### 可选：awareness
+
+如果你在父编辑器上配置了 `@tiptap/extension-collaboration-cursor`，远程光标和标签也会出现在页眉/页脚覆盖层中——请参见下面的 [添加 `CollaborationCursor`](#adding-collaborationcursor)。
+
+## 不同步的内容
+
+以下内容按设计保持为每个客户端独立，因为它们描述的是*你*如何查看文档，而不是文档本身：
+
+- **`zoom`**——不同的屏幕尺寸需要不同的缩放。一个用户 80%，另一个用户 100% 是完全合理且有用的。
+- **`accentColor` / `headerAccentColor` / `footerAccentColor`**——覆盖层界面元素（光标、工具栏边框、标签背景）只会显示在*你*自己的编辑上。按用户区分可以让人们为无障碍性选择高对比度选项。
+- **`pageGapBackground`**——页面区域外的视觉界面元素，理由同上。
+- **`editableHeader` / `editableFooter`**——这些是权限控制。它们应当来自你应用的认证/角色模型（管理员可编辑，查看者不可编辑），而不是来自每个文档的 Y 状态。否则任何用户都可能把所有人锁在外面。
+
+如果你需要共享这些内容中的任意一项（例如，你希望所有客户端看到相同的强调色），请通过你自己的应用状态来同步它们。
+
+## 注意事项
+
+- **在启用协作时，不要在 `Pages.configure()` 中传入 `header` / `footer` 默认值。** 启用协作后，页眉/页脚内容由 Y 管理，而配置的默认值可能会在其他客户端清空内容后再次出现。请不要保留这些默认值；如果你需要一个初始值，请在 provider 同步完成后，使用 `editor.commands.setHeader(...)` 只设置一次。
+- **该包不包含 `yjs` 或 `@tiptap/extension-collaboration`。** 它们是 peer dependencies——请在你的应用中安装它们，并通过 `headerFooterExtensions` 回调附加 `Collaboration`。
+- **切换 `differentOddEven` 不会通过网络复制内容。** 当你启用它时，其他客户端不会将默认页眉中的内容预填充到奇数槽位。每个客户端只会看到各个 subtype 中实际编辑过的内容。
+
+---
+
+## 回调上下文
+
+该回调会接收一个包含为某个 subtype 配置协作所需全部信息的上下文：
+
+```ts
+import type { HeaderFooterExtensionsContext } from '@tiptap-pro/extension-pages'
+
+interface HeaderFooterExtensionsContext {
+  /** 此次调用对应哪个子编辑器。 */
+  editorType: 'header' | 'footer'
+  /** 哪个 subtype（default / first / odd / even）。 */
+  subType: 'default' | 'first' | 'odd' | 'even'
+  /** 当父编辑器安装了 Collaboration 时为 true。 */
+  isCollaborative: boolean
+  /** 来自父级 Collaboration 扩展的 Y.Doc 实例，或 null。 */
+  ydoc: import('yjs').Doc | null
+  /** 要绑定子编辑器 Collaboration 扩展的 Y 字段名。 */
+  field: string
+  /** 来自父级 CollaborationCursor 的可见性信息，或 null。 */
+  cursor: { provider: unknown; user: unknown } | null
+}
+```
+
+直接将 `ctx.field` 传入 `Collaboration.configure({ document: ctx.ydoc, field: ctx.field })` —— 该扩展会自动将每个 subtype 路由到 `Y.Doc` 的各自片段。
+
+---
+
+## 顺畅使用的小贴士
+
+- **在允许编辑之前，先等待 provider 同步完成。** 一个常见做法是使用 `connected` 标志来控制 `<EditorContent>` 的显示，并在 provider 的 `onSynced` 回调中将其切换。
+- **在回调的 `base` 中镜像主编辑器的扩展。** 传入相同的 `ConvertKit` / `TableKit` 配置，这样子编辑器就能接受相同的 marks 和 nodes。
+- **持久化由你负责。** Tiptap Cloud / 你的 provider 会持久化 `Y.Doc`，这会自动覆盖页眉/页脚内容、已同步的切换状态，以及文档级页面几何信息（格式、间距、边距覆盖）。如果你还希望保留一个非协作的备用快照，那么你只需要单独持久化主文档正文。
+- **在两个浏览器窗口中测试。** 在两个标签页中打开同一文档，并检查完整的同步范围：在一个窗口的页眉中输入内容，观察另一个窗口在不打开覆盖层的情况下页面级预览更新；切换“不同首页”标志，观察两个按钮同时变化；在一个窗口更改页面格式，观察另一个窗口的页面重新排版；在一个窗口拖动边距滑块，观察另一个窗口的页面 CSS 重新计算。
+
+## 下一步
+
+- 查看 [Pages 选项](/pages/core-concepts/options) 以了解布局控制
+- 查看 [页面页眉和页脚](/pages/core-concepts/page-header-footer) 以了解编辑体验、锁定、通过程序打开/关闭，以及对 DOCX 友好的行为
+- 查看 [Tiptap 协作文档](https://tiptap.dev/collaboration) 以了解高级协作用法

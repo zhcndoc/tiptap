@@ -52,7 +52,7 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/ai-toolkit/agents/review-changes',
                   children: [
                     {
-                      title: '修订记录',
+                      title: 'With Tracked Changes',
                       href: '/content-ai/capabilities/ai-toolkit/agents/review-changes/tracked-changes',
                     },
                     {
@@ -274,7 +274,11 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/server-ai-toolkit/install',
             },
             {
-              title: '智能体',
+              title: 'Tiptap Access Control',
+              href: '/content-ai/capabilities/server-ai-toolkit/tiptap-access-control',
+            },
+            {
+              title: 'Agents',
               href: '/content-ai/capabilities/server-ai-toolkit/agents',
               children: [
                 {
@@ -282,7 +286,7 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot',
                 },
                 {
-                  title: '修订记录',
+                  title: 'With Tracked Changes',
                   href: '/content-ai/capabilities/server-ai-toolkit/agents/tracked-changes',
                 },
                 {
@@ -292,10 +296,6 @@ export const sidebarConfig: SidebarConfig = {
                 {
                   title: '流式传输',
                   href: '/content-ai/capabilities/server-ai-toolkit/agents/streaming',
-                },
-                {
-                  title: '工具定义',
-                  href: '/content-ai/capabilities/server-ai-toolkit/agents/tools',
                 },
               ],
             },
@@ -308,16 +308,20 @@ export const sidebarConfig: SidebarConfig = {
               href: '/content-ai/capabilities/server-ai-toolkit/api-reference',
               children: [
                 {
+                  title: 'REST API',
+                  href: '/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api',
+                },
+                {
+                  title: 'Tools',
+                  href: '/content-ai/capabilities/server-ai-toolkit/api-reference/tools',
+                },
+                {
                   title: 'Editor context',
                   href: '/content-ai/capabilities/server-ai-toolkit/api-reference/editor-context',
                 },
                 {
                   title: '审阅选项',
                   href: '/content-ai/capabilities/server-ai-toolkit/api-reference/review-options',
-                },
-                {
-                  title: 'REST API',
-                  href: '/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api',
                 },
               ],
             },

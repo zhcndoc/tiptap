@@ -157,6 +157,67 @@ const Editor = new Editor({
 
 这样可以确保建议菜单只对实际输入触发字符的用户打开。
 
+## 在原生 JavaScript 中使用
+
+下面是一个完整示例，设置了带有建议列表的提及功能：
+
+```js
+import { Editor } from '@tiptap/core'
+import Mention from '@tiptap/extension-mention'
+
+new Editor({
+  element: document.querySelector('#editor'),
+  extensions: [
+    StarterKit,
+    Mention.configure({
+      HTMLAttributes: {
+        class: 'mention',
+      },
+      suggestion: {
+        char: '@',
+        items: ({ query }) => {
+          return ['Alice', 'Bob', 'Carol'].filter((name) =>
+            name.toLowerCase().includes(query.toLowerCase())
+          )
+        },
+        render: () => {
+          let popup
+
+          return {
+            onStart: (props) => {
+              popup = document.createElement('div')
+              popup.classList.add('suggestion-popup')
+              props.items.forEach((item) => {
+                const button = document.createElement('button')
+                button.textContent = item
+                button.addEventListener('click', () => props.command({ id: item }))
+                popup.appendChild(button)
+              })
+              document.body.appendChild(popup)
+            },
+            onUpdate: (props) => {
+              popup.innerHTML = ''
+              props.items.forEach((item) => {
+                const button = document.createElement('button')
+                button.textContent = item
+                button.addEventListener('click', () => props.command({ id: item }))
+                popup.appendChild(button)
+              })
+            },
+            onHide: () => {
+              popup?.remove()
+            },
+          }
+        },
+      },
+    }),
+  ],
+  content: '<p>输入 @ 来提及某人。</p>',
+})
+```
+
+您也可以传入自定义的 React 或 Vue 组件进行渲染。有关详细信息，请参阅 [Suggestion utility](/editor/api/utilities/suggestion)。
+
 ## 源代码
 
 [packages/extension-mention/](https://github.com/ueberdosis/tiptap/blob/main/packages/extension-mention/)

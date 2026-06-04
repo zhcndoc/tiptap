@@ -11,16 +11,20 @@ sidebars:
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
+<Callout title="独立产品" variant="info">
+  [Tracked Changes](/tracked-changes/getting-started/overview) 是一个与 AI Toolkit 分开的独立 Tiptap 产品，需单独购买。它默认处理用户编辑，并且在与 AI Toolkit 集成后也可以审阅 AI 编辑。
+</Callout>
+
 <Callout title="实验性" variant="warning">
   [Tracked Changes](/tracked-changes/getting-started/overview) 扩展目前处于 Alpha 阶段。
 </Callout>
 
-<Callout title="继续阅读 tracked changes 指南" variant="info">
-  本指南是对 [tracked changes
-  指南](/content-ai/capabilities/ai-toolkit/agents/review-changes/tracked-changes) 的延续。请先阅读它。
+<Callout title="延续自 Use with Tracked Changes 指南" variant="info">
+  本指南是 [Use with Tracked Changes
+  guide](/content-ai/capabilities/ai-toolkit/agents/review-changes/tracked-changes) 的后续内容。请先阅读前者。
 </Callout>
 
-你可以让 AI 为每个更改提供理由。每个理由都会成为一个评论线程，并通过 [Comments](/comments/getting-started/overview) 扩展链接到对应的跟踪更改。
+你可以要求 AI 为每一处更改提供理由。每条理由都会成为一个与其跟踪更改相关联的评论线程，并使用 [Comments](/comments/getting-started/overview) 扩展。本指南建立在 [Use with Tracked Changes](/content-ai/capabilities/ai-toolkit/agents/review-changes/tracked-changes) 集成之上，并且需要单独授权的 Tracked Changes 扩展。
 
 <CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/tracked-changes-comments" />
 
@@ -46,7 +50,7 @@ Rule: Use tiptapRead before tiptapEdit.
 Rule: When editing the document, ALWAYS provide a brief justification for each change in the meta field.`,
     tools: toolDefinitions({
       operationMeta:
-        'Brief justification explaining why this change improves the document.',
+        '简要说明此更改为何能改进文档。',
     }),
   })
 
@@ -72,7 +76,7 @@ const editor = useEditor({
     TrackedChanges.configure({ enabled: false }),
     AiToolkit,
     CommentsKit.configure({
-      provider, // Your TiptapCollabProvider instance
+      provider, // 你的 TiptapCollabProvider 实例
     }),
   ],
 })

@@ -1,9 +1,9 @@
 ---
-title: Suggestions
+title: 建议
 meta:
-  title: Review AI changes with suggestions | Tiptap Content AI
-  description: Preview and approve AI-inserted changes using suggestions with customizable rendering.
-  category: Content AI
+  title: 使用建议审阅 AI 变更 | Tiptap Content AI
+  description: 使用可自定义渲染的建议预览并批准 AI 插入的更改。
+  category: 内容 AI
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -44,8 +44,8 @@ const [reviewState, setReviewState] = useState({
   // 工具调用结果数据
   tool: '',
   toolCallId: '',
-  output: '',
-  // 从用户操作收集的反馈事件
+  output: null as unknown,
+  // 从用户操作中收集的反馈事件
   userFeedback: [] as SuggestionFeedbackEvent[],
 })
 
@@ -162,7 +162,9 @@ import './suggestions.css'
 
           // 如果有未接受的更改，附加反馈到工具输出
           if (userFeedback.length > 0 && userFeedback.some((event) => !event.accepted)) {
-            output += `\n\n<user_feedback>\n${JSON.stringify(userFeedback)}\n</user_feedback>`
+            const outputString =
+              typeof output === 'string' ? output : JSON.stringify(output)
+            output = `${outputString}\n\n<user_feedback>\n${JSON.stringify(userFeedback)}\n</user_feedback>`
           }
 
           addToolOutput({
@@ -302,8 +304,8 @@ export default function Page() {
     // 工具调用结果数据
     tool: '',
     toolCallId: '',
-    output: '',
-    // 从用户操作收集的反馈事件
+    output: null as unknown,
+    // 从用户操作中收集的反馈事件
     userFeedback: [] as SuggestionFeedbackEvent[],
   })
 
@@ -502,6 +504,6 @@ export default function Page() {
 
 ### 自定义建议的显示方式
 
-When reviewing changes, the AI Toolkit displays the preview of the changes as [suggestions](/content-ai/capabilities/ai-toolkit/api-reference/suggestions).
+在审核更改时，AI Toolkit 会将更改的预览显示为 [建议](/content-ai/capabilities/ai-toolkit/api-reference/suggestions)。
 
-You can customize how these suggestions are displayed, by setting the `reviewOptions.displayOptions` parameter. You can even [render React components](/content-ai/capabilities/ai-toolkit/agents/review-changes/style-suggestions) inside them.
+你可以通过设置 `reviewOptions.displayOptions` 参数来自定义这些建议的显示方式。你甚至可以在其中 [渲染 React 组件](/content-ai/capabilities/ai-toolkit/agents/review-changes/style-suggestions)。
