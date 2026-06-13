@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.1.0
+    label: v0.3.0
 meta:
   title: ConvertKit | Tiptap Conversion
   description: 一个打包的 Tiptap 扩展，用于为从 DOCX 导入的内容配置编辑器。
@@ -151,10 +151,10 @@ ConvertKit 还导出与 `OrderedListNumbering` 搭配使用、用于编辑器预
 
 ## 你应该预期到
 
-- 编辑器挂载期间会应用一个小型、作用域化的 CSS 重置，并在编辑器销毁时移除。同一页面上的多个由 ConvertKit 驱动的编辑器会共享这份重置（它只插入一次）。
-- 在你的应用中，DOCX 导入内容会获得一致的渲染。带有非零 DOCX 裁剪的图片会真正裁剪显示；当列变窄时，具有 `heightRule: "atLeast"` 的行会垂直增长；`verticalAlign: "center"` 的单元格会将内容居中。
-- 与其余 Tiptap Pro 扩展生态系统完全兼容。`@tiptap-pro/extension-import-docx` 和 `@tiptap-pro/extension-export-docx` 是天然的配套项；如果你需要分页，`@tiptap-pro/extension-pages-tablekit` 可以叠加使用。
-- **紧凑的默认排版。** CSS 重置会清零段落外边距并应用紧凑的行高。如果你用 ConvertKit 处理的内容不是从 DOCX 导入的，请在其上叠加你自己的排版规则——这份重置是有意设计的，而不是我们期望直接呈现为美观的默认样式。
+- 编辑器挂载期间会应用一个小而作用域化的 CSS 重置。同一页面上的多个基于 ConvertKit 的编辑器会共享这份重置——它只会插入一次，并且只有在最后一个编辑器销毁时才会移除。
+- 跨你的应用对 DOCX 导入内容进行一致的渲染。具有非零 DOCX 裁剪的图片会实际按裁剪后的效果渲染；当列宽缩小时，`heightRule: "atLeast"` 的行会在垂直方向增长；`verticalAlign: "center"` 的单元格会让其内容居中。
+- 与 Tiptap Pro 其余扩展生态完全兼容。`@tiptap-pro/extension-import-docx` 和 `@tiptap-pro/extension-export-docx` 是天然的配套扩展；如果你需要分页，`@tiptap-pro/extension-pages-tablekit` 可以叠加其上。
+- **紧凑的默认排版。** CSS 重置会清零段落外边距并应用紧凑行高。如果你将 ConvertKit 用于并非从 DOCX 导入的内容，请在其上叠加你自己的排版规则——这种重置是有意为之，而不是我们期望直接呈现精美视觉效果的默认值。
 
 ## 不要预期到
 
@@ -196,7 +196,7 @@ ConvertKit.configure({
   orderedList: Partial<OrderedListOptions> | false,
   listItem: Partial<ListItemOptions> | false,
   listKeymap: Partial<ListKeymapOptions> | false,
-  orderedListNumbering: boolean, // 默认：false — 使用 `true` 进行启用
+  orderedListNumbering: boolean | Partial<OrderedListNumberingOptions>, // 默认：false — 通过 `true` 启用，或传入一个选项对象（`defaultFormat`、`formats`）
   hardBreak: Partial<HardBreakOptions> | false,
   horizontalRule: Partial<HorizontalRuleOptions> | false,
   dropcursor: Partial<DropcursorOptions> | false,

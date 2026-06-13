@@ -2,43 +2,68 @@
 title: Next.js
 meta:
   title: Next.js | Tiptap UI Components
-  description: Install and configure Tiptap UI Components in your Next.js project.
+  description: 在你的 Next.js 项目中安装并配置 Tiptap UI Components。
   category: UI Components
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-Run the `init` command to create a new Next.js project or to setup an existing one:
+运行 `init` 命令以创建一个新的 Next.js 项目或设置现有项目：
 
 ```bash
 npx @tiptap/cli@latest init
 ```
 
-Choose between a `Next.js` project or a `Monorepo`.
+在 `Next.js` 项目和 `Monorepo` 之间进行选择。
 
-When prompted with:
+当提示以下内容时：
 
 ```bash
 Would you like to add a template or UI components to your project?
 ```
 
-Select **UI Components** if you want to include reusable Tiptap UI components.
-Alternatively, select **Template** to scaffold a full example project.
+如果你想包含可复用的 Tiptap UI 组件，请选择 **UI Components**。
+或者，选择 **Template** 来搭建一个完整的示例项目。
 
-<Callout title="Only add styles" variant="info">
-  If you added a template or UI components during setup, you can skip this section and proceed
-  directly to **Add Styles**.
+<Callout title="仅添加样式" variant="info">
+  如果你在设置期间添加了模板或 UI 组件，则可以跳过本节并直接继续
+  到 **Add Styles**。
 </Callout>
 
-## Add Tiptap components
+<Callout title="新项目仍然显示默认的 Next.js 页面" variant="warning">
+  `init` 会搭建一个标准的 Next.js 应用，并将你选择的组件作为源代码复制到你的
+  `components/` 文件夹中——但它**不会**修改 `app/page.tsx`。在你自己在那里渲染一个
+  Tiptap 组件之前，`npm run dev` 显示的仍然是 Next.js 默认的起始页面。这是
+  预期行为，不是安装出错。
+</Callout>
 
-Install Tiptap UI components using the CLI. For example, to add the `HeadingButton` component:
+## 渲染编辑器
+
+打开 `app/page.tsx` 并渲染你安装的模板或组件。例如，如果你在 `init` 期间添加了 **Simple Editor** 模板：
+
+```tsx
+import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor'
+
+export default function Page() {
+  return <SimpleEditor />
+}
+```
+
+启动开发服务器并打开页面以查看你的编辑器：
+
+```bash
+npm run dev
+```
+
+## 添加 Tiptap 组件
+
+使用 CLI 安装 Tiptap UI 组件。例如，要添加 `HeadingButton` 组件：
 
 ```bash
 npx @tiptap/cli@latest add heading-button
 ```
 
-The command above will install the `HeadingButton` component and its dependencies. You can then import and use it in your **Tiptap** project:
+上面的命令会安装 `HeadingButton` 组件及其依赖项。然后你就可以在你的 **Tiptap** 项目中导入并使用它：
 
 ```tsx
 import { HeadingButton } from '@/components/ui/heading-button'
@@ -48,38 +73,38 @@ export default function App() {
 
   return (
     <>
-      <HeadingButton level={1}>Heading 1</HeadingButton>
-      <HeadingButton level={2}>Heading 2</HeadingButton>
-      <HeadingButton level={3}>Heading 3</HeadingButton>
+      <HeadingButton level={1}>标题 1</HeadingButton>
+      <HeadingButton level={2}>标题 2</HeadingButton>
+      <HeadingButton level={3}>标题 3</HeadingButton>
     </>
   )
 }
 ```
 
-## Add Styles
+## 添加样式
 
-<Callout title="Styles are added automatically" variant="info">
-  When you install your first Tiptap UI Component, the CLI automatically adds the required{' '}
-  <code>.scss</code> imports to your main stylesheet. In most cases, **no manual setup is needed**.
+<Callout title="样式会自动添加" variant="info">
+  当你安装第一个 Tiptap UI 组件时，CLI 会自动将所需的{' '}
+  <code>.scss</code> 导入添加到你的主样式表中。在大多数情况下，**无需手动设置**。
 </Callout>
 
-Before proceeding, ensure your project includes a CSS reset.
-If you are using Tailwind CSS, you already have one.
+在继续之前，请确保你的项目包含 CSS reset。
+如果你正在使用 Tailwind CSS，你已经有了。
 
-#### Where styles are imported
+#### 样式的导入位置
 
-The CLI automatically injects style imports into your global stylesheet, such as:
+CLI 会自动将样式导入注入到你的全局样式表中，例如：
 
 - `app/globals.css`
 - `src/app/globals.css`
 
-If you’ve customized your entry file, make sure this is present:
+如果你自定义了入口文件，请确保其中包含以下内容：
 
-**File:** `app/globals.css` or `src/app/globals.css` (depending on your project)
+**文件：** `app/globals.css` 或 `src/app/globals.css`（取决于你的项目）
 
 ```css
 @import '<path-to-styles>/_variables.scss';
 @import '<path-to-styles>/_keyframe-animations.scss';
 ```
 
-Learn more about configuring styles in the [style setup guide](/ui-components/getting-started/style).
+在 [样式设置指南](/ui-components/getting-started/style) 中了解更多有关配置样式的信息。

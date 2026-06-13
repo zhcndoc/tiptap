@@ -4,11 +4,11 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.18.0
+    label: v0.20.0
 meta:
   title: DOCX 自定义节点的 DSL 构建器 | Tiptap Conversion
   description: 一个带类型、流畅的 TypeScript API，用于编写 DOCX 自定义节点 DSL。提供编译时包含安全性、每个属性的自动补全，以及与 REST API 消费的相同线缆格式。
-  category: Conversion
+  category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -26,7 +26,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 <Requirements>
   <RequirementItem label="1. 激活试用或订阅">
     在你的账户中开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Start
-    计划](https://cloud.tiptap.dev/v2/billing)。
+  计划](https://cloud.tiptap.dev/v2/billing)。
   </RequirementItem>
   <RequirementItem label="2. 从私有注册表安装">
     按照 [设置指南](/guides/pro-extensions) 通过身份验证连接到 Tiptap 的私有 npm 注册表。
@@ -212,7 +212,7 @@ textRun({
 
 | 方法                     | 用途                                                                                                                                                                                                  |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.applyMarks(policy)`    | `'node'`（继承该规则的 PM 节点 marks）或一个 `marks('node')...` 构建器，用于更细粒度控制。这里明确拒绝使用 `'default'` 和 `'none'` — 见 [Mark policies](#mark-policies)。 |
+| `.applyMarks(policy)`    | `'node'`（继承该规则的 PM 节点 marks）或一个 `marks('node')...` 构建器，用于更细粒度控制。这里明确拒绝使用 `'default'` 和 `'none'` — 见 [标记策略](#mark-policies)。 |
 | `.inheritOverrides(value)` | 当为 `false` 时，跳过该 run 的 `textRunOverrides`。默认值为 `true`。                                                                                                                                  |
 | `.toJSON()`              | 线格式 `ElementNode`。                                                                                                                                                                           |
 
@@ -733,7 +733,7 @@ ExportDocx.configure({
 
 该构建器只是一个轻量的编写层——[JSON DSL 参考页](/conversion/export/docx/custom-nodes-dsl#errors) 中描述的所有运行时约束都同样适用：
 
-- 当同一个 `type` 同时出现在两个 API 中时，基于函数的 [`customNodes`](/conversion/export/docx/custom-nodes) 会优先生效（每次导出调用中，每个冲突类型只记录一次警告）。
+- 当同一个 `type` 同时出现在两个 API 中时，基于函数的 [`customNodes`](/conversion/export/docx/custom-nodes) 会优先作用（每次导出调用中，每个冲突类型只记录一次警告）。
 - DSL 错误会返回带有 `code` + `dslPath` +（对于运行时错误）`nodePath` + `nodeType` 的 [结构化封装](/conversion/export/docx/custom-nodes-dsl#error-responses-rest)。
 - [资源上限](/conversion/export/docx/custom-nodes-dsl#resource-limits) 会在编译期和运行时强制执行——可通过 `exportDocx` 上的 `customNodeDslLimits` 以及 REST 接口上的 `DOCX_DSL_MAX_*` 环境变量进行调整。
 

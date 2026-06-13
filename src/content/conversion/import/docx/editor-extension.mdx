@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.8.0
+    label: v0.11.0
 meta:
   title: 导入 DOCX | Tiptap 转换
   description: 了解如何在我们的文档中使用 Import 扩展将 DOCX（Word）文档导入 Tiptap 编辑器。
@@ -333,17 +333,32 @@ editor.chain().importDocx({ file, placeholders: false }).run()
 
 ## 脚注和尾注
 
-<Callout
-  variant="warning"
-  title="脚注和尾注在扩展的 onImport 回调中不可用"
->
-  REST API 会在其响应中返回脚注和尾注数据（作为 `footnotes` 和 `endnotes`
-  字段），但编辑器扩展目前不会在 `onImport` 回调的
-  `ImportContext` 中提供这些内容。如果你需要脚注/尾注数据，请直接使用 [REST
-  API](/conversion/import/docx/rest-api)，并从响应中提取 `footnotes` 和 `endnotes` 字段。
+导入 API 会从 DOCX 文件中提取脚注和尾注内容。文档正文中的内联引用会表示为 `footnoteReference` 和 `endnoteReference` 节点，每个节点都带有一个 `noteId` 属性，且注释内容会以这些 id 为键进行提供。
+
+`onImport` 回调的 `ImportContext` 同时包含这两组数据：
+
+```js
+editor
+  .chain()
+  .importDocx({
+    file,
+    onImport(context) {
+      if (context.error) return
+
+      context.footnotes // Record<noteId, JSONContent> — 每个 id 对应的脚注内容
+      context.endnotes // Record<noteId, JSONContent> — 每个 id 对应的尾注内容
+
+      context.setEditorContent(context.content)
+    },
+  })
+  .run()
+```
+
+<Callout title="与 Tiptap Pages 一起自动应用" variant="hint">
+  当安装了 [Pages 扩展](/pages/getting-started/overview) 并启用[脚注](/pages/core-concepts/footnotes)时，导入的脚注会自动应用：标记会在正文中渲染，内容会落入每页的脚注区域，编号也会与源文档保持一致。无需额外配置。
 </Callout>
 
-导入 API 可以从 DOCX 文件中提取脚注和尾注内容。文档正文中的内联引用表示为 `footnoteReference` 和 `endnoteReference` 节点，每个节点都有一个 `noteId` 属性。不过，这些节点需要一个[自定义扩展](/editor/extensions/custom-extensions/extend-existing)才能在编辑器中渲染。
+如果没有 Pages，`footnoteReference` / `endnoteReference` 节点需要通过一个[自定义扩展](/editor/extensions/custom-extensions/extend-existing)才能在编辑器中渲染——`ImportContext` 上的数据已经为你提供了构建自定义展示所需的一切。尾注始终需要你自行负责渲染；Pages 只管理脚注。
 
 ## 详细输出
 

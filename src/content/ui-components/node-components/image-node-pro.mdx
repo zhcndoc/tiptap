@@ -1,11 +1,11 @@
 ---
-title: Image Node Pro
+title: 图像节点 Pro
 meta:
-  title: Image Node Pro | Tiptap UI 组件
+  title: 图像节点 Pro | Tiptap UI 组件
   description: 在 Tiptap 编辑器中添加图片，支持对齐控制、下载功能及浮动工具栏管理。
   category: UI 组件
 component:
-  name: Image Node Pro
+  name: 图像节点 Pro
   description: 一个用于 Tiptap 编辑器的增强图片节点组件，带有浮动工具栏、对齐控制和高级管理功能。
   type: node-component
   isFree: false
@@ -18,8 +18,9 @@ tags:
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
 
-一个用于 Tiptap 编辑器的增强图片节点组件。具有浮动工具栏控制、图片对齐选项、下载功能，以及支持响应式样式和无障碍功能的高级管理能力。
+An enhanced image node component for Tiptap editors. Features drag-to-resize, editable captions, floating toolbar controls, image alignment options, download functionality, and advanced management capabilities with responsive styling and accessibility features.
 
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-node/image-node-pro" />
 
@@ -31,7 +32,11 @@ import { CodeDemo } from '@/components/CodeDemo'
 npx @tiptap/cli@latest add image-node-pro
 ```
 
-## 组件
+<Callout title="源码在哪里？" variant="info">
+  上方预览是一个实时演示。要获取其完整源码——包括图片节点 **以及** 它引用的每个组件——请运行上面的安装命令。Tiptap UI 组件会以可编辑的源文件形式复制到你的项目中（位于 `@/components/…` 下），而不是作为 npm 包提供。这就是为什么下面示例中的导入会解析为你自己代码库中的文件，而不是 `node_modules` 中的某个模块。有关 CLI 为你添加的完整列表，请参见 [引用的组件](#referenced-components)。
+</Callout>
+
+## Components
 
 ### `<ImageNode />`
 
@@ -64,14 +69,16 @@ export default function ImageEditor() {
 
 #### 特性
 
+- 拖拽调整大小：悬停在图片上并拖动任一侧的手柄即可设置宽度
+- 可编辑图片说明文字
 - 带对齐控制的浮动工具栏
 - 图片下载功能
 - 删除节点按钮
-- 对齐选项（左、中、右）
+- 对齐选项（左对齐、居中、右对齐）
 - 支持自定义 HTML 属性
-- 增强的无障碍支持
+- 增强的可访问性
 - 响应式图片尺寸
-- 选区高亮显示
+- 选中高亮
 
 ## 扩展
 
@@ -109,11 +116,12 @@ const editor = useEditor({
 
 图片节点系统通过多个集成层次实现：
 
-1. **增强显示**：扩展了基础的 Tiptap 图片扩展，增加样式和响应式行为
-2. **浮动工具栏**：提供上下文控制，图片选中时出现
-3. **对齐系统**：管理图片的左、中、右对齐
-4. **节点管理**：通过工具栏操作处理图片删除和下载功能
-5. **状态集成**：与 Tiptap 节点系统和命令架构无缝集成
+1. **增强显示**：在基础 Tiptap Image 扩展之上增加了额外样式和响应式行为
+2. **浮动工具栏**：在选中图片时提供上下文相关的控制项
+3. **调整大小**：悬停图片任一侧的拖拽手柄可交互式设置宽度
+4. **对齐系统**：通过左对齐、居中和右对齐选项管理图片位置
+5. **节点管理**：通过工具栏操作处理图片删除和下载功能
+6. **状态集成**：与 Tiptap 的节点系统和命令架构无缝集成
 
 浮动工具栏在选中图片时自动出现，快速访问对齐控制、下载功能及删除节点操作。
 
@@ -127,9 +135,14 @@ const editor = useEditor({
 
 ### 相关组件
 
-- `use-tiptap-editor`（hook）
-- `tiptap-utils`（库）
-- `delete-node-button`（组件）
-- `image-download-button`（组件）
-- `image-align-button`（组件）
-- `separator`（基础组件）
+CLI 会自动在图片节点旁安装以下组件——你无需手动添加。它们是图片节点从你项目内部导入的文件：
+
+- `use-tiptap-editor` (hook)
+- `tiptap-utils` (lib)
+- `delete-node-button` (component)
+- `image-download-button` (component)
+- `image-align-button` (component)
+- `image-caption-button` (component)
+- `image-upload-button` (component)
+- `refresh-ccw-icon` (icon)
+- `separator` (primitive)

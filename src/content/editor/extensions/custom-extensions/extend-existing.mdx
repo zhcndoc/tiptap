@@ -429,7 +429,7 @@ parseHTML() {
 
 如您所见，您可以选择性地传递一个 `getAttrs` 回调，以添加更复杂的检查，例如针对特定的 HTML 属性。回调会传递 HTML DOM 节点，检查 `style` 属性时再传递值。
 
-您可能会想知道 `&& null` 是干什么的？ [ProseMirror 期望在检查成功时返回 `null` 或 `undefined`](https://prosemirror.net/docs/ref/version/0.18.0.html#model.ParseRule.getAttrs)
+您是否在想 `&& null` 是做什么的？[ProseMirror 期望在检查成功时返回 null 或 undefined。](https://prosemirror.net/docs/ref/version/0.18.0.html#model.ParseRule.getAttrs)
 
 [将 `priority` 传递给规则](https://prosemirror.net/docs/ref/version/0.18.0.html#model.ParseRule.priority) 以解决与其他扩展的冲突，例如，如果您构建了一个自定义扩展，该扩展搜索具有类属性的段落，但您已经使用了默认段落扩展。
 

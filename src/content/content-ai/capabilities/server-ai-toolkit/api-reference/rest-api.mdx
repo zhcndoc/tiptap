@@ -191,6 +191,8 @@ POST /v3/ai/toolkit/stream-tool
 
 流式执行工具。请求结构与 `POST /v3/ai/toolkit/execute-tool` 相同。流式响应格式仍在最终确定中。
 
+因为此端点通过实时连接在文档上工作，所以它可能返回 REST 端点不会返回的连接和并发错误。它们会作为响应流中的 `error` 事件到达 —— 参阅 [流式传输和会话错误](#streaming-and-session-errors)。
+
 ## 旧版工作流端点
 
 <Callout title="工作流端点已弃用" variant="warning">
@@ -581,7 +583,24 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/threads' \
 
 ## 错误处理
 
-该 API 使用标准的 HTTP 错误代码：
+REST 端点会返回以下格式的错误：
+
+```json
+{
+  "error": {
+    "message": "用人类可读的方式描述出错原因。",
+    "status": 502,
+    "code": "document_load_failed"
+  }
+}
+```
+
+- `message` (`string`): 人类可读的描述。不要基于它进行匹配——措辞可能会变化。
+- `status` (`number`): HTTP 状态码，也会设置在响应中。
+- `code` (`string`): 可用于分支判断的稳定标识符。验证失败会使用
+  `code: "validation_failed"` 并添加一个 `issues` 数组。
+
+该 API 使用标准 HTTP 错误码：
 
 - `400 错误请求`：无效的请求体、无效的格式、缺少文档源，或缺少 Document 服务器凭据
 - `401 未授权`：缺少或无效的 JWT 或应用程序 ID
@@ -591,8 +610,60 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/threads' \
 - `500 内部服务器错误`：意外的服务器错误
 - `502 错误网关`：无法加载或保存 Tiptap Cloud 文档
 
+### 流式传输和会话错误
+
+[`POST /v3/ai/toolkit/stream-tool`](#stream-a-tool) 会在与 Tiptap Cloud 文档的实时连接上工作：它会实时加入该文档，因此 AI 会与其他协作者一起编辑最新内容。在建立或使用该连接时发生的错误，会以内联方式作为响应流中的 `error` 事件传递，而不是作为 HTTP 状态码：
+
+```json
+{ "type": "error", "code": "concurrent_edit_conflict", "status": 409, "message": "..." }
+```
+
+`status` 字段与对应的 HTTP 状态码一致。可能的 `code` 值如下：
+
+| `code`                        | `status` | 发生时机                                                                                                                              | 处理方式                                                                                                                                                     |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `concurrent_edit_conflict`    | 409      | 文档在工具运行期间发生了变化（例如，用户编辑了它），因此无法在过时内容之上应用更改。 | 重新运行请求。AI 会在下一次尝试中读取最新内容。可安全自动重试。参见 [处理并发编辑](#handle-concurrent-edits)。 |
+| `schema_mismatch`             | 409      | 请求中的编辑器 schema 与该文档当前正在使用的 schema 不匹配，或者存储的文档无法用它解析。 | 为同一文档发送一致的 `editorContext` schema。不要使用相同的 schema 重试。                                                              |
+| `websocket_auth_failed`       | 401      | 打开连接时，Tiptap Cloud 拒绝了文档凭据。                                                                 | 刷新 Document Server JWT 声明，然后重试。不要使用相同的令牌重试。                                                                           |
+| `websocket_connection_failed` | 502      | 与 Tiptap Cloud 的连接在初始同步完成之前就关闭了。                                                                    | 使用退避策略重试。检查连接性和 Tiptap Cloud 状态。                                                                                                |
+| `websocket_sync_timeout`      | 504      | 文档未能在时间限制内完成初始同步。                                                                          | 使用退避策略重试。大文档和较差的连接状况会使这种情况更容易发生。                                                                           |
+| `session_limit_reached`       | 503      | 服务器正在处理的并发文档会话数量已达到上限。                                                                  | 使用退避策略重试。会话在空闲时会被释放。                                                                                                     |
+| `session_creation_cancelled`  | 503      | 会话在完成连接之前就被终止，通常发生在服务器重启期间。                                                   | 重试。                                                                                                                                                         |
+
+<Callout title="仅适用于 Tiptap Cloud 文档" variant="info">
+  这些错误仅会发生在 `stream-tool` 使用的实时连接路径上。发送内联 `document` 的请求不会打开连接，因此不会返回会话或 WebSocket 错误。
+</Callout>
+
+### 处理并发编辑
+
+在协作文档中，`concurrent_edit_conflict` 是预期内的。AI 在读取文档、调用模型并写入其更改时，用户可能会在此期间编辑同一文档。工具不会覆盖该编辑，而是拒绝写入，以免丢失任何工作内容。
+
+请将其视为一个安全、可重试的信号：当你收到带有
+`code: "concurrent_edit_conflict"` 的 `error` 事件时，请再次运行相同的工具调用。工具包会重新读取文档，
+因此 AI 会基于用户的最新更改进行处理。为避免在被频繁编辑的文档上陷入长时间循环，请限制重试次数。
+
+```ts
+// `runStream` 发送 start/delta/end 消息，并解析为流的
+// 最终 `error` 事件；如果流成功完成，则返回 `null`。
+async function streamToolWithRetry(body: unknown, maxRetries = 3) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const error = await runStream(body)
+
+    if (!error) {
+      return // 成功完成
+    }
+    if (error.code !== 'concurrent_edit_conflict') {
+      throw new Error(`stream-tool failed: ${error.code}`)
+    }
+    // 文档在传输过程中发生了变化——使用最新内容重试。
+  }
+
+  throw new Error('Tool call kept conflicting with concurrent edits.')
+}
+```
+
 ## 相关页面
 
-- [Tool definitions](/content-ai/capabilities/server-ai-toolkit/api-reference/tools)
-- [Review options](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options)
-- [Editor context](/content-ai/capabilities/server-ai-toolkit/api-reference/editor-context)
+- [工具定义](/content-ai/capabilities/server-ai-toolkit/api-reference/tools)
+- [审查选项](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options)
+- [编辑器上下文](/content-ai/capabilities/server-ai-toolkit/api-reference/editor-context)

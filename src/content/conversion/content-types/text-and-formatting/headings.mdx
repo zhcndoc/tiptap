@@ -18,22 +18,23 @@ import { Callout } from '@/components/ui/Callout'
 - **配置：** 不需要。
 
 <Callout title="标题级别可往返；视觉样式需要 ConvertKit 或 CSS 注入" variant="hint">
-  标题级别（1 到 6）和对齐方式在任何设置下都可以往返。每个标题的属性（间距、缩进、行高、标题标记上的字号）通过 ConvertKit 的自定义 Heading 渲染。来自 Word 样式目录的命名样式排版（例如“Heading 1 is Aptos Light 16pt blue”）是另一个独立问题：编辑器使用你的 CSS 渲染标题，而不是 Word 的主题。要通过作用域 CSS 带入样式目录，请使用实验性的 [CSS 注入](/conversion/import/docx/css-injection) 功能。
+  标题级别（1 到 6）和对齐方式在任何设置下都可以往返。每个标题的属性（间距、缩进、行高、标题标记上的字号）通过 ConvertKit 的自定义 Heading 渲染。来自 Word 样式目录的命名样式排版（例如“Heading 1 是 Aptos Light 16pt 蓝色”）是另一个独立问题：编辑器使用你的 CSS 渲染标题，而不是 Word 的主题。要通过作用域 CSS 带入样式目录，请使用实验性的 [CSS 注入](/conversion/import/docx/css-injection) 功能。
 </Callout>
 
 ## 支持概览
 
 | | 导入 | 编辑器（使用 ConvertKit） | 导出 |
 | --- | --- | --- | --- |
-| 标题级别 1 到 6 | 支持 | 支持 | 支持 |
-| Title 和 Subtitle 样式 | 作为段落导入（带有来自样式链继承的字体和间距） | 渲染为视觉上类似标题的段落 | 导出为段落 |
-| 标题级别 7 到 9 | 生成 `level: 7`、`8` 或 `9` 的 heading 节点 | 渲染为 `<h1>`，因为标准 Heading 扩展的 `levels` 选项只允许 1–6；级别会保留在 JSON attrs 中，但标签会被强制转换。配置 `Heading.configure({ levels: [1,2,3,4,5,6,7,8,9] })`（或覆盖 ConvertKit 的 `heading` 插槽）可渲染实际标签。 | 默认导出为 `<h1>`（除非你的编辑器 schema 接受更高级别） |
-| 自定义标题样式 | 解析为最接近的标准级别 | 样式名丢失 | 应用通用标题样式 |
-| 文本对齐 | 支持 | 支持（TextAlign） | 支持 |
-| 行内格式 | 支持 | 支持 | 支持 |
-| 标题编号 | 转换为 indent 属性 | 渲染缩进（`padding-left`）；不会生成编号符号 | 不保留 |
-| 每个标题的间距/缩进/行高/字号 | 转换为属性 | 支持 | 应用导出默认值 |
-| 命名样式排版（主题） | 可通过 [CSS 注入](/conversion/import/docx/css-injection) 获取样式目录 | 通过注入的 CSS 渲染 | 应用导出默认值 |
+| Heading levels 1 to 6 | Supported | Supported | Supported |
+| Title and Subtitle styles | Imported as paragraphs (with inherited font and spacing from the style chain) | Render as paragraphs that visually resemble headings | Exported as paragraphs |
+| Heading levels 7 to 9 | Heading nodes produced with `level: 7`, `8`, or `9` in JSON | Render as `<h1>` because the standard Heading extension's `levels` option only allows 1–6; the level is preserved in the JSON attrs but the tag is coerced. Configure `Heading.configure({ levels: [1,2,3,4,5,6,7,8,9] })` (or override ConvertKit's `heading` slot) to render the actual tags. | Exported as `<h1>` Word-side unless your editor schema accepts higher levels |
+| Custom heading styles | Resolved to closest standard level | Style name lost | Generic heading style applied |
+| Text alignment | Supported | Supported (TextAlign) | Supported |
+| Inline formatting | Supported | Supported | Supported |
+| Heading numbering | Converted to indent attr | Indent rendered (`padding-left`); numbering glyphs not generated | Not preserved |
+| Per-heading spacing / indent / line-height | Converted to attrs | Supported | Supported (proportional line height only; a negative first-line indent becomes a hanging indent) |
+| Per-heading font-size | Converted to attr | Supported | Export defaults applied |
+| Named-style typography (theme) | Catalog available via [CSS injection](/conversion/import/docx/css-injection) | Renders via injected CSS | Export defaults applied |
 
 ## 导入
 
@@ -55,7 +56,7 @@ import { Callout } from '@/components/ui/Callout'
   "content": [
     {
       "type": "text",
-      "text": "My Heading",
+      "text": "我的标题",
       "marks": [
         { "type": "bold", "attrs": {} }
       ]

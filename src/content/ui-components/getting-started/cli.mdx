@@ -20,7 +20,9 @@ npx @tiptap/cli@latest [command] [options]
 
 ### `init`
 
-初始化您的项目并安装依赖项。此命令设置您的项目配置并添加任何指定的组件。
+初始化您的项目并安装依赖项。此命令会设置您的项目配置，并将任何指定组件作为可编辑的源文件添加进去。
+
+在空目录中运行时，它会搭建一个新的 Vite 或 Next.js 项目；在现有项目中运行时，它会对其进行配置。无论哪种方式，组件都会被复制到您的 `components/` 文件夹中——然后您可以在自己的页面中导入并渲染它们。它们不会自动接入页面，因此新搭建的应用仍会显示框架默认的起始页面，直到您渲染一个组件为止。有关完整流程，请参阅 [Next.js](/ui-components/install/next) 或 [Vite](/ui-components/install/vite) 指南。
 
 ```bash
 npx @tiptap/cli@latest init

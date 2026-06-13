@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v2.12.0
+    label: v2.25.0
 meta:
   title: DOCX 导出 REST API | Tiptap Conversion
   description: 了解如何通过 Conversion REST API 将 Tiptap JSON 文档导出为 DOCX 格式。
@@ -30,7 +30,7 @@ import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
 
 DOCX 导出 API 会将 Tiptap JSON 文档转换为 `.docx`（Microsoft Word）文件。它使用与 [编辑器扩展](/conversion/export/docx/editor-extension) 相同的转换库，并为标准内容生成等效的 DOCX 输出。
 
-The REST API 支持 [样式覆盖](/conversion/export/docx/styles)、[通过 DSL 的自定义节点渲染](/conversion/export/docx/custom-nodes-dsl)、页面大小和页边距、页眉/页脚，以及元素级覆盖（`tableOverrides`、`paragraphOverrides`、`textRunOverrides`、`tableCellOverrides`、`imageOverrides`）。它不接受 JavaScript 函数选项。对于基于函数的自定义节点 API，请使用 [编辑器扩展](/conversion/export/docx/editor-extension)，它也可在服务端运行。
+REST API 支持 [样式覆盖](/conversion/export/docx/styles)、[通过 DSL 的自定义节点渲染](/conversion/export/docx/custom-nodes-dsl)、页面大小和页边距、页眉/页脚，以及元素级覆盖（`tableOverrides`、`paragraphOverrides`、`textRunOverrides`、`tableCellOverrides`、`imageOverrides`）。它不接受 JavaScript 函数选项。对于基于函数的自定义节点 API，请使用 [编辑器扩展](/conversion/export/docx/editor-extension)，它也可在服务端运行。
 
 <Callout title="查看 postman 集合" variant="hint">
   您也可以前往我们的 [Postman
@@ -194,8 +194,8 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
   每个页脚值都可以是 **纯文本字符串**（生成简单、无样式的页脚）或 **字符串化的 Tiptap JSONContent** 对象（可启用加粗、斜体、链接等富文本格式）。当传入 JSONContent 时，请在请求体中发送前使用 `JSON.stringify()` 将对象转为字符串。
 </Callout>
 
-<Callout title="`{page}` / `{total}` 标记会变成动态的 Word 字段" variant="info">
-    REST API 会将纯文本页眉/页脚中的 `{page}`、`{total}` 以及 `{numpages}` 同义词转换为导出的 `.docx` 中动态的 Word `PAGE` / `NUMPAGES` 字段。自定义标记名称（例如 `{p}` / `{pages}`）需要传入可选的 `placeholders` 重命名映射——见下方 [自定义标记名称](#custom-token-names-placeholders)。传入 `"placeholders": false` 则会改为将这些标记作为字面量文本输出。
+<Callout title="`{page}` / `{total}` 标记会变为实时 Word 字段" variant="info">
+  REST API 会将纯文本页眉/页脚中的 `{page}`、`{total}` 以及 `{numpages}` 同义标记转换为导出的 `.docx` 中实时的 Word `PAGE` / `NUMPAGES` 字段。自定义标记名称（例如 `{p}` / `{pages}`）需要传入可选的 `placeholders` 重命名映射——请参见下方的 [自定义标记名称](#custom-token-names-placeholders)。如需改为直接将标记作为字面文本输出，请传入 `"placeholders": false`。
 </Callout>
 
 #### 自定义标记名称 (`placeholders`)
@@ -278,7 +278,61 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 
 | Status | Code                             | Description                          |
 | ------ | -------------------------------- | ------------------------------------ |
-| 400    | `NO_DOCUMENT_PROVIDED`           | 请求体中未提供文档 |
-| 422    | `FAILED_TO_PARSE_DOCX_FILE`      | 解析 JSON 输入失败          |
-| 422    | `FAILED_TO_EXPORT_DOCX_FILE`     | 导出 DOCX 失败                |
-| 422    | `FAILED_TO_CONVERT_DOCX_TO_BLOB` | 结果类型转换失败        |
+| 400    | `NO_DOCUMENT_PROVIDED`           | 未在请求体中提供文档 |
+| 422    | `FAILED_TO_PARSE_DOCX_FILE`      | 解析 JSON 输入失败 |
+| 422    | `FAILED_TO_EXPORT_DOCX_FILE`     | 导出 DOCX 失败 |
+| 422    | `FAILED_TO_CONVERT_DOCX_TO_BLOB` | 转换结果类型失败 |
+
+## 转换字体
+
+`POST /v2/convert/fonts/convert`
+
+将字体转换为可嵌入 DOCX 文件的形式：`TTF` / `OTF` 上传会原样返回，而 `WOFF2` 上传会转换为 `TTF`。这是编辑器扩展的 [`embedFonts`](/conversion/export/docx/fonts#automatic-embedding) 选项在后台调用的端点；你也可以直接调用它。自 Convert Service **v2.25.0** 起可用。
+
+<Callout>
+  该端点是无状态的——不会存储任何内容。每个请求都会被转换，临时文件会
+  立即清理。
+</Callout>
+
+### 必需请求头
+
+```bash
+Authorization: Bearer <your-jwt>
+X-App-Id: <your-app-id>
+```
+
+### 请求体
+
+`multipart/form-data`:
+
+| 字段         | 类型      | 描述                                               | 必填 |
+| ------------ | --------- | -------------------------------------------------- | ---- |
+| `file`       | `File`    | 字体二进制文件（`TTF`、`OTF` 或 `WOFF2`）。最大 25MB。 | 是   |
+| `fontFamily` | `String`  | 字体族名称，仅用于日志记录。                         | 否   |
+
+### 示例（cURL）
+
+```bash
+curl --output MyFont.ttf -X POST "https://api.tiptap.dev/v2/convert/fonts/convert" \
+  -H "Authorization: Bearer <your-jwt>" \
+  -H "X-App-Id: <your-app-id>" \
+  -F "file=@MyFont.woff2" \
+  -F "fontFamily=My Font"
+```
+
+### 响应
+
+成功时，API 会将可嵌入的字体作为二进制下载返回：
+
+- **状态**：`200 OK`
+- **Content-Type**: `font/ttf`
+
+### 错误响应
+
+| 状态 | 代码                      | 描述                                               |
+| ---- | ------------------------- | -------------------------------------------------- |
+| 400  | —                         | 请求验证错误（例如缺少 `file` 字段）               |
+| 413  | `FONT_FILE_TOO_LARGE`     | 上传的字体超过了 25MB 限制                         |
+| 422  | `UNSUPPORTED_FONT_FORMAT` | 上传内容不是可识别的 TTF、OTF 或 WOFF2 字体         |
+| 422  | `FONT_CONVERSION_FAILED`  | WOFF2 → TTF 转换没有产生任何输出                   |
+| 500  | `FONT_CONVERSION_FAILED`  | 转换期间发生意外错误                               |

@@ -1,0 +1,120 @@
+---
+title: 通过 REST API 创建评论线程
+tags:
+  - type: team
+meta:
+  title: 通过 API 创建线程 | Tiptap Comments 文档
+  description: 学习如何使用 REST API 在编辑器外部为 Tiptap 文档创建评论线程的完整工作流程。
+  category: 评论
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+从编辑器外部在文档上创建评论线程需要两步：先通过 [Comments REST API](/comments/integrate/rest-api) 创建线程，然后在文档中将目标内容用 `inlineThread` 标记包裹起来，把该线程链接到文档中的某个位置，这个位置使用文档的 Tiptap JSON 表示。
+
+仅调用 REST API 还不够。如果文档中没有 `inlineThread` 标记，编辑器就无法知道该线程属于哪段内容，因此该线程不会在编辑器 UI 中渲染出来。
+
+<Callout title="正在使用编辑器实例？" variant="info">
+  如果你有一个活动的编辑器实例，建议使用 [`setThread` 编辑器命令](/comments/integrate/editor-commands#setthread-content-data-commentdata)。它会一步完成创建线程并添加 `inlineThread` 标记。
+</Callout>
+
+## 工作流程概览
+
+1. 通过 REST API **创建线程**。响应中包含线程的 `id`。
+2. **更新文档 JSON**，将你想要附加线程的内容用一个 `inlineThread` 标记包裹起来，并让其 `data-thread-id` 与该 `id` 匹配。
+3. **（可选）添加更多评论** 到该线程中，通过 REST API 完成。
+
+## 第 1 步：创建线程
+
+发送一个 `POST` 请求到 `/api/documents/:identifier/threads`。`content` 字段会成为线程中的第一条评论，`data` 可以保存你希望与该线程关联的任何元数据（例如作者）。
+
+```bash
+curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/{document_id}/threads' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: {{Authorization}}' \
+--data '{
+    "content": "这里的 \"Capabilities\" 用词是否正确？",
+    "data": { "authorId": "123" }
+}'
+```
+
+响应中包含新创建的线程，包括它的 `id`。请保留这个 ID——下一步需要用到它。
+
+示例响应：
+
+```json
+{
+    "comments": [
+        {
+            "id": "2f5e54cf-cd3e-48a0-994c-48efa064111d",
+            "createdAt": "2026-01-01T12:00:00.000Z",
+            "updatedAt": "2026-01-01T12:00:00.000Z",
+            "data": {
+                "authorId": "123"
+            },
+            "content": "这里的 \"Capabilities\" 用词是否正确？"
+        }
+    ],
+    "id": "f290f5c4-fc22-4a58-b697-f0f2a10d2d95",
+    "createdAt": "2026-01-01T12:00:00.000Z",
+    "updatedAt": "2026-01-01T12:00:00.000Z"
+}
+```
+
+## 第 2 步：将线程链接到文档中的内容
+
+要在编辑器中渲染该线程，需要在文档的 Tiptap JSON 中，用 `inlineThread` 标记包裹相关范围。`data-thread-id` 属性必须与 API 返回的线程 `id` 匹配。
+
+```json
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "heading",
+      "attrs": { "level": 1 },
+      "content": [
+        { "type": "text", "text": "欢迎来到 " },
+        {
+          "type": "text",
+          "text": "Tiptap 评论",
+          "marks": [
+            {
+              "type": "inlineThread",
+              "attrs": {
+                "data-thread-id": "f290f5c4-fc22-4a58-b697-f0f2a10d2d95"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+如何应用这次编辑取决于文档存放的位置：
+
+- **由 Document server 管理的文档。** 使用 [Inject Content API](/collaboration/documents/content-injection) 通过补丁方式更新带有 `inlineThread` 标记的 Tiptap JSON，同时保持实时协作继续进行。
+- **你正在导入或生成的文档。** 在生成 JSON 的过程中添加 `inlineThread` 标记（例如，在转换带有评论锚点的源格式如 DOCX 时），然后用生成的 JSON 初始化 Document server。
+
+## 第 3 步：向线程添加更多评论
+
+对已有线程添加额外评论时，不需要对文档 JSON 做任何更改。直接将它们发布到该线程即可：
+
+```bash
+curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/{document_id}/threads/{thread_id}/comments' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: {{Authorization}}' \
+--data '{
+    "content": "回复该线程",
+    "data": { "authorId": "123" }
+}'
+```
+
+`content` 字段包含评论正文。如果你的前端将评论渲染为富文本，请传入 Tiptap JSON 而不是纯字符串。
+
+## 相关内容
+
+- [Comments REST API 参考](/comments/integrate/rest-api) — 端点完整列表。
+- [编辑器命令](/comments/integrate/editor-commands) — 从活动编辑器实例创建线程和评论。
+- [管理线程](/comments/core-concepts/manage-threads) — 处理线程的概念与模式。

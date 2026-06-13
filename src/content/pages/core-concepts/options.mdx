@@ -8,7 +8,7 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 
-本页面是 Pages 扩展的 **选项**、**命令** 和 **存储** 的权威参考。有关面向任务的演练，请参见 [Page format](/pages/core-concepts/page-format)、[Page header and footer](/pages/core-concepts/page-header-footer)、[Page gap](/pages/core-concepts/page-gap)、[Page break node](/pages/core-concepts/page-break-node) 和 [Zoom](/pages/core-concepts/zoom)。
+This page is the canonical reference for the Pages extension's **options**, **commands**, and **storage**. For task-focused walkthroughs, see [Page format](/pages/core-concepts/page-format), [Page header and footer](/pages/core-concepts/page-header-footer), [Footnotes](/pages/core-concepts/footnotes), [Page gap](/pages/core-concepts/page-gap), [Page break node](/pages/core-concepts/page-break-node), and [Zoom](/pages/core-concepts/zoom).
 
 ## 选项接口
 
@@ -144,6 +144,39 @@ interface PagesOptions {
   /** 重命名内置的 `{page}` / `{total}` 占位符标记，或传入
    *  `false` 以完全禁用替换。默认：undefined（按原样使用内置项）。 */
   placeholders?: false | { page?: string; total?: string }
+
+  /** 类 Word 的脚注。除非 `enabled` 为 true，否则禁用——参见脚注。 */
+  footnotes?: {
+    /** 主开关。默认：false。 */
+    enabled?: boolean
+
+    /** 脚注编辑器的扩展。静态数组，或接收
+     *  脚注编辑器协作上下文（Y 字段 + Y.Doc）的回调。
+     *  默认：ConvertKit。 */
+    extensions?: Extensions | ((ctx: FootnotesExtensionsContext) => Extensions)
+
+    /** 按 note id 作为键预置脚注内容（与 DOCX 导入结构匹配）。
+     *  仅限非协作文档。 */
+    initialContent?: Record<string, JSONContent>
+
+    /** 在脚注区域上方渲染 Word 风格的分隔线。默认：true。 */
+    separator?: boolean
+
+    /** 脚注区域在被裁剪前最多可占据页面内容高度的比例。
+     *  默认：0.5。 */
+    maxHeightRatio?: number
+
+    /** 双击脚注区域时是否打开编辑器。默认：true。 */
+    editable?: boolean
+
+    /** 脚注标记和脚注编辑器的强调色。
+     *  默认为 `accentColor` 的值。 */
+    accentColor?: string
+  }
+
+  /** 类似 `onDblClickHeaderFooterPreventClose`，但仅适用于脚注编辑器。
+   *  当两者都设置时，优先于回退项。 */
+  onDblClickFootnotesPreventClose?: (event: MouseEvent) => boolean
 }
 ```
 
@@ -162,30 +195,45 @@ interface PagesOptions {
 
 页眉/页脚选项的完整参考位于 [Page header and footer](/pages/core-concepts/page-header-footer#complete-options-reference)。下表概述了表面层；有关首页、奇偶页、内容类型以及编辑器覆盖层行为，请点击链接查看。
 
-| Option                               | Type                             | Default              | Description                                               |
-| ------------------------------------ | -------------------------------- | -------------------- | --------------------------------------------------------- |
-| `header`                             | `PagesHeaderFooter`              | `''`                 | 默认页眉内容                                    |
-| `footer`                             | `PagesHeaderFooter`              | `''`                 | 默认页脚内容                                    |
-| `headerTopMargin`                    | `number`                         | 上边距的 50%    | 从页面顶部到页眉内容的距离（px）             |
-| `footerBottomMargin`                 | `number`                         | 下边距的 50% | 从页脚内容到底部页面的距离（px）          |
-| `differentFirstPage`                 | `boolean`                        | `false`              | 首页页眉和页脚与其余页面不同         |
-| `headerFirstPage`                    | `PagesHeaderFooter`              | `''`                 | 首页页眉内容                                 |
-| `footerFirstPage`                    | `PagesHeaderFooter`              | `''`                 | 首页页脚内容                                 |
-| `differentOddEven`                   | `boolean`                        | `false`              | 奇数页和偶数页具有不同的页眉和页脚         |
-| `headerOdd`                          | `PagesHeaderFooter`              | `''`                 | 奇数页页眉内容                                  |
-| `headerEven`                         | `PagesHeaderFooter`              | `''`                 | 偶数页页眉内容                                 |
-| `footerOdd`                          | `PagesHeaderFooter`              | `''`                 | 奇数页页脚内容                                  |
-| `footerEven`                         | `PagesHeaderFooter`              | `''`                 | 偶数页页脚内容                                 |
-| `editableHeader`                     | `boolean`                        | `true`               | 允许在双击时打开页眉覆盖层          |
-| `editableFooter`                     | `boolean`                        | `true`               | 允许在双击时打开页脚覆盖层          |
-| `headerFooterExtensions`             | `Extensions \| (ctx) => Extensions` | `ConvertKit`         | 内部页眉/页脚编辑器的扩展。传入回调可针对每个子类型附加 `Collaboration`（参见 [为 Pages 添加协作](/pages/guides/collaboration-with-pages)）。 |
-| `onDblClickHeaderFooterPreventClose` | `(event: MouseEvent) => boolean` | `undefined`          | 防止在外部双击时关闭（页眉 + 页脚） |
-| `onDblClickHeaderPreventClose`       | `(event: MouseEvent) => boolean` | `undefined`          | 防止在外部双击时关闭（仅页眉）     |
-| `onDblClickFooterPreventClose`       | `(event: MouseEvent) => boolean` | `undefined`          | 防止在外部双击时关闭（仅页脚）     |
-| `accentColor`                        | `string`                         | `'#6366f1'`          | 两个覆盖层的强调色                            |
-| `headerAccentColor`                  | `string`                         | `accentColor` value  | 仅页眉覆盖层的强调色                  |
-| `footerAccentColor`                  | `string`                         | `accentColor` value  | 仅页脚覆盖层的强调色                  |
-| `placeholders`                       | `false \| { page?, total? }`     | `undefined`          | 重命名 `{page}` / `{total}` 标记，或使用 `false` 禁用 |
+| Option                               | Type                                | Default              | Description                                                                                                                                                                          |
+| ------------------------------------ | ----------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `header`                             | `PagesHeaderFooter`                 | `''`                 | 默认页眉内容                                                                                                                                                               |
+| `footer`                             | `PagesHeaderFooter`                 | `''`                 | 默认页脚内容                                                                                                                                                               |
+| `headerTopMargin`                    | `number`                            | 页面上边距的 50%    | 从页面顶部到页眉内容的距离（px）                                                                                                                                        |
+| `footerBottomMargin`                 | `number`                            | 页面下边距的 50% | 从页脚内容到底部页面的距离（px）                                                                                                                                     |
+| `differentFirstPage`                 | `boolean`                           | `false`              | 首页的页眉和页脚与其余页面不同                                                                                                                                    |
+| `headerFirstPage`                    | `PagesHeaderFooter`                 | `''`                 | 首页页眉内容                                                                                                                                                            |
+| `footerFirstPage`                    | `PagesHeaderFooter`                 | `''`                 | 首页页脚内容                                                                                                                                                            |
+| `differentOddEven`                   | `boolean`                           | `false`              | 奇数页/偶数页有不同的页眉和页脚                                                                                                                                    |
+| `headerOdd`                          | `PagesHeaderFooter`                 | `''`                 | 奇数页页眉内容                                                                                                                                                             |
+| `headerEven`                         | `PagesHeaderFooter`                 | `''`                 | 偶数页页眉内容                                                                                                                                                            |
+| `footerOdd`                          | `PagesHeaderFooter`                 | `''`                 | 奇数页页脚内容                                                                                                                                                             |
+| `footerEven`                         | `PagesHeaderFooter`                 | `''`                 | 偶数页页脚内容                                                                                                                                                            |
+| `editableHeader`                     | `boolean`                           | `true`               | 允许双击打开页眉覆盖层                                                                                                                                     |
+| `editableFooter`                     | `boolean`                           | `true`               | 允许双击打开页脚覆盖层                                                                                                                                     |
+| `headerFooterExtensions`             | `Extensions \| (ctx) => Extensions` | `ConvertKit`         | 内部页眉/页脚编辑器的扩展。传入回调可按子类型附加 `Collaboration`（参见 [为 Pages 添加协作](/pages/guides/collaboration-with-pages)）。 |
+| `onDblClickHeaderFooterPreventClose` | `(event: MouseEvent) => boolean`    | `undefined`          | 防止在外部双击时关闭（页眉 + 页脚）                                                                                                                            |
+| `onDblClickHeaderPreventClose`       | `(event: MouseEvent) => boolean`    | `undefined`          | 防止在外部双击时关闭（仅页眉）                                                                                                                                |
+| `onDblClickFooterPreventClose`       | `(event: MouseEvent) => boolean`    | `undefined`          | 防止在外部双击时关闭（仅页脚）                                                                                                                                |
+| `accentColor`                        | `string`                            | `'#6366f1'`          | 两个覆盖层的强调色                                                                                                                                                       |
+| `headerAccentColor`                  | `string`                            | `accentColor` value  | 仅页眉覆盖层的强调色                                                                                                                                             |
+| `footerAccentColor`                  | `string`                            | `accentColor` value  | 仅页脚覆盖层的强调色                                                                                                                                             |
+| `placeholders`                       | `false \| { page?, total? }`        | `undefined`          | 重命名 `{page}` / `{total}` 标记，或使用 `false` 禁用                                                                                                                            |
+
+### 脚注
+
+脚注选项的完整参考位于 [Footnotes](/pages/core-concepts/footnotes#complete-options-reference)。以下所有选项都位于 `footnotes` 键下，除非另有说明。
+
+| Option                            | Type                                                | Default             | Description                                                              |
+| --------------------------------- | --------------------------------------------------- | ------------------- | ------------------------------------------------------------------------ |
+| `footnotes.enabled`               | `boolean`                                           | `false`             | 脚注功能的主开关                                  |
+| `footnotes.extensions`            | `Extensions \| (ctx) => Extensions`                 | `ConvertKit`        | 脚注编辑器的扩展；回调形式启用协作 |
+| `footnotes.initialContent`        | `Record<string, JSONContent>`                       | `undefined`         | 按 note id 作为键预置脚注内容（仅限非协作）          |
+| `footnotes.separator`             | `boolean`                                           | `true`              | 在脚注区域上方渲染分隔线                       |
+| `footnotes.maxHeightRatio`        | `number`                                            | `0.5`               | 该区域最多可占据页面内容高度的比例                  |
+| `footnotes.editable`              | `boolean`                                           | `true`              | 允许双击打开脚注编辑器                       |
+| `footnotes.accentColor`           | `string`                                            | `accentColor` value | 标记和脚注编辑器的强调色                        |
+| `onDblClickFootnotesPreventClose` | `(event: MouseEvent) => boolean` (top-level option) | `undefined`         | 防止在外部双击时关闭脚注编辑器             |
 
 ### 回调
 
@@ -209,34 +257,48 @@ interface PagesOptions {
 
 ### 页眉 / 页脚命令
 
-完整参考也位于 [Page header and footer](/pages/core-concepts/page-header-footer#commands-reference)。
+完整参考也位于 [页面页眉和页脚](/pages/core-concepts/page-header-footer#commands-reference)。
 
-| Command                       | Parameters                  | Description                                         |
-| ----------------------------- | --------------------------- | --------------------------------------------------- |
-| `setHeader`                   | `header: PagesHeaderFooter` | 设置默认页眉内容                      |
-| `setFooter`                   | `footer: PagesHeaderFooter` | 设置默认页脚内容                      |
-| `setHeaderTopMargin`          | `margin: number`            | 设置页眉上边距（px）                          |
-| `setFooterBottomMargin`       | `margin: number`            | 设置页脚下边距（px）                       |
-| `setDifferentFirstPage`       | `enabled: boolean`          | 切换首页页眉和页脚不同     |
-| `setDifferentFirstPageFooter` | `enabled: boolean`          | 独立切换首页页脚不同    |
-| `setHeaderFirstPage`          | `header: PagesHeaderFooter` | 设置首页页眉内容                       |
-| `setFooterFirstPage`          | `footer: PagesHeaderFooter` | 设置首页页脚内容                       |
-| `setDifferentOddEven`         | `enabled: boolean`          | 切换奇偶页页眉和页脚不同     |
-| `setDifferentOddEvenFooter`   | `enabled: boolean`          | 独立切换奇偶页页脚不同     |
-| `setHeaderOdd`                | `header: PagesHeaderFooter` | 设置奇数页页眉内容                        |
-| `setHeaderEven`               | `header: PagesHeaderFooter` | 设置偶数页页眉内容                       |
-| `setFooterOdd`                | `footer: PagesHeaderFooter` | 设置奇数页页脚内容                       |
-| `setFooterEven`               | `footer: PagesHeaderFooter` | 设置偶数页页脚内容                       |
+| Command                       | Parameters                  | Description                                                    |
+| ----------------------------- | --------------------------- | -------------------------------------------------------------- |
+| `setHeader`                   | `header: PagesHeaderFooter` | 设置默认页眉内容                                 |
+| `setFooter`                   | `footer: PagesHeaderFooter` | 设置默认页脚内容                                 |
+| `setHeaderTopMargin`          | `margin: number`            | 设置页眉上边距（px）                                     |
+| `setFooterBottomMargin`       | `margin: number`            | 设置页脚下边距（px）                                  |
+| `setDifferentFirstPage`       | `enabled: boolean`          | 切换不同的首页页眉 _和_ 页脚                |
+| `setDifferentFirstPageFooter` | `enabled: boolean`          | 单独切换不同的首页页脚               |
+| `setHeaderFirstPage`          | `header: PagesHeaderFooter` | 设置首页页眉内容                                  |
+| `setFooterFirstPage`          | `footer: PagesHeaderFooter` | 设置首页页脚内容                                  |
+| `setDifferentOddEven`         | `enabled: boolean`          | 切换不同的奇数/偶数页页眉 _和_ 页脚                |
+| `setDifferentOddEvenFooter`   | `enabled: boolean`          | 单独切换不同的奇数/偶数页页脚                |
+| `setHeaderOdd`                | `header: PagesHeaderFooter` | 设置奇数页页眉内容                                   |
+| `setHeaderEven`               | `header: PagesHeaderFooter` | 设置偶数页页眉内容                                  |
+| `setFooterOdd`               | `footer: PagesHeaderFooter` | 设置奇数页页脚内容                                   |
+| `setFooterEven`               | `footer: PagesHeaderFooter` | 设置偶数页页脚内容                                  |
 | `setHeaderEditable`           | `enabled: boolean`          | 锁定或解锁页眉覆盖层（控制 `editableHeader`）。 |
 | `setFooterEditable`           | `enabled: boolean`          | 锁定或解锁页脚覆盖层（控制 `editableFooter`）。 |
-| `openHeaderEditor`            | `{ pageNumber: number }`    | 打开指定页面的页眉编辑器（从 1 开始编号）。 |
-| `openFooterEditor`            | `{ pageNumber: number }`    | 打开指定页面的页脚编辑器（从 1 开始编号）。 |
-| `closeHeaderFooterEditors`    | none                        | 关闭当前打开的任一页眉/页脚编辑器        |
-| `closeHeaderEditor`           | none                        | 如果已打开，则关闭页眉编辑器                     |
-| `closeFooterEditor`           | none                        | 如果已打开，则关闭页脚编辑器                     |
-| `setAccentColor`              | `color: string`             | 设置两个编辑器覆盖层的强调色           |
-| `setHeaderAccentColor`        | `color: string`             | 仅设置页眉覆盖层的强调色        |
-| `setFooterAccentColor`        | `color: string`             | 仅设置页脚覆盖层的强调色        |
+| `openHeaderEditor`            | `{ pageNumber: number }`    | 为特定页面打开页眉编辑器（从 1 开始编号）。            |
+| `openFooterEditor`            | `{ pageNumber: number }`    | 为特定页面打开页脚编辑器（从 1 开始编号）。            |
+| `closeHeaderFooterEditors`    | none                        | 关闭当前打开的任意页眉/页脚编辑器                   |
+| `closeHeaderEditor`           | none                        | 如果页眉编辑器已打开，则将其关闭                                |
+| `closeFooterEditor`           | none                        | 如果页脚编辑器已打开，则将其关闭                                |
+| `setAccentColor`              | `color: string`             | 为两个编辑器覆盖层设置强调色                      |
+| `setHeaderAccentColor`        | `color: string`             | 仅为页眉覆盖层设置强调色                   |
+| `setFooterAccentColor`        | `color: string`             | 仅为页脚覆盖层设置强调色                   |
+
+### 脚注命令
+
+完整参考也位于 [脚注](/pages/core-concepts/footnotes#commands-reference)。
+
+| Command                   | Parameters                                     | Description                                                      |
+| ------------------------- | ---------------------------------------------- | ---------------------------------------------------------------- |
+| `insertFootnote`          | none                                           | 在选区插入脚注并打开其编辑器           |
+| `setFootnotes`            | `footnotes: Record<string, JSONContent>`       | 使用从 id → 文档映射替换所有脚注内容           |
+| `openFootnoteEditor`      | `{ pageNumber: number, focusNoteId?: string }` | 为某一页面打开脚注编辑器（从 1 开始编号）                 |
+| `closeFootnoteEditor`     | none                                           | 如果脚注编辑器已打开，则将其关闭                               |
+| `setFootnotesEditable`    | `enabled: boolean`                             | 锁定或解锁脚注编辑（控制 `footnotes.editable`） |
+| `cleanupOrphanFootnotes`  | none                                           | 永久移除其引用已消失的脚注内容    |
+| `setFootnotesAccentColor` | `color: string`                                | 设置脚注强调色                                   |
 
 ## 存储引用
 
@@ -259,47 +321,61 @@ interface PagesOptions {
 
 当用户通过覆盖层编辑页眉或页脚后，渲染后的 HTML 和底层的 Tiptap JSON 都会暴露在存储中。导出为 DOCX 时，请使用 JSON 形式进行序列化。HTML 属性始终是字符串（在任何编辑之前默认为 `''`）。JSON 属性在用户首次通过覆盖层编辑对应的页眉或页脚之前为 `null`。
 
-| 属性                      | 类型                            | 描述                                  |
-| ------------------------- | ------------------------------- | ------------------------------------- |
-| `headerHTML`              | `string`                        | 默认页眉渲染后的 HTML                |
-| `headerJSON`              | `Record<string, any> \| null`   | 默认页眉的 Tiptap JSON               |
-| `headerFirstPageHTML`     | `string`                        | 首页页眉渲染后的 HTML                |
-| `headerFirstPageJSON`     | `Record<string, any> \| null`   | 首页页眉的 Tiptap JSON               |
-| `headerOddHTML`           | `string`                        | 奇数页页眉渲染后的 HTML              |
-| `headerOddJSON`           | `Record<string, any> \| null`   | 奇数页页眉的 Tiptap JSON             |
-| `headerEvenHTML`          | `string`                        | 偶数页页眉渲染后的 HTML              |
-| `headerEvenJSON`          | `Record<string, any> \| null`   | 偶数页页眉的 Tiptap JSON             |
-| `footerHTML`              | `string`                        | 默认页脚渲染后的 HTML                |
-| `footerJSON`              | `Record<string, any> \| null`   | 默认页脚的 Tiptap JSON               |
-| `footerFirstPageHTML`     | `string`                        | 首页页脚渲染后的 HTML                |
-| `footerFirstPageJSON`     | `Record<string, any> \| null`   | 首页页脚的 Tiptap JSON               |
-| `footerOddHTML`           | `string`                        | 奇数页页脚渲染后的 HTML              |
-| `footerOddJSON`           | `Record<string, any> \| null`   | 奇数页页脚的 Tiptap JSON             |
-| `footerEvenHTML`          | `string`                        | 偶数页页脚渲染后的 HTML              |
-| `footerEvenJSON`          | `Record<string, any> \| null`   | 偶数页页脚的 Tiptap JSON             |
-| `differentFirstPage`      | `boolean`             | 首页是否不同                        |
-| `differentOddEven`        | `boolean`             | 奇偶页是否不同                      |
-| `differentFirstPageFooter` | `boolean`             | 首页页脚是否不同（独立标志）         |
-| `differentOddEvenFooter`   | `boolean`             | 奇偶页脚是否不同（独立标志）         |
-| `editableHeader`          | `boolean`             | 是否可以打开页眉覆盖层（只读——使用 `setHeaderEditable`） |
-| `editableFooter`          | `boolean`             | 是否可以打开页脚覆盖层（只读——使用 `setFooterEditable`） |
-| `accentColor`             | `string`              | 当前强调色（两者）                  |
-| `headerAccentColor`       | `string`              | 当前页眉强调色                    |
-| `footerAccentColor`       | `string`              | 当前页脚强调色                    |
+| Property                   | Type                          | Description                                                                    |
+| -------------------------- | ----------------------------- | ------------------------------------------------------------------------------ |
+| `headerHTML`               | `string`                      | 默认页眉渲染后的 HTML                                                   |
+| `headerJSON`               | `Record<string, any> \| null` | 默认页眉的 Tiptap JSON                                                  |
+| `headerFirstPageHTML`      | `string`                      | 首页页眉渲染后的 HTML                                                |
+| `headerFirstPageJSON`      | `Record<string, any> \| null` | 首页页眉的 Tiptap JSON                                               |
+| `headerOddHTML`            | `string`                      | 奇数页页眉渲染后的 HTML                                                 |
+| `headerOddJSON`            | `Record<string, any> \| null` | 奇数页页眉的 Tiptap JSON                                                |
+| `headerEvenHTML`           | `string`                      | 偶数页页眉渲染后的 HTML                                                |
+| `headerEvenJSON`           | `Record<string, any> \| null` | 偶数页页眉的 Tiptap JSON                                               |
+| `footerHTML`               | `string`                      | 默认页脚渲染后的 HTML                                                   |
+| `footerJSON`               | `Record<string, any> \| null` | 默认页脚的 Tiptap JSON                                                  |
+| `footerFirstPageHTML`      | `string`                      | 首页页脚渲染后的 HTML                                                |
+| `footerFirstPageJSON`      | `Record<string, any> \| null` | 首页页脚的 Tiptap JSON                                               |
+| `footerOddHTML`            | `string`                      | 奇数页页脚渲染后的 HTML                                                 |
+| `footerOddJSON`            | `Record<string, any> \| null` | 奇数页页脚的 Tiptap JSON                                                |
+| `footerEvenHTML`           | `string`                      | 偶数页页脚渲染后的 HTML                                                |
+| `footerEvenJSON`           | `Record<string, any> \| null` | 偶数页页脚的 Tiptap JSON                                               |
+| `differentFirstPage`       | `boolean`                     | 首页是否不同                                                 |
+| `differentOddEven`         | `boolean`                     | 奇数页/偶数页是否不同                                                  |
+| `differentFirstPageFooter` | `boolean`                     | 首页页脚是否不同（独立标志）                                   |
+| `differentOddEvenFooter`   | `boolean`                     | 奇数/偶数页脚是否不同（独立标志）                                     |
+| `editableHeader`           | `boolean`                     | 是否可以打开页眉覆盖层（只读——使用 `setHeaderEditable`） |
+| `editableFooter`           | `boolean`                     | 是否可以打开页脚覆盖层（只读——使用 `setFooterEditable`） |
+| `accentColor`              | `string`                      | 当前强调色（两者）                                                    |
+| `headerAccentColor`        | `string`                      | 当前页眉强调色                                                    |
+| `footerAccentColor`        | `string`                      | 当前页脚强调色                                                    |
+
+### 脚注
+
+完整参考也位于 [脚注](/pages/core-concepts/footnotes#storage-reference)。
+
+| Property            | Type                          | Description                                                          |
+| ------------------- | ----------------------------- | -------------------------------------------------------------------- |
+| `footnotesJSON`     | `Record<string, JSONContent>` | 每个脚注 id 对应的脚注内容——用于持久化和 DOCX 导出   |
+| `footnotesHTML`     | `Record<string, string>`      | 每个脚注 id 对应的渲染后 HTML，与页面预览一致                |
+| `footnoteNumbers`   | `Record<string, number>`      | 当前编号（note id → 从 1 开始的编号）                         |
+| `footnotesEnabled`  | `boolean`                     | 脚注是否已启用                                        |
+| `editableFootnotes` | `boolean`                     | 是否已解锁编辑（只读——使用 `setFootnotesEditable`） |
 
 ### 活动的内部编辑器状态
 
-当页眉或页脚覆盖层打开时，这些属性会反映当前处于活动状态的是哪一个。适用于构建跟随当前聚焦编辑器的工具栏——完整的工具栏示例请参见 [页面页眉和页脚](/pages/core-concepts/page-header-footer#active-editor-state)。
+当页眉、页脚或脚注覆盖层打开时，这些属性会反映当前激活的是哪一个。对于构建跟随当前聚焦编辑器的工具栏很有用——完整的工具栏示例请参见 [页面页眉和页脚](/pages/core-concepts/page-header-footer#active-editor-state)。
 
-| 属性              | 类型                           | 描述                                                          |
-| ----------------- | ------------------------------ | ------------------------------------------------------------- |
-| `activeEditor`    | `Editor \| null`               | 当前活动的页眉/页脚编辑器实例，或 `null`                    |
-| `activeEditorType`| `'header' \| 'footer' \| null` | 哪种覆盖层处于活动状态                                         |
-| `activePageNumber`| `number \| null`               | 正在编辑的页码                                                 |
-| `headerEditorOn`  | `Editor['on'] \| null`         | 预绑定的页眉覆盖层内部编辑器事件订阅函数                       |
-| `headerEditorOff` | `Editor['off'] \| null`        | 预绑定的页眉覆盖层内部编辑器取消订阅函数                       |
-| `footerEditorOn`  | `Editor['on'] \| null`         | 预绑定的页脚覆盖层内部编辑器事件订阅函数                       |
-| `footerEditorOff` | `Editor['off'] \| null`        | 预绑定的页脚覆盖层内部编辑器取消订阅函数                       |
+| Property             | Type                                          | Description                                                          |
+| -------------------- | --------------------------------------------- | -------------------------------------------------------------------- |
+| `activeEditor`       | `Editor \| null`                              | 当前激活的页眉/页脚/脚注编辑器实例，或 `null`        |
+| `activeEditorType`   | `'header' \| 'footer' \| 'footnotes' \| null` | 当前激活的是哪种覆盖层                                      |
+| `activePageNumber`   | `number \| null`                              | 正在编辑的页码                                             |
+| `headerEditorOn`     | `Editor['on'] \| null`                        | 预绑定的页眉覆盖层内部编辑器事件订阅器 |
+| `headerEditorOff`    | `Editor['off'] \| null`                       | 预绑定的页眉覆盖层内部编辑器取消订阅器         |
+| `footerEditorOn`     | `Editor['on'] \| null`                        | 预绑定的页脚覆盖层内部编辑器事件订阅器 |
+| `footerEditorOff`    | `Editor['off'] \| null`                       | 预绑定的页脚覆盖层内部编辑器取消订阅器         |
+| `footnotesEditorOn`  | `Editor['on'] \| null`                        | 预绑定的脚注编辑器事件订阅器              |
+| `footnotesEditorOff` | `Editor['off'] \| null`                       | 预绑定的脚注编辑器取消订阅器                      |
 
 ## 示例用法
 

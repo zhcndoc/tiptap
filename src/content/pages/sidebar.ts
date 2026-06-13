@@ -18,6 +18,11 @@ export const sidebarConfig: SidebarConfig = {
           title: '安装',
           href: '/pages/getting-started/install',
         },
+        {
+          title: 'Live demo',
+          href: '/pages/getting-started/live-demo',
+          tags: ['New'],
+        },
       ],
     },
     {
@@ -38,7 +43,12 @@ export const sidebarConfig: SidebarConfig = {
           href: '/pages/core-concepts/page-header-footer',
         },
         {
-          title: '页面间隙与背景',
+          title: 'Footnotes',
+          href: '/pages/core-concepts/footnotes',
+          tags: ['New'],
+        },
+        {
+          title: 'Page gap & background',
           href: '/pages/core-concepts/page-gap',
         },
         {

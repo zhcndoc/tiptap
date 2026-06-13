@@ -1,0 +1,61 @@
+---
+title: Pages 在线演示
+tags:
+  - type: team
+  - type: beta
+meta:
+  title: Pages 在线演示 | Tiptap Pages
+  description: 试用 Tiptap Pages 的在线演示，这是一款可分页的 DOCX 编辑器，支持可配置的页面布局、页眉和页脚，以及 DOCX/PDF 导出。
+  category: Pages
+sidebars:
+  hideSecondary: true
+---
+
+import { ExternalLinkIcon, Expand } from 'lucide-react'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Link } from '@/components/Link'
+import { Callout } from '@/components/ui/Callout'
+
+这个演示展示了 Tiptap Pages 在真实文字处理器中的表现。它将分页、协作、可配置的页面布局以及 DOCX/PDF 导出集成在一个编辑器中。
+
+<CodeDemo
+  isScrollable
+  isLarge
+  src="https://template.tiptap.dev/docx"
+  caption={
+    <>
+      <strong>试用 Tiptap Pages</strong>，在这个交互式 DOCX 编辑器演示中体验分页、
+      页眉和页脚，以及 DOCX/PDF 导出。
+    </>
+  }
+  captionActions={
+    <>
+      <a
+        href="https://template.tiptap.dev/docx"
+        target="_blank"
+        className="flex items-center gap-1 text-grayAlpha-600 hover:text-grayAlpha-800 font-medium whitespace-nowrap"
+      >
+        全屏
+        <Expand className="size-3" />
+      </a>
+    </>
+  }
+/>
+
+### 分页编辑
+
+- **页面布局**：内容会在可视页面之间流动，内置格式包括 A4、Letter 等，并支持可配置的页边距
+- **页眉和页脚**：双击页眉或页脚即可就地编辑，并支持 `{page}` 和 `{total}` 占位符
+- **分页符**：插入明确的分页符，或让 Pages 处理自动分页
+- **缩放**：视觉缩放不会影响文档内容或导出
+
+### 文档工作流
+
+- **协作**：整篇文档都是共享协作会话的一部分，包括其页眉和页脚
+- **DOCX 导入和导出**：通过 [Tiptap Conversion](/conversion/getting-started/overview) 往返处理 Word 文档，并保留页眉、页脚和分页
+- **PDF 导出**：将分页布局渲染为可直接打印的 PDF
+
+<Callout title="获取源代码" variant="info">
+  我们正在通过 Tiptap CLI 提供此演示的完整源代码。
+  很快就会发布。使用需遵守我们的 [服务条款](https://tiptap.dev/terms-of-service) 和 [专业许可证](https://tiptap.dev/pro-license)。
+</Callout>

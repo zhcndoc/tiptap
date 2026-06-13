@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.3.0
+    label: v0.6.1
 meta:
     title: 使用页眉和页脚扩展您的 DOC 导出功能 | Tiptap 转换
     description: 学习如何使用 Export DOC 扩展自定义您的 DOC 导出中的页眉和页脚。
@@ -18,77 +18,77 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 <EnterpriseCalloutAuto variant="doc" renderMode="sidebar" disableWaitlist />
 
 <Requirements>
-    <RequirementItem label="1. Activate Trial or Subscription">
-        Start a [free trial](https://cloud.tiptap.dev/v2?trial=true) or [subscribe to a starter plan](https://cloud.tiptap.dev/v2/billing) in your account.
+    <RequirementItem label="1. 激活试用或订阅">
+        在你的账户中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
-    <RequirementItem label="2. Install from Private Registry">
-        To install this frontend extension, follow the [setup guide](/guides/pro-extensions) to authenticate and access Tiptap's private npm registry.
+    <RequirementItem label="2. 从私有注册表安装">
+        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)进行身份验证并访问 Tiptap 的私有 npm 注册表。
     </RequirementItem>
 </Requirements>
 
-<Callout title="Consider Using DOCX Instead" variant="info">
-    The DOC format is the traditional format for Microsoft Word 97-2003. For modern use, we recommend exporting as [DOCX](/conversion/export/docx/headers-footers). Use DOC only when compatibility with older systems is required.
+<Callout title="考虑改用 DOCX" variant="info">
+    DOC 格式是 Microsoft Word 97-2003 的传统格式。对于现代用途，我们建议导出为 [DOCX](/conversion/export/docx/headers-footers)。仅在需要兼容旧系统时才使用 DOC。
 </Callout>
 
-The `@tiptap-pro/extension-export-doc` extension natively supports customizing headers and footers when exporting documents. You can configure different headers and footers for the first page, odd pages, and even pages.
+`@tiptap-pro/extension-export-doc` 扩展在导出文档时原生支持自定义页眉和页脚。你可以为首页、奇数页和偶数页配置不同的页眉和页脚。
 
-## Header Configuration
+## 页眉配置
 
-The `headers` object allows you to customize the exported DOC document headers:
-
-| Property             | Type         | Description                                                                                           |
-| -------------------- | ------------ | ------------------------------------------------------------------------------------------------- |
-| `evenAndOddHeaders`  | `boolean`    | Whether to use different headers for odd and even pages                                           |
-| `differentFirstPage` | `boolean`    | Whether the first page uses a different header. When `true`, the first page uses the `first` value instead of `default`. |
-| `default`            | `string`     | Default header, applied to all pages or odd pages when `evenAndOddHeaders` is enabled. Supports plain text strings or serialized Tiptap JSONContent for rich formatting. |
-| `first`              | `string`     | Header for the first page, effective only if `differentFirstPage` is `true`. Supports plain text strings or serialized Tiptap JSONContent. |
-| `even`               | `string`     | Header for even pages when `evenAndOddHeaders` is enabled. Supports plain text strings or serialized Tiptap JSONContent. |
-
-Plain text generates simple, unstyled headers. Using serialized Tiptap JSONContent (via `JSON.stringify()`) preserves rich formatting like bold, italic, and links.
-
-## Footer Configuration
-
-The `footers` object allows you to customize the exported DOC document footers:
+`headers` 对象允许你自定义导出的 DOC 文档页眉：
 
 | Property             | Type         | Description                                                                                           |
 | -------------------- | ------------ | ------------------------------------------------------------------------------------------------- |
-| `evenAndOddFooters`  | `boolean`    | Whether to use different footers for odd and even pages                                           |
-| `differentFirstPage` | `boolean`    | Whether the first page uses a different footer. When `true`, the first page uses the `first` value instead of `default`. |
-| `default`            | `string`     | Default footer, applied to all pages or odd pages when `evenAndOddFooters` is enabled. Supports plain text strings or serialized Tiptap JSONContent. |
-| `first`              | `string`     | Footer for the first page, effective only if `differentFirstPage` is `true`. Supports plain text strings or serialized Tiptap JSONContent. |
-| `even`               | `string`     | Footer for even pages when `evenAndOddFooters` is enabled. Supports plain text strings or serialized Tiptap JSONContent. |
+| `evenAndOddHeaders`  | `boolean`    | 是否为奇数页和偶数页使用不同的页眉                                           |
+| `differentFirstPage` | `boolean`    | 首页是否使用不同的页眉。当为 `true` 时，首页使用 `first` 的值而不是 `default`。 |
+| `default`            | `string`     | 默认页眉，应用于所有页面，或在启用 `evenAndOddHeaders` 时应用于奇数页。支持纯文本字符串或序列化的 Tiptap JSONContent，用于富文本格式。 |
+| `first`              | `string`     | 首页页眉，仅在 `differentFirstPage` 为 `true` 时生效。支持纯文本字符串或序列化的 Tiptap JSONContent。 |
+| `even`               | `string`     | 启用 `evenAndOddHeaders` 时用于偶数页的页眉。支持纯文本字符串或序列化的 Tiptap JSONContent。 |
 
-Plain text generates simple, unstyled footers. Using serialized Tiptap JSONContent (via `JSON.stringify()`) preserves rich formatting like bold, italic, and links.
+纯文本会生成简单、无样式的页眉。使用序列化的 Tiptap JSONContent（通过 `JSON.stringify()`）可以保留粗体、斜体和链接等富文本格式。
 
-## Complete Example
+## 页脚配置
+
+`footers` 对象允许你自定义导出的 DOC 文档页脚：
+
+| Property             | Type         | Description                                                                                           |
+| -------------------- | ------------ | ------------------------------------------------------------------------------------------------- |
+| `evenAndOddFooters`  | `boolean`    | 是否为奇数页和偶数页使用不同的页脚                                           |
+| `differentFirstPage` | `boolean`    | 首页是否使用不同的页脚。当为 `true` 时，首页使用 `first` 的值而不是 `default`。 |
+| `default`            | `string`     | 默认页脚，应用于所有页面，或在启用 `evenAndOddFooters` 时应用于奇数页。支持纯文本字符串或序列化的 Tiptap JSONContent。 |
+| `first`              | `string`     | 首页页脚，仅在 `differentFirstPage` 为 `true` 时生效。支持纯文本字符串或序列化的 Tiptap JSONContent。 |
+| `even`               | `string`     | 启用 `evenAndOddFooters` 时用于偶数页的页脚。支持纯文本字符串或序列化的 Tiptap JSONContent。 |
+
+纯文本会生成简单、无样式的页脚。使用序列化的 Tiptap JSONContent（通过 `JSON.stringify()`）可以保留粗体、斜体和链接等富文本格式。
+
+## 完整示例
 
 ```js
 import { ExportDoc } from '@tiptap-pro/extension-export-doc'
 
 const editor = new Editor({
   extensions: [
-    // other extensions...
+    // 其他扩展...
     ExportDoc.configure({
       token: 'YOUR_TOKEN',
       appId: 'YOUR_APP_ID',
       headers: {
         evenAndOddHeaders: true,
-        default: 'My Document - Confidential',
-        first: 'Welcome to My Document',
-        even: 'My Document - Even Pages',
+        default: '我的文档 - 机密',
+        first: '欢迎使用我的文档',
+        even: '我的文档 - 偶数页',
       },
       footers: {
         evenAndOddFooters: true,
-        default: 'Company Name - All Rights Reserved',
-        first: 'Draft Version 1.0',
-        even: 'Company Name - Even Page Footer',
+        default: '公司名称 - 保留所有权利',
+        first: '草稿版本 1.0',
+        even: '公司名称 - 偶数页页脚',
       },
     }),
-    // other extensions...
+    // 其他扩展...
   ],
 })
 
-// Export with headers and footers
+// 导出带有页眉和页脚的文档
 editor
   .chain()
   .exportDoc({
@@ -106,19 +106,19 @@ editor
   .run()
 ```
 
-## Simple Headers and Footers
+## 简单页眉和页脚
 
-If you don't need different headers for odd and even pages, you can just provide a `default` value:
+如果你不需要为奇数页和偶数页设置不同的页眉，可以只提供一个 `default` 值：
 
 ```js
 ExportDoc.configure({
   token: 'YOUR_TOKEN',
   appId: 'YOUR_APP_ID',
   headers: {
-    default: 'My Document Title',
+    default: '我的文档标题',
   },
   footers: {
-    default: 'Footer - Company Name',
+    default: '页脚 - 公司名称',
   },
 })
 ```

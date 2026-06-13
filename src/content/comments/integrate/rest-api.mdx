@@ -95,6 +95,10 @@ curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/{document
 }'
 ```
 
+<Callout title="创建线程是一个两步过程" variant="info">
+  调用此端点会创建线程，但不会将其附加到文档中的任何内容。要使线程在编辑器中显示，您还需要在文档的 Tiptap JSON 中使用 `inlineThread` 标记包裹目标范围。完整工作流程请参见 [通过 API 创建线程指南](/comments/integrate/create-thread-via-api)。
+</Callout>
+
 ### 更新线程
 
 ```bash

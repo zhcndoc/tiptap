@@ -12,13 +12,13 @@ import { Callout } from '@/components/ui/Callout'
 
 这个模式是 _非常_ 严格的。您不能使用未在您的模式中定义的任何 HTML 元素或属性。
 
-让我给你一个例子：如果您将类似 `This is <strong>important</strong>` 的内容粘贴到 Tiptap 中，而没有处理 `strong` 标签的扩展，您将只会看到 `This is important` — 没有强标签。
+让我给你一个例子：如果您将类似 `This is <strong>important</strong>` 的内容粘贴到 Tiptap 中，而没有处理 `strong` 标签的扩展，您将只会看到 `This is important` — 没有 strong 标签。
 
 如果您想知道何时发生这种情况，可以在启用 `enableContentCheck` 选项后监听 [`contentError`](/editor/api/events#contenterror) 事件。
 
 ## 模式是什么样子的
 
-当您只使用提供的扩展时，您不必过于关心模式。如果您正在构建自己的扩展，理解模式的工作方式可能会有所帮助。让我们看看一个典型 ProseMirror 编辑器的最简单模式：
+当您完全使用提供的扩展时，其实不需要太在意模式。如果您正在构建自己的扩展，那么了解模式的工作方式可能会很有帮助。让我们看看典型 ProseMirror 编辑器最简单的模式：
 
 ```js
 // 底层 ProseMirror 模式

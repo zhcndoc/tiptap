@@ -4,11 +4,11 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v2.12.0
+    label: v2.25.0
 meta:
     title: EPUB REST API | Tiptap 转换
     description: 了解如何使用 Tiptap Conversion REST API v2 将 Tiptap JSON 文档导出为 EPUB 格式。
-    category: Conversion
+    category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -132,14 +132,14 @@ curl --output document.epub -X POST "https://api.tiptap.dev/v2/convert/export/ep
     每个页脚值可以是**纯文本字符串**（生成简单无样式页脚），也可以是**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，请先用 `JSON.stringify()` 转换成字符串再发送。
 </Callout>
 
-### Element Overrides
+### 元素覆盖
 
 EPUB 生成通过 DOCX 管道完成，因此当发送 Tiptap JSON 时，`/export/docx` 接受的同样五个元素覆盖也同样适用于这里。
 当通过 `docxFile` 上传预生成的 DOCX 时，它们**没有任何效果**。
 
 <ElementOverridesRestApi />
 
-#### Example cURL combining multiple element overrides
+#### 组合多个元素覆盖的示例 cURL
 
 ```bash
 curl --output document.epub -X POST "https://api.tiptap.dev/v2/convert/export/epub" \
@@ -158,7 +158,7 @@ curl --output document.epub -X POST "https://api.tiptap.dev/v2/convert/export/ep
     }'
 ```
 
-### Example with custom page layout
+### 自定义页面布局示例
 
 ```bash
 curl --output document.epub -X POST "https://api.tiptap.dev/v2/convert/export/epub" \

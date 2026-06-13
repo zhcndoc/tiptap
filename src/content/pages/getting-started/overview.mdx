@@ -11,12 +11,44 @@ sidebars:
   hideSecondary: true
 ---
 
+import { ExternalLinkIcon, Expand } from 'lucide-react'
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
+import Link from '@/components/Link'
 
-Tiptap Pages 是 Tiptap 的分页编辑层。它在任何 Tiptap 编辑器之上增加了页面边界、页面格式、页眉、页脚、分页符和缩放功能——因此你的读者可以像在文字处理器中一样编写报告、信件、合同或书籍。
+Tiptap Pages 是 Tiptap 的分页编辑层。它在任何 Tiptap 编辑器之上增加了页面边界、页面格式、页眉、页脚、分页符和缩放功能。有了它，你的读者可以像在文字处理器中一样撰写报告、信件、合同或书籍。
 
-<CodeDemo isPro path="/Extensions/Pages" />
+<CodeDemo
+  isScrollable
+  isLarge
+  src="https://template.tiptap.dev/docx"
+  caption={
+    <>
+      <strong>试用 Tiptap Pages</strong>，在这个交互式 DOCX 编辑器演示中体验分页、
+      页眉和页脚，以及 DOCX/PDF 导出。
+    </>
+  }
+  captionActions={
+    <>
+      <a
+        href="https://template.tiptap.dev/docx"
+        target="_blank"
+        className="flex items-center gap-1 text-grayAlpha-600 hover:text-grayAlpha-800 font-medium whitespace-nowrap"
+      >
+        全屏
+        <Expand className="size-3" />
+      </a>
+      <span className="text-grayAlpha-300">|</span>
+      <Link
+        href="/pages/getting-started/live-demo"
+        className="flex items-center gap-1 text-grayAlpha-600 hover:text-grayAlpha-800 font-medium whitespace-nowrap"
+      >
+        了解更多
+        <ExternalLinkIcon className="size-3" />
+      </Link>
+    </>
+  }
+/>
 
 <Callout title="Pro 套餐" variant="hint">
   Pages 是一个 Pro 套餐，包含在 [Tiptap 订阅](https://tiptap.dev/pricing) 中。安装前，请先配置好 [访问 Tiptap 的私有 NPM 仓库](/guides/pro-extensions)。
@@ -24,19 +56,20 @@ Tiptap Pages 是 Tiptap 的分页编辑层。它在任何 Tiptap 编辑器之上
 
 ## 这项功能的作用
 
-- **分页布局** — 内容会按照所选格式（A4、Letter、自定义）在可视页面之间流动。
-- **页面格式和边距** — 内置格式提供合理的默认值，同时也可通过自定义格式对象进行完全控制。
-- **页眉和页脚** — 可使用静态文本、HTML 字符串或 Tiptap JSON；支持 `{page}` 和 `{total}` 占位符；并且像 Word 一样，为首页或奇偶页提供独立区域。
-- **所见即所得编辑** — 双击页眉或页脚，即可在覆盖层中打开一个功能完整的 Tiptap 编辑器。
-- **缩放** — 在 `[0.25, 4]` 范围内进行视觉缩放，不影响文档内容或导出。
-- **分页符** — 可通过 [PageBreak 扩展](/pages/core-concepts/page-break-node) 插入显式分页，或让 Pages 处理自动分页。
+- **分页布局**：内容会在所选格式的可视页面之间流动（A4、Letter、自定义）。
+- **页面格式和边距**：内置格式带有合理的默认值，自定义格式对象则让你完全掌控。
+- **页眉和页脚**：可将其定义为静态文本、HTML 字符串或 Tiptap JSON。它们支持 `{page}` 和 `{total}` 占位符，你还可以像 Word 一样为首页或奇偶页设置不同的区域。
+- **脚注**：类似 Word 的脚注，会渲染在每页页脚上方，自动编号，并在内容重新排版时跟随其引用位置。参见 [脚注](/pages/core-concepts/footnotes)。
+- **所见即编辑**：双击页眉、页脚或脚注区域，即可在覆盖层中打开功能完整的 Tiptap 编辑器。
+- **缩放**：视觉缩放范围为 `[0.25, 4]`，不会影响文档内容或导出。
+- **分页符**：可通过 [PageBreak 扩展](/pages/core-concepts/page-break-node) 插入显式分页，也可以让 Pages 处理自动分页。
 
 ## 随之安装的内容
 
 Pages **不** 自带节点和标记（mark）模式。要使用它，你还需要安装：
 
-- **`@tiptap-pro/extension-convert-kit`** — 用于 Conversion 和 Pages 工作流的标准编辑器套件。ConvertKit 注册了一个支持 DOCX 的模式（段落、标题、列表、图片、标记）。
-- **`@tiptap-pro/extension-pages-tablekit`** — 支持分页安全的表格。此项必需，因为 ConvertKit 内置的表格并不是为分页设计的。
+- **`@tiptap-pro/extension-convert-kit`**：用于 Conversion 和 Pages 工作流的标准编辑器套件。ConvertKit 注册了一个支持 DOCX 的 schema（段落、标题、列表、图片、标记）。
+- **`@tiptap-pro/extension-pages-tablekit`**：支持分页安全的表格。必须安装，因为 ConvertKit 内置的表格并不是为分页而设计的。
 
 ```bash
 npm install @tiptap-pro/extension-convert-kit \
@@ -67,44 +100,45 @@ const editor = new Editor({
 
 ## 可用内容
 
-- 内置页面格式：A4、A3、A5、Letter、Legal、Tabloid；以及具有任意尺寸和边距的自定义格式。
-- 页眉和页脚内容可使用纯文本、HTML 或 Tiptap JSON，并支持 `{page}` / `{total}` 占位符。
-- 第一页以及奇数页/偶数页可设置不同的页眉和页脚，就像 Word 一样。
-- 在专用覆盖层中实时编辑页眉和页脚。它们会与主文档一起参与协作——参见 [为 Pages 添加协作](/pages/guides/collaboration-with-pages)。
-- 程序化控制：为特定页面打开或关闭页眉/页脚编辑器，对页面格式变化做出响应，对缩放变化做出响应。
-- 可在配置时或运行时通过 `editableHeader` / `editableFooter` 选项以及 `setHeaderEditable` / `setFooterEditable` 命令，锁定或解锁每个覆盖层中的页眉/页脚编辑。
+- 内置页面格式：A4、A3、A5、Letter、Legal、Tabloid。你也可以用任意尺寸和边距定义自定义格式。
+- 页眉和页脚内容可采用纯文本、HTML 或 Tiptap JSON，并支持 `{page}` / `{total}` 占位符。
+- 首页以及奇偶页可使用不同的页眉和页脚，类似 Word。
+- 类似 Word 的 [脚注](/pages/core-concepts/footnotes)：每页脚注区域带有自动连续编号，会随引用位置重新排版并占用页面空间。
+- 在专用覆盖层中实时编辑页眉、页脚和脚注。它们会与主文档一起参与协作。参见 [为 Pages 添加协作](/pages/guides/collaboration-with-pages)。
+- 程序化控制：可为特定页面打开或关闭页眉/页脚/脚注编辑器，对页面格式变化作出响应，对缩放变化作出响应。
+- 通过配置时或运行时的 `editableHeader` / `editableFooter` / `footnotes.editable` 选项，以及 `setHeaderEditable` / `setFooterEditable` / `setFootnotesEditable` 命令，锁定或解锁各覆盖层的编辑。
 - 通过 [PagesTableKit](/pages/guides/pages-tablekit) 实现分页安全表格。表格会按比例缩小以适配页面，固定高度的行会被裁切，声明的宽度会被保留。
-- 与 Tiptap Conversion 往返兼容：导入的 DOCX 页眉和页脚会自动应用；导出的 DOCX、PDF、ODT、EPUB 会保留页眉、页脚和分页信息。
+- 与 Tiptap Conversion 往返兼容：导入的 DOCX 页眉、页脚和脚注会自动应用；导出的 DOCX、PDF、ODT 和 EPUB 文件会保留页眉、页脚和分页信息。DOCX 导出会写入真实的 Word 脚注。
 
 ## 不可用的内容
 
-这些是真实且已记录的限制——不是 bug。如果你的工作流依赖其中任何一项，请将其视为设计边界。
+这些是真实且已记录的限制，不是 bug。如果你的工作流依赖其中任何一项，请将该约束视为设计边界。
 
-- **无法拆分且大于一页的块会导致无限布局循环。** 在采用 Pages 之前，这是最重要的一项限制。表格行、图形、定位容器以及大多数其他块格式化上下文（BFC）元素都不能跨页拆分——布局只能将整个块移动到下一页。如果该块比页面本身还高，它仍然无法放下，布局会持续尝试将其向前移动并永远无法稳定。结果就是编辑器无响应。这是当前在页面之间拆分内容的方法所固有的硬性限制，不是短期路线图项目。完整说明请参见 [限制](/pages/core-concepts/limitations#oversized-non-splittable-blocks-cause-an-infinite-layout-loop)，其中包括如何检测和防止它。表格相关的特定情况见 [PagesTableKit 的已知问题](/pages/guides/pages-tablekit#known-issues)。
-- **不支持按页样式设置，也不支持页面模板。** 每一页都使用相同的布局和视觉样式。
-- **不支持浏览器打印集成。** 如需生成可直接打印的输出，请使用 [Conversion 扩展和 REST 端点](/conversion/getting-started/overview)。
+- **大于一页且不可拆分的块会导致无限布局循环。** 这是在采用 Pages 之前最重要的一项限制。表格行、图形、定位容器以及大多数其他块格式化上下文（BFC）元素都不能跨页拆分。布局只能把整个块移到下一页。如果该块本身就比页面还高，它也无法放下，布局就会不断尝试将其继续前移，始终无法稳定。结果就是编辑器无响应。这是当前在页面之间拆分内容的方法所固有的硬限制，不是近期路线图中的功能项。完整说明（包括如何检测和预防）请参见 [限制](/pages/core-concepts/limitations#oversized-non-splittable-blocks-cause-an-infinite-layout-loop)。表格相关的具体情况见 [PagesTableKit 的已知问题](/pages/guides/pages-tablekit#known-issues)。
+- **没有按页样式，也没有页面模板。** 每一页都使用相同的布局和视觉样式。
+- **没有浏览器打印集成。** 如需可直接打印的输出，请使用 [Conversion 扩展和 REST 端点](/conversion/getting-started/overview)。
 
 ## 预期情况
 
-- **Beta 版面向。** Pages 正在积极开发中。如果你依赖它，请锁定确切的包版本；次要版本可能引入破坏性变更。
-- **像素值即 CSS 像素。** API 中的所有尺寸都对应标准浏览器 CSS 像素（一英寸为 96 px）。`cmToPixels` 和 `inchToPixels` 工具可无损往返转换，因此你可以使用真实世界单位进行编写。
-- **参与协作的所见即所得编辑。** 双击页眉或页脚会打开完整的 Tiptap 编辑器，而该编辑器与主文档属于同一个协作会话。
+- **Beta 阶段。** Pages 仍在积极开发中。如果你依赖它，请锁定确切的包版本，因为次要版本可能引入破坏性变更。
+- **像素值即 CSS 像素。** API 中的所有尺寸都对应标准浏览器 CSS 像素（1 英寸 = 96 px）。`cmToPixels` 和 `inchToPixels` 工具可以无损往返，因此你可以使用真实世界单位进行创作。
+- **参与协作的所见即编辑。** 双击页眉或页脚会打开完整的 Tiptap 编辑器，而该编辑器与主文档处于同一个协作会话中。
 
 ## 不要期待的内容
 
-- **Pages 本身不是一个完整编辑器**——它只是一个布局覆盖层。请将其与用于文档模式的 `ConvertKit` 以及用于表格的 `extension-pages-tablekit` 中的 `TableKit` 搭配使用。
-- **Pages 本身不实现 DOCX 导入或导出。** 它只是一个渲染目标。若要与文件往返，请配合 [Conversion](/conversion/getting-started/overview) 扩展：通过 `extension-import-docx` 导入，通过 `extension-export-docx`、`extension-export-pdf` 等导出。
-- **Pages 不负责分页内容的表格渲染。** 请使用 [PagesTableKit](/pages/guides/pages-tablekit)，而不是开源的 `@tiptap/extension-table` 或 ConvertKit 内置表格。
+- **Pages 本身并不是一个完整的编辑器。** 它只是一个布局覆盖层。请将其与用于文档 schema 的 `ConvertKit` 以及来自 `extension-pages-tablekit` 的 `TableKit` 搭配使用。
+- **Pages 本身不实现 DOCX 的导入或导出。** 它是一个渲染目标。若要与文件往返配合使用，请搭配 [Conversion](/conversion/getting-started/overview) 扩展：通过 `extension-import-docx` 导入，通过 `extension-export-docx`、`extension-export-pdf` 等导出。
+- **Pages 不负责分页内容的表格渲染。** 请使用 [PagesTableKit](/pages/guides/pages-tablekit)，不要使用开源的 `@tiptap/extension-table` 或 ConvertKit 内置表格。
 
 ## 与 Conversion 搭配使用
 
 这两个产品就是为了协同工作而构建的：
 
-- [Conversion 概览](/conversion/getting-started/overview) — 导入/导出流水线。
-- [导入 DOCX](/conversion/import/docx/editor-extension) — 将 Word 文档导入你的分页编辑器（页眉和页脚会自动应用）。
-- [导出 DOCX](/conversion/export/docx/editor-extension) — 导出保留页眉和页脚的分页内容。
-- [导出 PDF](/conversion/export/pdf/editor-extension) — 将分页布局渲染为 PDF。
-- [从零到可打印](/pages/guides/zero-to-print-ready) — 完整的端到端演练。
+- [Conversion 概览](/conversion/getting-started/overview)：导入/导出流水线。
+- [导入 DOCX](/conversion/import/docx/editor-extension)：将 Word 文档带入你的分页编辑器（页眉和页脚会自动应用）。
+- [导出 DOCX](/conversion/export/docx/editor-extension)：导出保留页眉和页脚的分页内容。
+- [导出 PDF](/conversion/export/pdf/editor-extension)：将分页布局渲染为 PDF。
+- [从零到可打印输出](/pages/guides/zero-to-print-ready)：完整的端到端演示。
 
 ## 相关内容
 

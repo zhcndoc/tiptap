@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.3.0
+    label: v0.6.1
 meta:
     title: 使用页眉和页脚扩展您的 PDF 导出 | Tiptap 转换
     description: 学习如何使用 Export PDF 扩展，自定义 PDF 导出的页眉和页脚。
@@ -92,15 +92,15 @@ const editor = new Editor({
       appId: 'YOUR_APP_ID',
       headers: {
         evenAndOddHeaders: true,
-        default: 'My Document - Confidential',
-        first: 'Welcome to My Document',
-        even: 'My Document - Even Page',
+        default: '我的文档 - 机密',
+        first: '欢迎阅读我的文档',
+        even: '我的文档 - 偶数页',
       },
       footers: {
         evenAndOddFooters: true,
-        default: 'Company Name - All Rights Reserved',
-        first: 'Draft Version 1.0',
-        even: 'Company Name - Even Page Footer',
+        default: '公司名称 - 保留所有权利',
+        first: '草稿版本 1.0',
+        even: '公司名称 - 偶数页页脚',
       },
     }),
     // 其他扩展...
@@ -116,7 +116,7 @@ editor
       const a = document.createElement('a')
 
       a.href = url
-      a.download = 'document-with-headers.pdf'
+      a.download = '带页眉页脚的文档.pdf'
       a.click()
 
       URL.revokeObjectURL(url)
@@ -134,10 +134,10 @@ ExportPdf.configure({
   token: 'YOUR_TOKEN',
   appId: 'YOUR_APP_ID',
   headers: {
-    default: 'My Document Title',
+    default: '我的文档标题',
   },
   footers: {
-    default: 'Page Footer - Company Name',
+    default: '页脚 - 公司名称',
   },
 })
 ```
@@ -157,8 +157,8 @@ ExportPdf.configure({
         {
           type: 'paragraph',
           content: [
-            { type: 'text', marks: [{ type: 'bold' }], text: 'My Document' },
-            { type: 'text', text: ' · Confidential' },
+            { type: 'text', marks: [{ type: 'bold' }], text: '我的文档' },
+            { type: 'text', text: ' · 机密' },
           ],
         },
       ],
@@ -182,7 +182,7 @@ ExportPdf.configure({
     default: new Docx.Header({
       children: [
         new Docx.Paragraph({
-          children: [new Docx.TextRun({ text: 'My Document' })],
+          children: [new Docx.TextRun({ text: '我的文档' })],
         }),
       ],
     }),
@@ -192,7 +192,7 @@ ExportPdf.configure({
         node: {
           type: 'doc',
           content: [
-            { type: 'paragraph', content: [{ type: 'text', text: 'Welcome' }] },
+            { type: 'paragraph', content: [{ type: 'text', text: '欢迎' }] },
           ],
         },
       }),

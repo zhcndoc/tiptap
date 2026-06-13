@@ -189,12 +189,12 @@ result.aiFeedback.events
 
 一次性应用所有活跃建议。
 
-This method accepts all suggestions by replacing the content at each suggestion's range with the first replacement option. You can optionally filter which suggestions are accepted.
+此方法通过将每个建议范围内的内容替换为第一个替换选项来接受所有建议。你也可以选择性过滤要接受的建议。
 
 该方法适用于常规建议以及来自 [比较文档](/content-ai/capabilities/ai-toolkit/api-reference/compare-documents) 功能的变更。
 
-- `options?` (`AcceptAllSuggestionsOptions`): Options for the `acceptAllSuggestions` method
-  - `filter?` (`(suggestion: Suggestion) => boolean`): A predicate that determines which suggestions are accepted
+- `options?` (`AcceptAllSuggestionsOptions`): `acceptAllSuggestions` 方法的选项
+  - `filter?` (`(suggestion: Suggestion) => boolean`): 用于决定接受哪些建议的谓词
 
 无
 
@@ -280,11 +280,12 @@ result.aiFeedback.events
 
 拒绝所有活跃建议，且不应用它们。
 
-该方法从活跃建议列表中移除所有建议，不会对文档做出修改。它会返回关于被拒绝内容的反馈。
+默认情况下，此方法会在不将建议应用到文档的情况下，从建议列表中移除所有活跃建议。你也可以选择性过滤要拒绝的建议。不匹配过滤条件的建议将保持活跃。它会返回关于已拒绝内容的反馈。
 
 该方法适用于常规建议以及来自 [比较文档](/content-ai/capabilities/ai-toolkit/api-reference/compare-documents) 功能的变更。
 
-### 参数
+- `options?` (`RejectAllSuggestionsOptions`): `rejectAllSuggestions` 方法的选项
+  - `filter?` (`(suggestion: Suggestion) => boolean`): 用于决定拒绝哪些建议的谓词
 
 无
 

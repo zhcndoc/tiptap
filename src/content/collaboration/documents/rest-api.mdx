@@ -147,7 +147,7 @@ curl --location --request PUT 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin
 ## 获取文档
 
 ```bash
-GET /api/documents/:identifier?format=:format&fragment=:fragment
+GET /api/documents/:identifier?format=:format&fragment=:fragment&version=:version
 ```
 
 此调用允许您以 JSON 或 Yjs 格式导出指定文档及其所有片段。如果文档当前在您的服务器上打开，我们将返回内存中的版本；否则，我们将从数据库读取。
@@ -155,6 +155,8 @@ GET /api/documents/:identifier?format=:format&fragment=:fragment
 - `format` 支持 `yjs`、`base64`、`text` 或 `json`（默认：`json`）。如果您选择 `yjs` 格式，您将获得使用 `Y.encodeStateAsUpdate` 创建的二进制 Yjs 更新消息。
 
 - `fragment` 可以是一个数组（例如，`fragment=a&fragment=b`）或您想要导出的单个片段。默认情况下，我们只导出 `default` 片段。此参数仅在使用 `json` 或 `text` 格式时适用；在使用 `yjs` 时，您将始终获得整个 Yjs 文档。
+
+- `version`（`string`，可选）：要检索的 Y.js 文档版本。默认为最新版本。
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \

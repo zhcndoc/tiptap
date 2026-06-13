@@ -77,6 +77,16 @@ Tiptap 的 [UI 组件](/ui-components/components/overview) 遵循它们所基于
   我们将从开源组件开始。针对 Tiptap Cloud 功能的组件将逐步推出。
 </Callout>
 
+## 组件的安装方式
+
+Tiptap UI 组件不会作为 npm 包发布。[CLI](/ui-components/getting-started/cli) 会将它们作为你拥有并可编辑的源文件复制到你的项目中：
+
+```bash
+npx @tiptap/cli@latest add <component>
+```
+
+每个组件还会自动拉取其依赖的其他组件、hooks、icons、libs 和 styles。这就是为什么已安装组件的 imports（例如 `@/components/tiptap-node/image-node/image-node-extension`）会解析到你自己代码库中的文件，而不是 `node_modules` 中的模块。要获得本页面演示所使用的全部内容，请使用上述命令安装对应的组件或模板；每个组件页面都会在 **Referenced Components** 下列出其引用的文件。
+
 ## 设计默认值
 
 组件设计风格简洁自然，能够融入你的设计。它们采用中性色调：极简颜色、基础间距，没有强烈的视觉倾向。你可以直接使用，或按照你的品牌风格进行定制。

@@ -67,16 +67,16 @@ import { Callout } from '@/components/ui/Callout'
 | 功能 | 导入 | 编辑器 | 导出 |
 | --- | --- | --- | --- |
 | [文本对齐](/conversion/content-types/text-and-formatting/text-alignment) | ✓ | ✓ | ✓ |
-| [行距](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✕*** |
-| [段落间距](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✕ |
-| [缩进](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✕ |
+| [行距](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✓*** |
+| [段落间距](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✓ |
+| [缩进](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✓ |
 | [字间距](/conversion/content-types/text-and-formatting/font-family-size) | ✓ | ✕* | ✕ |
 | [段落边框](/conversion/content-types/text-and-formatting/paragraphs) | ✕ | ✕ | ✕ |
 | [Word 样式](/conversion/content-types/structures-and-media/word-styles) | ~ | ~** | ~ |
 
-**\*** 字间距会被提取为 `textStyle.letterSpacing`，但没有内置扩展来渲染它。若要渲染导入的字间距，请 [扩展 TextStyle](/conversion/getting-started/guides/styling-converted-content#extending-extensions-for-unsupported-attributes)。<br />
-**\*\*** Word 的命名样式排版默认不会应用。请使用 [CSS 注入](/conversion/import/docx/css-injection) 将其提取为带作用域的 CSS。<br />
-**\*\*\*** 行高会作为段落节点属性导入，并在使用 ConvertKit 的编辑器中正确渲染。但 DOCX 导出时读取的是 `textStyle` 标记中的行高，因此无法完整往返：导入的值会保留在编辑器中，但在导出时被丢弃。
+**\*** 字间距会作为 `textStyle.letterSpacing` 提取，但没有任何内置扩展会渲染它。若要渲染导入的字间距，请 [扩展 TextStyle](/conversion/getting-started/guides/styling-converted-content#extending-extensions-for-unsupported-attributes)。<br />
+**\*\*** 默认不会应用 Word 的命名样式排版。请使用 [CSS 注入](/conversion/import/docx/css-injection) 将其提取为带作用域的 CSS。<br />
+**\*\*\*** 导出时只有比例行距可以往返保留：无单位倍数（如 `1.5`）或百分比（如 `150%`）。带单位的固定行高（例如 `24px`、`18pt`）没有对应的比例 DOCX 表达，因而不会被保留。
 
 ## 列表
 
@@ -120,13 +120,13 @@ import { Callout } from '@/components/ui/Callout'
 
 | 功能 | 导入 | 编辑器 | 导出 |
 | --- | --- | --- | --- |
-| [Page breaks](/conversion/content-types/page-layout/page-breaks) | ✓ | ~ | ✓ |
-| [Headers and footers](/conversion/content-types/page-layout/headers-footers) | ✓* | ✓ | ✓ |
-| [Sections](/conversion/content-types/page-layout/page-structure) | ~ | ✕ | ✕ |
-| [Page size and margins](/conversion/content-types/page-layout/page-structure) | ✕ | ✓ | ✓ |
-| [Page numbers](/conversion/content-types/page-layout/page-structure) | ~** | ✓ | ~** |
-| [Footnotes](/conversion/content-types/structures-and-media/footnotes-endnotes) | ✓* | ✕ | ✕ |
-| [Endnotes](/conversion/content-types/structures-and-media/footnotes-endnotes) | ✓* | ✕ | ✕ |
+| [页分隔符](/conversion/content-types/page-layout/page-breaks) | ✓ | ~ | ✓ |
+| [页眉和页脚](/conversion/content-types/page-layout/headers-footers) | ✓* | ✓ | ✓ |
+| [分节](/conversion/content-types/page-layout/page-structure) | ~ | ✕ | ✕ |
+| [页面大小和边距](/conversion/content-types/page-layout/page-structure) | ✕ | ✓ | ✓ |
+| [页码](/conversion/content-types/page-layout/page-structure) | ~** | ✓ | ~** |
+| [脚注](/conversion/content-types/structures-and-media/footnotes-endnotes) | ✓* | ✕ | ✕ |
+| [尾注](/conversion/content-types/structures-and-media/footnotes-endnotes) | ✓* | ✕ | ✕ |
 
 **\*** 导入行为在不同集成路径之间有所不同。[REST API](/conversion/import/docx/rest-api) 会在响应中将脚注、尾注和页眉/页脚作为单独字段返回。[编辑器扩展](/conversion/import/docx/editor-extension) 会通过 Pages 扩展自动应用页眉和页脚，但不会暴露脚注或尾注数据。详情请参见安装页面。<br />
 **\*\*** 页眉/页脚中的 Word `PAGE` 和 `NUMPAGES` 字段会转换为标准文本标记（`{page}` / `{numpages}`）——在使用 Pages 扩展时会自动开启；在其他情况下，可通过 `placeholders` 字段选择启用。其他字段代码（`DATE`、`AUTHOR`、`MERGEFIELD`）仍会作为其缓存显示值导入。导出时，**编辑器扩展** 和 **REST API** 都会在页眉/页脚内容中输出 `{page}` / `{total}` 标记，并将其作为实时 `PAGE` / `NUMPAGES` 字段。请参见 [页码字段](/conversion/content-types/page-layout/page-structure#page-numbers)。
@@ -141,14 +141,14 @@ import { Callout } from '@/components/ui/Callout'
 
 | 功能 | 状态 |
 | --- | --- |
-| Comments and annotations | 不会转换。comments 扩展虽然存在，但未连接到转换流程。 |
-| Tracked changes and revisions | 不会转换。tracked changes 扩展虽然存在，但未连接到转换流程。 |
-| Table of Contents | 作为 `tableOfContents` 节点导入（标题和标题范围）。需要一个 [自定义扩展](/editor/extensions/custom-extensions/extend-existing) 才能在编辑器中渲染。现有的 [Table of Contents 扩展](/editor/extensions/functionality/table-of-contents) 是用于构建侧边栏导航的无头工具，而不是文档块渲染器。不会导出。 |
-| Text boxes | 不会转换。文本框中的内容不会被提取。 |
-| Shapes, SmartArt, WordArt | 不会转换。这些元素在导入期间不会被提取。 |
-| Field codes (DATE, AUTHOR, MERGEFIELD) | 缓存的显示值会以纯文本形式保留（例如，一个显示“2026年4月10日”的 DATE 字段会作为文本“2026年4月10日”导入）。字段代码本身不会被转换，因此该值会变为静态，并且不会更新。 |
-| Page-number field codes (PAGE, NUMPAGES) | 当启用 `placeholders` 时，会转换为标准文本标记（`PAGE` 对应 `{page}`，`NUMPAGES` 对应 `{numpages}`）（在使用 Pages 扩展时默认开启；在 REST API 中可通过 `placeholders={}` 表单字段选择启用）。Pages 扩展原生渲染 `{page}`；可通过 `Pages.configure({ placeholders: { total: 'numpages' } })` 将 `{numpages}` 映射以实时渲染。若设置 `placeholders: false`（或在 REST API 中省略），缓存显示值会作为纯文本导入。 |
-| Document metadata (author, title, keywords) | 不会转换。元数据不会包含在 JSON 输出中。 |
-| Form fields and content controls | 不会转换。内联结构化文档标记（SDT）的文本内容会被保留，但控制元数据会被丢弃。 |
-| Hidden text | 标记为隐藏的文本运行（`w:vanish`）会从导入输出中排除。 |
-| Right-to-left text direction | DOCX `<w:bidi>`（段落方向）和 `<w:rtl>`（文本运行方向）在导入时不会解析，也不会在导出时写回。以阿拉伯语、希伯来语、波斯语、乌尔都语及其他 RTL 语言编写的文档会使用编辑器的 CSS 方向渲染（默认 LTR）。如今可在编辑器根节点上设置 `dir="rtl"`，或在应用层检测语言来处理。详情请参见 [文本对齐](/conversion/content-types/text-and-formatting/text-alignment)。 |
+| 评论和注释 | 不会转换。comments 扩展虽然存在，但未连接到转换流程。 |
+| 修订和跟踪更改 | 不会转换。tracked changes 扩展虽然存在，但未连接到转换流程。 |
+| 目录 | 作为 `tableOfContents` 节点导入（标题和标题范围）。需要一个 [自定义扩展](/editor/extensions/custom-extensions/extend-existing) 才能在编辑器中渲染。现有的 [目录扩展](/editor/extensions/functionality/table-of-contents) 是用于构建侧边栏导航的无头工具，而不是文档块渲染器。不会导出。 |
+| 文本框 | 不会转换。文本框中的内容不会被提取。 |
+| 形状、SmartArt、WordArt | 不会转换。这些元素在导入期间不会被提取。 |
+| 字段代码（DATE、AUTHOR、MERGEFIELD） | 缓存的显示值会以纯文本形式保留（例如，一个显示“2026年4月10日”的 DATE 字段会作为文本“2026年4月10日”导入）。字段代码本身不会被转换，因此该值会变为静态，并且不会更新。 |
+| 页码字段代码（PAGE、NUMPAGES） | 当启用 `placeholders` 时，会转换为标准文本标记（`PAGE` 对应 `{page}`，`NUMPAGES` 对应 `{numpages}`）（在使用 Pages 扩展时默认开启；在 REST API 中可通过 `placeholders={}` 表单字段选择启用）。Pages 扩展原生渲染 `{page}`；可通过 `Pages.configure({ placeholders: { total: 'numpages' } })` 将 `{numpages}` 映射以实时渲染。若设置 `placeholders: false`（或在 REST API 中省略），缓存显示值会作为纯文本导入。 |
+| 文档元数据（作者、标题、关键词） | 不会转换。元数据不会包含在 JSON 输出中。 |
+| 表单字段和内容控件 | 不会转换。内联结构化文档标记（SDT）的文本内容会被保留，但控制元数据会被丢弃。 |
+| 隐藏文本 | 标记为隐藏的文本运行（`w:vanish`）会从导入输出中排除。 |
+| 从右到左的文本方向 | DOCX `<w:bidi>`（段落方向）和 `<w:rtl>`（文本运行方向）在导入时不会解析，也不会在导出时写回。以阿拉伯语、希伯来语、波斯语、乌尔都语及其他 RTL 语言编写的文档会使用编辑器的 CSS 方向渲染（默认 LTR）。如今可在编辑器根节点上设置 `dir="rtl"`，或在应用层检测语言来处理。详情请参见 [文本对齐](/conversion/content-types/text-and-formatting/text-alignment)。 |
