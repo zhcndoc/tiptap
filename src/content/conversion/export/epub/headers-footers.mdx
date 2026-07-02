@@ -25,21 +25,21 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
     </RequirementItem>
 </Requirements>
 
-`@tiptap-pro/extension-export-epub` 扩展内置了支持自定义导出文档的页眉和页脚。您可以为首页、奇数页和偶数页分别配置不同的页眉和页脚。
+`@tiptap-pro/extension-export-epub` 扩展内置了对自定义导出文档页眉和页脚的支持。您可以为首页、奇数页和偶数页分别配置不同的页眉和页脚。
 
-## 页眉配置
+## Header Configuration
 
-`headers` 对象允许您自定义导出 EPUB 文档的页眉：
+The `headers` object allows you to customize the headers of exported EPUB documents:
 
-| 属性                | 类型       | 说明                                                                                           |
+| Property            | Type       | Description                                                                                           |
 | ------------------- | ---------- | ---------------------------------------------------------------------------------------------- |
-| `evenAndOddHeaders` | `boolean`  | 是否为奇数页和偶数页使用不同的页眉                                                            |
-| `differentFirstPage` | `boolean`  | 是否首页使用不同的页眉。为 `true` 时，首页采用 `first` 值，而非 `default`。                   |
-| `default`           | `string`   | 每页的标准默认页眉，或开启 `evenAndOddHeaders` 时奇数页的页眉。支持纯文本字符串或序列化的 Tiptap JSONContent 用于丰富格式。 |
-| `first`             | `string`   | 首页的页眉，仅当 `differentFirstPage` 为 `true` 时使用。支持纯文本字符串或序列化的 Tiptap JSONContent 用于丰富格式。    |
-| `even`              | `string`   | 偶数页的页眉，仅当 `evenAndOddHeaders` 选项启用时使用。支持纯文本字符串或序列化的 Tiptap JSONContent 用于丰富格式。       |
+| `evenAndOddHeaders` | `boolean`  | Whether to use different headers for odd and even pages                                                            |
+| `differentFirstPage` | `boolean`  | Whether to use a different header on the first page. When set to `true`, the first page uses the `first` value instead of `default`.                   |
+| `default`           | `string`   | The standard default header for each page, or the header for odd pages when `evenAndOddHeaders` is enabled. Supports plain text strings or serialized Tiptap JSONContent for richer formatting. |
+| `first`             | `string`   | The header for the first page, used only when `differentFirstPage` is `true`. Supports plain text strings or serialized Tiptap JSONContent for richer formatting.    |
+| `even`              | `string`   | The header for even pages, used only when the `evenAndOddHeaders` option is enabled. Supports plain text strings or serialized Tiptap JSONContent for richer formatting.       |
 
-使用纯文本时，将生成简单无样式的页眉。使用序列化的 Tiptap JSONContent（通过 `JSON.stringify()`）时，可保留加粗、斜体、链接等丰富格式。
+When using plain text, a simple unstyled header will be generated. When using serialized Tiptap JSONContent (via `JSON.stringify()`), rich formatting such as bold, italic, and links can be preserved.
 
 ## 页脚配置
 
@@ -65,7 +65,6 @@ const editor = new Editor({
     // 其他扩展...
     ExportEpub.configure({
       token: 'YOUR_TOKEN',
-      appId: 'YOUR_APP_ID',
       headers: {
         evenAndOddHeaders: true,
         default: '我的文档 - 机密',
@@ -108,7 +107,6 @@ editor
 ```js
 ExportEpub.configure({
   token: 'YOUR_TOKEN',
-  appId: 'YOUR_APP_ID',
   headers: {
     default: '我的文档标题',
   },

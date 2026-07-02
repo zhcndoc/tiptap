@@ -1,0 +1,93 @@
+---
+title: 迁移到新的身份验证
+meta:
+  title: 迁移到新的身份验证 | Tiptap 文档
+  description: 将之前按服务分开的 App ID 和 secret 身份验证映射到统一的 Tiptap 身份验证模型。
+  category: 身份验证
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+本指南将先前按服务划分的身份验证（记录于 [Legacy authentication](/authentication/legacy)）映射到统一的 [Authentication](/authentication) 模型。
+
+<Callout title="按自己的节奏迁移" variant="info">
+  两种格式将并行运行。只有当请求的 JWT 携带 `aud` 声明时，才会路由到新路径，因此在你逐个服务迁移的同时，现有集成仍可继续正常工作。
+</Callout>
+
+## 有哪些变化
+
+| 之前 | 现在 |
+| --- | --- |
+| 每个服务一个单独的 App ID 和密钥 | 每个环境一对非对称密钥 |
+| HS256 共享密钥 | ES256 密钥对（您保留私钥，Tiptap 存储公钥） |
+| 在 REST 请求中通过 `X-App-Id` 标头传递 App ID | 通过 JWT `iss` 声明携带环境 ID |
+| 每个服务使用不同的令牌格式 | 一个带有 `aud` 声明和 `permissions` 数组的令牌 |
+| `allowedDocumentNames`、`readonlyDocumentNames`、`commentDocumentNames` | 带有 `action`、`resource` 和可选 `constraints` 的 `permissions` 条目 |
+
+## 第 1 步：创建密钥对
+
+在 Tiptap 仪表板中为你的环境创建一个非对称密钥对。你将私钥保存在你的服务器上。Tiptap 只存储公钥，并使用它来验证你的令牌。有关完整流程，请参见 [签名令牌](/authentication#signing-the-token)。
+
+## 第 2 步：用一个 token 代替多个 token 进行签名
+
+将你按服务分别签名的代码替换为一个单独的 token，在 `aud` 中注明它所需的服务，并在 `permissions` 中列出它可以执行的操作。[Authentication](/authentication) 参考文档涵盖了这些声明，并展示了多种语言的签名示例。
+
+## 第 3 步：映射你的权限
+
+### 协作与文档
+
+文档访问声明会变成 `permissions` 条目：
+
+| 之前 | 新 |
+| --- | --- |
+| `allowedDocumentNames: ['doc_a']` | `{ "action": "Documents:Write", "resource": "doc_a" }` |
+| `readonlyDocumentNames: ['doc_a']` | `{ "action": "Documents:Read", "resource": "doc_a" }` |
+| `commentDocumentNames: ['doc_a']` | `{ "action": "Documents:Comment", "resource": "doc_a" }` |
+| `allowedDocumentNames: ['team/*']` | `{ "action": "Documents:Write", "resource": "*", "constraints": { "prefix": "team/" } }` |
+| `allowedDocumentNames` 省略（完全访问） | `{ "action": "Documents:Write", "resource": "*" }` |
+
+`Documents:Write` 隐含 `Documents:Read` 和 `Documents:Comment`，因此无需单独列出这些权限。
+
+### 转换
+
+将 `aud` 设为 `"Convert"`，并授予集成所使用的格式和方向操作。新的路径不再读取 `X-App-Id` 标头，因为环境 id 会通过 `iss` 传递。
+
+```json
+{
+  "iss": "your-environment-hash-id",
+  "aud": "Convert",
+  "permissions": [
+    { "action": "Convert:Import:Docx", "resource": "*" },
+    { "action": "Convert:Export:Pdf", "resource": "*" }
+  ]
+}
+```
+
+### 内容 AI
+
+将 `aud` 设为 `"AI"`，并授予 `AI:Generation`、`AI:Toolkit`，或两者。
+
+```json
+{
+  "iss": "your-environment-hash-id",
+  "aud": "AI",
+  "permissions": [
+    { "action": "AI:Generation", "resource": "*" },
+    { "action": "AI:Toolkit", "resource": "*" }
+  ]
+}
+```
+
+## 前端扩展
+
+`token` 属性在所有地方都保持不变。变化的是你如何生成 token，以及是否仍然需要 App ID：
+
+- **协作。** `TiptapCollabProvider` 仍然同时接受 `appId` 和 `token`，与之前完全一样。
+- **转换。** 删除 `appId`。通过相同的 `token` 属性传递新的 token。
+- **内容 AI。** 删除 `appId`。通过相同的 `token` 属性传递新的 token。
+
+在所有情况下，你都继续使用 `token` 属性。你只需要更改 token 的签名方式，现在使用你的环境密钥对。
+
+## 第 4 步：逐步上线并停用旧密钥
+
+让两种格式并行运行，直到每个客户端都签发新模型令牌。由于 Tiptap 支持每个环境使用多个活跃密钥对，你可以在不停机的情况下完成轮换。待流量完全切换到新模型后，停用旧的按服务密钥。

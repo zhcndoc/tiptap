@@ -1,0 +1,211 @@
+---
+tags:
+  - type: editor
+title: 嵌套节点视图
+meta:
+  title: 嵌套节点视图 | Tiptap 编辑器文档
+  description: 了解如何在 Vue 和 React 中使用嵌套的 NodeViewContent 构建父节点和子节点视图。
+  category: 编辑器
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+本指南展示了如何创建一个父节点，该父节点包含多个子节点，并且每个子节点都使用各自的组件进行渲染。当你需要在单个块内构建具有不同视觉表现的结构化内容时，这种模式非常有用。
+
+如果你刚接触节点视图，请先阅读 [节点视图概览](/editor/extensions/custom-extensions/node-views) 以及适用于 [React](/editor/extensions/custom-extensions/node-views/react) 和 [Vue](/editor/extensions/custom-extensions/node-views/vue) 的框架特定指南。
+
+## 关键思路
+
+这个模式最重要的部分是正确地定义你的 schema。父节点必须显式声明允许哪些子节点，而每个子节点都需要有自己的 node view，并包含一个 `NodeViewContent` 组件。
+
+在这个示例中，`multiNode` 父节点包含两个子节点：`firstNode` 和 `secondNode`。每个节点都由各自的组件进行渲染。
+
+<Callout variant="info" title="先定义 Schema">
+  如果嵌套的 `NodeViewContent` 没有按预期渲染，请在调试组件之前，先仔细检查父节点和子节点扩展上的 `content` 表达式。
+</Callout>
+
+## 插入父节点
+
+在插入父节点时，一次性创建完整结构，这样文档始终包含预期的子节点：
+
+```js
+editor
+  .chain()
+  .focus()
+  .insertContent(
+    editor.schema.node('multiNode', null, [
+      editor.schema.node('firstNode', null, [editor.schema.node('paragraph')]),
+      editor.schema.node('secondNode', null, [editor.schema.node('paragraph')]),
+    ]),
+  )
+  .run()
+```
+
+## Vue
+
+### 父节点扩展
+
+```js
+import MultiNode from './MultiNode.vue'
+import { Node, mergeAttributes } from '@tiptap/core'
+import { VueNodeViewRenderer } from '@tiptap/vue-3'
+
+export default Node.create({
+  name: 'multiNode',
+  group: 'block',
+  content: 'firstNode secondNode',
+  parseHTML() {
+    return [{ tag: 'multi-node' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['multi-node', mergeAttributes(HTMLAttributes), 0]
+  },
+  addNodeView() {
+    return VueNodeViewRenderer(MultiNode)
+  },
+})
+```
+
+### 父节点视图
+
+父组件提供包装结构。使用 `<node-view-content />` 在其中渲染子节点视图。
+
+```html
+<template>
+  <node-view-wrapper class="multi-node">
+    <node-view-content />
+  </node-view-wrapper>
+</template>
+
+<script setup>
+  import { NodeViewContent, NodeViewWrapper } from '@tiptap/vue-3'
+</script>
+```
+
+### 子节点扩展
+
+子节点与父节点保持相同的组，并定义它们自己的可编辑内容。
+
+```js
+import FirstNode from './FirstNode.vue'
+import { Node, mergeAttributes } from '@tiptap/core'
+import { VueNodeViewRenderer } from '@tiptap/vue-3'
+
+export default Node.create({
+  name: 'firstNode',
+  group: 'block',
+  content: 'block+',
+  parseHTML() {
+    return [{ tag: 'first-node' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['first-node', mergeAttributes(HTMLAttributes), 0]
+  },
+  addNodeView() {
+    return VueNodeViewRenderer(FirstNode)
+  },
+})
+```
+
+### 子节点视图
+
+```html
+<template>
+  <node-view-wrapper class="first-node">
+    <node-view-content />
+  </node-view-wrapper>
+</template>
+
+<script setup>
+  import { NodeViewContent, NodeViewWrapper } from '@tiptap/vue-3'
+</script>
+```
+
+`secondNode` 扩展和视图遵循与 `firstNode` 相同的模式。
+
+## React
+
+React 实现遵循相同的 schema 规则。主要区别在于你使用来自 `@tiptap/react` 的 `ReactNodeViewRenderer`、`NodeViewWrapper` 和 `NodeViewContent`。
+
+### 父节点扩展
+
+```js
+import { Node, mergeAttributes } from '@tiptap/core'
+import { ReactNodeViewRenderer } from '@tiptap/react'
+import MultiNode from './MultiNode.jsx'
+
+export default Node.create({
+  name: 'multiNode',
+  group: 'block',
+  content: 'firstNode secondNode',
+  parseHTML() {
+    return [{ tag: 'multi-node' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['multi-node', mergeAttributes(HTMLAttributes), 0]
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(MultiNode)
+  },
+})
+```
+
+### 父节点视图
+
+```jsx
+import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
+
+export default function MultiNode() {
+  return (
+    <NodeViewWrapper className="multi-node">
+      <NodeViewContent />
+    </NodeViewWrapper>
+  )
+}
+```
+
+### 子节点扩展
+
+```js
+import { Node, mergeAttributes } from '@tiptap/core'
+import { ReactNodeViewRenderer } from '@tiptap/react'
+import FirstNode from './FirstNode.jsx'
+
+export default Node.create({
+  name: 'firstNode',
+  group: 'block',
+  content: 'block+',
+  parseHTML() {
+    return [{ tag: 'first-node' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['first-node', mergeAttributes(HTMLAttributes), 0]
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(FirstNode)
+  },
+})
+```
+
+### 子节点视图
+
+```jsx
+import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
+
+export default function FirstNode() {
+  return (
+    <NodeViewWrapper className="first-node">
+      <NodeViewContent />
+    </NodeViewWrapper>
+  )
+}
+```
+
+`secondNode` 扩展和视图遵循与 `firstNode` 相同的模式。
+
+## 相关资源
+
+- [Node 视图概览](/editor/extensions/custom-extensions/node-views)
+- [使用 React 的 Node 视图](/editor/extensions/custom-extensions/node-views/react)
+- [使用 Vue 的 Node 视图](/editor/extensions/custom-extensions/node-views/vue)
+- [创建自定义节点](/editor/extensions/custom-extensions/create-new/node)

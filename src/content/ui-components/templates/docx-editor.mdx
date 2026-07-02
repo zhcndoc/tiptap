@@ -1,0 +1,260 @@
+---
+title: DOCX 编辑器
+meta:
+  title: DOCX 编辑器 | Tiptap UI 组件
+  description: 基于 Tiptap Pages 构建的分页式、类似 Word 的文档编辑器，支持实时协作、可编辑页眉页脚、脚注、分页符、实时 Word 预览，以及 DOCX/PDF 导出。
+  category: UI 组件
+tags:
+  - type: team
+---
+
+import { ArrowRightIcon } from 'lucide-react'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Button } from '@/components/ui/Button'
+import { Link } from '@/components/Link'
+import { Callout } from '@/components/ui/Callout'
+
+**DOCX 编辑器模板**是一款分页式、类似 Word 的文档编辑器。不同于连续画布编辑器，它将内容渲染在带有真实页边距的独立页面上，支持可编辑的页眉和页脚、脚注、手动分页，以及可配置的页面格式——随后导出忠实的 `.docx` 文件，并在编辑器旁边渲染实时的 Word 预览。
+
+它建立在 [Tiptap Pages](/pages/getting-started/overview) 扩展和 [Conversion](/conversion/getting-started/overview) DOCX/PDF 导出器之上，并由 [Tiptap Collaboration](/collaboration/getting-started/overview) 提供实时协作功能。
+
+<div className="flex items-center gap-4 mt-8">
+  <Button variant="primary" size="medium">
+    <Link
+      href="https://template.tiptap.dev/docx"
+      className="flex items-center justify-center gap-2"
+    >
+      全屏查看
+      <ArrowRightIcon className="size-3.5" />
+    </Link>
+  </Button>
+</div>
+
+<CodeDemo isScrollable isLarge src="https://template.tiptap.dev/docx" />
+
+<Callout title="需要 Team 方案" variant="warning">
+  DOCX 编辑器模板在生产环境中使用时，至少需要订阅 **Team 方案**。你可以在试用期内进行集成和测试。使用此模板需遵守我们的 [服务条款](https://tiptap.dev/terms-of-service) 和 [Pro
+  许可证](https://tiptap.dev/pro-license)。
+</Callout>
+
+## 概览
+
+该模板将多个 Tiptap Pro 扩展组合成一种统一的文档编辑体验：
+
+- **[Pages](/pages/getting-started/overview)** — 分页、页面格式（尺寸、方向、页边距）、页眉和页脚、脚注，以及缩放。
+- **[Convert / Export DOCX](/conversion/export/docx/editor-extension)** — 将编辑器文档在浏览器中转换为真实的 Word `.docx` 文件。
+- **[Export PDF](/conversion/export/pdf/editor-extension)** — 通过 Tiptap Conversion API 生成并排的 Word 预览。
+- **[Collaboration](/collaboration/getting-started/overview)** — 对正文、页眉、页脚和脚注进行实时多人协作编辑。
+
+在此基础上，该模板还添加了类似 Word 的工具栏、文档设置侧边栏、可编辑的页眉/页脚覆盖层，以及一组让 Pages 交互更接近原生体验的小型兼容处理。
+
+## 安装
+
+你需要一个带有有效订阅或试用的 Tiptap 账户。请前往 [cloud.tiptap.dev/register](https://cloud.tiptap.dev/register) 创建一个。
+
+### 适用于现有项目
+
+```bash
+npx @tiptap/cli@latest add docx
+```
+
+### 适用于新项目
+
+```bash
+npx @tiptap/cli@latest init docx
+```
+
+此模板需要进行样式和配置设置。
+
+### 样式
+
+我们对样式框架不持特定立场，因此你需要将其集成到你的设置中。请按照 [样式设置指南](/ui-components/getting-started/style) 操作，以确保编辑器正确显示。
+
+该模板附带 SCSS，因此请确保你的项目中已将 `sass`（以及 `sass-embedded`）作为开发依赖可用。
+
+### 环境变量
+
+DOCX 编辑器使用两项云服务：**协作**（用于实时编辑）和 **转换**（用于 PDF/Word 预览）。请为以下变量提供值。
+
+**协作**
+
+- `NEXT_PUBLIC_TIPTAP_COLLAB_APP_ID` — 你的协作（文档服务器）App ID。
+- `NEXT_PUBLIC_TIPTAP_COLLAB_TOKEN` — 用于访问协作服务的 JWT。
+- `NEXT_PUBLIC_TIPTAP_COLLAB_DOC_PREFIX` — _(可选)_ 追加到每个文档名称前的前缀。
+- `NEXT_PUBLIC_USE_JWT_TOKEN_API_ENDPOINT` — _(生产环境)_ 一个返回新签名 JWT 的 API 端点，而不是将静态 token 直接发送给客户端。
+
+**转换（PDF / Word 预览）**
+
+- `NEXT_PUBLIC_TIPTAP_CONVERSION_APP_ID` — 你的转换 App ID（在客户端读取并传递给 PDF 导出器）。
+- `TIPTAP_CONVERSION_SECRET` — _(仅服务器端)_ 用于 `/api/convert/token` 路由签名短期（10 分钟）JWT 的转换密钥，供预览使用。
+
+以 `NEXT_PUBLIC_` 为前缀的变量必须在客户端可用。根据你使用的框架，请使用相应的前缀：
+
+- [Next.js](/ui-components/install/next): `NEXT_PUBLIC_`。例如，`NEXT_PUBLIC_TIPTAP_COLLAB_APP_ID`。
+- [Vite + React](/ui-components/install/vite): `VITE_`。例如，`VITE_TIPTAP_COLLAB_APP_ID`。
+- 其他框架：请遵循你所用框架的规则，并将这些值接入 `tiptap-collab-utils.ts`。
+
+<Callout title="生成 JWT" variant="info">
+  为了快速开始，你可以使用 Tiptap Cloud 账户中的示例 JWT，并将其存储
+  在 token 环境变量中。示例 JWT 仅在短时间内有效，不应在生产环境中使用。
+  在生产环境中，请实现一个在服务端生成 JWT 的 API 端点。
+  请参阅 [JWT 身份验证](/guides/authentication) 完整指南。
+</Callout>
+
+如果未配置协作，编辑器会显示设置提示，要求你设置 App ID 和 token（或 JWT 端点）。你也可以在 URL 后附加 `?noCollab=1`，以便在本地测试时禁用协作。
+
+## 用法
+
+渲染 `PageDocxEditor` 组件。每个文档都是一个协作房间，因此请为每个文档传入唯一的 `room` ID。
+
+```tsx
+import { PageDocxEditor } from '@/components/tiptap-templates/page-docx/components/page-docx-editor'
+import initialContent from '@/components/tiptap-templates/page-docx/data/content.json'
+
+export default function App() {
+  return <PageDocxEditor room="contract-123" initialContent={initialContent} />
+}
+```
+
+### 路由
+
+该模板自带一个页面，其行为与演示完全一致：访问 `/docx` 会重定向到带有新生成 room ID 的 `/docx/<room-id>`，而 `[slug]` 路由会为该房间渲染编辑器，同时预加载字体选择器所使用的 Google Fonts。每个房间都是一个独立、持久化的协作文档。
+
+### 属性
+
+导出的 `PageDocxEditor` 组件接受以下属性：
+
+| 属性              | 类型              | 描述                                                                                                                                                                               |
+| ----------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `room`            | `string`          | 协作房间 ID。每个文档都应使用唯一的房间。如果省略，则会创建一个随机房间。                                                                                      |
+| `initialContent`  | `JSONContent`     | 首次打开该房间时注入文档的 Tiptap JSON。模板附带了一个示例 NDA。注入过程有保护机制，因此绝不会重复。                                       |
+| `invertMenu`      | `boolean`         | 将工具栏渲染在屏幕底部而不是顶部。也可以通过 `?menu=invert` 查询参数切换。默认为 `false`。                                     |
+| `settingsStorage` | `SettingsStorage` | 用于侧边栏 UI 设置的持久化后端（页面格式、页眉/页脚设置、预览开关）。默认为 localStorage 适配器。参见 [设置持久化](#settings-persistence)。 |
+
+## 功能
+
+一个带有类似 Word 工具栏、文档设置和实时导出的完整分页文档编辑器。
+
+- **分页**：内容跨真实页面流动，支持可配置的页面尺寸、方向和页边距。
+- **页眉和页脚**：可按文档编辑，支持首页不同、奇偶页不同，可调整与页面边缘的距离，并支持动态页码字段。
+- **脚注**：类似 Word 的脚注——正文中的引用，内容位于页脚上方的每页专用区域，并在自动编号的覆盖层中编辑。
+- **手动分页符**：插入一个会消耗剩余页面空间并将后续内容推到下一页的分页符，行为与 Word 完全一致。
+- **文档设置**：页面尺寸（20+ 预设以及自定义）、方向、页边距、单位、页间距和页面背景色。
+- **缩放与适配页面**：40%–200% 预设，另有自动适配页面模式，可将页面缩放到可用宽度。
+- **字体族**：分类、可搜索的字体选择器。Carlito（与 Calibri 兼容的度量匹配字体）是默认字体，也是嵌入导出的字体。
+- **有序列表编号**：八种编号方案（十进制、字母、罗马数字、嵌套等），在屏幕上和导出文档中保持一致。
+- **富文本格式**：标题、粗体/斜体/删除线/代码、文本颜色、链接、行内图片、项目符号列表、行距、文本对齐和字体大小。
+- **DOCX 导出**：一键下载真正的 `.docx` 文件，完全在浏览器中生成。
+- **实时 Word 预览**：并排显示文档按 Word 排版后的 PDF 渲染结果，可按需刷新。
+- **实时协作**：正文、页眉、页脚和脚注支持多用户实时编辑，并显示协作光标。
+- **深色和浅色模式**：开箱即用的完整主题支持。
+- **响应式设计**：支持移动端布局，包含全屏预览模式，以及会将额外控件折叠到菜单中的溢出工具栏。
+
+### 分页和页面格式
+
+页面几何由 Pages 扩展管理，并从文档设置侧边栏进行配置。你可以设置：
+
+- **页面尺寸** — A4、A5、A6、JIS B5、US Letter、US Legal、Executive、明信片、信封等，以及带明确宽度和高度的 **自定义** 尺寸。
+- **方向** — 纵向或横向。
+- **页边距** — 上、下、左、右，并可选“链接页边距”开关，使四边保持同步。
+- **单位** — `cm`、`in`、`mm` 或 `px`；所有输入都会重新格式化为所选单位。
+- **页间距** — 编辑器画布中页面之间的间距。
+- **页面背景色** — 默认透明，并提供一组预设颜色调色板。
+
+在侧边栏中输入的设置会驱动实时编辑器；反过来，通过 Pages 扩展所做的更改（包括协作者的远程更改）也会回流到侧边栏并持久化保存。
+
+### 页眉和页脚
+
+双击任意页眉或页脚区域，或在侧边栏中打开 **页眉和页脚** 选项卡，即可在固定于实时页面上方的覆盖层中编辑它。示例文档附带一个页眉（文档标题 + 标志）和一个页脚（标签、“Confidential”，以及一个 `{page} of {pages}` 字段），以表格布局呈现。
+
+支持的选项：
+
+- **首页不同** — 第 1 页使用不同的页眉/页脚。
+- **奇偶页不同** — 书籍式布局中交替显示不同的页眉/页脚。
+- **距页面边缘的距离** — 页眉距顶部的距离和页脚距底部的距离，使用文档单位（会限制在 Word 的范围内，默认约为 1.25 cm）。
+- **页码** — 插入当前页或总页数字段。它们在编辑器中显示为 `{page}` / `{pages}` 标记，并在导出时变为实时 Word 字段。
+
+由于 Pages 会为每个变体（默认 / 首页 / 奇数页 / 偶数页）维护一个独立的内部编辑器，侧边栏还包含一个小型分页器，用于在当前文档可访问的变体之间切换。
+
+### 脚注
+
+脚注是 Pages 扩展的一项功能。从工具栏插入脚注（或使用键盘快捷键）后，正文中会放置一个带编号的引用，而脚注内容会在覆盖层编辑器中打开；渲染后的脚注位于其所在页面页脚上方的专用区域。导出时，DOCX 导出器会自动将这些内容提取为真正的 Word 脚注。
+
+### 页面分隔符
+
+手动分页符总会在分页符前留下一个空段落，并将光标落到其后的段落中——与 Word 处理手动分页符的方式一致。从尾随空段落中退格时，会先逐个删除相邻的分页符，然后再回到正常编辑。可通过工具栏插入分页符，或使用 `Mod-Enter`。
+
+### 缩放
+
+缩放控件提供 40% 到 200% 的预设，以及一个 **适配页面** 操作。默认情况下，编辑器处于自动模式，会将页面缩小以适应可用列宽，并在视口变大时再放大到 100%；选择预设会切换为固定的手动缩放。缩放通过 `--zoom` CSS 变量发布，因此通过门户渲染的覆盖层（例如页眉/页脚编辑器）也能一致地缩放。
+
+### 导出和预览
+
+- **DOCX 导出** 会下载一个由 Export DOCX 扩展在浏览器中构建的 `.docx` 文件——无需与服务器往返。页面尺寸、页边距（包括页眉/页脚扩展）、背景色、有序列表编号和页码字段都会带入文档，Carlito 字体会被嵌入，并且编辑器 CSS 变量颜色会被规范化为固定的十六进制值，以确保文件在任何地方看起来都一样。
+- **Word 预览** 是同一文档的按需 PDF 渲染结果，显示在编辑器旁边（移动端为全屏）。它通过 Tiptap Conversion API 生成，使用来自 `/api/convert/token` 路由的短期令牌，然后借助 `react-pdf` 渲染。打开预览时、页面布局变化时，以及文档有未保存更改时可通过 **更新预览** 按钮刷新预览。
+
+### 实时协作
+
+正文绑定到一个 `TiptapCollabProvider` 文档，而每个页眉/页脚变体以及脚注内容也通过各自的协作字段进行同步。协作光标仅显示在正文中（内部编辑器有意转发内容同步但不转发光标，以避免在共享 provider 上出现重复光标）。默认页眉/页脚外壳和初始正文内容仅在每个房间中注入一次，并以 provider 已同步为前提进行控制，这样返回同一房间时会保留之前编辑的内容。
+
+### 设置持久化
+
+侧边栏 UI 设置（页面格式、页眉/页脚设置以及预览切换）按房间持久化保存。默认情况下，它们存储在 `localStorage` 中的房间作用域键下。后端可通过 `settingsStorage` 属性和 `SettingsStorage` 适配器接口进行插拔：
+
+```ts
+interface SettingsStorage {
+  get<T = unknown>(key: string): T | null
+  set<T = unknown>(key: string, value: T): void
+  remove(key: string): void
+}
+```
+
+传入 `noopStorage` 可完全禁用持久化，或者实现该接口以将设置持久化到你自己的后端（例如，以文档为键的数据库）。
+
+## 组件拆解
+
+该模板由其自身的组件、hooks 和库组成，并建立在一组共享的 Tiptap UI 组件之上。
+
+### 模板组件
+
+- `page-docx-editor` — 根组件：协作设置、编辑器实例、布局和效果。
+- `page-docx-main-toolbar` — 类似 Word 的工具栏，带有溢出处理。
+- `page-docx-header-footer-overlay` — 悬停在页眉/页脚区域上方的浮动“编辑”入口。
+- `page-docx-pdf-preview` — `react-pdf` 的 Word 预览面板。
+- `page-docx-loading-overlay`、`floating`、`theme-toggle` — 辅助 UI。
+- `sidebar/*` — 文档和页眉/页脚设置面板、页脚分页，以及设置面板原语。
+- `zoom-dropdown-menu`、`font-family-combobox`、`numbering-format-dropdown-menu` — 专用的工具栏控件。
+
+### Hooks
+
+- `use-page-editor-state` — 从 Pages 存储中派生页面状态（活动编辑器类型、页数、当前页、页眉/页脚标志）。
+- `use-zoom`、`use-auto-export`、`use-page-docx-export`、`use-page-docx-insert-actions` — 缩放、脏状态跟踪、DOCX/PDF 导出操作，以及工具栏插入操作（脚注 / 分页符 / 图片）。
+- `use-overlay-focus`、`use-overlay-labels`、`use-mobile-typography-guard` — 覆盖层行为和布局辅助工具。实时元素矩形跟踪来自共享的 `use-bounding-rect` hook。
+
+### Lib
+
+- `page-docx-utils`、`page-docx-pages` — 单位/转换、页面格式辅助工具，以及设置同步。
+- `page-docx-export`、`page-docx-export-colors`、`page-docx-fonts` — 导出布局/样式、颜色归一化，以及字体注册表。
+- `settings-storage`、`settings-storage-context` — 可插拔的持久化适配器及其 React 上下文。
+
+### 扩展和变通方案
+
+- `extensions/extension-page-token-highlight` — 行内 `{page}` / `{pages}` 页码节点及其 DOCX 适配器。
+- `workaround/page-break`、`workaround/header-footer`、`workaround/footnote` — 一些小而注释充分的补丁，使 Pages 交互（光标定位、覆盖层聚焦与滚动、脚注滚动到视图）表现得像桌面文字处理器一样。
+
+### Tiptap Pro 扩展
+
+- `@tiptap-pro/extension-pages`
+- `@tiptap-pro/extension-convert-kit`
+- `@tiptap-pro/extension-export-docx`
+- `@tiptap-pro/extension-export-pdf`
+- `@tiptap-pro/extension-pagebreak`
+- `@tiptap-pro/provider`
+
+### 复用的 UI 组件
+
+工具栏和侧边栏复用了开源 UI 组件，包括 `mark-button`、`list-button`、`heading-button` / `heading-dropdown-menu`、`text-button`、`font-size-dropdown-menu`、`line-spacing-dropdown-menu`、`text-align-dropdown-menu`、`color-text-popover` 和 `link-popover`，以及 `button`、`card`、`combobox`、`dropdown-menu`、`popover`、`sidebar` 和 `toolbar` 原语。
+
+## 许可证
+
+DOCX Editor 模板使用 Tiptap Pro 扩展，并且需要有效的 **团队方案**（或更高级别）订阅。使用须遵守 [Tiptap Pro 许可证](https://tiptap.dev/pro-license) 和 [服务条款](https://tiptap.dev/terms-of-service)。其所依赖的开源 UI 组件仍采用 MIT 许可证。

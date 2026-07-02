@@ -157,9 +157,9 @@ const Editor = new Editor({
 
 这样可以确保建议菜单只对实际输入触发字符的用户打开。
 
-## 在原生 JavaScript 中使用
+## 使用原生 JavaScript
 
-下面是一个完整示例，设置了带有建议列表的提及功能：
+下面是一个完整示例，展示了如何设置带有建议列表的提及功能：
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -204,7 +204,7 @@ new Editor({
                 popup.appendChild(button)
               })
             },
-            onHide: () => {
+            onExit: () => {
               popup?.remove()
             },
           }

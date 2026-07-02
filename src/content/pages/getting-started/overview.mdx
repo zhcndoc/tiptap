@@ -24,7 +24,7 @@ Tiptap Pages 是 Tiptap 的分页编辑层。它在任何 Tiptap 编辑器之上
   src="https://template.tiptap.dev/docx"
   caption={
     <>
-      <strong>试用 Tiptap Pages</strong>，在这个交互式 DOCX 编辑器演示中体验分页、
+      <strong>Try Tiptap Pages</strong>，在这个交互式 DOCX 编辑器演示中体验分页、
       页眉和页脚，以及 DOCX/PDF 导出。
     </>
   }
@@ -40,7 +40,7 @@ Tiptap Pages 是 Tiptap 的分页编辑层。它在任何 Tiptap 编辑器之上
       </a>
       <span className="text-grayAlpha-300">|</span>
       <Link
-        href="/pages/getting-started/live-demo"
+        href="https://tiptap.dev/docs/ui-components/templates/docx-editor"
         className="flex items-center gap-1 text-grayAlpha-600 hover:text-grayAlpha-800 font-medium whitespace-nowrap"
       >
         了解更多
@@ -56,13 +56,14 @@ Tiptap Pages 是 Tiptap 的分页编辑层。它在任何 Tiptap 编辑器之上
 
 ## 这项功能的作用
 
-- **分页布局**：内容会在所选格式的可视页面之间流动（A4、Letter、自定义）。
-- **页面格式和边距**：内置格式带有合理的默认值，自定义格式对象则让你完全掌控。
-- **页眉和页脚**：可将其定义为静态文本、HTML 字符串或 Tiptap JSON。它们支持 `{page}` 和 `{total}` 占位符，你还可以像 Word 一样为首页或奇偶页设置不同的区域。
-- **脚注**：类似 Word 的脚注，会渲染在每页页脚上方，自动编号，并在内容重新排版时跟随其引用位置。参见 [脚注](/pages/core-concepts/footnotes)。
-- **所见即编辑**：双击页眉、页脚或脚注区域，即可在覆盖层中打开功能完整的 Tiptap 编辑器。
+- **分页布局**：内容会在所选格式（A4、Letter、自定义）的可视页面之间流动。
+- **页面格式和边距**：内置格式提供合理的默认值，自定义格式对象则让你完全掌控。
+- **页眉和页脚**：可将其定义为静态文本、HTML 字符串或 Tiptap JSON。它们支持 `{page}` 和 `{total}` 占位符，并且你可以像 Word 一样，为首页或奇偶页分别设置独立的槽位。
+- **脚注**：类似 Word 的脚注，会显示在每页页脚上方，自动编号，并在内容重排时跟随其引用位置。参见 [脚注](/pages/core-concepts/footnotes)。
+- **尾注**：类似 Word 的尾注，收集在文档末尾，使用小写罗马数字、自动编号，并支持就地编辑。参见 [尾注](/pages/core-concepts/endnotes)。
+- **就地编辑**：双击页眉、页脚、脚注或尾注区域，即可在覆盖层中打开功能完整的 Tiptap 编辑器。
 - **缩放**：视觉缩放范围为 `[0.25, 4]`，不会影响文档内容或导出。
-- **分页符**：可通过 [PageBreak 扩展](/pages/core-concepts/page-break-node) 插入显式分页，也可以让 Pages 处理自动分页。
+- **分页符**：可通过 [PageBreak 扩展](/pages/core-concepts/page-break-node) 插入显式分页，或让 Pages 自动处理分页。
 
 ## 随之安装的内容
 
@@ -100,15 +101,16 @@ const editor = new Editor({
 
 ## 可用内容
 
-- 内置页面格式：A4、A3、A5、Letter、Legal、Tabloid。你也可以用任意尺寸和边距定义自定义格式。
-- 页眉和页脚内容可采用纯文本、HTML 或 Tiptap JSON，并支持 `{page}` / `{total}` 占位符。
-- 首页以及奇偶页可使用不同的页眉和页脚，类似 Word。
-- 类似 Word 的 [脚注](/pages/core-concepts/footnotes)：每页脚注区域带有自动连续编号，会随引用位置重新排版并占用页面空间。
-- 在专用覆盖层中实时编辑页眉、页脚和脚注。它们会与主文档一起参与协作。参见 [为 Pages 添加协作](/pages/guides/collaboration-with-pages)。
-- 程序化控制：可为特定页面打开或关闭页眉/页脚/脚注编辑器，对页面格式变化作出响应，对缩放变化作出响应。
-- 通过配置时或运行时的 `editableHeader` / `editableFooter` / `footnotes.editable` 选项，以及 `setHeaderEditable` / `setFooterEditable` / `setFootnotesEditable` 命令，锁定或解锁各覆盖层的编辑。
-- 通过 [PagesTableKit](/pages/guides/pages-tablekit) 实现分页安全表格。表格会按比例缩小以适配页面，固定高度的行会被裁切，声明的宽度会被保留。
-- 与 Tiptap Conversion 往返兼容：导入的 DOCX 页眉、页脚和脚注会自动应用；导出的 DOCX、PDF、ODT 和 EPUB 文件会保留页眉、页脚和分页信息。DOCX 导出会写入真实的 Word 脚注。
+- 内置页面格式：A4、A3、A5、Letter、Legal、Tabloid。你也可以定义具有任意尺寸和边距的自定义格式。
+- 页眉和页脚内容可以是纯文本、HTML 或 Tiptap JSON，并支持 `{page}` / `{total}` 占位符。
+- 首页面以及奇数/偶数页可使用不同的页眉和页脚，类似 Word。
+- 类 Word 的 [脚注](/pages/core-concepts/footnotes)：每页脚注区域，带自动连续编号，会随其引用重新排版并占用页面空间。
+- 类 Word 的 [尾注](/pages/core-concepts/endnotes)：文档末尾的单一列表，使用小写罗马数字和自动编号，跨页面流动，并保留完整页面外壳。
+- 在专用覆盖层中实时编辑页眉、页脚、脚注和尾注。它们会与主文档一起参与协作。参见 [为 Pages 添加协作](/pages/guides/collaboration-with-pages)。
+- 程序化控制：打开或关闭页眉/页脚/脚注/尾注编辑器，对页面格式变化作出响应，对缩放变化作出响应。
+- 可在配置时或运行时通过 `editableHeader` / `editableFooter` / `footnotes.editable` / `endnotes.editable` 选项以及 `setHeaderEditable` / `setFooterEditable` / `setFootnotesEditable` / `setEndnotesEditable` 命令来锁定或解锁每个覆盖层的编辑。
+- 通过 [PagesTableKit](/pages/guides/pages-tablekit) 实现分页安全的表格。表格会按比例缩小以适应页面，固定高度的行会被裁剪，声明的宽度会被保留。
+- 与 Tiptap Conversion 往返兼容：导入的 DOCX 页眉、页脚、脚注和尾注会自动应用，而导出的 DOCX、PDF、ODT 和 EPUB 文件会保留页眉、页脚和分页信息。DOCX 导出会写入真正的 Word 脚注和尾注。
 
 ## 不可用的内容
 
@@ -118,11 +120,11 @@ const editor = new Editor({
 - **没有按页样式，也没有页面模板。** 每一页都使用相同的布局和视觉样式。
 - **没有浏览器打印集成。** 如需可直接打印的输出，请使用 [Conversion 扩展和 REST 端点](/conversion/getting-started/overview)。
 
-## 预期情况
+## Expectations
 
-- **Beta 阶段。** Pages 仍在积极开发中。如果你依赖它，请锁定确切的包版本，因为次要版本可能引入破坏性变更。
-- **像素值即 CSS 像素。** API 中的所有尺寸都对应标准浏览器 CSS 像素（1 英寸 = 96 px）。`cmToPixels` 和 `inchToPixels` 工具可以无损往返，因此你可以使用真实世界单位进行创作。
-- **参与协作的所见即编辑。** 双击页眉或页脚会打开完整的 Tiptap 编辑器，而该编辑器与主文档处于同一个协作会话中。
+- **Beta stage.** Pages is still under active development. If you depend on it, pin the exact package version, because minor versions may introduce breaking changes.
+- **Pixel values are CSS pixels.** All sizes in the API correspond to standard browser CSS pixels (1 inch = 96 px). The `cmToPixels` and `inchToPixels` utilities can round-trip without loss, so you can create using real-world units.
+- **What you see is what you edit in collaboration.** Double-clicking the header or footer opens the full Tiptap editor, and that editor is in the same collaborative session as the main document.
 
 ## 不要期待的内容
 

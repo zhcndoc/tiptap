@@ -27,20 +27,20 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
     在你的账户中开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Start 套餐](https://cloud.tiptap.dev/v2/billing)。
   </RequirementItem>
   <RequirementItem label="2. 从私有仓库安装">
-    请按照 [设置指南](/guides/pro-extensions) 完成验证，以访问 Tiptap 的私有 npm 仓库。
+    请按照 [设置指南](/guides/pro-tables) 完成验证，以访问 Tiptap 的私有 npm 仓库。
   </RequirementItem>
 </Requirements>
 
-## 哪种设置适合我？
+## Which setup is right for me?
 
-<Callout title="两种场景，一个编辑器栈" variant="info">
-  PagesTableKit 在两种场景下都很有用，它们的区别在于表格内容如何进入编辑器，而不是你如何配置编辑器。基础扩展是相同的；第二种场景会在此基础上额外添加 Import 扩展。
+<Callout title="Two scenarios, one editor stack" variant="info">
+  PagesTableKit is useful in both scenarios, and the difference is how table content gets into the editor, not how you configure the editor. The base extensions are the same; the second scenario adds the Import extension on top.
 </Callout>
 
-- **仅 Pages 工作流。** 你正在构建一个分页编辑器（适合打印的版式、信纸风格文档、报告），并且需要表格能够正确分页。内容为手动编写。
-- **Pages + DOCX 导入工作流。** 你正在导入 `.docx` 文件，并在分页编辑器中渲染它们。你需要表格既能分页，**又**能忠实反映原始 DOCX 的格式（声明的宽度、行高、缩进）。
+- **Pages only workflow.** You are building a paginated editor (print-friendly layouts, letter-style documents, reports), and you need tables to paginate correctly. The content is handwritten.
+- **Pages + DOCX import workflow.** You are importing `.docx` files and rendering them in a paginated editor. You need tables to paginate, **and** to faithfully reflect the original DOCX formatting (declared width, row height, indentation).
 
-这两种场景使用相同的编辑器栈：`ConvertKit`（用于 schema）+ `TableKit`（用于分页安全的表格）+ `Pages`（用于布局）。场景 B 额外添加 `ImportDocx`。下面每一节都会标明它适用于哪个场景。
+Both scenarios use the same editor stack: `ConvertKit` (for schema) + `TableKit` (for pagination-safe tables) + `Pages` (for layout). Scenario B additionally adds `ImportDocx`. Each section below will indicate which scenario it applies to.
 
 <CodeDemo isPro path="/Extensions/ImportDocxCssStylesPages" />
 
@@ -101,7 +101,7 @@ const editor = new Editor({
     ConvertKit.configure({ table: false }),
     TableKit,
     ImportDocx.configure({
-      /* appId, token, … */
+      /* token, … */
     }),
     Pages.configure({
       /* 页面格式、边距等 */
@@ -219,8 +219,8 @@ PagesTableKit 没有任何独有的配置项；每个键都会透传到其底层
 
 ## 相关内容
 
-- [Pages overview](/pages/getting-started/overview)：PagesTableKit 所需的分页扩展。
-- [Pages with tables](/pages/guides/table-with-pages)：在 Pages 中编写表格的一般指南。
+- [页面概览](/pages/getting-started/overview)：PagesTableKit 所需的分页扩展。
+- [表格中的页面](/pages/guides/table-with-pages)：在 Pages 中编写表格的一般指南。
 - [ConvertKit](/conversion/import/docx/convertkit)：支持 DOCX 的编辑器套件；用于场景 B。
-- [Editor extension (import DOCX)](/conversion/import/docx/editor-extension)：`ImportDocx` 扩展如何将 Word 内容导入你的编辑器。
-- [CSS injection (import)](/conversion/import/docx/css-injection)：将 DOCX 样式目录提取为 CSS，以便在分页内容中保持一致的排版。
+- [编辑器扩展（导入 DOCX）](/conversion/import/docx/editor-extension)：`ImportDocx` 扩展如何将 Word 内容导入你的编辑器。
+- [CSS 注入（导入）](/conversion/import/docx/css-injection)：将 DOCX 样式目录提取为 CSS，以便在分页内容中保持一致的排版。

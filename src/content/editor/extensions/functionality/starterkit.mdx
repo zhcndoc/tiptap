@@ -105,3 +105,26 @@ const editor = new Editor({
   ],
 })
 ```
+
+Tiptap 不允许存在两个具有相同 `name` 属性的扩展。如果自定义扩展与 StarterKit 中包含的某个扩展同名，请将其禁用：
+
+```js
+import { Editor, Mark } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Link from '@tiptap/extension-link'
+
+const CustomLinkExtension = Mark.create({
+  name: 'link',
+})
+
+const editor = new Editor({
+  extensions: [
+    StarterKit.configure({
+      // 禁用 Link 扩展
+      // 以免它与 CustomLinkExtension 冲突
+      link: false,
+    }),
+    CustomLinkExtension,
+  ],
+})
+```

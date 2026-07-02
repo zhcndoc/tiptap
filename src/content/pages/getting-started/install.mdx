@@ -31,8 +31,8 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 Pages 扩展**不**自带 node 和 mark schema。要使用它，您还需要安装：
 
-- **`@tiptap-pro/extension-convert-kit`** — 适用于任何 Pages 或 Conversion 工作流的标准编辑器套件。ConvertKit 注册了一个支持 DOCX 的 schema（段落、标题、列表、图片、marks），可同时渲染手动创建的内容以及通过 Tiptap Conversion 导入的内容。
-- **`@tiptap-pro/extension-pages-tablekit`** — 支持分页安全的表格。之所以需要它，是因为 ConvertKit 内置的表格并不适合分页；在 Pages 中使用它们会导致布局断裂。
+- **`@tiptap-pro/extension-convert-kit`**：适用于任何 Pages 或 Conversion 工作流的标准编辑器套件。ConvertKit 注册了一个支持 DOCX 的 schema（段落、标题、列表、图片、marks），可同时渲染手动编写的内容以及通过 Tiptap Conversion 导入的内容。
+- **`@tiptap-pro/extension-pages-tablekit`**：支持分页安全的表格。之所以需要它，是因为 ConvertKit 自带的表格并不适合分页；在 Pages 中使用它们会导致布局错乱。
 
 请从私有注册表安装这三个 Pro 包：
 
@@ -75,12 +75,12 @@ const editor = new Editor({
 
 ## 身份验证
 
-Pages 本身不会发起任何网络请求，也不需要任何凭证。一旦您在 Pages 之上再添加 Tiptap Conversion（DOCX 导入、PDF 导出等），就需要 JWT 和 App ID。有关凭证设置，请参见 [Conversion 安装指南](/conversion/getting-started/install)；其中的配置可直接沿用，无需修改。
+Pages 本身不会进行任何网络调用，也不需要任何凭据。一旦你在 Pages 之上添加 Tiptap Conversion（DOCX 导入、PDF 导出等），就需要一个签名令牌。有关设置，请参阅 [Conversion 安装指南](/conversion/getting-started/install)。那里的配置可以直接沿用，无需修改。
 
 ## 后续步骤
 
-- [Pages 选项](/pages/core-concepts/options) — 完整配置参考
-- [页面页眉和页脚](/pages/core-concepts/page-header-footer) — 不同首页、奇偶页和实时编辑
-- [PagesTableKit](/pages/guides/pages-tablekit) — 详细介绍支持分页安全的表格
-- [从零到可打印](/pages/guides/zero-to-print-ready) — 带有 DOCX 导入和导出的分页编辑器
-- [限制](/pages/core-concepts/limitations) — Pages 无法做到的事情，包括最重要的需要避免的陷阱
+- [Pages 选项](/pages/core-concepts/options)：完整配置参考
+- [页面页眉和页脚](/pages/core-concepts/page-header-footer)：首页不同、奇偶页不同，以及实时编辑
+- [PagesTableKit](/pages/guides/pages-tablekit)：详细介绍分页安全表格
+- [从零到可打印](/pages/guides/zero-to-print-ready)：支持 DOCX 导入和导出的分页编辑器
+- [限制](/pages/core-concepts/limitations)：Pages 不能做什么，包括最重要的要避免的陷阱

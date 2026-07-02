@@ -43,7 +43,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 转换扩展发布在 Tiptap 的私有 npm 注册表中。请按照 [私有注册表指南](/guides/pro-extensions) 集成这些扩展。
 
-完成后，你可以安装并导入 **Export DOC** 扩展包。
+完成后，你可以安装并导入 **导出 DOC** 扩展包。
 
 ```bash
 npm i @tiptap-pro/extension-export-doc
@@ -66,7 +66,6 @@ const editor = new Editor({
     ExportDoc.configure({
       endpoint: 'https://api.tiptap.dev/v2/convert',
       token: 'YOUR_TOKEN',
-      appId: 'YOUR_APP_ID',
       styleOverrides: {},
       headers: {},
       footers: {},
@@ -82,18 +81,17 @@ const editor = new Editor({
 })
 ```
 
-| 参数               | 类型                     | 描述                                                                                         | 默认值                                |
-| ------------------ | ------------------------ | -------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `endpoint`         | `string`                 | 用于转换的 Tiptap API 端点                                                                  | `'https://api.tiptap.dev/v2/convert'` |
-| `token`            | `string`                 | 用于认证的 Tiptap JWT                                                                     | `''`                                  |
-| `appId`            | `string`                 | 用于认证的 Tiptap App ID                                                                  | `''`                                  |
-| `styleOverrides`   | `Record<string, string>` | 要应用于导出的样式覆盖                                                                    | `undefined`                           |
-| `headers`          | `HeaderConfig`           | 导出文档的页眉配置                                                                        | `undefined`                           |
-| `footers`          | `FooterConfig`           | 导出文档的页脚配置                                                                        | `undefined`                           |
-| `pageSize`         | `PageSize`               | 页面尺寸配置                                                                            | `undefined`                           |
-| `pageMargins`      | `PageMargins`            | 页面边距配置                                                                            | `undefined`                           |
-| `customNodes`      | `CustomNodeDefinition[]` | 基于 DOCX 转换的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`） | `undefined`                           |
-| `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调                                                                     | 如果未提供则抛出错误          |
+| 参数               | 类型                     | 描述                                                                                      | 默认值                                |
+| ------------------ | ------------------------ | ----------------------------------------------------------------------------------------- | ------------------------------------- |
+| `endpoint`         | `string`                 | 用于转换的 Tiptap API 端点                                                           | `'https://api.tiptap.dev/v2/convert'` |
+| `token`            | `string`                 | 用于身份验证的 Tiptap JWT                                                                | `''`                                  |
+| `styleOverrides`   | `Record<string, string>` | 要应用到导出的样式覆盖                                                           | `undefined`                           |
+| `headers`          | `HeaderConfig`           | 导出文档的页眉配置                                                   | `undefined`                           |
+| `footers`          | `FooterConfig`           | 导出文档的页脚配置                                                   | `undefined`                           |
+| `pageSize`         | `PageSize`               | 页面大小配置                                                                          | `undefined`                           |
+| `pageMargins`      | `PageMargins`            | 页面边距配置                                                                       | `undefined`                           |
+| `customNodes`      | `CustomNodeDefinition[]` | 用于基于 DOCX 转换的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`） | `undefined`                           |
+| `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调                                               | 如果未提供则抛出错误          |
 
 ### HeaderConfig
 
@@ -151,11 +149,10 @@ exportDoc: (options?: ExportDocCommandOptions) => ReturnType
 | ------------------ | ------------------------ | --------------------------------------------------------- |
 | `endpoint`         | `string`                 | 为此次特定导出覆盖 API 端点        |
 | `token`            | `string`                 | 为此次特定导出覆盖 JWT 令牌           |
-| `appId`            | `string`                 | 为此次特定导出覆盖 App ID              |
 | `styleOverrides`   | `Record<string, string>` | 为此次特定导出覆盖样式覆盖         |
 | `headers`          | `HeaderConfig`           | 为此次特定导出覆盖页眉配置    |
 | `footers`          | `FooterConfig`           | 为此次特定导出覆盖页脚配置    |
-| `pageSize`         | `PageSize`               | 为此次特定导出覆盖页面尺寸               |
+| `pageSize`         | `PageSize`               | 为此次特定导出覆盖页面大小               |
 | `pageMargins`      | `PageMargins`            | 为此次特定导出覆盖页面边距            |
 | `customNodes`      | `CustomNodeDefinition[]` | 为此次特定导出覆盖自定义节点定义 |
 | `onCompleteExport` | `(result: Blob) => void` | 为此次特定导出覆盖回调            |
@@ -168,7 +165,6 @@ const editor = new Editor({
     // 其他扩展 ...
     ExportDoc.configure({
       token: 'YOUR_TOKEN',
-      appId: 'YOUR_APP_ID',
       onCompleteExport(result) {
         // 下载 DOC 文件
         const url = URL.createObjectURL(result)
@@ -208,9 +204,9 @@ editor
 
 ## 预期内容
 
-- **需要身份验证**（`token` JWT 和 `appId`）。请在服务器端生成 JWT。请参阅 [Conversion 安装指南](/conversion/getting-started/install)。
-- **需要处理的 HTTP 响应：** `401`（缺少或无效的 JWT）、`403`（该操作对你的应用不允许——通常是你的计划不包含的格式）、`5xx`（瞬态服务器端错误；请使用退避重试）。
-- **每个请求都会在响应前端到端处理完成。** 对于大型文档，请预留更长的往返时间。
+- **需要进行身份验证**（`token` JWT）。在服务端生成 JWT。请参阅 [Conversion 安装指南](/conversion/getting-started/install)。
+- **需要处理的 HTTP 响应：**`401`（缺少或无效的 JWT）、`403`（此操作不适用于你的应用——通常是你的套餐不包含的格式）、`5xx`（临时性的服务器端错误；使用退避重试）。
+- **每个请求在响应之前都会端到端完成处理。** 对于大型文档，请预留更长的往返时间。
 
 ## 不应期待的内容
 

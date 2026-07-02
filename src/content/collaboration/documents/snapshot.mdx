@@ -17,7 +17,7 @@ import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
-文档历史记录记录您内容的每一次更改，以便您能够撤回错误、审核编辑或从任何时刻创建新草稿。
+文档历史记录会记录您内容的每一次更改，以便您能够撤销错误、审核编辑或从任意时刻创建新草稿。
 
 本页将向您介绍 **历史** 扩展的安装、配置和常见任务。
 
@@ -230,11 +230,17 @@ editor.commands.saveVersion('Release v1.0', false, {
 
 | 字段        | 类型       | 描述                                                                                                    |
 | ----------- | ---------- | -------------------------------------------------------------------------------------------------------- |
-| trigger     | `string`   | 版本的创建方式。可能的值包括：`"websocket"`（通过编辑器/提供者），`"api"`（通过 REST API），`"autoVersioning"`（自动版本控制功能创建），或 `"revert"`（恢复到以前版本时创建）。 |
-| changesBy   | `string[]` | 包含此版本更改的用户标识列表。                                                                            |
-| triggeredBy | `string`   | 触发版本创建的用户标识。                                                                                  |
+| trigger     | `string`   | 版本是如何创建的。可能的值：`"websocket"`（通过编辑器/提供程序）、`"api"`（通过 REST API）、`"autoVersioning"`（由自动版本控制功能自动创建）或 `"revert"`（在恢复到先前版本时创建）。 |
+| changesBy   | `string[]` | 做出本版本所包含更改的用户标识符列表。这些标识符是贡献客户端在其 `TiptapCollabProvider` 上设置的 `user` 值。 |
+| triggeredBy | `string`   | 触发版本创建的用户标识符。对于 `"websocket"` 版本，这是已认证 JWT 的 `sub`；对于 `"api"` 版本，这是您的后端提供的 `user` 查询参数。 |
 
 您通过 `saveVersion` 或 REST API 传递的任何自定义元数据都存储在 `__tiptap` 键的同一级 `meta` 顶层中。`__tiptap` 键为保留字段，不能被自定义元数据覆盖。
+
+<Callout title="保护编辑归因" variant="warning">
+  默认情况下，`changesBy` 反映的是每个客户端在其 `TiptapCollabProvider` 上设置的 `user` 值。这个值由客户端提供，**不会**与已认证的 JWT 进行校验，因此客户端可以冒用其他用户的身份记录更改。
+
+  要使归因可信，请启用 [`user_mapping_authenticator`](/collaboration/operations/configure) 设置。启用后，服务器会拒绝任何注册、覆盖或删除与连接 JWT `sub` 不匹配的用户身份的尝试。启用此设置后，**每个客户端都必须将 `TiptapCollabProvider.user` 设置为其 JWT `sub`**，否则其连接将被拒绝。这需要启用 JWT 身份验证。
+</Callout>
 
 ### 从服务器获取版本
 
@@ -408,7 +414,7 @@ unwatchContent()
 请求将文档恢复到给定版本，带有可选的标题设置。
 
 ```js
-provider.createVersion('My custom version', false, { author: 'Jane Doe' })
+provider.createVersion('我的自定义版本', false, { author: 'Jane Doe' })
 ```
 
 #### `version.create`

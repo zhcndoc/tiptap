@@ -28,9 +28,9 @@ import { CodeDemo } from '@/components/CodeDemo'
 ```ts
 import { getAuthHeaders } from '@/lib/server-ai-toolkit/get-auth-headers'
 
-const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
+const response = await fetch(`${apiBaseUrl}/v4/ai/toolkit/fetch-tools`, {
   method: 'POST',
-  headers: getAuthHeaders(),
+  headers: await getAuthHeaders(),
   body: JSON.stringify({
     editorContext,
     tools: {
@@ -47,37 +47,30 @@ const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
 
 ## 执行评论工具
 
-评论工具需要一个 **Tiptap Cloud 文档**，因为线程和评论存储在 Tiptap 文档服务器上。使用 `experimental_documentOptions` 时，**不需要传递 `document` 字段** —— AI 服务器会自动从文档服务器获取。
+评论工具需要一个 **Tiptap Cloud 文档**，因为线程和评论存储在 Tiptap Document Server 上。传递 `document: { type: 'cloud', id }`，这样 AI Server 就可以自动从 Document Server 获取它。
 
 ### 请求体
 
-在请求体中包含 `experimental_documentOptions`：
+在请求体中包含云文档引用：
 
-- `documentId`（`string`，必填）：文档 ID  
-- `userId`（`string`，可选）：创建评论的用户 ID。如果省略，则评论将不带用户归属创建。
-
-可选包含 `experimental_commentsOptions` 以添加元数据：
-
-- `threadData` (`Record<string, unknown>`, 可选): 当由 `editThreads` 工具创建新线程时附加到新线程的元数据。
-- `commentData` (`Record<string, unknown>`, 可选): 当由 `editThreads` 工具创建新评论时附加到新评论的元数据。
+- `document.id` (`string`，必填)：文档的 ID。
+- `user` (`string`，可选)：创建评论的用户 ID。若省略，评论将不关联用户。
 
 ```ts
-const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
+const result = await fetch(`${apiBaseUrl}/v4/ai/toolkit/execute-tool`, {
   method: 'POST',
-  headers: getAuthHeaders(),
+  headers: await getAuthHeaders('your-document-id'),
   body: JSON.stringify({
-    toolName: 'editThreads',
-    input: {},
     editorContext,
     // 引用 Tiptap Cloud 文档
-    experimental_documentOptions: {
-      documentId: '123',
-      userId: 'ai-assistant',
+    document: {
+      type: 'cloud',
+      id: 'your-document-id',
     },
-    // 可选元数据
-    experimental_commentsOptions: {
-      threadData: { source: 'ai' },
-      commentData: { source: 'ai' },
+    user: 'ai-assistant',
+    tool: {
+      name: 'editThreads',
+      input: {},
     },
   }),
 })
@@ -93,5 +86,4 @@ const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
 
 ## 下一步
 
-- 了解所有可用的 [工具定义](/content-ai/capabilities/server-ai-toolkit/api-reference/tools)
-- 浏览 [REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)
+- 探索 [REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)

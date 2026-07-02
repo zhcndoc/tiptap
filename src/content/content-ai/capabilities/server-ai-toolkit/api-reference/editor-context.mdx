@@ -28,7 +28,13 @@ import { Callout } from '@/components/ui/Callout'
   存储到数据库中。你不需要每次都生成它——只需在你的编辑器扩展或 schema 发生变化时更新它。
 </Callout>
 
-请参阅 [自定义节点指南](/content-ai/capabilities/server-ai-toolkit/advanced-guides/custom-nodes) 中的使用示例。
+<Callout title="在哪里调用 getEditorContext" variant="info">
+  `getEditorContext` 需要一个已配置的 Tiptap 编辑器实例。请在客户端
+  编辑器初始化阶段或其他能够实例化相同编辑器扩展的环境中生成它，然后在服务器端 API 调用中复用
+  存储的 JSON。
+</Callout>
+
+有关如何使用它的示例，请参阅 [自定义节点指南](/content-ai/capabilities/server-ai-toolkit/advanced-guides/custom-nodes)。
 
 ### 参数
 
@@ -69,7 +75,7 @@ const editor = new Editor({
 const editorContext = getEditorContext(editor)
 
 // 与 Server AI Toolkit API 一起使用
-const response = await fetch('https://api.tiptap.dev/v3/ai/toolkit/tools', {
+const response = await fetch('https://api.tiptap.dev/v4/ai/toolkit/fetch-tools', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',

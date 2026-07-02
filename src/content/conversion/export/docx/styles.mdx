@@ -6,11 +6,12 @@ tags:
   - type: version
     label: v0.20.0
 meta:
-    title: 导出样式 | Tiptap 转换
-    description: 在我们的文档中了解如何将 Tiptap JSON 中的自定义样式导出到 DOCX。
-    category: 转换
+  title: 导出样式 | Tiptap 转换
+  description: 了解如何在我们的文档中将 Tiptap JSON 中的自定义样式导出到 DOCX。
+  category: 转换
 ---
 
+import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 import ExportStylesGuide from '../_shared/_export-styles-guide.mdx'
@@ -18,14 +19,48 @@ import ExportStylesGuide from '../_shared/_export-styles-guide.mdx'
 <EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
 
 <Requirements>
-    <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或订阅[Start 计划](https://cloud.tiptap.dev/v2/billing)。
-    </RequirementItem>
-    <RequirementItem label="2. 从私有仓库安装">
-        要安装此前端扩展，请按照[设置指南](/guides/pro-extensions)向 Tiptap 的私有 npm 仓库进行身份验证。
-    </RequirementItem>
+  <RequirementItem label="1. 开通试用或订阅">
+    在您的账户中开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Start
+    套餐](https://cloud.tiptap.dev/v2/billing)。
+  </RequirementItem>
+  <RequirementItem label="2. 从私有仓库安装">
+    要安装这些前端扩展，请按照 [设置指南](/guides/pro-extensions) 通过身份验证访问 Tiptap 的私有 npm 仓库。
+  </RequirementItem>
 </Requirements>
 
 在导出为 `DOCX` 时，您可以定义将应用于导出文档的自定义样式。这在您想要跨文档保持一致的外观和感觉时非常有用。
 
 <ExportStylesGuide />
+
+## 使用函数按节点覆盖
+
+每个元素覆盖项 — `paragraphOverrides`、`textRunOverrides`、`tableOverrides`、`tableRowOverrides`、`tableCellOverrides` 和 `imageOverrides` — 除了静态对象之外，还可以接受一个函数。该函数接收当前正在转换的节点，并返回该节点的覆盖项，因此你可以基于节点的属性按节点变化覆盖内容。对象形式仍然保持不变，因此这是一个无缝添加的功能。
+
+```ts
+ExportDocx.configure({
+  onCompleteExport: (result) => {
+    /* ... */
+  },
+  // `node` 是当前正在转换的图片节点，包括它的 `attrs`。
+  imageOverrides: (node) => ({
+    // 将编辑器的 alt 文本带入 Word 的无障碍元数据。
+    altText: { name: node.attrs?.alt, description: node.attrs?.alt },
+    // 根据节点上设置的尺寸推导渲染大小。
+    transformation: {
+      width: Number(node.attrs?.width),
+      height: Number(node.attrs?.height),
+    },
+  }),
+  // 对于每种覆盖类型，该函数都会接收对应的节点。
+  paragraphOverrides: (node) => ({
+    keepNext: node.attrs?.keepWithNext === true,
+  }),
+})
+```
+
+函数返回的值会像静态对象一样被应用——其优先级与该覆盖项的对象形式相同。返回空对象会让该节点保留所有默认值。
+
+<Callout title="函数形式仅适用于 DOCX">
+  元素覆盖项的函数形式受 DOCX 导出支持。其他导出格式
+  接受静态对象形式。
+</Callout>

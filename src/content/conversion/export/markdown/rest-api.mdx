@@ -22,7 +22,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
         在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 配置 Convert 应用">
-        要使用 Convert REST API，请从[您的仪表盘](https://cloud.tiptap.dev/v2/cloud/convert)获取您的应用 ID 和 Convert secret。
+        使用携带 `aud: "Convert"` 的签名令牌对 REST 调用进行身份验证。请参见[身份验证](/authentication)。
     </RequirementItem>
 </Requirements>
 
@@ -44,7 +44,6 @@ Markdown 导出 API 将 Tiptap JSON 文档转换为 Markdown 文件。
 ```bash
 curl --output document.md -X POST "https://api.tiptap.dev/v2/convert/export/markdown" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"来自 Tiptap 的你好！\"}]}]}"
@@ -57,11 +56,10 @@ curl --output document.md -X POST "https://api.tiptap.dev/v2/convert/export/mark
 
 ### 必需头信息
 
-| 名称             | 说明                                                                                                                                |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization` | 用于验证请求的 JWT 令牌。示例：`Bearer your-jwt-token`                                                                             |
-| `X-App-Id`      | 从 Convert 设置页面获取的 Convert 应用 ID：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert) |
-| `Content-Type`  | 必须为 `application/json`                                                                                                           |
+| Name            | Description                                                                                                                               |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization` | 用于验证请求的 JWT 令牌。示例：`Bearer your-jwt-token`                                                               |
+| `Content-Type`  | 必须为 `application/json`                                                                                                                |
 
 ### 请求体
 

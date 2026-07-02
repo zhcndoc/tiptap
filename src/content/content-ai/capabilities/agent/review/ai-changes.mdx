@@ -33,12 +33,11 @@ import AiAgent from '@tiptap-pro/extension-ai-agent'
 import AiChanges from '@tiptap-pro/extension-ai-changes'
 
 const provider = new AiAgentProvider({
-  appId: 'YOUR_APP_ID',
   token: 'YOUR_JWT_TOKEN',
   reviewOptions: {
-    // 设置扩展为 "aiChanges" 以使用 AI 更改进行审核
+    // 将扩展设置为 "aiChanges" 以使用 AI 更改进行审核
     extension: 'aiChanges',
-    // 可选：将 autoAccept 设置为 "never" 以始终要求审核
+    // 可选：将 autoAccept 设置为 "never"，以始终要求审核
     autoAccept: 'never',
   },
   // ... 其他选项
@@ -51,7 +50,7 @@ const editor = new Editor({
       provider,
     }),
     AiChanges.configure({
-      // 可选：自定义 AI 更改的外观，在选中更改时显示弹出框
+      // 可选：自定义 AI 更改的外观；在选中更改时显示弹出框
       getCustomDecorations({ change, isSelected, getDefaultDecorations }) {
         const decorations = getDefaultDecorations()
         // 如有需要，添加自定义装饰

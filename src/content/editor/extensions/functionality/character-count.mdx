@@ -83,6 +83,19 @@ CharacterCount.configure({
 })
 ```
 
+### autoTrim
+
+控制在初始内容超出配置限制时是否自动修剪。当设置为 `false` 时，超出限制的初始内容会被保留。在文档仍然超出限制期间，任何会增加内容大小的事务都会被阻止。
+
+默认值: `true`
+
+```js
+CharacterCount.configure({
+  limit: 280,
+  autoTrim: false, // 保留超出限制的初始内容
+})
+```
+
 ### textCounter
 
 要使用的文本计数器函数。默认为简单的字符计数。

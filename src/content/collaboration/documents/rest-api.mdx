@@ -14,7 +14,7 @@ import { Callout } from '@/components/ui/Callout'
 
 ## 速率限制
 
-为维护系统的完整性并防止错误配置的客户端，我们的基础设施——包括管理 API 和通过 `TiptapCollabProvider` 的 websocket 连接——受到速率限制。
+为维护系统的完整性并防止配置错误的客户端，我们的基础设施——包括管理 API 和通过 `TiptapCollabProvider` 的 websocket 连接——受到速率限制。
 
 ### 默认速率限制（每个源 IP）：
 
@@ -34,8 +34,15 @@ https://YOUR_APP_ID.collab.tiptap.cloud/
 
 将 `YOUR_APP_ID` 替换为您的文档服务器 ID，该 ID 在 [Cloud 控制台](https://cloud.tiptap.dev/v2/configuration/document-server) 中标示为"Document server ID"。
 
-### Authentication
-通过在 `Authorization` 请求头中包含您的 API 密钥来验证 API 请求。您可以在 Tiptap Cloud 控制台的 [设置](https://cloud.tiptap.dev/v2/configuration/document-server) 中找到您的 API 密钥。
+### 身份验证
+
+使用携带 `Documents:Api:All` 权限的签名 token 对您的 API 请求进行身份验证，并通过 `Authorization: Bearer <jwt>` 发送。有关如何签名 token，请参阅 [身份验证](/authentication)。
+
+<Callout title="Keep this token server-side" variant="warning">
+  `Documents:Api:All` 可访问每个 Document Server API 端点，包括受管理的设置。请将携带该权限的 token 视为管理员凭证。请在您的服务器上签名，保持其短期有效，并且绝不要暴露给客户端。
+</Callout>
+
+之前的 API secret 仍然有效，并在 [旧版身份验证](/authentication/legacy) 中有文档说明。
 
 ### 文档标识符
 如果您的文档标识符包含斜杠 (`/`)，请将其编码为 `%2F`，例如，使用 `encodeURIComponent`。
@@ -73,7 +80,7 @@ POST /api/documents/:identifier
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \
---header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA' \
+--header 'Authorization: Bearer YOUR_JWT' \
 --data '@yjsUpdate.binary'
 ```
 
@@ -81,7 +88,7 @@ curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json' \
---header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA' \
+--header 'Authorization: Bearer YOUR_JWT' \
 --header 'Content-Type: application/json' \
 --data '{
     "type": "doc",
@@ -117,13 +124,13 @@ curl --location --request PUT 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin
         {
             "created_at": "2024-05-01T10:00:00Z",
             "version": 0,
-            "name": "document-1",
+            "name": "文档-1",
             "tiptap_json": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "文档-1 的文本：v0"}]}]}
         },
         {
             "created_at": "2024-05-01T11:00:00Z",
             "version": 1,
-            "name": "document-1",
+            "name": "文档-1",
             "tiptap_json": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "文档-1 的文本：v1"}]}]}
         }
     ],
@@ -131,13 +138,13 @@ curl --location --request PUT 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin
         {
             "created_at": "2024-06-01T10:00:00Z",
             "version": 0,
-            "name": "document-2",
+            "name": "文档-2",
             "tiptap_json": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "文档-2 的文本：v0"}]}]}
         },
         {
             "created_at": "2024-06-01T11:00:00Z",
             "version": 1,
-            "name": "document-2",
+            "name": "文档-2",
             "tiptap_json": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "文档-2 的文本：v1"}]}]}
         }
     ]
@@ -160,7 +167,7 @@ GET /api/documents/:identifier?format=:format&fragment=:fragment&version=:versio
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \
---header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
+--header 'Authorization: Bearer YOUR_JWT'
 ```
 
 当使用 `axios` 时，您需要在请求选项中指定 `responseType: arraybuffer`。
@@ -174,7 +181,7 @@ const axiosResult = await axios.get(
   'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=yjs',
   {
     headers: {
-      Authorization: 'YOUR_SECRET_FROM_SETTINGS_AREA',
+      Authorization: 'Bearer YOUR_JWT',
     },
     responseType: 'arraybuffer',
   },
@@ -194,7 +201,7 @@ const fetchResult = await fetch(
   'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=yjs',
   {
     headers: {
-      Authorization: 'YOUR_SECRET_FROM_SETTINGS_AREA',
+      Authorization: 'Bearer YOUR_JWT',
     },
   },
 )
@@ -212,7 +219,7 @@ GET /api/documents?take=100&skip=0
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents' \
---header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
+--header 'Authorization: Bearer YOUR_JWT'
 ```
 
 ## 复制文档
@@ -224,7 +231,7 @@ const docUpdateAsBinaryResponse = await axios.get(
   'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=yjs',
   {
     headers: {
-      Authorization: 'YOUR_SECRET_FROM_SETTINGS_AREA',
+      Authorization: 'Bearer YOUR_JWT',
     },
     responseType: 'arraybuffer',
   },
@@ -235,7 +242,7 @@ await axios.post(
   docUpdateAsBinaryResponse.data,
   {
     headers: {
-      Authorization: 'YOUR_SECRET_FROM_SETTINGS_AREA',
+      Authorization: 'Bearer YOUR_JWT',
     },
   },
 )
@@ -256,7 +263,7 @@ POST /api/documents/:identifier/encrypt
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME/encrypt' \
 --header 'Content-Type: application/json' \
---header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA' \
+--header 'Authorization: Bearer YOUR_JWT' \
 --data '{
     "type": "doc",
     "content": [
@@ -298,7 +305,7 @@ POST /api/documents/:identifier/versions/:versionId/revertTo
 ```bash
 curl --location --request POST 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME/versions/VERSION_ID/revertTo' \
 --header 'Content-Type: application/json' \
---header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
+--header 'Authorization: Bearer YOUR_JWT'
 ```
 
 ### 更新版本
@@ -323,7 +330,7 @@ PATCH /api/documents/:identifier
 
 ```bash
 curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \
---header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA' \
+--header 'Authorization: Bearer YOUR_JWT' \
 --data '@yjsUpdate.binary'
 ```
 
@@ -343,7 +350,7 @@ DELETE /api/documents/:identifier
 
 ```bash
 curl --location --request DELETE 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \
---header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
+--header 'Authorization: Bearer YOUR_JWT'
 ```
 
 <Callout title="删除后文档仍然存在" variant="hint">

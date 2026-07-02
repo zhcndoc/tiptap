@@ -14,8 +14,8 @@ import { Callout } from '@/components/ui/Callout'
 
 ## 你需要什么
 
-- **扩展：** [`ConvertKit`](/conversion/import/docx/convertkit) — 打包了 Bold、Italic、Underline 和 Strike。
-- **配置：** 无需配置。四种 mark 都可直接开箱即用。
+- **扩展：**[`ConvertKit`](/conversion/import/docx/convertkit)，它捆绑了粗体、斜体、下划线和删除线。
+- **配置：**无需。所有四种标记都可直接使用。
 
 ## 支持概览
 
@@ -29,7 +29,7 @@ import { Callout } from '@/components/ui/Callout'
 
 ## 导入
 
-使用 [编辑器扩展](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入这些 mark。两者会产生相同的输出。
+使用 [编辑器扩展](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入这些标记。两者会产生相同的输出。
 
 转换服务会读取 Word 的运行属性，并生成相应的 Tiptap mark：
 
@@ -41,20 +41,20 @@ import { Callout } from '@/components/ui/Callout'
 | `<w:strike/>` | `strike` |
 | `<w:dstrike/>` | 不处理 |
 
-对于包含这些标记的文本运行，Bold、Italic 和 Strikethrough 都能干净地导入。Underline 仅在 Word 元素具有 `val="single"` 时才会被导入。其他下划线样式（double、wavy、dotted、dash）不会转换。组合标记（同一段文本上的 bold + italic）会被完整保留。已知有一个问题：导入时 strikethrough 可能会从一个段落泄漏到下一个段落；见下方的 [Strikethrough](#strikethrough)。
+对于包含这些标记的文本运行，粗体、斜体和删除线都能干净地导入。下划线仅在 Word 元素具有 `val="single"` 时才会被导入。其他下划线样式（double、wavy、dotted、dash）不会转换。组合标记（同一段文本上的 bold + italic）会被完整保留。已知有一个问题：导入时删除线可能会从一个段落泄漏到下一个段落；见下方的 [Strikethrough](#strikethrough)。
 
 ## 编辑器渲染
 
-所有四种 mark 都包含在 [`ConvertKit`](/conversion/import/docx/convertkit) 中。无需单独安装。
+所有四种标记都包含在 [`ConvertKit`](/conversion/import/docx/convertkit) 中。无需单独安装。
 
-| Mark | 扩展 | 渲染为 | 键盘快捷键 |
+| 标记 | 扩展 | 渲染为 | 键盘快捷键 |
 | --- | --- | --- | --- |
-| bold | [`Bold`](/editor/extensions/marks/bold) | `<strong>` | Cmd+B |
-| italic | [`Italic`](/editor/extensions/marks/italic) | `<em>` | Cmd+I |
-| underline | [`Underline`](/editor/extensions/marks/underline) | `<u>` | Cmd+U |
-| strike | [`Strike`](/editor/extensions/marks/strike) | `<s>` | Cmd+Shift+S |
+| 粗体 | [`Bold`](/editor/extensions/marks/bold) | `<strong>` | Cmd+B |
+| 斜体 | [`Italic`](/editor/extensions/marks/italic) | `<em>` | Cmd+I |
+| 下划线 | [`Underline`](/editor/extensions/marks/underline) | `<u>` | Cmd+U |
+| 删除线 | [`Strike`](/editor/extensions/marks/strike) | `<s>` | Cmd+Shift+S |
 
-所有四种 mark 都可以同时作用于同一段文本。
+所有四种标记都可以同时作用于同一段文本。
 
 ## 导出
 
@@ -69,12 +69,12 @@ import { Callout } from '@/components/ui/Callout'
 | `underline` | `UnderlineType.SINGLE` |
 | `strike` | `strike = true` |
 
-Strikethrough 能正确往返。导入会生成正确的 `strike` mark 名称，因此不会丢失任何格式。
+删除线可以正确往返。导入会生成正确的 `strike` mark 名称，因此不会丢失任何格式。
 
-## Strikethrough
+## 删除线
 
-<Callout title="已知问题：strikethrough 会跨段落泄漏" variant="warning">
-  导入带有 strikethrough 格式的段落时，可能会导致后续段落也被渲染为 strikethrough，即使源 DOCX 并没有对第二个段落应用删除线。导入后的 JSON 看起来会将 `strike` mark 带到原始段落边界之外。如果遇到这种情况，请在将内容加载到编辑器之前，在 `onImport` 回调中检查 `context.content`，并在适当的位置清理多余的 `strike` mark。
+<Callout title="已知问题：删除线会跨段落泄漏" variant="warning">
+  导入带有删除线格式的段落时，可能会导致后续段落也被渲染为删除线，即使源 DOCX 并没有对第二个段落应用删除线。导入后的 JSON 看起来会将 `strike` mark 带到原始段落边界之外。如果遇到这种情况，请在将内容加载到编辑器之前，在 `onImport` 回调中检查 `context.content`，并在适当的位置清理多余的 `strike` mark。
 </Callout>
 
 <Callout title="不支持双删除线" variant="info">

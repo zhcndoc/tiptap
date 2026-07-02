@@ -12,7 +12,7 @@ import { Callout } from '@/components/ui/Callout'
 
 Tiptap 简写是一种用于表示 Tiptap 文档的高效 Token 格式。与标准 JSON 相比，它可以将 AI Token 成本降低多达 80%，同时不损失准确性。
 
-<Callout title="Alpha release" variant="warning">
+<Callout title="Alpha 版本" variant="warning">
 
 Tiptap 简写目前处于 alpha 开发阶段。在生产部署中，我们
 建议使用 `"json"` 格式（Tiptap JSON）。我们建议你
@@ -25,18 +25,17 @@ Tiptap 简写目前处于 alpha 开发阶段。在生产部署中，我们
 
 </Callout>
 
-## 设置 Tiptap 简写
+## Set Up Tiptap Shorthand
 
-通过设置 JSON 正文中的 `format` 参数，定义 AI 读取和编辑文档的格式。此参数适用于所有 Server AI 工具包端点。
+By setting the `format` parameter in the JSON body, define the format that AI uses to read and edit documents. This parameter applies to all Server AI toolkit endpoints.
 
-`format` 的默认值为 `"json"`。要启用 Tiptap 简写，请在**所有** API 请求中传递 `format: "shorthand"` 参数。
+The default value of `format` is `"json"`. To enable Tiptap shorthand, pass the `format: "shorthand"` parameter in **all** API requests.
 
-例如，获取工具定义的请求：
+For example, a request to fetch tool definitions:
 
 ```bash
-curl -X POST https://api.tiptap.dev/v3/ai/toolkit/tools \
+curl -X POST https://api.tiptap.dev/v4/ai/toolkit/fetch-tools \
   -H "Content-Type: application/json" \
-  -H "X-App-Id: YOUR_APP_ID" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
     "format": "shorthand",
@@ -44,16 +43,16 @@ curl -X POST https://api.tiptap.dev/v3/ai/toolkit/tools \
   }'
 ```
 
-无需进行其他修改。
+No other changes are required.
 
-<Callout title="格式一致性" variant="warning">
-  在同一段对话中的所有 API 调用里使用相同的 `format` 值。不要在单次 AI 交互中混用 `json` 和
-  `shorthand` 格式。
+<Callout title="Format Consistency" variant="warning">
+  Use the same `format` value in all API calls within the same conversation. Do not mix `json` and
+  `shorthand` formats in a single AI interaction.
 </Callout>
 
 ## Tiptap 简写的工作原理
 
-`/v3/ai/toolkit/tools` 端点会返回一个提示，告知 AI 文档的结构以及应以何种格式生成内容。其中还包括对 AI 应生成文档内容格式的说明。该提示会向 AI 模型讲解语言规则和语法。
+`/v4/ai/toolkit/fetch-tools` 端点会返回一个提示，告诉 AI 文档的结构以及它应该以何种格式生成。这包括对 AI 应如何生成文档内容的格式说明。该提示会向 AI 模型讲解语言规则和语法。
 
 Tiptap 简写内容会被编码为一个文本字符串。与 Tiptap JSON 相比，无论是在字符数还是 token 数上，它都占用更少的空间。这在不更改 AI 模型的情况下，实现了速度提升和成本降低。
 

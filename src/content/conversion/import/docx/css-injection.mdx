@@ -62,7 +62,6 @@ npm i @tiptap-pro/extension-import-docx@^0.10.0
 import { ImportDocx } from '@tiptap-pro/extension-import-docx'
 
 ImportDocx.configure({
-  appId: 'your-app-id',
   token: 'your-jwt',
   cssStyles: {
     enabled: true,      // 每次导入都提取样式
@@ -145,29 +144,29 @@ editor
 - **跨文档合并。** 每次导入都会替换之前的 `<style>` 标签。连续导入两个 DOCX 文件时，你只能得到第二个文档的样式。如果你需要合并，可以从 `onImport` 中读取两个 `cssStyles` 对象并自行合并。
 - **往返保证。** 提取再导出的循环并不是无损的；反向方向及其自身注意事项请参见 [CSS to DOCX](/conversion/export/docx/css-to-docx) 导出页面。
 
-## 配置参考
+## Configuration Reference
 
 ```ts
 ImportDocx.configure({
   cssStyles: {
-    enabled?: boolean,     // 默认：false。打开提取。
-    autoInject?: boolean,  // 默认：false。将 <style> 标签追加到 document.head。
-    selector?: string,     // 默认：'.tiptap'。注入规则的作用域。
+    enabled?: boolean,     // Default: false. Enable extraction.
+    autoInject?: boolean,  // Default: false. Append <style> tags to document.head.
+    selector?: string,     // Default: '.tiptap'. Scope of the injected rules.
   },
 })
 ```
 
-按次调用覆盖：
+Override on a per-call basis:
 
 ```ts
 editor.chain().importDocx({
   file,
-  cssStyles: { enabled, autoInject, selector }, // 任意子集
-  onImport(context) { /* context.cssStyles 在此处可用 */ },
+  cssStyles: { enabled, autoInject, selector }, // any subset
+  onImport(context) { /* context.cssStyles available here */ },
 })
 ```
 
-REST API 查询参数（若你直接调用 `/import/docx`）：
+REST API query parameters (if you call `/import/docx` directly):
 
 ```
 POST /import/docx?extractCssStyles=true

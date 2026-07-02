@@ -6,7 +6,7 @@ meta:
   category: 内容AI
 ---
 
-Tiptap的AI建议扩展接受不同的设置来配置扩展和命令的全局行为。
+Tiptap 的 AI 建议扩展接受不同的设置来配置扩展和命令的全局行为。
 
 ## 规则
 
@@ -95,7 +95,7 @@ AiSuggestion.configure({
 
 ## 自定义何时加载建议
 
-默认情况下，AI建议扩展在编辑器准备就绪时会自动加载建议。你可以通过 `loadOnStart` 选项禁用此行为。
+By default, the AI suggestion extension automatically loads suggestions when the editor is ready. You can disable this behavior with the `loadOnStart` option.
 
 ```ts
 AiSuggestion.configure({
@@ -103,7 +103,7 @@ AiSuggestion.configure({
 })
 ```
 
-默认情况下，AI建议扩展会在编辑器内容变化时重新加载建议。你可以通过 `reloadOnUpdate` 选项禁用此行为。
+By default, the AI suggestion extension reloads suggestions when the editor content changes. You can disable this behavior with the `reloadOnUpdate` option.
 
 ```ts
 AiSuggestion.configure({
@@ -111,7 +111,7 @@ AiSuggestion.configure({
 })
 ```
 
-你可以在[此指南](/content-ai/capabilities/suggestion/features/configure-when-to-load-suggestions)中了解如何配置何时加载建议。
+You can learn how to configure when suggestions are loaded in [this guide](/content-ai/capabilities/suggestion/features/configure-when-to-load-suggestions).
 
 ## 自定义防抖超时时间
 
@@ -127,7 +127,7 @@ AiSuggestion.configure({
 
 你可以提供一个回调函数来处理加载建议时的错误。这允许你记录错误、向用户显示错误信息或在发生错误时执行其他操作。
 
-关于如何在UI中处理加载和错误状态的完整指南见下：
+关于如何在 UI 中处理加载和错误状态的完整指南见下：
 
 ```ts
 AiSuggestion.configure({
@@ -137,24 +137,22 @@ AiSuggestion.configure({
 })
 ```
 
-## Tiptap内容AI云选项
+## Tiptap 内容 AI 云选项
 
-如果你不[提供自己的后端](/content-ai/capabilities/suggestion/custom-llms)，AI建议扩展将使用Tiptap内容AI云来生成建议。
+如果你不[提供自己的后端](/content-ai/capabilities/suggestion/custom-llms)，AI 建议扩展将使用 Tiptap 内容 AI 云来生成建议。
 
-你可以通过 `model` 选项配置用于生成建议的OpenAI模型。默认模型为 `gpt-4o-mini`。我们推荐它用于大多数用例，因其在速度、成本与准确性之间取得了良好平衡。
+你可以通过 `model` 选项配置用于生成建议的 OpenAI 模型。默认模型为 `gpt-4o-mini`。我们推荐它用于大多数用例，因其在速度、成本与准确性之间取得了良好平衡。
 
 ```ts
 AiSuggestion.configure({
-  // 你的Tiptap内容AI应用ID
-  appId: 'APP_ID_HERE',
-  // 这里需填写你生成的JWT，且绝对不能是OpenAI API密钥！
+  // 这需要是你生成的 JWT，且绝不能是 OpenAI API 密钥！
   token: 'YOUR_TOKEN',
   // 用于生成建议的模型，默认为"gpt-4o-mini"
   model: 'gpt-4o',
 })
 ```
 
-目前支持的OpenAI模型包括：
+目前支持的 OpenAI 模型包括：
 
 - `gpt-5`
 - `gpt-5-2025-08-07`

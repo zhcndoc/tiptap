@@ -80,6 +80,10 @@ export const sidebarConfig: SidebarConfig = {
           href: '/guides/typescript',
           title: '使用 TypeScript 扩展',
         },
+        {
+          href: '/guides/nested-node-view-content',
+          title: 'Nested node views',
+        },
       ],
     },
     {

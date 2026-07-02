@@ -1,47 +1,94 @@
 ---
-title: AI 图像生成编辑器命令
+title: 生成图像
 tags:
   - type: start
 meta:
-  title: 生成图像 | Tiptap 内容 AI 文档
-  description: 将 aiImagePrompt 集成到您的编辑器中，通过自定义提示和样式使用 AI 生成图像。更多内容请参阅文档！
+  title: 生成图像 | Tiptap Content AI 文档
+  description: 使用 OpenAI API 生成图像并将其插入到您的 Tiptap 编辑器中。
   category: 内容 AI
 ---
 
-import { Requirements, RequirementItem } from '@/components/Requirements'
+import { Callout } from '@/components/ui/Callout'
 
-<Requirements>
-  <RequirementItem label="1. 激活试用或订阅">
-    在您的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
-  </RequirementItem>
-  <RequirementItem label="2. 集成 AI 提供商">
-    在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查看[自定义大型语言模型指南](/content-ai/capabilities/generation/custom-llms)。
-  </RequirementItem>
-  <RequirementItem label="3. 从私有注册表安装">
-    若要安装前端扩展，请按照[设置指南](/guides/pro-extensions)认证访问 Tiptap 的私有 npm 注册表。
-  </RequirementItem>
-</Requirements>
+使用 AI 生成图像，并将其插入到你的文档中。
 
-Tiptap 内容 AI 中的 `aiImagePrompt` 命令使您可以直接在编辑器内生成图像。您可以使用不同的 OpenAI 模型，并自定义生成图像的样式。
+## 安装 Image 扩展
 
-想了解此命令的使用方法，请查看[类似 Notion 的模板](https://templates.tiptap.dev/)。
-
-## 集成 aiImagePrompt
-
-根据您的提示和所需样式生成图像。
-
-请确保在您的编辑器实例中加载了图像扩展（`'@tiptap/extension-image'`）。
+将 [`@tiptap/extension-image`](/editor/extensions/nodes/image) 扩展添加到你的编辑器中。
 
 ```js
-editor.chain().focus().aiImagePrompt(options: ImageOptions).run()
+import Image from '@tiptap/extension-image'
+import { Editor } from '@tiptap/core'
+
+const editor = new Editor({
+  extensions: [Image],
+})
 ```
 
-## 图像命令选项
+## 在你的服务器上生成图片
 
-通过以下设置，您可以控制图像的生成方式：
+从服务器端路由调用 OpenAI API，这样你的 API 密钥就不会暴露给浏览器。使用类似 `gpt-image-2` 的图像生成模型。
 
-| 设置       | 类型                                                                                             | 默认值            | 说明                     |
-| ---------- | ------------------------------------------------------------------------------------------------ | ----------------- | ------------------------ |
-| modelName  | `dall-e-2`、`dall-e-3`、`null`                                                                    | `dall-e-3`        | OpenAI 使用的模型        |
-| style      | `photorealistic`、`digital_art`、`comic_book`、`neon_punk`、`isometric`、`line_art`、`3d_model`     | `photorealistic`  | 定义图像的样式           |
-| size       | `256x256`、`512x512`、`1024x1024`                                                               | `null`            |                           |
+然后，将生成的图片存储到你应用程序的存储方案中，例如 S3、R2、Supabase Storage，或者你自己的媒体服务。将存储后的图片 URL 返回给客户端。
+
+<Callout title="避免将图片以 base64 形式存储" variant="warning">
+  不建议将生成的图片以 base64 形式存储在文档中，尤其是在协作文档中。Base64 图片会显著增加文档大小，减慢同步速度，并且会让协作更新的处理成本更高。
+</Callout>
+
+```js
+import OpenAI from 'openai'
+
+const openai = new OpenAI()
+
+export async function POST(request) {
+  const { prompt } = await request.json()
+
+  const result = await openai.images.generate({
+    model: 'gpt-image-2',
+    prompt,
+    size: '1024x1024',
+  })
+
+  const imageBuffer = Buffer.from(result.data[0].b64_json, 'base64')
+  const imageSrc = await uploadImageToStorage(imageBuffer, {
+    contentType: 'image/png',
+    fileName: `generated-${Date.now()}.png`,
+  })
+
+  return Response.json({
+    imageSrc,
+  })
+}
+```
+
+`uploadImageToStorage` 函数取决于你的应用程序。它应该将图片字节上传到你的存储提供商，并返回编辑器可以渲染的 URL。
+
+## 插入生成的图片
+
+从客户端调用你的服务器路由，并将返回的图片源传递给 `setImage`。
+
+```js
+async function generateAndInsertImage(prompt) {
+  const response = await fetch('/api/generate-image', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ prompt }),
+  })
+
+  const { imageSrc } = await response.json()
+
+  editor.commands.setImage({ src: imageSrc })
+}
+```
+
+在插入图片时，你可以包含额外的属性。查看[所有可用选项列表](/editor/extensions/nodes/image)。
+
+```js
+editor.commands.setImage({
+  src: imageSrc,
+  alt: prompt,
+  title: prompt,
+})
+```

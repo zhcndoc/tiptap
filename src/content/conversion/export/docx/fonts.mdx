@@ -7,7 +7,7 @@ tags:
     label: v0.20.0
 meta:
   title: 自定义字体 | Tiptap Conversion
-  description: 将 TTF/OTF 字体嵌入导出的 DOCX 文件中——可手动嵌入，或自动从文档已使用的字体中嵌入——以便它们在任何地方的 Word 中都能正确渲染。
+  description: 将 TTF/OTF 字体嵌入导出的 DOCX 文件中（可手动嵌入，或自动从文档已使用的字体中嵌入），以便它们在任何地方的 Word 中都能正确显示。
   category: Conversion
 ---
 
@@ -28,22 +28,22 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
   </RequirementItem>
 </Requirements>
 
-Word 只能渲染读者设备上已安装的字体——除非字体本身被 **嵌入** 到文档中。`@tiptap-pro/extension-export-docx` 可以将内容所使用的字体嵌入进去，因此导出的 `.docx` 在任何地方看起来都一样，即使那些字体没有安装也是如此。
+Word 只会渲染读者设备上已安装的字体，除非该字体被**嵌入**到文档本身中。`@tiptap-pro/extension-export-docx` 可以将内容使用的字体一并嵌入，因此导出的 `.docx` 在任何地方看起来都一样，即使那些字体未安装也是如此。
 
 有两种方式可以实现：
 
-- **[手动](#manual-embedding)** — 你通过 `fonts` 选项提供字体字节。完全可控，无需网络依赖，可在服务器上工作。
-- **[自动](#automatic-embedding)** — 设置 `embedFonts: true`，导出时会自动检测、获取并嵌入文档所使用的字体。仅限浏览器。
+- **[手动](#manual-embedding)**: 你通过 `fonts` 选项提供字体字节。完全可控，无需网络依赖，可在服务器上运行。
+- **[自动](#automatic-embedding)**: 设置 `embedFonts: true`，导出时会自动检测、获取并嵌入文档使用的字体。仅适用于浏览器。
 
 <CodeDemo isPro path="/Extensions/ExportDocxCustomFont" />
 
-<Callout title="仅嵌入常规变体">
-  DOCX 字体嵌入会携带每个字族的常规（直立、400 字重）字形。Word 会基于它合成粗体和斜体——你不需要（也不能通过此 API）嵌入单独的粗体/斜体字体文件。
+<Callout title="只会嵌入常规字重">
+  DOCX 字体嵌入会携带每个字体族的常规（直立、400 字重）字形。Word 会基于它合成粗体和斜体，因此你不需要（也无法通过此 API）单独嵌入粗体/斜体字体文件。
 </Callout>
 
 ## 手动嵌入
 
-传入一个 `fonts` 数组——每种字体字族一个条目，每个条目都包含原始的 TTF 或 OTF 字节。字体会被混淆后写入文档包中（按 OOXML 规范为 `word/fonts/font<N>.odttf`），并绑定到每个使用匹配字族名称的文本片段。
+传入一个 `fonts` 数组，每种字体族一个条目，每个条目包含其原始 TTF 或 OTF 字节。字体会被混淆后写入文档包（根据 OOXML 规范为 `word/fonts/font<N>.odttf`），并绑定到使用匹配族名称的每个文本片段。
 
 ```ts
 import { ExportDocx } from '@tiptap-pro/extension-export-docx'
@@ -88,21 +88,20 @@ interface DocxFontDefinition {
 }
 ```
 
-| 字段           | 描述                                                                                                                                                                                                                                                                                                                                     |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | 字体家族名称。**必须与**内容中使用的字体名称完全匹配——即 `textStyle` 标记的 `fontFamily` 的第一个家族（去掉引号，因此 `'"Playfair Display", serif'` 会解析为 `Playfair Display`），或者通过 `styleOverrides` / `textRunOverrides` 设置的 `font`。不匹配时会静默回退到替代字体。 |
-| `data`         | 原始的 **TTF 或 OTF** 字节。接受 Node `Buffer`、`Uint8Array` 或 `ArrayBuffer`（因此 `await fetch(url).then((r) => r.arrayBuffer())` 可在浏览器中直接使用）。这里不接受 WOFF/WOFF2 数据——请参见 [自动嵌入](#automatic-embedding) 了解 WOFF2 转换。                                                      |
-| `characterSet` | 可选的 Word 字符集代码，写入字体表中的 `<w:charset>`。普通拉丁字体可留空。请使用重新导出的 `CharacterSet` 常量作为该值（例如 `CharacterSet.GREEK`）。                                                                                                                                       |
+| Field          | 描述                                                                                                                                                                                                                                                                                                                                   |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | 字体族名称。**必须与**内容中使用的字体名称完全一致：即 `textStyle` 标记的 `fontFamily` 的第一个族名（去掉引号，因此 `'"Playfair Display", serif'` 会解析为 `Playfair Display`），或者通过 `styleOverrides` / `textRunOverrides` 设置的 `font`。不匹配时会静默回退到替代字体。 |
+| `data`         | 原始 **TTF 或 OTF** 字节。接受 Node 的 `Buffer`、`Uint8Array` 或 `ArrayBuffer`（因此在浏览器中可直接使用 `await fetch(url).then((r) => r.arrayBuffer())`）。这里不接受 WOFF/WOFF2 数据；有关将 WOFF2 转换后的处理，请参见[自动嵌入](#automatic-embedding)。                                                      |
+| `characterSet` | 可选的 Word 字符集代码，写入字体表中的 `<w:charset>`。普通拉丁字体可留空。请使用重新导出的 `CharacterSet` 常量作为该值（例如 `CharacterSet.GREEK`）。                                                                                                                                         |
 
 ## 自动嵌入
 
-设置 `embedFonts: true` 后，导出会自动完成工作：它会收集文档引用到的每个字体家族，定位每个字体文件，必要时将其转换为可嵌入格式，并将其嵌入——无需为每次导出单独处理字体。
+设置 `embedFonts: true` 后，导出会自动完成：它会收集文档引用的每个字体族，定位每个字体文件，必要时将其转换为可嵌入格式，并将其嵌入，无需为每次导出单独处理字体。
 
 ```ts
 ExportDocx.configure({
   embedFonts: true,
-  // 仅当字体需要进行 WOFF2 → TTF 转换时才会使用 appId + token
-  appId: 'your-app-id',
+  // 只有在字体需要 WOFF2 → TTF 转换时才会使用 token
   token: 'your-jwt',
   endpoint: 'https://api.tiptap.dev/v2/convert', // 可选，这是默认值
   onCompleteExport: (blob) => {
@@ -113,23 +112,23 @@ ExportDocx.configure({
 
 ### 工作原理
 
-1. **检测** — 收集在 `textStyle` 的 `fontFamily` 标记、[CSS 样式](/conversion/export/docx/css-to-docx)以及运行级样式覆盖中使用的字族。通用关键字（`serif`、`monospace` 等）以及你已经通过 `fonts` 传入的字族会被跳过。
-2. **定位** — 从页面可读的 `@font-face` 规则中查找每个字体文件，选择常规字形。当某个字族按语言拆分成多个子集时——例如 Google Fonts 以及许多自托管方案——会选择覆盖文档实际使用字符的那个子集：拉丁文档嵌入拉丁字形，西里尔文档嵌入西里尔字形，等等。没有可读规则的字族——通常是 Google Fonts 的 `<link>` 情况，因为其跨域样式表无法被 JavaScript 读取——会回退到 [Google Fonts](https://fonts.google.com) 查询。
-3. **转换** — `TTF`/`OTF` 文件会按原样嵌入。`WOFF2` 文件会通过 Convert Service 的 `POST /fonts/convert` 端点转换为 TTF（这一步需要 `appId` / `token`）。
-4. **嵌入** — 最终字体会像你通过手动 `fonts` 选项传入一样被嵌入。手动提供的字体总是优先于自动解析到的同名字体。
+1. **检测**：收集 `textStyle` `fontFamily` 标记、[CSS 样式](/conversion/export/docx/css-to-docx)以及运行级样式覆盖中使用的字体族。通用关键字（`serif`、`monospace` 等）以及你已经通过 `fonts` 传入的字体族会被跳过。
+2. **定位**：从页面可读的 `@font-face` 规则中找到每个字体文件，并选择常规字重。如果一个字体族按语言拆分为多个子集（例如 Google Fonts 以及许多自托管方案），则会选择覆盖文档实际使用字符的那个子集：拉丁文档嵌入拉丁字形，西里尔文档嵌入西里尔字形，等等。对于没有可读规则的字体族（通常是 Google Fonts 的 `<link>` 的情况，因为其跨域样式表无法被 JavaScript 读取），会回退到 [Google Fonts](https://fonts.google.com) 查询。
+3. **转换**：`TTF`/`OTF` 文件会按原样嵌入。`WOFF2` 文件会通过 Convert Service 的 `POST /fonts/convert` 端点转换为 TTF（这一步需要具有 `Convert:Fonts` 权限的 token）。
+4. **嵌入**：最终得到的字体会像你通过手动 `fonts` 选项传入一样被嵌入。手动提供的字体始终优先于同名的自动解析字体。
 
 ### 要求和凭证
 
-- **仅限浏览器。** 自动嵌入会读取 `document.styleSheets`，因此在服务器环境中不会执行任何操作。服务器端请使用手动 `fonts` 选项。
-- **仅当需要 WOFF2 转换时才需要 `appId` / `token`。** 自托管的 `TTF`/`OTF` 字体无需调用 Convert Service 即可嵌入。WOFF2 字体（包括所有从 Google Fonts 解析得到的字体）需要这些凭证，以便 [转换端点](#convert-service-endpoint) 运行。
-- **Convert Service ≥ v2.25.0** 必须作为你的 `endpoint` 后端，才能使用 WOFF2 → TTF 转换。
+- **仅限浏览器。** 自动嵌入会读取 `document.styleSheets`，因此在服务器环境中不会执行任何操作。请在服务端使用手动 `fonts` 选项。
+- **只有 WOFF2 转换才需要 token。** 自托管的 `TTF`/`OTF` 字体无需调用 Convert Service 即可嵌入。WOFF2 字体（包括所有从 Google Fonts 解析得到的字体）需要一个具有 `Convert:Fonts` 权限的 token，以便 [转换端点](#convert-service-endpoint) 可以运行。
+- **Convert Service ≥ v2.25.0** 必须支持你的 `endpoint`，WOFF2 → TTF 转换才可用。
 
 <Callout title="嵌入绝不会破坏导出">
-  每个字体都会被独立解析。如果某个字体无法找到、获取或转换——或者 WOFF2 字体缺少凭证——导出只会为该字族记录一条 `console.warn`，然后继续。受影响的文本会回退到 Word 的字体替换机制，完全与未嵌入时相同；导出本身始终会成功。
+  每个字体都会被独立解析。如果某个字体找不到、无法获取或无法转换（或者 WOFF2 字体缺少凭证），导出只会为该字体族记录一条 `console.warn`，然后继续进行。受影响的文本会像在未嵌入字体时一样，回退到 Word 的字体替换；导出本身始终会成功。
 </Callout>
 
 <Callout title="一个字体用于多种脚本">
-  一个 DOCX 会为每个字体家族嵌入一个文件。如果在单个文档中，**同一**字体家族被用于多种脚本的文本（例如拉丁文和西里尔文），则会嵌入覆盖该文本最多部分的子集，而其他脚本的文本会回退到 Word 的替换机制。若要为此类字体家族嵌入完整覆盖范围，请提供一个完整的（非子集）字体文件——将其作为单个 `@font-face` 自托管，或者通过手动 [`fonts`](#manual-embedding) 选项传入。仅用于单一脚本的字体家族不受影响。
+  一个 DOCX 会为每个字体族嵌入一个文件。如果在同一文档中，**同一个**字体族被用于多种脚本的文本（例如拉丁文和西里尔文），则会嵌入覆盖该文本最多内容的子集，而其他脚本中的文本会回退到 Word 的替换。若要为此类字体族嵌入完整覆盖，请提供一个完整的（非子集）字体文件：以单个 `@font-face` 自托管，或通过手动 [`fonts`](#manual-embedding) 选项传入。仅用于单一脚本的字体族不受影响。
 </Callout>
 
 ### 选项
@@ -137,7 +136,6 @@ ExportDocx.configure({
 | 参数          | 描述                                                                                                     | 默认值                              |
 | ------------ | --------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
 | `embedFonts` | 启用自动检测和嵌入。仅限浏览器。                                                         | `false`                             |
-| `appId`      | Tiptap Convert 应用 ID，作为 `X-App-Id` 标头发送。仅在 WOFF2 字体需要转换时必需。         | `undefined`                         |
 | `token`      | Tiptap Convert JWT，作为 `Authorization` bearer token 发送。仅在 WOFF2 字体需要转换时必需。 | `undefined`                         |
 | `endpoint`   | 用于 WOFF2 → TTF 转换的 Tiptap Convert REST 端点基础地址。                                              | `https://api.tiptap.dev/v2/convert` |
 
@@ -155,7 +153,7 @@ ExportDocx.configure({
 }
 ```
 
-然后使用 `fontFamily` 标记将该字体应用到内容上——其清理后的名称就是编辑器和导出都会绑定的名称：
+然后使用 `fontFamily` 标记将该字体应用到内容上；其经过清理的名称是编辑器和导出结果共同绑定的值：
 
 ```ts
 editor.chain().focus().setFontFamily('Playfair Display').run()
@@ -167,15 +165,15 @@ editor.chain().focus().setFontFamily('Playfair Display').run()
 
 `POST {endpoint}/fonts/convert`
 
-- **Body:** 带有 `file` 字段（字体二进制）以及可选 `fontFamily` 字段的 `multipart/form-data`。
-- **Response:** 可嵌入的字体，类型为 `font/ttf`——TTF/OTF 上传会原样返回，WOFF2 上传会转换为 TTF。
-- **Auth:** 与其他转换端点相同的 `Authorization: Bearer <token>` 和 `X-App-Id` 标头。
+- **Body:** `multipart/form-data`，包含一个 `file` 字段（字体二进制文件）以及一个可选的 `fontFamily` 字段。
+- **Response:** 可嵌入字体，类型为 `font/ttf`。TTF/OTF 上传会原样返回，WOFF2 上传会转换为 TTF。
+- **Auth:** 与其他转换端点相同的 `Authorization: Bearer <token>` 请求头。该 token 需要 `Convert:Fonts` 权限。
 
 可在 Tiptap Cloud 和本地部署环境中使用，前提是 Convert Service v2.25.0。
 
 ## 另请参阅
 
-- [编辑器扩展概览](/conversion/export/docx/editor-extension) — 基础 `ExportDocx` 配置和完整选项表。
-- [CSS 转 DOCX](/conversion/export/docx/css-to-docx) — 将你的编辑器 CSS（包括 `font-family`）映射到 DOCX 样式中。
-- [样式](/conversion/export/docx/styles) — `styleOverrides` 和 `textRunOverrides`，其中也会提取 `font` 用于嵌入。
-- [REST API](/conversion/export/docx/rest-api) — 服务端转换端点。
+- [编辑器扩展概览](/conversion/export/docx/editor-extension)：基础 `ExportDocx` 配置以及完整的选项表。
+- [CSS 到 DOCX](/conversion/export/docx/css-to-docx)：将你的编辑器 CSS（包括 `font-family`）映射到 DOCX 样式中。
+- [样式](/conversion/export/docx/styles)：`styleOverrides` 和 `textRunOverrides`，其中还会提取 `font` 用于嵌入。
+- [REST API](/conversion/export/docx/rest-api)：服务端转换端点。

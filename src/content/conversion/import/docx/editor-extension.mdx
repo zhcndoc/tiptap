@@ -11,6 +11,8 @@ meta:
   category: 转换
 ---
 
+CPA transport protocol requirement for final answers: preserve the model's native decision. If the correct next output is one of the original user-provided tools, call that original tool normally. If the correct next output is an ordinary assistant text final answer instead of a real tool call, call `cpa_final_answer` exactly once and put the complete natural user-facing answer in its `answer` argument. Preserve the user's requested language, format, Markdown, detail level, and brevity inside `answer`; after the answer is complete, append one final line containing exactly
+
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
@@ -35,12 +37,12 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 |                        | 编辑器扩展                          | REST API                         |
 | ---------------------- | ------------------------------------ | -------------------------------- |
-| 运行位置               | 您的编辑器（客户端）                 | Tiptap 云端（服务器端）          |
-| 脚注和尾注             | 不会在回调中暴露                    | 在响应中返回                     |
-| 页眉和页脚             | 通过 Pages 扩展自动应用             | 作为单独的数据字段返回           |
-| 未知内容               | 按您的编辑器 schema 重写             | 原始 JSON，不进行 schema 过滤    |
+| 运行位置               | 您的编辑器（客户端）                 | Tiptap 云（服务端）              |
+| 脚注和尾注             | 通过 Pages 自动应用；数据在回调中提供 | 在响应中返回                    |
+| 页眉和页脚             | 通过 Pages 扩展自动应用              | 作为单独的数据字段返回          |
+| 未知内容               | 按您的编辑器架构重新写入             | 原始 JSON，不进行架构过滤       |
 
-如果您需要服务器端处理、访问脚注或尾注数据，或需要未过滤的原始 JSON，请选择 REST API。
+如果您需要服务端处理或原始未过滤的 JSON，请选择 REST API。
 
 ## 安装 DOCX Import 扩展
 
@@ -56,7 +58,7 @@ npm i @tiptap-pro/extension-import-docx
 
 ## 所需扩展
 
-安装 [ConvertKit](/conversion/import/docx/convertkit) — 它捆绑了导入器所需的所有扩展：标准 nodes 和 marks、用于颜色/字体/大小/行高/背景的 `TextStyleKit`、预配置为 `['paragraph', 'heading']` 的 `TextAlign`、带有 `multicolor: true` 的 `Highlight`、带有 DOCX 裁剪属性的 `Image`、用于 DOCX 感知表格的 `ConvertTableKit`，以及 `PageBreak`：
+安装 [ConvertKit](/conversion/import/docx/convertkit)：它捆绑了导入器所需的每个扩展：标准节点和 mark，`TextStyleKit` 用于颜色/字体/大小/行高/背景，预配置为 `['paragraph', 'heading']` 的 `TextAlign`，带有 `multicolor: true` 的 `Highlight`，带有 DOCX 裁剪属性的 `Image`，用于支持 DOCX 的表格的 `ConvertTableKit`，以及 `PageBreak`：
 
 ```ts
 import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
@@ -77,8 +79,7 @@ const editor = new Editor({
   extensions: [
     // 其他扩展 ...
     ImportDocx.configure({
-      appId: 'your-app-id', // 您的 Convert App ID（请参见 Tiptap Cloud 设置）
-      token: 'your-jwt', // 用于身份验证的 JWT（请参见身份验证文档）
+      token: 'your-jwt', // 用于身份验证的 JWT（参见身份验证文档）
       imageUploadConfig: {
         url: 'https://your-image-upload-endpoint.com',
       },
@@ -90,11 +91,10 @@ const editor = new Editor({
 ```
 
 | 属性                | 描述                                                                                                                                                                                                                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `appId`             | 您的 Tiptap Convert 应用的 ID（可在您 Tiptap 账户的 [conversion settings](https://cloud.tiptap.dev/convert-settings) 中找到）                                                                                                                                           |
-| `token`             | 由您的服务器为 Convert 服务生成的 JWT 身份验证令牌。（有关获取和使用这些凭据的详细信息，请参见 [Authentication guide](https://cloud.tiptap.dev/convert-settings)。）                                                                                                  |
-| `imageUploadConfig` | 用于导入期间图片上传的结构化配置。详情请参见 [图片上传配置](#image-upload-configuration)。                                                                                                                                               |
-| `verbose`           | 一个 `string \| number` 配置属性，可帮助您控制导入过程中的诊断输出级别。这对于调试或更深入了解转换过程中发生的情况尤其有用。更多信息请参见 [详细输出](#verbose-output)。 |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `token`             | 由您的服务器为 Convert 服务生成的 JWT 身份验证令牌。（有关如何获取和使用这些凭据的详情，请参见 [身份验证指南](https://cloud.tiptap.dev/convert-settings)。）                                                                   |
+| `imageUploadConfig` | 用于导入过程中图片上传的结构化配置。详情请参见 [图片上传配置](#image-upload-configuration)。                                                                                                                                             |
+| `verbose`           | 一个 `string \| number` 配置属性，可帮助您控制导入过程中的诊断输出级别。这对于调试或更深入了解转换过程中发生的情况特别有用。更多信息请参见 [详细输出](#verbose-output) |
 
 ## 图片上传配置
 
@@ -102,7 +102,6 @@ const editor = new Editor({
 
 ```ts
 ImportDocx.configure({
-  appId: 'your-app-id',
   token: 'your-jwt',
   imageUploadConfig: {
     url: 'https://your-server.com/upload-image',
@@ -171,7 +170,7 @@ editor
   .importDocx({
     file,
     onImport(context) {
-      // 判别联合：先处理失败分支。
+      // 区分联合：先处理失败分支。
       if (context.error) {
         showErrorToast({ message: context.error.message })
         return
@@ -208,7 +207,7 @@ editor
 
 ## 页眉与页脚
 
-当导入包含页眉和页脚的 `.docx` 文件时，如果安装了 [Pages 扩展](/pages/getting-started/overview)，导入扩展会自动检测并应用它们。没有 Pages，页眉/页脚数据仍会返回到你的 `onImport` 回调（见下面的[手动处理](#manual-handling)）中，但没有地方渲染——请安装 Pages 以便它们在编辑器中可见。
+当导入包含页眉和页脚的 `.docx` 文件时，如果已安装 [Pages 扩展](/pages/getting-started/overview)，导入扩展会自动检测并应用它们。没有 Pages 时，页眉/页脚数据仍会返回给你的 `onImport` 回调（见下方 [手动处理](#manual-handling)），但没有地方可以渲染。请安装 Pages 以便它们在编辑器中可见。
 
 ### 自动处理
 
@@ -303,7 +302,7 @@ editor
 
 ### 页码字段
 
-Word 页眉和页脚通常包含 `PAGE` 和 `NUMPAGES` 字段代码，它们会渲染为实时页码。默认情况下，当安装了 [Pages 扩展](/pages/getting-started/overview) 时，`importDocx` 会将这些字段翻译为与当前 Pages 注册表匹配的文本占位符——开箱即用的是 `{page}` 和 `{total}`——因此在重新导出时它们可以无缝还原为 Word 的实时字段，无需额外配置。
+Word 的页眉和页脚通常包含 `PAGE` 和 `NUMPAGES` 字段代码，它们会渲染为实时页码。默认情况下，当安装了 [Pages 扩展](/pages/getting-started/overview) 时，`importDocx` 会将这些字段转换为与你当前 Pages 注册表匹配的文本令牌（开箱即用为 `{page}` 和 `{total}`），从而在重新导出为 Word 时能够无缝地还原为实时字段，无需额外配置。
 
 当您重命名这些内置占位符时，导入器会将您的注册表转发给转换服务，以便输出相同的名称：
 
@@ -319,17 +318,17 @@ Pages.configure({
 // 字段。
 ```
 
-此连接是自动的——`importDocx` 会读取 `Pages.options.placeholders` 并将其转发给转换服务。您无需在 `onImport` 回调中做任何事情。
+此连接是自动的：`importDocx` 会读取 `Pages.options.placeholders` 并将其转发给转换服务。你无需在 `onImport` 回调中做任何事情。
 
 #### 禁用令牌翻译
 
-在导入命令中传入 `placeholders: false` 即可选择不启用该功能。Word 缓存的数值会改为以纯文本形式传递——这是历史行为，在下游未安装 Pages 扩展时会很有用：
+在导入命令中传入 `placeholders: false` 即可选择不启用。此时，Word 缓存的数值会直接作为纯文本传递。这是历史行为，在下游没有安装 Pages 扩展时很有用：
 
 ```ts
 editor.chain().importDocx({ file, placeholders: false }).run()
 ```
 
-当省略 `placeholders` 时，只要安装了 Pages 扩展，该命令默认会启用该功能——除非您已通过 `Pages.configure({ placeholders: false })` 禁用了令牌替换，此时它将保持关闭。传入 `true`（或显式的 `{ page?, total? }` 重命名映射）可强制启用翻译，其中重命名映射的优先级高于编辑器的 Pages 配置。
+当省略 `placeholders` 时，如果安装了 Pages 扩展，命令默认会启用该功能，除非你通过 `Pages.configure({ placeholders: false })` 禁用了令牌替换，在这种情况下它会保持关闭。传入 `true`（或显式的 `{ page?, total? }` 重命名映射）可强制启用翻译，其中重命名映射的优先级高于编辑器的 Pages 配置。
 
 ## 脚注和尾注
 
@@ -345,8 +344,8 @@ editor
     onImport(context) {
       if (context.error) return
 
-      context.footnotes // Record<noteId, JSONContent> — 每个 id 对应的脚注内容
-      context.endnotes // Record<noteId, JSONContent> — 每个 id 对应的尾注内容
+      context.footnotes // Record<noteId, JSONContent>, 每个 id 对应的脚注内容
+      context.endnotes // Record<noteId, JSONContent>, 每个 id 对应的尾注内容
 
       context.setEditorContent(context.content)
     },
@@ -354,11 +353,14 @@ editor
   .run()
 ```
 
-<Callout title="与 Tiptap Pages 一起自动应用" variant="hint">
-  当安装了 [Pages 扩展](/pages/getting-started/overview) 并启用[脚注](/pages/core-concepts/footnotes)时，导入的脚注会自动应用：标记会在正文中渲染，内容会落入每页的脚注区域，编号也会与源文档保持一致。无需额外配置。
+<Callout title="与 Tiptap Pages 自动应用" variant="hint">
+  当 [Pages 扩展](/pages/getting-started/overview) 与
+  [脚注](/pages/core-concepts/footnotes) 和/或 [尾注](/pages/core-concepts/endnotes)
+  一起启用时，导入的注释会自动应用：标记会在正文中渲染，脚注内容会进入每页的脚注区域，
+  尾注内容会进入文档末尾的尾注列表，并且编号与源文档保持一致。无需额外配置。
 </Callout>
 
-如果没有 Pages，`footnoteReference` / `endnoteReference` 节点需要通过一个[自定义扩展](/editor/extensions/custom-extensions/extend-existing)才能在编辑器中渲染——`ImportContext` 上的数据已经为你提供了构建自定义展示所需的一切。尾注始终需要你自行负责渲染；Pages 只管理脚注。
+如果不使用 Pages，`footnoteReference` / `endnoteReference` 节点需要一个[自定义扩展](/editor/extensions/custom-extensions/extend-existing)才能在编辑器中渲染。`ImportContext` 上的数据已经提供了构建你自己的展示所需的一切。
 
 ## 详细输出
 

@@ -12,14 +12,15 @@ meta:
 
 | 设置                | 描述                                                                                                               | 默认值                              |
 |---------------------|-------------------------------------------------------------------------------------------------------------------|-------------------------------------|
-| `url`               | Hocuspocus/WebSocket 服务器的 URL。                                                                                | `''`                                |
-| `websocketProvider` | HocuspocusProviderWebsocket 的一个实例，如果你想在多个提供者之间共享一个 socket。                                 | `new HocuspocusProviderWebsocket()` |
-| `name`              | 文档的名称。                                                                                                       | `''`                                |
-| `document`          | 实际的 Y.js 文档。可选，默认会创建一个新文档，并可通过 provider.document 访问。                                     | `new Y.Doc()`                       |
-| `token`             | 将传递给服务器的身份验证令牌（支持字符串、函数和 Promises）。                                                      | `''`                                |
-| `awareness`         | Awareness 对象，默认会附加到传入的 Y.js 文档上。                                                                  | `new Awareness()`                   |
-| `forceSyncInterval` | 每隔 x 毫秒向服务器请求更新。                                                                                       | `false`                             |
-| `sessionAwareness`  | 在每条消息的文档名中嵌入唯一的 `sessionId`，从而允许在同一个 WebSocket 上使用多个具有相同文档名的提供者。连接到 v3 服务器时请保持为 `false`。需要 v4 服务器。 | `false`                             |
+| `url`               | Hocuspocus/WebSocket 服务器的 URL。                                                                       | `''`                                |
+| `websocketProvider` | HocuspocusProviderWebsocket 的实例，如果你想在多个 provider 之间共享一个 socket              | `new HocuspocusProviderWebsocket()` |
+| `name`              | 文档名称。                                                                                         | `''`                                |
+| `document`          | 实际的 Y.js 文档。可选，默认情况下会创建一个新文档，并可通过 provider.document 访问。 | `new Y.Doc()`                       |
+| `token`             | 将传递给服务器的身份验证令牌（支持字符串、函数和 Promises）。           | `''`                                |
+| `awareness`         | Awareness 对象，默认情况下会附加到传入的 Y.js 文档上。                                                | `new Awareness()`                   |
+| `forceSyncInterval` | 每隔 x 毫秒向服务器请求更新。                                                                            | `false`                             |
+| `sessionAwareness`  | 在每条消息的文档名称中嵌入唯一的 `sessionId`，允许在同一个 WebSocket 上使用具有相同文档名称的多个 provider。连接到 v3 服务器时保持 `false`。需要 v4 服务器。 | `false`                             |
+| `flushDelay`        | 在一个短时间窗口内批量发送文档和 awareness 更新，而不是每次变更都发送一条消息。可减少大量编辑时的 websocket 流量。新增延迟最多为 `flushDelay`，因此应保持较小值（例如 `500`）。设置为 `false` 可立即发送每次变更。参见 [批量发送外发更新](#batching-outgoing-updates)。 | `false`                             |
 
 ### HocuspocusProviderWebsocket
 
@@ -39,4 +40,24 @@ meta:
 
 ## 使用
 
-配置提供者不需要过多步骤，一个简单示例可见于 [快速入门](/hocuspocus/provider/install)
+## 使用
+
+设置提供程序所需的内容并不多，简单示例可以在 [快速开始](/hocuspocus/provider/install) 中找到
+
+## 批量发送出站更新
+
+默认情况下，提供程序每次变更都会发送一条 websocket 消息。在重度编辑期间——快速输入、大段粘贴，或光标快速移动——这可能会产生很多小消息。将 `flushDelay` 设为一个毫秒数，可以在一个短时间窗口内批量发送出站文档更新和 awareness 更新：
+
+```js
+import { HocuspocusProvider } from '@hocuspocus/provider'
+
+const provider = new HocuspocusProvider({
+  url: 'ws://127.0.0.1:1234',
+  name: 'example-document',
+  flushDelay: 500,
+})
+```
+
+在每个窗口内，缓冲的 Yjs 更新会通过 `Y.mergeUpdates` 合并为一条消息，而 awareness 会折叠为每个已变更客户端的最新状态。这个窗口是固定批次，而不是会重置的防抖，因此即使用户持续输入，新增延迟也会被限制在 `flushDelay` 之内——请将其保持较小（例如 `500`），以避免延迟其他客户端看到的内容。
+
+你可以通过调用 `provider.flushPendingUpdates()` 强制立即发送当前窗口中所有已缓冲的内容。

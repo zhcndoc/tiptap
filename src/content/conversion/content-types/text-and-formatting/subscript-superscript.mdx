@@ -14,15 +14,15 @@ Subscript 和 superscript 标记可在 DOCX 与 Tiptap 之间往返转换。像 
 
 ## 你需要什么
 
-- **扩展：** [ConvertKit](/conversion/import/docx/convertkit) — `Subscript` 和 `Superscript` 已捆绑并默认启用。
-- **配置：** 除了注册 ConvertKit 外，不需要其他配置。
+- **扩展：** [ConvertKit](/conversion/import/docx/convertkit) 捆绑了 `Subscript` 和 `Superscript`，二者默认都已启用。
+- **配置：** 除了注册 ConvertKit 之外，不需要任何额外配置。
 
 ## 支持概览
 
 | | 导入 | 编辑器 | 导出 |
 | --- | --- | --- | --- |
-| Subscript | Supported | Supported via ConvertKit | Supported |
-| Superscript | Supported | Supported via ConvertKit | Supported |
+| 下标 | 支持 | 通过 ConvertKit 支持 | 支持 |
+| 上标 | 支持 | 通过 ConvertKit 支持 | 支持 |
 
 ## 导入
 
@@ -37,9 +37,9 @@ Subscript 和 superscript 标记可在 DOCX 与 Tiptap 之间往返转换。像 
 
 化学式（H₂O、CO₂）、数学符号（x²、E=mc²）以及脚注引用都会正确导入。
 
-## 编辑器渲染
+## Editor Rendering
 
-[ConvertKit](/conversion/import/docx/convertkit) 同时捆绑了 [`Subscript`](/editor/extensions/marks/subscript) 和 [`Superscript`](/editor/extensions/marks/superscript)，并默认启用它们——无需单独安装。
+[ConvertKit](/conversion/import/docx/convertkit) bundles both [`Subscript`](/editor/extensions/marks/subscript) and [`Superscript`](/editor/extensions/marks/superscript) and enables them by default, so no separate install is required.
 
 ```ts
 import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
@@ -55,8 +55,8 @@ const editor = new Editor({
 
 ```ts
 ConvertKit.configure({
-  subscript: false,   // 禁用下标
-  superscript: false, // 禁用上标
+  subscript: false,   // Disable subscript
+  superscript: false, // Disable superscript
 })
 ```
 

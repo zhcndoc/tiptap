@@ -20,8 +20,12 @@ import Link from '@/components/Link'
   <RequirementItem label="2. 安装该包">
     Server AI 工具包包是开源的。请使用 npm 或您偏好的包管理器从公共 npm 注册表安装。
   </RequirementItem>
-  <RequirementItem label="3. 认证服务">
-    配置您的 Content AI 凭据以访问 Server AI 工具包服务。
+  <RequirementItem label="3. 认证到该服务">
+    配置一个{' '}
+    <a href="/content-ai/capabilities/server-ai-toolkit/install#set-up-authorization">
+      Tiptap 访问控制 JWT
+    </a>{' '}
+    以访问 Server AI Toolkit 服务。
   </RequirementItem>
 </Requirements>
 
@@ -71,10 +75,12 @@ const editorContext = getEditorContext(editor)
 
 Server AI 工具包是一个云端或本地服务。需认证后方可访问其 REST API。
 
-1. 在 [Tiptap 云 AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 页面，获取您的 App ID 和密钥。  
-2. 在 [文档服务器设置](https://cloud.tiptap.dev/v2/configuration/document-server) 页面，获取您的文档服务器凭据（ID 和管理 API 密钥）。这些会作为 JWT 声明包含，方便 Server AI 工具包自动获取并保存您的 Tiptap 云文档。  
-3. 使用诸如 `jsonwebtoken` 的库生成 JWT。生产环境中，请务必**在服务器端**创建 JWT，以保持密钥安全。  
-4. 在 API 请求中使用 JWT。将其作为 Bearer token 放入 `Authorization` 头部，并在 `X-App-Id` 中传递 App ID。
+1. **创建密钥** in the Tiptap Cloud dashboard. Go to `Authentication > Secrets > Add Secret`. The dashboard generates an ES256 key pair and shows you the **private key** once. Store the private key.
+2. **复制你的环境 ID** from the dashboard. Go to `Authentication > Environment ID`. Use it as the JWT `iss` claim.
+3. **在你的服务器上生成 Tiptap Access Control JWT**. See the [JWT token guide](#create-a-jwt-token) below.
+4. **在 API 请求中使用 JWT**. Pass it in the `Authorization: Bearer JWT` header.
+
+For the full JWT format and signing examples, see the [Authentication reference](/authentication).
 
 ### 环境变量
 
@@ -83,46 +89,49 @@ Server AI 工具包是一个云端或本地服务。需认证后方可访问其 
 ```sh
 # .env
 TIPTAP_CLOUD_AI_API_URL=https://api.tiptap.dev
-TIPTAP_CLOUD_AI_SECRET=your-secret-key
-TIPTAP_CLOUD_AI_APP_ID=your-app-id
-TIPTAP_CLOUD_DOCUMENT_SERVER_ID=your-tiptap-cloud-document-server-id
-TIPTAP_CLOUD_DOCUMENT_SERVER_MANAGEMENT_API_SECRET=your-tiptap-cloud-document-management-api-secret
+TIPTAP_ENVIRONMENT_ID=your-environment-hash-id
+TIPTAP_PRIVATE_KEY=your-private-key-pem
 ```
 
-- **TIPTAP_CLOUD_AI_API_URL**：Server AI 工具包 API 的基础 URL。
-- **TIPTAP_CLOUD_AI_SECRET**：来自 [Content AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 页面中的“Content AI Secret”。用于签名 JWT。
-- **TIPTAP_CLOUD_AI_APP_ID**：来自 [Content AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 页面中的“Content AI App ID”。
-- **TIPTAP_CLOUD_DOCUMENT_SERVER_ID**：来自 [文档服务器设置](https://cloud.tiptap.dev/v2/configuration/document-server) 页面中的 Tiptap Cloud Document Server ID。它会作为 `experimental_document_server_id` JWT 声明包含，以便 Server AI 工具包可以自动获取并保存文档。
-- **TIPTAP_CLOUD_DOCUMENT_SERVER_MANAGEMENT_API_SECRET**：您的文档服务器管理 API 密钥。它会作为 `experimental_document_server_management_api_secret` JWT 声明包含，用于文档访问。
+- **TIPTAP_CLOUD_AI_API_URL**: Server AI 工具包 API 的基础 URL。
+- **TIPTAP_ENVIRONMENT_ID**: 来自 Tiptap 仪表板的环境哈希 ID。签发令牌时用作 `iss` 声明。
+- **TIPTAP_PRIVATE_KEY**: 来自 Tiptap 仪表板的 ES256 私钥（PKCS#8 PEM）。用于在服务器端签署令牌。
 
 ### 创建 JWT 令牌
 
-此函数会从 `TIPTAP_CLOUD_AI_SECRET` 生成一个 JWT，用于对 Server AI 工具包 API 进行身份验证。它包含文档服务器凭据，以便 Server AI 工具包可以自动获取并保存您的 Tiptap 云文档。
+`createJwtToken` 函数为 Server AI 工具包 API 签发令牌。当 AI 工具包需要读取和编辑 Tiptap Cloud 文档时，请传入 `documentId`。
 
 ```ts
 // lib/server-ai-toolkit/create-jwt-token.ts
-import jwt from 'jsonwebtoken'
+import { SignJWT, importPKCS8 } from 'jose'
 
 /**
- * 从 TIPTAP_CLOUD_AI_SECRET 生成一个 JWT，用于对 Server AI 工具包 API 进行身份验证
+ * 签发用于与 Server AI 工具包 API 进行身份验证的 JWT
  */
-export function createJwtToken(): string {
-  return jwt.sign(
-    {
-      // 用于自动获取/保存文档的文档服务器凭据
-      experimental_document_server_id: process.env.TIPTAP_CLOUD_DOCUMENT_SERVER_ID,
-      experimental_document_server_management_api_secret:
-        process.env.TIPTAP_CLOUD_DOCUMENT_SERVER_MANAGEMENT_API_SECRET,
-    },
-    process.env.TIPTAP_CLOUD_AI_SECRET,
-    { expiresIn: '1h' },
-  )
+export async function createJwtToken(documentId?: string): Promise<string> {
+  const privateKey = await importPKCS8(process.env.TIPTAP_PRIVATE_KEY!, 'ES256')
+
+  const permissions: { action: string; resource: string }[] = [
+    { action: 'AI:Toolkit', resource: '*' },
+  ]
+
+  if (documentId) {
+    permissions.push({ action: 'Documents:Write', resource: documentId })
+  }
+
+  return new SignJWT({ permissions })
+    .setProtectedHeader({ alg: 'ES256' })
+    .setIssuer(process.env.TIPTAP_ENVIRONMENT_ID!)
+    .setAudience(documentId ? ['AI', 'Documents'] : ['AI'])
+    .setIssuedAt()
+    .setExpirationTime('30m')
+    .sign(privateKey)
 }
 ```
 
 ### 获取身份验证头
 
-此函数返回所有 Server AI 工具包 API 请求所需的身份验证头。
+此函数返回 Server AI 工具包 API 请求所需的身份验证头。它是异步的，因为它会签发一个新的 JWT，因此所有示例都使用 `await getAuthHeaders(...)`。
 
 ```ts
 // lib/server-ai-toolkit/get-auth-headers.ts
@@ -131,19 +140,24 @@ import { createJwtToken } from './create-jwt-token'
 /**
  * 返回 Server AI 工具包 API 的身份验证头
  */
-export function getAuthHeaders(): Record<string, string> {
+export async function getAuthHeaders(documentId?: string): Promise<Record<string, string>> {
   return {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${createJwtToken()}`,
-    'X-App-Id': process.env.TIPTAP_CLOUD_AI_APP_ID,
+    Authorization: `Bearer ${await createJwtToken(documentId)}`,
   }
 }
 ```
 
-<Callout title="替代方案：直接提供文档" variant="info">
-  如果您管理文档的方式不是使用 Tiptap Cloud，而是自行存储，可以省略 JWT 中的
-  `experimental_document_server_id` 和 `experimental_document_server_management_api_secret` 声明，并直接通过 API 请求中的 `document` 字段传递文档。请参阅 [REST API
-  参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)。
+<Callout title="Alternative: provide documents directly" variant="info">
+  如果你在自己的存储中管理文档，而不是使用 Tiptap Cloud，则省略 `documentId` 选项
+  并在 API 请求中通过 `document` 字段直接传递文档。此时令牌只需要
+  `AI:Toolkit` 权限。
+</Callout>
+
+<Callout title="Maintaining an existing integration?" variant="info">
+  之前的 App ID 和 secret（HS256）流程会将 App ID 发送到 `X-App-Id`，并将
+  文档服务器凭据嵌入为 JWT 声明，该流程记录在 [Legacy
+  authentication](/authentication/legacy) 中。
 </Callout>
 
 ## 调用 API 端点
@@ -155,11 +169,15 @@ import { getAuthHeaders } from './lib/server-ai-toolkit/get-auth-headers'
 
 const apiBaseUrl = process.env.TIPTAP_CLOUD_AI_API_URL || 'https://api.tiptap.dev'
 
-const response = await fetch(`${apiBaseUrl}/v3/ai/toolkit/tools`, {
+const response = await fetch(`${apiBaseUrl}/v4/ai/toolkit/fetch-tools`, {
   method: 'POST',
-  headers: getAuthHeaders(),
+  headers: await getAuthHeaders(),
   body: JSON.stringify({
     editorContext,
+    tools: {
+      tiptapRead: true,
+      tiptapEdit: true,
+    },
   }),
 })
 

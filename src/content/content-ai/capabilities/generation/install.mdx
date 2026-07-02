@@ -23,10 +23,10 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 本安装指南基于使用 [Tiptap 内容 AI 后端服务](https://cloud.tiptap.dev/v2/cloud/ai)，如果您想配置自己的自定义 LLM，请改为参考[此指南](/content-ai/capabilities/generation/custom-llms)。
 
-## 启动您的内容 AI 应用
-1. **激活计划：** 开始[免费试用或选择订阅方案](https://cloud.tiptap.dev/v2/billing)。
-2. **配置您的 AI 应用：** 在您的[内容 AI 应用](https://cloud.tiptap.dev/v2/cloud/ai)中添加您的 OpenAI API 密钥。
-3. **设置认证：** 使用我们提供的密钥生成包含 HS256 算法的 JWT，用于验证扩展与服务之间的身份。[获取您的 JWT 密钥。](https://cloud.tiptap.dev/v2/cloud/ai)
+## 启动你的 Content AI 应用
+1. **激活套餐：** 先[免费试用或选择订阅](https://cloud.tiptap.dev/v2/billing)。
+2. **配置你的 AI 应用。** 将你的 OpenAI API 密钥添加到你的 [Content AI 应用](https://cloud.tiptap.dev/v2/cloud/ai) 中。
+3. **设置身份验证：** 使用 `aud: "AI"` 和 `AI:Generation` 权限签名一个令牌，然后将其传递给扩展。有关如何签署令牌，请参见[身份验证](/authentication)。
 
 ## 访问私有注册表
 AI 生成扩展发布在 Tiptap 的私有 npm 注册表中。请按照[私有注册表指南](/guides/pro-extensions)集成此扩展。如果您已完成 Tiptap 账户认证，可直接跳转到[#安装](#安装)。
@@ -48,9 +48,7 @@ const editor = new Editor({
   extensions: [
     StarterKit,
     Ai.configure({
-      // 您的 Tiptap 内容 AI 应用 ID
-      appId: 'APP_ID_HERE',
-      // 这里应为您生成的 JWT，绝对不要使用 OpenAI API 密钥！
+      // 这需要是您的签名令牌，且绝不能是 OpenAI API 密钥！
       token: 'TOKEN_HERE',
       autocompletion: true,
       // … 其他选项（详见下文）
@@ -61,6 +59,8 @@ const editor = new Editor({
 ```
 
 此时，您即可在 Tiptap 编辑器中使用 OpenAI。可查看[配置选项](/content-ai/capabilities/generation/configure)以定制您的使用体验。
+
+先前的 App ID 和密钥（HS256）流程仍然可用，并记录在[旧版身份验证](/authentication/legacy)中。
 
 ## 隐私与数据处理
 

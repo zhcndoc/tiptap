@@ -15,7 +15,10 @@ tags:
     label: 下载量
 ---
 
-此工具帮助处理编辑器中的各种建议。查看 [`Mention`](/editor/extensions/nodes/mention) 或 [`Emoji`](/editor/extensions/nodes/emoji) 节点以查看其实际效果。
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+此实用工具可帮助编辑器中的各种建议功能。查看 [`Mention`](/editor/extensions/nodes/mention) 或 [`Emoji`](/editor/extensions/nodes/emoji) 节点以了解其实际效果。
 
 ## 设置
 
@@ -78,7 +81,13 @@ Suggestion({
 
 ### allowSpaces
 
-允许或不允许建议项目中出现空格。
+允许或不允许建议项中包含空格。与 `allowToIncludeChar` 不兼容——如果 `allowToIncludeChar` 为 `true`，则此选项会被禁用。
+
+默认：`false`
+
+### allowToIncludeChar
+
+允许将触发字符本身包含在建议查询中。与 `allowSpaces` 不兼容。
 
 默认：`false`
 
@@ -191,7 +200,7 @@ Suggestion({
 
 将建议弹出窗口相对于其锚点在各轴上偏移指定像素数。这些值会传递给 Floating UI 的 [`offset` 中间件](https://floating-ui.com/docs/offset)。
 
-默认：`{}`
+默认：`{ mainAxis: 4, crossAxis: 0 }`
 
 ```js
 Suggestion({
@@ -226,19 +235,18 @@ Suggestion({
 
 ### floatingUi
 
-适用于默认选项无法提供足够控制的高级 Floating UI 配置。提供后，这些选项将优先于顶层的 `placement`、`offset` 和 `flip` 设置。
+用于顶层选项无法提供足够控制时的高级 Floating UI 配置。插件会保留锚点和位置的所有权——使用顶层 [`placement`](#placement) 选项来设置方向——而 `floatingUi` 允许你切换定位 `strategy` 并追加额外的 `middleware`。
+
+你传入的任何 middleware 都会在插件根据顶层 `offset` 和 `flip` 选项构建出的 `offset` 与 `flip` middleware 之后追加，因此二者是组合而不是相互替换。
 
 ```js
-import { flip, shift, size } from '@floating-ui/dom'
+import { shift, size } from '@floating-ui/dom'
 
 Suggestion({
+  placement: 'top-start',
   floatingUi: {
-    placement: 'top-start',
     strategy: 'fixed',
-    middleware: [
-      flip({ padding: 8 }),
-      shift({ padding: 8 }),
-    ],
+    middleware: [shift({ padding: 8 }), size()],
   },
 })
 ```
@@ -247,16 +255,18 @@ Suggestion({
 
 ```ts
 type SuggestionFloatingUiOptions = {
-  placement?: 'top' | 'top-start' | 'top-end'
-    | 'bottom' | 'bottom-start' | 'bottom-end'
-    | 'right' | 'right-start' | 'right-end'
-    | 'left' | 'left-start' | 'left-end'
   strategy?: 'absolute' | 'fixed'
   middleware?: Middleware[]
 }
 ```
 
 默认：`undefined`
+
+### dismissOnOutsideClick
+
+当为 `true` 时，弹窗和编辑器之外的指针交互会关闭当前活动的建议。仅当你使用 [受控定位](#managed-positioning-with-propsmount)（`props.mount`）渲染弹窗时，此选项才会生效，因为插件需要知道哪个元素是弹窗，才能判断什么算作“外部”。
+
+默认：`true`
 
 ### command
 
@@ -281,21 +291,31 @@ items: async ({ editor, query, signal }) => {
 
 用于自动补全弹窗的渲染函数。返回一个包含生命周期钩子（`onStart`、`onBeforeStart`、`onUpdate`、`onBeforeUpdate`、`onExit`、`onKeyDown`）的对象，这些钩子会接收一个 `SuggestionProps` 对象。
 
-当 `items()` 是异步函数时，传递给每个钩子的 `SuggestionProps` 对象还包含以下附加属性：
+传递给每个钩子的 `SuggestionProps` 对象除了现有的 `editor`、`range`、`query`、`text`、`items`、`command`、`decorationNode` 和 `clientRect` 之外，还包含以下属性：
 
 ```ts
 {
-  // ... 现有属性（editor、range、query、text、items、command、decorationNode、clientRect）...
+  /** 挂载你的弹窗元素并接管定位。推荐的默认建议弹窗渲染方式——见下方“定位”。 
+   *  返回一个 `unmount` 函数，在 `onExit` 中调用。 */
+  mount: (element: HTMLElement, options?: SuggestionMountOptions) => () => void
 
-  /** 当异步 items() 调用正在进行时为 true，否则为 false */
+  /** 当异步 items() 调用进行中时为 true，否则为 false。
+   *  仅在 items() 返回 Promise 时相关。 */
   loading: boolean
 
-  /** 从选项中传入并解析后的 Floating UI 配置 */
+  /** 解析后的定位选项，会从建议
+   *  选项中传递下来，因此你可以在渲染回调中读取它们。 */
+  placement: SuggestionPlacement
+  offset: { mainAxis: number; crossAxis: number }
+  flip: boolean
+  container?: string | HTMLElement
+
+  /** 已解析的 Floating UI 配置，可直接传给 `computePosition()`。
+   *  如果你想自行运行定位循环而不是使用 `mount()`，这是一个可用的备用方案。 */
   floatingUi: {
     placement: SuggestionPlacement
     strategy: 'absolute' | 'fixed'
     middleware: Middleware[]
-    offset: { mainAxis?: number; crossAxis?: number }
   }
 }
 ```
@@ -309,7 +329,270 @@ items: async ({ editor, query, signal }) => {
 
 默认：`findSuggestionMatch(config: Trigger): SuggestionMatch`
 
-## 关闭打开的建议
+## 异步行为
+
+当你的 `items()` 函数返回一个 `Promise` 时，建议插件会自动处理异步生命周期：
+
+1. **初始状态：** 弹出窗口打开，`loading` 为 `true`。如果提供了 `initialItems`，这些项目会立即显示。
+2. **获取中：** `items()` 函数会带着一个 `AbortSignal` 被调用。如果用户继续输入，前一个请求的信号会被中止，并在 `debounce` 延迟后发起一个新的请求。
+3. **解析：** 一旦 promise 解析完成，返回的项目会替换当前项目，`loading` 变为 `false`。`onUpdate` 回调会携带新的 `SuggestionProps` 被触发。
+4. **空状态：** 如果没有提供 `items()` 函数，或者它返回一个空数组，弹出窗口会显示空状态。除非正在进行获取，否则 `loading` 属性保持为 `false`。
+5. **关闭：** 当弹出窗口关闭时（例如用户按下 Escape），任何进行中的请求都会自动中止。
+
+下面是一个完整示例：
+
+```js
+Suggestion({
+  minQueryLength: 2,
+  debounce: 300,
+  initialItems: ['Lea Thompson', 'Cyndi Lauper'],
+  items: async ({ query, signal }) => {
+    // 模拟一次 API 调用 —— 如果查询发生变化，这个请求将被中止
+    const response = await fetch(`/api/users?q=${query}`, { signal })
+    const data = await response.json()
+    return data.slice(0, 5)
+  },
+  render: () => {
+    let component
+    let unmount
+
+    return {
+      onStart(props) {
+        component = new ReactRenderer(MyList, {
+          props,
+          editor: props.editor,
+        })
+        // 让插件为你挂载并定位弹出窗口。
+        unmount = props.mount(component.element)
+      },
+      onUpdate(props) {
+        // `props.loading` 在获取时为 true，否则为 false
+        // `props.items` 包含解析后的数据（或解析前的 initialItems）
+        component.updateProps(props)
+      },
+      onExit() {
+        unmount?.()
+        component.destroy()
+      },
+    }
+  },
+})
+```
+
+## 定位
+
+该建议工具与 [Floating UI](https://floating-ui.com/) 集成，用于弹出层定位。定位弹出层有两种方式：
+
+- **使用 `props.mount` 的托管定位** — 推荐的默认方式。插件会挂载元素，将其锚定到光标，并持续为你保持定位。
+- **手动定位** — 备用方案。你自己挂载元素，并使用 `props.floatingUi` 和 `props.clientRect` 运行自己的定位循环。
+
+### 使用 `props.mount` 的托管定位
+
+在你的 `render` 回调中，使用你渲染出来的弹出层元素调用 `props.mount(element)`（例如 `ReactRenderer` 或 `VueRenderer` 的 `element`）。然后插件会：
+
+- 将该元素追加到配置的 [`container`](#container) 中（默认是 `document.body`），
+- 使用你的 [`placement`](#placement)、[`offset`](#offset)、[`flip`](#flip) 和 [`floatingUi`](#floatingui) 选项，将其锚定到建议项的光标矩形，
+- 通过 Floating UI 的 [`autoUpdate`](https://floating-ui.com/docs/autoUpdate) 在滚动、调整大小和布局变化时自动重新定位——无需手动监听器，并且
+- 当启用 [`dismissOnOutsideClick`](#dismissonoutsideclick) 时，点击外部会将其关闭。
+
+`mount()` 会返回一个 `unmount` 函数。**你必须在 `onExit` 中调用它**，以清理自动更新循环和外部点击监听器（如果插件添加了元素，还会移除该元素）。忘记这么做会导致监听器泄漏，并在 DOM 中留下孤立的弹出层。
+
+```js
+import { ReactRenderer } from '@tiptap/react'
+import DropdownList from './DropdownList.jsx'
+
+Suggestion({
+  placement: 'top-start',
+  offset: { mainAxis: 8 },
+  items: ({ query }) => fetchItems(query),
+  render: () => {
+    let component
+    let unmount = null
+
+    return {
+      onStart(props) {
+        component = new ReactRenderer(DropdownList, {
+          props,
+          editor: props.editor,
+        })
+
+        // 插件会挂载元素、定位它，并持续让它保持锚定。
+        unmount = props.mount(component.element)
+      },
+      onUpdate(props) {
+        component.updateProps(props)
+        // 不需要调用重新定位——autoUpdate 会保持它锚定。
+      },
+      onKeyDown(props) {
+        if (props.event.key === 'Escape') {
+          component.destroy()
+          return true
+        }
+        return component.ref?.onKeyDown(props)
+      },
+      onExit() {
+        unmount?.()
+        component.destroy()
+      },
+    }
+  },
+})
+```
+
+<Callout title="注意" variant="info">
+  如果你传入的元素已经附加到 DOM 中，插件不会移动或移除它——它只会对其进行定位。
+  在这种情况下，你仍然需要自己负责挂载和卸载该元素。如果你希望插件为你管理 DOM，
+  请传入一个未附加的元素。
+</Callout>
+
+### 配置 placement、offset 和 flip
+
+使用顶层的 [`placement`](#placement)、[`offset`](#offset) 和 [`flip`](#flip) 选项来控制托管弹出层显示的位置：
+
+```js
+Suggestion({
+  placement: 'top-start',
+  offset: { mainAxis: 8, crossAxis: 0 },
+  flip: true,
+})
+```
+
+如果需要更改定位 `strategy` 或使用自定义中间件（例如 `shift` 或 `size`），请添加 [`floatingUi`](#floatingui) 选项。其 `middleware` 会附加在插件自身的 `offset` 和 `flip` 中间件之后：
+
+```js
+import { shift, size } from '@floating-ui/dom'
+
+Suggestion({
+  placement: 'bottom-end',
+  floatingUi: {
+    strategy: 'fixed',
+    middleware: [
+      shift({ padding: 16 }),
+      size({
+        apply({ availableWidth, availableHeight, elements }) {
+          Object.assign(elements.floating.style, {
+            maxWidth: `${availableWidth}px`,
+            maxHeight: `${availableHeight}px`,
+          })
+        },
+      }),
+    ],
+  },
+})
+```
+
+### 自定义位置的应用方式
+
+默认情况下，托管弹出层的位置是通过向元素的 style 写入 `position`、`left` 和 `top` 来应用的（并且元素会在第一次测量完成前隐藏，以避免在错误坐标处闪现）。
+
+如果你需要以不同方式应用位置——例如使用 CSS transform、动画，或写入框架 ref——请在挂载选项中传入 `onPosition` 回调。这样做时，插件将不再自行写入样式，而是把计算出的坐标交给你：
+
+```js
+onStart(props) {
+  component = new ReactRenderer(DropdownList, { props, editor: props.editor })
+
+  unmount = props.mount(component.element, {
+    onPosition({ x, y, placement, strategy }) {
+      Object.assign(component.element.style, {
+        position: strategy,
+        transform: `translate(${x}px, ${y}px)`,
+      })
+    },
+  })
+}
+```
+
+<Callout title="注意" variant="info">
+  当你提供 `onPosition` 时，插件在第一次测量前将不再隐藏元素，因此请你自己先应用初始位置，以避免闪烁。
+</Callout>
+
+### 跟随动画或变换中的锚点
+
+`autoUpdate` 已经会响应滚动、调整大小和布局变化。对于持续移动的锚点——例如位于经过变换或动画的容器中——你可以通过转发 [`autoUpdate` 选项](https://floating-ui.com/docs/autoUpdate#options) 来启用逐帧更新：
+
+```js
+unmount = props.mount(component.element, {
+  autoUpdate: { animationFrame: true },
+})
+```
+
+### 挂载到容器中
+
+要将弹出层渲染到特定的堆叠或滚动上下文中——例如模态框或对话框——请设置 [`container`](#container) 选项。托管弹出层会被追加到该处，而不是 `document.body`：
+
+```js
+Suggestion({
+  container: '#my-dialog',
+})
+```
+
+字符串会被当作 CSS 选择器处理；你也可以直接传入一个 `HTMLElement`。如果选择器匹配不到任何元素（或者无效），插件会回退到 `document.body`。
+
+### 手动定位（备用方案）
+
+如果你需要对挂载和定位拥有完全控制权，请完全跳过 `props.mount`。你自己挂载元素，然后结合解析后的 `props.floatingUi` 配置和 `props.clientRect` 运行自己的 Floating UI 循环。因为这里的 DOM 由你自己管理，你也需要负责在 `onUpdate` 时重新定位，并在 `onExit` 时清理：
+
+```js
+import { computePosition, shift } from '@floating-ui/dom'
+import { ReactRenderer } from '@tiptap/react'
+
+function reposition(props, element) {
+  const reference = { getBoundingClientRect: () => props.clientRect() }
+
+  computePosition(reference, element, props.floatingUi).then(({ x, y, strategy }) => {
+    Object.assign(element.style, {
+      position: strategy,
+      left: `${x}px`,
+      top: `${y}px`,
+    })
+  })
+}
+
+Suggestion({
+  floatingUi: {
+    strategy: 'fixed',
+    middleware: [shift({ padding: 8 })],
+  },
+  render: () => {
+    let component
+
+    return {
+      onStart(props) {
+        component = new ReactRenderer(DropdownList, { props, editor: props.editor })
+
+        if (!props.clientRect) {
+          return
+        }
+
+        document.body.appendChild(component.element)
+        reposition(props, component.element)
+      },
+      onUpdate(props) {
+        component.updateProps(props)
+
+        if (!props.clientRect) {
+          return
+        }
+
+        reposition(props, component.element)
+      },
+      onExit() {
+        component.element.remove()
+        component.destroy()
+      },
+    }
+  },
+})
+```
+
+<Callout title="注意" variant="warning">
+  使用手动定位时，你只会在 `onUpdate` 时重新定位，因此除非你自己绑定监听器（或者使用 Floating UI 的 `autoUpdate`），
+  否则弹出层不会跟随滚动、调整大小或布局变化。`props.mount` 会为你处理所有这些，因此它是推荐方案。
+</Callout>
+
+<CodeDemo path="/Examples/SuggestionPositioning" />
+
+## 退出打开的建议
 
 有时你希望用户能够在不选择项目的情况下退出打开的建议。  
 为实现这一点，用户可以按下 Escape 键，这将关闭打开的建议。  
@@ -329,9 +612,9 @@ exitSuggestion(editor.view, MySuggestionPluginKey)
 
 ## 协作
 
-当在协作环境中使用 Tiptap 时，你可能会注意到当某个用户触发建议（如提及）时，建议会对所有用户弹出。这是因为文档更改被同步到所有客户端，每个客户端的建议插件都会对该更改作出反应。
+当在协作环境中使用 Tiptap 时，你可能会注意到，当某个用户触发建议（如提及）时，建议会对所有用户弹出。这是因为文档更改会同步到所有客户端，每个客户端的建议插件都会对该更改作出反应。
 
-为防止这种情况，可以使用 `shouldShow` 选项结合来自 `@tiptap/extension-collaboration` 的 `isChangeOrigin` 辅助函数。
+为防止这种情况，可以使用 `shouldShow` 选项，并结合来自 `@tiptap/extension-collaboration` 的 `isChangeOrigin` 辅助函数。
 
 ```js
 import { isChangeOrigin } from '@tiptap/extension-collaboration'

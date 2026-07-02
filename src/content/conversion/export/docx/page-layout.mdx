@@ -28,7 +28,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
   </RequirementItem>
 </Requirements>
 
-DOCX Export 扩展现在支持自定义页面尺寸和边距，允许您创建符合需求的精准布局文档。无论您需要 A5 页面、自定义纸张尺寸，还是特定的边距配置，都可以直接在扩展中进行设置。
+DOCX 导出扩展现在支持自定义页面尺寸和边距，允许您创建符合需求的精准布局文档。无论您需要 A5 页面、自定义纸张尺寸，还是特定的边距配置，都可以直接在扩展中进行设置。
 
 <CodeDemo isPro path="/Extensions/ExportDocxCustomPageSize" />
 
@@ -148,10 +148,10 @@ ExportDocx.configure({
 ```
 
 <Callout title="由 Pages 扩展自动推导" variant="hint">
-  当 [Pages 扩展](/editor/extensions/functionality/pages) 与
-  `ExportDocx` 一起配置时，`header` 和 `footer` 偏移会自动根据 Pages 存储中的
-  `headerTopMargin` 和 `footerBottomMargin` 推导得出。您传递给 `pageMargins` 的值始终
-  具有优先级——如需覆盖自动推导的值，请显式设置 `header` 或 `footer`。
+  当 [Pages 扩展](/editor/extensions/functionality/pages) 与 `ExportDocx` 一同配置时，
+  `header` 和 `footer` 偏移量会根据 Pages 存储中的 `headerTopMargin` 和 `footerBottomMargin`
+  自动推导。您传递给 `pageMargins` 的值始终具有优先级；如需覆盖自动推导的值，请显式设置 `header` 或
+  `footer`。
 </Callout>
 
 ## 页面背景颜色
@@ -180,7 +180,7 @@ ExportDocx.configure({
 ```
 
 <Callout title="Word 默认不会打印页面背景" variant="hint">
-  在 Word 中，页面背景会显示在屏幕上，但在打印或导出为 PDF 时**不会**包含在内。要使其在打印输出或 PDF 导出中可见，读者必须在 Word 中启用 **文件 →
+  在 Word 中，页面背景会显示在屏幕上，但在打印或导出为 PDF 时**不会**包含在内。要使其在打印输出或 PDF 导出时可见，读者必须在 Word 中启用 **文件 →
   选项 → 显示 → 打印背景色和图像**。
 </Callout>
 
@@ -232,7 +232,7 @@ const editor = new Editor({
 
 以下是一些常用页面尺寸，供参考：
 
-| Format      | Width    | Height   |
+| 格式        | 宽度      | 高度      |
 | ----------- | -------- | -------- |
 | **A4**      | `21.0cm` | `29.7cm` |
 | **A5**      | `14.8cm` | `21.0cm` |

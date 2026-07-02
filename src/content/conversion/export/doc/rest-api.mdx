@@ -23,7 +23,7 @@ import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
         在您的账户中开始一个 <a href="https://cloud.tiptap.dev/v2?trial=true" target="_blank" rel="noopener noreferrer">免费试用</a> 或 <a href="https://cloud.tiptap.dev/v2/billing" target="_blank" rel="noopener noreferrer">订阅 Start 计划</a>。
     </RequirementItem>
     <RequirementItem label="2. 配置 Convert 应用">
-        要使用 Convert REST API，请在 <a href="https://cloud.tiptap.dev/v2/cloud/convert" target="_blank" rel="noopener noreferrer">您的仪表盘</a> 获取您的 App ID 和 Convert 密钥。
+        使用带有 `aud: "Convert"` 的签名令牌对 REST 调用进行身份验证。请参阅 [身份验证](/authentication)。
     </RequirementItem>
 </Requirements>
 
@@ -48,7 +48,6 @@ DOC 导出 API 将 Tiptap JSON 文档转换为 DOC 文件（传统 Microsoft Wor
 ```bash
 curl --output document.doc -X POST "https://api.tiptap.dev/v2/convert/export/doc" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}"
@@ -61,11 +60,10 @@ curl --output document.doc -X POST "https://api.tiptap.dev/v2/convert/export/doc
 
 ### 必填请求头
 
-| 名称             | 描述                                                                                                                              |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization`  | 用于认证请求的 JWT 令牌。例如：`Bearer your-jwt-token`                                                                           |
-| `X-App-Id`       | 来自 Convert 设置页面的 Convert 应用 ID：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert)  |
-| `Content-Type`   | 必须为 `application/json`                                                                                                         |
+| Name            | Description                                                                                                                               |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization` | 用于验证请求的 JWT 令牌。示例：`Bearer your-jwt-token`                                                                                   |
+| `Content-Type`  | 必须为 `application/json`                                                                                                                 |
 
 ### 请求体
 
@@ -147,7 +145,6 @@ DOC 生成会经过 DOCX 管线，因此在发送 Tiptap JSON 时，`/export/doc
 ```bash
 curl --output document.doc -X POST "https://api.tiptap.dev/v2/convert/export/doc" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"DOC with element-level overrides\"}]}]}",
@@ -166,7 +163,6 @@ curl --output document.doc -X POST "https://api.tiptap.dev/v2/convert/export/doc
 ```bash
 curl --output document.doc -X POST "https://api.tiptap.dev/v2/convert/export/doc" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}",

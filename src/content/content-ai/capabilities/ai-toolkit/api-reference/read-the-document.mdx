@@ -12,7 +12,7 @@ import { Callout } from '@/components/ui/Callout'
 
 ## `getText`
 
-以纯文本返回整个文档。
+Return the entire document as plain text.
 
 ### 返回值
 
@@ -176,24 +176,24 @@ const snippet = toolkit.getMarkdownRange({ from: 0, to: 100 })
 
 ## `getJsonRange`
 
-从指定范围返回 Tiptap JSON 内容。
+Returns Tiptap JSON content from the specified range.
 
-### 参数
+### Parameters
 
-- `range` (`Range`): 获取内容的范围
-  - `from` (`number`): 起始位置
-  - `to` (`number`): 结束位置
-- `options?` (`GetJsonRangeOptions`): `getJsonRange` 方法的选项
-  - `doc?` (`Node`): 可选，使用该文档节点代替当前编辑器文档
+- `range` (`Range`): The range of content to retrieve
+  - `from` (`number`): Start position
+  - `to` (`number`): End position
+- `options?` (`GetJsonRangeOptions`): Options for the `getJsonRange` method
+  - `doc?` (`Node`): Optional, use this document node instead of the current editor document
 
-### 返回值
+### Returns
 
-`any`：Tiptap JSON 内容
+`any`: Tiptap JSON content
 
-### 示例
+### Example
 
 ```ts
-// 读取一段 Tiptap JSON
+// Read a segment of Tiptap JSON
 const snippet = toolkit.getJsonRange({ from: 0, to: 100 })
 ```
 
@@ -298,7 +298,9 @@ const smallerChunks = toolkit.getJsonChunks({ chunkSize: 1000 })
 - `range?` (`Range`): 要读取的范围。默认为整个文档。
   - `from` (`number`): 起始位置
   - `to` (`number`): 结束位置
-- `ignoreSuggestions?` (`boolean`): 当为 `true` 时，不应用预览建议，文档将按原样读取。默认为 `false`。
+- `ignoreSuggestions?` (`boolean`): 当为 `true` 时，不应用预览建议，按原样读取文档。默认为 `false`。
+- `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/ai-toolkit/api-reference/review-options)): 用于决定应读取哪种文档表示形式的审阅模式选项。
+  - 当 `mode` 为 `'trackedChanges'` 时，该方法会在应用跟踪更改后读取文档。
 
 ### 返回值 (`TiptapReadResult`)
 
@@ -311,8 +313,9 @@ const smallerChunks = toolkit.getJsonChunks({ chunkSize: 1000 })
 ### 参数
 
 - `options?` (`TiptapReadChunksOptions`): `tiptapReadChunks` 方法的选项
-  - `chunkSize?` (`number`): 每块最大字符数。默认 32000 字符（8000 令牌 \* 每令牌 4 字符）
-  - `selectableNodeTypes?` (`string[]`): AI 可选择的节点类型名称数组，默认所有块级节点可选择。若设为 `[]`，则仅顶层节点可选
+  - `chunkSize?` (`number`): 每个分块的最大字符数。默认为 32,000 个字符（8000 个 token * 每个 token 4 个字符）
+  - `reviewOptions?` ([`ReviewOptions`](/content-ai/capabilities/ai-toolkit/api-reference/review-options)): 用于决定应对哪种文档表示形式进行分块的审阅模式选项。
+    - 当 `mode` 为 `'trackedChanges'` 时，该方法会在应用跟踪更改后对文档进行分块。
 
 ### 返回值
 

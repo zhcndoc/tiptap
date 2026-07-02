@@ -39,12 +39,11 @@ import AiAgent from '@tiptap-pro/extension-ai-agent'
 import AiSuggestion from '@tiptap-pro/extension-ai-suggestion'
 
 const provider = new AiAgentProvider({
-  appId: 'YOUR_APP_ID',
   token: 'YOUR_JWT_TOKEN',
   reviewOptions: {
-    // 设置扩展为 "aiSuggestion"，以使用 AI Suggestion 预览更改
+    // 将扩展设置为 "aiSuggestion"，以使用 AI Suggestion 预览更改
     extension: 'aiSuggestion',
-    // 可选：设置 autoAccept 为 "never"，始终要求用户审核后再应用更改
+    // 可选：将 autoAccept 设置为 "never"，始终要求用户审核后再应用更改
     autoAccept: 'never',
   },
   // ... 其他选项

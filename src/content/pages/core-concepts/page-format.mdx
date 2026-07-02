@@ -17,7 +17,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ## 内置格式
 
-Pages 使用标准 CSS 像素——1 英寸等于 96 像素——因此下面的尺寸与浏览器实际渲染的结果一致。Pages 扩展会在内部保留小数像素值，以避免布局随累积产生偏移；此处显示的整数为便于阅读而四舍五入后的结果。
+Pages 使用标准 CSS 像素（1 英寸等于 96 像素），因此下面的尺寸与浏览器实际渲染的结果一致。Pages 扩展会在内部保留小数像素值，以避免累计的布局偏移；此处显示的整数已为便于阅读而四舍五入。
 
 | 名称      | 尺寸（cm）      | 尺寸（px）      | 边距（cm：上、右、下、左）               | 边距（px）     |
 | --------- | --------------- | --------------- | -------------------------------------- | -------------- |
@@ -28,7 +28,7 @@ Pages 使用标准 CSS 像素——1 英寸等于 96 像素——因此下面的
 | `Legal`   | 21.59 × 35.56   | 816 × 1345      | 2.54, 2.54, 2.54, 2.54                 | 96, 96, 96, 96 |
 | `Tabloid` | 27.94 × 43.18   | 1056 × 1633     | 2.54, 2.54, 2.54, 2.54                 | 96, 96, 96, 96 |
 
-每种内置格式都自带默认边距和尺寸。若要自定义它们，请定义你自己的格式对象——见下方的[自定义页面格式](#custom-page-formats)。
+每种内置格式都附带默认的边距和尺寸。若要自定义它们，请定义你自己的格式对象。另见下面的 [自定义页面格式](#custom-page-formats)。
 
 ## 使用内置格式
 
@@ -95,27 +95,27 @@ Pages.configure({
 Pages.configure({
   pageFormat: {
     id: 'custom-layout',
-    width: 794, // px
-    height: 1123, // px
+    width: 794, // 像素
+    height: 1123, // 像素
     margins: {
-      top: 60, // px
-      right: 40, // px
-      bottom: 60, // px
-      left: 40, // px
+      top: 60, // 像素
+      right: 40, // 像素
+      bottom: 60, // 像素
+      left: 40, // 像素
     },
   },
 })
 ```
 
-## 编程方式更改页面格式
+## Programmatically change page format
 
-在编辑器初始化后，使用 `setPageFormat` 命令更改页面格式：
+After the editor is initialized, use the `setPageFormat` command to change the page format:
 
 ```js
-// 切换到内置格式
+// Switch to built-in format
 editor.commands.setPageFormat('A4')
 
-// 切换到自定义格式
+// Switch to custom format
 editor.commands.setPageFormat({
   id: 'custom-wide-page-format',
   width: cmToPixels(27.94),

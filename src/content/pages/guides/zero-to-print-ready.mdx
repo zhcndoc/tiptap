@@ -31,10 +31,10 @@ npm install @tiptap-pro/extension-convert-kit \
 
 <Callout title="为什么是这三个包" variant="info">
   `@tiptap-pro/extension-convert-kit` 提供编辑器的节点和标记 schema（段落、
-  标题、列表、图片、标记）。`@tiptap-pro/extension-pages-tablekit` 提供分页安全的
-  表格——这是必须的，因为 ConvertKit 内置的表格并不是为分页而设计的。
-  `@tiptap-pro/extension-pages` 提供页面布局本身。请确保你已经先完成对
-  Tiptap 私有 npm registry 的身份验证；有关设置，请参阅 [Pro Extensions 指南](/guides/pro-extensions)。
+  标题、列表、图片、标记）。`@tiptap-pro/extension-pages-tablekit` 提供分页安全
+  的表格，这是必需的，因为 ConvertKit 内置的表格并不是为分页设计的。
+  `@tiptap-pro/extension-pages` 提供页面布局本身。请先确保你已经通过身份验证，
+  登录到 Tiptap 私有 npm registry；设置方法请参见 [Pro Extensions 指南](/guides/pro-extensions)。
 </Callout>
 
 ## 2. 使用 Pages 设置你的编辑器
@@ -93,7 +93,7 @@ const editor = new Editor({
 
 ### 3a. 配置 DOCX 导出
 
-DOCX 导出扩展完全在浏览器中运行——没有 JWT，没有 App ID，也没有服务器调用。你需要通过一个 `onCompleteExport` 回调来配置它，该回调会接收结果：
+DOCX 导出扩展完全在浏览器中运行：不需要 JWT、不需要 App ID，也不需要服务器调用。你可以通过 `onCompleteExport` 回调进行配置，该回调会接收导出结果：
 
 ```ts
 import { ExportDocx } from '@tiptap-pro/extension-export-docx'
@@ -161,9 +161,8 @@ const editor = new Editor({
       /* ... */
     }),
     ImportDocx.configure({
-      appId: 'YOUR_APP_ID', // 你的 Convert App ID
       token: 'YOUR_JWT', // 由你的服务器生成的 JWT
-      // 可选：导入服务应将文档中提取出的图片上传到哪里
+      // 可选：导入服务应将从文档中提取的图片上传到哪里
       // imageUploadConfig: { url: 'https://your-server.com/upload-image' },
     }),
   ],
@@ -188,20 +187,22 @@ editor
   .run()
 ```
 
-当导入的文档包含页眉和页脚时，Pages 扩展会自动识别它们——它们会在每个渲染页面的顶部和底部显示，无需额外配置。
+当导入的文档包含页眉和页脚时，Pages 扩展会自动识别它们；它们会在每个渲染页面的顶部和底部显示，无需额外配置。
 
-<Callout title="在哪里获取你的 App ID 和 JWT" variant="hint">
-  有关凭据设置，请参阅 [转换安装指南](/conversion/getting-started/install)。JWT 必须在服务器端生成；切勿将你的密钥嵌入浏览器中。
+<Callout title="Where to get your token" variant="hint">
+  参见 [Conversion install guide](/conversion/getting-started/install) 进行设置，以及
+  [Authentication](/authentication) 了解如何签名 token。请在服务端签名 token，且永远不要
+  在浏览器中暴露你的签名密钥。
 </Callout>
 
 ---
 
 ## 接下来的步骤
 
-- [Pages 选项](/pages/core-concepts/options) — Pages 暴露的每个选项
-- [页面页眉和页脚](/pages/core-concepts/page-header-footer) — 不同的首页、奇偶页、通过程序打开/关闭编辑器
-- [PagesTableKit](/pages/guides/pages-tablekit) — 详细介绍分页安全表格，包括最重要的已知限制
-- [限制](/pages/core-concepts/limitations) — 不可拆分内容、Pages 不做什么，以及如何处理每种情况
+- [Pages 选项](/pages/core-concepts/options)：Pages 暴露的每个选项
+- [页面页眉和页脚](/pages/core-concepts/page-header-footer)：不同的首页、奇偶页、以编程方式打开/关闭编辑器
+- [PagesTableKit](/pages/guides/pages-tablekit)：详细介绍可分页安全的表格，包括最重要的已知限制
+- [限制](/pages/core-concepts/limitations)：不可拆分内容、Pages 不做什么，以及如何在每种情况下规避
 
 <Callout title="需要帮助吗？">
   如果你遇到意料之外的问题，请联系支持团队，或者查看文档的其他部分以了解

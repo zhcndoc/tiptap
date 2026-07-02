@@ -23,8 +23,12 @@ import { CodeDemo } from '@/components/CodeDemo'
   <RequirementItem label="2. 安装该包">
     Server AI Toolkit 包是开源的。使用 npm 或您偏好的包管理器，从公共 npm 注册表安装它。
   </RequirementItem>
-  <RequirementItem label="3. 认证服务">
-    配置您的 Content AI 凭据以访问 Server AI Toolkit 服务。
+  <RequirementItem label="3. 验证服务身份">
+    配置一个{' '}
+    <a href="/content-ai/capabilities/server-ai-toolkit/install#set-up-authorization">
+      Tiptap Access Control JWT
+    </a>{' '}
+    以访问 Server AI Toolkit 服务。
   </RequirementItem>
 </Requirements>
 
@@ -39,29 +43,25 @@ import { CodeDemo } from '@/components/CodeDemo'
   src="https://ai-toolkit-demos.vercel.app/server-ai-agent-chatbot"
 />
 
-## 核心功能
-
-服务器 AI 工具包包括构建任何自定义 AI 功能的基础组件：
-
-- **工具**，用于构建能够执行复杂任务的 [AI 代理](/content-ai/capabilities/server-ai-toolkit/agents)。
-- [**工作流**](/content-ai/capabilities/server-ai-toolkit/workflows) 用于单一用途
-  的自动化功能将在即将发布的版本中推出。
-
 <Callout title="兼容任何 AI 模型" variant="info">
-  服务器 AI 工具包可与任何能够生成文本的 AI 模型配合使用，包括开源和自托管模型。
+  使用 Server AI Toolkit 与任何能够生成文本的 AI 模型一起使用，包括开源和自托管模型。
 </Callout>
 
-## 核心功能
+## 快速开始
 
-服务器 AI 工具包提供与 AI 工具包功能对应的服务器端实现。
-
-### AI 代理工具
-
-预构建的工具定义，供 AI 代理调用以在服务器端与文档交互。这些工具兼容 Vercel AI SDK 等流行框架，并为其他提供商提供通用格式。
-
-构建能够通过处理 Tiptap 文档执行复杂任务的 [AI 代理](/content-ai/capabilities/server-ai-toolkit/agents)。
+使用这些指南快速入门：
 
 <div className="grid md:grid-cols-2 gap-6 mt-6 md:items-start">
+  <Link
+    href="/content-ai/capabilities/server-ai-toolkit/install"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">安装指南</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">在你的应用中设置 Server AI Toolkit</div>
+  </Link>
   <Link
     href="/content-ai/capabilities/server-ai-toolkit/agents/ai-agent-chatbot"
     className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
@@ -74,39 +74,16 @@ import { CodeDemo } from '@/components/CodeDemo'
       构建能够编辑文档并通过聊天互动的对话式 AI。
     </div>
   </Link>
-  <Link
-    href="/content-ai/capabilities/server-ai-toolkit/advanced-guides/custom-nodes"
-    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
-  >
-    <div className="flex items-center justify-between mb-2">
-      <h4 className="font-semibold text-black">自定义节点</h4>
-      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">更多 →</span>
-    </div>
-    <div className="text-sm text-grayAlpha-700">
-      为自定义节点和标记配置架构感知，以便您的 AI 可以可靠地生成它们。
-    </div>
-  </Link>
 </div>
 
-### 工作流
+### 以效率为核心构建
 
-服务器端工作流将在 Server AI Toolkit 的即将发布版本中提供。请查看 [工作流](/content-ai/capabilities/server-ai-toolkit/workflows) 页面了解当前状态。
+Server AI Toolkit 适用于对成本敏感的使用场景。可用的工具，如 `tiptapEdit` 和 `proofread`，采用高效格式，使 AI 能够快速应用编辑并保持较低的 token 消耗。
 
-- 校对文档
-- 添加评论
-- 替换内容或进行重点编辑
-- 总结和分析文档
-
-### 模式感知
-
-我们的模式感知技术使 AI 模型能够自动理解文档结构。确保 AI 生成有效内容，包括自定义元素。
-
-### Tiptap Shorthand 和 Tiptap Edit
-
-服务器 AI 工具包以效率为设计初衷，适应对成本敏感的使用场景。
+[Tiptap Shorthand](/content-ai/capabilities/server-ai-toolkit/advanced-guides/tiptap-shorthand)（alpha）是一种用于编码 Tiptap 文档的 token 高效格式。它在不牺牲准确性的前提下，可将 AI token 成本降低高达 80%。
 
 它利用专门的编辑格式 Tiptap Edit，让 AI 进行小而精准的编辑，无需替换整个文档。
 
-[Tiptap Shorthand](/content-ai/capabilities/server-ai-toolkit/advanced-guides/tiptap-shorthand) 是一种高效编码文档结构的格式，帮助您在不牺牲准确度的前提下，将 AI 令牌成本降低多达 80%。
+Server AI Toolkit 可以作为云服务使用，也可以在本地部署，完全运行在你自己的基础设施上。
 
 <EnterpriseCalloutAuto variant="server-ai-toolkit" renderMode="inline" />

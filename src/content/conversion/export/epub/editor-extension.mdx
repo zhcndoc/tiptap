@@ -36,7 +36,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 Conversion 扩展发布在 Tiptap 的私有 npm 注册表中。请按照 [私有注册表指南](/guides/pro-extensions) 集成这些扩展。
 
-完成后，你就可以安装并导入 **Export EPUB** 扩展包。
+完成后，你就可以安装并导入 **导出 EPUB** 扩展包。
 
 ```bash
 npm i @tiptap-pro/extension-export-epub
@@ -59,7 +59,6 @@ const editor = new Editor({
     ExportEpub.configure({
       endpoint: 'https://api.tiptap.dev/v2/convert',
       token: 'YOUR_TOKEN',
-      appId: 'YOUR_APP_ID',
       styleOverrides: {},
       headers: {},
       footers: {},
@@ -75,18 +74,17 @@ const editor = new Editor({
 })
 ```
 
-| 参数               | 类型                     | 描述                                                                                      | 默认值                                |
-| ------------------ | ------------------------ | ----------------------------------------------------------------------------------------- | ------------------------------------- |
-| `endpoint`         | `string`                 | 用于转换的 Tiptap API 端点                                                           | `'https://api.tiptap.dev/v2/convert'` |
-| `token`            | `string`                 | 用于身份验证的 Tiptap JWT                                                                | `''`                                  |
-| `appId`            | `string`                 | 用于身份验证的 Tiptap App ID                                                             | `''`                                  |
-| `styleOverrides`   | `Record<string, string>` | 要应用到导出的样式覆盖                                                           | `undefined`                           |
-| `headers`          | `HeaderConfig`           | 导出文档的页眉配置                                                   | `undefined`                           |
-| `footers`          | `FooterConfig`           | 导出文档的页脚配置                                                   | `undefined`                           |
-| `pageSize`         | `PageSize`               | 页面尺寸配置                                                                          | `undefined`                           |
-| `pageMargins`      | `PageMargins`            | 页面边距配置                                                                       | `undefined`                           |
-| `customNodes`      | `CustomNodeDefinition[]` | 用于基于 DOCX 的转换的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`） | `undefined`                           |
-| `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调                                               | 未提供时抛出错误          |
+| 参数               | 类型                     | 描述                                                                                               | 默认值                                |
+| ------------------ | ------------------------ | -------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `endpoint`          | `string`                 | 用于转换的 Tiptap API 端点                                                                      | `'https://api.tiptap.dev/v2/convert'` |
+| `token`             | `string`                 | 用于身份验证的 Tiptap JWT                                                                     | `''`                                  |
+| `styleOverrides`    | `Record<string, string>` | 要应用于导出的样式覆盖                                                                   | `undefined`                           |
+| `headers`           | `HeaderConfig`           | 导出文档的页眉配置                                                                           | `undefined`                           |
+| `footers`           | `FooterConfig`           | 导出文档的页脚配置                                                                           | `undefined`                           |
+| `pageSize`          | `PageSize`               | 页面尺寸配置                                                                                | `undefined`                           |
+| `pageMargins`       | `PageMargins`            | 页面边距配置                                                                               | `undefined`                           |
+| `customNodes`       | `CustomNodeDefinition[]` | 基于 DOCX 转换的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`） | `undefined`                           |
+| `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调                                                                     | 如果未提供则抛出错误                   |
 
 ### HeaderConfig
 
@@ -140,16 +138,15 @@ exportEpub: (options?: ExportEpubCommandOptions) => ReturnType
 
 `ExportEpubCommandOptions` 接口扩展了 `ExportEpubOptions`，因此每个配置项都可以在单次命令调用中被覆盖：
 
-| 属性               | 类型                     | 描述                                               |
-| ------------------ | ------------------------ | --------------------------------------------------- |
+| Property           | Type                     | Description                                               |
+| ------------------ | ------------------------ | --------------------------------------------------------- |
 | `endpoint`         | `string`                 | 覆盖此特定导出的 API 端点        |
 | `token`            | `string`                 | 覆盖此特定导出的 JWT 令牌           |
-| `appId`            | `string`                 | 覆盖此特定导出的 App ID              |
 | `styleOverrides`   | `Record<string, string>` | 覆盖此特定导出的样式覆盖         |
 | `headers`          | `HeaderConfig`           | 覆盖此特定导出的页眉配置    |
-| `footers`          | `FooterConfig`           | 覆盖此特定导出的页脚配置    |
+| `footers`          | `FooterConfig`           | 覆盖此特定导出的页脚配置            |
 | `pageSize`         | `PageSize`               | 覆盖此特定导出的页面尺寸               |
-| `pageMargins`      | `PageMargins`            | 覆盖此特定导出的页面边距            |
+| `pageMargins`      | `PageMargins`           | 覆盖此特定导出的页边距            |
 | `customNodes`      | `CustomNodeDefinition[]` | 覆盖此特定导出的自定义节点定义 |
 | `onCompleteExport` | `(result: Blob) => void` | 覆盖此特定导出的回调            |
 
@@ -161,7 +158,6 @@ const editor = new Editor({
     // 其他扩展 ...
     ExportEpub.configure({
       token: 'YOUR_TOKEN',
-      appId: 'YOUR_APP_ID',
       onCompleteExport(result) {
         // 下载 EPUB 文件
         const url = URL.createObjectURL(result)
@@ -201,9 +197,9 @@ editor
 
 ## 预期内容
 
-- **需要认证**（`token` JWT 和 `appId`）。请在服务器端生成 JWT。请参阅 [转换安装指南](/conversion/getting-started/install)。
-- **需要处理的 HTTP 响应：** `401`（缺少或无效的 JWT）、`403`（该操作不允许你的应用执行——通常是你的计划未包含的格式）、`5xx`（临时性服务器端错误；请使用退避策略重试）。
-- **每个请求在响应前都会端到端处理完成。** 对于较长的文档，请预留更长的往返时间。
+- **需要身份验证**（`token` JWT）。在服务端生成 JWT。请参阅 [Conversion 安装指南](/conversion/getting-started/install)。
+- **需要处理的 HTTP 响应：**`401`（缺少或无效的 JWT）、`403`（你的应用不允许执行该操作——通常是你的套餐不包含的格式）、`5xx`（临时性服务端错误；请使用退避重试）。
+- **每个请求都会在响应前端到端处理完毕。**对于长文档，请预留更长的往返时间。
 
 ## 不应期待的内容
 

@@ -4,8 +4,8 @@ tags:
   - type: 开始
   - type: 测试版
 meta:
-  title: 有序列表编号格式 | Tiptap Conversion
-  description: 定义在 DOCX 导出后仍能保留的多级有序列表编号格式——基础样式、标记模板、对齐、缩进和字体。
+  title: 有序列表编号格式 | Tiptap 转换
+  description: 定义可在 DOCX 导出中保留的多级有序列表编号格式，涵盖基础样式、标记模板、对齐、缩进和字体。
   category: 转换
 ---
 
@@ -25,7 +25,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
   </RequirementItem>
 </Requirements>
 
-`@tiptap-pro/extension-export-docx` 接受一个可选的 **编号格式定义** 注册表——多级标记样式、标记文本、对齐方式、缩进和字体——通过最外层 `<ol>` 上的属性按列表选择。具有匹配 id 的列表会导出为对应的定义；没有对应定义的列表会作为普通的 `1. 2. 3.` 导出。
+`@tiptap-pro/extension-export-docx` 接受一个可选的 **编号格式定义** 注册表（多级标记样式、标记文本、对齐、缩进和字体），并通过外层 `<ol>` 上的一个属性按列表进行选择。具有匹配 id 的列表会按对应定义导出；没有对应定义的列表则按普通 `1. 2. 3.` 导出。
 
 此功能为可选启用。未提供 `numberingFormats` 的使用者不会看到任何行为变化。
 
@@ -33,15 +33,15 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 ## 提供了什么
 
-| 导出                                                                              | 包                                  | 作用                                                                                                                                                                                                                                                                                                                                   |
-| --------------------------------------------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OrderedListNumbering`                                                            | `@tiptap-pro/extension-convert-kit` | Tiptap 扩展，为 `orderedList` 添加 `numberingFormat` 属性，并暴露 `setOrderedListNumberingFormat(id)` 和 `toggleOrderedListWithFormat(format?)` 命令，同时通过 `editor.storage.orderedListNumbering` 跟踪选区中的活动格式。由 `ConvertKit` 注册（通过 `orderedListNumbering: true`，或带有 `defaultFormat` / `formats` 的选项对象选择启用）。在粘贴、JSON、协作同步和程序化编辑时强制仅最外层列表参与编号。 |
-| `generateNumberingFormatCss(formats, options?)`                                   | `@tiptap-pro/extension-convert-kit` | 纯净、无依赖的函数，返回用于编辑器预览的 CSS 文本——同一注册表，同样的视觉效果。                                                                                                                                                                                                                                                     |
-| `NumberingFormatDefinition`, `NumberingLevelDefinition`, `NumberingMarkerFont`    | `@tiptap-pro/extension-convert-kit` | 你的注册表所遵循的数据结构。在结构上与 `ExportDocx` 的 `numberingFormats` 配置兼容。                                                                                                                                                                                                                                                 |
-| `ExportDocx.configure({ numberingFormats })`                                      | `@tiptap-pro/extension-export-docx` | 将注册表传给导出器，使 `.docx` 包含匹配的定义。                                                                                                                                                                                                                                                                                        |
-| `LevelFormat`, `IRunOptions`, `PositiveUniversalMeasure`                          | `@tiptap-pro/extension-export-docx` | 从 `docx` 重新导出，因此你无需再添加第二个依赖。                                                                                                                                                                                                                                                                                      |
+| 导出                                                                             | 包                                   | 用途                                                                                                                                                                                                                                                                                                                                   |
+| -------------------------------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OrderedListNumbering`                                                         | `@tiptap-pro/extension-convert-kit` | Tiptap 扩展，为 `orderedList` 添加 `numberingFormat` 属性，并提供 `setOrderedListNumberingFormat(id)` 和 `toggleOrderedListWithFormat(format?)` 命令，还会通过 `editor.storage.orderedListNumbering` 跟踪光标选区处的活动格式。由 `ConvertKit` 注册（通过 `orderedListNumbering: true`，或带有 `defaultFormat` / `formats` 的选项对象启用）。在粘贴、JSON、协作同步和程序化编辑中强制仅最外层编号。 |
+| `generateNumberingFormatCss(formats, options?)`                                | `@tiptap-pro/extension-convert-kit` | 纯函数、无依赖，返回用于编辑器预览的 CSS 文本：相同的注册表，相同的视觉效果。                                                                                                                                                                                                                          |
+| `NumberingFormatDefinition`, `NumberingLevelDefinition`, `NumberingMarkerFont` | `@tiptap-pro/extension-convert-kit` | 你的注册表遵循的数据结构。结构上与 `ExportDocx` 的 `numberingFormats` 配置兼容。                                                                                                                                                                                                                              |
+| `ExportDocx.configure({ numberingFormats })`                                   | `@tiptap-pro/extension-export-docx` | 将注册表传递给导出器，使 `.docx` 包含匹配的定义。                                                                                                                                                                                                                                                        |
+| `LevelFormat`, `IRunOptions`, `PositiveUniversalMeasure`                       | `@tiptap-pro/extension-export-docx` | 从 `docx` 重新导出，因此你无需再添加第二个依赖项。                                                                                                                                                                                                                                                                             |
 
-面向最终用户的选择器 UI 不属于这些包的一部分——这属于应用层职责，并取决于你的组件库。
+面向最终用户的选择器 UI 并不属于这些包；这属于应用层关注点，取决于你的组件库。
 
 ## 快速开始
 
@@ -50,7 +50,7 @@ import { Editor } from '@tiptap/core'
 import { ConvertKit, type NumberingFormatDefinition } from '@tiptap-pro/extension-convert-kit'
 import { ExportDocx, LevelFormat } from '@tiptap-pro/extension-export-docx'
 
-// 1. 定义你的注册表——唯一事实来源，下面两侧都会使用。
+// 1. 定义你的注册表：单一事实来源，供下面两侧共用。
 const MY_FORMATS: NumberingFormatDefinition[] = [
   {
     id: 'decimal-paren',
@@ -94,7 +94,7 @@ const editor = new Editor({
 editor.chain().focus().toggleOrderedListWithFormat('outline').run()
 ```
 
-想自己管理样式表？省略 `formats`，改为从 [`generateNumberingFormatCss`](#generatenumberingformatcssformats-options) 注入 CSS —— 两条路径会生成相同的标记。
+更喜欢自己管理样式表？那就省略 `formats`，改为从 [`generateNumberingFormatCss`](#generatenumberingformatcssformats-options) 注入 CSS。这两种方式会生成相同的标记。
 
 ## 启用有序列表编号
 
@@ -119,12 +119,12 @@ ConvertKit.configure({
 })
 ```
 
-| 选项            | 默认值  | 说明                                                                                                                                                                                                                                                                                                                                              |
-| --------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `defaultFormat` | `null`  | 应用于新创建有序列表的编号格式 id（`numberingFormat` 属性默认值）。仅最外层列表会被格式化；嵌套列表保持不变。                                                                                                                                                                                                                                   |
-| `formats`       | `null`  | 用于生成并注入编辑器预览 CSS 的编号格式定义——与传给 `ExportDocx.configure({ numberingFormats })` 的数组相同。使用相同格式配置的编辑器共享一份预览样式表，而使用不同格式配置的编辑器则各自拥有独立样式表，因此每个编辑器始终显示正确的标记；共享样式表仅在最后一个使用它的编辑器被销毁后才会移除。 |
+| Option          | Default | Description                                                                                                                                                                                                                                                                                                                                              |
+| --------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `defaultFormat` | `null`  | 应用于新建有序列表的编号格式 id（`numberingFormat` 属性的默认值）。仅对最外层列表进行格式化；嵌套列表保持不变。                                                                                                                                                                                                                                                   |
+| `formats`       | `null`  | 用于生成并注入编辑器预览 CSS 的编号格式定义，与你传给 `ExportDocx.configure({ numberingFormats })` 的数组相同。使用相同格式配置的编辑器会共享一份预览样式表，而使用不同格式配置的编辑器则会获得各自独立的样式表，因此每个编辑器始终显示正确的标记；共享样式表只有在最后一个使用它的编辑器被销毁后才会移除。 |
 
-在这里传入 `formats` 等同于你自己调用 [`generateNumberingFormatCss`](#generatenumberingformatcssformats-options) 并注入结果——任选其一，取决于你的设置。
+在这里传入 `formats`，等同于你自己调用 [`generateNumberingFormatCss`](#generatenumberingformatcssformats-options) 并注入其结果：按你的设置选择最合适的方式即可。
 
 ## 应用格式
 
@@ -139,7 +139,7 @@ editor.chain().focus().setOrderedListNumberingFormat(null).run()
 
 ### 以某种格式开始新列表
 
-`setOrderedListNumberingFormat` 只会作用于选区**已经**所在的列表。若要从非列表选区以所选格式开始一个编号列表，请使用 `toggleOrderedListWithFormat(format?)`——它会在一次调用中创建有序列表并应用格式，这正是“选择一种格式来开始编号列表”的工具栏按钮的自然行为：
+`setOrderedListNumberingFormat` 只会作用于选区**已经**位于其中的列表。要从非列表选区开始以所选格式创建编号列表，请使用 `toggleOrderedListWithFormat(format?)`。它会在一次调用中创建有序列表并应用格式，这正是“选择一种格式来开始编号列表”工具栏按钮的自然操作：
 
 ```ts
 // 从段落开始：创建一个有序列表并设置其格式。
@@ -151,7 +151,7 @@ editor.chain().focus().toggleOrderedListWithFormat().run()
 
 当选区已经位于有序列表中时，该命令会切换关闭该列表，与 `toggleOrderedList` 的行为一致。链式调用 `toggleOrderedList().setOrderedListNumberingFormat(format)` 会得到相同的最终状态；只是单个命令更方便，也会处理关闭切换的情况。
 
-要在工具栏中反映当前活动格式，可从扩展的 storage 中读取——它会随着选区和文档变化保持同步：
+要在工具栏中反映当前激活的格式，请从扩展的 storage 中读取它；当选区和文档发生变化时，它会保持同步：
 
 ```ts
 const activeFormatId = editor.storage.orderedListNumbering.activeNumberingFormat
@@ -190,13 +190,13 @@ ConvertKit 的类型使用普通字符串字面量，因此该包不会引入 `d
 
 | 字段          | 默认值                  | 描述                                                                                                                                                                                                                                                               |
 | -------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `baseStyle`    | (必需)               | 计数器字形，对应于匹配的 docx [`LevelFormat`](https://docx.js.org/api/enums/LevelFormat.html) 值。拉丁/数字样式（`'decimal'`、`'decimalZero'`、`'upperLetter'`、`'lowerLetter'`、`'upperRoman'`、`'lowerRoman'`、`'none'`）以及许多区域样式（例如 `'hebrew1'`、`'thaiNumbers'`、`'hindiNumbers'`、`'japaneseCounting'`、`'koreanDigital'`、`'chineseCounting'`、`'ideographDigital'`）会映射到匹配的 CSS 计数器样式，因此预览会渲染其原生字形。没有可靠 CSS 等效项的样式（例如 `'chicago'`、`'ordinal'`、`'cardinalText'`）——以及任何未识别的字符串——会在**仅编辑器预览中**回退为 `decimal`；导出的 `.docx` 始终会保留你设置的精确 `LevelFormat`。 |
-| `textTemplate` | (必需)               | 使用 Word 的 `<w:lvlText>` 语法的标记文本——见下文。                                                                                                                                                                                                               |
-| `startAt`      | `1`                      | 初始计数值。                                                                                                                                                                                                                                                    |
-| `alignment`    | `'left'`                 | 号码区域内的标记文本对齐方式。                                                                                                                                                                                                                             |
-| `numberIndent` | Word 每层级的默认值 | 从页面边距到标记的距离。Twips 数值或 docx 风格的度量字符串（`'0.63cm'`、`'0.25in'`、`'18pt'`）。                                                                                                                                              |
-| `textIndent`   | Word 每层级的默认值 | 从页面边距到正文文本的距离。应大于 `numberIndent`。                                                                                                                                                                                    |
-| `markerFont`   | —                        | 仅标记的运行格式（参见下方的 [`NumberingMarkerFont`](#numberingmarkerfont)）。在 DOCX 导出中会保留，并在编辑器预览中由 `generateNumberingFormatCss` 反映。                                                                                        |
+| `baseStyle`    | (必填)                   | 计数器字形，对应于匹配的 docx [`LevelFormat`](https://docx.js.org/api/enums/LevelFormat.html) 值。拉丁/数字样式（`'decimal'`、`'decimalZero'`、`'upperLetter'`、`'lowerLetter'`、`'upperRoman'`、`'lowerRoman'`、`'none'`）以及许多区域样式（例如 `'hebrew1'`、`'thaiNumbers'`、`'hindiNumbers'`、`'japaneseCounting'`、`'koreanDigital'`、`'chineseCounting'`、`'ideographDigital'`）会映射到匹配的 CSS 计数器样式，因此预览会渲染其原生字形。没有对应 CSS 等价形式的样式（例如 `'chicago'`、`'ordinal'`、`'cardinalText'`），以及任何无法识别的字符串，都会在**仅编辑器预览中**回退为 `decimal`；导出的 `.docx` 始终会保留你设置的精确 `LevelFormat`。 |
+| `textTemplate` | (必填)                   | 使用 Word 的 `<w:lvlText>` 语法的标记文本（见下文）。                                                                                                                                                                                                               |
+| `startAt`      | `1`                      | 初始计数值。                                                                                                                                                                                                                                                      |
+| `alignment`    | `'left'`                 | 数字区域内的标记文本对齐方式。                                                                                                                                                                                                                             |
+| `numberIndent` | Word 的每级默认值        | 从页面边距到标记的距离。Twips 数值或 docx 风格的度量字符串（`'0.63cm'`、`'0.25in'`、`'18pt'`）。                                                                                                                                              |
+| `textIndent`   | Word 的每级默认值        | 从页面边距到正文文本的距离。应大于 `numberIndent`。                                                                                                                                                                                    |
+| `markerFont`   | 无                       | 仅标记的 run 格式（见下文 [`NumberingMarkerFont`](#numberingmarkerfont)）。可随 DOCX 导出保留，并会在编辑器预览中由 `generateNumberingFormatCss` 反映。                                                                                        |
 
 ## `NumberingMarkerFont`
 
@@ -240,9 +240,9 @@ interface NumberingMarkerFont {
 | 第 0 层的 `'§ %1 —'`    | `§ 1 —`                   |
 | 第 2 层的 `'(%3)'`      | `(1)`                     |
 
-## 约定的模式 — 仅最外层
+## 架构约定：仅限最外层
 
-`numberingFormat` 属性只应放在**最外层** `<ol>` 上。一个定义会声明整个多级列表的所有嵌套层级。`OrderedListNumbering` 会在解析时强制执行这一点——粘贴的 HTML 如果在嵌套 `<ol>` 上带有 `data-numbering-format`，该属性会被移除。
+`numberingFormat` 属性只应放在**最外层** `<ol>` 上。一个定义会声明整个多级列表的所有嵌套层级。`OrderedListNumbering` 会在解析时强制执行这一点：如果粘贴的 HTML 中，嵌套的 `<ol>` 上带有 `data-numbering-format`，该属性会被移除。
 
 同一个最外层 `<ol>` 下的所有嵌套层级共享一个计数器作用域，并且子级会在父级递增时重新开始，就像 Word 的行为一样。
 
@@ -268,7 +268,7 @@ interface NumberingMarkerFont {
 
 ## `generateNumberingFormatCss(formats, options?)`
 
-返回 CSS 文本——由你决定如何注入它（`<style>` 标签、CSS-in-JS 层、由构建流水线提供的样式表等）。该函数是纯函数且无依赖，适合在启动时或注册表发生变化时调用。
+返回 CSS 文本，由你决定如何注入（例如 `<style>` 标签、CSS-in-JS 层、由构建流水线提供的样式表等）。该函数是纯函数且无依赖，可安全地在启动时或注册表发生变化时调用。
 
 ```ts
 generateNumberingFormatCss(formats, {
@@ -286,9 +286,9 @@ generateNumberingFormatCss(formats, {
 
 ## 解析规则
 
-- 匹配到的 id 会渲染该多级列表的每一层——包括所有嵌套的 `<ol>`——并使用对应的定义。
-- 未匹配到的 id（拼写错误、缺少属性、`numberingFormats` 为空）会渲染为普通的 `1. 2. 3.` 编号。
-- 引用相同格式的同级多级列表会独立重新开始——每个列表都从自己的 `startAt` 开始。
+- 匹配的 id 会使用相应的定义来渲染该多级列表的每一层（包括所有嵌套的 `<ol>`）。
+- 未匹配的 id（拼写错误、缺少属性、空的 `numberingFormats`）会渲染为普通的 `1. 2. 3.` 编号。
+- 引用相同格式的同级多级列表会独立重新开始，每个都从各自的 `startAt` 开始。
 
 ## 已知限制
 
@@ -305,6 +305,6 @@ generateNumberingFormatCss(formats, {
 
 ## 另请参阅
 
-- [编辑器扩展概览](/conversion/export/docx/editor-extension) — 基础 `ExportDocx` 配置。
-- [样式](/conversion/export/docx/styles) — 段落样式、标题、列表段落样式的 `styleOverrides`。
-- [REST API](/conversion/export/docx/rest-api) — 服务端转换端点。
+- [编辑器扩展概览](/conversion/export/docx/editor-extension): 基础 `ExportDocx` 配置。
+- [样式](/conversion/export/docx/styles): 段落样式、标题、列表段落样式的 `styleOverrides`。
+- [REST API](/conversion/export/docx/rest-api): 服务器端转换端点。

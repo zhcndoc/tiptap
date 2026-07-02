@@ -13,7 +13,7 @@ sidebars:
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-PageKit 是一个便捷扩展，它将 `Pages`、分页安全的 `TableKit` 和 `PageBreak` 封装到一次注册中，让你可以在一个地方统一配置它们。默认情况下，**只注册 Pages 和 PageBreak** —— `TableKit` 需要显式启用：传入任意 options 对象（例如 `table: {}`）即可启用它。PageKit **不包含** `ConvertKit` —— ConvertKit 是一个需要单独安装的包，你可以将它与 PageKit 配合使用。
+PageKit 是一个便捷扩展，它将 `Pages`、分页安全的 `TableKit` 以及 `PageBreak` 封装到一次注册中，这样你就可以在同一处进行配置。默认情况下，**只会注册 Pages 和 PageBreak**。`TableKit` 需要显式启用：传入任意选项对象（例如 `table: {}`）即可启用它。PageKit **不包含** `ConvertKit`；ConvertKit 是一个单独安装的包，需要与 PageKit 配合使用。
 
 <CodeDemo isPro path="/Extensions/PagesPageKit" />
 
@@ -51,7 +51,7 @@ const editor = new Editor({
       },
       pagebreak: {
         // 传递给 PageBreak（可选）
-        label: 'Page break',
+        label: '页面分隔符',
       },
     }),
   ],

@@ -33,25 +33,26 @@ Hocuspocus 提供了钩子来扩展其功能并将其集成到现有应用程序
 
 | Hook                       | 说明                                       | 链接                                                  |
 | -------------------------- |-------------------------------------------|-------------------------------------------------------|
-| `beforeHandleMessage`      | 处理消息之前                              | [阅读更多](/hocuspocus/server/hooks#before-handle-message)      |
-| `beforeHandleAwareness`    | 应用传入的 awareness 更新之前              | [阅读更多](/hocuspocus/server/hooks#before-handle-awareness)  |
-| `onConnect`                | 连接建立时                                | [阅读更多](/hocuspocus/server/hooks#on-connect)                 |
-| `connected`                | 连接建立后                                | [阅读更多](/hocuspocus/server/hooks#connected)                  |
-| `onAuthenticate`           | 需要身份验证时                            | [阅读更多](/hocuspocus/server/hooks#on-authenticate)            |
-| `onAwarenessUpdate`        | awareness 发生变化时                      | [阅读更多](/hocuspocus/server/hooks#on-awareness-update)        |
-| `onLoadDocument`           | 创建新文档期间                            | [阅读更多](/hocuspocus/server/hooks#on-load-document)           |
-| `afterLoadDocument`        | 文档创建后                                | [阅读更多](/hocuspocus/server/hooks#after-load-document)        |
-| `onChange`                 | 文档发生变化时                            | [阅读更多](/hocuspocus/server/hooks#on-change)                  |
-| `onDisconnect`             | 连接关闭时                                | [阅读更多](/hocuspocus/server/hooks#on-disconnect)              |
-| `onListen`                 | 服务器初始化时                            | [阅读更多](/hocuspocus/server/hooks#on-listen)                  |
-| `onDestroy`                | 服务器即将被销毁时                        | [阅读更多](/hocuspocus/server/hooks#ondestroy)                 |
-| `onConfigure`              | 服务器完成配置时                          | [阅读更多](/hocuspocus/server/hooks#on-configure)               |
-| `onRequest`                | 有 HTTP 请求进入时                         | [阅读更多](/hocuspocus/server/hooks#on-request)                 |
-| `onStoreDocument`          | 文档已更改时                              | [阅读更多](/hocuspocus/server/hooks#on-store-document)          |
-| `onUpgrade`                | WebSocket 连接升级时                      | [阅读更多](/hocuspocus/server/hooks#on-upgrade)                 |
-| `onStateless`              | 收到 Stateless 消息时                     | [阅读更多](/hocuspocus/server/hooks#on-stateless)               |
-| `beforeBroadcastStateless` | 广播无状态消息之前                        | [阅读更多](/hocuspocus/server/hooks#before-broadcast-stateless) |
-| `afterUnloadDocument`      | 文档关闭时                                | [阅读更多](/hocuspocus/server/hooks#after-unload-document)      |
+| `beforeHandleMessage`      | Before handling a message                 | [Read more](/hocuspocus/server/hooks#before-handle-message)      |
+| `afterHandleMessage`       | After an inbound message has been handled | [Read more](/hocuspocus/server/hooks#after-handle-message)       |
+| `beforeHandleAwareness`    | Before applying an inbound awareness update | [Read more](/hocuspocus/server/hooks#before-handle-awareness)  |
+| `onConnect`                | When a connection is established          | [Read more](/hocuspocus/server/hooks#on-connect)                 |
+| `connected`                | After a connection has been establied     | [Read more](/hocuspocus/server/hooks#connected)                  |
+| `onAuthenticate`           | When authentication is required           | [Read more](/hocuspocus/server/hooks#on-authenticate)            |
+| `onAwarenessUpdate`        | When awareness changed                    | [Read more](/hocuspocus/server/hooks#on-awareness-update)        |
+| `onLoadDocument`           | During the creation of a new document     | [Read more](/hocuspocus/server/hooks#on-load-document)           |
+| `afterLoadDocument`        | After a document is created               | [Read more](/hocuspocus/server/hooks#after-load-document)        |
+| `onChange`                 | When a document has changed               | [Read more](/hocuspocus/server/hooks#on-change)                  |
+| `onDisconnect`             | When a connection was closed              | [Read more](/hocuspocus/server/hooks#on-disconnect)              |
+| `onListen`                 | When the server is initialized            | [Read more](/hocuspocus/server/hooks#on-listen)                  |
+| `onDestroy`                | When the server will be destroyed         | [Read more](/hocuspocus/server/hooks#ondestroy)                 |
+| `onConfigure`              | When the server has been configured       | [Read more](/hocuspocus/server/hooks#on-configure)               |
+| `onRequest`                | When a HTTP request comes in              | [Read more](/hocuspocus/server/hooks#on-request)                 |
+| `onStoreDocument`          | When a document has been changed          | [Read more](/hocuspocus/server/hooks#on-store-document)          |
+| `onUpgrade`                | When the WebSocket connection is upgraded | [Read more](/hocuspocus/server/hooks#on-upgrade)                 |
+| `onStateless`              | When the Stateless message is received    | [Read more](/hocuspocus/server/hooks#on-stateless)               |
+| `beforeBroadcastStateless` | Before broadcast a stateless message      | [Read more](/hocuspocus/server/hooks#before-broadcast-stateless) |
+| `afterUnloadDocument`      | When a document is closed                 | [Read more](/hocuspocus/server/hooks#after-unload-document)      |
 
 ## 使用示例
 
@@ -120,6 +121,51 @@ const server = new Server({
 
       throw error;
     }
+  },
+});
+
+server.listen();
+```
+
+### afterHandleMessage
+
+The `afterHandleMessage` hooks are called after an inbound message has been handled — that is, after the Yjs update has been applied to the document. It is the counterpart to `beforeHandleMessage`. The hook fires whether the apply resolved or threw, but it does **not** fire when `beforeHandleMessage` rejected the message (in that case the message is never applied).
+
+Use it to react to applied updates, e.g. for metrics, logging, or triggering side effects once the document state has changed.
+
+**Hook payload**
+
+The `data` passed to the `afterHandleMessage` hook has the following attributes:
+
+```js
+import { URLSearchParams } from "url";
+import { Doc } from "yjs";
+import type { Connection } from "@hocuspocus/server";
+
+const data = {
+  clientsCount: number,
+  context: any,
+  document: Doc,
+  documentName: string,
+  instance: Hocuspocus,
+  requestHeaders: Headers,
+  requestParameters: URLSearchParams,
+  update: Uint8Array,
+  socketId: string,
+  connection: Connection,
+};
+```
+
+Context contains the data provided in former `onConnect` hooks.
+
+**Example**
+
+```js
+import { Server } from "@hocuspocus/server";
+
+const server = new Server({
+  async afterHandleMessage({ documentName, context }) {
+    console.log(`Applied an update to "${documentName}" for ${context.user?.name}`);
   },
 });
 
@@ -678,7 +724,7 @@ const ydoc = TiptapTransformer.toYdoc(
 );
 ```
 
-若要导入 HTML，需要先[转为 Tiptap 兼容的 JSON](https://tiptap.dev/api/utilities/html/#generate-json-from-html)。
+If you want to import HTML, you have to [convert it to Tiptap-compatible JSON first](/editor/api/utilities/html#generating-json-from-html)
 
 但我们期望你从 `onLoadDocument` 钩子返回一个 Y.js 文档（或者自 v4 起返回原始的 `Uint8Array` Yjs 更新），无论它来自何处。
 

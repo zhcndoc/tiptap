@@ -22,7 +22,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
         从您的账户开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Starter 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 配置 Convert 应用">
-        要使用 Convert REST API，请从您的 [仪表板](https://cloud.tiptap.dev/v2/cloud/convert) 获取应用 ID 和 Convert 密钥。
+        使用带有 `aud: "Convert"` 的签名令牌对 REST 调用进行身份验证。参见 [身份验证](/authentication)。
     </RequirementItem>
 </Requirements>
 
@@ -43,7 +43,6 @@ Markdown 导入 API 将 `.md` 文件转换为 Tiptap JSON 格式。
 ```bash
 curl -X POST "https://api.tiptap.dev/v2/convert/import/markdown" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -F "file=@/path/to/file.md"
 ```
 
@@ -53,10 +52,9 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/markdown" \
 
 ### 必需的头部信息
 
-| 名称             | 描述                                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------ |
-| `Authorization`  | 用于验证请求的 JWT 令牌，例如 `Bearer your-jwt-token`                                                   |
-| `X-App-Id`       | Convert 应用 ID，来自 Convert 设置页面：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert) |
+| Name            | Description                                                                                                                               |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization` | 用于对请求进行身份验证的 JWT 令牌。示例：`Bearer your-jwt-token`                                                               |
 
 ### 请求体
 

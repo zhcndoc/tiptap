@@ -5,14 +5,14 @@ title: 协作 API
 meta:
   title: 协作 API | Tiptap 编辑器文档
   description: 协作 API
-  category: Editor
+  category: 编辑器
 ---
 
 ## 向文档添加初始内容
 
 为了向文档添加初始内容（或创建空文档），你可以使用我们的创建文档 API。
 
-请注意，你需要将 `APP_ID`、`DOCUMENT_NAME` 和 `API_SECRET` 替换为你自己的值。`APP_ID` 是你的文档服务器 ID，在 [Cloud 控制台](https://cloud.tiptap.dev/v2/configuration/document-server) 中标记为 "Document server ID"。
+请注意，你需要将 `APP_ID` 和 `DOCUMENT_NAME` 替换为你自己的值，并将 `YOUR_JWT` 替换为一个携带 `Documents:Api:All` 的签名令牌（参见 [身份验证](/authentication)）。请将该令牌保留在服务端，因为它授予完整的 API 访问权限。`APP_ID` 是你的文档服务器 ID，在 [Cloud 控制台](https://cloud.tiptap.dev/v2/configuration/document-server) 中标注为“Document server ID”。
 如果你只想创建一个空文档，可以将空数组作为 `content` 发送。
 
 请求的负载应该是 Tiptap JSON，可以通过调用 `editor.getJSON()` 获取（详见 [获取 JSON](/guides/output-json-html#option-1-json)）
@@ -21,7 +21,7 @@ meta:
 curl --location \
 'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json' \
 --header 'Content-Type: application/json' \
---header 'Authorization: API_SECRET' \
+--header 'Authorization: Bearer YOUR_JWT' \
 --data '{
     "type": "doc",
     "content": [
@@ -51,7 +51,7 @@ curl --location \
 ```curl
 curl --location \
 'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json' \
---header 'Authorization: API_SECRET' \
+--header 'Authorization: Bearer YOUR_JWT' \
 ```
 
 然后，你可以对 JSON 应用修改，再发送给我们。我们会计算你新 JSON 与当前文档状态之间的差异，并以协作的方式应用更新。
@@ -61,7 +61,7 @@ curl --location \
 curl --location --request PATCH \
 'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json' \
 --header 'Content-Type: application/json' \
---header 'Authorization: API_SECRET' \
+--header 'Authorization: Bearer YOUR_JWT' \
 --data 'UPDATED_JSON'
 ```
 
@@ -72,7 +72,7 @@ curl --location --request PATCH \
 ```curl
 curl --location \
 'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json' \
---header 'Authorization: API_SECRET'
+--header 'Authorization: Bearer YOUR_JWT'
 ```
 
 然后，你可以找到需要更新的节点并在 JSON 中应用修改。你只需将该更新后的节点单独发送给我们，但必须是完整的 Tiptap JSON 格式。
@@ -83,7 +83,7 @@ curl --location \
 curl --location --request PATCH \
 'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json&nodeAttributeName=id&nodeAttributeValue=12345' \
 --header 'Content-Type: application/json' \
---header 'Authorization: API_SECRET' \
+--header 'Authorization: Bearer YOUR_JWT' \
 --data 'UPDATED_JSON'
 ```
 
@@ -118,7 +118,7 @@ curl --location --request PATCH \
 ```curl
 curl --location --request PATCH \
 'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json&nodeAttributeName=ATTR_NAME&nodeAttributeValue=ATTR_VALUE&mode=delete' \
---header 'Authorization: API_SECRET'
+--header 'Authorization: Bearer YOUR_JWT'
 ```
 
 ## 更新文档中节点的属性
@@ -132,7 +132,7 @@ curl --location --request PATCH \
 curl --location --request PATCH \
 'https://APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME?format=json&nodeAttributeName=ATTR_NAME&nodeAttributeValue=ATTR_VALUE&mode=attrs' \
 --header 'Content-Type: application/json' \
---header 'Authorization: API_SECRET' \
+--header 'Authorization: Bearer YOUR_JWT' \
 --data '{
     "level": 3
 }'

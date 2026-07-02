@@ -102,9 +102,9 @@ ConvertKit 在单个 `@tiptap-pro/extension-convert-kit` 包中捆绑了 **30** 
 | History    | `UndoRedo`                                                                                                                                                          |
 | Tables     | `ConvertTableKit` (Table*, TableRow*, TableCell*, TableHeader*)                                                                                                     |
 
-带有 `*` 标记的扩展是 Tiptap 基础扩展的自定义 DOCX 感知覆盖版本。它们新增的内容见下一节。带有 `†` 标记的扩展虽然已捆绑，但**默认关闭**——可通过同名配置项启用（参见 [配置参考](#configuration-reference)）。
+标记为 `*` 的扩展是自定义的、支持 DOCX 的 Tiptap 基础扩展覆写。请参阅下一节了解它们新增了什么。标记为 `†` 的扩展已捆绑但**默认关闭**：请通过同名配置项启用它们（参见 [配置参考](#configuration-reference)）。
 
-ConvertKit 还导出与 `OrderedListNumbering` 搭配使用、用于编辑器预览渲染的辅助函数和类型——`generateNumberingFormatCss`、`GenerateNumberingFormatCssOptions`、`NumberingFormatDefinition`、`NumberingLevelDefinition`、`NumberingBaseStyle` 和 `NumberingMarkerFont`。参见 [有序列表编号](/conversion/export/docx/ordered-list-numbering) 获取端到端方案。
+ConvertKit 还导出与 `OrderedListNumbering` 配套、用于编辑器预览渲染的辅助函数和类型：`generateNumberingFormatCss`、`GenerateNumberingFormatCssOptions`、`NumberingFormatDefinition`、`NumberingLevelDefinition`、`NumberingBaseStyle` 和 `NumberingMarkerFont`。有关端到端流程，请参见 [有序列表编号](/conversion/export/docx/ordered-list-numbering)。
 
 ### 在 Tiptap 基础扩展上新增的属性
 
@@ -127,7 +127,7 @@ ConvertKit 还导出与 `OrderedListNumbering` 搭配使用、用于编辑器预
 - **精确高度行会裁剪溢出内容。** 具有 `heightRule: "exact"` 的行会通过内部单元格包装器裁剪溢出内容；比声明行高更高的内容会被隐藏，这与 Word 的行为一致。
 - **尾随换行伪影。** ProseMirror 的尾随换行会设置为零外边距和内边距，因此不会在段落末尾引入虚假的空白。
 
-如果你需要覆盖其中任何一项，请在 `.tiptap` 内针对你自己的选择器进行设置——你的规则会覆盖重置。
+如果你需要覆盖其中任何内容，请在 `.tiptap` 内部定位你自己的选择器；你的规则会覆盖重置。
 
 ### 一些小但重要的默认值
 
@@ -151,10 +151,10 @@ ConvertKit 还导出与 `OrderedListNumbering` 搭配使用、用于编辑器预
 
 ## 你应该预期到
 
-- 编辑器挂载期间会应用一个小而作用域化的 CSS 重置。同一页面上的多个基于 ConvertKit 的编辑器会共享这份重置——它只会插入一次，并且只有在最后一个编辑器销毁时才会移除。
-- 跨你的应用对 DOCX 导入内容进行一致的渲染。具有非零 DOCX 裁剪的图片会实际按裁剪后的效果渲染；当列宽缩小时，`heightRule: "atLeast"` 的行会在垂直方向增长；`verticalAlign: "center"` 的单元格会让其内容居中。
-- 与 Tiptap Pro 其余扩展生态完全兼容。`@tiptap-pro/extension-import-docx` 和 `@tiptap-pro/extension-export-docx` 是天然的配套扩展；如果你需要分页，`@tiptap-pro/extension-pages-tablekit` 可以叠加其上。
-- **紧凑的默认排版。** CSS 重置会清零段落外边距并应用紧凑行高。如果你将 ConvertKit 用于并非从 DOCX 导入的内容，请在其上叠加你自己的排版规则——这种重置是有意为之，而不是我们期望直接呈现精美视觉效果的默认值。
+- 在编辑器挂载期间，会应用一个小范围的 CSS 重置。页面上多个由 ConvertKit 驱动的编辑器会共享这份重置：它只会插入一次，并且只有在最后一个编辑器被销毁时才会移除。
+- 你应用中 DOCX 导入内容的一致渲染。带有非零 DOCX 裁剪的图片会真正以裁剪后的效果渲染；`heightRule: "atLeast"` 的行在其列收缩时会垂直增高；`verticalAlign: "center"` 的单元格会将内容居中。
+- 与 Tiptap Pro 其余扩展生态完全兼容。`@tiptap-pro/extension-import-docx` 和 `@tiptap-pro/extension-export-docx` 是天然的配套扩展；如果你需要分页，`@tiptap-pro/extension-pages-tablekit` 可以叠加使用。
+- **紧凑的默认排版。** CSS 重置会将段落外边距清零，并应用紧凑的行高。如果你使用 ConvertKit 来处理并非从 DOCX 导入的内容，请在其基础上叠加你自己的排版规则。这种重置是有意为之，而不是我们期望默认就视觉上足够精美的样式。
 
 ## 不要预期到
 
@@ -196,7 +196,7 @@ ConvertKit.configure({
   orderedList: Partial<OrderedListOptions> | false,
   listItem: Partial<ListItemOptions> | false,
   listKeymap: Partial<ListKeymapOptions> | false,
-  orderedListNumbering: boolean | Partial<OrderedListNumberingOptions>, // 默认：false — 通过 `true` 启用，或传入一个选项对象（`defaultFormat`、`formats`）
+  orderedListNumbering: boolean | Partial<OrderedListNumberingOptions>, // 默认：false；使用 `true` 开启，或传入一个选项对象（`defaultFormat`、`formats`）
   hardBreak: Partial<HardBreakOptions> | false,
   horizontalRule: Partial<HorizontalRuleOptions> | false,
   dropcursor: Partial<DropcursorOptions> | false,

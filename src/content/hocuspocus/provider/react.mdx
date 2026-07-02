@@ -1,7 +1,7 @@
 ---
 title: React 绑定
 meta:
-  title: React bindings | Tiptap Collaboration Docs
+  title: React 绑定 | Tiptap 协作文档
   description: 使用 @hocuspocus/provider-react 通过组件和 hooks 将 Hocuspocus 接入 React 应用。
   category: Hocuspocus
 ---
@@ -81,9 +81,11 @@ websocket 组件会为其子树创建一个单独的 `HocuspocusProviderWebsocke
 | Prop       | Type                                                                | Description                                                                                             |
 |------------|---------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
 | `name`     | `string`                                                            | 文档名称。必需。                                                                                         |
-| `document` | `Y.Doc`                                                             | 可选——传入你自己的 Y.Doc。如果省略，将为你创建一个。                                                      |
-| `token`    | `string \| (() => string) \| (() => Promise<string>)`               | 发送到服务器用于身份验证的 JWT（或异步解析函数）。                                                        |
-| `onOpen`, `onConnect`, `onClose`, `onDisconnect`, `onStatus`, `onSynced`, `onUnsyncedChanges`, `onMessage`, `onOutgoingMessage`, `onStateless`, `onAuthenticated`, `onAuthenticationFailed`, `onAwarenessUpdate`, `onAwarenessChange`, `onDestroy` | Function | 每个 [provider 事件](/hocuspocus/provider/events) 的可选处理器。 |
+| `document` | `Y.Doc`                                                             | 可选——传入你自己的 Y.Doc。若省略，则会为你创建一个。                                                     |
+| `token`    | `string \| (() => string) \| (() => Promise<string>)`               | 发送到服务器用于身份验证的 JWT（或异步解析器）。                                                          |
+| `sessionAwareness` | `boolean`                                                   | 启用会话感知的多路复用，使具有相同文档名称的多个 room 可以共享一个 WebSocket。仅在连接到 v4 服务器时设为 `true`。默认 `false`。请参见 [`sessionAwareness`](/hocuspocus/provider/configuration)。 |
+| `flushDelay` | `false \| number`                                                 | 在短时间窗口内批量发送文档和 awareness 更新（毫秒），以在高强度编辑时减少 websocket 流量。默认 `false`。请参见[批量发送外发更新](/hocuspocus/provider/configuration#batching-outgoing-updates)。 |
+| `onOpen`, `onConnect`, `onClose`, `onDisconnect`, `onStatus`, `onSynced`, `onUnsyncedChanges`, `onMessage`, `onOutgoingMessage`, `onStateless`, `onAuthenticated`, `onAuthenticationFailed`, `onAwarenessUpdate`, `onAwarenessChange`, `onDestroy` | Function | 每个[provider 事件](/hocuspocus/provider/events)的可选处理器。 |
 
 更改 `name`、`document`、`token` 或上游 websocket provider 会重新创建底层 provider。其余内容都会保持稳定。
 
@@ -114,11 +116,11 @@ websocket 组件会为其子树创建一个单独的 `HocuspocusProviderWebsocke
 
 ## Hooks
 
-下面所有 hooks 都必须在 `HocuspocusRoom` 内部使用。如果没有 room 上下文，它们会抛出错误。
+All hooks below must be used inside `HocuspocusRoom`. If there is no room context, they will throw an error.
 
 ### useHocuspocusProvider
 
-返回当前房间的 `HocuspocusProvider` 实例。当你需要直接访问 provider 时使用它——例如将 Tiptap 的 `Collaboration` / `CollaborationCaret` 扩展连接到 provider 的 Y.Doc 和 awareness。
+Returns the current room's `HocuspocusProvider` instance. Use it when you need direct access to the provider—for example, to connect Tiptap's `Collaboration` / `CollaborationCaret` extensions to the provider's Y.Doc and awareness.
 
 ```tsx
 import { useHocuspocusProvider } from '@hocuspocus/provider-react'
@@ -147,7 +149,7 @@ function Editor() {
 
 ### useHocuspocusConnectionStatus
 
-订阅 WebSocket 连接状态。返回 `'connecting' | 'connected' | 'disconnected'`。
+Subscribes to the WebSocket connection status. Returns `'connecting' | 'connected' | 'disconnected'`.
 
 ```tsx
 import { useHocuspocusConnectionStatus } from '@hocuspocus/provider-react'
@@ -169,7 +171,7 @@ function ConnectionIndicator() {
 
 ### useHocuspocusSyncStatus
 
-订阅本地更改是否已与服务器同步。返回 `'synced' | 'syncing'`。
+Subscribes to whether local changes have been synced with the server. Returns `'synced' | 'syncing'`.
 
 ```tsx
 import { useHocuspocusSyncStatus } from '@hocuspocus/provider-react'
@@ -183,7 +185,7 @@ function SaveIndicator() {
 
 ### useHocuspocusAwareness
 
-订阅已连接用户列表（awareness 状态）。返回一个对象数组，每个对象包含 `clientId`，以及你在 awareness 上设置的任何状态（name、color、cursor 等）。
+Subscribes to the list of connected users (awareness state). Returns an array of objects, each containing `clientId`, plus any state you set on awareness (name, color, cursor, etc.).
 
 ```tsx
 import { useHocuspocusAwareness } from '@hocuspocus/provider-react'
@@ -209,7 +211,7 @@ function UserList() {
 
 ### useHocuspocusEvent
 
-通过稳定订阅监听任意 [provider 事件](/hocuspocus/provider/events)（处理器引用会在内部保持最新，因此你不需要做 memoize）。
+Listen to any [provider event](/hocuspocus/provider/events) via a stable subscription (the handler reference is kept up to date internally, so you don't need to memoize it).
 
 ```tsx
 import { useHocuspocusEvent } from '@hocuspocus/provider-react'

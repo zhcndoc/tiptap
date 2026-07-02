@@ -23,7 +23,7 @@ import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
         在您的账户中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 配置 Convert 应用">
-        要使用 Convert REST API，请从[您的控制面板](https://cloud.tiptap.dev/v2/cloud/convert)中获取您的应用 ID 和 Convert secret。
+        使用携带 `aud: "Convert"` 的签名令牌对 REST 调用进行身份验证。请参阅[身份验证](/authentication)。
     </RequirementItem>
 </Requirements>
 
@@ -44,7 +44,6 @@ PDF 导出 API 将 Tiptap JSON 文档转换为 PDF 文件。
 ```bash
 curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}"
@@ -57,11 +56,10 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 
 ### 必要请求头
 
-| 名称             | 说明                                                                                                               |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `Authorization`  | 用于认证请求的 JWT 令牌。例如：`Bearer your-jwt-token`                                                              |
-| `X-App-Id`       | 从 Convert 设置页面获取的 Convert 应用 ID：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert) |
-| `Content-Type`   | 必须为 `application/json`                                                                                            |
+| Name            | Description                                                                                                                               |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization` | 用于验证请求的 JWT 令牌。示例：`Bearer your-jwt-token`                                                               |
+| `Content-Type`  | 必须为 `application/json`                                                                                                                |
 
 ### 请求体
 
@@ -139,7 +137,6 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 ```bash
 curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}",
@@ -178,7 +175,6 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 ```bash
 curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}",
@@ -202,7 +198,6 @@ PDF 生成会经过 DOCX 管道，因此在发送 Tiptap JSON 时，`/export/doc
 ```bash
 curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"PDF with element-level overrides\"}]}]}",
@@ -221,7 +216,6 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 ```bash
 curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Hello World\"}]}]}",

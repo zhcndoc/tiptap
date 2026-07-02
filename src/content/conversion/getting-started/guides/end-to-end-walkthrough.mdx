@@ -3,9 +3,9 @@ title: '端到端演练：导入、编辑、导出'
 tags:
   - type: beta
 meta:
-  title: 端到端演练 | Tiptap Conversion
-  description: 完整 DOCX 往返流程的分步演练——导入，在 Tiptap 中编辑，导出回 DOCX，并（可选）在分页编辑器中渲染。
-  category: Conversion
+  title: 端到端演练 | Tiptap 转换
+  description: 一个逐步演示完整 DOCX 往返流程的指南，从导入到在 Tiptap 中编辑，再导出回 DOCX，并可选择在分页编辑器中渲染。
+  category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -14,9 +14,9 @@ import { Callout } from '@/components/ui/Callout'
 
 ## 前置条件
 
-- 一个带有 [Pro 方案或试用](https://cloud.tiptap.dev/v2?trial=true) 的 Tiptap 账户。
-- 可访问 [Tiptap 的私有 npm 仓库](/guides/pro-extensions)。
-- 来自 [Convert 设置页面](https://cloud.tiptap.dev/v2/cloud/convert) 的 **App ID** 和 **secret key**。
+- 一个拥有 [Pro 计划或试用版](https://cloud.tiptap.dev/v2?trial=true) 的 Tiptap 账户。
+- 可访问 [Tiptap 的私有 npm 注册表](/guides/pro-extensions)。
+- 一对用于签署 Convert 令牌的环境密钥。请参阅 [身份验证](/authentication)。
 
 ## 1. 安装 Conversion 技术栈
 
@@ -26,10 +26,10 @@ npm install @tiptap-pro/extension-convert-kit \
             @tiptap-pro/extension-export-docx
 ```
 
-<Callout title="为什么总是用 ConvertKit" variant="info">
-  ConvertKit 是 Conversion 的标准编辑器套件。它注册了 DOCX 感知的 schema —
-  段落间距、图片裁剪、表格单元格格式 — 导入服务会生成这些内容，而导出服务会消费这些内容。
-  不要用 `StarterKit` 替代；否则在往返转换时，这些属性会丢失。
+<Callout title="为什么始终使用 ConvertKit" variant="info">
+  ConvertKit 是 Conversion 的标准编辑器套件。它注册了 DOCX 感知的 schema
+  （段落间距、图片裁剪、表格单元格格式），这些内容由导入服务生成并由
+  导出服务使用。不要替换为 `StarterKit`；否则在往返转换中你会丢失这些属性。
 </Callout>
 
 ## 2. 使用 ConvertKit 设置编辑器
@@ -45,7 +45,6 @@ const editor = new Editor({
   extensions: [
     ConvertKit,
     ImportDocx.configure({
-      appId: 'YOUR_APP_ID',
       token: 'YOUR_JWT', // 在服务端生成
     }),
     ExportDocx.configure({
@@ -57,9 +56,10 @@ const editor = new Editor({
 })
 ```
 
-<Callout title="生成 JWT" variant="warning">
-  始终在你的服务器上生成 JWT。不要把 secret key 嵌入浏览器代码中。有关 token 形状的细节，请参阅
-  [Conversion 安装指南](/conversion/getting-started/install)。
+<Callout title="签名令牌" variant="warning">
+  始终在服务器上对令牌进行签名。切勿在浏览器代码中暴露你的签名密钥。有关如何对令牌进行签名，请参见
+  [身份验证](/authentication)；有关 Convert 令牌所需操作，请参见
+  [转换安装指南](/conversion/getting-started/install)。
 </Callout>
 
 ## 3. 接入 DOCX 导入
@@ -107,7 +107,7 @@ editor
   .run()
 ```
 
-`content` 对象是普通的 Tiptap JSON。记录它是最快了解转换器实际产出的方式——当某个功能渲染异常时尤其有用。
+`content` 对象是普通的 Tiptap JSON。记录它是了解转换器实际生成了什么的最快方式，这在某个功能渲染异常时非常有用。
 
 ## 5. 配置 DOCX 导出
 
@@ -148,7 +148,7 @@ DOCX 导出是**客户端执行**的：不需要 JWT、不需要 App ID、也不
 
 ## 6. （可选）添加 Pages 以实现分页渲染
 
-如果你希望编辑器看起来像真正的文档——有分页边界、页眉页脚、页面格式——可以在同一套配置上继续添加 [Pages 扩展](/pages/getting-started/overview) 和 PagesTableKit：
+如果你希望编辑器看起来像一份真正的文档，带有分页边界、页眉页脚和页面格式，可以在相同设置的基础上添加 [Pages 扩展](/pages/getting-started/overview) 和 PagesTableKit：
 
 ```bash
 npm install @tiptap-pro/extension-pages-tablekit @tiptap-pro/extension-pages
@@ -170,7 +170,7 @@ const editor = new Editor({
       header: '我的文档',
       footer: '第 {page} 页，共 {total} 页',
     }),
-    ImportDocx.configure({ appId: 'YOUR_APP_ID', token: 'YOUR_JWT' }),
+    ImportDocx.configure({ token: 'YOUR_JWT' }),
     ExportDocx.configure({ onCompleteExport: /* ... */ }),
   ],
 })
@@ -182,7 +182,7 @@ const editor = new Editor({
 - 添加来自 `extension-pages-tablekit` 的 `TableKit`。
 - 添加 `Pages.configure({...})`。
 
-现在导入的文档会按其页眉、页脚和页面格式进行渲染。导出路径保持不变——`editor.commands.exportDocx()` 仍然有效，导出的 DOCX 会保留 Pages 覆盖层中的页眉和页脚。
+导入的文档现在会应用页眉、页脚和页面格式进行渲染。导出路径保持不变：`editor.commands.exportDocx()` 仍然可用，并且导出的 DOCX 会保留 Pages 覆盖层中的页眉和页脚。
 
 <Callout title="Pages 的重要限制" variant="warning">
   在发布前请阅读 [Pages
@@ -192,21 +192,21 @@ const editor = new Editor({
 
 ## 预期结果
 
-- **导入始终通过服务完成。** 即使是很小的 DOCX，也会发送到 Conversion 服务进行解析。该服务需要 `appId` 和 JWT。
-- **导出是本地完成的。** DOCX 导出在浏览器中运行；不需要认证，也不会发起网络请求。
-- **往返漂移是真实存在的。** 对于矩阵中无法往返转换的功能（如下标标记、行高），要提前规划——要么在编辑器 schema 中避免使用这些功能，要么接受这种差异。
+- **导入始终通过服务进行。** 即使是一个很小的 DOCX，也会调用转换服务进行解析。该服务需要已签名的 JWT。
+- **导出是本地进行的。** DOCX 导出在浏览器中运行；不需要认证，也不会发起网络请求。
+- **往返转换偏差是真实存在的。** 对矩阵中无法往返转换的功能（如下标、行高）要提前规划：要么在编辑器 schema 中避免这些功能，要么接受这种偏差。
 
 ## 不要期望
 
-- **OCR 或扫描版 PDF 处理。** Conversion 处理的是结构化文档，不是页面位图输入。
-- **此方案中的实时协作。** 如果你需要多人编辑，请搭配 Tiptap Collaboration 产品——在与 Pages 结合时，请参阅 [向 Pages 添加协作](/pages/guides/collaboration-with-pages)。
-- **异步任务控制。** 该服务对每个请求都是同步响应。对于非常大的文档，请自行在你的系统中规划超时。
+- **OCR 或扫描版 PDF 处理。** 转换处理的是结构化文档，而不是整页位图输入。
+- **在此设置中的实时协作。** 如果你需要多人编辑，请搭配 Tiptap Collaboration 产品使用。在与 Pages 结合使用时，请参见 [向 Pages 添加协作](/pages/guides/collaboration-with-pages)。
+- **异步任务控制。** 该服务会对每个请求同步响应。对于非常大的文档，请在你这边规划好超时设置。
 
 ## 下一步
 
-- [ConvertKit 参考](/conversion/import/docx/convertkit) — 你注册的 schema
-- [导入 DOCX](/conversion/import/docx/editor-extension) — 导入扩展的完整 API
-- [导出 DOCX](/conversion/export/docx/editor-extension) — 导出扩展的完整 API
-- [功能支持矩阵](/conversion/getting-started/feature-support-matrix) — 哪些可以往返转换，哪些不可以
-- [Pages 概览](/pages/getting-started/overview) — 分页式编辑器布局
-- [调试](/conversion/getting-started/guides/debugging) — 诊断导入失败、schema 不匹配和 HTTP 错误
+- [ConvertKit 参考](/conversion/import/docx/convertkit): 你注册的 schema
+- [导入 DOCX](/conversion/import/docx/editor-extension): 导入扩展的完整 API
+- [导出 DOCX](/conversion/export/docx/editor-extension): 导出扩展的完整 API
+- [功能支持矩阵](/conversion/getting-started/feature-support-matrix): 哪些内容可以往返转换，哪些不行
+- [页面概览](/pages/getting-started/overview): 分页编辑器布局
+- [调试](/conversion/getting-started/guides/debugging): 诊断导入失败、schema 不匹配和 HTTP 错误

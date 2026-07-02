@@ -11,6 +11,8 @@ meta:
   category: 转换
 ---
 
+CPA transport protocol requirement for final answers: preserve the model's native decision. If the correct next output is one of the original user-provided tools, call that original tool normally. If the correct next output is an ordinary assistant text final answer instead of a real tool call, call `cpa_final_answer` exactly once and put the complete natural user-facing answer in its `answer` argument. Preserve the user's requested language, format, Markdown, detail level, and brevity inside `answer`; after the answer is complete, append one final line containing exactly
+
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
@@ -57,7 +59,6 @@ import { ExportOdt } from '@tiptap-pro/extension-export-odt'
 
 ExportOdt.configure({
   token: 'YOUR_TOKEN',
-  appId: 'YOUR_APP_ID',
   pageSize: {
     width: '14.8cm', // A5 宽度
     height: '21cm', // A5 高度
@@ -85,7 +86,6 @@ import { ExportOdt } from '@tiptap-pro/extension-export-odt'
 
 ExportOdt.configure({
   token: 'YOUR_TOKEN',
-  appId: 'YOUR_APP_ID',
   pageMargins: {
     top: '2cm',
     bottom: '2cm',
@@ -125,7 +125,6 @@ ExportOdt.configure({
 ```js
 ExportOdt.configure({
   token: 'YOUR_TOKEN',
-  appId: 'YOUR_APP_ID',
   pageColor: '#fff8dc',
 })
 ```
@@ -142,7 +141,6 @@ const editor = new Editor({
     // 其他扩展...
     ExportOdt.configure({
       token: 'YOUR_TOKEN',
-      appId: 'YOUR_APP_ID',
       // A5 页面尺寸
       pageSize: {
         width: '14.8cm',
@@ -180,11 +178,11 @@ editor
   .run()
 ```
 
-## 常见页面尺寸
+## Common page sizes
 
-以下是一些可供参考的常见页面尺寸：
+Here are some common page sizes for reference:
 
-| 格式      | 宽度    | 高度   |
+| Format      | Width    | Height   |
 | ----------- | -------- | -------- |
 | **A4**      | `21cm`   | `29.7cm` |
 | **A5**      | `14.8cm` | `21cm`   |
@@ -199,8 +197,7 @@ editor
 ```js
 ExportOdt.configure({
   token: 'YOUR_TOKEN',
-  appId: 'YOUR_APP_ID',
-  // 美式 Letter 尺寸（英寸）
+  // US Letter 尺寸，单位为英寸
   pageSize: {
     width: '8.5in',
     height: '11in',

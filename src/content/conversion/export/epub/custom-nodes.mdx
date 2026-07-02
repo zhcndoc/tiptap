@@ -8,7 +8,7 @@ tags:
 meta:
     title: 将自定义节点导出为 EPUB | Tiptap 转换
     description: 学习如何使用 Export EPUB 扩展将自定义节点导出为 EPUB 文件。
-    category: Conversion
+    category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -46,7 +46,6 @@ const editor = new Editor({
     ExportDocx,
     ExportEpub.configure({
       token: 'YOUR_TOKEN',
-      appId: 'YOUR_APP_ID',
       customNodes: [
         {
           type: 'hintbox',
@@ -86,7 +85,6 @@ const editor = new Editor({
     ExportDocx,
     ExportEpub.configure({
       token: 'YOUR_TOKEN',
-      appId: 'YOUR_APP_ID',
       onCompleteExport: result => {
         const url = URL.createObjectURL(result)
         const a = document.createElement('a')

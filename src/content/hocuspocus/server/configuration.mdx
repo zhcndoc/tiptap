@@ -12,15 +12,18 @@ meta:
 
 ## 设置
 
-| Setting            | Description                                                                                                                          | Default value   |
-|--------------------|--------------------------------------------------------------------------------------------------------------------------------------|-----------------|
-| `name`             | 实例名称，用于日志记录。                                                                                                              |                 |
-| `port`             | 服务器应监听的端口。                                                                                                                  | `80`            |
-| `timeout`          | 连接健康检查间隔，单位为毫秒。在 v4 中已从 30 秒增加到 60 秒。                                                                          | `60000 (= 60s)` |
-| `debounce`         | 在指定时间内对 onStoreDocument hook 的调用进行防抖。否则每次更新都会被持久化。                                                       | `2000 (= 2s)`   |
-| `maxDebounce`      | 确保在给定时间（毫秒）内至少调用一次 onStoreDocument。                                                                                | `10000 (= 10s)` |
-| `quiet`            | 默认情况下，服务器会显示启动界面。如果传入 false，服务器将静默启动。                                                                   | `false`         |
-| `websocketOptions` | 传递给底层 WebSocket 服务器的选项（例如 `{ maxPayload: 1024 * 1024 }`）。在 v4 中已移入配置对象内部。                                  | `{}`            |
+| 设置               | 描述                                                                                                                                    | 默认值               |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------|----------------------|
+| `name`             | 实例的名称，用于日志记录。                                                                                                               |                      |
+| `port`             | 服务器应监听的端口。                                                                                                                     | `80`                 |
+| `timeout`          | 连接健康检查的时间间隔，单位为毫秒。在 v4 中已从 30s 增加到 60s。                                                                         | `60000 (= 60s)`      |
+| `debounce`         | 对 onStoreDocument 钩子的调用进行去抖，时间单位为 ms。否则每次更新都会被持久化。                                                         | `2000 (= 2s)`        |
+| `maxDebounce`      | 确保至少在给定的时间（ms）内调用一次 onStoreDocument。                                                                                   | `10000 (= 10s)`      |
+| `quiet`            | 默认情况下，服务器会显示启动界面。如果传入 false，服务器将安静启动。                                                                     | `false`              |
+| `websocketOptions` | 传递给底层 WebSocket 服务器的选项（例如 `{ maxPayload: 1024 * 1024 }`）。在 v4 中已移到 config 对象内部。                                   | `{}`                 |
+| `maxUnauthenticatedQueueSize`     | 在单个连接尚未通过身份验证时，缓冲的最大字节数（跨所有文档）。超过后连接将被关闭。参见 [预认证资源限制](#pre-authentication-resource-limits)。 | `5242880 (= 5 MiB)` |
+| `maxUnauthenticatedQueueMessages` | 在单个连接尚未通过身份验证时，缓冲的最大消息数（跨所有文档）。超过后连接将被关闭。                                                                                           | `1000`              |
+| `maxPendingDocuments`             | 在任何文档完成身份验证之前，单个连接最多可打开的不同文档数量。超过后连接将被关闭。                                                                                          | `100`               |
 
 ## 使用示例
 
@@ -64,4 +67,26 @@ const server = new Server<MyContext>({
 })
 ```
 
-该通用类型默认是 `any`，因此没有显式类型标注的现有代码仍然可以正常工作。
+该泛型的默认值为 `any`，因此未显式指定类型的现有代码仍可继续正常工作。
+
+## 认证前资源限制
+
+在认证完成之前收到的消息会按连接缓存在内存中。若没有上限，未认证客户端可能会耗尽服务器内存（参见 [GHSA-xwhh-v746-pj9m](https://github.com/ueberdosis/hocuspocus/security/advisories/GHSA-xwhh-v746-pj9m)）。以下三个设置用于限制这种缓存，一旦超过任一限制，连接就会立即关闭：
+
+- `maxUnauthenticatedQueueSize`（默认 5 MiB）— 每个连接缓冲的总字节数。
+- `maxUnauthenticatedQueueMessages`（默认 1000）— 每个连接缓冲的总消息数。
+- `maxPendingDocuments`（默认 100）— 单个连接在任一时刻可打开的、尚未通过认证的不同文档数量。每个待处理文档都有自己的队列和 hook 负载，因此这可以阻止客户端在保持每连接队列限制之内的同时，向多个文档名分散连接。
+
+此外，空闲 `timeout` 会在认证前被强制作为一个*绝对*的认证截止时间（从连接建立时开始计算，不会因入站流量而刷新），直到连接对其首个文档完成认证。首次认证成功后，`timeout` 会恢复为该 socket 在其余生命周期中的正常空闲行为。
+
+```js
+import { Server } from '@hocuspocus/server'
+
+const server = new Server({
+  maxUnauthenticatedQueueSize: 5 * 1024 * 1024, // 5 MiB
+  maxUnauthenticatedQueueMessages: 1000,
+  maxPendingDocuments: 100,
+})
+
+server.listen()
+```

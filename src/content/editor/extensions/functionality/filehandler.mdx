@@ -89,3 +89,17 @@ FileHandler.configure({
   allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
 })
 ```
+
+### consumePasteEvent
+
+当为 `true` 时，如果剪贴板中存在文件，即使旁边还有 HTML 内容，粘贴事件也会被完全消费。这可以防止其他扩展的粘贴规则在同一事件上运行并创建重复内容。
+
+当您的 `onPaste` 回调负责处理文件插入，并且您希望阻止其他扩展处理同一次粘贴时使用此选项（例如，避免文件处理器和图片扩展都尝试处理同一张已粘贴图片而导致重复的图片节点）。
+
+默认值：`false`
+
+```js
+FileHandler.configure({
+  consumePasteEvent: true,
+})
+```

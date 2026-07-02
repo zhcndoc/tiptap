@@ -1,185 +1,122 @@
 ---
 title: 在协作中进行身份验证和授权
 meta:
-  title: 身份验证指南 | Tiptap 协作文档
-  description: 通过 JWT 安全管理协作编辑器的访问权限，涵盖设置、测试和生产集成。
+  title: 认证指南 | Tiptap 协作文档
+  description: 使用 Tiptap 认证对协作编辑进行授权。将令牌限定到 Documents 服务，并授予按文档划分的读取、写入和评论访问权限。
   category: 协作
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-在安装指南中设置协作编辑器之后，解决长时间使用的身份验证变得至关重要。您在 [Tiptap 账户](https://cloud.tiptap.dev/v2/configuration/document-server) 中提供的临时 JWT 仅适合短期测试会话。
+Collaboration 使用 Documents 服务进行身份验证。你在服务器上签名一个 JWT，并在客户端连接时将其传递给提供商。该令牌会指定用户可以访问哪些文档，以及他们可以对这些文档执行什么操作。
 
-<Callout title="需要 JWT 帮助吗？" variant="hint">
-  如果您需要设置服务器端 JWT 身份验证的帮助，请在
-  [页面底部](#integrate-jwt-server-side) 寻找指导。
+<Callout title="刚接触 Tiptap 身份验证？" variant="hint">
+  本页面涵盖 Documents 特定的声明。要创建密钥对并签名令牌，请参见 [身份验证](/authentication)。关于之前的 `allowedDocumentNames` 模型，请参见 [旧版身份验证](/authentication/legacy)。
 </Callout>
 
-## 设置授权
+## 受众和操作
 
-设置正确的访问控制对保持文档安全和工作流程顺畅在 Tiptap 协作中非常重要。
+将 `aud` 声明设置为 `"Documents"`。协作识别以下操作：
 
-本指南的这一部分将引导您如何使用 JSON Web Tokens (JWT) 精细化谁可以查看和编辑什么内容。无论您是否需要给予某人完全访问权限，限制他们查看某些文档，或者完全阻塞访问，我们都为您提供了简洁的示例。
+| 操作 | 授予 |
+| --- | --- |
+| `Documents:Read` | 打开并读取文档 |
+| `Documents:Write` | 编辑文档。隐含 `Documents:Read` 和 `Documents:Comment` |
+| `Documents:Comment` | 无需编辑即可添加评论 |
+| `Documents:Api:All` | 对所有 Document Server API 端点的完全访问权限，包括设置。请将此令牌保留在服务器端。参见 [REST API](/collaboration/documents/rest-api) |
+
+因为 `Documents:Write` 隐含读取和评论权限，所以仅授予写入权限就足以获得完整的编辑访问权限。
+
+## 按文档授权
+
+`resource` 字段用于指定权限适用的文档。对每个文档使用 `"*"`，对单个文档使用准确的文档名称，或使用带约束的 `"*"` 来匹配一组文档。
+
+### 对每个文档的完全访问权限
+
+```json
+{
+  "aud": "Documents",
+  "permissions": [{ "action": "Documents:Write", "resource": "*" }]
+}
+```
 
 <Callout title="注意" variant="warning">
-  如果您在 JWT 设置中省略 `allowedDocumentNames` 属性，用户将可以访问系统中的所有文档！
+  具有 `"resource": "*"` 且没有任何约束的权限会匹配你环境中的每个文档。当用户只应访问特定文档时，请为资源设置范围。
 </Callout>
 
-### 允许对每个文档的完全访问
+### 特定文档
 
-从 JWT 有效载荷中省略 `allowedDocumentNames` 属性会授予用户访问所有文档的权限。这对于需要无限制访问的用户非常有用。
-
-```typescript
-import jsonwebtoken from 'jsonwebtoken'
-
-const data = { sub: 'your_local_user_identifier' }
-
-const jwt = jsonwebtoken.sign(data, 'your_secret')
-```
-
-### 限制对特定文档的访问
-
-要限制用户对特定文档的访问，请在 JWT 有效载荷中的 `allowedDocumentNames` 数组中包含这些文档的名称。这确保用户只能访问列出的文档。
-
-```typescript
-import jsonwebtoken from 'jsonwebtoken'
-
-const data = {
-  sub: 'your_local_user_identifier',
-  allowedDocumentNames: ['user-specific-document-1', 'user-specific-document-2'],
+```json
+{
+  "permissions": [
+    { "action": "Documents:Write", "resource": "user-specific-document-1" },
+    { "action": "Documents:Write", "resource": "user-specific-document-2" }
+  ]
 }
-
-const jwt = jsonwebtoken.sign(data, 'your_secret')
 ```
 
-### 阻止对所有文档的访问
+### 只读访问
 
-要禁止用户访问任何文档，请在 JWT 有效载荷中为 `allowedDocumentNames` 提供一个空数组。这有效阻止了对所有文档的访问，除非通过 `readonlyDocumentNames` 赋予访问权限。
+授予 `Documents:Read`，但不授予 `Documents:Write`：
 
-```typescript
-import jsonwebtoken from 'jsonwebtoken'
-
-const data = {
-  sub: 'your_local_user_identifier',
-  allowedDocumentNames: [],
+```json
+{
+  "permissions": [{ "action": "Documents:Read", "resource": "annual-report-2024" }]
 }
-
-const jwt = jsonwebtoken.sign(data, 'your_secret')
 ```
 
-## 设置只读访问
+### 无编辑权限的评论
 
-JWT 设置中的 `readonlyDocumentNames` 属性在需要让用户查看文档而不能编辑时起着至关重要的作用。此功能在您希望与团队成员共享信息以供审阅或参考时特别有用，但又需要保持原始文档的完整性。
-
-通过在 `readonlyDocumentNames` 数组中指定文档名称，您可以授予用户对这些文档的只读访问权限。用户可以打开并阅读这些文档，但任何尝试修改内容的行为都会受到限制。这确保了敏感或关键的信息在必要人员可以访问的同时保持不变。
-
-在这个例子中，我们授予两个文档的只读访问权限，`annual-report-2024` 和 `policy-document-v3`。具有此 JWT 的用户可以查看这些文档，但不能进行任何编辑。
-
-```typescript
-import jsonwebtoken from 'jsonwebtoken'
-
-const data = {
-  sub: 'your_local_user_identifier',
-  allowedDocumentNames: ['annual-report-2024', 'policy-document-v3'], // 或者 [] ; 如果您省略 "allowedDocumentNames"，用户对所有文档具有读写权限，除了在 readonlyDocumentNames 中提到的文档（如上所述！），
-  readonlyDocumentNames: ['annual-report-2024', 'policy-document-v3'],
+```json
+{
+  "permissions": [
+    { "action": "Documents:Read", "resource": "policy-document-v3" },
+    { "action": "Documents:Comment", "resource": "policy-document-v3" }
+  ]
 }
-
-const jwt = jsonwebtoken.sign(data, 'your_secret')
 ```
 
-将 `readonlyDocumentNames` 属性纳入您的 JWT 策略通过确保只有经过授权的编辑被进行，提高了文档安全性，从而保护了关键文档的完整性。
+### 一组文档
 
-## 在只读访问时允许评论
+使用 `prefix` 约束，而不是按名称逐个列出每个文档：
 
-如果您想禁止编辑文档但仍然允许评论，可以将 `commentDocumentNames` 添加到 JWT 中。
-
-```typescript
-import jsonwebtoken from 'jsonwebtoken'
-
-const data = {
-  sub: 'your_local_user_identifier',
-  allowedDocumentNames: [], // no write access to any doc
-  readonlyDocumentNames: ['annual-report-2024', 'policy-document-v3'], // read access
-  commentDocumentNames: ['annual-report-2024', 'policy-document-v3'], // plus comments access
+```json
+{
+  "permissions": [
+    {
+      "action": "Documents:Write",
+      "resource": "*",
+      "constraints": { "prefix": "project-alpha/" }
+    }
+  ]
 }
-
-const jwt = jsonwebtoken.sign(data, 'your_secret')
 ```
 
-## 使用通配符授权
+这会授予对名称以 `project-alpha/` 开头的每个文档的访问权限。有关完整的约束参考，包括 `suffix` 和 `in`，请参见 [权限](/authentication#permissions)。
 
-JWT 中的通配符提供了一种动态管理文档访问权限的方法，允许在特定条件下更广泛的权限，而无需逐个列出每个文档。这种方法在文档按某些属性（例如项目或团队）分组的情况下特别有用。
+## 连接提供方
 
-### 管理项目特定文档
+将签名后的 token 作为 `token` 传递给 `TiptapCollabProvider`，并同时传入你的 `appId`。请在服务器上生成该 token，并将其发送到客户端。切勿在客户端代码中暴露你的签名密钥。
 
-对于参与多个项目的团队，确保成员仅访问与其当前项目相关的文档至关重要。通过使用带通配符的项目标识符，您可以简化访问管理。
+```ts
+const doc = new Y.Doc()
 
-```typescript
-import jsonwebtoken from 'jsonwebtoken'
-
-const data = {
-  sub: 'your_local_user_identifier',
-  allowedDocumentNames: ['project-alpha/*', 'project-beta/*'],
-}
-
-const jwt = jsonwebtoken.sign(data, 'your_secret')
+const provider = new TiptapCollabProvider({
+  name: note.id, // 文档标识符
+  appId: 'YOUR_APP_ID', // 来自 Cloud 仪表盘的文档服务器 ID
+  token: 'YOUR_JWT', // 签名后的 Documents token
+  document: doc,
+  user: userId,
+})
 ```
 
-在此示例中，用户将可以访问 'project-alpha' 和 'project-beta' 下的所有文档，从而更轻松地管理新文档添加到这些项目时的权限。
+## 处理 token 过期
 
-## 短期 JWT
+通过设置 `exp` 来保持 token 的短生命周期。Token 会每隔几秒进行一次验证，因此过期的 token 会在过期后不久被拒绝，并且无法重新连接。
 
-您可能希望通过设置过期时间来限制 JWT 的寿命。JWT 每隔几秒钟进行验证，所以过期的令牌将在过期后不久被拒绝，无法重新连接。
+- 如果 token 在连接或重新连接时无效，`onAuthenticationFailed` 回调会以 `permission-denied` 作为原因触发。
+- 如果 token 在已建立的连接期间过期，`onClose` 回调会以 `JWT verification failed` 作为原因触发。
 
-不用说，对于会过期的令牌，处理过期情况是必要的——无论是在会话中途，还是在初次连接或重新连接时。您的用户可能会打开标签页数周，您不希望他们因为令牌过期而丢失数据（参见 [未同步的更改](/collaboration/provider/integration#unsynced-changes)）。
+在这两种情况下，都需要创建一个新的 token 并重新创建 provider。用户可能会长时间保持标签页打开，因此应在重新连接时处理过期，以避免丢失 [未同步的更改](/collaboration/provider/integration#unsynced-changes)。
 
-- 如果在创建连接（或重新连接）时 JWT 无效，将触发 `onAuthenticationFailed` 回调（原因 `permission-denied`）。
-- 如果在已建立连接期间 JWT 过期，将触发 `onClose` 回调，原因是 `JWT verification failed`。
-
-在这两种情况下，您都需要重新创建提供程序并提供新的 JWT。
-
-Tiptap Collab 提供了撤销 JWT 的 API，以备需要，因此不建议将令牌设置得过短寿命。([查看撤销 JWT API](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/request/33042171-63ed5bbe-f54d-4a85-b2d0-5c1bc215d2fc))
-
-## 服务器端集成 JWT
-
-JWT，或 JSON Web Token，是一种紧凑的、URL 安全的方式，用于表示在两个方之间传输的声明。JWT 中的信息使用加密算法进行数字签名，以确保在令牌发布后声明不能被更改。这种数字签名使 JWT 成为 Web 应用程序中安全信息交换的可靠载体，提供了身份验证和信息交换的方法。
-
-### 创建用于测试的静态 JWT
-
-出于测试目的，您可能不想设置完整的后端系统来生成 JWT。在这种情况下，可以使用 http://jwtbuilder.jamiekurtz.com/ 之类的在线工具作为快速解决方案。这些工具允许您通过输入必要的有效载荷并使用密钥签名来创建 JWT。
-
-使用这些工具时，请确保将 "Key" 字段替换为您的 [协作设置](https://collab.tiptap.dev/apps/settings) 页中的秘密密钥。您不需要更改任何其他信息。
-
-请记住，由于暴露秘密密钥的安全风险，这种方法仅建议用于测试。
-
-### 服务器端生成 JWT
-
-对于生产级应用，服务器端生成 JWT 是维护安全的必要条件。在客户端代码中暴露秘密密钥将危及您的应用安全。以下是使用 NodeJS 在服务器端创建 JWT 的示例：
-
-```bash
-npm install jsonwebtoken
-```
-
-```typescript
-import jsonwebtoken from 'jsonwebtoken'
-
-const payload = {
-  // 有效载荷包含用户 ID 等声明，可用于识别用户及其权限。
-  sub: 'your_local_user_identifier',
-}
-
-// `sign` 方法创建 JWT，使用有效载荷和您的秘密密钥作为输入。
-const jwt = jsonwebtoken.sign(payload, 'your_secret_key_here')
-// 生成的 JWT 用于 API 请求中的身份验证，确保安全访问。
-// 重要提示：切勿在客户端代码中暴露您的秘密密钥！
-```
-
-该 JWT 应包含在身份验证提供程序的 API 请求中的 `token` 字段中，保障用户会话和数据访问。
-
-为了充分将 JWT 集成到您的应用中，考虑设置一个专用的服务器或 API 端点，例如 `GET /getCollabToken`。此端点将根据安全存储在服务器上的秘密以及用户特定的信息（如文档访问权限）动态生成 JWT。
-
-此设置不仅提高了安全性，还为在您的协作应用中管理用户会话和权限提供了可扩展的解决方案。
-
-确保在服务器上将秘密密钥存储为环境变量，或直接在服务器代码中定义。避免从客户端发送它。
-
-完整的服务器/API 示例可在 [这里](https://github.com/ueberdosis/tiptap-collab-replit/tree/main/src) 获取。
+要在 token 过期前使其失效，Collaboration 提供了 [Revoke JWT API](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/request/33042171-63ed5bbe-f54d-4a85-b2d0-5c1bc215d2fc)。由于提供了撤销机制，你不需要让 token 的有效期极短。

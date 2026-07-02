@@ -8,11 +8,11 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 
-<Callout title="按需提供" variant="info">
-  这种统一身份验证模型目前正在逐步推出，仅对部分环境启用。如果你希望提前体验，请发送邮件至 [humans@tiptap.dev](mailto:humans@tiptap.dev)。在你的环境迁移完成之前，请继续使用现有的按服务身份验证方式，适用于 [Collaboration](/collaboration/getting-started/authenticate)、[Conversion](/conversion/getting-started/install) 和 [Content AI](/content-ai/capabilities/generation/install)。
-</Callout>
+Tiptap 服务使用 JWT（JSON Web Tokens）进行身份验证和授权。你在服务器上生成并签名令牌，然后将它们传递给 Tiptap 服务。每个令牌都会标识你的环境、列出它可以访问的服务，以及它被授权在你的资源上执行的操作。
 
-Tiptap 服务使用 JWT（JSON Web Tokens）进行身份验证和授权。你在自己的服务器上生成并签名令牌，然后将它们传递给 Tiptap 服务。每个令牌都会标识你的环境、列出它可以访问的服务，以及它被授权在你的资源上执行的操作。
+<Callout title="仍在使用 App ID 和按服务的密钥？" variant="hint">
+  如果你使用 App ID 和按服务的密钥进行身份验证，请参阅[迁移到新的身份验证](/authentication/migrate)。之前的设置已在[旧版身份验证](/authentication/legacy)中记录，并且仍可继续使用。
+</Callout>
 
 ## 它是如何工作的
 
@@ -21,14 +21,14 @@ Tiptap 服务使用 JWT（JSON Web Tokens）进行身份验证和授权。你在
 3. 你的客户端在连接到 Tiptap 服务（AI、Convert、Documents）时传递该 JWT。
 4. Tiptap 使用公钥验证令牌签名并检查你的订阅。
 
-## 为什么需要新的身份验证模型？
+## 一个令牌控制什么
 
-新模型用一个单一、统一的 JWT 取代了按服务分散的令牌，这个 JWT 承载了请求所需了解的全部信息：它可以访问哪些服务、允许执行什么操作，以及可作用于哪些资源。结果是集成面更小、默认安全性更强，并且控制粒度更细。
+一个单独的 JWT 承载了请求所需的一切：它可以访问哪些服务、允许执行什么操作，以及可作用于哪些资源。
 
-- **一个令牌，多个服务。** 一个 JWT 通过 `aud` 声明即可授权 AI、Convert 和 Documents 的任意组合。
-- **跨服务工作流。** AI 服务可以在相同令牌下对你的文档执行操作，无需服务间的额外对接。
-- **权限写在令牌里。** 通过 `action`、`resource` 和可选约束精确声明允许的内容，而不是依赖粗粒度的服务级作用域。
-- **零停机密钥轮换。** 每个环境可同时运行多个有效密钥对，并且无需切换窗口即可退役旧密钥。
+- **一个令牌，多个服务。** 单个 JWT 通过 `aud` 声明可授权 AI、Convert 和 Documents 的任意组合。
+- **跨服务工作流。** AI 服务可以在同一令牌下对你的文档进行操作，无需服务之间的额外连接。
+- **令牌内的权限。** 通过 `action`、`resource` 以及可选约束精确声明允许的内容。
+- **零停机密钥轮换。** 每个环境可同时运行多个活动密钥对，并在无需切换窗口的情况下停用旧密钥。
 
 ## 声明参考
 
@@ -143,7 +143,7 @@ $token = JWT::encode($payload, $privateKey, 'ES256');
 
 `Documents:Write` 隐含 `Documents:Read` 和 `Documents:Comment`——授予写入权限会自动授予另外两项，因此你无需单独列出它们。
 
-`Documents:Api:All` 授予对 Document Server 的 REST API 的完全访问权限。它与其他 `Documents:*` 操作是分开的，后者授权通过协作连接进行文档操作。
+`Documents:Api:All` 授予对每个 Document Server API 端点的访问权限，包括受管理的设置。它与其他 `Documents:*` 操作是分开的，后者用于通过协作连接授权文档操作。请将携带它的令牌视为管理员凭证。请将其保留在服务器端，严格限制其有效期，切勿与客户端共享。
 
 `Convert:*` 操作按文件格式 **和** 操作类型（`Import` 与 `Export`）进行作用域限定。令牌只需要它实际使用到的操作——例如，一个只导出 PDF 的令牌只需要 `Convert:Export:Pdf`。目前只有 DOCX 和 Markdown 支持双向；Doc、ODT、EPUB 和 PDF 仅支持导出。`Convert:Fonts` 不受作用域限制，并适用于 `/fonts/*` 路由。
 
@@ -213,6 +213,23 @@ $token = JWT::encode($payload, $privateKey, 'ES256');
 - `in` 不能与 `prefix` 或 `suffix` 同时出现在同一个约束对象中。请改为在数组中使用单独的约束。
 - `prefix` 和 `suffix` 必须是非空字符串。
 - `in` 必须是非空字符串数组。
+
+## 跨服务操作
+
+某些操作会跨越服务边界。Document Server 存储你的文档，而其他服务则对其进行操作。例如，通过 Convert 服务导入 DOCX 会将文档及其注释写入 Document Server。当某个操作以这种方式读取或写入文档时，令牌需要同时包含发起操作和匹配的 `Documents` 操作。
+
+一个将带注释的 DOCX 导入为已存储文档的令牌需要同时包含以下两项：
+
+```json
+{
+  "permissions": [
+    { "action": "Convert:Import:Docx", "resource": "*" },
+    { "action": "Documents:Write", "resource": "*" }
+  ]
+}
+```
+
+`resource` 由你自行定义。每个服务页面都会说明它执行了哪些跨服务操作，以及它们所需的权限。
 
 ## 示例
 

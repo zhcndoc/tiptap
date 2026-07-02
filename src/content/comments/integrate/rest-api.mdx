@@ -33,7 +33,7 @@ https://YOUR_APP_ID.collab.tiptap.cloud/
 
 将 `YOUR_APP_ID` 替换为您的文档服务器 ID，该 ID 在 [Cloud 仪表板](https://cloud.tiptap.dev/v2/configuration/document-server) 中标记为 "Document server ID"。
 
-身份验证使用 API 密钥完成，您可以在文档服务器的 [设置](https://cloud.tiptap.dev/v2/configuration/document-server) 中找到该密钥。该密钥必须作为 `Authorization` 标头发送。
+使用带有 `Documents:Api:All` 权限的签名 token 进行身份验证，并作为 `Authorization: Bearer <jwt>` 标头发送。有关如何签名，请参见 [身份验证](/authentication)。此 token 授予完整的 Document Server API 访问权限，因此请将其保留在服务器端。先前的 API secret 仍然可用，并在 [传统身份验证](/authentication/legacy) 中有相关文档。
 
 如果您的文档标识符包含斜杠 (`/`)，请将其编码为 `%2F`，例如使用 `encodeURIComponent`。
 

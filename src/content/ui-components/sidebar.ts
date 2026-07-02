@@ -71,7 +71,12 @@ export const sidebarConfig: SidebarConfig = {
         {
           title: '类 Notion 编辑器',
           href: '/ui-components/templates/notion-like-editor',
-          tags: ['Start 计划'],
+          tags: ['Start'],
+        },
+        {
+          title: 'DOCX Editor',
+          href: '/ui-components/templates/docx-editor',
+          tags: ['Team'],
         },
       ],
     },
@@ -153,7 +158,11 @@ export const sidebarConfig: SidebarConfig = {
               href: '/ui-components/components/emoji-trigger-button',
             },
             {
-              title: '标题按钮',
+              title: 'Font family combobox',
+              href: '/ui-components/components/font-family-combobox',
+            },
+            {
+              title: 'Heading button',
               href: '/ui-components/components/heading-button',
             },
             {
@@ -201,7 +210,11 @@ export const sidebarConfig: SidebarConfig = {
               href: '/ui-components/components/move-node-button',
             },
             {
-              title: '重置所有格式按钮',
+              title: 'Numbering format dropdown menu',
+              href: '/ui-components/components/numbering-format-dropdown-menu',
+            },
+            {
+              title: 'Reset all formatting button',
               href: '/ui-components/components/reset-all-formatting-button',
             },
             {
@@ -227,6 +240,10 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: '撤销重做按钮',
               href: '/ui-components/components/undo-redo-button',
+            },
+            {
+              title: 'Zoom dropdown menu',
+              href: '/ui-components/components/zoom-dropdown-menu',
             },
           ],
         },

@@ -3,7 +3,7 @@ title: 与修订模式一起使用
 meta:
   title: 与修订模式一起使用 | Tiptap Server AI Toolkit
   description: 将服务器端 AI 编辑显示为修订内容，用户可以逐条接受或拒绝。
-  category: Content AI
+  category: 内容 AI
 sidebars:
   hideSecondary: true
 ---
@@ -46,25 +46,30 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ## 显示追踪变更
 
-要将服务端 AI 编辑显示为追踪变更，请在 `POST /v3/toolkit/execute-tool` 端点上配置 `reviewOptions` 参数。在调用 `tiptapRead` 和 `tiptapEdit` 工具时，将审阅模式设为 `{mode: 'trackedChanges'}`。有关所有可用设置，请参阅 [review options 参考文档](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options)。
+要将服务端 AI 编辑显示为追踪变更，请在 `POST /v4/ai/toolkit/execute-tool` 端点上配置 `reviewOptions` 参数。在调用 `tiptapRead` 和 `tiptapEdit` 工具时，将审阅模式设置为 `{ mode: 'trackedChanges' }`。有关所有可用设置，请参阅 [review options 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options)。
 
 ### 使用追踪变更执行工具
 
 在调用 `execute-tool` 时传入 `reviewOptions`：
 
+`getAuthHeaders` 辅助函数会签名一个 JWT，因此在将 headers 传递给 `fetch` 时请保留 `await`。
+
 ```ts
 import { getAuthHeaders } from '@/lib/server-ai-toolkit/get-auth-headers'
 
-const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
+const result = await fetch(`${apiBaseUrl}/v4/ai/toolkit/execute-tool`, {
   method: 'POST',
-  headers: getAuthHeaders(),
+  headers: await getAuthHeaders('your-document-id'),
   body: JSON.stringify({
-    toolName: 'tiptapEdit',
-    input: toolCallInput,
     editorContext,
-    experimental_documentOptions: {
-      documentId: 'your-document-id',
-      userId: 'ai-assistant',
+    document: {
+      type: 'cloud',
+      id: 'your-document-id',
+    },
+    user: 'ai-assistant',
+    tool: {
+      name: 'tiptapEdit',
+      input: toolCallInput,
     },
     reviewOptions: {
       mode: 'trackedChanges',
@@ -135,37 +140,41 @@ export default function Page() {
 
 ### API 端点
 
-当获取工具定义时，请配置 `tiptapEdit` 工具，使其可以在操作中包含 `meta` 字段。然后指示 AI 在该 `meta` 字段中提供说明理由。
+在获取工具定义时，配置 `tiptapEdit` 工具，使其能够在操作中包含 `meta` 字段。`meta` 值是添加到每个编辑操作工具 schema 中的一条指令。AI 在创建编辑时会填写该字段，Server AI Toolkit 会将每个非空的 `meta` 值作为追踪变更的理由评论。
 
 ```ts
-const response = await fetch(`${apiBaseUrl}/toolkit/tools`, {
+const response = await fetch(`${apiBaseUrl}/v4/ai/toolkit/fetch-tools`, {
   method: 'POST',
-  headers: getAuthHeaders(),
+  headers: await getAuthHeaders(),
   body: JSON.stringify({
     editorContext,
     tools: {
-      tiptapEdit: true,
+      tiptapEdit: {
+        meta: '简要说明为什么此更改能改进文档。',
+      },
     },
-    operationMeta: '简要说明此变更如何改进文档的理由。',
   }),
 })
 ```
 
 ### 使用评论执行工具
 
-在调用 `execute-tool` 时，同时传递 `experimental_commentsOptions` 和 `reviewOptions`：
+调用 `execute-tool` 时传入 `reviewOptions`：
 
 ```ts
-const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
+const result = await fetch(`${apiBaseUrl}/v4/ai/toolkit/execute-tool`, {
   method: 'POST',
-  headers: getAuthHeaders(),
+  headers: await getAuthHeaders('your-document-id'),
   body: JSON.stringify({
-    toolName: 'tiptapEdit',
-    input: toolCallInput,
     editorContext,
-    experimental_documentOptions: {
-      documentId: 'your-document-id',
-      userId: 'ai-assistant',
+    document: {
+      type: 'cloud',
+      id: 'your-document-id',
+    },
+    user: 'ai-assistant',
+    tool: {
+      name: 'tiptapEdit',
+      input: toolCallInput,
     },
     reviewOptions: {
       mode: 'trackedChanges',
@@ -175,10 +184,6 @@ const result = await fetch(`${apiBaseUrl}/toolkit/execute-tool`, {
           name: 'AI Assistant',
         },
       },
-    },
-    experimental_commentsOptions: {
-      threadData: { userName: 'Tiptap AI' },
-      commentData: { userName: 'Tiptap AI' },
     },
   }),
 })
@@ -221,7 +226,6 @@ const editor = useEditor({
 
 ## 下一步
 
-- 了解所有可用的 [tool definitions](/content-ai/capabilities/server-ai-toolkit/api-reference/tools)
-- 了解更多关于 [review options](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options)
-- 浏览 [REST API reference](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)
-- 了解更多关于 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展
+- 了解更多关于 [审阅选项](/content-ai/capabilities/server-ai-toolkit/api-reference/review-options)
+- 探索 [REST API 参考](/content-ai/capabilities/server-ai-toolkit/api-reference/rest-api)
+- 了解更多关于 [跟踪更改](/tracked-changes/getting-started/overview) 扩展

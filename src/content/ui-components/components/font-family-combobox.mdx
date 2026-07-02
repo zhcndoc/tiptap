@@ -1,0 +1,203 @@
+---
+title: 字体族组合框
+meta:
+  title: 字体族组合框 | Tiptap UI 组件
+  description: 为你的 Tiptap 编辑器添加一个可搜索、分组的字体族选择器，并提供实时预览。更多内容请查看文档！
+  category: UI 组件
+component:
+  name: 字体族组合框
+  description: 一个可搜索、分组的字体族选择器，支持按字体预览，并可配置字体目录。
+  type: component
+  isFree: false
+  isCloud: false
+  isOpen: false
+  isNew: true
+  icon: Type
+tags:
+  - type: start
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+适用于 Tiptap 编辑器的可搜索字体族选择器。触发器会显示当前激活的字体；展开后会出现一个模糊搜索字段，以及按类别分组的字体，每种字体都以其自身字形进行预览。“默认字体”选项会取消任何内联字体设置。
+
+它是 `font-family-dropdown-menu` 的一个更丰富、可搜索的对应组件，并与 `@tiptap/extension-text-style` 中的 `FontFamily` 标记配合使用。该组件与字体目录无关：你可以传入自己的 `fonts`、`categories` 和 `defaultFont`，也可以使用内置的网页安全默认值。所有编辑器逻辑都位于 `useFontFamilyCombobox` 钩子中。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/font-family-combobox" />
+
+## 安装
+
+通过 Tiptap CLI 添加该组件：
+
+```bash
+npx @tiptap/cli@latest add font-family-combobox
+```
+
+## 组件
+
+### `<FontFamilyCombobox />`
+
+一个基于 Ariakit 的 menu-with-combobox 复合组件预构建的可搜索字体选择器。
+
+#### 用法
+
+```tsx
+export default function MyEditor() {
+  return (
+    <FontFamilyCombobox
+      editor={editor}
+      hideWhenUnavailable={true}
+      onOpenChange={(isOpen) => console.log('选择器', isOpen ? '已打开' : '已关闭')}
+    />
+  )
+}
+```
+
+要使用你自己的目录，请提供 `fonts`、`categories` 和 `defaultFont`。每个选项的 `category` 会与某个分类的 `id` 匹配，而选项可选的 `fallbackFor` 允许导入的系统字体（例如 `"Arial"`）解析为某个打包的字体族。
+
+```tsx
+const fonts = [
+  { value: 'inter', label: 'Inter', family: 'Inter', hint: 'UI 无衬线', category: 'sans-serif', default: true },
+  { value: 'georgia', label: 'Georgia', family: 'Georgia, serif', hint: '衬线', category: 'serif' },
+]
+const categories = [
+  { id: 'sans-serif', label: '无衬线' },
+  { id: 'serif', label: '衬线' },
+]
+
+<FontFamilyCombobox editor={editor} fonts={fonts} categories={categories} defaultFont={fonts[0]} />
+```
+
+#### 属性
+
+该组件还会将任何额外的 `Button` 属性（`type` 除外）透传给触发器。
+
+| 名称                 | 类型                   | 默认值                        | 描述                                                         |
+| -------------------- | ---------------------- | ----------------------------- | ------------------------------------------------------------ |
+| `editor`             | `Editor \| null`       | `undefined`                   | Tiptap 编辑器实例。                                           |
+| `fonts`              | `FontFamilyOption[]`   | `defaultFontFamilyOptions`    | 在选择器中提供的字体。                                         |
+| `defaultFont`        | `FontFamilyOption`     | `defaultFontFamilyOption`     | 当未应用任何行内字体时，文档所回退使用的字体。                 |
+| `categories`         | `FontFamilyCategory[]` | `defaultFontFamilyCategories` | 要渲染的分类组，与每个字体的 `category` 匹配。               |
+| `hideWhenUnavailable` | `boolean`              | `false`                       | 当无法应用字体族时隐藏选择器。                                 |
+| `onOpenChange`       | `(boolean) => void`    | `undefined`                   | 选择器打开或关闭时的回调。                                     |
+
+#### 类型
+
+```tsx
+interface FontFamilyOption {
+  label: string // 选择器中的显示名称
+  value: string // 稳定标识符
+  family: string // 应用于文档的 CSS font-family；此字体会用于预览
+  hint?: string // 标签下方的简短描述，例如 "类似 Calibri"
+  category: string // 组 id（与 FontFamilyCategory 匹配）
+  default?: boolean // 标记默认选项（无行内字体）
+  fallbackFor?: string[] // 导入时此字体族可替代的系统字体
+}
+
+interface FontFamilyCategory {
+  id: string
+  label: string
+}
+```
+
+## Hooks
+
+### `useFontFamilyCombobox()`
+
+一个无界面（headless）的 Hook，暴露构建自定义字体选择器所需的选择状态和操作。
+
+#### 用法
+
+```tsx
+function MyFontPicker() {
+  const { isVisible, triggerLabel, selectFont, selectDefault, filterFonts } = useFontFamilyCombobox(
+    { editor, hideWhenUnavailable: true },
+  )
+
+  if (!isVisible) return null
+
+  const results = filterFonts('geo') // 搜索查询的排序匹配结果
+  // …使用 selectFont(font) / selectDefault() 渲染你自己的 UI
+}
+```
+
+#### 属性
+
+| 名称                  | 类型                      | 默认值                     | 描述                                                   |
+| --------------------- | -------------------- | -------------------------- | -------------------------------------------------------- |
+| `editor`              | `Editor \| null`     | `undefined`                | Tiptap 编辑器实例。                                     |
+| `fonts`               | `FontFamilyOption[]` | `defaultFontFamilyOptions` | 要提供的字体。                                         |
+| `defaultFont`         | `FontFamilyOption`   | `defaultFontFamilyOption`  | 当未设置任何内联字体时，文档的回退字体。               |
+| `hideWhenUnavailable` | `boolean`            | `false`                    | 当字体族不可用时隐藏选择器。                             |
+
+#### 返回值
+
+| 名称               | 类型                                    | 描述                                                       |
+| ------------------ | --------------------------------------- | ----------------------------------------------------------------- |
+| `isVisible`        | `boolean`                               | 选择器是否应当渲染。                                          |
+| `canToggle`        | `boolean`                               | 当前状态下是否可以应用字体族。                                |
+| `isActive`         | `boolean`                               | 是否有显式的内联字体处于激活状态（不是默认字体）。            |
+| `fonts`            | `FontFamilyOption[]`                    | 已配置的字体。                                               |
+| `defaultFont`      | `FontFamilyOption`                      | 已配置的默认字体。                                           |
+| `selectionState`   | `FontFamilySelectionState`              | 选择内容的字体状态（`default` / `font` / `mixed`）。        |
+| `activeFontFamily` | `string`                                | 应用于所选内容的 `font-family`（默认时为空）。               |
+| `activeFont`       | `FontFamilyOption \| undefined`         | 当前字体族对应的已解析选项（如果有）。                      |
+| `triggerLabel`     | `string`                                | 触发器标签（当前字体、`Mixed`，或 `Default · …`）。         |
+| `selectFont`       | `(font: FontFamilyOption) => void`      | 将字体族应用到所选内容。                                     |
+| `selectDefault`    | `() => void`                            | 取消设置任何内联字体（使用文档默认字体）。                   |
+| `filterFonts`      | `(query: string) => FontFamilyOption[]` | 根据搜索查询对已配置字体进行排序。                           |
+
+## 实用工具
+
+### 默认字体目录
+
+```tsx
+import {
+  defaultFontFamilyOptions,
+  defaultFontFamilyCategories,
+  defaultFontFamilyOption,
+} from '@/components/tiptap-ui/font-family-combobox'
+```
+
+一组适合网页使用的字体（Arial、Verdana、Tahoma、Times New Roman、Georgia、Courier New），按无衬线 / 衬线 / 等宽分组，因此无需加载任何 webfont 即可开箱即用。
+
+### 辅助函数
+
+```tsx
+import {
+  filterFontsByQuery,
+  findFontByFamily,
+  resolveFontFamily,
+  getActiveFontOption,
+  getFontFamilySelectionState,
+  getFontFamilyTriggerLabel,
+} from '@/components/tiptap-ui/font-family-combobox'
+
+filterFontsByQuery(fonts, 'geo') // 排名匹配（空查询 → 顺序不变）
+findFontByFamily(fonts, 'Georgia') // family 匹配的选项，或 undefined
+resolveFontFamily(fonts, 'Arial') // 通过每个选项的 fallbackFor 将系统字体映射过去
+getActiveFontOption(fonts, 'Inter') // 将已应用的 family 解析为一个选项
+getFontFamilySelectionState(editor) // { kind: 'default' | 'font' | 'mixed', fontFamily }
+getFontFamilyTriggerLabel(state, defaultFont, fonts) // 触发器标签字符串
+```
+
+## 要求
+
+### 依赖项
+
+- `@tiptap/react` — Tiptap React 核心集成
+- `@tiptap/pm` — 用于读取选区字体标记的 ProseMirror 模型/状态
+- `match-sorter` — 用于搜索字段的模糊排序
+- `@tiptap/extension-text-style` — 提供此选择器应用的 `FontFamily` 标记
+
+### 引用的组件
+
+- `use-tiptap-editor`（hook）
+- `use-composed-ref`（hook）
+- `font-family-dropdown-menu`（组件 — 共享编辑器辅助工具）
+- `button`（基础组件）
+- `combobox`（基础组件）
+- `input`（基础组件）
+- `menu`（基础组件）
+- `check-icon`（图标）
+- `chevron-down-icon`（图标）

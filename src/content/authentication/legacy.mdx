@@ -1,0 +1,73 @@
+---
+title: 旧版认证
+meta:
+  title: 旧版认证 | Tiptap 文档
+  description: 基于 App ID 和各服务密钥的先前按服务认证模型的参考文档。用于维护和排查现有集成问题。
+  category: 认证
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+在统一的 [Authentication](/authentication) 模型之前，每个 Tiptap 服务都是独立进行身份验证的。你需要从仪表板中复制每个服务各自的 App ID 和密钥，并签发一个特定于服务的 JWT。本页面是这些集成的参考文档。
+
+<Callout title="仍受支持" variant="info">
+  现有集成无需更改即可继续工作。使用旧格式的请求会自动路由到旧路径，因此你可以按照自己的节奏进行迁移。准备好后，请参阅 [迁移到新的身份验证](/authentication/migrate)。
+</Callout>
+
+## 之前的模型如何工作
+
+每个服务都有自己的凭据和自己的令牌形式：
+
+| Service | Credentials | Token |
+| --- | --- | --- |
+| 协作和文档 | Collaboration secret | 使用该密钥签名的 JWT，携带文档访问声明 |
+| 转换 | App ID 和密钥（Convert 设置） | `Authorization` 中的 JWT，`X-App-Id` 标头中的 App ID |
+| 内容 AI | App ID 和密钥（AI 设置） | 使用该密钥签名的 JWT，不包含额外声明 |
+
+## 协作和文档
+
+你使用你的协作密钥签署了一个 JWT。载荷中列出了用户可以访问哪些文档以及访问级别，分别通过 `allowedDocumentNames`、`readonlyDocumentNames` 和 `commentDocumentNames` 指定。
+
+```typescript
+import jsonwebtoken from 'jsonwebtoken'
+
+const data = {
+  sub: 'your_local_user_identifier',
+  allowedDocumentNames: ['user-specific-document-1', 'user-specific-document-2'],
+}
+
+const jwt = jsonwebtoken.sign(data, 'your_secret')
+```
+
+访问模式：
+
+- **完全访问。** 省略 `allowedDocumentNames` 以授予对每个文档的访问权限。
+- **特定文档。** 在 `allowedDocumentNames` 中列出名称。
+- **只读。** 在 `readonlyDocumentNames` 中列出名称。
+- **仅评论。** 将名称列在 `commentDocumentNames` 中，并同时具有只读访问权限。
+- **通配符。** 在 `allowedDocumentNames` 中使用如 `project-alpha/*` 这样的模式来匹配一组文档。
+
+关于新模型中的等效方式，请参阅 [按文档授权](/collaboration/getting-started/authenticate#authorize-per-document) 和 [迁移映射](/authentication/migrate#collaboration-and-documents)。
+
+## 转换
+
+你从 Convert 设置页面获取了 App ID 和密钥，用该密钥签名了一个 JWT，并在每个 REST 请求中同时发送了这两者：
+
+```bash
+Authorization: Bearer YOUR_JWT
+X-App-Id: YOUR_APP_ID
+```
+
+对于编辑器扩展，你传递了相同的 `appId` 和 `token` 选项。对于新模型，请参见 [迁移到新认证](/authentication/migrate#conversion)。
+
+## 内容 AI
+
+你从 AI 设置页面获取了一个 App ID 和 secret，并使用该 secret 签名了一个 JWT。App ID 和 token 被传递给了 AI 扩展。REST 请求在 `Authorization` 中携带 JWT，并在 `X-App-Id` 中携带 App ID。请参见 [内容 AI 安装](/content-ai/capabilities/generation/install)。
+
+## 故障排查
+
+- **一个以前可用的 token 现在被拒绝了。** 检查 `exp` 声明。短期 token 会持续进行验证，因此过期的 token 会在下一次检查时被拒绝。
+- **REST API 返回 `401`。** 确认用于签名 token 的密钥与服务设置中显示的密钥一致，并且 App ID 已通过 `X-App-Id` 发送。
+- **带有权限或功能错误的 `403`。** 环境的订阅可能不包含该服务。请在控制台中确认套餐。
+
+当你准备将这些按服务划分的 token 整合为一个时，请参阅 [迁移到新的身份验证](/authentication/migrate)。

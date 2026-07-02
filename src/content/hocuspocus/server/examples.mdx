@@ -423,3 +423,13 @@ await docConnection.transact((doc) => {
 
 await docConnection.disconnect()
 ```
+
+### 在断开连接后保持文档处于热状态
+
+默认情况下，`disconnect()` 会立即持久化文档，并在其完成后将其从内存中卸载。如果你预计在不久后会再次为同一文档打开另一个直接连接，请传入 `unloadImmediately: false`。此时，存储会通过防抖定时器进行调度，文档会继续保留在内存中处于热状态，因此后续连接会复用它，重复写入也会合并——这与 WebSocket 连接关闭时的行为一致。
+
+```typescript
+await docConnection.disconnect({ unloadImmediately: false })
+```
+
+请注意，当使用 `unloadImmediately: false` 时，`disconnect()` 返回时不能再保证持久化已经完成。

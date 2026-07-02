@@ -25,16 +25,16 @@ import { Callout } from '@/components/ui/Callout'
 
 | | 导入 | 编辑器（使用 ConvertKit） | 导出 |
 | --- | --- | --- | --- |
-| Heading levels 1 to 6 | Supported | Supported | Supported |
-| Title and Subtitle styles | Imported as paragraphs (with inherited font and spacing from the style chain) | Render as paragraphs that visually resemble headings | Exported as paragraphs |
-| Heading levels 7 to 9 | Heading nodes produced with `level: 7`, `8`, or `9` in JSON | Render as `<h1>` because the standard Heading extension's `levels` option only allows 1–6; the level is preserved in the JSON attrs but the tag is coerced. Configure `Heading.configure({ levels: [1,2,3,4,5,6,7,8,9] })` (or override ConvertKit's `heading` slot) to render the actual tags. | Exported as `<h1>` Word-side unless your editor schema accepts higher levels |
-| Custom heading styles | Resolved to closest standard level | Style name lost | Generic heading style applied |
-| Text alignment | Supported | Supported (TextAlign) | Supported |
-| Inline formatting | Supported | Supported | Supported |
-| Heading numbering | Converted to indent attr | Indent rendered (`padding-left`); numbering glyphs not generated | Not preserved |
-| Per-heading spacing / indent / line-height | Converted to attrs | Supported | Supported (proportional line height only; a negative first-line indent becomes a hanging indent) |
-| Per-heading font-size | Converted to attr | Supported | Export defaults applied |
-| Named-style typography (theme) | Catalog available via [CSS injection](/conversion/import/docx/css-injection) | Renders via injected CSS | Export defaults applied |
+| 1 到 6 级标题 | 支持 | 支持 | 支持 |
+| 标题和副标题样式 | 作为段落导入（继承样式链中的字体和间距） | 渲染为视觉上类似标题的段落 | 导出为段落 |
+| 7 到 9 级标题 | 在 JSON 中生成带有 `level: 7`、`8` 或 `9` 的标题节点 | 渲染为 `<h1>`，因为标准 Heading 扩展的 `levels` 选项只允许 1–6；该级别会保留在 JSON attrs 中，但标签会被强制转换。配置 `Heading.configure({ levels: [1,2,3,4,5,6,7,8,9] })`（或覆盖 ConvertKit 的 `heading` slot）以渲染实际标签。 | 除非你的编辑器 schema 接受更高级别，否则在 Word 端导出为 `<h1>` |
+| 自定义标题样式 | 解析为最接近的标准级别 | 样式名称丢失 | 应用通用标题样式 |
+| 文本对齐 | 支持 | 支持（TextAlign） | 支持 |
+| 行内格式 | 支持 | 支持 | 支持 |
+| 标题编号 | 转换为 indent 属性 | 渲染缩进（`padding-left`）；不生成编号符号 | 不保留 |
+| 每个标题的间距 / 缩进 / 行高 | 转换为属性 | 支持 | 支持（仅比例行高；负的首行缩进会变成悬挂缩进） |
+| 每个标题的字体大小 | 转换为属性 | 支持 | 应用导出默认值 |
+| 命名样式排版（主题） | 可通过 [CSS 注入](/conversion/import/docx/css-injection) 获取样式目录 | 通过注入的 CSS 渲染 | 应用导出默认值 |
 
 ## 导入
 
@@ -100,7 +100,7 @@ ConvertKit.configure({
 
 ### 文本对齐已内置
 
-ConvertKit 也会注册 `TextAlign`，并将其预配置为 `['paragraph', 'heading']`，因此从导入的 DOCX 标题中得到的 `textAlign` 属性会自动渲染。如果你禁用了内置的 `textAlign` 插槽，该属性会保留在 JSON 中，但不会被应用——参见 [无效 schema 指南](/guides/invalid-schema)。
+ConvertKit 还会注册 `TextAlign`，并将其预配置为 `['paragraph', 'heading']`，因此从导入的 DOCX 标题中获取的 `textAlign` 属性会自动渲染。如果你禁用内置的 `textAlign` 插槽，该属性仍会保留在 JSON 中，但不会被应用。请参见[无效 schema 指南](/guides/invalid-schema)。
 
 ### 与 Word 的视觉差异
 

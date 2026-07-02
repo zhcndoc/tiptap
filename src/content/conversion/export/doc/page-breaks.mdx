@@ -44,7 +44,6 @@ const editor = new Editor({
     ConvertKit,
     PageBreak,
     ExportDoc.configure({
-      appId: 'your-app-id',
       token: 'your-jwt',
       onCompleteExport: (result) => {
         const blob = new Blob([result], { type: 'application/msword' })
@@ -62,6 +61,6 @@ const editor = new Editor({
 
 ## 了解更多
 
-- [PageBreak extension reference](/pages/core-concepts/page-break-node) 了解完整选项、命令和键盘快捷键
+- [PageBreak 扩展参考](/pages/core-concepts/page-break-node) 了解完整选项、命令和键盘快捷键
 - [DOCX 导入中的分页符](/conversion/import/docx/page-breaks) 了解导入支持
 - [DOC 导出指南](/conversion/export/doc/editor-extension) 了解通用导出设置

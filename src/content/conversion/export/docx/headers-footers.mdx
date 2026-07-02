@@ -460,8 +460,8 @@ async function getDocumentStats() {
 
 导出支持两种方式来生成实时页码字段：
 
-1. **普通文本页眉和页脚中的 `{page}` / `{total}` 标记**——可与从 [Pages 扩展](/pages/getting-started/overview) 中提取的内容自动配合使用，也可与传递给 `headers` / `footers` 的普通文本字符串一起使用。导出会将每个标记转换为实时的 `PAGE` / `NUMPAGES` 字段，因此 Word 会渲染出实际的当前页码和总页数。
-2. **`Docx.PageNumber` API**——当你使用 `new Docx.Header()` / `new Docx.Footer()` 手动构建页眉/页脚内容时，或者当你需要在字段周围加入超出纯标记之外的格式时，这是必需的。`convertHeader` / `convertFooter` 辅助函数目前不会处理 `Docx.PageNumber` 引用——请直接传入 `Docx` 实例。
+1. **普通文本页眉和页脚中的 `{page}` / `{total}` 标记**：当内容来自 [Pages 扩展](/pages/getting-started/overview) 自动提取时，以及通过 `headers` / `footers` 传入普通文本字符串时，都会自动生效。导出时会将每个标记转换为实时的 `PAGE` / `NUMPAGES` 字段，因此 Word 会显示实际的当前页码和总页数。
+2. **`Docx.PageNumber` API**：当你使用 `new Docx.Header()` / `new Docx.Footer()` 手动构建页眉/页脚内容，或者你需要在字段周围添加超出简单标记的格式时，需要使用此 API。`convertHeader` / `convertFooter` 辅助函数目前不会处理 `Docx.PageNumber` 引用，因此请直接传入 `Docx` 实例。
 
 ### 通过 `{page}` / `{total}` 标记显示页码
 
@@ -485,10 +485,10 @@ const editor = new Editor({
         a.click()
         URL.revokeObjectURL(url)
       },
-      // 普通文本页眉/页脚——`{page}` 和 `"{total}"` 会在导出时转换为
-      // 实时的 `PAGE` / `NUMPAGES` 字段。
+      // 普通文本页眉/页脚：`{page}` 和 `{total}` 会在导出时转换
+      // 为实时的 `PAGE` / `NUMPAGES` 字段。
       headers: {
-        default: '机密 — 第 {page} 页，共 {total} 页',
+        default: 'Confidential | Page {page} of {total}',
       },
       footers: {
         default: '第 {page} 页，共 {total} 页',
@@ -505,7 +505,7 @@ editor.commands.exportDocx()
 
 ### 自定义占位符名称
 
-如果你的编辑器通过 `Pages.configure({ placeholders: { total: 'pages' } })` 重命名了内置标记（参见 [Pages → 重命名占位符](/pages/core-concepts/page-header-footer#renaming-or-disabling-placeholders)），导出会遵循相同的标记名称——`{pages}` 会变成实时的 `NUMPAGES` 字段，而原始的 `{total}` 将不再被识别。`ExportDocx` 本身没有 `placeholders` 选项；在 Pages 上进行配置可以保持编辑器预览与导出的 `.docx` 一致。
+如果你的编辑器通过 `Pages.configure({ placeholders: { total: 'pages' } })` 重命名了内置标记（参见 [Pages → 重命名占位符](/pages/core-concepts/page-header-footer#renaming-or-disabling-placeholders)），导出也会遵循相同的标记名称：`{pages}` 会变成实时的 `NUMPAGES` 字段，而原始的 `{total}` 将不再被识别。`ExportDocx` 本身没有 `placeholders` 选项；在 Pages 上进行配置可保持编辑器预览与导出的 `.docx` 一致。
 
 当直接调用 `convertHeader` / `convertFooter` 时（例如，在没有编辑器的服务端代码中），你可以显式传入 `placeholders`：
 
@@ -518,7 +518,7 @@ const footer = await convertFooter({
 })
 ```
 
-传入 `placeholders: false` 可禁用替换，并将标记按字面文本输出。对于直接调用 `convertHeader` / `convertFooter`，如果完全省略 `placeholders`，也会禁用替换——需要你显式开启。
+传入 `placeholders: false` 可禁用替换，并将标记按字面文本输出。如果在直接调用 `convertHeader` / `convertFooter` 时完全省略 `placeholders`，也会禁用替换；你需要显式启用。
 
 ### 基础页码
 

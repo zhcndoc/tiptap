@@ -23,14 +23,14 @@ import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
     在您的账户中开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Start
     套餐](https://cloud.tiptap.dev/v2/billing)。
   </RequirementItem>
-  <RequirementItem label="2. 配置 Convert 应用">
-    要使用 Convert REST API，请从 [您的仪表板](https://cloud.tiptap.dev/v2/cloud/convert) 获取您的 App ID 和 Convert secret。
+  <RequirementItem label="2. Configure Convert app">
+    Authenticate REST calls with a signed token carrying `aud: "Convert"`. See [Authentication](/authentication).
   </RequirementItem>
 </Requirements>
 
 DOCX 导出 API 会将 Tiptap JSON 文档转换为 `.docx`（Microsoft Word）文件。它使用与 [编辑器扩展](/conversion/export/docx/editor-extension) 相同的转换库，并为标准内容生成等效的 DOCX 输出。
 
-REST API 支持 [样式覆盖](/conversion/export/docx/styles)、[通过 DSL 的自定义节点渲染](/conversion/export/docx/custom-nodes-dsl)、页面大小和页边距、页眉/页脚，以及元素级覆盖（`tableOverrides`、`paragraphOverrides`、`textRunOverrides`、`tableCellOverrides`、`imageOverrides`）。它不接受 JavaScript 函数选项。对于基于函数的自定义节点 API，请使用 [编辑器扩展](/conversion/export/docx/editor-extension)，它也可在服务端运行。
+The REST API supports [style overrides](/conversion/export/docx/styles), [custom-node rendering via the DSL](/conversion/export/docx/custom-nodes-dsl), page size and margins, headers/footers, comment threads, and element-level overrides (`tableOverrides`, `paragraphOverrides`, `textRunOverrides`, `tableCellOverrides`, `imageOverrides`). It does not accept JavaScript-function options. For the function-based custom-node API, use the [editor extension](/conversion/export/docx/editor-extension), which also works server-side.
 
 <Callout title="查看 postman 集合" variant="hint">
   您也可以前往我们的 [Postman
@@ -56,7 +56,6 @@ REST API 支持 [样式覆盖](/conversion/export/docx/styles)、[通过 DSL 的
 ```bash
 curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"left\"},\"content\":[{\"type\":\"text\",\"text\":\"欢迎参加本次演示，展示我们的编辑器如何将各种格式选项导出为 DOCX，确保您的内容在 Word 中保持预期外观。\"}]}]}",
@@ -71,30 +70,30 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 
 ### 必填请求头
 
-| 名称              | 说明                                                                                                                                   |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization` | 用于验证请求的 JWT 令牌。例如：`Bearer your-jwt-token`                                                                                 |
-| `X-App-Id`      | 来自 Convert 设置页面的 Convert 应用 ID：[https://cloud.tiptap.dev/v2/cloud/convert](https://cloud.tiptap.dev/v2/cloud/convert)           |
-| `Content-Type`  | 必须为 `application/json`                                                                                                              |
+| Name            | Description                                                                                                                               |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization` | The JWT token to authenticate the request. Example: `Bearer your-jwt-token`                                                               |
+| `Content-Type`  | Must be `application/json`                                                                                                                |
 
 ### 请求体
 
 | Name                 | Type              | Description                                                                                                                                                                                                                                                                                                                                                                  | Default     |
 | -------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `doc`                | `String`          | Tiptap 的 JSON                                                                                                                                                                                                                                                                                                                                                               | `N/A`       |
-| `exportType`         | `string`          | 期望的导出类型                                                                                                                                                                                                                                                                                                                                                              | `blob`      |
-| `styleOverrides`     | `Object`          | 样式覆盖                                                                                                                                                                                                                                                                                                                                                                    | `{}`        |
-| `pageSize`           | `Object`          | 页面尺寸配置                                                                                                                                                                                                                                                                                                                                                                | `undefined` |
-| `pageMargins`        | `Object`          | 页面边距配置                                                                                                                                                                                                                                                                                                                                                                | `undefined` |
-| `headers`            | `Object`          | 页眉配置                                                                                                                                                                                                                                                                                                                                                                    | `undefined` |
-| `footers`            | `Object`          | 页脚配置                                                                                                                                                                                                                                                                                                                                                                    | `undefined` |
-| `tableOverrides`     | `Object`          | 表格级渲染覆盖                                                                                                                                                                                                                                                                                                                                                              | `undefined` |
-| `paragraphOverrides` | `Object`          | 段落级渲染覆盖                                                                                                                                                                                                                                                                                                                                                              | `undefined` |
-| `textRunOverrides`   | `Object`          | 文本运行级渲染覆盖                                                                                                                                                                                                                                                                                                                                                           | `undefined` |
-| `tableCellOverrides` | `Object`          | 表格单元格级渲染覆盖                                                                                                                                                                                                                                                                                                                                                         | `undefined` |
-| `imageOverrides`     | `Object`          | 图像渲染覆盖                                                                                                                                                                                                                                                                                                                                                                 | `undefined` |
-| `customNodeDsl`      | `Object`          | [自定义节点 DSL](/conversion/export/docx/custom-nodes-dsl) 规则                                                                                                                                                                                                                                                                                                             | `undefined` |
-| `placeholders`       | `Object \| false` | 可选的 `{ page?, total? }` 重命名映射，需与 `Pages.configure({ placeholders })` 保持一致，以便将重命名后的标记（例如 `{p}` / `{pages}`）在纯文本页眉/页脚中转换为动态的 `PAGE` / `NUMPAGES` 字段。传入 `false` 可完全禁用替换（导出的 `.docx` 中将保留字面量 `{page}` / `{total}` 文本）。参见 [自定义标记名称](#custom-token-names-placeholders)。 | `undefined` |
+| `doc`                | `String`          | Tiptap's JSON                                                                                                                                                                                                                                                                                                                                                                | `N/A`       |
+| `exportType`         | `string`          | The expected export type                                                                                                                                                                                                                                                                                                                                                     | `blob`      |
+| `styleOverrides`     | `Object`          | Style overrides                                                                                                                                                                                                                                                                                                                                                              | `{}`        |
+| `pageSize`           | `Object`          | Page size configuration                                                                                                                                                                                                                                                                                                                                                      | `undefined` |
+| `pageMargins`        | `Object`          | Page margins configuration                                                                                                                                                                                                                                                                                                                                                   | `undefined` |
+| `headers`            | `Object`          | Page header configuration                                                                                                                                                                                                                                                                                                                                                    | `undefined` |
+| `footers`            | `Object`          | Page footer configuration                                                                                                                                                                                                                                                                                                                                                    | `undefined` |
+| `tableOverrides`     | `Object`          | Table-level rendering overrides                                                                                                                                                                                                                                                                                                                                              | `undefined` |
+| `paragraphOverrides` | `Object`          | Paragraph-level rendering overrides                                                                                                                                                                                                                                                                                                                                          | `undefined` |
+| `textRunOverrides`   | `Object`          | Text run rendering overrides                                                                                                                                                                                                                                                                                                                                                 | `undefined` |
+| `tableCellOverrides` | `Object`          | Table cell rendering overrides                                                                                                                                                                                                                                                                                                                                               | `undefined` |
+| `imageOverrides`     | `Object`          | Image rendering overrides                                                                                                                                                                                                                                                                                                                                                    | `undefined` |
+| `customNodeDsl`      | `Object`          | [Custom-node DSL](/conversion/export/docx/custom-nodes-dsl) rules                                                                                                                                                                                                                                                                                                            | `undefined` |
+| `placeholders`       | `Object \| false` | Optional `{ page?, total? }` rename map matching `Pages.configure({ placeholders })` so renamed tokens (e.g. `{p}` / `{pages}`) in plain-text headers/footers become live `PAGE` / `NUMPAGES` fields. Pass `false` to disable substitution entirely (literal `{page}` / `{total}` text in the exported `.docx`). See [Custom token names](#custom-token-names-placeholders). | `undefined` |
+| `comments`           | `Object`          | Comment threads to embed as native Word comments: `{ threads: [...] }`. Each thread carries its messages, author, dates, and resolved state, and is anchored to the document's `inlineThread` / `blockThread` marks. See [Comments](#comments).                                                                                                                              | `undefined` |
 
 #### 页面尺寸配置
 
@@ -110,7 +109,6 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 ```bash
 curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"自定义页面尺寸的文档\"}]}]}",
@@ -135,7 +133,6 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 ```bash
 curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"自定义边距的文档\"}]}]}",
@@ -169,7 +166,6 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 ```bash
 curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"带自定义页眉的文档\"}]}]}",
@@ -194,8 +190,12 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
   每个页脚值都可以是 **纯文本字符串**（生成简单、无样式的页脚）或 **字符串化的 Tiptap JSONContent** 对象（可启用加粗、斜体、链接等富文本格式）。当传入 JSONContent 时，请在请求体中发送前使用 `JSON.stringify()` 将对象转为字符串。
 </Callout>
 
-<Callout title="`{page}` / `{total}` 标记会变为实时 Word 字段" variant="info">
-  REST API 会将纯文本页眉/页脚中的 `{page}`、`{total}` 以及 `{numpages}` 同义标记转换为导出的 `.docx` 中实时的 Word `PAGE` / `NUMPAGES` 字段。自定义标记名称（例如 `{p}` / `{pages}`）需要传入可选的 `placeholders` 重命名映射——请参见下方的 [自定义标记名称](#custom-token-names-placeholders)。如需改为直接将标记作为字面文本输出，请传入 `"placeholders": false`。
+<Callout title="`{page}` / `{total}` tokens become live Word fields" variant="info">
+  The REST API translates `{page}`, `{total}`, and the `{numpages}` synonym inside plain-text
+  headers/footers into live Word `PAGE` / `NUMPAGES` fields in the exported `.docx`. Custom token
+  names (e.g. `{p}` / `{pages}`) require passing the optional `placeholders` rename map. See [Custom
+  token names](#custom-token-names-placeholders) below. Pass `"placeholders": false` to ship the
+  tokens as literal text instead.
 </Callout>
 
 #### 自定义标记名称 (`placeholders`)
@@ -210,9 +210,40 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 }
 ```
 
-当省略该映射时，服务会退回到识别 `{page}`、`{total}` 和 `{numpages}`（Word 对总页数字段的拼写，为保持与直接 REST API 调用方可镜像 `/import/docx` 的输出而保留为同义词）。重命名 `total` 会移除 `{numpages}` 同义词，因此过期标记会按字面量渲染——该重命名是严格的。传入 `"placeholders": false` 可禁用所有位置的替换，因此所有 `{page}` / `{total}` 文本都会作为字面量原样输出，不生成动态字段。
+When the map is omitted, the service falls back to recognizing `{page}`, `{total}`, and `{numpages}` (Word's spelling for the total-pages field, kept as a synonym so direct REST API callers can mirror what `/import/docx` emits). Renaming `total` removes the `{numpages}` synonym so stale tokens render literally; the rename is strict. Pass `"placeholders": false` to disable substitution on every slot so all `{page}` / `{total}` text ships literally with no live fields.
 
 **带自定义页脚的 cURL 示例：**
+
+```bash
+curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Document with custom footers\"}]}]}",
+      "exportType": "blob",
+      "footers": {"evenAndOddFooters": true, "default": "Default Footer", "first": "First Page Footer", "even": "Even Page Footer"}
+    }'
+```
+
+### Comments
+
+Pass a `comments` object to embed comment threads as native Word comments in the exported `.docx`. Each thread is anchored to the text it belongs to through the document's own comment markers: an `inlineThread` mark whose `data-thread-id` matches the thread `id`, or a `blockThread` node. The `comments` field supplies the thread bodies, authors, dates, and resolved state.
+
+The shape mirrors the editor's export extension:
+
+| Field                  | Type               | Description                                                                                                                    |
+| ---------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `threads`              | `Array`            | The comment threads to embed.                                                                                                  |
+| `threads[].id`         | `String`           | Thread id. Must match the `data-thread-id` on the matching `inlineThread` / `blockThread` in `doc`.                            |
+| `threads[].resolvedAt` | `String \| null`   | When set, the thread is exported as resolved.                                                                                  |
+| `threads[].comments`   | `Array`            | The thread's messages, root first, then replies in order.                                                                      |
+| `comments[].id`        | `String`           | Message id.                                                                                                                    |
+| `comments[].content`   | `String \| Object` | The message body as plain text or Tiptap JSON.                                                                                 |
+| `comments[].data`      | `Object`           | Optional metadata: `author`, `initials`, `dateIso`, `dateUtc`, and round-trip identities (`originalWId`, `originalDurableId`). |
+
+When omitted, the export contains no comments, so existing requests are unaffected.
+
+**Example cURL with a comment thread:**
 
 ```bash
 curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
@@ -220,9 +251,23 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
     -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
-      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"带自定义页脚的文档\"}]}]}",
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Reviewed text\",\"marks\":[{\"type\":\"inlineThread\",\"attrs\":{\"data-thread-id\":\"T1\"}}]}]}]}",
       "exportType": "blob",
-      "footers": {"evenAndOddFooters": true, "default": "默认页脚", "first": "首页页脚", "even": "偶数页页脚"}
+      "comments": {
+        "threads": [
+          {
+            "id": "T1",
+            "resolvedAt": null,
+            "comments": [
+              {
+                "id": "c1",
+                "content": "Please cite a source.",
+                "data": { "author": "Ada Lovelace", "initials": "AL", "dateIso": "2026-01-01T00:00:00.000Z" }
+              }
+            ]
+          }
+        ]
+      }
     }'
 ```
 
@@ -235,7 +280,6 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 ```bash
 curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"带元素级覆盖的文档\"}]}]}",
@@ -290,15 +334,14 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 将字体转换为可嵌入 DOCX 文件的形式：`TTF` / `OTF` 上传会原样返回，而 `WOFF2` 上传会转换为 `TTF`。这是编辑器扩展的 [`embedFonts`](/conversion/export/docx/fonts#automatic-embedding) 选项在后台调用的端点；你也可以直接调用它。自 Convert Service **v2.25.0** 起可用。
 
 <Callout>
-  该端点是无状态的——不会存储任何内容。每个请求都会被转换，临时文件会
-  立即清理。
+  The endpoint is stateless: nothing is stored. Each request is converted and the temporary files
+  are cleaned up immediately.
 </Callout>
 
 ### 必需请求头
 
 ```bash
 Authorization: Bearer <your-jwt>
-X-App-Id: <your-app-id>
 ```
 
 ### 请求体
@@ -315,7 +358,6 @@ X-App-Id: <your-app-id>
 ```bash
 curl --output MyFont.ttf -X POST "https://api.tiptap.dev/v2/convert/fonts/convert" \
   -H "Authorization: Bearer <your-jwt>" \
-  -H "X-App-Id: <your-app-id>" \
   -F "file=@MyFont.woff2" \
   -F "fontFamily=My Font"
 ```
@@ -329,10 +371,10 @@ curl --output MyFont.ttf -X POST "https://api.tiptap.dev/v2/convert/fonts/conver
 
 ### 错误响应
 
-| 状态 | 代码                      | 描述                                               |
-| ---- | ------------------------- | -------------------------------------------------- |
-| 400  | —                         | 请求验证错误（例如缺少 `file` 字段）               |
-| 413  | `FONT_FILE_TOO_LARGE`     | 上传的字体超过了 25MB 限制                         |
-| 422  | `UNSUPPORTED_FONT_FORMAT` | 上传内容不是可识别的 TTF、OTF 或 WOFF2 字体         |
-| 422  | `FONT_CONVERSION_FAILED`  | WOFF2 → TTF 转换没有产生任何输出                   |
-| 500  | `FONT_CONVERSION_FAILED`  | 转换期间发生意外错误                               |
+| Status | Code                      | Description                                            |
+| ------ | ------------------------- | ------------------------------------------------------ |
+| 400    | None                      | Request validation error (e.g. no `file` field)        |
+| 413    | `FONT_FILE_TOO_LARGE`     | The uploaded font exceeds the 25MB limit               |
+| 422    | `UNSUPPORTED_FONT_FORMAT` | The upload is not a recognized TTF, OTF, or WOFF2 font |
+| 422    | `FONT_CONVERSION_FAILED`  | The WOFF2 → TTF conversion produced no output          |
+| 500    | `FONT_CONVERSION_FAILED`  | Unexpected error during conversion                     |

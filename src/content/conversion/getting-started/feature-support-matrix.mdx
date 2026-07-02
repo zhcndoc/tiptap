@@ -120,16 +120,17 @@ import { Callout } from '@/components/ui/Callout'
 
 | 功能 | 导入 | 编辑器 | 导出 |
 | --- | --- | --- | --- |
-| [页分隔符](/conversion/content-types/page-layout/page-breaks) | ✓ | ~ | ✓ |
+| [分页符](/conversion/content-types/page-layout/page-breaks) | ✓ | ~ | ✓ |
 | [页眉和页脚](/conversion/content-types/page-layout/headers-footers) | ✓* | ✓ | ✓ |
-| [分节](/conversion/content-types/page-layout/page-structure) | ~ | ✕ | ✕ |
+| [节](/conversion/content-types/page-layout/page-structure) | ~ | ✕ | ✕ |
 | [页面大小和边距](/conversion/content-types/page-layout/page-structure) | ✕ | ✓ | ✓ |
 | [页码](/conversion/content-types/page-layout/page-structure) | ~** | ✓ | ~** |
 | [脚注](/conversion/content-types/structures-and-media/footnotes-endnotes) | ✓* | ✕ | ✕ |
 | [尾注](/conversion/content-types/structures-and-media/footnotes-endnotes) | ✓* | ✕ | ✕ |
+| [评论](/conversion/content-types/structures-and-media/comments) | ✓ | ✓ | ✓ |
 
-**\*** 导入行为在不同集成路径之间有所不同。[REST API](/conversion/import/docx/rest-api) 会在响应中将脚注、尾注和页眉/页脚作为单独字段返回。[编辑器扩展](/conversion/import/docx/editor-extension) 会通过 Pages 扩展自动应用页眉和页脚，但不会暴露脚注或尾注数据。详情请参见安装页面。<br />
-**\*\*** 页眉/页脚中的 Word `PAGE` 和 `NUMPAGES` 字段会转换为标准文本标记（`{page}` / `{numpages}`）——在使用 Pages 扩展时会自动开启；在其他情况下，可通过 `placeholders` 字段选择启用。其他字段代码（`DATE`、`AUTHOR`、`MERGEFIELD`）仍会作为其缓存显示值导入。导出时，**编辑器扩展** 和 **REST API** 都会在页眉/页脚内容中输出 `{page}` / `{total}` 标记，并将其作为实时 `PAGE` / `NUMPAGES` 字段。请参见 [页码字段](/conversion/content-types/page-layout/page-structure#page-numbers)。
+**\*** 导入行为在不同集成路径中有所不同。[REST API](/conversion/import/docx/rest-api) 会在响应中将脚注、尾注以及页眉/页脚作为单独字段返回。[编辑器扩展](/conversion/import/docx/editor-extension) 会通过 Pages 扩展自动应用页眉和页脚，但不会显示脚注或尾注数据。详情请参见安装页面。<br />
+**\*\*** 页眉/页脚中的 Word `PAGE` 和 `NUMPAGES` 字段会转换为规范文本标记（`{page}` / `{numpages}`）：在使用 Pages 扩展时默认开启；在其他情况下可通过 `placeholders` 字段选择启用。其他字段代码（`DATE`、`AUTHOR`、`MERGEFIELD`）仍会按其缓存的显示值导入。导出时，**编辑器扩展** 和 **REST API** 都会将页眉/页脚内容中的 `{page}` / `{total}` 标记作为实时的 `PAGE` / `NUMPAGES` 字段输出。请参见[页码字段](/conversion/content-types/page-layout/page-structure#page-numbers)。
 
 <Callout variant="info" title="页面布局需要 Pages 扩展">
   页眉、页脚、分页符以及分页布局都需要 [Pages 扩展](/pages/getting-started/overview) 才能在编辑器中渲染。没有它，即使转换服务生成了这些内容，也没有地方可供显示。
@@ -141,14 +142,13 @@ import { Callout } from '@/components/ui/Callout'
 
 | 功能 | 状态 |
 | --- | --- |
-| 评论和注释 | 不会转换。comments 扩展虽然存在，但未连接到转换流程。 |
-| 修订和跟踪更改 | 不会转换。tracked changes 扩展虽然存在，但未连接到转换流程。 |
-| 目录 | 作为 `tableOfContents` 节点导入（标题和标题范围）。需要一个 [自定义扩展](/editor/extensions/custom-extensions/extend-existing) 才能在编辑器中渲染。现有的 [目录扩展](/editor/extensions/functionality/table-of-contents) 是用于构建侧边栏导航的无头工具，而不是文档块渲染器。不会导出。 |
+| 修订和修订记录 | 不会转换。跟踪修订扩展存在，但未与转换连接。 |
+| 目录 | 作为 `tableOfContents` 节点导入（标题和标题范围）。需要一个[自定义扩展](/editor/extensions/custom-extensions/extend-existing)来在编辑器中渲染它。现有的[目录扩展](/editor/extensions/functionality/table-of-contents)是一个用于构建侧边栏导航的无头工具，而不是文档块渲染器。不导出。 |
 | 文本框 | 不会转换。文本框中的内容不会被提取。 |
 | 形状、SmartArt、WordArt | 不会转换。这些元素在导入期间不会被提取。 |
-| 字段代码（DATE、AUTHOR、MERGEFIELD） | 缓存的显示值会以纯文本形式保留（例如，一个显示“2026年4月10日”的 DATE 字段会作为文本“2026年4月10日”导入）。字段代码本身不会被转换，因此该值会变为静态，并且不会更新。 |
-| 页码字段代码（PAGE、NUMPAGES） | 当启用 `placeholders` 时，会转换为标准文本标记（`PAGE` 对应 `{page}`，`NUMPAGES` 对应 `{numpages}`）（在使用 Pages 扩展时默认开启；在 REST API 中可通过 `placeholders={}` 表单字段选择启用）。Pages 扩展原生渲染 `{page}`；可通过 `Pages.configure({ placeholders: { total: 'numpages' } })` 将 `{numpages}` 映射以实时渲染。若设置 `placeholders: false`（或在 REST API 中省略），缓存显示值会作为纯文本导入。 |
-| 文档元数据（作者、标题、关键词） | 不会转换。元数据不会包含在 JSON 输出中。 |
-| 表单字段和内容控件 | 不会转换。内联结构化文档标记（SDT）的文本内容会被保留，但控制元数据会被丢弃。 |
+| 域代码（DATE、AUTHOR、MERGEFIELD） | 缓存的显示值会以纯文本形式保留（例如，显示为“2026年4月10日”的 DATE 域会作为文本“2026年4月10日”导入）。域代码本身不会转换，因此该值会变为静态且不会更新。 |
+| 页码域代码（PAGE、NUMPAGES） | 当启用 `placeholders` 时，会翻译为规范文本标记（`PAGE` 对应 `{page}`，`NUMPAGES` 对应 `{numpages}`）（Pages 扩展默认启用；也可通过 REST API 的 `placeholders={}` 表单字段显式启用）。Pages 扩展可原生渲染 `{page}`；通过 `Pages.configure({ placeholders: { total: 'numpages' } })` 将 `{numpages}` 映射后即可动态渲染。若 `placeholders: false`（或在 REST API 中省略），缓存的显示值会作为纯文本导入。 |
+| 文档元数据（作者、标题、关键词） | 不会转换。元数据不包含在 JSON 输出中。 |
+| 表单域和内容控件 | 不会转换。内联结构化文档标记（SDT）的文本内容会保留，但控件元数据会被丢弃。 |
 | 隐藏文本 | 标记为隐藏的文本运行（`w:vanish`）会从导入输出中排除。 |
-| 从右到左的文本方向 | DOCX `<w:bidi>`（段落方向）和 `<w:rtl>`（文本运行方向）在导入时不会解析，也不会在导出时写回。以阿拉伯语、希伯来语、波斯语、乌尔都语及其他 RTL 语言编写的文档会使用编辑器的 CSS 方向渲染（默认 LTR）。如今可在编辑器根节点上设置 `dir="rtl"`，或在应用层检测语言来处理。详情请参见 [文本对齐](/conversion/content-types/text-and-formatting/text-alignment)。 |
+| 从右到左的文本方向 | 导入时不会解析 DOCX `<w:bidi>`（段落方向）和 `<w:rtl>`（文本运行方向），导出时也不会写入。用阿拉伯语、希伯来语、波斯语、乌尔都语及其他 RTL 语言编写的文档会按编辑器的 CSS 方向渲染（默认 LTR）。请在编辑器根元素上设置 `dir="rtl"`，或在应用层检测语言以处理此类情况。详见[文本对齐](/conversion/content-types/text-and-formatting/text-alignment)。 |

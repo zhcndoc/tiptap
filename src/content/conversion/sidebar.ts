@@ -311,7 +311,11 @@ export const sidebarConfig: SidebarConfig = {
               href: '/conversion/content-types/structures-and-media/footnotes-endnotes',
             },
             {
-              title: 'Word 样式',
+              title: 'Comments',
+              href: '/conversion/content-types/structures-and-media/comments',
+            },
+            {
+              title: 'Word styles',
               href: '/conversion/content-types/structures-and-media/word-styles',
             },
           ],

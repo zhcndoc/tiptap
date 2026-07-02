@@ -14,8 +14,8 @@ import { Callout } from '@/components/ui/Callout'
 
 ## 你需要什么
 
-- **扩展：** [`ConvertKit`](/conversion/import/docx/convertkit) — 其捆绑的 `TextStyleKit` 提供 `Color`（以及 `BackgroundColor`），并且 ConvertKit 已预配置注册了带有 `multicolor: true` 的 `Highlight`。
-- **配置：** 无需配置。
+- **Extensions:** [`ConvertKit`](/conversion/import/docx/convertkit)。其内置的 `TextStyleKit` 提供 `Color`（以及 `BackgroundColor`），并且 ConvertKit 会预先注册带有 `multicolor: true` 配置的 `Highlight`。
+- **Configuration:** 不需要。
 
 ```ts
 import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
@@ -62,14 +62,14 @@ new Editor({ extensions: [ConvertKit] })
 
 如果你禁用 `ConvertKit.configure({ textStyleKit: false })`，导入的文本颜色属性将不会被 schema 识别。`highlight: false` 也是同理。有关如何处理无法识别的标记和属性，请参阅[无效 schema 指南](/guides/invalid-schema)。
 
-## 导出
+## Export
 
-可使用 [编辑器扩展](/conversion/export/docx/editor-extension) 或 [REST API](/conversion/export/docx/rest-api) 导出文本颜色和高亮。两者对颜色和高亮的处理方式完全一致。
+You can use [Editor Extension](/conversion/export/docx/editor-extension) or [REST API](/conversion/export/docx/rest-api) to export text color and highlight. Both handle color and highlight in exactly the same way.
 
-导出时，颜色值会规范化为 6 位十六进制。支持以下输入格式：
+When exporting, color values are normalized to 6-digit hexadecimal. The following input formats are supported:
 
-- 带井号的十六进制：`#FF0000`、`#F00`、`#FF0000AA`
-- RGB/RGBA：`rgb(255, 0, 0)`、`rgba(255, 0, 0, 0.5)`
-- 命名的 CSS 颜色：`red`、`blue`、`green`、`yellow`、`cyan`、`purple`，以及其他 14 种
+- Hex with a hash: `#FF0000`, `#F00`, `#FF0000AA`
+- RGB/RGBA: `rgb(255, 0, 0)`, `rgba(255, 0, 0, 0.5)`
+- Named CSS colors: `red`, `blue`, `green`, `yellow`, `cyan`, `purple`, and 14 others
 
-高亮会导出为命名的 Word 高亮颜色（当颜色匹配 Word 枚举值，如 `yellow` 或 `cyan` 时），或者导出为带有十六进制填充值的纯色字符底纹。如果 `highlight` 标记没有颜色属性，则默认使用黄色。
+Highlights are exported as named Word highlight colors (when the color matches a Word enum value, such as `yellow` or `cyan`), or as solid character shading with a hexadecimal fill value. If the `highlight` mark has no color attribute, yellow is used by default.

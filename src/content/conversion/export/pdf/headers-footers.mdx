@@ -71,13 +71,13 @@ type FooterSlotValue = string | TiptapNodeContent | Footer | (() => Promise<Foot
 
 `footers` 对象与 `headers` 相同。每个槽位都接受一个[页脚槽位值](#header-and-footer-slot-values)。
 
-| 属性                 | 类型              | 说明                                                                                          |
-| -------------------- | ----------------- | ---------------------------------------------------------------------------------------------------- |
-| `evenAndOddFooters`  | `boolean`         | 是否为奇数页和偶数页使用不同的页脚。                                                               |
-| `differentFirstPage` | `boolean`         | 是否在第一页使用不同的页脚。当为 `true` 时，第一页使用 `first` 值而不是 `default`。                 |
-| `default`            | `FooterSlotValue` | 每一页的标准默认页脚；当 `evenAndOddFooters` 启用时，则表示奇数页页脚。                             |
-| `first`              | `FooterSlotValue` | 第一页的页脚。仅在 `differentFirstPage` 为 `true` 时使用。                                         |
-| `even`               | `FooterSlotValue` | 偶数页的页脚。仅在 `evenAndOddFooters` 为 `true` 时使用。                                          |
+| 属性                 | 类型                 | 说明                                                                                          |
+| -------------------- | -------------------- | ---------------------------------------------------------------------------------------------------- |
+| `evenAndOddFooters`  | `boolean`            | 是否为奇数页和偶数页使用不同的页脚。                                                               |
+| `differentFirstPage` | `boolean`            | 是否在第一页使用不同的页脚。当为 `true` 时，第一页使用 `first` 值而不是 `default`。                 |
+| `default`            | `FooterSlotValue`    | 每一页的标准默认页脚；当 `evenAndOddFooters` 启用时，则表示奇数页页脚。                             |
+| `first`              | `FooterSlotValue`    | 第一页的页脚。仅在 `differentFirstPage` 为 `true` 时使用。                                         |
+| `even`               | `FooterSlotValue`    | 偶数页的页脚。仅在 `evenAndOddFooters` 为 `true` 时使用。                                          |
 
 ## 完整示例
 
@@ -89,7 +89,6 @@ const editor = new Editor({
     // 其他扩展...
     ExportPdf.configure({
       token: 'YOUR_TOKEN',
-      appId: 'YOUR_APP_ID',
       headers: {
         evenAndOddHeaders: true,
         default: '我的文档 - 机密',
@@ -132,7 +131,6 @@ editor
 ```js
 ExportPdf.configure({
   token: 'YOUR_TOKEN',
-  appId: 'YOUR_APP_ID',
   headers: {
     default: '我的文档标题',
   },
@@ -149,7 +147,6 @@ ExportPdf.configure({
 ```js
 ExportPdf.configure({
   token: 'YOUR_TOKEN',
-  appId: 'YOUR_APP_ID',
   headers: {
     default: {
       type: 'doc',
@@ -167,7 +164,7 @@ ExportPdf.configure({
 })
 ```
 
-## Docx Header / Footer 实例
+## Docx Header / Footer 示例
 
 如果您需要对段落属性、对齐方式和运行样式进行完全控制，可以传入一个 `docx` `Header` / `Footer` 实例（或返回其实例的异步工厂）。这要求在安装 PDF 扩展的同时也安装 `@tiptap-pro/extension-export-docx`：
 
@@ -176,7 +173,6 @@ import { Docx, convertHeader } from '@tiptap-pro/extension-export-docx'
 
 ExportPdf.configure({
   token: 'YOUR_TOKEN',
-  appId: 'YOUR_APP_ID',
   headers: {
     // 直接的 Docx.Header 实例
     default: new Docx.Header({

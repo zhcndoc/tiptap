@@ -19,8 +19,12 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
   <RequirementItem label="2. 安装该包">
     Server AI Toolkit 包是开源的。使用 npm 或你偏好的包管理器，从公共 npm 仓库安装它。
   </RequirementItem>
-  <RequirementItem label="3. 对服务进行身份验证">
-    配置你的 Content AI 凭据以访问 Server AI Toolkit 服务。
+  <RequirementItem label="3. 验证服务身份">
+    配置一个{' '}
+    <a href="/content-ai/capabilities/server-ai-toolkit/install#set-up-authorization">
+      Tiptap Access Control JWT
+    </a>{' '}
+    以访问 Server AI Toolkit 服务。
   </RequirementItem>
 </Requirements>
 
@@ -41,7 +45,7 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 
 - [React](https://react.dev/) + [Next.js](https://nextjs.org/)
 - [Vercel 的 AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
-- Server AI Toolkit API
+- Server AI 工具包 API
 
 ## 安装
 
@@ -54,19 +58,13 @@ npx create-next-app@latest server-ai-agent-chatbot
 安装核心 Tiptap 包、协作扩展，以及用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
 
 ```bash
-npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-collaboration @tiptap-pro/provider ai @ai-sdk/react @ai-sdk/openai zod uuid yjs jsonwebtoken
+npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-collaboration @tiptap-pro/provider ai @ai-sdk/react @ai-sdk/openai zod uuid yjs jose
 ```
 
 安装 Server AI Toolkit 包：
 
 ```bash
 npm install @tiptap/server-ai-toolkit
-```
-
-安装 jsonwebtoken 的 TypeScript 类型：
-
-```bash
-npm install --save-dev @types/jsonwebtoken
 ```
 
 ## API 端点
@@ -114,11 +112,15 @@ export async function getToolDefinitions(editorContext: unknown): Promise<{
 }> {
   const apiBaseUrl = process.env.TIPTAP_CLOUD_AI_API_URL || 'https://api.tiptap.dev'
 
-  const response = await fetch(`${apiBaseUrl}/v3/ai/toolkit/tools`, {
+  const response = await fetch(`${apiBaseUrl}/v4/ai/toolkit/fetch-tools`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: await getAuthHeaders(),
     body: JSON.stringify({
       editorContext,
+      tools: {
+        tiptapRead: true,
+        tiptapEdit: true,
+      },
     }),
   })
 
@@ -127,7 +129,10 @@ export async function getToolDefinitions(editorContext: unknown): Promise<{
   }
   const responseData = await response.json()
 
-  return responseData
+  return {
+    prompt: responseData.systemPrompt,
+    tools: responseData.tools,
+  }
 }
 ```
 
@@ -137,7 +142,7 @@ export async function getToolDefinitions(editorContext: unknown): Promise<{
 
 #### 执行工具
 
-此函数通过 Server AI Toolkit API 执行工具。它会将工具名称、输入参数、文档 ID 和编辑器上下文数据发送到 API。服务器会自动使用 JWT 中的凭据获取并保存 Tiptap Cloud 文档。
+此函数通过 Server AI Toolkit API 执行工具。它会将工具名称、输入参数、文档 ID 和编辑器上下文数据发送到 API。当 JWT 包含该文档的 `Documents:Write` 权限时，服务器会自动获取并保存 Tiptap Cloud 文档。
 
 ```ts
 // lib/server-ai-toolkit/execute-tool.ts
@@ -151,17 +156,27 @@ export async function executeTool(
   input: unknown,
   documentId: string,
   editorContext: unknown,
-): Promise<{ output: unknown; toolResult: unknown; docChanged: boolean; document: object | null }> {
+): Promise<{
+  tool: { name: string; output: unknown }
+  docChanged: boolean
+  document: object | null
+}> {
   const apiBaseUrl = process.env.TIPTAP_CLOUD_AI_API_URL || 'https://api.tiptap.dev'
 
-  const response = await fetch(`${apiBaseUrl}/v3/ai/toolkit/execute-tool`, {
+  const response = await fetch(`${apiBaseUrl}/v4/ai/toolkit/execute-tool`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: await getAuthHeaders(documentId),
     body: JSON.stringify({
-      toolName,
-      input,
-      experimental_documentOptions: { documentId },
       editorContext,
+      document: {
+        type: 'cloud',
+        id: documentId,
+      },
+      user: 'ai-assistant',
+      tool: {
+        name: toolName,
+        input,
+      },
     }),
   })
 
@@ -207,7 +222,7 @@ export async function POST(req: Request) {
         execute: async (input) => {
           try {
             const result = await executeTool(toolDef.name, input, documentId, editorContext)
-            return result.output
+            return result.tool.output
           } catch (error) {
             console.error(`执行工具 ${toolDef.name} 失败:`, error)
             return {
@@ -248,29 +263,37 @@ ${prompt}`,
 // app/actions.ts
 'use server'
 
-import jwt from 'jsonwebtoken'
+import { SignJWT, importPKCS8 } from 'jose'
 
-const TIPTAP_CLOUD_SECRET = process.env.TIPTAP_CLOUD_SECRET
+const TIPTAP_PRIVATE_KEY = process.env.TIPTAP_PRIVATE_KEY
+const TIPTAP_ENVIRONMENT_ID = process.env.TIPTAP_ENVIRONMENT_ID
 const TIPTAP_CLOUD_DOCUMENT_SERVER_ID = process.env.TIPTAP_CLOUD_DOCUMENT_SERVER_ID
 
 export async function getCollabConfig(
   userId: string,
   documentName: string,
 ): Promise<{ token: string; appId: string }> {
-  if (!TIPTAP_CLOUD_SECRET) {
-    throw new Error('TIPTAP_CLOUD_SECRET 环境变量未设置')
+  if (!TIPTAP_PRIVATE_KEY || !TIPTAP_ENVIRONMENT_ID) {
+    throw new Error(
+      '必须设置 TIPTAP_PRIVATE_KEY 和 TIPTAP_ENVIRONMENT_ID 环境变量',
+    )
   }
 
   if (!TIPTAP_CLOUD_DOCUMENT_SERVER_ID) {
     throw new Error('TIPTAP_CLOUD_DOCUMENT_SERVER_ID 环境变量未设置')
   }
 
-  const payload = {
-    sub: userId,
-    allowedDocumentNames: [documentName],
-  }
+  const privateKey = await importPKCS8(TIPTAP_PRIVATE_KEY, 'ES256')
 
-  const token = jwt.sign(payload, TIPTAP_CLOUD_SECRET, { expiresIn: '1h' })
+  const token = await new SignJWT({
+    permissions: [{ action: 'Documents:Write', resource: documentName }],
+  })
+    .setProtectedHeader({ alg: 'ES256' })
+    .setIssuer(TIPTAP_ENVIRONMENT_ID)
+    .setSubject(userId)
+    .setAudience(['Documents'])
+    .setExpirationTime('1h')
+    .sign(privateKey)
 
   return { token, appId: TIPTAP_CLOUD_DOCUMENT_SERVER_ID }
 }
@@ -388,7 +411,7 @@ export default function Page() {
 ```
 
 <Callout title="文档状态管理" variant="info">
-  此实现使用 `documentId` 代替直接传递文档。文档状态通过 Tiptap Cloud 的 REST API 在服务器端管理，确保工具多次执行时状态一致。客户端则使用 Tiptap Collaboration 进行实时同步。
+  此实现传入了 `document: { type: 'cloud', id: documentId }`，因此 Server AI Toolkit 会自动从 Tiptap Cloud 获取并保存文档。客户端使用 Tiptap Collaboration 实时同步更改。
 </Callout>
 
 ## 最终结果
@@ -406,7 +429,8 @@ export default function Page() {
 
 ## 替代方案：直接提供文档
 
-你可以不用 Tiptap Cloud 文档，而是在 execute-tool 请求体中传入一个 `document` 字段（而不是 `experimental_documentOptions`），由你自己提供并管理文档。
+Instead of using Tiptap Cloud documents, you can provide and manage the document yourself by
+passing an inline `document` field in the execute-tool request body.
 
 采用这种方式时，你需要在每次工具执行前获取文档，并在 `docChanged` 为 `true` 时将更新后的文档保存回去。
 
@@ -414,19 +438,24 @@ export default function Page() {
 import { loadDocument, saveDocument } from './db'
 
 const document = await loadDocument()
-const response = await fetch(`${apiBaseUrl}/v3/ai/toolkit/execute-tool`, {
+const response = await fetch(`${apiBaseUrl}/v4/ai/toolkit/execute-tool`, {
   method: 'POST',
-  headers: getAuthHeaders(),
+  headers: await getAuthHeaders(),
   body: JSON.stringify({
-    toolName,
-    input,
-    experimental_documentOptions: { documentId },
     editorContext,
+    document: {
+      type: 'inline',
+      content: document,
+    },
+    tool: {
+      name: toolName,
+      input,
+    },
   }),
 })
 
 if (!response.ok) {
-  throw new Error(`Tool execution failed: ${response.statusText}`)
+  throw new Error(`工具执行失败：${response.statusText}`)
 }
 
 const body = await response.json()

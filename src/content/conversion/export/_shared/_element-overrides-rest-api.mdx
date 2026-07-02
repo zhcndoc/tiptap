@@ -45,15 +45,15 @@ import { Callout } from '@/components/ui/Callout'
 | Property        | Type      | Description                                                            |
 | --------------- | --------- | ---------------------------------------------------------------------- |
 | `font`          | `string`  | 字体族名称。                                                      |
-| `size`          | `number`  | 字体大小，单位为半磅（`24` = 12pt）。                                |
+| `size`          | `number`  | 以半磅为单位的字体大小（`24` = 12pt）。                                |
 | `bold`          | `boolean` | 默认以粗体渲染。                                                |
 | `italics`       | `boolean` | 默认以斜体渲染。                                              |
-| `underline`     | `Object`  | `{ type, color }` — 例如 `{ type: "single", color: "auto" }`。          |
+| `underline`     | `Object`  | `{ type, color }`，例如 `{ type: "single", color: "auto" }`。          |
 | `strike`        | `boolean` | 删除线。                                                         |
-| `color`         | `string`  | 不含前导 `#` 的十六进制颜色（`"FF0000"`）。                        |
-| `highlight`     | `string`  | 预定义的高亮颜色名称（`"yellow"`、`"green"`、……）。            |
-| `superScript`   | `boolean` | 以上标形式渲染。                                                 |
-| `subScript`     | `boolean` | 以下标形式渲染。                                                   |
+| `color`         | `string`  | 不带前导 `#` 的十六进制颜色（`"FF0000"`）。                        |
+| `highlight`     | `string`  | 预定义的高亮颜色名称（`"yellow"`、`"green"`、…）。            |
+| `superScript`   | `boolean` | 以上标显示。                                                 |
+| `subScript`     | `boolean` | 以下标显示。                                                   |
 
 #### `tableCellOverrides`
 
@@ -61,9 +61,9 @@ import { Callout } from '@/components/ui/Callout'
 
 | Property        | Type      | Description                                                              |
 | --------------- | --------- | ------------------------------------------------------------------------ |
-| `shading`       | `Object`  | `{ fill, type, color }` — 例如 `{ fill: "F0F0F0", type: "clear" }`。       |
+| `shading`       | `Object`  | `{ fill, type, color }`，例如 `{ fill: "F0F0F0", type: "clear" }`。       |
 | `verticalAlign` | `string`  | `"top" \| "center" \| "bottom"`。                                         |
-| `borders`       | `Object`  | 各边单元格边框定义，形状与 `tableOverrides.borders` 相同。 |
+| `borders`       | `Object`  | 按边定义的单元格边框，与 `tableOverrides.borders` 的结构相同。 |
 | `margins`       | `Object`  | 单元格内边距 `{ top, bottom, left, right }`，单位为二十分之一磅。     |
 | `width`         | `Object`  | 单元格宽度 `{ size, type }`。                                             |
 
@@ -75,6 +75,6 @@ import { Callout } from '@/components/ui/Callout'
 
 | Property         | Type      | Description                                                                       |
 | ---------------- | --------- | --------------------------------------------------------------------------------- |
-| `transformation` | `Object`  | `{ width, height, rotation?, flip? }` — 以 96 dpi 计算的像素。                          |
+| `transformation` | `Object`  | `{ width, height, rotation?, flip? }`，以 96 dpi 下的像素为单位。                          |
 | `altText`        | `Object`  | `{ title, description, name }`。                                                   |
-| `floating`       | `Object`  | 浮动定位选项（锚点、对齐、偏移、环绕）。                    |
+| `floating`       | `Object`  | 浮动定位选项（anchor、alignment、offset、wrap）。                    |

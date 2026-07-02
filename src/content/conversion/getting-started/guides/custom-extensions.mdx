@@ -10,11 +10,11 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 
-ConvertKit 覆盖了大多数 DOCX 内容的 schema。当转换器生成了 ConvertKit 无法渲染的节点或属性——例如自定义 mark、冷门属性，或领域特定的块——你需要使用标准的 Tiptap `extend()` 模式自行接入。本指南展示了两个实际示例：扩展现有扩展以呈现被丢弃的属性，以及添加一个自定义节点并将导入内容路由到其中。
+ConvertKit 覆盖了大多数 DOCX 内容的 schema。当转换器生成了 ConvertKit 不会渲染的节点或属性（自定义 mark、某个小众属性，或特定领域的块）时，你可以使用标准的 Tiptap `extend()` 模式自行将其接入。本文将展示两个完整示例：扩展现有扩展以呈现一个被丢弃的属性，以及添加一个自定义节点并将导入的内容路由到其中。
 
 ## 心智模型
 
-转换服务会尽可能从源文档中提取所有内容，并输出带有对应节点、marks 和属性的 Tiptap JSON。ConvertKit 会注册可以渲染其中大部分内容的扩展，但并不是全部。当缺少某些内容时，你有三个手段：
+转换服务会尽可能从源文档中提取所有内容，并输出带有对应节点、mark 和属性的 Tiptap JSON。ConvertKit 会注册可以渲染其中大部分内容的扩展，但并不是全部。当缺少某些内容时，你有三个手段：
 
 1. **扩展现有扩展**，以渲染转换器生成而 ConvertKit 没有渲染的属性。
 2. **向你的 schema 添加自定义节点或 mark**，并告诉导入器将某种 DOCX 结构映射到它。
@@ -24,7 +24,7 @@ ConvertKit 覆盖了大多数 DOCX 内容的 schema。当转换器生成了 Conv
 
 ## 实际示例 1：渲染导入的字母间距
 
-转换器会将字符间距提取为带有 `letterSpacing` 属性的 `textStyle` mark。ConvertKit 注册了 `TextStyle`（通过其捆绑的 `TextStyleKit`），但并未将 `letterSpacing` 声明为其属性之一——因此该值存在于 JSON 中，却从未进入渲染后的 DOM。
+转换器会将字符间距提取为带有 `letterSpacing` 属性的 `textStyle` 标记。ConvertKit 注册了 `TextStyle`（通过其内置的 `TextStyleKit`），但没有将 `letterSpacing` 声明为其属性之一，因此该值会保留在 JSON 中，但永远不会传递到渲染后的 DOM。
 
 扩展 `TextStyle` 以声明该属性，并将其作为内联 CSS 输出：
 
@@ -63,18 +63,17 @@ const editor = new Editor({
 })
 ```
 
-导入的带有字母间距的文档现在会以应用了该间距的方式渲染出来。对于转换器提取了但 ConvertKit 默认没有呈现的任何属性，这种模式都适用——请参见[功能支持矩阵](/conversion/getting-started/feature-support-matrix)的其余部分。
+现在，带有字母间距的导入文档将会以应用了该间距的方式进行渲染。对于转换器提取但 ConvertKit 默认配置未暴露的任何属性，同样适用这种模式。有关详细信息，请参阅其余的 [功能支持矩阵](/conversion/getting-started/feature-support-matrix)。
 
 <Callout title="何时扩展而不是替换" variant="info">
   扩展现有扩展可以保留其余行为，并允许你展开
-  <code>...this.parent?.()</code> 属性。完全替换它（从零开始使用你自己的 Mark）
-  意味着你需要重新实现 ConvertKit 依赖的解析规则以支持往返转换——通常并不
-  值得。
+  <code>...this.parent?.()</code> 属性。完全替换它（从头编写你自己的 Mark）
+  意味着需要重新实现 ConvertKit 依赖于往返转换的解析规则，这通常不值得。
 </Callout>
 
 ## 实际示例 2：自定义 callout 块
 
-假设你的编辑器有一个 `callout` 节点——一个带有图标和颜色的样式化块——并且你希望导入的 DOCX blockquote 映射到它，而不是默认的 `blockquote`。分三步：定义自定义节点、将导入映射到它，以及定义导出回 DOCX。
+假设你的编辑器有一个 `callout` 节点（一个带有图标和颜色的样式块），并且你希望导入的 DOCX 引用块映射到它，而不是默认的 `blockquote`。这需要三步：定义自定义节点，将导入映射到它，以及定义导出回 DOCX。
 
 ### 定义节点
 
@@ -111,7 +110,6 @@ const Callout = Node.create({
 import { ImportDocx } from '@tiptap-pro/extension-import-docx'
 
 ImportDocx.configure({
-  appId: 'YOUR_APP_ID',
   token: 'YOUR_JWT',
   prosemirrorNodes: {
     blockquote: 'callout',
@@ -164,13 +162,13 @@ ExportDocx.configure({
 
 ## 不要期待
 
-- 一个 schema 迁移工具。没有自动方式将现有已存内容从旧节点类型升级到你的新自定义节点——那需要你编写一次性转换。
-- 超出转换器当前能力的转换侧属性提取。如果源 DOCX 包含转换器未解析的功能（例如多栏节属性、某些 SmartArt 图形），无论编辑器端如何扩展都无法把它显现出来。
+- 一个模式迁移工具。没有自动方法可以将现有已存储内容从旧节点类型升级到你的新自定义节点；这需要你编写一次性的转换。
+- 超出转换器已完成范围的转换端属性提取。如果源 DOCX 携带了转换器未解析的功能（例如多栏节属性、某些 SmartArt 图形），无论在编辑器端如何扩展都无法将其显现出来。
 
 ## 下一步
 
-- [自定义节点映射](/conversion/import/docx/custom-node-mapping) — `prosemirrorNodes` 的完整参考
-- [自定义 mark 映射](/conversion/import/docx/custom-mark-mapping) — `prosemirrorMarks` 的完整参考
-- [自定义节点导出](/conversion/export/docx/custom-nodes) — 导出端 `customNodes` 的完整参考
-- [设置转换内容样式](/conversion/getting-started/guides/styling-converted-content) — 为导入内容叠加 CSS 的模式
-- [调试](/conversion/getting-started/guides/debugging) — 诊断 schema 不匹配和详细导入日志
+- [自定义节点映射](/conversion/import/docx/custom-node-mapping): `prosemirrorNodes` 的完整参考
+- [自定义标记映射](/conversion/import/docx/custom-mark-mapping): `prosemirrorMarks` 的完整参考
+- [自定义节点导出](/conversion/export/docx/custom-nodes): 导出端 `customNodes` 的完整参考
+- [转换内容样式设置](/conversion/getting-started/guides/styling-converted-content): 在导入内容上分层应用 CSS 的模式
+- [调试](/conversion/getting-started/guides/debugging): 诊断 schema 不匹配和详细的导入日志
