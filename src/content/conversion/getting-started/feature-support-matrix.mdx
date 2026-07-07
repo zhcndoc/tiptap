@@ -30,7 +30,7 @@ import { Callout } from '@/components/ui/Callout'
 
 [Markdown](/conversion/export/markdown/editor-extension) 走的是完全独立的转换路径，并支持另一组功能。相关内容记录在其单独的页面中。
 
-## 行内格式
+## 内联格式
 
 | 功能 | 导入 | 编辑器 | 导出 |
 | --- | --- | --- | --- |
@@ -74,9 +74,9 @@ import { Callout } from '@/components/ui/Callout'
 | [段落边框](/conversion/content-types/text-and-formatting/paragraphs) | ✕ | ✕ | ✕ |
 | [Word 样式](/conversion/content-types/structures-and-media/word-styles) | ~ | ~** | ~ |
 
-**\*** 字间距会作为 `textStyle.letterSpacing` 提取，但没有任何内置扩展会渲染它。若要渲染导入的字间距，请 [扩展 TextStyle](/conversion/getting-started/guides/styling-converted-content#extending-extensions-for-unsupported-attributes)。<br />
-**\*\*** 默认不会应用 Word 的命名样式排版。请使用 [CSS 注入](/conversion/import/docx/css-injection) 将其提取为带作用域的 CSS。<br />
-**\*\*\*** 导出时只有比例行距可以往返保留：无单位倍数（如 `1.5`）或百分比（如 `150%`）。带单位的固定行高（例如 `24px`、`18pt`）没有对应的比例 DOCX 表达，因而不会被保留。
+**\*** 字母间距会被提取为 `textStyle.letterSpacing`，但没有内置扩展来渲染它。要渲染导入的字母间距，请[扩展 TextStyle](/conversion/getting-started/guides/styling-converted-content#extending-extensions-for-unsupported-attributes)。<br />
+**\*\*** 默认不会应用 Word 的命名样式排版。请使用 [CSS 注入](/conversion/import/docx/css-injection) 将其提取为作用域 CSS。<br />
+**\*\*\*** 导出时会往返保留行距。比例值（无单位的倍数，如 `1.5`，或百分比，如 `150%`）会写入为相对行距，并随字体大小缩放；带绝对单位的固定值（`24px`、`18pt`、`1cm`）会写入为精确行高。`em` 和 `rem` 等与字体相关的单位则保留为文档默认值。
 
 ## 列表
 

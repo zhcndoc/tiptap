@@ -75,6 +75,22 @@ import { Callout } from '@/components/ui/Callout'
 
 | Property         | Type      | Description                                                                       |
 | ---------------- | --------- | --------------------------------------------------------------------------------- |
-| `transformation` | `Object`  | `{ width, height, rotation?, flip? }`，以 96 dpi 下的像素为单位。                          |
-| `altText`        | `Object`  | `{ title, description, name }`。                                                   |
-| `floating`       | `Object`  | 浮动定位选项（anchor、alignment、offset、wrap）。                    |
+| `transformation` | `Object`  | `{ width, height, rotation?, flip? }`, 以 96 dpi 下的像素为单位。                          |
+| `altText`        | `Object`  | `{ title, description, name }`.                                                   |
+| `floating`       | `Object`  | 浮动定位选项（锚点、对齐、偏移、环绕）。                    |
+
+#### `headerFooterOverrides`
+
+将同样的五种元素覆盖项仅作用于页眉/页脚内容。你省略的每个
+字段都会回退到与正文同名的覆盖项。此功能
+仅在页眉或页脚槽位作为 Tiptap JSON 传入时生效（对象
+或字符串化的 JSONContent）；纯文本槽位不受影响。一个常见的
+用例是正文中带边框的表格，而页眉中使用无边框表格。
+
+| Property             | Type     | Description                                                            |
+| -------------------- | -------- | ----------------------------------------------------------------------- |
+| `tableOverrides`     | `Object` | 与顶层覆盖项形状相同，应用于页眉/页脚中。 |
+| `paragraphOverrides` | `Object` | 与顶层覆盖项形状相同，应用于页眉/页脚中。 |
+| `textRunOverrides`   | `Object` | 与顶层覆盖项形状相同，应用于页眉/页脚中。 |
+| `tableCellOverrides` | `Object` | 与顶层覆盖项形状相同，应用于页眉/页脚中。 |
+| `imageOverrides`     | `Object` | 与顶层覆盖项形状相同，应用于页眉/页脚中。 |

@@ -45,12 +45,12 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 ## 何时使用它
 
-| 你想要……                                                                                           | 使用                                                                      |
-| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| 在浏览器中调用 `editor.exportDocx()` 时渲染自定义节点，并且拥有完整的 JavaScript 灵活性。 | [函数 API](/conversion/export/docx/custom-nodes)（`customNodes`）。 |
-| 在调用 `POST /v2/convert/export/docx` 时渲染自定义节点。                                         | **`customNodeDsl`**（本页）。                                          |
-| 在你的浏览器应用与服务端渲染之间共享相同的自定义节点导出逻辑。                | **`customNodeDsl`**（本页）。                                          |
-| 从两个场景渲染同一个自定义节点，并以单一来源为准。                                 | **`customNodeDsl`**（本页）。                                          |
+| 你想要……                                                                                              | 使用                                                                       |
+| --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| 在浏览器中调用 `editor.exportDocx()` 时渲染自定义节点，并拥有完整的 JavaScript 灵活性。 | [函数 API](/conversion/export/docx/custom-nodes)（`customNodes`）。 |
+| 在调用任何导出 REST 端点（docx、pdf、odt、epub、doc）时渲染自定义节点。                                         | **`customNodeDsl`**（本页）。                                          |
+| 在你的浏览器应用和服务端渲染之间共享相同的自定义节点导出逻辑。                | **`customNodeDsl`**（本页）。                                          |
+| 从两个端同时渲染相同的自定义节点，并以一个单一来源为准。                                 | **`customNodeDsl`**（本页）。                                          |
 
 这两种 API 可以在编辑器扩展上共存。当同一种节点类型同时出现在 `customNodes` 和 `customNodeDsl` 中时，函数定义优先生效，并且每次导出调用只会输出一次 `console.warn`。现有基于函数的用户不会看到行为变化。
 
@@ -141,7 +141,7 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 
 ## CustomNodeRule
 
-一条规则描述一个 ProseMirror 节点类型：
+A rule describing a ProseMirror node type:
 
 ```jsonc
 {
@@ -153,13 +153,13 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 }
 ```
 
-| 字段       | 类型                            | 默认值  | 说明                                                                                        |
+| Field       | Type                            | Default  | Description                                                                                        |
 | ---------- | ------------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `type`     | `string`                        | 必需 | 此规则匹配的 PM 节点类型（例如 `"hintbox"`、`"mention"`）。                                |
-| `nodeKind` | `"block" \| "inline" \| "auto"` | `"auto"` | 源 PM 节点声明的类型。`"auto"` 允许校验器从规则的 emit 形状推断。 |
-| `render`   | `RenderProgram \| null`         | 必需 | 要渲染的内容。`null` 会删除匹配的 PM 节点及其**所有后代**。                     |
+| `type`     | `string`                        | Required | The PM node type matched by this rule (for example, `"hintbox"` or `"mention"`).                                |
+| `nodeKind` | `"block" \| "inline" \| "auto"` | `"auto"` | The type declared by the source PM node. `"auto"` allows the validator to infer it from the rule's emit shape. |
+| `render`   | `RenderProgram \| null`         | Required | The content to render. `null` will delete the matched PM node and all of its **descendants**.                     |
 
-若要让包裹节点不输出内容，同时让子节点正常渲染，请使用 `render: { emit: { "$children": { "as": "block" } } }`，而不是 `render: null`。
+If you want a wrapper node to output no content while still rendering its child nodes normally, use `render: { emit: { "$children": { "as": "block" } } }` instead of `render: null`.
 
 ---
 
@@ -171,9 +171,9 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 }
 ```
 
-`RenderProgram` must declare at least one `emit`. If neither `emit` nor the (reserved) `contribute` field is present, it will be rejected with `DOCX_DSL_INVALID_SHAPE`.
+`RenderProgram` 必须至少声明一个 `emit`。如果 `emit` 和（保留的）`contribute` 字段都不存在，则会因 `DOCX_DSL_INVALID_SHAPE` 被拒绝。
 
-`emit: null` will cause this PM node to render no content, but it **will not** delete descendants. To completely delete descendants, set `render: null` on the rule itself.
+`emit: null` 会使这个 PM 节点不渲染任何内容，但它**不会**删除后代节点。要完全删除后代节点，请在规则本身上设置 `render: null`。
 
 ---
 
@@ -304,7 +304,7 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 | 元素                | 类型         | 允许出现在      | 子元素类型                | 备注                                                                                                                                                    |
 | ------------------- | ------------ | --------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Paragraph`         | `block`      | document, block | `inline`                | 标准文本块。                                                                                                                                     |
-| `TextRun`           | `inline`     | inline          | (leaf)                  | 标准文本片段。                                                                                                                                       |
+| `TextRun`         | `inline`     | inline          | (leaf)                  | 标准文本片段。                                                                                                                                       |
 | `ExternalHyperlink` | `inline`     | inline          | `inline` (仅限 TextRun) | 将一个或多个 `TextRun` 包裹在超链接中。                                                                                                             |
 | `Table`             | `block`      | document, block | `table-row`             | 子元素填充到 `rows` 中，而不是 `children`。                                                                                                                |
 | `TableRow`          | `table-row`  | table-row       | `table-cell`            | 表格中的一行。                                                                                                                                      |
@@ -940,7 +940,7 @@ REST 接口接受来自已认证客户端的任意 `customNodeDsl`。该 DSL 的
 
 ## REST API 补充说明
 
-DSL 通过现有的 `POST /v2/convert/export/docx` 端点传输，作为现有 `styleOverrides`、`pageSize`、`pageMargins`、`headers` 和 `footers` 字段的同级字段。有关请求头、响应结构以及其余 body schema，请参见 [REST API 参考](/conversion/export/docx/rest-api)。
+DSL 在每个导出 REST 端点（`/export/docx`、`/export/pdf`、`/export/odt`、`/export/epub`、`/export/doc`）中都可被接受，作为现有 `styleOverrides`、`pageSize`、`pageMargins`、`headers` 和 `footers` 字段的同级字段。有关 headers、响应格式以及请求体其余 schema，请参见 [REST API reference](/conversion/export/docx/rest-api)。
 
 | Body 字段        | 类型                                              | 默认值      | 描述                   |
 | ---------------- | ------------------------------------------------- | ----------- | ---------------------- |

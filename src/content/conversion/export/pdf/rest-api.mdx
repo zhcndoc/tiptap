@@ -56,7 +56,7 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 
 ### 必要请求头
 
-| Name            | Description                                                                                                                               |
+| 名称            | 描述                                                                                                                               |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `Authorization` | 用于验证请求的 JWT 令牌。示例：`Bearer your-jwt-token`                                                               |
 | `Content-Type`  | 必须为 `application/json`                                                                                                                |
@@ -66,18 +66,21 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 | Name                 | Type     | Description                                                            | Default     |
 | -------------------- | -------- | ---------------------------------------------------------------------- | ----------- |
 | `doc`                | `String` | 以字符串形式表示的 Tiptap JSON 文档                                      | `N/A`       |
-| `exportType`         | `string` | 预期的导出类型                                                         | `blob`      |
-| `styleOverrides`     | `Object` | 样式覆盖                                                              | `{}`        |
-| `pageSize`           | `Object` | 页面大小配置                                                            | `undefined` |
-| `pageMargins`        | `Object` | 页面边距配置                                                            | `undefined` |
-| `headers`            | `Object` | 页眉配置                                                              | `undefined` |
-| `footers`            | `Object` | 页脚配置                                                              | `undefined` |
-| `customFonts`        | `Array`  | 要提供的自定义字体文件（仅限本地部署）                                      | `undefined` |
-| `tableOverrides`     | `Object` | 传递给 DOCX 步骤的表格级渲染覆盖                                           | `undefined` |
-| `paragraphOverrides` | `Object` | 传递给 DOCX 步骤的段落级渲染覆盖                                           | `undefined` |
-| `textRunOverrides`   | `Object` | 传递给 DOCX 步骤的文本运行级渲染覆盖                                         | `undefined` |
-| `tableCellOverrides` | `Object` | 传递给 DOCX 步骤的表格单元格级渲染覆盖                                       | `undefined` |
-| `imageOverrides`     | `Object` | 传递给 DOCX 步骤的图像渲染覆盖                                             | `undefined` |
+| `exportType`         | `string` | 期望的导出类型                                                       | `blob`      |
+| `styleOverrides`     | `Object` | 样式覆盖                                                        | `{}`        |
+| `pageSize`           | `Object` | 页面大小配置                                                | `undefined` |
+| `pageMargins`        | `Object` | 页面边距配置                                             | `undefined` |
+| `headers`            | `Object` | 页面页眉配置                                              | `undefined` |
+| `footers`            | `Object` | 页面页脚配置                                              | `undefined` |
+| `customFonts`        | `Array`  | 要提供的自定义字体文件（仅限本地部署）                      | `undefined` |
+| `tableOverrides`     | `Object` | 传递到 DOCX 步骤的表级渲染覆盖             | `undefined` |
+| `paragraphOverrides` | `Object` | 传递到 DOCX 步骤的段落级渲染覆盖         | `undefined` |
+| `textRunOverrides`   | `Object` | 传递到 DOCX 步骤的文本运行渲染覆盖                | `undefined` |
+| `tableCellOverrides` | `Object` | 传递到 DOCX 步骤的表格单元格渲染覆盖              | `undefined` |
+| `imageOverrides`     | `Object` | 传递到 DOCX 步骤的图片渲染覆盖                   | `undefined` |
+| `headerFooterOverrides` | `Object` | 作用于页眉/页脚内容的按字段覆盖（与元素覆盖相同的五个键）。参见 [元素覆盖](#element-overrides)。 | `undefined` |
+| `placeholders`       | `Object \| false` | 页码标记在纯文本页眉/页脚中的重命名映射（`{ page?, total? }`），与 `Pages.configure({ placeholders })` 匹配。传入 `false` 可禁用替换。参见 [自定义标记名称](/conversion/export/docx/rest-api#custom-token-names-placeholders)。 | `undefined` |
+| `customNodeDsl` | `Object` | 用于将自定义 Tiptap 节点渲染到导出文件中的 [自定义节点 DSL](/conversion/export/docx/custom-nodes-dsl) 规则。 | `undefined` |
 
 #### 页面大小配置
 

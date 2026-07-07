@@ -48,7 +48,7 @@ BASE_URL=https://api.tiptap.dev
 
 要自动获取并保存 Tiptap Cloud 文档，请添加 `Documents` audience 和 `Documents:Write` permission。`Documents:Write` 包含读和评论访问权限。
 
-有关如何创建密钥对并签名令牌，请参阅 [Authentication](/authentication)；完整设置请参阅 [authorization guide](/content-ai/capabilities/server-ai-toolkit/install#set-up-authorization)。
+有关如何创建密钥对并签名令牌，请参阅 [认证](/authentication)；完整设置请参阅 [授权指南](/content-ai/capabilities/server-ai-toolkit/install#set-up-authorization)。
 
 ```ts
 import { SignJWT, importPKCS8 } from 'jose'
@@ -68,7 +68,7 @@ const JWT_TOKEN = await new SignJWT({
   .sign(privateKey)
 ```
 
-之前的 App ID + secret 身份验证流程记录在 [Legacy authentication](/authentication/legacy) 中。
+之前的 App ID + secret 身份验证流程记录在 [旧版身份验证](/authentication/legacy) 中。
 
 ## 可选字段
 
@@ -120,7 +120,7 @@ curl --location 'BASE_URL/v4/ai/toolkit/fetch-tools' \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_JWT' \
   --data '{
-    "editorContext": { /* editor context data */ },
+    "editorContext": { /* 编辑器上下文数据 */ },
     "tools": {
       "tiptapRead": true,
       "tiptapEdit": {
@@ -130,6 +130,39 @@ curl --location 'BASE_URL/v4/ai/toolkit/fetch-tools' \
     "format": "shorthand"
   }'
 ```
+
+#### 错误响应
+
+HTTP 错误会返回：
+
+- `error` (`object`): 一个包含以下属性的对象：
+  - `message` (`string`): 人类可读的错误消息。
+  - `status` (`number`): HTTP 状态码。
+  - `code` (`string`): 稳定的错误代码。
+  - `data` (`object`, optional): 已清理的结构化上下文。
+
+此端点可能返回：
+
+- `401` with `access_control_auth_required` or `missing_token`: 请求未包含
+  Tiptap Access Control JWT。
+- `401` with an access-control code such as `token_expired` or `signature_invalid`: JWT
+  被 Access Control 拒绝。
+- `403` with `feature_not_available`: 当前环境未启用 Server AI Toolkit。
+- `403` with `insufficient_permissions`: JWT 未授予 `AI:Toolkit`。
+- `403` with `origin_not_allowed`: 请求的 `Origin` 不允许用于当前环境。
+- `422` with `validation_failed`: 请求体与端点 schema 不匹配。响应中
+  包含 `error.issues`，即验证问题列表。
+- `429` with `rate_limited`: Access Control 速率限制了身份验证。
+- `429`: 服务端速率限制器阻止了该请求。此响应使用不同的顶层
+  结构：
+  - `error` (`string`): 速率限制错误消息。
+  - `retryAfter` (`number`, optional): 重试前等待的秒数。
+  - `limit` (`number`, optional): 当前窗口的请求限制。
+  - `window` (`number`, optional): 速率限制窗口，单位为秒。
+- `500` with `internal_server_error`: 发生了意外的服务器错误。
+- `500` with `missing_cloud_api_token`: 云服务缺少内部身份验证
+  配置。
+- `503` with `service_unavailable`: Access Control 暂时不可用。
 
 ### 执行工具
 
@@ -144,7 +177,7 @@ POST /v4/ai/toolkit/execute-tool
 - `editorContext` (`object`, required): 由 `getEditorContext` 返回的编辑器上下文。
 - `document` (`object`, required): 要对其执行工具的文档。使用
   `{ "type": "cloud", "id": "your-document-id" }`，当 API 应该从 Tiptap Cloud 文档读取和写入时。使用
-  `{ "type": "inline", "content": { /* Tiptap JSON document */ } }`，当你想在请求体中提供
+  `{ "type": "inline", "content": { /* Tiptap JSON 文档 */ } }`，当你想在请求体中提供
   Tiptap JSON 文档时。
 - `user` (`string`, optional): 由 AI 执行的编辑所归属的标识符。
 - `field` (`string`, optional, default: `"default"`): 用于定位云
@@ -174,7 +207,7 @@ curl --location 'BASE_URL/v4/ai/toolkit/execute-tool' \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_JWT' \
   --data '{
-    "editorContext": { /* editor context data */ },
+    "editorContext": { /* 编辑器上下文数据 */ },
     "document": {
       "type": "cloud",
       "id": "your-document-id"
@@ -189,6 +222,64 @@ curl --location 'BASE_URL/v4/ai/toolkit/execute-tool' \
     "format": "shorthand"
   }'
 ```
+
+#### 错误响应
+
+HTTP 错误返回：
+
+- `error` (`object`): 包含以下属性的对象：
+  - `message` (`string`): 人类可读的错误消息。
+  - `status` (`number`): HTTP 状态码。
+  - `code` (`string`): 稳定的错误代码。
+  - `data` (`object`, optional): 已清理的结构化上下文。文档和线程上游
+    失败包括诸如 `operation`、`upstreamStatus`、`upstreamUrl` 和
+    `upstreamMethod` 之类的字段。
+
+此端点可能返回：
+
+- `400` with `missing_document_credentials`: 请求使用了云文档，但 JWT 不包含文档服务器凭证。
+- `400` with `missing_document_options`: `getThreads` 或 `editThreads` 是针对一个
+  线内文档执行的。这些工具需要云文档。
+- `400` with a thread-store code such as `thread_not_found` or `comment_not_found`: 线程或
+  评论操作引用了不存在的数据。
+- `401` with `access_control_auth_required` or `missing_token`: 请求未包含
+  Tiptap 访问控制 JWT。
+- `401` with an access-control code such as `token_expired` or `signature_invalid`: JWT
+  被访问控制拒绝。
+- `403` with `feature_not_available`: 当前环境未启用 Server AI Toolkit。
+- `403` with `insufficient_permissions`: JWT 未授予 `AI:Toolkit`，或者未授予
+  对请求中的云文档的访问权限。
+- `403` with `origin_not_allowed`: 请求的 `Origin` 不允许用于该环境。
+- `403` with `unsupported_tool_format`: 所选工具不支持请求的 `format`。
+- `403` with `tracked_changes_unsupported_schema`: `reviewOptions.mode` 为 `trackedChanges`，但
+  编辑器 schema 不支持跟踪更改。
+- `403` with `thread_schema_not_supported`: 编辑器 schema 不支持评论或线程。
+- `409` with `concurrent_edit_conflict`: 云文档在工具执行时发生了更改。
+  使用最新的文档状态重试请求。
+- `422` with `validation_failed`: 请求体与端点 schema 不匹配。响应
+  包含 `error.issues`，即验证问题列表。
+- `429` with `rate_limited`: 访问控制限流了身份验证。
+- `429`: 服务器端限流器阻止了该请求。此响应使用不同的顶层
+  结构：
+  - `error` (`string`): 限流错误消息。
+  - `retryAfter` (`number`, optional): 重试前等待的秒数。
+  - `limit` (`number`, optional): 当前窗口的请求限制。
+  - `window` (`number`, optional): 限流窗口，单位为秒。
+- `500` with `document_save_failed`: 服务器在加载云文档后无法保存它，
+  或者在文档加载之前调用了保存流程。
+- `500` with `diff_worker_failed` or `diff_worker_invalid_result`: 在准备可审阅更改时，
+  内部 diff worker 失败。
+- `500` with `internal_server_error` or `unknown_error`: 发生了意外的服务器错误。
+- `500` with `missing_cloud_api_token`: 云服务缺少内部身份验证
+  配置。
+- `502` with `document_load_failed` or `document_save_failed`: 加载或保存云文档
+  时上游失败。检查 `error.data.upstreamStatus` 以获取上游 HTTP 状态。
+- `502` with a thread or comment code such as `thread_list_failed`, `thread_create_failed`,
+  `thread_update_failed`, `thread_delete_failed`, `thread_resolve_failed`,
+  `thread_unresolve_failed`, `comment_create_failed`, `comment_update_failed`, or
+  `comment_delete_failed`: 评论 API 操作在上游失败。
+- `503` with `diff_worker_queue_timeout`: diff worker 队列已饱和或超时。
+- `503` with `service_unavailable`: 访问控制暂时不可用。
 
 ### 流式执行工具
 
@@ -229,6 +320,66 @@ POST /v4/ai/toolkit/stream-tool
 - `tiptapEdit`：在编辑被应用时返回增量事件，随后返回一个包含
   更新后 `document` 的最终事件。
 - 其他工具：返回一个最终事件，结果结构与 `execute-tool` 相同。
+
+#### 错误响应
+
+在流式传输开始之前，HTTP 错误使用与 `execute-tool` 相同的 JSON 结构：
+
+- `error` (`object`): 一个包含以下属性的对象：
+  - `message` (`string`): 人类可读的错误消息。
+  - `status` (`number`): HTTP 状态码。
+  - `code` (`string`): 稳定的错误代码。
+  - `data` (`object`, optional): 已清理的结构化上下文。
+
+在流式传输开始之后，错误会以 NDJSON 事件形式发送：
+
+- `version` (`number`): 流协议版本。
+- `type` (`'error'`): 事件类型。
+- `code` (`string`): 稳定的错误代码。
+- `status` (`number`): 类 HTTP 状态码。
+- `message` (`string`): 人类可读的错误消息。
+
+此端点可能返回或发出：
+
+- `400` with `invalid_request`: 请求没有正文。
+- `400` with `missing_document_credentials`: JWT 不包含文档服务器凭据。
+- `400` with `invalid_stream_message`: 流消息不是有效的 JSON，未通过 schema 验证，
+  使用了不支持的协议版本，或者流在 NDJSON 行未终止时结束。
+- `400` with `duplicate_start`: 发送了多个 `start` 消息。
+- `400` with `delta_before_start`: `delta` 消息在 `start` 之前到达。
+- `400` with `end_before_start`: `end` 消息在 `start` 之前到达。
+- `400` with `incomplete_stream`: 请求在 `end` 消息到达之前结束。
+- `400` with a thread-store code such as `thread_not_found` or `comment_not_found`: 缓冲的
+  线程或评论操作引用了不存在的数据。
+- `401` with `access_control_auth_required` or `missing_token`: 请求未包含
+  Tiptap Access Control JWT。
+- `401` with an access-control code such as `token_expired` or `signature_invalid`: JWT 被
+  Access Control 拒绝。
+- `403` with `feature_not_available`: 当前环境未启用 Server AI Toolkit。
+- `403` with `insufficient_permissions`: JWT 未授予 `AI:Toolkit`。
+- `403` with `origin_not_allowed`: 请求的 `Origin` 不被当前环境允许。
+- `403` with `tracked_changes_unsupported_schema`: `reviewOptions.mode` 为 `trackedChanges`，但
+  编辑器 schema 不支持跟踪更改。
+- `403` with `thread_schema_not_supported`: 编辑器 schema 不支持评论或线程。
+- `413` with `ndjson_line_too_long`: 单个 NDJSON 行超过了最大大小。
+- `429` with `stream_rate_limit_exceeded`: 同一客户端打开的并发流过多。
+- `429` with `rate_limited`: Access Control 认证被限流。
+- `429`: 服务器端限流器在流式传输开始前阻止了请求。此响应
+  使用不同的顶层结构：
+  - `error` (`string`): 限流错误消息。
+  - `retryAfter` (`number`, optional): 重试前等待的秒数。
+  - `limit` (`number`, optional): 当前窗口的请求上限。
+  - `window` (`number`, optional): 限流窗口，单位为秒。
+- `500` with `diff_worker_failed`, `diff_worker_invalid_result`, `stream_internal_error`, or
+  `unknown_error`: 流处理期间发生了意外的服务器错误。
+- `500` with `missing_cloud_api_token`: 云服务缺少内部身份验证
+  配置。
+- `502` with document, thread, or comment upstream failure codes such as `document_load_failed`,
+  `document_save_failed`, `thread_list_failed`, or `comment_create_failed`: 云文档或
+  评论 API 操作在上游失败。
+- `503` with `diff_worker_queue_timeout`: diff worker 队列已饱和或超时。
+- `503` with `service_unavailable`: Access Control 暂时不可用。
+- `504` with `stream_request_timeout`: 流超过了服务器请求超时时间。
 
 ## 可用工具
 

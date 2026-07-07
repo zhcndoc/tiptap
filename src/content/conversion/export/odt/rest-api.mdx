@@ -77,7 +77,10 @@ curl --output document.odt -X POST "https://api.tiptap.dev/v2/convert/export/odt
 | `paragraphOverrides` | `Object` | 传递给 DOCX 步骤的段落级渲染覆盖         | `undefined` |
 | `textRunOverrides`   | `Object` | 传递给 DOCX 步骤的文本运行渲染覆盖                | `undefined` |
 | `tableCellOverrides` | `Object` | 传递给 DOCX 步骤的表格单元格渲染覆盖              | `undefined` |
-| `imageOverrides`     | `Object` | 传递给 DOCX 步骤的图片渲染覆盖                   | `undefined` |
+| `imageOverrides`     | `Object` | 传递给 DOCX 步骤的图像渲染覆盖                   | `undefined` |
+| `headerFooterOverrides` | `Object` | 针对页眉/页脚内容的按字段覆盖，作用域限定于页眉/页脚内容（与元素覆盖相同的五个键）。参见 [元素覆盖](#element-overrides)。 | `undefined` |
+| `placeholders`       | `Object \| false` | 用于页眉/页脚中页码标记的重命名映射（`{ page?, total? }`），与 `Pages.configure({ placeholders })` 匹配。传入 `false` 可禁用替换。参见 [自定义标记名称](/conversion/export/docx/rest-api#custom-token-names-placeholders)。 | `undefined` |
+| `customNodeDsl` | `Object` | 用于将自定义 Tiptap 节点渲染到导出文件中的 [自定义节点 DSL](/conversion/export/docx/custom-nodes-dsl) 规则。 | `undefined` |
 
 #### 页面尺寸配置
 

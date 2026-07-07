@@ -69,18 +69,21 @@ curl --output document.doc -X POST "https://api.tiptap.dev/v2/convert/export/doc
 
 | 名称                 | 类型     | 描述                                                            | 默认值      |
 | -------------------- | -------- | ---------------------------------------------------------------------- | ----------- |
-| `doc`                | `String` | 作为字符串的 Tiptap JSON 文档                                       | `N/A`       |
-| `exportType`         | `string` | 预期的导出类型                                               | `blob`      |
+| `doc`                | `String` | 以字符串形式表示的 Tiptap JSON 文档                                    | `N/A`       |
+| `exportType`         | `string` | 期望的导出类型                                                   | `blob`      |
 | `styleOverrides`     | `Object` | 样式覆盖                                                        | `{}`        |
 | `pageSize`           | `Object` | 页面尺寸配置                                                | `undefined` |
 | `pageMargins`        | `Object` | 页面边距配置                                             | `undefined` |
-| `headers`            | `Object` | 页眉配置                                              | `undefined` |
-| `footers`            | `Object` | 页脚配置                                              | `undefined` |
-| `tableOverrides`     | `Object` | 传递给 DOCX 步骤的表格级渲染覆盖             | `undefined` |
+| `headers`            | `Object` | 页面页眉配置                                              | `undefined` |
+| `footers`            | `Object` | 页面页脚配置                                              | `undefined` |
+| `tableOverrides`     | `Object` | 传递给 DOCX 步骤的表级渲染覆盖             | `undefined` |
 | `paragraphOverrides` | `Object` | 传递给 DOCX 步骤的段落级渲染覆盖         | `undefined` |
-| `textRunOverrides`   | `Object` | 传递给 DOCX 步骤的文本运行级渲染覆盖                | `undefined` |
-| `tableCellOverrides` | `Object` | 传递给 DOCX 步骤的表格单元格级渲染覆盖              | `undefined` |
-| `imageOverrides`     | `Object` | 传递给 DOCX 步骤的图像渲染覆盖                   | `undefined` |
+| `textRunOverrides`   | `Object` | 传递给 DOCX 步骤的文本运行渲染覆盖                | `undefined` |
+| `tableCellOverrides` | `Object` | 传递给 DOCX 步骤的单元格渲染覆盖              | `undefined` |
+| `imageOverrides`     | `Object` | 传递给 DOCX 步骤的图片渲染覆盖                   | `undefined` |
+| `headerFooterOverrides` | `Object` | 作用域限定到页眉/页脚内容的按字段覆盖（与元素覆盖具有相同的五个键）。参见 [元素覆盖](#element-overrides)。 | `undefined` |
+| `placeholders`       | `Object \| false` | 用于页眉/页脚纯文本中页码标记的重命名映射（`{ page?, total? }`），与 `Pages.configure({ placeholders })` 匹配。传入 `false` 可禁用替换。参见 [自定义标记名称](/conversion/export/docx/rest-api#custom-token-names-placeholders)。 | `undefined` |
+| `customNodeDsl` | `Object` | 用于将自定义 Tiptap 节点渲染到导出文件中的 [自定义节点 DSL](/conversion/export/docx/custom-nodes-dsl) 规则。 | `undefined` |
 
 #### 页面尺寸配置
 
