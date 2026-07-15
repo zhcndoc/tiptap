@@ -20,9 +20,9 @@ import { Callout } from '@/components/ui/Callout'
 
 | Service | Credentials | Token |
 | --- | --- | --- |
-| 协作和文档 | Collaboration secret | 使用该密钥签名的 JWT，携带文档访问声明 |
-| 转换 | App ID 和密钥（Convert 设置） | `Authorization` 中的 JWT，`X-App-Id` 标头中的 App ID |
-| 内容 AI | App ID 和密钥（AI 设置） | 使用该密钥签名的 JWT，不包含额外声明 |
+| 协作和文档 | 协作密钥 | 使用该密钥签名的 JWT，携带文档访问声明 |
+| 转换 | App ID 和 secret（Convert 设置） | `Authorization` 中的 JWT，`X-App-Id` 标头中的 App ID |
+| AI 工具包 | App ID 和 secret（AI 设置） | 使用该密钥签名的 JWT，不包含额外声明 |
 
 ## 协作和文档
 
@@ -60,9 +60,9 @@ X-App-Id: YOUR_APP_ID
 
 对于编辑器扩展，你传递了相同的 `appId` 和 `token` 选项。对于新模型，请参见 [迁移到新认证](/authentication/migrate#conversion)。
 
-## 内容 AI
+## AI 工具包
 
-你从 AI 设置页面获取了一个 App ID 和 secret，并使用该 secret 签名了一个 JWT。App ID 和 token 被传递给了 AI 扩展。REST 请求在 `Authorization` 中携带 JWT，并在 `X-App-Id` 中携带 App ID。请参见 [内容 AI 安装](/content-ai/capabilities/generation/install)。
+你从 AI 设置页面检索到了一个 App ID 和 secret，并使用该 secret 签署了一个 JWT。App ID 和 token 已传递给 AI 扩展。REST 请求在 `Authorization` 中携带 JWT，并在 `X-App-Id` 中携带 App ID。请参见 [AI Toolkit 安装](/ai/basic/install)。
 
 ## 故障排查
 

@@ -1,0 +1,259 @@
+---
+title: 插入内容工作流程
+meta:
+  title: 插入内容工作流程 | Tiptap AI 工具包
+  description: 使用 Tiptap AI 工具包构建一个工作流程，用于在文档中插入或替换内容。
+  category: AI 工具包
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+构建一个在您的 Tiptap 文档中插入或替换内容的工作流程。
+
+<CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/insert-content-workflow" />
+
+查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 技术栈
+
+- [React](https://react.dev/) + [Next.js](https://nextjs.org/)
+- [Vercel 的 AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
+- Tiptap AI 工具包
+
+## 项目概述
+
+该演示使用 AI 工具包的插入内容工作流程，在实时状态下用 AI 生成的内容替换所选内容。
+
+## 安装
+
+创建一个 [Next.js](https://nextjs.org/) 项目：
+
+```bash
+npx create-next-app@latest insert-content-workflow
+```
+
+安装核心 Tiptap 包和用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
+
+```bash
+npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/react @ai-sdk/openai
+```
+
+安装 Tiptap AI 工具包：
+
+<Callout title="专业版套餐" variant="hint">
+  AI 工具包是一个专业版套餐。安装前，请按照[私有注册表指南](/guides/pro-extensions)设置对私有 NPM 注册表的访问权限。
+</Callout>
+
+```bash
+npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
+```
+
+## 服务器设置
+
+创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型。
+
+If your backend is in another programming language than TypeScript, see [this guide](/ai/ai-toolkit/client/advanced-guides/non-typescript-backends).
+
+在该 API 端点内，使用 `createInsertContentWorkflow` 函数创建并配置插入内容工作流程。该流程包含一个可直接使用的系统提示，用于指导 AI 模型如何生成内容。
+
+用户消息应为包含以下属性的 JSON 对象：
+
+- `task`：要完成的任务
+- `replace`：被替换的 HTML 内容（可选）
+- `before`：之前的 HTML 内容（可选）
+- `after`：之后的 HTML 内容（可选）
+
+当 AI 模型生成响应时，API 端点将 HTML 内容以流的形式发送到客户端。
+
+```ts
+// app/api/insert-content-workflow/route.ts
+import { openai } from '@ai-sdk/openai'
+import { createInsertContentWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { streamText } from 'ai'
+
+export async function POST(req: Request) {
+  const { task, replace } = await req.json()
+
+  // 创建并配置插入内容工作流程（使用默认设置）。
+  // 它包含可直接使用的系统提示。
+  const workflow = createInsertContentWorkflow()
+
+  const result = streamText({
+    model: openai('gpt-5.4-mini'),
+    // 系统提示
+    system: workflow.systemPrompt,
+    // 用户消息，包含任务和要替换的内容，格式为 JSON 对象。
+    prompt: JSON.stringify({
+      task,
+      replace,
+    }),
+  })
+
+  return result.toTextStreamResponse()
+}
+```
+
+## 客户端设置
+
+创建一个 React 组件，用于渲染编辑器并将 AI 生成的内容流式插入到选区中。
+
+首先，当工作流启动时，使用 AI 工具包的 `getHtmlRange` 方法获取当前选区。然后调用 API 端点来启动工作流。API 端点会返回一个 HTML 流，可以通过 AI 工具包的 `streamHtml` 方法将其插入到编辑器中。
+
+```tsx
+// app/insert-content-workflow/page.tsx
+'use client'
+
+import { EditorContent, useEditor, useEditorState } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { AiToolkit, getAiToolkit } from '@tiptap-pro/client-ai-toolkit'
+import { useState } from 'react'
+import { Selection } from '@tiptap/extensions'
+
+export default function Page() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit, AiToolkit, Selection],
+    content: `<p>选中文本后点击“添加表情”按钮，为选区添加表情符号。</p>`,
+  })
+
+  // 当 AI 生成内容时显示加载状态
+  const [isLoading, setIsLoading] = useState(false)
+
+  // 当选区为空时禁用按钮
+  const selectionIsEmpty = useEditorState({
+    editor,
+    selector: (snapshot) => snapshot.editor?.state.selection.empty ?? true,
+  })
+
+  if (!editor) return null
+
+  const editSelection = async (task: string) => {
+    editor.commands.blur()
+    setIsLoading(true)
+
+    const toolkit = getAiToolkit(editor)
+
+    // 使用 AI 工具包以 HTML 格式获取选区
+    const selection = toolkit.getHtmlRange(editor.state.selection)
+    const selectionPosition = editor.state.selection
+
+    // 调用 API 端点获取编辑后的 HTML 内容
+    const response = await fetch('/api/insert-content-workflow', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        task,
+        replace: selection,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP 错误！状态码：${response.status}`)
+    }
+
+    // 响应为 HTML 内容流
+    const readableStream = response.body
+    if (!readableStream) {
+      throw new Error('无响应主体')
+    }
+
+    // 使用 AI 工具包将 HTML 流插入选区
+    await toolkit.streamHtml(readableStream, {
+      position: selectionPosition,
+      // 在流式处理过程中更新选区，确保选区持续覆盖生成的内容
+      onChunkInserted(event) {
+        editor.commands.setTextSelection(event.range)
+      },
+    })
+
+    setIsLoading(false)
+  }
+
+  const disabled = selectionIsEmpty || isLoading
+
+  return (
+    <div>
+      <EditorContent editor={editor} />
+      <button onClick={() => editSelection('为这段文字添加表情')} disabled={disabled}>
+        {isLoading ? '加载中...' : '添加表情'}
+      </button>
+    </div>
+  )
+}
+```
+
+## 最终效果
+
+通过额外的 CSS 样式，效果是一个打磨完善的应用，能够实时插入或替换成 AI 生成的内容：
+
+<CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/insert-content-workflow" />
+
+查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 显示 AI 输入光标
+
+您可以添加 `AiCaret` 扩展来显示一个光标，指示 AI 正在插入内容的位置。这为用户在内容流式传输期间提供实时的视觉反馈。
+
+```tsx
+import { AiCaret, AiToolkit, getAiToolkit } from '@tiptap-pro/client-ai-toolkit'
+
+const editor = useEditor({
+  extensions: [StarterKit, AiToolkit, AiCaret],
+})
+```
+
+查看 [AI 光标指南](/ai/ai-toolkit/client/advanced-guides/ai-caret) 以了解配置选项和 CSS 样式。
+
+## 禁用流式传输
+
+要将内容插入文档而不进行流式传输，请使用 `insertHtml` 方法。此方法与 `streamHtml` 具有相同的选项，只是它只会使用完整的 HTML 内容作为参数调用一次。[参见 API 参考](/ai/ai-toolkit/client/api-reference/edit-the-document#inserthtml)。
+
+## 显示审阅界面
+
+在审阅界面中显示更改，以便用户接受或拒绝它们。
+
+有两种实现方式：
+
+- 使用 [**Tracked Changes**](/tracked-changes/getting-started/overview) 扩展来渲染审阅界面。更改会作为文档的一部分保留，并对其他用户可见。
+- **AI Toolkit 建议**：一种基于装饰的界面，具有临时性，仅对当前文档用户可见。
+
+通过设置 `reviewOptions` 参数来配置审阅界面。更改将显示为建议，用户可以接受或拒绝。
+
+```tsx
+await toolkit.streamHtml(readableStream, {
+  // ... 其他选项
+
+  reviewOptions: {
+    // 使用 Tracked Changes 显示审阅界面
+    mode: 'trackedChanges',
+
+    // 在将更改插入文档之前预览更改，
+    // 使用 AI Toolkit 建议
+    mode: 'preview',
+
+    // 使用 AI Toolkit 建议显示审阅界面
+    mode: 'review',
+  },
+})
+```
+
+查看 [审阅更改](/ai/ai-toolkit/client/agents/review-changes) 指南以了解更多有关审阅界面的信息。
+
+<CodeDemo
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/insert-content-workflow-preview"
+/>
+
+查看 [AI Toolkit 演示](https://github.com/ueberdosis/ai-toolkit-demos) 了解如何在审阅界面中使用 AI Toolkit 工作流程的示例。
+
+## 下一步
+
+- [API 参考](/ai/ai-toolkit/client/api-reference/workflows#createinsertcontentworkflow) of the `createInsertContentWorkflow` function
+- [API 参考](/ai/ai-toolkit/client/api-reference/read-the-document#gethtmlrange) of the `getHtmlRange` method
+- [API 参考](/ai/ai-toolkit/client/api-reference/edit-the-document#streamhtml) of the `streamHtml` method
+- [建议](/ai/ai-toolkit/client/agents/review-changes)：了解如何审阅文档并在编辑器中显示建议。
+- [AI 光标](/ai/ai-toolkit/client/advanced-guides/ai-caret)：在 AI 插入内容的位置显示光标。

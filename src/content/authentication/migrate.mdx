@@ -63,7 +63,7 @@ import { Callout } from '@/components/ui/Callout'
 }
 ```
 
-### 内容 AI
+### AI 工具包
 
 将 `aud` 设为 `"AI"`，并授予 `AI:Generation`、`AI:Toolkit`，或两者。
 
@@ -82,9 +82,9 @@ import { Callout } from '@/components/ui/Callout'
 
 `token` 属性在所有地方都保持不变。变化的是你如何生成 token，以及是否仍然需要 App ID：
 
-- **协作。** `TiptapCollabProvider` 仍然同时接受 `appId` 和 `token`，与之前完全一样。
-- **转换。** 删除 `appId`。通过相同的 `token` 属性传递新的 token。
-- **内容 AI。** 删除 `appId`。通过相同的 `token` 属性传递新的 token。
+- **协作。** `TiptapCollabProvider` 仍然同时接受 `appId` 和 `token`，与之前完全一致。
+- **转换。** 去掉 `appId`。通过相同的 `token` 属性传递新的 token。
+- **AI 工具包。** 去掉 `appId`。通过相同的 `token` 属性传递新的 token。
 
 在所有情况下，你都继续使用 `token` 属性。你只需要更改 token 的签名方式，现在使用你的环境密钥对。
 

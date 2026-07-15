@@ -1,0 +1,56 @@
+---
+title: 基础 AI 生成
+tags:
+  - type: start
+meta:
+  title: Tiptap 基础 AI 生成
+  description: 将智能自动补全、图像生成等基础 AI 功能集成到你的编辑器中。
+  category: 基础 AI 生成
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+
+<Requirements>
+  <RequirementItem label="1. 激活试用或订阅">
+    在您的账户中开始一个 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅起始计划](https://cloud.tiptap.dev/v2/billing)。
+  </RequirementItem>
+  <RequirementItem label="2. 集成 AI 提供商">
+    在您的 [AI 设置](https://cloud.tiptap.dev/v2/cloud/ai) 中配置 OpenAI，或查看
+    [自定义 LLM 指南](/ai/basic/custom-llms)。
+  </RequirementItem>
+  <RequirementItem label="3. 从私有注册表安装">
+    要安装前端扩展，请按照
+    [安装指南](/guides/pro-extensions)认证访问 Tiptap 的私有 npm 注册表。
+  </RequirementItem>
+</Requirements>
+
+仅需几行代码，即可将基础 AI 生成扩展集成到您的 Tiptap 编辑器中。它为您提供一组预构建的 AI 功能，包括命令、提示词自定义、图像生成和智能自动补全。
+
+在这些基础上添加您自己的自定义命令，甚至集成您自己的专有 LLM，以打造独特的用户体验。
+
+对于智能代理工作流和更高的灵活性，**请查看 [AI 工具包](/ai/ai-toolkit/overview)。**
+
+<CodeDemo isPro path="/Extensions/AiCommands" />
+
+## 基础 AI 生成功能
+
+- [预配置的默认命令](/ai/basic/text-generation)
+- [用于高效编辑的自动补全](/ai/basic/text-generation/autocompletion)
+- 命令的实时流式传输
+- 兼容各种 OpenAI 模型（例如 GPT-5、GPT-5 mini、GPT Image 2）
+- [创建你自己的提示词和命令](/ai/basic/text-generation/custom-commands)
+- [自定义 LLM 集成](/ai/basic/custom-llms)
+- 可与 Tiptap Collaboration 无缝协作（[了解更多](/ai/basic/collaboration)）
+
+## 工作原理
+
+将 [OpenAI](/ai/basic/install) 或您自己的 [Custom LLM](/ai/basic/custom-llms) 与您的 Tiptap 编辑器集成。该扩展同时涵盖客户端和服务端实现。用户体验如下：
+
+1. 在编辑器中高亮选中文本并应用 AI 命令。  
+2. 您的选择、所选操作和任何选项会发送到我们的云服务。  
+3. 我们生成提示并代表您调用 OpenAI。  
+4. AI 的响应随后直接插入或流式传输到您的编辑器中。
+
+默认情况下，使用我们的后端服务，但也支持高级场景，例如自定义后端和大语言模型。

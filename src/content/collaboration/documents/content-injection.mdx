@@ -10,7 +10,7 @@ meta:
 
 import { Requirements, RequirementItem } from '@/components/Requirements'
 
-要在服务器端注入内容到文档中，请使用本文档中描述的 PATCH 端点。此功能支持版本历史记录，跟踪更改以及通过此端点添加的内容。
+要在服务器端注入内容到文档中，请使用本文档中描述的 PATCH 端点。此功能支持版本历史记录、跟踪更改以及通过此端点添加的内容。
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
@@ -67,18 +67,20 @@ PATCH /api/documents/:identifier?format=:format
 
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
-| `format` | `string` | — | 更新的格式：`json`、`binary`（Yjs 的 `Y.encodeStateAsUpdate`）或 `base64`（以 Base64 编码的二进制状态）。 |
-| `mode` | `string` | `default` | 更新策略：`default` 合并节点，`append` 仅追加，`node` 将匹配的节点替换为负载内容，`attrs` 替换匹配节点的属性，`delete` 删除匹配的节点（不需要负载）。请参阅[模式](#模式)。 |
-| `nodeAttributeName` | `string` | — | 将更新限制为具有此名称属性的节点。与 `nodeAttributeValue` 一起使用。 |
-| `nodeAttributeValue` | `string` | — | 将更新限制为具有此值属性的节点。与 `nodeAttributeName` 一起使用。您可以传递多个值：`?nodeAttributeValue=a&nodeAttributeValue=b`。 |
-| `checksum` | `string` | — | 仅当文档的当前状态与此校验和匹配时才应用更新（在获取文档响应中作为 `x-FRAGMENTNAME-checksum` 返回）。否则返回 `409 校验和不匹配`。 |
-| `user` | `string` | — | 与更改关联的用户 ID。 |
-| `skipVersioning` | `1` | — | 如果传递，此更改不会触发自动版本控制。 |
-| `fragment` | `string` | `default` | 要更新的 Yjs 片段。您可以通过传递多个值来更新多个片段（当 `format=json` 时）：`?fragment=a&fragment=b`。 |
+| `format` | `string` | — | 更新的格式：`json`、`binary`（Yjs 的 `Y.encodeStateAsUpdate`），或 `base64`（以 Base64 编码的二进制状态）。 |
+| `mode` | `string` | `default` | 更新策略：`default` 合并节点，`append` 仅追加，`node` 用负载替换匹配的节点，`attrs` 替换匹配节点的属性，`delete` 删除匹配的节点（无需负载）。参见 [模式](#modes)。 |
+| `nodeAttributeName` | `string` | — | 将更新限制为具有此名称属性的节点。与 `nodeAttributeValue` 结合使用。 |
+| `nodeAttributeValue` | `string` | — | 将更新限制为具有此值属性的节点。与 `nodeAttributeName` 结合使用。您可以传递多个值：`?nodeAttributeValue=a&nodeAttributeValue=b`。 |
+| `checksum` | `string` | — | 仅当文档当前状态与此校验和匹配时才应用更新（在获取文档响应中作为 `x-FRAGMENTNAME-checksum` 返回）。否则返回 `409 Checksum mismatch`。 |
+| `user` | `string` | — | 与此次更改关联的用户 ID。 |
+| `skipVersioning` | `1` | — | 如果传递此参数，此次更改不会触发自动版本控制。 |
+| `upsert` | `0` \| `1` | `0` | 当为 `1` 时，如果文档尚不存在，则创建文档，而不是返回 `404`。 |
+| `fragment` | `string` | `default` | 要更新的 Yjs 片段。通过传递多个值，可以用相同内容更新多个片段（当 `format=json` 时）：`?fragment=a&fragment=b`。 |
+| `multi` | `0` \| `1` | `0` | 仅与 `format=json` 一起使用。当为 `1` 时，请求体是一个以片段名为键的 JSON 对象，可在单个请求中用不同内容更新多个片段。仅与默认模式兼容。参见 [使用不同内容更新多个片段](#update-multiple-fragments-with-different-content)。 |
 | `mergeAttributes` | `0` \| `1` | `0` | 仅与 `mode=attrs` 一起使用。当为 `1` 时，请求负载中未包含的属性将被保留。当为 `0`（默认）时，缺失的属性将被删除。 |
-| `multiUpdates` | `true` | — | 仅与 `mode=attrs` 和 `format=json` 一起使用。允许在单个请求中更新具有不同属性值的多个节点。请求体必须是 `{ where, attrs }` 对象的 JSON 数组。请参阅[多重更新](#多重更新)。 |
+| `multiUpdates` | `true` | — | 仅与 `mode=attrs` 和 `format=json` 一起使用。允许在单个请求中更新多个具有不同属性值的节点。请求体必须是一个包含 `{ where, attrs }` 对象的 JSON 数组。参见 [多重更新](#multi-updates)。 |
 
-成功更新后，服务器将返回 HTTP 状态 `204`。如果文档不存在，将返回 `404`，如果负载无效或无法应用更新，将返回 `422`。
+更新成功后，服务器将返回 HTTP 状态 `204`。如果文档不存在，则返回 `404`（除非传递了 `upsert=1`，此时会创建文档）；如果负载无效或无法应用更新，则返回 `422`。
 
 **示例：** 更新文档的 `curl` 命令
 
@@ -253,7 +255,35 @@ curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/doc
 }'
 ```
 
-#### 使用校验和的安全冲突更新
+#### 使用不同内容更新多个片段
+
+要在单个请求中使用**不同**内容更新多个片段，请传入 `multi=1`（配合 `format=json`），并发送一个以片段名称为键的 JSON 对象。每个值都是该片段完整的 Tiptap JSON 内容，并使用默认模式合并到对应片段中。
+
+与 `?fragment=a&fragment=b`（将*相同*的载荷应用到每个列出的片段）不同，`multi=1` 允许你为每个片段发送不同内容。
+
+`multi=1` 仅适用于默认模式。它不能与 `mode`、`nodeAttributeName`/`nodeAttributeValue`、`checksum` 或 `multiUpdates` 组合使用——否则会返回 `400`。它可以与 `user`、`skipVersioning` 和 `upsert` 组合使用。
+
+```bash
+curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/my-doc?format=json&multi=1' \
+--header 'Authorization: YOUR_SECRET' \
+--header 'Content-Type: application/json' \
+--data '{
+  "default": {
+    "type": "doc",
+    "content": [
+      { "type": "paragraph", "content": [{ "type": "text", "text": "片段 default 中的文本" }] }
+    ]
+  },
+  "otherFragment": {
+    "type": "doc",
+    "content": [
+      { "type": "paragraph", "content": [{ "type": "text", "text": "片段 otherFragment 中的文本" }] }
+    ]
+  }
+}'
+```
+
+#### 使用校验和进行冲突安全更新
 
 仅当自上次获取以来文档未更改时才应用更新。
 
@@ -315,7 +345,7 @@ const nodes = tiptapJson.content
 const query = nodes.find(n => n.attrs?.identifier === 'fe5c0789-85d9-4877-a2c3-bccf5d874866').content[0].text
 const resultTable = nodes.find(n => n.attrs?.identifier === '246368b6-0746-4ca1-a16f-8d964aff4041')
 
-console.log(`Query: ${query}`)
+console.log(`查询：${query}`)
 console.log(JSON.stringify(resultTable.content))
 
 // 向结果表节点附加新内容
@@ -401,12 +431,12 @@ await axios.patch(`${url}/api/documents/${docName}?format=json`, tiptapJson, {
 
 ### 仅更新节点属性
 
-如果您只想更新节点的属性，可以使用 `?mode=attrs` 查询参数。这将仅更新节点的属性，而不更新其内容。
-在此模式下，`nodeAttributeName` 和 `nodeAttributeValue` 参数适用于任何（不仅仅是顶层）节点。
+If you only want to update a node’s attributes, you can use the `?mode=attrs` query parameter. This will update only the node’s attributes, not its content.
+In this mode, the `nodeAttributeName` and `nodeAttributeValue` parameters apply to any node, not just top-level nodes.
 
-默认情况下，匹配节点上的所有属性都会被替换——未包含在负载中的属性将被删除。要保留现有属性并仅更新负载中指定的属性，请传递 `?mergeAttributes=1`。
+By default, all attributes on matching nodes are replaced—attributes not included in the payload will be deleted. To preserve existing attributes and update only the attributes specified in the payload, pass `?mergeAttributes=1`.
 
-不指定节点过滤器（`nodeAttributeName`、`nodeAttributeValue`）将导致所有节点被更新。
+Omitting the node filter (`nodeAttributeName`, `nodeAttributeValue`) will result in all nodes being updated.
 
 ```
 curl --location --request PATCH '/api/documents/:identifier?format=json&nodeAttributeName=id&nodeAttributeValue=12&mode=attrs' \

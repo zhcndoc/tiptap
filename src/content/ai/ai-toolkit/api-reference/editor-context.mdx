@@ -1,0 +1,88 @@
+---
+title: 编辑器上下文
+meta:
+  title: 编辑器上下文 | Tiptap Server AI Toolkit
+  description: 从你的 Tiptap 编辑器中获取编辑器上下文数据，以便与 Server AI Toolkit API 配合使用。
+  category: AI 工具包
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+在使用 Server AI Toolkit API 之前，你需要从你的 Tiptap 编辑器中获取编辑器上下文数据。
+
+`getEditorContext` 函数会从你的 Tiptap 编辑器中检索 schema 信息，并将其转换为适合 Server AI Toolkit API 的格式。该数据描述了文档结构，并帮助 AI 理解哪些内容是有效的。
+
+## `getEditorContext`
+
+返回描述 Server AI Toolkit API 文档结构的编辑器上下文数据。
+
+此函数会收集来自扩展的 schema 信息，并将其转换为适合 AI 模型消费的格式。返回的数据会被 Server AI Toolkit API 用于理解文档中哪些内容是有效的。
+
+<Callout title="已弃用的别名" variant="warning">
+  `getSchemaAwarenessData` 仍可用于向后兼容，但它已被弃用。对于新的集成，请使用
+  `getEditorContext`。
+</Callout>
+
+<Callout title="存储编辑器上下文数据" variant="info">
+  `getEditorContext` 返回的编辑器上下文数据是一个可 JSON 序列化的对象，你可以将它
+  存储到数据库中。你不需要每次都生成它——只需在你的编辑器扩展或 schema 发生变化时更新它。
+</Callout>
+
+<Callout title="在哪里调用 getEditorContext" variant="info">
+  `getEditorContext` 需要一个已配置的 Tiptap 编辑器实例。请在客户端
+  编辑器初始化阶段或其他能够实例化相同编辑器扩展的环境中生成它，然后在服务器端 API 调用中复用
+  存储的 JSON。
+</Callout>
+
+查看在 [自定义节点指南](/ai/ai-toolkit/advanced-guides/custom-nodes) 中如何使用它的示例。
+
+### 参数
+
+#### `editor` (`Editor`)
+
+要从中提取编辑器上下文数据的 Tiptap 编辑器实例。
+
+#### `options?` (`GetEditorContextOptions`)
+
+编辑器上下文的配置选项：
+
+- `customNodes?` (`JsonItem[]`): 除默认项之外要包含的自定义编辑器上下文项。这允许通过自定义节点类型或对现有节点定义的修改来扩展 schema 信息，以供 AI 模型消费。默认值：`[]`。
+
+每个 `JsonItem` 对象都包含以下属性：
+
+- `extensionName` (`string`): 提供此元素的扩展名称
+- `name` (`string`): 该元素的英文人类可读名称
+- `description?` (`string`): 对该元素是什么以及如何显示的说明
+- `isMark?` (`boolean`): 此项是否为 mark（而不是 node）
+- `attributes?` (`Record<string, unknown>`): 该元素可能具有的属性，使用 Zod schema 定义，并将转换为 JSON schema
+
+### 返回值
+
+`EditorContext`: 描述文档结构的编辑器上下文数据。此数据会传递给 Server AI Toolkit API 端点。
+
+### 示例
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { getEditorContext, ServerAiToolkit } from '@tiptap/ai-toolkit'
+
+const editor = new Editor({
+  extensions: [StarterKit, ServerAiToolkit],
+})
+
+// 获取编辑器上下文数据
+const editorContext = getEditorContext(editor)
+
+// 与 Server AI Toolkit API 一起使用
+const response = await fetch('https://api.tiptap.dev/v4/ai/toolkit/fetch-tools', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${API_TOKEN}`,
+  },
+  body: JSON.stringify({
+    editorContext,
+  }),
+})
+```

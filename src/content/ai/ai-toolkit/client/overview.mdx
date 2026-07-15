@@ -1,0 +1,365 @@
+---
+title: AI 工具包（客户端包）
+tags:
+  - type: addon
+    tooltip: 将 AI 工具包添加到您的订阅中
+  - type: beta
+meta:
+  title: AI 工具包（客户端包）
+  description: Tiptap AI 工具包仅客户端扩展的概览。了解其功能、结构，以及它如何帮助您构建 AI 扩展和 AI 代理。
+  category: AI 工具包
+sidebars:
+  hideSecondary: true
+---
+
+import { ExternalLinkIcon, Expand } from 'lucide-react'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import * as CardGrid from '@/components/CardGrid'
+import Link from '@/components/Link'
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+<Requirements>
+  <RequirementItem label="1. 获取访问权限">
+    通过购买付费的 AI Toolkit 附加组件来访问仅客户端的 AI Toolkit 扩展。{' '}
+    <a href="https://tiptap.dev/contact-sales?form=ai-toolkit">联系我们的团队</a>。
+  </RequirementItem>
+  <RequirementItem label="2. 访问私有注册表">
+AI Toolkit 客户端扩展发布在 Tiptap 的私有 npm 注册表中。请按照 [设置指南](/guides/pro-extensions) 验证并访问 Tiptap 的
+    私有 npm 注册表。
+  </RequirementItem>
+  <RequirementItem label="3. 安装扩展">
+    使用 npm 或您偏好的包管理器从私有注册表中安装该扩展。
+  </RequirementItem>
+</Requirements>
+
+<EnterpriseCalloutAuto variant="ai-toolkit" renderMode="sidebar" />
+
+对于大多数使用场景，**[基于服务器的 AI Toolkit](/ai/ai-toolkit/overview) 是您的最佳选择**。这种仅客户端的方式可在浏览器中运行，并直接与编辑器通信：如果您想要一个完全在浏览器中完成的解决方案，或者需要基于 AI 的更改但 _不_ 与文档同步，它会很有用。
+
+<Callout title="付费附加组件" variant="hint">
+  默认版和客户端版 AI Toolkit 都是您订阅中的付费附加组件。{' '}
+  <a href="https://tiptap.dev/contact-sales?form=ai-toolkit">联系我们的团队</a> 以获取访问权限。
+</Callout>
+
+<CodeDemo
+  isScrollable
+  isLarge
+  src="https://template.tiptap.dev/page-ai-toolkit"
+  caption={
+    <>
+      <strong>试用客户端 AI Toolkit</strong>，体验这个交互式演示，其中包含一个可以读取、编辑和操作文档的 AI 智能体。
+    </>
+  }
+  captionActions={
+    <>
+      <a
+        href="https://template.tiptap.dev/page-ai-toolkit"
+        target="_blank"
+        className="flex items-center gap-1 text-grayAlpha-600 hover:text-grayAlpha-800 font-medium whitespace-nowrap"
+      >
+        全屏
+        <Expand className="size-3" />
+      </a>
+      <span className="text-grayAlpha-300">|</span>
+      <Link
+        href="/ai/ai-toolkit/client/advanced-guides/live-demo"
+        className="flex items-center gap-1 text-grayAlpha-600 hover:text-grayAlpha-800 font-medium whitespace-nowrap"
+      >
+        了解更多
+        <ExternalLinkIcon className="size-3" />
+      </Link>
+    </>
+  }
+/>
+
+## 核心功能
+
+客户端 AI 工具包包含构建任何自定义 AI 功能的基础组件：
+
+- **工具**：用于构建能够执行复杂任务的 [AI 代理](/ai/ai-toolkit/client/agents)。
+- [**工作流**](/ai/ai-toolkit/client/workflows)：AI 在其中执行单一且定义明确的任务，例如插入内容、校对文档等。
+
+<Callout title="兼容任何 AI 模型" variant="info">
+  将 AI 工具包与任何能够生成文本的 AI 模型一起使用，包括开源模型和
+  自托管模型。
+</Callout>
+
+### AI 代理工具
+
+构建能够通过处理 Tiptap 文档来执行复杂任务的 [AI 代理](/ai/ai-toolkit/client/agents)。
+
+<div className="grid md:grid-cols-2 gap-6 mt-6 md:items-start">
+  <Link
+    href="/ai/ai-toolkit/client/agents/ai-agent-chatbot"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">执行工具（AI 代理）</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">查看更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      让您的 AI 代理通过工具调用读取、插入和修补文档内容。包含所有文档操作的内置工具。
+    </div>
+  </Link>
+  <Link
+    href="/ai/ai-toolkit/client/api-reference/execute-tool"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">工具定义</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">所有工具 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      针对 Vercel AI SDK、LangChain、OpenAI、Anthropic 和 Mastra 的框架特定工具定义。直接传递给您的代理即可使用。
+    </div>
+  </Link>
+  <Link
+    href="/ai/ai-toolkit/client/agents/review-changes"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">变更审核</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">查看更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      将 AI 生成的编辑显示为用户可以接受或拒绝的建议。实现类似 Google Docs 的审核工作流。
+    </div>
+  </Link>
+  <Link
+    href="/content-ai/capabilities/ai-toolkit/agents/review-changes-as-summary"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">以摘要形式审查变更</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">查看更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      显示所有 AI 变更的文本摘要，而非行内建议。适用于批量编辑或高层次审核。
+    </div>
+  </Link>
+  <Link
+    href="/ai/ai-toolkit/client/agents/streaming"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">工具流式传输</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">查看更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      实时流式显示 AI 工具调用，让用户看到 AI 正在执行的操作。提升感知性能和透明度。
+    </div>
+  </Link>
+  <Link
+    href="/ai/ai-toolkit/client/agents/selection-awareness"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">选区感知</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">查看更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      通过仅传递所选内容，使 AI 操作具备上下文意识。减少令牌使用，提高相关性。
+    </div>
+  </Link>
+  <Link
+    href="/ai/ai-toolkit/client/agents/multi-document"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">多文档 AI 代理</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">查看更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      构建能够同时处理多份文档的代理。包含文档切换和跨文档上下文功能。
+    </div>
+  </Link>
+  <Link
+    href="/ai/ai-toolkit/client/agents/comments"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">评论</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">查看更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      让 AI 在文档中插入评论和注释。适用于反馈、建议或协作编辑。
+    </div>
+  </Link>
+</div>
+
+### 原语
+
+构建自定义 AI 功能的底层方法。当您需要精细控制 AI 与文档交互的方式，或构建超出标准代理工作流程的功能时使用。
+
+<div className="grid md:grid-cols-2 gap-6 mt-6 md:items-start">
+  <Link
+    href="/ai/ai-toolkit/client/workflows/insert-content"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">插入内容</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">查看更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      在文档的单个位置插入内容。
+    </div>
+  </Link>
+  <Link
+    href="/ai/ai-toolkit/client/workflows/proofreader"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">校对员</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">查看更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">纠正拼写和语法错误。</div>
+  </Link>
+  <Link
+    href="/ai/ai-toolkit/client/workflows/tiptap-edit"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">Tiptap 编辑</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">查看更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      用于对 Tiptap 文档进行大小编辑的通用工作流程。
+    </div>
+  </Link>
+  <Link
+    href="/ai/ai-toolkit/client/workflows/comments"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">评论管理</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">查看更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      管理 Tiptap 文档中的评论和讨论线程。
+    </div>
+  </Link>
+</div>
+
+<EnterpriseCalloutAuto variant="ai-toolkit" renderMode="inline" />
+
+## 指南与示例
+
+AI 工具包为构建任何自定义 AI 集成提供了灵活的构建模块。浏览 [API 参考](/ai/ai-toolkit/client/api-reference) 中可用的实用工具，或者直接查看下面的指南和示例。
+
+<CardGrid.Wrapper>
+  <CardGrid.Item asChild>
+    <Link href="/ai/ai-toolkit/client/advanced-guides/live-demo">
+      <CardGrid.ItemTitle>实时演示</CardGrid.ItemTitle>
+      <CardGrid.ItemParagraph>
+        构建一个可通过聊天读取和编辑文档的对话式 AI。包含流式传输、工具执行和会话管理。
+      </CardGrid.ItemParagraph>
+      <CardGrid.ItemFooter />
+    </Link>
+  </CardGrid.Item>
+  <CardGrid.Item asChild>
+    <Link href="/content-ai/capabilities/ai-toolkit/guides/review-changes">
+      <CardGrid.ItemTitle>变更审核</CardGrid.ItemTitle>
+      <CardGrid.ItemParagraph>
+        将 AI 生成的编辑显示为用户可以接受或拒绝的建议。实现类似 Google Docs 的审核工作流。
+      </CardGrid.ItemParagraph>
+      <CardGrid.ItemFooter />
+    </Link>
+  </CardGrid.Item>
+  <CardGrid.Item asChild>
+    <Link href="/content-ai/capabilities/ai-toolkit/guides/review-changes-as-summary">
+      <CardGrid.ItemTitle>以摘要形式审查变更</CardGrid.ItemTitle>
+      <CardGrid.ItemParagraph>
+        显示所有 AI 变更的文本摘要，而非行内建议。适用于批量编辑或高层次审核。
+      </CardGrid.ItemParagraph>
+      <CardGrid.ItemFooter />
+    </Link>
+  </CardGrid.Item>
+  <CardGrid.Item asChild>
+    <Link href="/content-ai/capabilities/ai-toolkit/guides/tool-streaming">
+      <CardGrid.ItemTitle>工具流式传输</CardGrid.ItemTitle>
+      <CardGrid.ItemParagraph>
+        实时流式显示 AI 工具调用，让用户看到 AI 正在执行的操作。提升感知性能和透明度。
+      </CardGrid.ItemParagraph>
+      <CardGrid.ItemFooter />
+    </Link>
+  </CardGrid.Item>
+  <CardGrid.Item asChild>
+    <Link href="/content-ai/capabilities/ai-toolkit/guides/inline-edits">
+      <CardGrid.ItemTitle>行内编辑</CardGrid.ItemTitle>
+      <CardGrid.ItemParagraph>
+        用 AI 生成的内容替换所选文本。适合重写、总结或转换特定章节。
+      </CardGrid.ItemParagraph>
+      <CardGrid.ItemFooter />
+    </Link>
+  </CardGrid.Item>
+</CardGrid.Wrapper>
+
+### 高级指南
+
+<CardGrid.Wrapper>
+  <CardGrid.Item asChild>
+    <Link href="/content-ai/capabilities/ai-toolkit/advanced-guides/selection-awareness">
+      <CardGrid.ItemTitle>选区感知</CardGrid.ItemTitle>
+      <CardGrid.ItemParagraph>
+        通过仅传递所选内容，使 AI 操作具备上下文意识。减少令牌使用，提高相关性。
+      </CardGrid.ItemParagraph>
+      <CardGrid.ItemFooter />
+    </Link>
+  </CardGrid.Item>
+  <CardGrid.Item asChild>
+    <Link href="/content-ai/capabilities/ai-toolkit/advanced-guides/multi-document">
+      <CardGrid.ItemTitle>多文档 AI 代理</CardGrid.ItemTitle>
+      <CardGrid.ItemParagraph>
+        构建能够同时处理多份文档的代理。包含文档切换和跨文档上下文功能。
+      </CardGrid.ItemParagraph>
+      <CardGrid.ItemFooter />
+    </Link>
+  </CardGrid.Item>
+  <CardGrid.Item asChild>
+    <Link href="/content-ai/capabilities/ai-toolkit/advanced-guides/comments">
+      <CardGrid.ItemTitle>添加评论</CardGrid.ItemTitle>
+      <CardGrid.ItemParagraph>
+        让 AI 在文档中插入评论和注释。适用于反馈、建议或协作编辑。
+      </CardGrid.ItemParagraph>
+      <CardGrid.ItemFooter />
+    </Link>
+  </CardGrid.Item>
+  <CardGrid.Item asChild>
+    <Link href="/ai/ai-toolkit/client/advanced-guides/ai-engineering">
+      <CardGrid.ItemTitle>AI 工程指南</CardGrid.ItemTitle>
+      <CardGrid.ItemParagraph>
+        构建 AI 文档功能时的提示语设计、错误处理和性能优化最佳实践。
+      </CardGrid.ItemParagraph>
+      <CardGrid.ItemFooter />
+    </Link>
+  </CardGrid.Item>
+  <CardGrid.Item asChild>
+    <Link href="/content-ai/capabilities/ai-toolkit/advanced-guides/proofreader">
+      <CardGrid.ItemTitle>校对员</CardGrid.ItemTitle>
+      <CardGrid.ItemParagraph>
+        示例实现，展示如何构建分析并建议文档改进的功能。
+      </CardGrid.ItemParagraph>
+      <CardGrid.ItemFooter />
+    </Link>
+  </CardGrid.Item>
+  <CardGrid.Item asChild>
+    <Link href="/ai/ai-toolkit/client/advanced-guides/non-typescript-backends">
+      <CardGrid.ItemTitle>非 TypeScript 后端</CardGrid.ItemTitle>
+      <CardGrid.ItemParagraph>
+        将 AI 工具包与使用 Python、Go 或其他语言编写的后端结合使用。
+      </CardGrid.ItemParagraph>
+      <CardGrid.ItemFooter />
+    </Link>
+  </CardGrid.Item>
+  <CardGrid.Item asChild>
+    <Link href="/ai/ai-toolkit/client/advanced-guides/compare-documents">
+      <CardGrid.ItemTitle>比较文档</CardGrid.ItemTitle>
+      <CardGrid.ItemParagraph>
+        对比两份 Tiptap 文档并突出显示差异。
+      </CardGrid.ItemParagraph>
+      <CardGrid.ItemFooter />
+    </Link>
+  </CardGrid.Item>
+</CardGrid.Wrapper>

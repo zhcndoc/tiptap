@@ -1,0 +1,46 @@
+---
+title: 在您的编辑器中显示 AI 建议
+tags:
+  - type: beta
+  - type: deprecated
+meta:
+  title: AI 建议 | Tiptap 内容 AI
+  description: 了解 AI 建议扩展的概述、功能及其工作原理。
+  category: 内容 AI
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<Callout title="已弃用" variant="warning">
+  此扩展正在逐步被 AI 工具包取代，后者提供了更强大的功能和现代化的 API。您仍可以继续使用此扩展，但我们建议在新项目中优先考虑 AI 工具包。
+</Callout>
+
+<EnterpriseCalloutAuto variant="deprecated" renderMode="sidebar" />
+
+AI 建议扩展会分析文档并提供用户可接受或拒绝的建议。它开箱即用地支持 Content AI Cloud，并且可以轻松扩展以支持您自己的后端和大语言模型（LLM）。
+
+<CodeDemo
+  isPro
+  path="/Extensions/AiSuggestion"
+  src="https://feature-beta-ai-extensions--tiptap-pro.netlify.app/preview/Extensions/AiSuggestion"
+/>
+
+## 功能
+
+- [定义你自己的规则](/ai/deprecated/suggestion/features/define-rules)，以执行你的风格指南、提升可读性，并确保用户内容遵循最佳实践。
+- [应用建议](/ai/deprecated/suggestion/features/apply-suggestions)：用 AI Suggestion 扩展生成的建议替换单词、短语或句子。
+- 建议中支持富文本，因此你可以强制执行样式规则，例如将关键词加粗或斜体。
+- [集成你自己的后端和 LLM](/ai/deprecated/suggestion/custom-llms)
+- [自定义用户界面](/ai/deprecated/suggestion/features/display-suggestions)：完全控制建议在编辑器中的显示方式。
+- 与 Tiptap Collaboration 无缝协作（[了解更多](/ai/deprecated/resources/collaboration)）
+
+## 工作原理
+
+AI 建议扩展使用 Tiptap Cloud 的 OpenAI 模型（或您的自定义后端）根据您的规则和编辑器内容生成校对建议。该扩展涵盖客户端和服务器端的实现。用户体验如下：
+
+1. 编辑器加载时，AI 建议扩展根据初始内容和规则生成建议。
+2. 如果用户编辑了规则或内容，扩展的建议会实时更新。
+3. 用户可以查看并接受建议，或拒绝建议。
+4. 当接受建议时，编辑器内容会更新为新的文本。

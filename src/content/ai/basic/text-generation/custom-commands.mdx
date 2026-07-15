@@ -1,0 +1,86 @@
+---
+title: 注册自定义命令和提示
+tags:
+  - type: start
+meta:
+  title: 自定义命令 | Tiptap 基础 AI 生成
+  description: 通过扩展 Basic AI Generation 插件，为特定内容转换工作流创建带有定制提示词的自定义 AI 命令。
+  category: Basic AI Generation
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在你的账户中开始一个<a href="https://cloud.tiptap.dev/v2?trial=true">免费试用</a>或<a href="https://cloud.tiptap.dev/v2/billing">订阅入门计划</a>。
+    </RequirementItem>
+    <RequirementItem label="2. 集成 AI 提供商">
+        在你的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查看[自定义 LLM 指南](/ai/basic/custom-llms)。
+    </RequirementItem>
+    <RequirementItem label="3. 从私有仓库安装">
+        若要安装前端扩展，请按照<a href="/guides/pro-extensions">设置指南</a>验证身份并登录 Tiptap 私有 npm 仓库。
+    </RequirementItem>
+</Requirements>
+
+基础 AI 生成扩展提供了一组[内置命令](/ai/basic/text-generation/built-in-commands)，但你也可以扩展它来定义自己的命令。这些自定义命令可用于通过你的自定义提示词调用 LLM。
+
+<CodeDemo isPro path="/Extensions/AiCustomCommandUsingAiTextPrompt" />
+
+## 注册自定义命令
+
+要注册你自己的 AI 命令，只需扩展 Basic AI Generation 扩展，在 `addCommands()` 中添加你的命令（别忘了在 `this.parent?.()` 中继承预定义命令），然后执行 `aiTextPrompt()` 来运行你的单独提示词。
+
+请注意，此示例是在客户端使用你的提示词，这意味着用户可以读取它。如果你想使用自定义语言模型（LLM）或在后端使用提示词，请参阅 [自定义 LLM 指南](/ai/basic/custom-llms)。
+
+```js
+import { Ai, getHTMLContentBetween } from '@tiptap-pro/extension-ai'
+
+// … 其他导入
+
+// 如果使用 TypeScript，声明扩展类型。
+// 更多信息：https://tiptap.dev/docs/guides/typescript
+//
+// declare module '@tiptap/core' {
+//   interface Commands<ReturnType> {
+//     ai: {
+//       aiCustomTextCommand: (options?: TextOptions) => ReturnType,
+//     }
+//   }
+// }
+
+const AiExtended = Ai.extend({
+  addCommands() {
+    return {
+      ...this.parent?.(),
+
+      aiCustomTextCommand:
+        (options = {}) =>
+        ({ editor, state }) => {
+          const { from, to } = state.selection
+          const selectedText = getHTMLContentBetween(editor, from, to)
+
+          return editor.commands.aiTextPrompt({
+            text: `将以下文本翻译成法语并添加一些表情符号: ${selectedText}`,
+            ...options,
+          })
+        },
+    }
+  },
+})
+
+// 初始化你的 Tiptap 编辑器实例并注册扩展后的扩展
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    AiExtended.configure({
+      /* … */
+    }),
+  ],
+  content: '',
+})
+
+// 运行你的自定义命令
+// editor.chain().focus().aiCustomTextCommand().run()
+```

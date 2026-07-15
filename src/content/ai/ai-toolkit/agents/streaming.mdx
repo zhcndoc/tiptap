@@ -1,0 +1,268 @@
+---
+title: 流式传输
+meta:
+  title: 流式传输 | Tiptap Server AI 工具包
+  description: 将服务器端 AI 编辑实时流式写入文档，使更改在模型生成时就能出现在浏览器中。
+  category: AI 工具包
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+<Callout title="Alpha" variant="warning">
+  流式传输目前处于 alpha 阶段：暂时还不建议用于生产部署，而且 API 可能会
+  发生变化。我们预计它会在未来几周内进入 beta 阶段。如果你在这之前就需要可用于生产环境的能力，
+  可以查看 [AI Toolkit 客户端包中的流式传输](/ai/ai-toolkit/client/agents/streaming)。
+</Callout>
+
+AI 编辑会从服务器流式传输，因此当模型生成时，它们会实时显示在文档中。编辑在你的服务器上运行，并通过实时连接应用到 Tiptap Cloud 文档，因此每个协作者都会看到它发生。
+
+<Callout title="Requires Collaboration" variant="info">
+  流式传输会将编辑应用到一个实时的 Tiptap Cloud 文档，并通过
+  [协作](/collaboration/getting-started/overview) 将其同步到编辑器，因此这两者都必不可少。与
+  非流式工具不同，这里没有内联文档模式。如果你还没有使用 Tiptap Cloud
+  协作，那么你将需要它才能从服务器流式传输编辑。
+</Callout>
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-ai-stream-tool-chatbot"
+/>
+
+查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 技术栈
+
+- 一个客户端 [React](https://react.dev/) 应用程序
+- 一个服务器应用程序
+- 一个 AI 代理框架，例如 [Vercel AI SDK](https://ai-sdk.dev/)
+- [OpenAI](https://openai.com/) 模型
+- Server AI Toolkit
+
+Server AI Toolkit 可与任何 AI 代理框架和 AI 模型配合使用。它可与任何前端框架和后端编程语言一起使用。本指南使用一个简单的 Node.js 服务器端点，该端点接收一个 [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) 对象并返回一个 [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response)。
+
+在继续之前，请按照[安装指南](/content-ai/capabilities/server-ai-toolkit/install)设置 Server AI Toolkit。
+
+## 工作原理
+
+1. 你的服务器获取 `tiptapEdit` 工具定义并读取文档，就像它处理一个[非流式 agent](/ai/ai-toolkit/agents/ai-agent-chatbot)时一样。
+2. 当模型生成工具调用时，你的服务器会将原始输入增量作为 [NDJSON](https://github.com/ndjson/ndjson-spec) `start`、`delta` 和 `end` 消息转发到 `POST /v4/ai/toolkit/stream-tool`。
+3. 之后由 Server AI Toolkit 为你应用编辑：随着转发的增量到达，它会通过实时连接逐步更新 Tiptap Cloud 文档。你无需自行应用任何内容；文档更新会在服务器端随着增量流入而自动发生。
+4. 客户端通过 [协作](/collaboration/getting-started/overview) 渲染这些变更。编辑器本身不会调用任何流式方法，因此这些编辑会作为文档更新到达。
+
+## 流式编辑
+
+<Callout title="适用于大多数 AI 后端" variant="hint">
+  此示例使用 [Vercel 的 AI SDK](https://ai-sdk.vercel.app/)，但你可以将
+  `stream-tool` 接入大多数 AI 后端架构。你只需把模型的工具调用输入转发为
+  NDJSON 增量即可。
+</Callout>
+
+在服务端，向 `stream-tool` 打开一个 [双工](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#duplex) NDJSON 请求，并用模型的工具调用流来驱动它。双工请求允许你逐步向上游流式传输请求体，这样你就可以在模型生成每个工具调用增量时立即转发，而不是一次性发送整个输入。
+
+`stream-tool` 请求和响应都使用 NDJSON：每行一个 JSON 对象。你会发送三种消息类型：`start` 用于打开流，`delta` 用于 AI 生成的每个工具输入片段，`end` 用于输入完成时。
+
+<details>
+  <summary>安装依赖</summary>
+
+在你的服务端应用中安装这些依赖：
+
+```bash
+npm install ai zod
+```
+
+</details>
+
+```ts
+import { gateway, stepCountIs, streamText, tool, type UIMessage } from 'ai'
+import { z } from 'zod'
+import { getAuthHeaders } from './server-ai-toolkit/get-auth-headers'
+import { streamToolFetch } from './server-ai-toolkit/stream-tool-fetch'
+
+// Server AI Toolkit API 基础 URL
+const apiBaseUrl = process.env.TIPTAP_CLOUD_AI_API_URL || 'https://api.tiptap.dev'
+
+export async function handleStreamEditRequest(request: Request): Promise<Response> {
+  const { messages, editorContext, documentId } = await request.json()
+  // 单次编辑：任务就是最新的用户消息。
+  const lastUser = (messages as UIMessage[]).filter((m) => m.role === 'user').at(-1)
+  const task =
+    lastUser?.parts
+      .filter((p) => p.type === 'text')
+      .map((p) => (p as { text: string }).text)
+      .join(' ') ?? ''
+
+  // 1. 获取 tiptapEdit 工具定义并读取文档。
+  //    这些步骤与非流式流程一致。请参阅 REST API 参考。
+  const { tools, systemPrompt } = await fetch(`${apiBaseUrl}/v4/ai/toolkit/fetch-tools`, {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify({ editorContext, tools: { tiptapEdit: true } }),
+  }).then((res) => res.json())
+  const tiptapEdit = tools.find((t) => t.name === 'tiptapEdit')
+
+  const read = await fetch(`${apiBaseUrl}/v4/ai/toolkit/execute-tool`, {
+    method: 'POST',
+    headers: await getAuthHeaders(documentId),
+    body: JSON.stringify({
+      tool: { name: 'readDocument', input: {} },
+      document: { type: 'cloud', id: documentId },
+      editorContext,
+    }),
+  }).then((res) => res.json())
+
+  // 2. 打开到 stream-tool 的 duplex NDJSON 请求。每条消息占一行。
+  const encoder = new TextEncoder()
+  let controller: ReadableStreamDefaultController<Uint8Array>
+  const body = new ReadableStream<Uint8Array>({ start: (c) => (controller = c) })
+  const send = (message: object) =>
+    controller.enqueue(encoder.encode(`${JSON.stringify(message)}\n`))
+
+  // `streamToolFetch` 通过 HTTP/2 发送请求，因此 duplex 上传
+  // 可以在反向代理下正常工作（HTTP/1.1 代理会在响应开始后清空
+  // 请求体，从而截断流）。请参阅演示源码了解该辅助函数。
+  // 在流式传输请求体时，始终需要 `duplex: 'half'`。
+  const upstream = streamToolFetch(`${apiBaseUrl}/v4/ai/toolkit/stream-tool`, {
+    method: 'POST',
+    headers: { ...(await getAuthHeaders(documentId)), 'Content-Type': 'application/x-ndjson' },
+    body,
+    duplex: 'half',
+  })
+
+  // 3. 驱动模型。将其工具输入作为 start / delta / end 消息转发。
+  const result = streamText({
+    model: gateway('openai/gpt-5.4-mini'),
+    system: `${systemPrompt}\n\n使用 tiptapEdit 完成编辑，然后只用一句简短的话回复，确认你修改了什么。`,
+    prompt: JSON.stringify({ content: read.tool.output, task }),
+    tools: {
+      tiptapEdit: tool({
+        description: tiptapEdit.description,
+        inputSchema: z.fromJSONSchema(tiptapEdit.inputSchema),
+        // 将采样限制在该工具的输入模式内。
+        strict: true,
+        onInputStart: () =>
+          send({
+            version: 1,
+            type: 'start',
+            editorContext,
+            document: { type: 'cloud', id: documentId },
+            tool: { name: 'tiptapEdit' },
+            user: 'ai-assistant',
+          }),
+        onInputDelta: ({ inputTextDelta }) =>
+          send({ version: 1, type: 'delta', argsTextDelta: inputTextDelta }),
+        onInputAvailable: () => {
+          send({ version: 1, type: 'end' })
+          controller.close()
+        },
+        // 等待 AI 服务端完成应用编辑，然后返回一个
+        // 结果，这样聊天轮次就能完成。
+        execute: async () => {
+          const res = await upstream
+          await res.text()
+          return { ok: res.ok }
+        },
+      }),
+    },
+    // 第 0 步：强制执行编辑。第 1 步：禁止使用工具，
+    // 让模型为聊天写出确认句。
+    stopWhen: stepCountIs(2),
+    prepareStep: ({ stepNumber }) => ({
+      toolChoice: stepNumber === 0 ? 'required' : 'none',
+    }),
+  })
+
+  // 编辑通过 Y.Doc 同步到达编辑器；这个流用于驱动聊天。
+  return result.toUIMessageStreamResponse()
+}
+```
+
+请参阅 [REST API 参考](/ai/ai-toolkit/api-reference/rest-api#stream-a-tool) 了解完整的请求和响应消息结构，并参阅 [演示源码](https://github.com/ueberdosis/ai-toolkit-demos) 获取带错误处理、可用于生产环境的路由示例。
+
+## 客户端设置
+
+<details>
+  <summary>安装依赖</summary>
+
+在你的客户端应用中安装以下依赖：
+
+```bash
+npm install @ai-sdk/react @tiptap/extension-collaboration @tiptap/react @tiptap/starter-kit @tiptap-pro/provider @tiptap/ai-toolkit ai yjs
+```
+
+</details>
+
+在客户端中，添加 `Collaboration` 和 `ServerAiToolkit` 扩展，使用 `TiptapCollabProvider` 连接文档，并通过 AI SDK 的 `useChat` 钩子驱动聊天（与其他服务端演示相同）。流式编辑内容会通过 Collaboration 到达编辑器；`useChat` 会显示模型的回复。
+
+```tsx
+import { useChat } from '@ai-sdk/react'
+import { Collaboration } from '@tiptap/extension-collaboration'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { ServerAiToolkit, getEditorContext } from '@tiptap/ai-toolkit'
+import { DefaultChatTransport } from 'ai'
+import { useRef } from 'react'
+
+const editor = useEditor({
+  immediatelyRender: false,
+  extensions: [
+    StarterKit.configure({ undoRedo: false }),
+    Collaboration.configure({ document: doc }),
+    ServerAiToolkit,
+  ],
+})
+
+// 将 editorContext 放在 ref 中，以避免 AI SDK 的陈旧闭包问题（vercel/ai#7819）。
+const editorContextRef = useRef(editor ? getEditorContext(editor) : null)
+editorContextRef.current = editor ? getEditorContext(editor) : null
+
+const { messages, sendMessage, status } = useChat({
+  transport: new DefaultChatTransport({
+    api: '/api/stream-edit',
+    body: () => ({
+      editorContext: editorContextRef.current,
+      documentId: 'your-document-id',
+    }),
+  }),
+})
+```
+
+## 以跟踪更改形式流式传输
+
+为了让用户审阅流式编辑而不是直接应用它们，请在 `start` 消息中添加 `reviewOptions`。这样，编辑内容会以跟踪更改建议的形式出现，实时输入到文档中，用户可以接受或拒绝。
+
+```ts
+send({
+  version: 1,
+  type: 'start',
+  editorContext,
+  document: { type: 'cloud', id: documentId },
+  tool: { name: 'tiptapEdit' },
+  user: 'ai-assistant',
+  reviewOptions: { mode: 'trackedChanges' },
+})
+```
+
+在客户端添加 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展，以渲染这些建议并接受或拒绝它们。请参阅 [Use with Tracked Changes 指南](/ai/ai-toolkit/agents/tracked-changes) 和 [Tracked Changes 流式演示](https://ai-toolkit-demos.vercel.app/server-ai-stream-tool-chatbot-tracked-changes)。
+
+## 最终结果
+
+结果是一个简单但精致的 AI 聊天机器人应用：
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-ai-stream-tool-chatbot"
+/>
+
+请查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 下一步
+
+- [REST API 参考](/ai/ai-toolkit/api-reference/rest-api#stream-a-tool)：`stream-tool` 请求和响应协议的完整说明。
+- [审阅选项](/ai/ai-toolkit/api-reference/review-options)：所有 `reviewOptions` 设置。
+- [结合修订痕迹使用](/ai/ai-toolkit/agents/tracked-changes)：在接受服务器端编辑前进行审阅。
+- [在客户端 AI Toolkit 中进行流式传输](/ai/ai-toolkit/client/agents/streaming)：使用 AI Toolkit 的客户端版本，将内容流式传输到 Tiptap 编辑器的客户端。

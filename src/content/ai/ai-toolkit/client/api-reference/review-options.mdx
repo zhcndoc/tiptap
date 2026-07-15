@@ -1,0 +1,36 @@
+---
+title: 审阅选项
+meta:
+  title: Review options | Tiptap AI Toolkit
+  description: 使用 ReviewOptions 配置 AI 生成更改的预览和审阅行为
+  category: AI Toolkit
+---
+
+所有会[编辑文档](/ai/ai-toolkit/client/api-reference/edit-the-document)的 AI Toolkit 方法都具有一个 `reviewOptions` 属性。配置后，它可以在文档编辑后显示审阅界面。
+
+```ts
+const result = toolkit.executeTool({
+  toolName: 'tiptapEdit',
+  input,
+  // 显示一个界面，允许用户在更改应用后进行审阅。
+  reviewOptions: { mode: 'review' },
+})
+```
+
+编辑文档后，会显示一个[建议](/ai/ai-toolkit/client/agents/review-changes)列表。
+
+`reviewOptions` 属性接收一个 `ReviewOptions` 配置对象。
+
+## `ReviewOptions`
+
+- `mode?` (`'disabled' | 'review' | 'preview' | 'trackedChanges'`): 是否在应用更改之前或之后审阅更改。默认值：`'disabled'`
+  - `'disabled'`：不显示审阅界面。
+  - `'review'`：先应用更改，然后显示审阅界面，允许用户撤销这些更改。
+  - `'preview'`：在应用更改之前显示预览界面，允许用户接受或拒绝这些更改。
+  - `'trackedChanges'`：AI 生成的更改会使用 [跟踪更改](/tracked-changes/getting-started/overview) 扩展编码为跟踪更改，允许用户接受或拒绝单个更改。
+- `displayOptions?` (`DisplayOptions`): 自定义建议在编辑器 UI 中的显示方式。设置 [`Suggestion`](/ai/ai-toolkit/client/api-reference/suggestions#the-suggestion-object) 类型的 `displayOptions` 属性。[查看可用选项](/ai/ai-toolkit/client/api-reference/suggestions#the-suggestion-object)。
+- `metadata?` (`Record<string, any>`): 供建议使用的额外元数据，可用于存储关于它们的附加信息（例如其来源或类别）。扩展内部不会使用它，但可能有助于开发者自定义建议在 UI 中的显示方式。
+- `trackedChangesOptions?` (`{ userId: string, userMetadata?: Record<string, unknown> | null }`): `trackedChanges` 模式的配置。`userId` 用于标识跟踪更改的作者。`userMetadata` 用于存储关于作者的附加信息。
+- `commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`): 当与 `trackedChanges` 模式一起提供时，操作元数据（编辑操作中的 `meta` 字段）会成为链接到每个跟踪更改的评论线程。需要 [评论](/comments/getting-started/overview) 扩展。
+- `useDiffUtility?` (`boolean`): 是否使用 [Diff Utility](/ai/ai-toolkit/client/api-reference/diff-utility) 在更改前后比较文档，并将删除内容和新增内容以富差异的形式显示。如果为 `false`，删除内容和新增内容会作为一个整体块显示，为单个更改。默认值：`true`
+- `diffUtilityOptions?` ([`ExternalDiffUtilityOptions`](/ai/ai-toolkit/client/api-reference/diff-utility#parameters-diffutilityoptions)): 使用 diff utility 比较文档的选项。[查看可用选项](/ai/ai-toolkit/client/api-reference/diff-utility#parameters-diffutilityoptions)。

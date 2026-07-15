@@ -1,0 +1,48 @@
+---
+title: 配置 AI Changes 扩展
+meta:
+  title: 配置 AI Changes | Tiptap 内容 AI
+  description: 配置 AI Changes 扩展。自定义 AI 生成内容在富文本编辑器中的显示方式。
+  category: 内容 AI
+---
+
+Tiptap 的 AI Changes 扩展提供了多个配置选项，供你自定义其外观和行为。
+
+## 自定义样式
+
+`getCustomDecorations` 函数允许你控制更改文本的外观。你可以为文本应用自定义 CSS 类，并在文本前后添加自定义元素。适用于显示弹出层、提示工具或图标。
+
+该函数接收以下参数：
+
+- `change`：当前更改对象，包含了修改内容的信息
+- `changes`：文档中所有检测到的更改列表
+- `isSelected`：布尔值，表示当前更改是否被选中（光标位置位于该处）
+- `getDefaultDecorations`：返回该更改的默认装饰的函数。如果未提供 `getCustomDecorations` 函数，则使用默认装饰。
+- `editor`：Tiptap 编辑器实例
+- `previousDoc`：AI 更改前文档的快照
+- `currentDoc`：AI 进行更改后的当前文档
+
+```ts
+AiChanges.configure({
+  getCustomDecorations({ change, isSelected, getDefaultDecorations }) {
+    // 你可以将 AI Changes 扩展的默认装饰与自定义装饰结合使用
+    const decorations = getDefaultDecorations()
+
+    // 当更改被选中时，在插入的文本后添加自定义元素
+    if (isSelected) {
+      decorations.push(
+        Decoration.widget(change.newRange.to, () => {
+          const element = document.createElement('span')
+          element.textContent = '✅'
+          return element
+        }),
+      )
+    }
+    return decorations
+  },
+})
+```
+
+自定义样式和元素是通过 [Prosemirror Decorations API](https://prosemirror.net/docs/ref/#view.Decorations) 实现的。
+
+要在选择某个更改时显示弹出层，请按照[本指南](/ai/deprecated/changes/features/display-changes#show-a-popover-when-a-change-is-selected)进行操作。

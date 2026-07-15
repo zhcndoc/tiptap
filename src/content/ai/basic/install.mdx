@@ -1,0 +1,67 @@
+---
+title: 安装 Basic AI Generation 扩展
+tags:
+  - type: start
+meta:
+  title: 安装 Basic AI Generation | Tiptap Basic AI Generation
+  description: 在你的编辑器中设置 Tiptap Basic AI Generation，包括配置 OpenAI 密钥和用于安全 AI 集成的 JWT 身份验证。
+  category: Basic AI Generation
+---
+import { Requirements, RequirementItem } from '@/components/Requirements'
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在您的账户中开始[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅入门计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 集成 AI 提供商">
+        在您的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查看[自定义 LLM 指南](/ai/basic/custom-llms)。
+    </RequirementItem>
+    <RequirementItem label="3. 从私有注册表安装">
+        要安装前端扩展，请按照[安装指南](/guides/pro-extensions)登录 Tiptap 私有 npm 注册表。
+    </RequirementItem>
+</Requirements>
+
+本安装指南依赖于使用[Tiptap AI 后端服务](https://cloud.tiptap.dev/v2/cloud/ai)。如果您想使用自己的自定义 LLM 进行配置，则需要改为按照[此指南](/ai/basic/custom-llms)进行。
+
+## 启动你的基础 AI 生成应用
+1. **激活计划：** 开始 [免费试用或选择订阅](https://cloud.tiptap.dev/v2/billing)。
+2. **配置你的 AI 应用。** 将你的 OpenAI API 密钥添加到 [你的应用](https://cloud.tiptap.dev/v2/cloud/ai)。
+3. **设置身份验证：** 使用 `aud: "AI"` 和 `AI:Generation` 权限签署一个令牌，然后将其传递给扩展。有关如何签署令牌，请参见 [身份验证](/authentication)。
+
+## 访问私有注册表
+Basic AI Generation 扩展发布在 Tiptap 的私有 npm 注册表中。请按照 [私有注册表指南](/guides/pro-extensions) 集成该扩展。如果你已经通过 Tiptap 账户完成身份验证，可以直接前往 [#安装](#install)。
+
+## 安装
+
+```bash
+npm install @tiptap-pro/extension-ai
+```
+
+将其集成到您的编辑器实例中的方式与其他 Tiptap 扩展相同。下面是示例代码：
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Ai from '@tiptap-pro/extension-ai'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    Ai.configure({
+      // 这需要是您的签名令牌，且绝不能是 OpenAI API 密钥！
+      token: 'TOKEN_HERE',
+      autocompletion: true,
+      // … 其他选项（详见下文）
+    }),
+    // … 其他扩展
+  ],
+})
+```
+
+此时，您就可以在 Tiptap 编辑器中使用 OpenAI 了。请查看[配置选项](/ai/basic/configure)，以自定义您的使用体验。
+
+先前的 App ID 和密钥（HS256）流程仍然可用，并记录在[旧版身份验证](/authentication/legacy)中。
+
+## 隐私与数据处理
+
+了解 Tiptap 如何处理 AI 请求以及如何在我们的 [隐私文档](/ai/basic/privacy) 中处理您的内容数据。该文档涵盖了使用基础 AI 生成功能时的数据保留、安全实践以及合规信息。

@@ -1,0 +1,199 @@
+---
+title: 使用 AI 工具包进行 AI 工程
+meta:
+  title: AI 工程指南 | Tiptap AI Toolkit
+  description: 了解如何在各种情况下选择最佳的 AI 模型和提示语，以便与 AI 工具包一起使用。
+  category: AI 工具包
+---
+
+通过为每种情况选择最佳的 AI 模型和提示语，充分发挥 AI 工具包的优势。
+
+## 选择 AI 模型
+
+AI 工具包的工具设计为可与任何支持函数调用的 AI 模型配合使用。它们已在多种来自不同 AI 提供商的模型上进行过测试。
+
+选择合适 AI 模型的一个关键区别是你是否需要构建一个[智能体（agent）或工作流](https://www.anthropic.com/engineering/building-effective-agents)：
+
+- AI 智能体会被赋予一个任务，并独立朝着目标推进，在每一步决定下一步要采取什么行动。例如：[AI 聊天机器人助手](/ai/ai-toolkit/client/agents/ai-agent-chatbot)
+- 在 AI 工作流中，AI 会执行一个或多个预定义操作，但不会自行选择下一步操作。这种情况适用于[简单的 AI 内容生成](/ai/ai-toolkit/client/workflows/insert-content)或自动补全。
+
+### 适合智能体任务的最佳模型
+
+对于像 [AI agent chatbot](/ai/ai-toolkit/client/agents/ai-agent-chatbot) 指南中那样的复杂智能体 AI 助手，建议使用具备工具调用能力的前沿模型。尤其是，以下模型表现出了积极效果：
+
+- OpenAI 模型：GPT-5、GPT-5 mini、GPT-5.4、GPT-5.4 mini
+- Anthropic 模型：Opus、Sonnet 和 Haiku（4 版及以后）
+- Google 模型：Gemini Pro、Gemini Flash（3 版及以后）
+- Mistral 模型：Mistral Large、Mistral Medium
+- Moonshot 模型：Kimi-K2
+- xAI 模型：Grok 4.1 Fast 及以后
+- Z.ai 模型：GLM-4.5 及以后
+
+### 适合智能体任务的经济型模型
+
+如果你有智能体文档编辑的需求，但优先考虑成本控制，可以选择仍支持函数调用的较小模型。特别可以考虑以下模型：
+
+- Claude Haiku 4.5（Anthropic）及以后
+- GPT-5 mini（OpenAI）及以后
+- Gemini 3 Flash（Google）及以后
+- Mistral Medium 3.1（Mistral）及以后
+
+### 非智能体工作流的模型选择
+
+并非所有文档编辑的 AI 用例都是智能体类型，有时你只是需要 AI 生成内容并插入文档。大量经济型模型适合此用途。比如前文提到的那些。
+
+### 是否应启用推理能力？
+
+根据我们的内部测试，在文档编辑任务中启用推理后，准确性和性能会略有提升。不过，从低到高提升推理强度似乎并没有明显改善。由于推理会增加 token 消耗和延迟，**建议将推理级别设置为较低水平**，除非你的 AI 智能体还会将推理用于其他目的（例如规划或解决复杂数学问题）。
+
+例如，对于 AI 工具包推荐的 GPT-5 配置是将 `reasoning` 参数设置为 `'minimal'`。
+
+关于 Gemini 3 Pro 和 Gemini 3 Flash，我们发现将推理设置为 minimal 后，响应更快且准确度相当。
+
+## 设计合适的提示语
+
+你可以通过提供自定义系统提示语来调整 AI 模型的行为和内容生成方式。
+
+```ts
+// app/api/chat/route.ts
+import { openai } from '@ai-sdk/openai'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
+
+export async function POST(req: Request) {
+  const { messages }: { messages: UIMessage[] } = await req.json()
+
+  const agent = new ToolLoopAgent({
+    model: openai('gpt-5.4-mini'),
+    instructions: `你是一位以莎士比亚风格编辑富文本文档的助手。 
+    你应当以莎士比亚的风格进行回应，并且在编辑文档时， 
+    你生成并添加到文档中的内容也应当以莎士比亚戏剧的风格来撰写。`,
+    tools: toolDefinitions(),
+  })
+
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
+  })
+}
+```
+
+在系统提示中不需要提及 AI 模型有哪些工具可用。因为它们已经包含在工具定义中，AI 模型会自动识别。
+
+然而，在系统提示中，你可以按名称引用[可用工具](/ai/ai-toolkit/client/agents/tools)。这样，你就可以指示 AI 模型如何以及何时使用这些工具，并引导 AI 模型变得更加详尽、更有创造力或更深思熟虑。
+
+```ts
+// app/api/chat/route.ts
+import { openai } from '@ai-sdk/openai'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
+
+export async function POST(req: Request) {
+  const { messages }: { messages: UIMessage[] } = await req.json()
+
+  const agent = new ToolLoopAgent({
+    model: openai('gpt-5.4-mini'),
+    instructions: `你是一位可以编辑富文本文档的助手。 
+    在调用诸如 tiptapEdit 之类的文档编辑工具之前，
+    你应该先阅读文档，以便了解其内容和上下文。
+    然后，你应该以非常详细的逐步描述，告知用户你将要采取的编辑计划。
+    只有在详细规划之后，你才应该调用文档编辑工具。`,
+    tools: toolDefinitions(),
+  })
+
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
+  })
+}
+```
+
+我们推荐以下资源帮助你深入学习提示工程和AI工程：
+
+- [Anthropic 提示工程指南](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview)
+- [GPT-5 提示指南](https://cookbook.openai.com/examples/gpt-5/gpt-5_prompting_guide)
+- [OpenAI 提示工程指南](https://platform.openai.com/docs/guides/prompt-engineering)
+- [智能体构建实用指南](https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf)
+
+## 提升速度和延迟
+
+为了提升 AI 工具包的响应速度，可以采用以下策略：
+
+### 实现响应流式传输
+
+将内容流式传输到编辑器中，会让用户感觉响应更快。请参考 [流式传输指南](/ai/ai-toolkit/client/agents/streaming) 来实现它。
+
+### 选择更快的模型或提供商
+
+选择模型时，注意其速度和延迟。可以参考如 [Artificial Analysis](https://artificialanalysis.ai/#intelligence-vs-output-speed) 这类排行榜，比较不同模型的多个指标。
+
+速度和延迟取决于模型以及其托管所在的提供商。如果输出速度是你的首要考虑，可以选择专注于快速推理的提供商，例如 [groq](https://groq.com/)、[SambaNova](https://www.sambanova.com/) 或 [Cerebras](https://www.cerebras.ai/)。
+
+### 关闭推理功能
+
+推理会增加 token 消耗和延迟。如果你的具体用例不需要推理，建议关闭或最小化此功能。例如，在 GPT-5 和 GPT-5 mini 中，推荐将 `reasoningEffort` 提供商选项设置为 `'minimal'`。
+
+```ts
+// app/api/chat/route.ts
+import { openai } from '@ai-sdk/openai'
+import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
+
+export async function POST(req: Request) {
+  const { messages }: { messages: UIMessage[] } = await req.json()
+
+  const agent = new ToolLoopAgent({
+    model: openai('gpt-5.4-mini'),
+    instructions: `You are an assistant that can edit rich text documents.`,
+    tools: toolDefinitions(),
+    // 将推理努力设置为 'minimal'
+    providerOptions: {
+      openai: {
+        reasoningEffort: 'minimal',
+      },
+    },
+  })
+
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
+  })
+}
+```
+
+### 为 AI 模型提供足够的上下文
+
+在编辑文档之前，AI 模型需要先读取文档内容。通过将文档内容包含在用户消息或系统提示中，可以加快这一过程。
+
+```ts
+const toolkit = getAiToolkit(editor)
+
+// 在发送用户消息之前，先读取文档开头内容
+const { output } = toolkit.executeTool({
+  toolName: 'tiptapRead',
+  input: {
+    from: 0,
+  },
+})
+
+// 然后，在用户消息中包含文档内容
+let userMessage = `将最后一段替换为一个短故事`
+
+userMessage += `
+
+---
+
+用户已调用过 'tiptapRead' 工具，其返回内容如下：
+
+${output}`
+
+// 将用户消息发送给 AI 模型
+```
+
+这样，AI 模型无需再次调用 `tiptapRead` 工具读取文档，而可直接进入编辑阶段。
+
+### 优先使用工作流而非智能体
+
+[工作流](/ai/ai-toolkit/client/workflows) 比 AI 智能体更容易实现。它们通常需要 AI 生成更少的 token，因此执行速度更快。此外，它们往往也可以使用更快、更小的模型。
+
+AI 工具包包含 [内置工作流](/ai/ai-toolkit/client/workflows)，可用于执行简单的文档编辑任务。

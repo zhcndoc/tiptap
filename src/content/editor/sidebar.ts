@@ -255,7 +255,7 @@ export const sidebarConfig: SidebarConfig = {
           children: [
             {
               href: '/editor/extensions/functionality/ai-generation',
-              title: 'AI 生成',
+              title: 'Basic AI 生成',
               tags: ['Start 计划'],
             },
             {
@@ -292,7 +292,6 @@ export const sidebarConfig: SidebarConfig = {
               href: '/editor/extensions/functionality/comments',
               title: '评论',
               tags: ['Start 计划'],
-              releaseTag: "beta",
             },
             {
               href: '/editor/extensions/functionality/drag-handle',

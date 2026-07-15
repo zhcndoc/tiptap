@@ -245,7 +245,7 @@ export const LayoutContent = forwardRef<HTMLDivElement, LayoutContentProps>(
                 Changelog
               </Link>
             </div>
-            <div className="flex-none">Copyright © 2025 Tiptap</div> */}
+            <div className="flex-none">Copyright © {new Date().getFullYear()} Tiptap</div> */}
             <div className="text-balance text-center text-sm leading-loose text-muted-foreground md:text-left">
               <a href="https://www.zhcndoc.com" target="_blank">
                 简中文档

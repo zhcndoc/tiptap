@@ -1,0 +1,44 @@
+---
+title: 使用 AI Suggestion 扩展与 Tiptap Content AI Cloud
+meta:
+  title: Content AI Cloud | Tiptap AI Suggestion
+  description: 通过 Tiptap Content AI Cloud API 生成建议，快速开始使用 AI Suggestion 扩展。
+  category: 内容 AI
+---
+
+使用 AI Suggestion 扩展最快速的入门方式是通过 Tiptap Content AI Cloud API 生成建议。这开箱即用，您只需向扩展提供认证凭证即可。
+
+本安装指南依赖于使用 [Tiptap Content AI 后端服务](https://cloud.tiptap.dev/v2/cloud/ai)。如果您想使用自己的自定义 LLM 进行配置，则需要改为遵循[此指南](/ai/deprecated/suggestion/custom-llms)。
+
+## 启动您的 Content AI 应用
+1. **激活方案：** 开始 [免费试用或选择订阅](https://cloud.tiptap.dev/v2/billing)。
+2. **配置您的 AI 应用。** 将您的 OpenAI API 密钥添加到您的 [Content AI 应用](https://cloud.tiptap.dev/v2/cloud/ai)。
+3. **设置身份验证**：使用 `aud: "AI"` 和 `AI:Generation` 权限签署令牌，然后将其传递给扩展。请参阅 [身份验证](/authentication)。
+
+## 将您的认证凭据添加到扩展中
+
+导入扩展并使用您的签名令牌进行配置。
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import AiSuggestion from '@tiptap-pro/extension-ai-suggestion'
+
+// 初始化编辑器
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    AiSuggestion.configure({
+      // 这需要是您生成的 JWT，且绝不能是 OpenAI API 密钥！
+      token: 'TOKEN_HERE',
+      // 其他配置选项...
+    }),
+  ],
+})
+```
+
+现在，当编辑器加载时，建议内容将从 Tiptap Content AI API 获取。
+
+## 隐私和数据处理
+
+了解 Tiptap 如何处理 AI 请求并管理您的内容数据，请参阅我们的 [隐私文档](/ai/basic/privacy)。其中涵盖了用于使用 Content AI 功能的数据保留、安全实践以及合规性信息。

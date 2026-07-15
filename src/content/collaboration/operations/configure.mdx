@@ -39,41 +39,43 @@ import { Callout } from '@/components/ui/Callout'
 | `commentonly_disallow_resolve_foreign_threads`   | 设置为 `1` 可在仅评论连接中禁止解决其他人的线程。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `webhook_include_fields`   | 设置为 `1` 可在 webhook 中包含自定义 yjs 字段（参见 [webhooks](/collaboration/core-concepts/webhooks#custom-fields)）。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
-## Manage settings via API
+## 通过 API 管理设置
 
-The collaboration platform provides a simple API to manage these settings. Replace `:key` with the settings key you want to update, and replace `YOUR_APP_ID` with your document server ID (marked as "Document server ID" in the [Cloud dashboard](https://cloud.tiptap.dev/v2/configuration/document-server)).
+协作平台提供了一个简单的 API 来管理这些设置。将 `:key` 替换为你要更新的设置键，并将 `YOUR_APP_ID` 替换为你的文档服务器 ID（在 [Cloud 仪表板](https://cloud.tiptap.dev/v2/configuration/document-server) 中标记为“Document server ID”）。
 
-### Create or overwrite a setting
+### 创建或覆盖设置
 
-Use this call to add or update a setting:
+使用此调用来添加或更新设置：
 
 ```bash
 curl --location --request PUT 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin/settings/:key' \
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA' --header 'Content-Type: text/plain' \
--d 'your value'
+-d '你的值'
 ```
 
-### List current settings
+此端点可互换接受 `PUT`、`PATCH` 和 `POST`。这三种方式都会在设置不存在时创建它，或在设置已存在时覆盖现有值。
 
-Use this call to retrieve a list of all current settings:
+### 列出现有设置
+
+使用此调用来检索所有当前设置的列表：
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin/settings' \
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
 ```
 
-### Retrieve a specific setting
+### 检索特定设置
 
-Use this call to retrieve the value of a specific setting:
+使用此调用来检索某个特定设置的值：
 
 ```bash
 curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin/settings/:key' \
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
 ```
 
-### Delete a setting
+### 删除设置
 
-Use this call to delete a setting:
+使用此调用来删除一个设置：
 
 ```bash
 curl --location --request DELETE 'https://YOUR_APP_ID.collab.tiptap.cloud/api/admin/settings/:key' \

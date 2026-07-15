@@ -1,0 +1,97 @@
+---
+title: 工具定义
+meta:
+  title: Tool definitions | Tiptap AI Toolkit
+  description: 完整的工具定义列表，可让 AI 代理读取、编辑和浏览文档内容。
+  category: AI Toolkit
+---
+
+Tiptap AI 工具包提供了一套全面的工具，用于与 Tiptap 文档交互。这些工具支持读取内容、进行编辑以及高效地浏览大型文档。
+
+这些工具定义以流行 AI 提供商库的格式提供：
+
+- [AI SDK by Vercel](/ai/ai-toolkit/client/agents/tools/ai-sdk)
+- [LangChain.js](/ai/ai-toolkit/client/agents/tools/langchain-js)
+- [OpenAI](/ai/ai-toolkit/client/agents/tools/openai)
+- [Anthropic](/ai/ai-toolkit/client/agents/tools/anthropic)
+- [Mastra](/ai/ai-toolkit/client/agents/tools/mastra)
+- [Other providers](/ai/ai-toolkit/client/agents/tools/other-providers)
+
+当你将这些工具定义添加到 AI 提供商库中时，你的 AI 代理将生成工具调用。然后你可以使用 [`executeTool` 方法](/ai/ai-toolkit/client/api-reference/execute-tool) 来执行这些工具调用。
+
+```ts
+// 从头开始读取文档
+await agent.executeTool({
+  toolName: 'tiptapRead',
+  // 传入 AI 生成的工具输入
+  input: { from: 0 },
+})
+```
+
+## `tiptapRead`
+
+从指定位置读取文档内容。
+
+### 参数
+
+- `from`（`number`）：读取起始位置。
+
+### 返回结果
+
+从指定位置起的文档内容。我们为客户提供了有关该工具格式的更详细信息。
+
+## `tiptapEdit`
+
+在指定位置编辑文档。
+
+### 参数
+
+- `operations`（`array`）：要对文档执行的一系列操作。我们为客户提供了有关该工具格式的更详细信息。
+
+### 返回结果
+
+编辑操作的成功或错误消息。
+
+## `tiptapReadSelection`
+
+读取文档中的选区。
+
+### 参数
+
+无参数。
+
+### 返回结果
+
+选区的内容和位置。我们为客户提供了有关该工具格式的更详细信息。
+
+## `getThreads`
+
+检索文档中的所有讨论串和评论。该工具提供文档中现有讨论和反馈的全面信息。
+
+### 参数
+
+- `from`（`number`）：读取讨论串的起始索引。
+
+### 返回结果
+
+文档中所有讨论串和评论的数据，包括它们的内容和位置。
+
+### 需求
+
+该工具需要编辑器中配置 Comments 扩展及 CommentsProvider。此工具默认关闭，需要显式启用。
+
+## `editThreads`
+
+对文档中的讨论串和评论执行操作。该工具支持创建、更新和删除讨论串及评论，实现全面的管理功能。
+
+### 参数
+
+- `operations`（`array`）：要执行的操作数组。
+
+### 返回结果
+
+如果操作成功，返回成功消息；否则返回错误消息。
+
+### 需求
+
+该工具需要编辑器中配置 Comments 扩展及 CommentsProvider。此工具默认关闭，需要显式启用。

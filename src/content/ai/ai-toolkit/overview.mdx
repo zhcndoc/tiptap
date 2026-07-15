@@ -1,0 +1,102 @@
+---
+title: 构建 AI 驱动的文档
+tags:
+  - type: addon
+  - type: beta
+meta:
+  title: Tiptap AI 工具包
+  description: 构建可实时读取和编辑 Tiptap 文档的 AI 代理。
+  category: AI 工具包
+---
+
+import { ArrowRightIcon } from 'lucide-react'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { Callout } from '@/components/ui/Callout'
+import { Link } from '@/components/Link'
+import { CodeDemo } from '@/components/CodeDemo'
+
+<Requirements>
+  <RequirementItem label="1. 获取访问权限">
+    通过购买付费的 AI Toolkit 附加组件来访问 AI Toolkit。{' '}
+    <a href="https://tiptap.dev/contact-sales?form=ai-toolkit">联系我们的团队</a>。
+  </RequirementItem>
+  <RequirementItem label="2. 安装该包">
+    AI Toolkit 包是开源的。可使用 npm 或你偏好的包管理器，从公共 npm 仓库进行安装。
+  </RequirementItem>
+  <RequirementItem label="3. 进行服务认证">
+    配置一个 <a href="/ai/ai-toolkit/install#set-up-authorization">Tiptap Access Control JWT</a>{' '}
+    以访问 AI Toolkit 服务。
+  </RequirementItem>
+</Requirements>
+
+<EnterpriseCalloutAuto variant="server-ai-toolkit" renderMode="sidebar" />
+
+Tiptap 的 **AI Toolkit** 使你的 AI 代理能够以内联方式处理 Tiptap 文档。它包含你传递给代理的工具，用于
+读取和编辑 Tiptap 文档，即使没有基于浏览器的编辑器也可以。
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-ai-agent-chatbot"
+/>
+
+### 使用你自己的 AI 模型和基础设施
+
+AI Toolkit 与框架无关。它可与 Vercel AI SDK、LangChain、OpenAI SDK、Anthropic SDK 或你自己的实现一起工作。
+
+### 以高效为设计目标
+
+AI Toolkit 会适配对成本敏感的使用场景。可用的工具，如 `tiptapEdit` 和 `proofread`，使用一种高效格式，使 AI 能够快速应用编辑并保持较低的 token 消耗。
+
+[Tiptap Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand)（alpha）是一种用于编码 Tiptap 文档的 token 高效格式。它在不牺牲准确性的前提下，可将 AI token 成本降低最多 80%。
+
+### 灵活的部署选项
+
+AI Toolkit 可作为云服务使用，部署在你基础设施的本地环境中，或[嵌入到你的客户端代码库中](/ai/ai-toolkit/client)。
+
+
+{/*
+### Explore use cases
+
+Explore technical implementations for AI-powered editing. Build AI agents with document-editing capabilities like chatbots, inline edits, and proofreading, or add simple AI commands like autocompletion, translation, and summarization.
+
+<Link
+  href="/ai/use-cases"
+  className="font-semibold text-blue-600 hover:text-blue-700 inline-flex items-center gap-1.5"
+>
+  <ArrowRightIcon className="size-3.5" />
+  View use cases
+</Link>
+*/}
+
+<EnterpriseCalloutAuto variant="server-ai-toolkit" renderMode="inline" />
+
+{/* <div className="grid md:grid-cols-2 gap-6 mt-6 md:items-start">
+Learn more and start implementing with these guides:
+
+  <Link
+    href="/ai/ai-toolkit/install"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">Installation guide</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">More →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">Set up AI Toolkit in your app</div>
+  </Link>
+  <Link
+    href="/ai/ai-toolkit/agents/ai-agent-chatbot"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">AI Agent Chatbot</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">More →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      Build a conversational AI capable of editing documents and interacting through chat.
+    </div>
+  </Link>
+</div>
+*/}

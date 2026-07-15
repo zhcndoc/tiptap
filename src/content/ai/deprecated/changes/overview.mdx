@@ -1,0 +1,53 @@
+---
+title: 跟踪和审查 AI 生成的更改
+meta:
+  title: AI 更改 | Tiptap 内容 AI
+  description: 在您的 Tiptap 编辑器中跟踪、审查并接受或拒绝 AI 生成的内容修改，视觉化高亮显示更改。
+  category: 内容 AI
+tags:
+  - type: beta
+  - type: deprecated
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<Callout title="已弃用" variant="warning">
+  该扩展正在逐步被 AI Toolkit 取代，后者提供增强功能和现代化的 API。虽然您仍然可以继续使用此扩展，但建议探索 AI Toolkit 以进行新的实现。
+</Callout>
+
+<EnterpriseCalloutAuto variant="deprecated" renderMode="sidebar" />
+
+AI 更改扩展使您能够跟踪、审查和管理编辑器中 AI 所做的内容修改。它清晰地突出显示更改，方便查看新增或删除的内容。
+
+将其与 [基础 AI 生成扩展](/ai/basic/overview) 结合使用，以创建内容并为您的用户提供无缝的审阅工作流。
+
+<CodeDemo
+  isPro
+  path="/Extensions/AiChanges"
+  src="https://feature-beta-ai-extensions--tiptap-pro.netlify.app/preview/Extensions/AiChanges"
+/>
+
+## AI 变更 功能
+
+- 与我们的 [基础 AI 生成扩展](/ai/basic/text-generation) 和 [AI Agent 扩展](/examples/experiments/ai-agent) 无缝集成
+- 支持富文本格式，包括图片、链接和提及
+- 允许用户 [接受和拒绝单个变更](/ai/deprecated/changes/features/review-changes)，或对生成内容进行调整
+- 提供用于显示变更的 [完全可自定义 UI](/ai/deprecated/changes/features/display-changes)
+
+<Callout title="何时使用 AI 变更？" variant="warning">
+  AI Changes 扩展会在变更**应用到文档后**显示这些变更。若要在变更应用之前预览
+  变更，请使用 [AI
+  建议](/ai/deprecated/suggestion/overview) 扩展。请参阅 [diff
+  视图](/ai/deprecated/suggestion/features/diff-view) 指南。
+</Callout>
+
+## 工作原理
+
+AI 更改扩展可适配您的特定文本编辑工作流程。四个简单步骤即可集成：
+
+1. [安装](/ai/deprecated/changes/install) 和 [配置](/ai/deprecated/changes/configure) 扩展
+2. 编辑编辑器的内容（例如，插入 AI 生成的文本）
+3. 在编辑器中[显示更改](/ai/deprecated/changes/features/display-changes)
+4. [审查更改](/ai/deprecated/changes/features/review-changes) 由 AI 进行的更改

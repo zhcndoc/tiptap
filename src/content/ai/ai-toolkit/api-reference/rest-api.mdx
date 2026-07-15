@@ -1,0 +1,538 @@
+---
+title: REST API
+meta:
+  title: REST API | Tiptap Server AI Toolkit
+  description: Server AI 工具包 REST API 端点的完整参考。
+  category: AI 工具包
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+Server AI Toolkit REST API 包含用于获取可用工具和执行工具调用的端点
+
+<Callout title="旧版端点" variant="info">
+  V4 是 Server AI Toolkit 端点当前使用的 API 版本。V3 端点已弃用；新项目请使用
+  v4。v4 还将工具定义端点重命名为 `/v4/ai/toolkit/fetch-tools`；
+  诸如 `/v3/ai/toolkit/tools` 之类的旧名称属于 v3 API。有关旧版
+  端点，请参阅 [v3 REST API
+  参考](/ai/ai-toolkit/api-reference/rest-api-v3)。
+</Callout>
+
+## 如何提供文档
+
+Tiptap Cloud 的基础 URL 为：
+
+```sh
+BASE_URL=https://api.tiptap.dev
+```
+
+在本地部署中，基础 URL 可能会有所不同。
+
+在下面的示例中，请求写作 `BASE_URL/v4/ai/toolkit/...`。
+
+## 身份验证
+
+所有请求都必须包含以下身份验证头：
+
+- `Authorization: Bearer JWT`，其中 `JWT` 是一个 Tiptap 访问控制 JWT。
+
+请使用以下设置在服务器端签名令牌：
+
+- Audience: `AI`
+- Permissions: `AI:Toolkit`
+
+要自动获取并保存 Tiptap Cloud 文档，请添加 `Documents` audience 和 `Documents:Write` permission。`Documents:Write` 包含读和评论访问权限。
+
+请参阅 [身份验证](/authentication) 了解如何创建密钥对并签名令牌，以及 [授权指南](/ai/ai-toolkit/install#set-up-authorization) 了解完整设置。
+
+```ts
+import { SignJWT, importPKCS8 } from 'jose'
+
+const privateKey = await importPKCS8(process.env.TIPTAP_PRIVATE_KEY, 'ES256')
+
+const JWT_TOKEN = await new SignJWT({
+  permissions: [
+    { action: 'AI:Toolkit', resource: '*' },
+    { action: 'Documents:Write', resource: 'your-document-id' },
+  ],
+})
+  .setProtectedHeader({ alg: 'ES256' })
+  .setIssuer(process.env.TIPTAP_ENVIRONMENT_ID)
+  .setAudience(['AI', 'Documents'])
+  .setExpirationTime('30m')
+  .sign(privateKey)
+```
+
+之前的 App ID + secret 身份验证流程记录在 [旧版身份验证](/authentication/legacy) 中。
+
+## 可选字段
+
+可选字段可以省略、`null` 或 `undefined`。
+
+## 终端点
+
+### 获取工具定义
+
+```txt
+POST /v4/ai/toolkit/fetch-tools
+```
+
+返回你传递给 AI 提供商的提示词和工具定义。
+
+请求体：
+
+- `editorContext` (`object`, required): 由 `getEditorContext` 返回的编辑器上下文。
+- `tools` (`Record<string, boolean | ToolConfig>`, optional, default: `{}`): 启用、禁用或
+  配置工具。工具默认处于禁用状态。
+- `format` (`'json' | 'shorthand'`, optional, default: `'json'`): 工具
+  定义和模型输出所使用的文档格式。参见 [Tiptap
+  Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand)。
+
+`tools` 可以包含以下键：
+
+- `tiptapRead` (`boolean`, optional)
+- `tiptapEdit` (`boolean | { meta?: string }`, optional): 当你希望 AI 在每次编辑操作中
+  包含一个额外的元数据字段时设置 `meta`，例如简短说明。
+- `getThreads` (`boolean`, optional)
+- `editThreads` (`boolean`, optional)
+- `readDocument` (`boolean`, optional)
+- `proofread` (`boolean | { meta?: string }`, optional): 当你希望 AI 在每次校对编辑中
+  包含一个额外的元数据字段时设置 `meta`，例如简短说明。
+
+响应：
+
+- `systemPrompt` (`string`): 将其添加到你 AI 请求的 system prompt 中。它会教会 AI
+  Tiptap 文档如何工作、编辑器支持哪些元素，以及应使用哪种文档格式。
+- `tools` (`array`): AI 或开发者可以调用的工具定义。每个数组元素包含：
+  - `name` (`string`): 工具名称。
+  - `description` (`string`): 工具描述。
+  - `inputSchema` (`object`): AI 生成的工具输入的 JSON schema。
+
+示例：
+
+```curl
+curl --location 'BASE_URL/v4/ai/toolkit/fetch-tools' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_JWT' \
+  --data '{
+    "editorContext": { /* 编辑器上下文数据 */ },
+    "tools": {
+      "tiptapRead": true,
+      "tiptapEdit": {
+        "meta": "简要解释此次编辑。"
+      }
+    },
+    "format": "shorthand"
+  }'
+```
+
+#### 错误响应
+
+HTTP 错误会返回：
+
+- `error` (`object`): 一个包含以下属性的对象：
+  - `message` (`string`): 人类可读的错误消息。
+  - `status` (`number`): HTTP 状态码。
+  - `code` (`string`): 稳定的错误代码。
+  - `data` (`object`, optional): 已清理的结构化上下文。
+
+此端点可能返回：
+
+- `401` with `access_control_auth_required` or `missing_token`: 请求未包含
+  Tiptap Access Control JWT。
+- `401` with an access-control code such as `token_expired` or `signature_invalid`: JWT
+  被 Access Control 拒绝。
+- `403` with `feature_not_available`: 当前环境未启用 Server AI Toolkit。
+- `403` with `insufficient_permissions`: JWT 未授予 `AI:Toolkit`。
+- `403` with `origin_not_allowed`: 请求的 `Origin` 不允许用于当前环境。
+- `422` with `validation_failed`: 请求体与端点 schema 不匹配。响应中
+  包含 `error.issues`，即验证问题列表。
+- `429` with `rate_limited`: Access Control 速率限制了身份验证。
+- `429`: 服务端速率限制器阻止了该请求。此响应使用不同的顶层
+  结构：
+  - `error` (`string`): 速率限制错误消息。
+  - `retryAfter` (`number`, optional): 重试前等待的秒数。
+  - `limit` (`number`, optional): 当前窗口的请求限制。
+  - `window` (`number`, optional): 速率限制窗口，单位为秒。
+- `500` with `internal_server_error`: 发生了意外的服务器错误。
+- `500` with `missing_cloud_api_token`: 云服务缺少内部身份验证
+  配置。
+- `503` with `service_unavailable`: Access Control 暂时不可用。
+
+### 执行工具
+
+```txt
+POST /v4/ai/toolkit/execute-tool
+```
+
+执行一个工具。在 AI 模型生成工具调用后使用此端点。
+
+请求体：
+
+- `editorContext` (`object`, required): `getEditorContext` 返回的编辑器上下文。
+- `document` (`object`, required): 要对其执行工具的文档。API 需要从 Tiptap Cloud 文档读取并写入时，使用
+  `{ "type": "cloud", "id": "your-document-id" }`。当你想在请求体中提供
+  Tiptap JSON 文档时，使用 `{ "type": "inline", "content": { /* Tiptap JSON 文档 */ } }`。
+- `user` (`string`, optional): 归因于 AI 执行编辑的标识符。
+- `field` (`string`, optional, default: `"default"`): 要在云文档中定位的协作字段。文档存储多个可编辑字段时使用此项，例如标题和正文。
+- `tool` (`object`, required): 要执行的工具调用。
+  - `name` (`string`, required): 工具名称，例如 `"tiptapRead"`。
+  - `input` (`object`, required): AI 生成的工具输入。这是一个与该工具的 schema 和工具定义相匹配的对象。每个工具的 schema 和工具定义可从
+    `/v4/ai/toolkit/fetch-tools` 端点获取。
+  - `config` (`unknown`, optional): 开发者提供的工具特定配置。
+- `format` (`'json' | 'shorthand'`, optional, default: `'json'`): 工具输入和输出的文档格式。参见 [Tiptap Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand)。
+- `reviewOptions` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`): 控制编辑是直接应用还是作为可审阅更改应用。
+
+响应：
+
+- `tool` (`object`): 已执行的工具及其输出。
+  - `name` (`string`): 工具名称。
+  - `output` (`object`): 提供给 AI 的工具输出。
+- `docChanged` (`boolean`): 文档是否发生了变化。
+- `document` (`object | null`): 更新后的文档；如果文档未更改则为 `null`。
+
+示例：
+
+```curl
+curl --location 'BASE_URL/v4/ai/toolkit/execute-tool' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_JWT' \
+  --data '{
+    "editorContext": { /* 编辑器上下文数据 */ },
+    "document": {
+      "type": "cloud",
+      "id": "your-document-id"
+    },
+    "user": "ai-assistant",
+    "tool": {
+      "name": "tiptapRead",
+      "input": {
+        "from": 0
+      }
+    },
+    "format": "shorthand"
+  }'
+```
+
+#### 错误响应
+
+HTTP 错误返回：
+
+- `error` (`object`): 包含以下属性的对象：
+  - `message` (`string`): 人类可读的错误消息。
+  - `status` (`number`): HTTP 状态码。
+  - `code` (`string`): 稳定的错误代码。
+  - `data` (`object`, optional): 已清理的结构化上下文。文档和线程上游
+    失败包括诸如 `operation`、`upstreamStatus`、`upstreamUrl` 和
+    `upstreamMethod` 之类的字段。
+
+此端点可能返回：
+
+- `400` with `missing_document_credentials`: 请求使用了云文档，但 JWT 不包含文档服务器凭证。
+- `400` with `missing_document_options`: `getThreads` 或 `editThreads` 是针对一个
+  线内文档执行的。这些工具需要云文档。
+- `400` with a thread-store code such as `thread_not_found` or `comment_not_found`: 线程或
+  评论操作引用了不存在的数据。
+- `401` with `access_control_auth_required` or `missing_token`: 请求未包含
+  Tiptap 访问控制 JWT。
+- `401` with an access-control code such as `token_expired` or `signature_invalid`: JWT
+  被访问控制拒绝。
+- `403` with `feature_not_available`: 当前环境未启用 Server AI Toolkit。
+- `403` with `insufficient_permissions`: JWT 未授予 `AI:Toolkit`，或者未授予
+  对请求中的云文档的访问权限。
+- `403` with `origin_not_allowed`: 请求的 `Origin` 不允许用于该环境。
+- `403` with `unsupported_tool_format`: 所选工具不支持请求的 `format`。
+- `403` with `tracked_changes_unsupported_schema`: `reviewOptions.mode` 为 `trackedChanges`，但
+  编辑器 schema 不支持跟踪更改。
+- `403` with `thread_schema_not_supported`: 编辑器 schema 不支持评论或线程。
+- `409` with `concurrent_edit_conflict`: 云文档在工具执行时发生了更改。
+  使用最新的文档状态重试请求。
+- `422` with `validation_failed`: 请求体与端点 schema 不匹配。响应
+  包含 `error.issues`，即验证问题列表。
+- `429` with `rate_limited`: 访问控制限流了身份验证。
+- `429`: 服务器端限流器阻止了该请求。此响应使用不同的顶层
+  结构：
+  - `error` (`string`): 限流错误消息。
+  - `retryAfter` (`number`, optional): 重试前等待的秒数。
+  - `limit` (`number`, optional): 当前窗口的请求限制。
+  - `window` (`number`, optional): 限流窗口，单位为秒。
+- `500` with `document_save_failed`: 服务器在加载云文档后无法保存它，
+  或者在文档加载之前调用了保存流程。
+- `500` with `diff_worker_failed` or `diff_worker_invalid_result`: 在准备可审阅更改时，
+  内部 diff worker 失败。
+- `500` with `internal_server_error` or `unknown_error`: 发生了意外的服务器错误。
+- `500` with `missing_cloud_api_token`: 云服务缺少内部身份验证
+  配置。
+- `502` with `document_load_failed` or `document_save_failed`: 加载或保存云文档
+  时上游失败。检查 `error.data.upstreamStatus` 以获取上游 HTTP 状态。
+- `502` with a thread or comment code such as `thread_list_failed`, `thread_create_failed`,
+  `thread_update_failed`, `thread_delete_failed`, `thread_resolve_failed`,
+  `thread_unresolve_failed`, `comment_create_failed`, `comment_update_failed`, or
+  `comment_delete_failed`: 评论 API 操作在上游失败。
+- `503` with `diff_worker_queue_timeout`: diff worker 队列已饱和或超时。
+- `503` with `service_unavailable`: 访问控制暂时不可用。
+
+### 流式执行工具
+
+<Callout title="Alpha feature" variant="hint">
+  流式传输目前处于 alpha 阶段
+</Callout>
+
+```txt
+POST /v4/ai/toolkit/stream-tool
+```
+
+以流式方式执行工具。`tiptapEdit` 可以逐步应用编辑，以实现打字效果。其他工具会在接收到完整输入后
+运行，并返回一个最终事件，就像 `execute-tool` 一样。
+
+请求分批发送。第一部分包含：
+
+- `editorContext` (`object`, required): 由 `getEditorContext` 返回的编辑器上下文。
+- `document` (`object`, required): 要将编辑流式写入的云文档：
+  `{ "type": "cloud", "id": "your-document-id" }`。内联文档不支持
+  流式传输。
+- `user` (`string`, optional): 归因于 AI 执行编辑的标识符。
+- `field` (`string`, optional, default: `"default"`): 要在云文档中定位的协作字段。
+- `tool` (`object`, required): 要执行的工具调用，不包含 `tool.input`。
+  - `name` (`string`, required): 工具名称，例如 `"tiptapEdit"`。
+  - `config` (`unknown`, optional): 开发者提供的工具特定配置。
+- `format` (`'json' | 'shorthand'`, optional, default: `'json'`): 工具输入和
+  输出的文档格式。参见 [Tiptap Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand)。
+- `reviewOptions` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`): 控制编辑是直接应用还是作为可审阅更改。
+- `delayMs` (`number`, optional, default: `5`): `tiptapEdit` 增量输出中每个字符的延迟，单位为毫秒。必须介于 `0` 和 `1000` 之间。使用 `0` 可尽可能快地应用编辑。
+
+然后发送：
+
+- 后续部分：`tool.input` 的值，在 AI 生成时以流式方式发送。
+
+响应：
+
+- `tiptapEdit`：在编辑被应用时返回增量事件，随后返回一个包含
+  更新后 `document` 的最终事件。
+- 其他工具：返回一个最终事件，结果结构与 `execute-tool` 相同。
+
+#### 错误响应
+
+在流式传输开始之前，HTTP 错误使用与 `execute-tool` 相同的 JSON 结构：
+
+- `error` (`object`): 一个包含以下属性的对象：
+  - `message` (`string`): 人类可读的错误消息。
+  - `status` (`number`): HTTP 状态码。
+  - `code` (`string`): 稳定的错误代码。
+  - `data` (`object`, optional): 已清理的结构化上下文。
+
+在流式传输开始之后，错误会以 NDJSON 事件形式发送：
+
+- `version` (`number`): 流协议版本。
+- `type` (`'error'`): 事件类型。
+- `code` (`string`): 稳定的错误代码。
+- `status` (`number`): 类 HTTP 状态码。
+- `message` (`string`): 人类可读的错误消息。
+
+此端点可能返回或发出：
+
+- `400` with `invalid_request`: 请求没有正文。
+- `400` with `missing_document_credentials`: JWT 不包含文档服务器凭据。
+- `400` with `invalid_stream_message`: 流消息不是有效的 JSON，未通过 schema 验证，
+  使用了不支持的协议版本，或者流在 NDJSON 行未终止时结束。
+- `400` with `duplicate_start`: 发送了多个 `start` 消息。
+- `400` with `delta_before_start`: `delta` 消息在 `start` 之前到达。
+- `400` with `end_before_start`: `end` 消息在 `start` 之前到达。
+- `400` with `incomplete_stream`: 请求在 `end` 消息到达之前结束。
+- `400` with a thread-store code such as `thread_not_found` or `comment_not_found`: 缓冲的
+  线程或评论操作引用了不存在的数据。
+- `401` with `access_control_auth_required` or `missing_token`: 请求未包含
+  Tiptap Access Control JWT。
+- `401` with an access-control code such as `token_expired` or `signature_invalid`: JWT 被
+  Access Control 拒绝。
+- `403` with `feature_not_available`: 当前环境未启用 Server AI Toolkit。
+- `403` with `insufficient_permissions`: JWT 未授予 `AI:Toolkit`。
+- `403` with `origin_not_allowed`: 请求的 `Origin` 不被当前环境允许。
+- `403` with `tracked_changes_unsupported_schema`: `reviewOptions.mode` 为 `trackedChanges`，但
+  编辑器 schema 不支持跟踪更改。
+- `403` with `thread_schema_not_supported`: 编辑器 schema 不支持评论或线程。
+- `413` with `ndjson_line_too_long`: 单个 NDJSON 行超过了最大大小。
+- `429` with `stream_rate_limit_exceeded`: 同一客户端打开的并发流过多。
+- `429` with `rate_limited`: Access Control 认证被限流。
+- `429`: 服务器端限流器在流式传输开始前阻止了请求。此响应
+  使用不同的顶层结构：
+  - `error` (`string`): 限流错误消息。
+  - `retryAfter` (`number`, optional): 重试前等待的秒数。
+  - `limit` (`number`, optional): 当前窗口的请求上限。
+  - `window` (`number`, optional): 限流窗口，单位为秒。
+- `500` with `diff_worker_failed`, `diff_worker_invalid_result`, `stream_internal_error`, or
+  `unknown_error`: 流处理期间发生了意外的服务器错误。
+- `500` with `missing_cloud_api_token`: 云服务缺少内部身份验证
+  配置。
+- `502` with document, thread, or comment upstream failure codes such as `document_load_failed`,
+  `document_save_failed`, `thread_list_failed`, or `comment_create_failed`: 云文档或
+  评论 API 操作在上游失败。
+- `503` with `diff_worker_queue_timeout`: diff worker 队列已饱和或超时。
+- `503` with `service_unavailable`: Access Control 暂时不可用。
+- `504` with `stream_request_timeout`: 流超过了服务器请求超时时间。
+
+## 可用工具
+
+这些工具可供 AI 代理使用。代理决定调用哪个工具。
+
+所有工具默认都处于禁用状态。我们建议先使用 `tiptapRead` 和 `tiptapEdit`，然后
+根据需要启用其他工具。
+
+你也可以直接从应用程序代码中调用这些工具，以构建自定义工作流。
+
+### `tiptapRead`
+
+分块读取文档，以避免上下文窗口溢出。
+
+工具配置（`tool.config`）：
+
+- `chunkSize`（`number`，可选）：每次工具调用中读取的最大字符数。默认值：`32000`
+
+工具输出（`tool.output`）：
+
+成功响应：
+
+- `success`（`true`）：表示读取请求成功。
+- `totalNodeCount`（`number`）：文档中顶层节点的总数。
+- `nodeRange`（`[number, number]`）：读取的顶层节点范围。
+- `content`（`JSONContent[] | string`）：所返回范围内的文档内容。当 `format` 为
+  `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand`
+  时，这是一个 Tiptap Shorthand 字符串。
+
+错误响应：
+
+- `success`（`false`）：表示读取请求失败。
+- `error`（`string`）：错误信息。
+- `totalNodeCount?`（`number`）：顶层节点总数。
+
+### `tiptapEdit`
+
+编辑文档内容。
+
+工具配置（`tool.config`）：
+
+- `threadData`（`object`，可选）：添加到新建线程的元数据。
+- `commentData`（`object`，可选）：添加到新建评论的元数据。
+
+工具输出（`tool.output`）：
+
+成功或部分成功响应：
+
+- `success`（`boolean`）：所有操作是否都已成功完成。
+- `operationResults`（`array`）：每个操作的结果。
+  - `success`（`boolean`）：该操作是否已成功完成。
+  - `target`（`string`）：操作所针对元素的字符串标识符。
+  - `error`（`string | null`）：失败原因；如果操作成功则为 `null`。
+
+错误响应：
+
+- `success`（`false`）：表示编辑请求失败。
+- `reason`（`'validationError' | 'unexpectedError'`）：错误类别。
+- `error`（`string`）：错误信息。
+
+### `getThreads`
+
+从云文档中读取评论线程。
+
+工具配置（`tool.config`）：
+
+- `chunkSize`（`number`，可选）：每次工具调用中读取的最大字符数。默认值：`32000`
+
+工具输出（`tool.output`）：
+
+成功响应：
+
+- `success`（`true`）：表示读取请求成功。
+- `totalThreadCount`（`number`）：文档中的线程总数。
+- `threadRange`（`[number, number]`）：读取的线程范围，格式为 `[from, to)`。
+- `threads`（`array`）：返回的线程对象。
+  - `id`（`string`）：唯一线程标识符。
+  - `nodeRange`（`[number, number] | null`）：线程所在的节点范围；如果线程未在文档中标注，则为 `null`。
+  - `content`（`JSONContent[] | string | null`）：线程标记的内容。当 `format` 为
+    `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 时，这是一个 Tiptap Shorthand
+    字符串。`null` 表示线程未在文档中标注。
+  - `comments`（`array`）：线程中的评论。
+    - `id`（`string`）：唯一评论标识符。
+    - `content`（`string`）：评论文本。
+    - `userId`（`string`）：创建该评论的用户 ID。
+    - `createdAt`（`string`）：评论创建时的 ISO 时间戳。
+    - `updatedAt`（`string`）：评论最后更新时间的 ISO 时间戳。
+  - `resolvedAt?`（`string | null`）：线程被解决时的 ISO 时间戳；如果未解决，则为 `null`。
+  - `createdAt`（`string`）：线程创建时的 ISO 时间戳。
+  - `updatedAt`（`string`）：线程最后更新时间的 ISO 时间戳。
+  - `data?`（`Record<string, unknown>`）：公开线程元数据。
+
+错误响应：
+
+- `success`（`false`）：表示读取请求失败。
+- `error`（`string`）：错误信息。
+- `totalThreadCount?`（`number`）：已持久化线程的总数（如已知）。
+
+### `editThreads`
+
+创建和更新评论线程。
+
+工具配置（`tool.config`）：
+
+- `threadData`（`object`，可选）：添加到新建线程的元数据。
+- `commentData`（`object`，可选）：添加到新建评论的元数据。
+
+工具输出（`tool.output`）：
+
+成功或部分成功响应：
+
+- `success`（`boolean`）：表示所有操作是否都已成功完成。
+- `operations`（`array`）：每个操作的结果。
+  - `type`（`string`）：已执行的操作类型。
+  - `success`（`boolean`）：该操作是否已成功完成。
+  - `message`（`string`）：人类可读的操作结果。
+  - `threadId?`（`string`）：用于创建或引用线程的操作对应的线程 ID。
+
+错误响应：
+
+- `success`（`false`）：表示请求在处理操作之前就已失败。
+- `error`（`string`）：错误信息。
+
+### `readDocument`
+
+读取整个文档。
+
+<Callout title="可能会溢出上下文窗口" variant="warning">
+  `readDocument` 会返回完整文档。对于大型文档，请改用 `tiptapRead`。
+</Callout>
+
+工具配置（`tool.config`）：
+
+`null`
+
+工具输出（`tool.output`）：
+
+成功响应：
+
+- `success`（`true`）：表示文档读取成功。
+- `content`（`JSONContent[] | string`）：整个有效文档内容。当 `format` 为 `json` 时，
+  这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 时，这是一个 Tiptap Shorthand 字符串。
+
+### `proofread`
+
+应用校对编辑。
+
+工具配置（`tool.config`）：
+
+- `threadData`（`object`，可选）：添加到新建线程的元数据。
+- `commentData`（`object`，可选）：添加到新建评论的元数据。
+
+工具输出（`tool.output`）：
+
+成功或部分成功响应：
+
+- `success`（`boolean`）：表示所有操作是否都已成功完成。
+- `operationResults`（`array`）：每个操作的结果。
+  - `target`（`string`）：操作所针对元素的字符串标识符。
+  - `success`（`boolean`）：该操作是否已成功完成。
+  - `error`（`string | null`）：失败原因；如果操作成功则为 `null`。
+
+## 相关页面
+
+- [审核选项](/ai/ai-toolkit/api-reference/review-options)
+- [编辑器上下文](/ai/ai-toolkit/api-reference/editor-context)

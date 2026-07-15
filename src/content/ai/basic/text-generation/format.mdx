@@ -1,0 +1,40 @@
+---
+title: 富文本 AI 响应
+tags:
+  - type: start
+meta:
+  title: 格式 | Tiptap 基础 AI 生成文档
+  description: 让 AI 能在您的 Tiptap 编辑器中自动将生成的内容格式化为富文本、列表等更多样式。了解如何在我们的文档中实现！
+  category: 基础 AI 生成
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+
+<Requirements>
+    <RequirementItem label="1. 激活试用或订阅">
+        在你的账户中开始一个[免费试用](https://cloud.tiptap.dev/v2?trial=true)或[订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
+    </RequirementItem>
+    <RequirementItem label="2. 集成 AI 提供商">
+        在你的[AI 设置](https://cloud.tiptap.dev/v2/cloud/ai)中配置 OpenAI，或查看[自定义 LLM 指南](/ai/basic/custom-llms)。
+    </RequirementItem>
+    <RequirementItem label="3. 从私有注册表安装">
+        若要安装前端扩展，按照 <a href="/guides/pro-extensions" target="_blank">设置指南</a>，对 Tiptap 私有 npm 注册表进行认证。
+    </RequirementItem>
+</Requirements>
+
+<CodeDemo isPro path="/Extensions/AiFormattedResponse" />
+
+通过 `format: 'rich-text'` 选项，你可以生成带有内容格式的 AI 响应。这在你需要生成包含加粗、斜体、链接等富文本格式的内容时特别有用。
+
+```ts
+// 将响应以富文本格式流式传输到编辑器
+editor
+  .chain()
+  .aiTextPrompt({
+    text: '写一份流行编程语言列表',
+    stream: true,
+    format: 'rich-text',
+  })
+  .run()
+```

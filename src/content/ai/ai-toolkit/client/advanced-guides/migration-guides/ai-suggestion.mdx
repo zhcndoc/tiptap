@@ -1,0 +1,62 @@
+---
+title: 从 AI Suggestion 迁移到 AI Toolkit
+meta:
+  title: 从 AI Suggestion 迁移到 AI Toolkit | Tiptap AI Toolkit
+  description: 了解如何从 AI Suggestion 扩展迁移到 AI Toolkit。
+  category: AI Toolkit
+---
+
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="deprecated" renderMode="sidebar" />
+
+AI Suggestion 扩展允许您让 AI 审核文档并展示用户可以接受或拒绝的建议。
+
+您可以通过遵循 [Proofreader 指南](/ai/ai-toolkit/client/workflows/proofreader) 使用 AI Toolkit 实现相同的功能。
+
+## 审核文档
+
+在 [Proofreader guide](/ai/ai-toolkit/client/workflows/proofreader) 中，`proofreaderWorkflow` 方法用于显示一个建议列表，用户可以接受或拒绝这些建议，这些建议来自 AI 模型生成的 HTML 内容。
+
+建议查看 `proofreaderWorkflow` 方法的 [API reference](/ai/ai-toolkit/client/api-reference/workflows)，以了解更多关于其参数和自定义选项的信息。
+
+## 接受和拒绝建议
+
+要进一步了解建议如何存储和管理，请参阅 [Suggestions 指南](/ai/ai-toolkit/client/agents/review-changes)。
+
+特别地，使用 `applySuggestion` 方法来接受一个建议。
+
+## 自定义建议的外观
+
+可以使用 AI Toolkit 的选项完全自定义建议的外观。请参阅 [样式建议指南](/ai/ai-toolkit/client/agents/review-changes/style-suggestions)。
+
+你也可以使用 `renderDecorations` 选项在建议中 [渲染 React 和 Vue 组件](/ai/ai-toolkit/client/agents/review-changes/style-suggestions#render-react-components-inside-a-suggestion)。[请参阅 API 参考](/ai/ai-toolkit/client/api-reference/suggestions)。此选项可以配置为在选中建议时渲染弹出框或工具提示。
+
+## 提升速度与性能
+
+AI Toolkit 的 suggestions 实用工具比 AI Suggestion 扩展程序快得多，因为它允许你流式传输建议（有关示例，请参见 [校对指南](/ai/ai-toolkit/client/workflows/proofreader)）。这相较于 AI Suggestion 扩展程序是一个重大改进；在该扩展中，建议会一次性全部加载，当建议数量很多时可能会导致性能问题。
+
+AI Toolkit 还提供了将文档拆分成多个块的方法，每个块可以单独发送到 AI 并独立处理。对块进行并行处理可以显著提升响应速度。
+
+```ts
+import { proofreaderApi } from './api'
+
+// 获取 AI Toolkit
+const toolkit = getAiToolkit(editor)
+
+// 将文档拆分成默认大小的块
+const chunks = toolkit.getHtmlChunks()
+
+// 遍历每个块
+for (const chunk of chunks) {
+  // 读取该块内容
+  const { content } = toolkit.tiptapRead({ range: chunk.range })
+  // 调用 AI 生成应应用于该块的更改
+  const operations = await proofreaderApi({ content })
+  // 使用 `proofreaderWorkflow` 方法仅在该块的范围内设置建议
+  toolkit.proofreaderWorkflow({
+    range: chunk.range,
+    operations,
+  })
+}
+```

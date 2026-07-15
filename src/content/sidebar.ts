@@ -57,7 +57,7 @@ export const sidebarConfig: SidebarConfig = {
           title: '修订记录',
         },
         {
-          href: '/content-ai/getting-started/overview',
+          href: '/ai/ai-toolkit/overview',
           title: '内容 AI',
         },
         {

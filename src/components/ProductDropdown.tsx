@@ -11,7 +11,7 @@ import { cn } from '@/utils'
 const options = [
   { label: '编辑器', href: '/editor/getting-started/overview' },
   { label: '协作', href: '/collaboration/getting-started/overview' },
-  { label: '内容 AI', href: '/content-ai/getting-started/overview' },
+  { label: '内容 AI', href: '/ai/ai-toolkit/overview' },
   { label: '评论', href: '/comments/getting-started/overview' },
   { label: '修订记录', href: '/tracked-changes/getting-started/overview' },
   { label: '快照', href: '/collaboration/documents/snapshot' },

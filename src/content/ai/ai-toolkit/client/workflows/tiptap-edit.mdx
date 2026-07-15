@@ -1,0 +1,267 @@
+---
+title: Tiptap 编辑工作流
+meta:
+  title: Tiptap 编辑工作流 | Tiptap AI 工具包
+  description: 使用 Tiptap AI 工具包构建一个使用 AI 生成内容编辑文档的工作流。
+  category: AI 工具包
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+构建一个工作流，让 AI 以精准、高效的操作编辑你的 Tiptap 文档。
+
+<CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/tiptap-edit-workflow" />
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 技术栈
+
+- [React](https://react.dev/) + [Next.js](https://nextjs.org/)
+- [Vercel AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
+- Tiptap AI 工具包
+
+## 项目概览
+
+本演示使用 AI 工具包中的 Tiptap 编辑工作流，实时对文档应用编辑操作。该工作流支持替换节点、在节点前插入以及在节点后插入。
+
+## 安装
+
+创建一个 [Next.js](https://nextjs.org/) 项目：
+
+```bash
+npx create-next-app@latest tiptap-edit-workflow
+```
+
+安装核心 Tiptap 包和用于 OpenAI 的 [Vercel AI SDK](https://ai-sdk.dev/)：
+
+```bash
+npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/react @ai-sdk/openai zod uuid
+```
+
+安装 Tiptap AI 工具包：
+
+<Callout title="Pro 软件包" variant="hint">
+  AI 工具包是一个专业版软件包。安装前，请按照 [私有注册表指南](/guides/pro-extensions) 配置对私有 NPM 注册表的访问权限。
+</Callout>
+
+```bash
+npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
+```
+
+## 服务器设置
+
+创建一个 API 端点，使用 [Vercel AI SDK](https://ai-sdk.dev/) 调用 OpenAI 模型。如果你的后端不是 TypeScript，请参阅 [非 TypeScript 后端指南](/content-ai/capabilities/ai-toolkit/advanced-guides/non-typescript-backends)。
+
+如果你的后端使用的编程语言不是 TypeScript，请参阅 [本指南](/ai/ai-toolkit/client/advanced-guides/non-typescript-backends)。
+
+此外，用户消息中需包含以下两个属性：
+
+- `content`: 要编辑的文档内容（从 `tiptapRead` 获取）
+- `task`: 由 AI 执行的任务，例如 “使文本更正式”。
+- `context`: （可选）与任务相关的额外上下文或背景信息。
+
+当 AI 模型生成响应时，API 端点会将操作流式传输给客户端。
+
+```ts
+// app/api/tiptap-edit-workflow/route.ts
+import { openai } from '@ai-sdk/openai'
+import { createTiptapEditWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { Output, streamText } from 'ai'
+
+export async function POST(req: Request) {
+  const { content, task, context } = await req.json()
+
+  // 创建并配置 Tiptap 编辑工作流（默认设置）。
+  // 包含可直接使用的系统提示和输出模式。
+  const workflow = createTiptapEditWorkflow()
+
+  const result = streamText({
+    model: openai('gpt-5.4-mini'),
+    // 系统提示
+    system: workflow.systemPrompt,
+    // 用户消息
+    prompt: JSON.stringify({
+      content,
+      task,
+      context,
+    }),
+    output: Output.object({ schema: workflow.zodOutputSchema }),
+  })
+
+  return result.toTextStreamResponse()
+}
+```
+
+## 客户端设置
+
+创建一个 React 组件，渲染编辑器并实时应用编辑。
+
+首先，启动编辑过程时，调用 AI 工具包的 `tiptapRead` 方法读取文档。该方法返回针对快速、精准编辑优化的内容格式。
+
+接着，调用 API 端点启动工作流。组件通过 Vercel AI SDK 的 `useObject` hook 处理流式响应，逐步接收结果并实时应用编辑。
+
+每当响应内容更新时，调用 AI 工具包的 `tiptapEditWorkflow` 方法，将编辑实时应用到文档中。编辑随接收立即生效。
+
+```tsx
+// app/tiptap-edit-workflow/page.tsx
+'use client'
+
+import { experimental_useObject as useObject } from '@ai-sdk/react'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import {
+  AiToolkit,
+  type TiptapReadResult,
+  getAiToolkit,
+  tiptapEditWorkflowOutputSchema,
+} from '@tiptap-pro/client-ai-toolkit'
+import { useEffect, useRef, useState } from 'react'
+import { v4 as uuid } from 'uuid'
+
+export default function Page() {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit, AiToolkit],
+    content: `<h1>文档编辑器</h1><p>这是一个可由 AI 编辑的示例文档。</p>`,
+  })
+
+  const [workflowId, setWorkflowId] = useState('')
+  const tiptapReadResultRef = useRef<TiptapReadResult | null>(null)
+  const [task, setTask] = useState('使文本更正式、更专业')
+
+  const { submit, isLoading, object } = useObject({
+    api: '/api/tiptap-edit-workflow',
+    schema: tiptapEditWorkflowOutputSchema,
+  })
+
+  const operations = object?.operations ?? []
+
+  // 随着分段结果到达实时流式处理
+  useEffect(() => {
+    if (!editor || !operations) return
+
+    const toolkit = getAiToolkit(editor)
+    if (!tiptapReadResultRef.current) return
+
+    toolkit.tiptapEditWorkflow({
+      operations,
+      workflowId,
+      hasFinished: !isLoading,
+      tiptapReadResult: tiptapReadResultRef.current,
+    })
+  }, [operations, workflowId, editor, isLoading])
+
+  if (!editor) return null
+
+  const editDocument = () => {
+    const toolkit = getAiToolkit(editor)
+
+    // 获取要编辑的文档内容
+    const readResult = toolkit.tiptapRead()
+    tiptapReadResultRef.current = readResult
+
+    // 每个工作流必须有唯一 ID
+    setWorkflowId(uuid())
+
+    // 调用 API 端点启动工作流
+    submit({ content: readResult.content, task })
+  }
+
+  return (
+    <div>
+      <EditorContent editor={editor} />
+
+      <input
+        type="text"
+        value={task}
+        onChange={(e) => setTask(e.target.value)}
+        placeholder="输入编辑任务..."
+      />
+
+      <button onClick={editDocument} disabled={isLoading}>
+        {isLoading ? '正在编辑...' : '编辑文档'}
+      </button>
+    </div>
+  )
+}
+```
+
+## 最终效果
+
+结合额外的 CSS 样式，结果是一个实时 AI 编辑的精致文档编辑应用：
+
+<CodeDemo path="" isScrollable src="https://ai-toolkit-demos.vercel.app/tiptap-edit-workflow" />
+
+查看 [GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 显示 AI 光标
+
+你可以添加 `AiCaret` 扩展来显示一个光标，指示 AI 正在编辑文档的位置。这为用户提供了流式编辑时的实时视觉反馈。
+
+```tsx
+import { AiCaret, AiToolkit, getAiToolkit } from '@tiptap-pro/client-ai-toolkit'
+
+const editor = useEditor({
+  extensions: [StarterKit, AiToolkit, AiCaret],
+})
+```
+
+查看 [AI 光标指南](/ai/ai-toolkit/client/advanced-guides/ai-caret) 以了解配置选项和 CSS 样式。
+
+## 编辑文档的部分内容
+
+要仅编辑文档的一个子部分，请设置 `range` 选项。此参数接受一个包含要编辑区域的 [Range](/ai/ai-toolkit/client/advanced-guides/concepts#range)。
+
+例如，要仅编辑选中的内容：
+
+```ts
+const range = editor.state.selection
+
+// 仅读取文档中选中的部分
+const { content } = toolkit.tiptapRead({ range })
+
+const operations = callApi(content)
+
+// 在相同范围内应用操作
+toolkit.tiptapEditWorkflow({
+  operations,
+})
+```
+
+对于大型文档，您可以使用 [`tiptapReadChunks`](/ai/ai-toolkit/client/api-reference/read-the-document#tiptapreadchunks) 方法将文档拆分为多个块并并行处理。每个块都包含一个 [Range](/ai/ai-toolkit/client/advanced-guides/concepts#range)，表示该块的区域。
+
+## 显示复审界面
+
+在审阅界面中显示更改，以便用户接受或拒绝它们。
+
+有两种方法：
+
+- 使用 [**Tracked Changes**](/tracked-changes/getting-started/overview) 扩展来渲染审阅界面。更改会作为文档的一部分保留，并对其他用户可见。
+- **AI Toolkit suggestions**：一种基于装饰的界面，具有临时性，仅对当前文档用户可见。
+
+通过设置 `reviewOptions` 参数来配置审阅界面。更改将以建议的形式显示，用户可以接受或拒绝。
+
+```tsx
+await toolkit.tiptapEditWorkflow({
+  // ... 其他选项
+
+  // 使用 Tracked Changes 显示审阅界面
+  reviewOptions: { mode: 'trackedChanges' },
+
+  // 使用 AI Toolkit suggestions 显示审阅界面
+  reviewOptions: { mode: 'review' },
+})
+```
+
+查看 [review changes](/ai/ai-toolkit/client/agents/review-changes) 指南以了解更多关于审阅界面的信息。
+
+查看 [AI Toolkit demos](https://github.com/ueberdosis/ai-toolkit-demos)，获取在审阅界面中使用 AI Toolkit 工作流的示例。
+
+## 相关指南
+
+- [`tiptapRead` 方法的 API 参考](/ai/ai-toolkit/client/api-reference/read-the-document#tiptapread)
+- [`tiptapReadChunks` 方法的 API 参考](/ai/ai-toolkit/client/api-reference/read-the-document#tiptapreadchunks)
+- [`tiptapEditWorkflow` 方法的 API 参考](/ai/ai-toolkit/client/api-reference/workflows#tiptapeditworkflow)
+- [建议](/ai/ai-toolkit/client/agents/review-changes)：了解如何审阅文档并在编辑器中显示建议。
+- [AI 光标](/ai/ai-toolkit/client/advanced-guides/ai-caret)：在 AI 插入内容的位置显示光标。

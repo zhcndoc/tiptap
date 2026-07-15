@@ -1,0 +1,123 @@
+---
+title: 自定义节点
+meta:
+  title: 自定义节点 | Tiptap AI Toolkit
+  description: 为 Server AI Toolkit 配置自定义节点和标记，以便 AI 模型能够正确生成它们。
+  category: AI Toolkit
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+<Callout title="来自 AI agent 聊天机器人指南的后续内容" variant="info">
+  本指南是 [AI agent 聊天机器人指南](/ai/ai-toolkit/agents/ai-agent-chatbot) 的后续内容。请先阅读该指南。
+</Callout>
+
+如果您的文档包含自定义节点或标记，请配置编辑器上下文，以便 Server AI
+Toolkit 能够向您的 AI 模型正确描述它们。
+
+<Callout title="为什么要配置自定义节点？" variant="default">
+  如果没有编辑器上下文，AI 模型可能会生成您的编辑器不支持的内容，或者
+  完全遗漏自定义元素。添加自定义节点元数据可为模型提供足够的上下文，
+  从而可靠地生成这些元素。
+</Callout>
+
+## 获取编辑器上下文数据
+
+首先从您的编辑器生成编辑器上下文数据。Server AI Toolkit 使用这些数据向
+AI 模型描述您的文档结构。
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { getEditorContext, ServerAiToolkit } from '@tiptap/ai-toolkit'
+
+const editor = new Editor({
+  extensions: [StarterKit, ServerAiToolkit],
+})
+
+// 检索编辑器上下文数据
+const editorContext = getEditorContext(editor)
+```
+
+<Callout title="存储编辑器上下文数据" variant="info">
+  `getEditorContext` 返回的编辑器上下文数据是一个可进行 JSON 序列化的对象，您可以
+  将其存储在数据库中。您无需每次都生成它。请在编辑器
+  扩展或模式发生变化时更新它。
+</Callout>
+
+## 配置自定义节点
+
+如果您的文档包含 [自定义节点和标记](/editor/extensions/custom-extensions)，请在扩展配置中添加 `addJsonSchemaAwareness` 选项。这使得 AI 模型能够准确地理解并生成该自定义节点或标记。
+
+例如，如果您有一个名为 `'alert'` 的自定义节点，请按如下方式配置：
+
+```ts
+import { Node } from '@tiptap/core'
+import { z } from 'zod'
+
+const CustomExtension = Node.create({
+  name: 'alert',
+
+  addAttributes() {
+    return {
+      type: {
+        default: 'info',
+        parseHTML: (element) => element.getAttribute('data-type'),
+        renderHTML: (attributes) => {
+          if (!attributes.type) {
+            return {}
+          }
+
+          return {
+            'data-type': attributes.type,
+          }
+        },
+      },
+    }
+  },
+
+  addJsonSchemaAwareness() {
+    return {
+      name: '警告框',
+      description: `用于显示重要信息、警告或提示的高亮框。
+它可以包含行内内容，如文本和格式标记。`,
+      attributes: {
+        type: z
+          .enum(['info', 'warning', 'error', 'success'])
+          .describe(
+            '警告类型。可为以下 4 种值之一：info、warning、error 或 success',
+          ),
+      },
+    }
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'div[data-alert]',
+      },
+    ]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['div', { ...HTMLAttributes, 'data-alert': '' }, 0]
+  },
+})
+```
+
+`addJsonSchemaAwareness` 函数应返回一个对象，包含：
+
+- `name`（`string`）：元素的人类可读英文名称
+- `description?`（`string`）：供 AI 模型使用的元素英文说明
+- `attributes?`（`Record<string, z.ZodTypeAny>`）：元素可能拥有的属性，定义为 Zod 模式，将被转换成 JSON 模式
+
+<Callout title="官方 Tiptap 扩展呢？" variant="info">
+  官方 Tiptap 扩展的编辑器上下文已由 Server AI Toolkit 自动支持。
+  它们无需配置。您仍然可以通过扩展该扩展并添加 `addJsonSchemaAwareness`
+  选项来覆盖官方 Tiptap 扩展的默认编辑器上下文信息。
+</Callout>
+
+## 后续步骤
+
+- [编辑器上下文 API 参考](/ai/ai-toolkit/api-reference/editor-context)
+- [REST API 参考](/ai/ai-toolkit/api-reference/rest-api)

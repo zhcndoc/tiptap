@@ -1,0 +1,158 @@
+---
+title: 入门 Anthropic Claude Messages API
+meta:
+  title: 入门 Anthropic Claude Messages API | Tiptap 内容 AI
+  description: 学习如何使用 AI Agent 扩展与 Anthropic Claude Messages API。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+[Anthropic Claude Messages API](https://docs.anthropic.com/) 允许你使用 Anthropic 的模型构建 AI 代理。
+
+<Callout title="代码演示可用" variant="info">
+  本指南包含一个代码演示，帮助你快速入门。见 [GitHub
+  仓库](https://github.com/ueberdosis/ai-agent-custom-llm-demos)。
+</Callout>
+
+## 客户端设置
+
+首先，安装 AI Agent 扩展。
+
+```bash
+npm install @tiptap-pro/extension-ai-agent
+```
+
+然后，导入扩展并使用 `AiAgentProvider` 类进行配置。
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import AiAgent, { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider()
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    AiAgent.configure({
+      provider,
+    }),
+  ],
+})
+```
+
+在 AI Agent 提供者内部，定义一个调用你后端的 `resolver` 函数。
+
+```tsx
+import AiAgent, { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider({
+  // `chatMessages` 属性包含对话的聊天消息
+  resolver: async ({ chatMessages, schemaAwarenessData }) => {
+    // 调用你的后端 API 端点
+    const response = await fetch('/api-endpoint', {
+      method: 'POST',
+      body: JSON.stringify({ chatMessages, schemaAwarenessData }),
+    })
+    return await response.json()
+  },
+})
+```
+
+在下一节中，我们将看到如何实现返回正确格式响应的 API 端点。
+
+## 服务器端设置
+
+首先，安装 AI Agent 和 Anthropic 服务器库。
+
+```bash
+npm install @tiptap-pro/extension-ai-agent-server @anthropic-ai/sdk
+```
+
+从请求参数中获取聊天消息和模式感知数据。
+
+```ts
+// 你的 API 端点中的代码。代码依赖于你的后端框架
+const { chatMessages, schemaAwarenessData } = request
+```
+
+然后，在你的 API 端点中，创建一个 `AiAgentToolkit` 实例。它允许你配置 AI 模型可用的工具。
+
+```ts
+import { AiAgentToolkit, anthropicMessagesAdapter } from '@tiptap-pro/extension-ai-agent-server'
+
+const toolkit = new AiAgentToolkit({
+  adapter: anthropicMessagesAdapter,
+  schemaAwarenessData,
+})
+```
+
+还要定义一个 `ChatMessagesFormatter` 实例。它让你将聊天消息转换成 Anthropic Claude Messages API 期望的格式。
+
+```ts
+import {
+  AiAgentToolkit,
+  anthropicMessagesAdapter,
+  ChatMessagesFormatter,
+} from '@tiptap-pro/extension-ai-agent-server'
+
+const formatter = new ChatMessagesFormatter({
+  initialMessages: chatMessages,
+  adapter: anthropicMessagesAdapter,
+})
+```
+
+创建工具包和格式化器后，向 Anthropic Claude Messages API 发送请求。
+
+```ts
+import {
+  AiAgentToolkit,
+  anthropicMessagesAdapter,
+  ChatMessagesFormatter,
+} from '@tiptap-pro/extension-ai-agent-server'
+import Anthropic from '@anthropic-ai/sdk'
+
+const { chatMessages, schemaAwarenessData } = request
+
+const toolkit = new AiAgentToolkit({
+  adapter: anthropicMessagesAdapter,
+  schemaAwarenessData,
+})
+
+const formatter = new ChatMessagesFormatter({
+  // 从请求体获取聊天消息
+  initialMessages: chatMessages,
+  adapter: anthropicMessagesAdapter,
+})
+
+// 初始化 Anthropic 客户端
+const anthropic = new Anthropic()
+
+// 调用 Anthropic Claude Messages API
+const response = await anthropic.messages.create({
+  model: 'claude-sonnet-4-0',
+  max_tokens: 2048,
+  system: `
+<你的系统提示>
+${toolkit.getSystemPrompt()}
+`,
+  messages: formatter.format(),
+  // 提供 AI 模型可以调用的工具
+  tools: toolkit.format(),
+})
+```
+
+在系统提示的末尾，包含由 `AiAgentToolkit` 实例生成的系统提示，如：`toolkit.getSystemPrompt()`。它包含关于如何使用工具的指令。
+
+To write the system prompt, see the [system prompt guide](/ai/deprecated/agent/configure/system-prompt). It includes an example system prompt that you can use as a starting point.
+
+最后，使用 `formatter` 将响应转换为 AI Agent 扩展期望的格式。
+
+```ts
+formatter.addAiResponse(response)
+
+const response = formatter.getResolverResponse()
+```
+
+从 `formatter.getResolverResponse()` 返回的值应作为你的 API 端点响应和 resolver 函数的返回值。

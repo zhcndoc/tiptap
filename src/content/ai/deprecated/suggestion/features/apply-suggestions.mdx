@@ -1,0 +1,85 @@
+---
+title: 将建议应用到编辑器内容
+meta:
+  title: 应用建议 | Tiptap AI 建议
+  description: 了解如何在 Tiptap 编辑器中应用、拒绝和高亮 AI 建议。更多内容请查阅文档！
+  category: 内容 AI
+---
+
+AI Suggestion 扩展提供命令，将建议应用到编辑器内容。这些命令允许你接受或拒绝建议，并将其应用到编辑器内容中。
+
+## 应用单个建议
+
+要将建议应用到编辑器内容中，使用 `applyAiSuggestion` 命令。
+
+一个建议可以有多个替换选项。要应用特定的替换选项，请提供 `replacementOptionId` 属性。如果你不提供该属性，默认应用第一个替换选项。
+
+注意：如果你使用 Tiptap Content AI Cloud API 生成建议，每个建议只有一个替换选项。但如果你使用自己的后端和大型语言模型（LLM），可以提供多个替换选项。
+
+你可以通过提供 `format` 属性来自定义替换文本的格式。默认格式是“plain-text”（纯文本）。如果你想让替换文本格式为富文本，请使用“rich-text”格式。当建议修改了样式，比如加粗或斜体格式时，这会很有用。
+
+```ts
+editor.commands.applyAiSuggestion({
+  suggestionId: '1',
+  replacementOptionId: '1',
+  format: 'plain-text',
+})
+```
+
+## Apply All Suggestions
+
+To apply all suggestions at once, use the `applyAllAiSuggestions` command.
+
+```ts
+editor.commands.applyAllAiSuggestions()
+```
+
+This will apply the first replacement option of each suggestion to the editor content.
+
+If some suggestions overlap, the AI Suggestion extension will automatically resolve conflicts and ignore overlapping suggestions applied later. This usually isn’t a problem, because suggestions are reloaded after each change, and the AI Suggestion extension generates new suggestions based on the updated content.
+
+## 拒绝建议
+
+你可以使用 `rejectAiSuggestion` 命令拒绝建议。
+
+```ts
+editor.commands.rejectAiSuggestion('suggestionId')
+```
+
+当你拒绝一个建议后，它将不再显示在编辑器中。不过，它仍然保存在扩展的存储对象中，你可以通过调用 `storage.getSuggestions()` 来获取它。你可以通过读取 `isRejected` 属性来检查某个建议是否被拒绝。
+
+你也可以通过调用 `storage.getRejections()` 访问被拒绝建议的列表。
+
+## 应用建议后高亮替换文本
+
+要高亮或添加任意标记到被建议替换的文本，你可以将 `applyAiSuggestion` 命令与设置标记到建议范围的命令链式调用。
+
+```ts
+editor
+  .chain()
+  // 应用建议
+  .applyAiSuggestion({
+    suggestionId: suggestion.id,
+    replacementOptionId: option.id,
+  })
+  // 选择被修改的文本
+  .command(({ tr, commands }) => {
+    // 需要映射被修改文本的位置，因为应用建议后它们可能已发生变化
+    return commands.setTextSelection({
+      from: tr.mapping.map(suggestion.deleteRange.from),
+      to: tr.mapping.map(suggestion.deleteRange.to),
+    })
+  })
+  // 对被修改文本应用样式。例如，加粗样式
+  .setBold()
+  // 将光标设置到被修改文本的末尾
+  .command(({ tr, commands }) => {
+    return commands.setTextSelection(tr.mapping.map(suggestion.deleteRange.to))
+  })
+  .focus()
+  .run()
+```
+
+## 与协作功能一起使用
+
+在将 AI Suggestion 与 Tiptap Collaboration 一起使用时，建议内容对每个用户都是私有的。这使得可以根据用户偏好或上下文显示不同的建议。一旦被接受，建议就会对所有已连接的用户可见（[了解更多](/ai/deprecated/resources/collaboration)）。

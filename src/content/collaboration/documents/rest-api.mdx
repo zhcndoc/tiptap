@@ -32,13 +32,13 @@ REST API 直接从您的文档服务器以自定义 URL 公开：
 https://YOUR_APP_ID.collab.tiptap.cloud/
 ```
 
-将 `YOUR_APP_ID` 替换为您的文档服务器 ID，该 ID 在 [Cloud 控制台](https://cloud.tiptap.dev/v2/configuration/document-server) 中标示为"Document server ID"。
+将 `YOUR_APP_ID` 替换为您的文档服务器 ID，该 ID 在 [Cloud 控制台](https://cloud.tiptap.dev/v2/configuration/document-server) 中标示为“Document server ID”。
 
 ### 身份验证
 
 使用携带 `Documents:Api:All` 权限的签名 token 对您的 API 请求进行身份验证，并通过 `Authorization: Bearer <jwt>` 发送。有关如何签名 token，请参阅 [身份验证](/authentication)。
 
-<Callout title="Keep this token server-side" variant="warning">
+<Callout title="将此 token 保留在服务端" variant="warning">
   `Documents:Api:All` 可访问每个 Document Server API 端点，包括受管理的设置。请将携带该权限的 token 视为管理员凭证。请在您的服务器上签名，保持其短期有效，并且绝不要暴露给客户端。
 </Callout>
 
@@ -51,18 +51,27 @@ https://YOUR_APP_ID.collab.tiptap.cloud/
 
 访问协作管理 API 以高效管理您的文档。有关 Tiptap 产品中所有端点的全面视图，请查看我们的 [Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-cc186a66-df41-4df8-9c6e-e91b20deffe5)，其中包括详细示例和配置。
 
-| 操作                | 方法       | 端点                                         | 描述                                                                           |
-| ------------------ | ---------- | -------------------------------------------- | ------------------------------------------------------------------------------ |
-| 创建文档           | POST       | `/api/documents/:identifier`                 | 使用 `yjs` 或 `json` 更新消息创建文档。                                        |
-| 批量导入文档       | PUT        | `/api/admin/batch-import`                    | 批量导入多个文档。                                                            |
-| 获取文档           | GET        | `/api/documents/:identifier`                 | 以 `json` 或 `yjs` 格式导出文档。                                             |
-| 列出文档           | GET        | `/api/documents`                             | 检索带有分页选项的所有文档列表。                                              |
-| 复制文档           | POST + GET | `/api/documents/:identifier` (GET 然后 POST) | 通过检索文档然后使用新标识符创建文档来复制文档。                             |
-| 加密文档           | POST       | `/api/documents/:identifier/encrypt`         | 使用 Base64 加密文档。                                                       |
-| 回退到版本         | POST       | `/api/documents/:identifier/versions`        | 回退文档到指定版本。                                                          |
-| 更新文档           | PATCH      | `/api/documents/:identifier`                 | 将 Yjs 更新消息应用于现有文档。                                              |
-| 删除文档           | DELETE     | `/api/documents/:identifier`                 | 从服务器中删除文档。                                                          |
-| 搜索文档           | POST       | `/api/search`                                | 对所有文档执行搜索。                                                          |
+| 操作          | 方法     | 端点                                     | 描述                                                                                  |
+| ------------------ | ---------- | -------------------------------------------- |----------------------------------------------------------------------------------------------|
+| 创建文档    | POST       | `/api/documents/:identifier`                 | 使用 `yjs` 或 `json` 更新消息创建文档。                                    |
+| 批量导入文档 | PUT    | `/api/admin/batch-import`                    | 批量导入多个文档。                                                           |
+| 获取文档       | GET        | `/api/documents/:identifier`                 | 以 `json` 或 `yjs` 格式获取文档。                                                    |
+| 列出文档     | GET        | `/api/documents`                             | 使用分页选项检索所有文档列表。                                    |
+| 复制文档 | POST + GET | `/api/documents/:identifier` (GET then POST) | 通过先检索文档再使用新标识符创建它来复制文档。            |
+| 加密文档   | POST       | `/api/documents/:identifier/encrypt`         | 使用 Base64 加密文档。                                                             |
+| 列出版本 | GET        | `/api/documents/:identifier/versions`        | 获取文档的所有版本。                                                              |
+| 获取版本        | GET        | `/api/documents/:identifier/versions/:versionId` | 获取特定版本。                                                                  |
+| 创建版本     | POST       | `/api/documents/:identifier/versions`        | 创建带有可选名称和元数据的新版本。                                        |
+| 更新版本     | PATCH      | `/api/documents/:identifier/versions/:versionId` | 更新版本的名称或元数据。                                                     |
+| 回退到版本  | POST       | `/api/documents/:identifier/versions/:versionId/revertTo` | 将文档回退到较早版本。                                        |
+| 更新文档    | PATCH      | `/api/documents/:identifier`                 | 将 Yjs 更新消息应用到现有文档。                                          |
+| 更新文档（PUT 别名） | PUT | `/api/documents/:identifier`                | `PATCH` 端点的别名——以相同的行为应用 Yjs 更新消息。    |
+| 检查文档是否存在 | HEAD    | `/api/documents/:identifier`                 | 检查文档是否存在（无响应正文）。                                          |
+| 删除文档    | DELETE     | `/api/documents/:identifier`                 | 从服务器删除文档。                                                           |
+| 删除版本     | DELETE     | `/api/documents/:identifier/versions/:versionId` | 删除文档的特定版本。                                                 |
+| 导出文档    | GET        | `/api/documents/:identifier/export`          | 将文档及其所有版本导出为 `.zip` 存档。                                  |
+| 导入文档    | POST       | `/api/documents/:identifier/import`          | 从导出的 `.zip` 存档中导入文档（及其版本）。                        |
+| 发送无状态消息 | POST   | `/api/documents/:identifier/stateless`       | 向文档的所有已连接客户端广播一条无状态消息。                        |
 
 同时查看 [指标和统计端点](/collaboration/operations/metrics)!
 
@@ -318,6 +327,22 @@ PATCH /api/documents/:identifier/versions/:versionId
 
 有关请求体参数和示例，请参阅 [Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/folder/33042171-a6e8aa7e-c077-46ee-a2a3-241f8efd5d25?action=share&creator=33042171&active-environment=33042171-378cfb31-9c16-40f0-95b8-b9f0d3c7d2ab)。
 
+### 删除一个版本
+
+```bash
+DELETE /api/documents/:identifier/versions/:versionId
+```
+
+此调用会删除文档的单个版本。`:versionId` 是列表/获取版本端点返回的版本编号。
+
+如果版本删除成功，该端点返回 HTTP 状态 `204`；如果未找到文档或版本，则返回 `404`。
+
+```bash
+curl --location --request DELETE 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME/versions/VERSION_ID' \
+--header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
+```
+
+
 ## 更新文档
 
 ```bash
@@ -326,7 +351,9 @@ PATCH /api/documents/:identifier
 
 此调用接受一个 Yjs 更新消息并将其应用于服务器上现有文档。
 
-如果文档成功更新，该端点返回 HTTP 状态 `204`，如果文档不存在，则返回 `404`，如果有效负载无效或无法应用更新，则返回 `422`。
+同一端点也可通过 `PUT /api/documents/:identifier` 访问，其行为与 `PATCH` 完全相同（请求体和查询参数相同）。
+
+如果文档更新成功，该端点返回 HTTP 状态 `204`；如果文档不存在，则返回 `404`；如果负载无效或无法应用更新，则返回 `422`。
 
 ```bash
 curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \
@@ -357,36 +384,72 @@ curl --location --request DELETE 'https://YOUR_APP_ID.collab.tiptap.cloud/api/do
   如果端点返回 `204` 但文档仍然存在，请确保没有用户正在从提供者重新创建文档。在删除文档之前，我们会关闭所有连接，但您的错误处理可能会重新创建提供者，从而再次创建文档。
 </Callout>
 
-## 搜索文档
+## 检查文档是否存在
 
 ```bash
-POST /api/search
+HEAD /api/documents/:identifier
 ```
 
-当 [Tiptap 语义搜索](/collaboration/documents/semantic-search) 启用时，您可以在所有文档中执行上下文相关的搜索。
+此调用会检查具有给定标识符的文档是否存在，而不会传输其内容。响应没有正文。
 
-<Callout title="保持您的 API 密钥秘密" variant="hint">
-  请在后端处理搜索请求以保持您的 API 密钥安全。考虑根据需要在您的应用程序中强制执行速率限制。
-</Callout>
-
-### 查询参数
-
-您可以使用以下查询参数来调整搜索结果：
-
-| 查询参数        | 类型   | 默认    | 描述                                                                   |
-| --------------- | ------ | ------- | ---------------------------------------------------------------------- |
-| `threshold`     | float  | `0.5`   | 描述文档的相似性因子。值可以在 `0` 和 `1` 之间。                       |
-| `limit`         | int    | `20`    | 限制结果数。值可以在 `1` 和 `100` 之间。                               |
-
-### 请求体参数
-
-| 请求体参数     | 类型    | 默认    | 描述         |
-| --------------- | ------- | ------- | ------------- |
-| `content`       | string  | -       | 您的搜索词。 |
+如果文档存在，则返回 HTTP 状态 `200`；如果不存在，则返回 `404`。存在性与文档的启用/停用状态无关。
 
 ```bash
-curl -X POST https://YOUR_APP_ID.collab.tiptap.cloud/api/search \
-  -H "Authorization: YOUR_SECRET_FROM_SETTINGS_AREA" \
-  -H "Content-Type: application/json" \
-  -d '{"content": "your search term"}'
+curl --location --head 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME' \
+--header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA'
 ```
+
+## 导出和导入文档
+
+使用这些端点可以在服务器之间移动文档（连同其所有版本），或者创建可移植备份。与[复制文档](#duplicate-a-document)不同，导出存档会保留文档的版本历史。
+
+### 导出文档
+
+```bash
+GET /api/documents/:identifier/export
+```
+
+此调用会将当前文档及其所有版本导出为一个 `.zip` 存档（`Content-Type: application/zip`）。之后可以使用导入端点再次导入该存档。
+
+它会返回 HTTP 状态 `200`，响应体为该存档；如果文档不存在，则返回 `404`。
+
+```bash
+curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME/export' \
+--header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA' \
+--output export.zip
+```
+
+### 导入文档
+
+```bash
+POST /api/documents/:identifier/import
+```
+
+此调用会从先前通过导出端点创建的存档中导入一个文档（及其版本）。请将存档作为原始请求体发送——服务器会读取原始字节，不需要特定的 `Content-Type` 头。目标 `:identifier` 不能已存在。
+
+验证失败的请求会在导入开始前被正常的 HTTP 状态码拒绝：如果目标标识符的文档已存在则返回 `409`，如果存档超过允许的最大请求体大小则返回 `413`，如果存档格式错误则返回 `400`。
+
+一旦导入开始，端点会返回 HTTP 状态 `200`（`Content-Type: application/x-ndjson`），并在工作过程中流式传输以换行分隔的 JSON（NDJSON）进度事件。流的结尾会以一个 `done` 事件结束，其 `status` 字段报告最终结果：成功时为 `201`，或者如果在导入运行期间创建了冲突文档，则为 `409`。如果导入中途失败，流会以带有状态 `422` 的 `error` 事件结束。
+
+```bash
+curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME/import' \
+--header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA' \
+--header 'Content-Type: application/zip' \
+--data-binary '@export.zip'
+```
+
+## 发送无状态消息
+
+```bash
+POST /api/documents/:identifier/stateless
+```
+
+此调用会向当前连接到该文档的所有客户端广播一个自定义负载。客户端会将其作为[无状态消息](/collaboration/provider/events)接收，你可以通过 provider 的 `onStateless` 回调或监听 `stateless` 事件来处理它。
+
+请求体会原样作为无状态负载发送。该端点在消息广播完成后返回 HTTP 状态 `204`。
+
+```bash
+curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME/stateless' \
+--header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA' \
+--header 'Content-Type: application/json' \
+--data '{ "type": "ping", "payload": "hello" }'

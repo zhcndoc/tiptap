@@ -22,7 +22,7 @@ const options = [
         label: '修订记录',
         href: '/tracked-changes/getting-started/overview',
       },
-      { label: '内容 AI', href: '/content-ai/getting-started/overview' },
+      { label: '内容 AI', href: '/ai/ai-toolkit/overview' },
       { label: '快照', href: '/collaboration/documents/snapshot' },
       { label: '转换', href: '/conversion/getting-started/overview' },
       { label: '页面', href: '/pages/getting-started/overview' },

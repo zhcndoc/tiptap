@@ -1,0 +1,145 @@
+---
+title: 执行工具（AI 代理）
+meta:
+  title: 执行工具（AI 代理） | Tiptap AI 工具包
+  description: 使用 AI 工具包将 AI 代理的工具调用应用到 Tiptap 编辑器。
+  category: AI 工具包
+---
+
+使用 `executeTool` 将 AI 代理的工具调用应用到编辑器。
+
+一旦你向 AI 代理添加了 [工具定义](/ai/ai-toolkit/client/agents/tools)，AI 代理就会生成工具调用。使用 `executeTool` 方法将这些工具调用应用到编辑器。
+
+## `executeTool`
+
+通过名称和输入执行支持的工具。
+
+### 参数
+
+- `toolName` (`string`): 要执行的工具。可以是[可用工具](/ai/ai-toolkit/client/agents/tools)之一。
+- `input` (`unknown`): 与工具参数输入模式匹配的 JSON 对象。如果此工具不需要参数，请传入空对象（`{}`）。
+- `chunkSize?` (`number`): 可作为输入传递给 AI 模型的字符串最大长度。可防止 AI 一次读取过多内容，从而避免超出 AI 模型的上下文窗口。默认值：`32000`。此参数由读取工具用于控制文档如何拆分为多个块。
+- `reviewOptions?` ([`ReviewOptions`](/ai/ai-toolkit/client/api-reference/review-options)): 控制预览/审阅行为。[查看可用选项](/ai/ai-toolkit/client/api-reference/review-options)。
+- `commentsOptions?` (`CommentsOptions`): 用于评论和线程操作的选项。这允许向评论和线程创建/更新操作传递自定义数据。`data` 属性用于线程数据，而 `commentData` 用于评论数据。
+  - `threadData?` (`Record<string, any>`): 为使用 `editThreads` 工具创建的 AI 生成线程提供额外元数据
+  - `commentData?` (`Record<string, any>`): 为使用 `editThreads` 工具创建的 AI 生成评论提供额外元数据
+- `tiptapEditHooks?` (`TiptapEditHooks`): 用于拦截和修改 Tiptap Edit 操作的钩子。详情请参见 [Tiptap Edit 钩子指南](/ai/ai-toolkit/client/advanced-guides/tiptap-edit-hooks)。
+  - `beforeOperation?` (`(context: BeforeOperationContext) => BeforeOperationResult`): 在应用每个操作之前调用。返回 `{ action: 'accept' }` 以应用该操作（可选地带有 `fragment` 或 `operationType` 覆盖），或返回 `{ action: 'reject', error }` 以跳过它。
+
+### 返回值 (`ExecuteToolResult`)
+
+- `output` (`string`): 工具执行的响应消息，供 AI 代理读取。
+- `hasError` (`boolean`): 执行期间是否发生错误
+- `unknownTool` (`boolean`): `toolName` 是否未被 AI 工具包识别
+- `docChanged` (`boolean`): 工具调用是否修改了文档。
+
+### 示例
+
+```ts
+// 处理 tiptapRead 工具调用
+const result = toolkit.executeTool({
+  toolName: 'tiptapRead',
+  input: {
+    from: 0,
+  },
+})
+```
+
+如需完整的实战教程，请参见 [AI 代理聊天机器人指南](/ai/ai-toolkit/client/agents/ai-agent-chatbot)。
+
+## `streamTool`
+
+实时更新文档，工具调用流式传输时生效。
+
+此方法的效果等同于调用 `executeTool`，但它在工具调用流传输时逐步编辑文档，而不是等待流完成后一次性编辑文档。
+
+### 参数
+
+- `toolCallId` (`unknown`): 工具调用的 id
+- `toolName` (`string`): 要执行的工具。可以是 [可用工具](/ai/ai-toolkit/client/agents/tools) 之一。
+- `input` (`unknown`): 与工具参数输入模式匹配的 JSON 对象。如果该工具不需要参数，请传递空对象（`{}`）。如果工具尚未完成流式传输，此参数应为仅包含部分参数的部分对象，但仍然必须是有效的 JSON 对象。
+- `hasFinished?` (`boolean`): 工具是否已完成流式传输。默认值：`false`
+- `chunkSize?` (`number`): 可传递给 AI 模型的字符串最大大小。用于防止 AI 一次读取过多内容，从而避免超出 AI 模型的上下文窗口。默认值：`32000`。此参数用于读取工具，以控制文档如何分块。
+- `reviewOptions?` ([`ReviewOptions`](/ai/ai-toolkit/client/api-reference/review-options)): 控制预览/审查行为。[查看可用选项](/ai/ai-toolkit/client/api-reference/review-options)。
+- `commentsOptions?` (`CommentsOptions`): 用于评论和线程操作的选项。允许向评论和线程创建/更新操作传递自定义数据。`data` 属性用于线程数据，而 `commentData` 用于评论数据。
+  - `threadData?` (`Record<string, any>`): 通过 `editThreads` 工具创建的 AI 生成线程的额外元数据
+  - `commentData?` (`Record<string, any>`): 通过 `editThreads` 工具创建的 AI 生成评论的额外元数据
+- `tiptapEditHooks?` (`TiptapEditHooks`): 用于拦截和修改 Tiptap Edit 操作的钩子。详情请参见 [Tiptap Edit 钩子指南](/ai/ai-toolkit/client/advanced-guides/tiptap-edit-hooks)。
+  - `beforeOperation?` (`(context: BeforeOperationContext) => BeforeOperationResult`): 在应用每个操作之前调用。返回 `{ action: 'accept' }` 可应用该操作（可选地带有 `fragment` 或 `operationType` 覆盖），或返回 `{ action: 'reject', error }` 以跳过它。
+
+### 返回值 (`StreamToolResult`)
+
+- `output` (`string`): 工具执行的响应消息，供 AI 代理读取。
+- `hasError` (`boolean`): 执行期间是否发生错误
+- `unknownTool` (`boolean`): `toolName` 是否未被 AI 工具包识别
+- `docChanged` (`boolean`): 工具调用是否修改了文档。
+
+### 示例
+
+`streamTool` 方法在工具调用流式传输过程中被反复调用。当工具调用完成流式传输后，再次调用 `streamTool` 方法并设置 `hasFinished: true`，表示流式传输已结束。
+
+```ts
+// 在工具调用生成时进行流式传输。
+// 每次接收到新的流式内容时调用 `streamTool`
+const result = toolkit.streamTool({
+  // 工具仍在流式传输，尚未完成
+  hasFinished: false,
+  toolCallId: 'call_123',
+  toolName: 'tiptapEdit',
+  // 内容仍在流式传输，所以传递部分参数对象
+  input,
+})
+
+// 当工具调用完成时，再次调用并设置 hasFinished: true
+const finalResult = toolkit.streamTool({
+  // 工具流传输已完成
+  hasFinished: true,
+  toolCallId: 'call_123',
+  toolName: 'tiptapEdit',
+  // 流传输已完成，可以传递完整参数对象
+  input,
+})
+```
+
+有关流式传输的完整实战教程，请参见 [流式传输指南](/ai/ai-toolkit/client/agents/streaming)。
+
+## `getActiveSelection`
+
+返回 `activeSelection` 变量的值。
+
+活动选择是由 AI 工具包设置的范围。设置后，该范围将在诸如 `readSelection` 等操作中代替当前编辑器选择。该范围会通过事务自动映射，以在文档变化时保持位置准确。
+
+### 返回值
+
+- `Range | null`: 活动选择范围，具有 `from` 和 `to` 属性，或当无活动选择时返回 `null`。
+
+### 示例
+
+```ts
+const toolkit = getAiToolkit(editor)
+const activeSelection = toolkit.getActiveSelection()
+```
+
+## `setActiveSelection`
+
+Set the `activeSelection` variable. This variable is used when executing tool calls with the `executeTool` or `streamTool` methods to determine the selection range AI will use in operations such as `readSelection`, instead of the current editor selection.
+
+The active selection is the range AI should use in place of the current editor selection. This range will be automatically mapped through transactions to keep its position accurate as the document changes.
+
+### Parameters
+
+- `selection` (`Range | null`): The range to set, with `from` and `to` properties representing the start and end positions, or use `null` to clear the active selection.
+
+### Example
+
+```ts
+const toolkit = getAiToolkit(editor)
+// Set the active selection to the current selection
+toolkit.setActiveSelection(editor.state.selection)
+
+// Set the active selection to a specific range
+toolkit.setActiveSelection({ from: 10, to: 50 })
+
+// Clear the active selection
+toolkit.setActiveSelection(null)
+```

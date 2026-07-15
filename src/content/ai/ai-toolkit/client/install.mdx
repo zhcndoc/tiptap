@@ -1,0 +1,91 @@
+---
+title: 安装
+meta:
+  title: 安装 AI Toolkit | Tiptap AI Toolkit
+  description: AI Toolkit 扩展的安装指南。了解如何在您的 Tiptap 编辑器中安装、配置并开始使用 AI Toolkit。
+  category: AI Toolkit
+---
+
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import Link from '@/components/Link'
+import { Callout } from '@/components/ui/Callout'
+
+<Requirements>
+  <RequirementItem label="1. 获取访问权限">
+    通过购买付费的 AI 工具包附加组件获得 AI 工具包扩展的访问权限。{' '}
+    <a href="https://tiptap.dev/contact-sales?form=ai-toolkit">联系我们团队</a>。
+  </RequirementItem>
+  <RequirementItem label="2. 访问私有注册表">
+    AI 工具包扩展发布在 Tiptap 的私有 npm 注册表中。请按照[设置指南](/guides/pro-extensions)进行认证以访问 Tiptap 的私有 npm 注册表。
+  </RequirementItem>
+  <RequirementItem label="3. 安装扩展">
+    使用 npm 或你偏好的包管理器从私有注册表安装该扩展。
+  </RequirementItem>
+</Requirements>
+
+<EnterpriseCalloutAuto variant="ai-toolkit" renderMode="sidebar" />
+
+<a href="https://tiptap.dev/contact-sales?form=ai-toolkit">联系我们团队</a>购买付费的 AI 工具包附加组件。获得访问权限后，按照[私有注册表指南](/guides/pro-extensions)配置你的包管理器。
+
+然后，安装该包：
+
+```bash
+npm install @tiptap-pro/client-ai-toolkit
+```
+
+将扩展添加到你的编辑器，并访问其方法：
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { AiToolkit, getAiToolkit } from '@tiptap-pro/client-ai-toolkit'
+
+const editor = new Editor({
+  // 添加 AI 工具包扩展
+  extensions: [AiToolkit],
+})
+
+// 获取 AI 工具包实例
+const toolkit = getAiToolkit(editor)
+
+// 调用 AI 工具包方法
+toolkit.insertText('AI 生成的内容')
+```
+
+恭喜！你已成功设置 AI 工具包。现在你可以开始构建你的 AI 集成了。
+
+<Callout title="所需的 Tiptap 版本" variant="warning">
+  确保所有 `@tiptap/*` 包的版本为 `3.12.0` 或更高。
+</Callout>
+
+## 下一步
+
+选择一个指南开始：
+
+<div className="grid md:grid-cols-2 gap-6 mt-6 md:items-start">
+  <Link
+    href="/ai/ai-toolkit/client/agents/ai-agent-chatbot"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">AI 代理聊天机器人</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      构建能够编辑文档并通过聊天进行交互的对话式 AI。
+    </div>
+  </Link>
+  <Link
+    href="/ai/ai-toolkit/client/workflows"
+    className="flex flex-col p-4 border border-grayAlpha-200 rounded-lg hover:border-grayAlpha-300 transition-colors cursor-pointer no-underline"
+  >
+    <div className="flex items-center justify-between mb-2">
+      <h4 className="font-semibold text-black">工作流</h4>
+      <span className="text-sm text-blue-600 font-medium whitespace-nowrap ml-4">更多 →</span>
+    </div>
+    <div className="text-sm text-grayAlpha-700">
+      执行简单的文档编辑任务，如插入内容、校对等。
+    </div>
+  </Link>
+</div>

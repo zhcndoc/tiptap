@@ -1,0 +1,120 @@
+---
+title: AI 光标
+meta:
+  title: AI 光标 | Tiptap AI 工具包
+  description: 显示一个光标，用于在流式操作期间展示 AI 正在插入内容的位置。
+  category: AI 工具包
+---
+
+`AiCaret` 扩展会在 AI 当前插入内容的位置显示一个光标装饰。在流式操作期间，它提供实时的视觉反馈，类似于 [协作光标扩展](/editor/extensions/functionality/collaboration-caret)。
+
+## 用法
+
+从 `@tiptap-pro/client-ai-toolkit` 导入 `AiCaret` 扩展，并将其添加到编辑器扩展中。
+
+```tsx
+import { AiCaret, AiToolkit } from '@tiptap-pro/client-ai-toolkit'
+
+const editor = useEditor({
+  extensions: [StarterKit, AiToolkit, AiCaret],
+})
+```
+
+光标会在流式操作（如 `streamHtml`、`streamTool` 和 `tiptapEditWorkflow`）期间自动显示，流处理完成后光标消失。
+
+## Configuration
+
+You can configure the cursor timeout, user label, and rendering mode.
+
+```tsx
+AiCaret.configure({
+  // Time the cursor remains visible after the last update (milliseconds)
+  timeout: 2000,
+  // User information for the cursor label
+  user: {
+    name: 'AI',
+    color: '#a5b4fc',
+  },
+})
+```
+
+### Options
+
+| Option    | Type                                 | Default                            | Description                                               |
+| --------- | ------------------------------------ | ---------------------------------- | --------------------------------------------------------- |
+| `timeout` | `number`                             | `2000`                             | Time the cursor remains visible after the last update (milliseconds). |
+| `user`    | `{ name: string, color: string }`    | `{ name: 'AI', color: '#a5b4fc' }` | Name and color displayed in the cursor label.            |
+| `render`  | `(user: AiCaretUser) => HTMLElement` | Built-in rendering function        | Function used to customize rendering of the cursor DOM element. |
+
+## CSS 样式
+
+默认的渲染函数会创建一个带有类名 `tiptap-ai-caret` 的 DOM 元素和一个带有类名 `tiptap-ai-caret__label` 的标签。添加以下 CSS 以美化光标：
+
+```css
+.tiptap .tiptap-ai-caret {
+  border-left: 1px solid #0d0d0d;
+  border-right: 1px solid #0d0d0d;
+  margin-left: -1px;
+  margin-right: -1px;
+  pointer-events: none;
+  position: relative;
+  word-break: normal;
+}
+
+.tiptap .tiptap-ai-caret__label {
+  border-radius: 3px 3px 3px 0;
+  color: #0d0d0d;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  left: -1px;
+  line-height: normal;
+  padding: 0.1rem 0.3rem;
+  position: absolute;
+  top: -1.4em;
+  user-select: none;
+  white-space: nowrap;
+}
+```
+
+光标和标签的 `border-color` 及 `background-color` 会根据 `user.color` 选项内联设置。
+
+## 自定义渲染
+
+你可以提供一个自定义的 `render` 函数，完全控制光标的 DOM 元素。
+
+```tsx
+AiCaret.configure({
+  render: (user) => {
+    const el = document.createElement('span')
+    el.className = 'my-custom-ai-caret'
+    el.style.borderColor = user.color
+    el.textContent = user.name
+    return el
+  },
+})
+```
+
+## 事件
+
+`AiCaret` 扩展会通过 Tiptap 的事件 API 触发事件。你可以订阅这些事件，以响应光标的移动——例如，用自定义 UI 行为跟随 AI 的写作位置。
+
+### 可用事件
+
+| 事件                      | 描述                                                                                     | 载荷                   |
+| ------------------------- | ---------------------------------------------------------------------------------------- | ---------------------- |
+| `aiCaret:positionChanged` | 在流式传输或编辑操作期间，每当 AI 光标位置更新时触发。                                     | `{ position: number }` |
+
+`position` 值是一个 ProseMirror 文档位置，指向 AI 光标当前所在的位置。
+
+### 订阅事件
+
+使用 `editor.on` 监听事件，并在不再需要时使用 `editor.off` 取消订阅。
+
+```tsx
+editor.on('aiCaret:positionChanged', ({ position }) => {
+  console.log('AI 光标移动到了位置', position)
+})
+```
+
+`aiCaret:positionChanged` 事件在流式传输期间可能会频繁触发——每个流式块都会触发一次。如果你的处理函数会执行开销较大的工作，建议使用 `requestAnimationFrame` 或像 `lodash.throttle` 这样的工具进行节流。

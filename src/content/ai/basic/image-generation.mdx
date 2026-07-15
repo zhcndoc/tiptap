@@ -1,0 +1,94 @@
+---
+title: 生成图像
+tags:
+  - type: start
+meta:
+  title: 生成图像 | Tiptap 基础 AI 生成文档
+  description: 使用 OpenAI API 生成图像并将其插入到你的 Tiptap 编辑器中。
+  category: 基础 AI 生成
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+使用 AI 生成图像，并将其插入到你的文档中。
+
+## 安装 Image 扩展
+
+将 [`@tiptap/extension-image`](/editor/extensions/nodes/image) 扩展添加到你的编辑器中。
+
+```js
+import Image from '@tiptap/extension-image'
+import { Editor } from '@tiptap/core'
+
+const editor = new Editor({
+  extensions: [Image],
+})
+```
+
+## 在你的服务器上生成图片
+
+从服务器端路由调用 OpenAI API，这样你的 API 密钥就不会暴露给浏览器。使用类似 `gpt-image-2` 的图像生成模型。
+
+然后，将生成的图片存储到你应用程序的存储方案中，例如 S3、R2、Supabase Storage，或者你自己的媒体服务。将存储后的图片 URL 返回给客户端。
+
+<Callout title="避免将图片以 base64 形式存储" variant="warning">
+  不建议将生成的图片以 base64 形式存储在文档中，尤其是在协作文档中。Base64 图片会显著增加文档大小，减慢同步速度，并且会让协作更新的处理成本更高。
+</Callout>
+
+```js
+import OpenAI from 'openai'
+
+const openai = new OpenAI()
+
+export async function POST(request) {
+  const { prompt } = await request.json()
+
+  const result = await openai.images.generate({
+    model: 'gpt-image-2',
+    prompt,
+    size: '1024x1024',
+  })
+
+  const imageBuffer = Buffer.from(result.data[0].b64_json, 'base64')
+  const imageSrc = await uploadImageToStorage(imageBuffer, {
+    contentType: 'image/png',
+    fileName: `generated-${Date.now()}.png`,
+  })
+
+  return Response.json({
+    imageSrc,
+  })
+}
+```
+
+`uploadImageToStorage` 函数取决于你的应用程序。它应该将图片字节上传到你的存储提供商，并返回编辑器可以渲染的 URL。
+
+## 插入生成的图片
+
+从客户端调用你的服务器路由，并将返回的图片源传递给 `setImage`。
+
+```js
+async function generateAndInsertImage(prompt) {
+  const response = await fetch('/api/generate-image', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ prompt }),
+  })
+
+  const { imageSrc } = await response.json()
+
+  editor.commands.setImage({ src: imageSrc })
+}
+```
+
+在插入图片时，你可以包含额外的属性。查看[所有可用选项列表](/editor/extensions/nodes/image)。
+
+```js
+editor.commands.setImage({
+  src: imageSrc,
+  alt: prompt,
+  title: prompt,
+})
+```

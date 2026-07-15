@@ -29,7 +29,7 @@ import {
 export function App() {
   return (
     <HocuspocusProviderWebsocketComponent url="ws://127.0.0.1:1234">
-      <HocuspocusRoom name="example-document">
+      <HocuspocusRoom name="示例文档">
         <Editor />
       </HocuspocusRoom>
     </HocuspocusProviderWebsocketComponent>
@@ -81,9 +81,10 @@ websocket 组件会为其子树创建一个单独的 `HocuspocusProviderWebsocke
 | Prop       | Type                                                                | Description                                                                                             |
 |------------|---------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
 | `name`     | `string`                                                            | 文档名称。必需。                                                                                         |
-| `document` | `Y.Doc`                                                             | 可选——传入你自己的 Y.Doc。若省略，则会自动为你创建一个。                                                  |
-| `token`    | `string \| (() => string) \| (() => Promise<string>)`               | 发送到服务器用于身份验证的 JWT（或异步解析器）。                                                          |
-| `sessionAwareness` | `boolean`                                                   | 启用会话感知的多路复用，使具有相同文档名称的多个 room 可以共享一个 WebSocket。仅在连接到 v4 服务器时设为 `true`。默认 `false`。参见 [`sessionAwareness`](/hocuspocus/provider/configuration)。 |
+| `document` | `Y.Doc`                                                             | 可选——传入你自己的 Y.Doc。若省略，则会为你创建一个。                                                    |
+| `token`    | `string \| (() => string) \| (() => Promise<string>)`               | 发送到服务器用于身份验证的 JWT（或异步解析器）。                                                         |
+| `sessionAwareness` | `boolean`                                                   | 启用支持会话感知的多路复用，使多个具有相同文档名称的房间可以共享一个 WebSocket。仅在连接到 v4 服务器时设置为 `true`。默认 `false`。参见 [`sessionAwareness`](/hocuspocus/provider/configuration)。 |
+| `flushDelay` | `false \| number`                                                 | 在短时间窗口内批量发送文档和 awareness 更新（单位：ms），以减少高强度编辑期间的 websocket 流量。默认 `false`。参见 [批量发送出站更新](/hocuspocus/provider/configuration#batching-outgoing-updates)。 |
 | `onOpen`, `onConnect`, `onClose`, `onDisconnect`, `onStatus`, `onSynced`, `onUnsyncedChanges`, `onMessage`, `onOutgoingMessage`, `onStateless`, `onAuthenticated`, `onAuthenticationFailed`, `onAwarenessUpdate`, `onAwarenessChange`, `onDestroy` | Function | 每个 [provider 事件](/hocuspocus/provider/events) 的可选处理器。 |
 
 更改 `name`、`document`、`token` 或上游 websocket provider 会重新创建底层 provider。其余内容都会保持稳定。

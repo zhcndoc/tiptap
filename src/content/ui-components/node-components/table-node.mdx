@@ -18,6 +18,7 @@ tags:
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
 
 这是一个为 Tiptap 编辑器增强的表格节点组件，具有表格句柄以操作行和列，同时提供单元格对齐控制。它包括添加、删除、移动和复制功能，以及高级表格管理能力，响应式样式和无障碍功能。
 
@@ -81,7 +82,23 @@ const editor = useEditor({
 })
 ```
 
-**3. 在编辑器中添加表格相关组件：**
+**3. 定义一个稳定的单元格菜单，然后将表格组件添加到您的编辑器中：**
+
+<Callout title="传入稳定的 cellMenu 引用" variant="warning">
+  将 `cellMenu` 组件定义在模块作用域中（或将其包裹在 `useMemo` 中）。内联箭头函数 —
+  `cellMenu={(props) => <TableCellHandleMenu ... />}` — 会在每次渲染时创建一个新的组件类型，
+  这会导致整个菜单子树重新挂载，并且在频繁重新渲染的编辑器中可能抛出 `Maximum update depth exceeded`。
+</Callout>
+
+```tsx
+// 模块作用域 —— 在多次渲染之间保持稳定的身份。
+const CellMenu = (props) => (
+  <TableCellHandleMenu
+    editor={props.editor}
+    onMouseDown={(e) => props.onResizeStart?.('br')(e)}
+  />
+)
+```
 
 ```tsx
 <EditorContext.Provider value={{ editor }}>
@@ -94,15 +111,7 @@ const editor = useEditor({
 
   {/* 以下组件需放在 EditorContent 外以确保位置正确 */}
   <TableHandle />
-  <TableSelectionOverlay
-    showResizeHandles={true}
-    cellMenu={(props) => (
-      <TableCellHandleMenu
-        editor={props.editor}
-        onMouseDown={(e) => props.onResizeStart?.('br')(e)}
-      />
-    )}
-  />
+  <TableSelectionOverlay showResizeHandles={true} cellMenu={CellMenu} />
   <TableExtendRowColumnButtons />
 </EditorContext.Provider>
 ```
@@ -231,6 +240,16 @@ import '@/components/tiptap-node/table-node/styles/table-node.scss'
 import '@/components/tiptap-node/heading-node/heading-node.scss'
 import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
 
+// 将单元格菜单定义在模块作用域中，以便其标识在各次渲染之间保持稳定。
+// 内联的 `cellMenu` 箭头函数会在每次渲染时重新挂载菜单，并可能抛出
+// "Maximum update depth exceeded"。
+const CellMenu = (props) => (
+  <TableCellHandleMenu
+    editor={props.editor}
+    onMouseDown={(e) => props.onResizeStart?.('br')(e)}
+  />
+)
+
 export default function BasicEditor() {
   const editor = useEditor({
     immediatelyRender: false,
@@ -321,15 +340,7 @@ export default function BasicEditor() {
       <EditorContent editor={editor} role="presentation" className="control-showcase" />
 
       <TableHandle />
-      <TableSelectionOverlay
-        showResizeHandles={true}
-        cellMenu={(props) => (
-          <TableCellHandleMenu
-            editor={props.editor}
-            onMouseDown={(e) => props.onResizeStart?.('br')(e)}
-          />
-        )}
-      />
+      <TableSelectionOverlay showResizeHandles={true} cellMenu={CellMenu} />
       <TableExtendRowColumnButtons />
     </EditorContext.Provider>
   )
@@ -642,6 +653,18 @@ function CustomDeleteButton() {
 - `label: string` - 操作的 UI 标签
 - `Icon: ComponentType` - 操作的图标组件
 
+## 分页支持
+
+表格节点内置了一个集成功能，使其与 [Pages 扩展](/pages/getting-started/overview) 兼容。当在编辑器中注册 Pages 后，表格会自动按行跨越分页边界：会保留列宽、合并单元格和单元格边框；跨页的垂直合并（rowspan）单元格会在下一页继续显示；而高度超过页面内容区域的单元格会变为可滚动，从而保持分页稳定。
+
+无需额外配置——表格会检测 Pages 扩展并自动适配。没有 Pages 时，表格将完全按之前的方式渲染。
+
+<Callout title="Pages Pro 用户" variant="info">
+  如果你是直接基于 `@tiptap-pro` 的 Pages 包进行开发（而不是这些可复制粘贴的
+  UI 组件），请改用专门的 `@tiptap-pro/extension-pages-tablekit` 包——请参阅
+  [在 Pages 中使用 TableKit](/pages/guides/table-with-pages)。
+</Callout>
+
 ## 样式
 
 表格节点需要引入两个样式表：
@@ -701,17 +724,18 @@ import '@/components/tiptap-node/table-node/styles/table-node.scss'
 
 ## 功能亮点
 
-- ✅ **表格创建**：可视化网格选择器快速插入表格
-- ✅ **行/列操作**：添加、删除、移动及复制行/列
-- ✅ **拖拽排序**：拖动句柄重排行和列
-- ✅ **单元格操作**：合并、拆分及清除单元格内容
-- ✅ **对齐控制**：单元格文本和垂直对齐支持
-- ✅ **列宽调整**：支持交互式列宽改变
-- ✅ **选区覆盖**：选中单元格的视觉反馈
-- ✅ **快捷键支持**：高效键盘导航
-- ✅ **响应式设计**：适用于桌面和移动设备
-- ✅ **暗色模式支持**：内置暗色主题
-- ✅ **无障碍支持**：ARIA 标签和键盘导航
+- ✅ **表格创建**：用于快速插入表格的可视化网格选择器
+- ✅ **行/列操作**：添加、删除、移动和复制行/列
+- ✅ **拖放**：通过拖动手柄重新排列行和列
+- ✅ **单元格操作**：合并、拆分和清除单元格内容
+- ✅ **对齐控制**：单元格文本和垂直对齐
+- ✅ **列宽调整**：交互式调整列宽
+- ✅ **选择覆盖层**：为所选单元格提供可视化反馈
+- ✅ **分页**：适配 Pages 扩展——表格可跨页拆分
+- ✅ **键盘快捷键**：高效的键盘导航
+- ✅ **响应式设计**：适用于桌面端和移动设备
+- ✅ **深色模式支持**：内置深色模式主题
+- ✅ **无障碍性**：ARIA 标签和键盘导航
 
 ## 相关扩展
 

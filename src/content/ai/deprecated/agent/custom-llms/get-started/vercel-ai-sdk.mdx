@@ -1,0 +1,165 @@
+---
+title: 入门 Vercel AI SDK
+meta:
+  title: 入门 Vercel AI SDK | Tiptap 内容 AI
+  description: 学习如何使用 Vercel AI SDK 的 AI Agent 扩展。
+  category: 内容 AI
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+[Vercel AI SDK](https://ai-sdk.dev) 允许你构建一个包含多个[AI 模型提供商](https://ai-sdk.dev/providers/ai-sdk-providers)的 AI Agent。它让你轻松切换提供商，以便尝试它们，并找到最适合你的那个。
+
+<Callout title="提供代码演示" variant="info">
+  本指南包含一个代码演示，助你快速入门。请查看 [GitHub
+  仓库](https://github.com/ueberdosis/ai-agent-custom-llm-demos)。
+</Callout>
+
+## 客户端设置
+
+首先，安装 AI Agent 扩展。
+
+```bash
+npm install @tiptap-pro/extension-ai-agent
+```
+
+然后，导入扩展并使用 `AiAgentProvider` 类进行配置。
+
+```tsx
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import AiAgent, { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider()
+
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    AiAgent.configure({
+      provider,
+    }),
+  ],
+})
+```
+
+在 AI Agent 提供商内定义一个 `resolver` 函数，该函数调用你的后端。
+
+```tsx
+import AiAgent, { AiAgentProvider } from '@tiptap-pro/extension-ai-agent'
+
+const provider = new AiAgentProvider({
+  // `chatMessages` 属性包含会话的聊天消息
+  resolver: async ({ chatMessages, schemaAwarenessData }) => {
+    // 调用你的后端 API 端点
+    const response = await fetch('/api-endpoint', {
+      method: 'POST',
+      body: JSON.stringify({ chatMessages, schemaAwarenessData }),
+    })
+    return await response.json()
+  },
+})
+```
+
+下一节我们将演示如何实现返回正确格式响应的 API 端点。
+
+## 服务端设置
+
+首先，安装 AI Agent、Vercel AI SDK 以及你偏好的 AI 提供商（此例使用 OpenAI）。
+
+```bash
+npm install @tiptap-pro/extension-ai-agent-server ai @ai-sdk/openai
+```
+
+从请求参数中获取聊天消息和模式感知数据。
+
+```ts
+// API 端点中的代码。代码取决于你的后端框架
+const { chatMessages, schemaAwarenessData } = request
+```
+
+然后，在你的 API 端点中，创建一个 `AiAgentToolkit` 实例。它允许你配置 AI 模型可用的工具。
+
+<Callout title="Use with Vercel AI SDK v4" variant="info">
+  要使用 Vercel AI SDK v4 而不是 v5，请导入 `vercelAiSdkV4Adapter`，而不是
+  `vercelAiSdkAdapter`。
+</Callout>
+
+```ts
+import { AiAgentToolkit, vercelAiSdkAdapter } from '@tiptap-pro/extension-ai-agent-server'
+
+const toolkit = new AiAgentToolkit({
+  adapter: vercelAiSdkAdapter,
+  schemaAwarenessData,
+})
+```
+
+同时，定义一个 `ChatMessagesFormatter` 实例。它让你将聊天消息转换为 Vercel AI SDK 所期望的格式。
+
+```ts
+import {
+  AiAgentToolkit,
+  vercelAiSdkAdapter,
+  ChatMessagesFormatter,
+} from '@tiptap-pro/extension-ai-agent-server'
+
+const formatter = new ChatMessagesFormatter({
+  initialMessages: chatMessages,
+  adapter: vercelAiSdkAdapter,
+})
+```
+
+创建 toolkit 和 formatter 后，使用 Vercel AI SDK 向 AI 提供商发送请求。
+
+```ts
+import {
+  AiAgentToolkit,
+  vercelAiSdkAdapter,
+  ChatMessagesFormatter,
+} from '@tiptap-pro/extension-ai-agent-server'
+import { generateText } from 'ai'
+import { openai } from '@ai-sdk/openai'
+
+const { chatMessages, schemaAwarenessData } = request
+
+const toolkit = new AiAgentToolkit({
+  adapter: vercelAiSdkAdapter,
+  schemaAwarenessData,
+})
+
+const formatter = new ChatMessagesFormatter({
+  // 从请求体中获取聊天消息
+  initialMessages: chatMessages,
+  adapter: vercelAiSdkAdapter,
+})
+
+// 调用 Vercel AI SDK
+const response = await generateText({
+  model: openai('gpt-4.1'),
+  messages: [
+    {
+      role: 'system',
+      content: `
+<你的系统提示>
+${toolkit.getSystemPrompt()}
+`,
+    },
+    ...formatter.format(),
+  ],
+  // 提供 AI 模型可调用的工具
+  tools: toolkit.format(),
+})
+```
+
+在系统提示的末尾，包含由 `AiAgentToolkit` 实例生成的系统提示，例如：`toolkit.getSystemPrompt()`。它包含了有关如何使用工具的指令。
+
+要编写系统提示，请参见 [系统提示指南](/ai/deprecated/agent/configure/system-prompt)。其中包含一个可作为起点使用的示例系统提示。
+
+最后，使用 `formatter` 将响应转换为 AI Agent 扩展所需的格式。
+
+```ts
+formatter.addAiResponse(response)
+
+const response = formatter.getResolverResponse()
+```
+
+从 `formatter.getResolverResponse()` 返回的值应作为你的 API 端点响应以及 resolver 函数的返回值。
