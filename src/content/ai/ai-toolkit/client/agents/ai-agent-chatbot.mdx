@@ -19,7 +19,7 @@ import { Callout } from '@/components/ui/Callout'
 
 - [React](https://react.dev/) + [Next.js](https://nextjs.org/)
 - [Vercel 的 AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
-- Tiptap AI 工具包
+- Tiptap AI 工具包。
 
 ## 安装
 
@@ -42,7 +42,7 @@ npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/react @ai-sdk/openai
 </Callout>
 
 ```bash
-npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/ai-toolkit-ai-sdk
+npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/client-ai-toolkit-ai-sdk
 ```
 
 ## API 端点
@@ -54,15 +54,15 @@ npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/ai-toolkit-ai-sdk
 ```ts
 // app/api/chat/route.ts
 import { openai } from '@ai-sdk/openai'
-import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { toolDefinitions } from '@tiptap-pro/client-ai-toolkit-ai-sdk'
 import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
   const agent = new ToolLoopAgent({
-    model: openai('gpt-5.4-mini'),
-    instructions: '你是一个可以编辑富文本文档的助手。',
+    model: openai('gpt-5.6-luna'),
+    instructions: 'You are an assistant that can edit rich text documents.',
     tools: toolDefinitions(),
   })
 

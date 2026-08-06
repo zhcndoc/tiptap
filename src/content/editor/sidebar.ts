@@ -225,7 +225,11 @@ export const sidebarConfig: SidebarConfig = {
             },
             {
               href: '/editor/extensions/marks/link',
-              title: '链接',
+              title: 'Link',
+            },
+            {
+              href: '/editor/extensions/marks/ruby-text',
+              title: 'Ruby Text',
             },
             {
               href: '/editor/extensions/marks/strike',
@@ -317,7 +321,11 @@ export const sidebarConfig: SidebarConfig = {
             },
             {
               href: '/editor/extensions/functionality/filehandler',
-              title: '文件处理',
+              title: 'File handler',
+            },
+            {
+              href: '/editor/extensions/functionality/find-and-replace',
+              title: 'Find and replace',
             },
             {
               href: '/editor/extensions/functionality/floatingmenu',
@@ -359,7 +367,7 @@ export const sidebarConfig: SidebarConfig = {
               href: '/editor/extensions/functionality/import',
               title: '导入',
               tags: ['Start 计划'],
-              releaseTag: "beta",
+              releaseTag: 'beta',
             },
             {
               href: '/editor/extensions/functionality/pages',

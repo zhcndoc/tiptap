@@ -8,7 +8,7 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 
-将 AI Toolkit 与任何后端语言配合使用。`@tiptap-pro/ai-toolkit-tool-definitions` 包含一个 CLI，可以输出工具定义和工作流配置的 JSON，因此您可以在 Python、Go、Ruby 或其他任何语言中使用它们。
+使用 AI Toolkit 搭配任何后端语言。`@tiptap-pro/client-ai-toolkit-tool-definitions` 包含一个 CLI，可将工具定义和工作流配置以 JSON 格式输出，因此你可以在 Python、Go、Ruby 或任何其他语言中使用它们。
 
 ## 设置
 
@@ -23,7 +23,7 @@ import { Callout } from '@/components/ui/Callout'
 运行 CLI，生成包含所有默认工具的 `tool-definitions.json` 文件：
 
 ```bash
-npx @tiptap-pro/ai-toolkit-tool-definitions@latest tool-definitions > tool-definitions.json
+npx @tiptap-pro/client-ai-toolkit-tool-definitions@latest tool-definitions > tool-definitions.json
 ```
 
 输出是一个 JSON 数组。每个条目包含：
@@ -63,7 +63,7 @@ tools = [
 ### 插入内容工作流
 
 ```bash
-npx @tiptap-pro/ai-toolkit-tool-definitions@latest insert-content-workflow > insert-content-workflow.json
+npx @tiptap-pro/client-ai-toolkit-tool-definitions@latest insert-content-workflow > insert-content-workflow.json
 ```
 
 输出：
@@ -72,7 +72,7 @@ npx @tiptap-pro/ai-toolkit-tool-definitions@latest insert-content-workflow > ins
 ### 校对工作流
 
 ```bash
-npx @tiptap-pro/ai-toolkit-tool-definitions@latest proofreader-workflow > proofreader-workflow.json
+npx @tiptap-pro/client-ai-toolkit-tool-definitions@latest proofreader-workflow > proofreader-workflow.json
 ```
 
 输出：
@@ -82,7 +82,7 @@ npx @tiptap-pro/ai-toolkit-tool-definitions@latest proofreader-workflow > proofr
 ### Tiptap 编辑工作流
 
 ```bash
-npx @tiptap-pro/ai-toolkit-tool-definitions@latest tiptap-edit-workflow > tiptap-edit-workflow.json
+npx @tiptap-pro/client-ai-toolkit-tool-definitions@latest tiptap-edit-workflow > tiptap-edit-workflow.json
 ```
 
 输出：
@@ -92,7 +92,7 @@ npx @tiptap-pro/ai-toolkit-tool-definitions@latest tiptap-edit-workflow > tiptap
 ### 评论工作流
 
 ```bash
-npx @tiptap-pro/ai-toolkit-tool-definitions@latest edit-threads-workflow > edit-threads-workflow.json
+npx @tiptap-pro/client-ai-toolkit-tool-definitions@latest edit-threads-workflow > edit-threads-workflow.json
 ```
 
 输出：
@@ -104,7 +104,7 @@ npx @tiptap-pro/ai-toolkit-tool-definitions@latest edit-threads-workflow > edit-
 模板工作流需要 HTML 模板作为输入：
 
 ```bash
-npx @tiptap-pro/ai-toolkit-tool-definitions@latest template-workflow --html-template '<p _templateslot="title">标题</p><p _templateslot="body">正文</p>' > template-workflow.json
+npx @tiptap-pro/client-ai-toolkit-tool-definitions@latest template-workflow --html-template '<p _templateslot="title">Title</p><p _templateslot="body">Body</p>' > template-workflow.json
 ```
 
 输出：
@@ -122,7 +122,7 @@ with open("proofreader-workflow.json") as f:
     workflow = json.load(f)
 
 response = client.chat.completions.create(
-    model="gpt-5.4-mini",
+    model="gpt-5.6-luna",
     messages=[
         {"role": "system", "content": workflow["systemPrompt"]},
         {"role": "user", "content": json.dumps({
@@ -147,7 +147,7 @@ response = client.chat.completions.create(
 生成工具定义的 JSON。
 
 ```bash
-npx @tiptap-pro/ai-toolkit-tool-definitions@latest tool-definitions [options]
+npx @tiptap-pro/client-ai-toolkit-tool-definitions@latest tool-definitions [options]
 ```
 
 | 选项 | 说明 |
@@ -160,7 +160,7 @@ npx @tiptap-pro/ai-toolkit-tool-definitions@latest tool-definitions [options]
 生成 Tiptap 编辑工作流配置的 JSON。
 
 ```bash
-npx @tiptap-pro/ai-toolkit-tool-definitions@latest tiptap-edit-workflow [options]
+npx @tiptap-pro/client-ai-toolkit-tool-definitions@latest tiptap-edit-workflow [options]
 ```
 
 | 选项 | 说明 |
@@ -172,7 +172,7 @@ npx @tiptap-pro/ai-toolkit-tool-definitions@latest tiptap-edit-workflow [options
 生成校对工作流配置的 JSON。
 
 ```bash
-npx @tiptap-pro/ai-toolkit-tool-definitions@latest proofreader-workflow [options]
+npx @tiptap-pro/client-ai-toolkit-tool-definitions@latest proofreader-workflow [options]
 ```
 
 | 选项 | 说明 |
@@ -184,7 +184,7 @@ npx @tiptap-pro/ai-toolkit-tool-definitions@latest proofreader-workflow [options
 生成模板工作流配置的 JSON。
 
 ```bash
-npx @tiptap-pro/ai-toolkit-tool-definitions@latest template-workflow --html-template <html>
+npx @tiptap-pro/client-ai-toolkit-tool-definitions@latest template-workflow --html-template <html>
 ```
 
 | 选项 | 说明 |
@@ -196,7 +196,7 @@ npx @tiptap-pro/ai-toolkit-tool-definitions@latest template-workflow --html-temp
 生成评论工作流配置的 JSON。
 
 ```bash
-npx @tiptap-pro/ai-toolkit-tool-definitions@latest edit-threads-workflow
+npx @tiptap-pro/client-ai-toolkit-tool-definitions@latest edit-threads-workflow
 ```
 
 无选项。
@@ -206,7 +206,7 @@ npx @tiptap-pro/ai-toolkit-tool-definitions@latest edit-threads-workflow
 生成插入内容工作流配置的 JSON。
 
 ```bash
-npx @tiptap-pro/ai-toolkit-tool-definitions@latest insert-content-workflow
+npx @tiptap-pro/client-ai-toolkit-tool-definitions@latest insert-content-workflow
 ```
 
 无选项。

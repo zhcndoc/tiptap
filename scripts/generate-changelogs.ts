@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import 'dotenv/config'
 
 type RepoConfig = {
   owner: string
@@ -8,6 +9,7 @@ type RepoConfig = {
   slugPrefix: string
   packageScope: string
   packageDirs: string[]
+  additionalPackagePaths?: string[]
 }
 
 const OSS_CONFIG: RepoConfig = {
@@ -26,6 +28,14 @@ const PRO_CONFIG: RepoConfig = {
   slugPrefix: 'pro-',
   packageScope: '@tiptap-pro',
   packageDirs: ['packages'],
+  additionalPackagePaths: [
+    'packages-deprecated/ai-toolkit-ai-sdk',
+    'packages-deprecated/ai-toolkit',
+    'packages-deprecated/ai-toolkit-openai',
+    'packages-deprecated/ai-toolkit-langchain',
+    'packages-deprecated/ai-toolkit-tool-definitions',
+    'packages-deprecated/ai-toolkit-anthropic',
+  ],
 }
 
 const REPO_CONFIGS: RepoConfig[] = [OSS_CONFIG, PRO_CONFIG]
@@ -176,18 +186,7 @@ async function listDirectories(config: RepoConfig, dirPath: string): Promise<str
   const response = await fetch(url, { headers: getHeaders() })
 
   if (!response.ok) {
-    if (response.status === 404) {
-      console.warn(
-        `Warning: Cannot access ${config.owner}/${config.repo}/${dirPath} (HTTP 404). Skipping.`,
-      )
-    } else if (response.status === 403) {
-      console.warn(get403Warning(config, dirPath, response))
-    } else {
-      console.warn(
-        `Failed to list ${dirPath} in ${config.owner}/${config.repo}: ${response.status}`,
-      )
-    }
-    return []
+    throw new Error('Unable to generate release-notes. Throwing to avoid a broken deployment.')
   }
 
   const entries = (await response.json()) as Array<{ name: string; type: string }>
@@ -285,6 +284,19 @@ async function discoverAndFetchPackages(
 
       allDirNames.push({ dirName, packageDir })
     }
+  }
+
+  for (const packagePath of config.additionalPackagePaths ?? []) {
+    const packageDir = path.posix.dirname(packagePath)
+    const dirName = path.posix.basename(packagePath)
+    const packageName = `${config.packageScope}/${dirName}`
+
+    if (OMITTED_PACKAGE_NAMES.has(packageName)) {
+      console.log(`Skipped ${packageName} (omitted from changelog generation)`)
+      continue
+    }
+
+    allDirNames.push({ dirName, packageDir })
   }
 
   const total = allDirNames.length
@@ -400,12 +412,8 @@ async function main() {
         console.warn(
           `Warning: Failed to process ${config.owner}/${config.repo}: ${message}. Skipping.`,
         )
-        return {
-          packageResults: {
-            results: [],
-            nextCacheEntries: [],
-          },
-        }
+
+        throw error
       }
     }),
   )

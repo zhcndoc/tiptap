@@ -49,8 +49,8 @@ import { Highlight } from '@tiptap/extension-highlight'
 // --- Tiptap UI ---
 import { ColorHighlightButton } from '@/components/tiptap-ui/color-highlight-button'
 
-// --- UI 原语 ---
-import { ButtonGroup } from '@/components/tiptap-ui-primitive/button'
+// --- UI Primitive ---
+import { ButtonGroup } from '@/components/tiptap-ui-primitive/button-group'
 
 // --- 节点样式 ---
 import '@/components/tiptap-node/code-block-node/code-block-node.scss'
@@ -101,11 +101,11 @@ export default function MyEditor() {
 | `onApplied`            | `({ color, label }) => void`  | `undefined`  | 应用高亮后触发的回调                             |
 | `showShortcut`         | `boolean`                     | `false`      | 显示键盘快捷键标记（如果有）                     |
 
-## Hooks
+## 钩子
 
 ### `useColorHighlight(config)`
 
-一个强大的 Hook，可帮助你构建自定义颜色高亮按钮，完全控制行为和渲染。
+一个强大的钩子，可帮助你构建自定义颜色高亮按钮，完全控制其行为和渲染。
 
 #### 使用示例
 
@@ -143,28 +143,28 @@ function MyColorHighlightButton() {
 
 #### 属性说明
 
-| 名称                   | 类型                              | 默认值       | 描述                                             |
-| ---------------------- | --------------------------------- | ------------ | ------------------------------------------------ |
-| `editor`               | `Editor \| null`                  | `undefined`  | Tiptap 编辑器实例                                |
-| `highlightColor`       | `string`                         | 必填         | 要应用的高亮颜色                                  |
-| `label`                | `string`                         | 可选         | 按钮的无障碍标签                                  |
-| `hideWhenUnavailable`  | `boolean`                        | `false`      | 如果无法应用高亮，隐藏按钮                         |
-| `mode`                 | `"mark" \| "node"`               | `"mark"`     | 高亮模式（标记或节点背景）                        |
-| `onApplied`            | `({ color, label, mode }) => void` | `undefined`  | 应用高亮后触发的回调                              |
+| 名称                  | 类型                                | 默认值      | 描述                              |
+| --------------------- | ----------------------------------- | ----------- | --------------------------------- |
+| `editor`              | `Editor \| null`                    | `undefined` | Tiptap 编辑器实例                 |
+| `highlightColor`      | `string`                            | 必填        | 要应用的高亮颜色                  |
+| `label`               | `string`                            | 可选        | 按钮的无障碍标签                  |
+| `hideWhenUnavailable` | `boolean`                           | `false`     | 如果无法应用高亮，则隐藏按钮      |
+| `mode`                | `"mark" \| "node"`                  | `"mark"`    | 高亮模式（标记或节点背景）        |
+| `onApplied`           | `({ color, label, mode }) => void`  | `undefined` | 应用高亮后触发的回调              |
 
 #### 返回值说明
 
-| 名称                     | 类型               | 描述                                 |
-| ------------------------ | ------------------ | ------------------------------------ |
-| `isVisible`              | `boolean`          | 是否应渲染按钮                       |
-| `isActive`               | `boolean`          | 高亮当前是否激活                     |
-| `canColorHighlight`      | `boolean`          | 是否可以应用高亮                     |
-| `handleColorHighlight`   | `() => boolean`    | 应用颜色高亮的函数                   |
-| `handleRemoveHighlight`  | `() => boolean`    | 移除高亮的函数                       |
-| `label`                  | `string`           | 按钮的无障碍标签文本                 |
-| `shortcutKeys`           | `string`           | 键盘快捷键（Cmd/Ctrl + Shift + H） |
-| `Icon`                   | `React.FC`         | 使用的图标组件（HighlighterIcon）   |
-| `mode`                   | `"mark" \| "node"` | 使用的高亮模式                      |
+| 名称                    | 类型                | 描述                                  |
+| ----------------------- | ------------------- | ------------------------------------- |
+| `isVisible`             | `boolean`           | 是否应渲染按钮                        |
+| `isActive`              | `boolean`           | 高亮当前是否激活                      |
+| `canColorHighlight`     | `boolean`           | 是否可以应用高亮                      |
+| `handleColorHighlight`  | `() => boolean`     | 应用颜色高亮的函数                    |
+| `handleRemoveHighlight` | `() => boolean`     | 移除高亮的函数                        |
+| `label`                 | `string`            | 按钮的无障碍标签文本                  |
+| `shortcutKeys`          | `string`            | 键盘快捷键（Cmd/Ctrl + Shift + H）    |
+| `Icon`                  | `React.FC`          | 使用的图标组件（HighlighterIcon）     |
+| `mode`                  | `"mark" \| "node"`  | 使用的高亮模式                        |
 
 ## 工具函数
 
@@ -202,7 +202,7 @@ const canApplyNode = canColorHighlight(editor, 'node')
 | ---------------- | ------------------ | ---------- | -------------------------------- |
 | `editor`         | `Editor \| null`   | 必填       | Tiptap 编辑器实例                |
 | `highlightColor` | `string`           | `undefined`| 指定检查的颜色                    |
-| `mode`           | `"mark" \| "node"` | `"mark"`   | 高亮模式（标记或节点背景）       |
+| `mode`            | `"mark" \| "node"` | `"mark"`   | 高亮模式（标记或节点背景）       |
 
 #### 返回值
 

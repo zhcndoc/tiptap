@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.20.0
+    label: v0.26.1
 meta:
   title: 自定义字体 | Tiptap Conversion
   description: 将 TTF/OTF 字体嵌入导出的 DOCX 文件中（可手动嵌入，或自动从文档已使用的字体中嵌入），以便它们在任何地方的 Word 中都能正确显示。
@@ -166,8 +166,8 @@ editor.chain().focus().setFontFamily('Playfair Display').run()
 `POST {endpoint}/fonts/convert`
 
 - **Body:** `multipart/form-data`，包含一个 `file` 字段（字体二进制文件）以及一个可选的 `fontFamily` 字段。
-- **Response:** 可嵌入字体，类型为 `font/ttf`。TTF/OTF 上传会原样返回，WOFF2 上传会转换为 TTF。
-- **Auth:** 与其他转换端点相同的 `Authorization: Bearer <token>` 请求头。该 token 需要 `Convert:Fonts` 权限。
+- **Response:** 可嵌入字体，类型为 `font/ttf`。上传 TTF/OTF 时会原样返回，上传 WOFF2 时会转换为 TTF。
+- **Auth:** 与其他转换端点相同的 `Authorization: Bearer <token>` 请求头。该令牌需要 `Convert:Fonts` 权限。
 
 可在 Tiptap Cloud 和本地部署环境中使用，前提是 Convert Service v2.25.0。
 

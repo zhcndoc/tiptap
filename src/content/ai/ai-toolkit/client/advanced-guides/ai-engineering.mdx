@@ -10,37 +10,37 @@ meta:
 
 ## 选择 AI 模型
 
-AI 工具包的工具设计为可与任何支持函数调用的 AI 模型配合使用。它们已在多种来自不同 AI 提供商的模型上进行过测试。
+AI 工具包中的工具设计为可与任何支持函数调用的 AI 模型配合使用。它们已在来自不同 AI 提供商的多种模型上进行过测试。
 
-选择合适 AI 模型的一个关键区别是你是否需要构建一个[智能体（agent）或工作流](https://www.anthropic.com/engineering/building-effective-agents)：
+选择合适 AI 模型的一个关键区别在于你是否需要构建一个[智能体（agent）或工作流](https://www.anthropic.com/engineering/building-effective-agents)：
 
-- AI 智能体会被赋予一个任务，并独立朝着目标推进，在每一步决定下一步要采取什么行动。例如：[AI 聊天机器人助手](/ai/ai-toolkit/client/agents/ai-agent-chatbot)
+- AI 智能体会被赋予一个任务，并独立朝着目标推进，在每一步决定下一步要采取什么行动。例如：[AI 智能体聊天机器人](/ai/ai-toolkit/client/agents/ai-agent-chatbot)
 - 在 AI 工作流中，AI 会执行一个或多个预定义操作，但不会自行选择下一步操作。这种情况适用于[简单的 AI 内容生成](/ai/ai-toolkit/client/workflows/insert-content)或自动补全。
 
 ### 适合智能体任务的最佳模型
 
-对于像 [AI agent chatbot](/ai/ai-toolkit/client/agents/ai-agent-chatbot) 指南中那样的复杂智能体 AI 助手，建议使用具备工具调用能力的前沿模型。尤其是，以下模型表现出了积极效果：
+对于像 [AI 智能体聊天机器人](/ai/ai-toolkit/client/agents/ai-agent-chatbot) 指南中那样的复杂 AI 智能体助手，建议使用具备工具调用能力的前沿模型。尤其是，以下模型表现出了积极效果：
 
-- OpenAI 模型：GPT-5、GPT-5 mini、GPT-5.4、GPT-5.4 mini
-- Anthropic 模型：Opus、Sonnet 和 Haiku（4 版及以后）
-- Google 模型：Gemini Pro、Gemini Flash（3 版及以后）
+- OpenAI 模型：GPT-5.6 Sol、Terra 和 Luna
+- Anthropic 模型：Opus 和 Sonnet（4 及更高版本）
+- Google 模型：Gemini Pro、Gemini Flash（3 及更高版本）
 - Mistral 模型：Mistral Large、Mistral Medium
 - Moonshot 模型：Kimi-K2
-- xAI 模型：Grok 4.1 Fast 及以后
-- Z.ai 模型：GLM-4.5 及以后
+- xAI 模型：Grok 4.1 Fast 及更高版本
+- Z.ai 模型：GLM-4.5 及更高版本
 
 ### 适合智能体任务的经济型模型
 
 如果你有智能体文档编辑的需求，但优先考虑成本控制，可以选择仍支持函数调用的较小模型。特别可以考虑以下模型：
 
-- Claude Haiku 4.5（Anthropic）及以后
-- GPT-5 mini（OpenAI）及以后
-- Gemini 3 Flash（Google）及以后
-- Mistral Medium 3.1（Mistral）及以后
+- GPT-5.6 Luna（OpenAI）
+- Claude Haiku 4.5（Anthropic）及更高版本
+- Gemini 3 Flash（Google）及更高版本
+- Mistral Medium 3.1（Mistral）及更高版本
 
 ### 非智能体工作流的模型选择
 
-并非所有文档编辑的 AI 用例都是智能体类型，有时你只是需要 AI 生成内容并插入文档。大量经济型模型适合此用途。比如前文提到的那些。
+并非所有文档编辑的 AI 用例都是智能体类型，有时你只是需要 AI 生成内容并插入文档。大量经济型模型适合此用途，例如前文提到的那些模型。
 
 ### 是否应启用推理能力？
 
@@ -57,17 +57,18 @@ AI 工具包的工具设计为可与任何支持函数调用的 AI 模型配合�
 ```ts
 // app/api/chat/route.ts
 import { openai } from '@ai-sdk/openai'
-import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { toolDefinitions } from '@tiptap-pro/client-ai-toolkit-ai-sdk'
 import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
   const agent = new ToolLoopAgent({
-    model: openai('gpt-5.4-mini'),
-    instructions: `你是一位以莎士比亚风格编辑富文本文档的助手。 
-    你应当以莎士比亚的风格进行回应，并且在编辑文档时， 
-    你生成并添加到文档中的内容也应当以莎士比亚戏剧的风格来撰写。`,
+    model: openai('gpt-5.6-luna'),
+    instructions: `You are an assistant that edits rich text documents in the style of Shakespeare. 
+    You should respond in the style of Shakespeare, and when editing the document, 
+    the content you generate and add to the document should be written in the style
+    of Shakespeare's plays.`,
     tools: toolDefinitions(),
   })
 
@@ -85,19 +86,20 @@ export async function POST(req: Request) {
 ```ts
 // app/api/chat/route.ts
 import { openai } from '@ai-sdk/openai'
-import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { toolDefinitions } from '@tiptap-pro/client-ai-toolkit-ai-sdk'
 import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
   const agent = new ToolLoopAgent({
-    model: openai('gpt-5.4-mini'),
-    instructions: `你是一位可以编辑富文本文档的助手。 
-    在调用诸如 tiptapEdit 之类的文档编辑工具之前，
-    你应该先阅读文档，以便了解其内容和上下文。
-    然后，你应该以非常详细的逐步描述，告知用户你将要采取的编辑计划。
-    只有在详细规划之后，你才应该调用文档编辑工具。`,
+    model: openai('gpt-5.6-luna'),
+    instructions: `You are an assistant that can edit rich text documents. 
+    Before calling the document editing tools like tiptapEdit,
+    you should first read the document to get a sense of the content and context.
+    Then, you should inform the user of the plan of action you will take to edit
+    the document, in a very detailed step-by-step description. Only after planning
+    in detail, you should call the document editing tools.`,
     tools: toolDefinitions(),
   })
 
@@ -108,12 +110,12 @@ export async function POST(req: Request) {
 }
 ```
 
-我们推荐以下资源帮助你深入学习提示工程和AI工程：
+我们推荐以下资源帮助你深入学习提示工程和 AI 工程：
 
 - [Anthropic 提示工程指南](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview)
-- [GPT-5 提示指南](https://cookbook.openai.com/examples/gpt-5/gpt-5_prompting_guide)
+- [GPT-5.6 Luna 模型文档](https://developers.openai.com/api/docs/models/gpt-5.6-luna)
 - [OpenAI 提示工程指南](https://platform.openai.com/docs/guides/prompt-engineering)
-- [智能体构建实用指南](https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf)
+- [构建智能体的实用指南](https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf)
 
 ## 提升速度和延迟
 
@@ -129,27 +131,27 @@ export async function POST(req: Request) {
 
 速度和延迟取决于模型以及其托管所在的提供商。如果输出速度是你的首要考虑，可以选择专注于快速推理的提供商，例如 [groq](https://groq.com/)、[SambaNova](https://www.sambanova.com/) 或 [Cerebras](https://www.cerebras.ai/)。
 
-### 关闭推理功能
+### 降低推理工作量
 
-推理会增加 token 消耗和延迟。如果你的具体用例不需要推理，建议关闭或最小化此功能。例如，在 GPT-5 和 GPT-5 mini 中，推荐将 `reasoningEffort` 提供商选项设置为 `'minimal'`。
+推理会增加 token 消耗和延迟。将 `reasoningEffort` 提供商选项设置为 `'low'`，可以减少推理 token 的消耗。
 
 ```ts
 // app/api/chat/route.ts
 import { openai } from '@ai-sdk/openai'
-import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { toolDefinitions } from '@tiptap-pro/client-ai-toolkit-ai-sdk'
 import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
   const agent = new ToolLoopAgent({
-    model: openai('gpt-5.4-mini'),
+    model: openai('gpt-5.6-luna'),
     instructions: `You are an assistant that can edit rich text documents.`,
     tools: toolDefinitions(),
-    // 将推理努力设置为 'minimal'
+    // 降低推理工作量
     providerOptions: {
       openai: {
-        reasoningEffort: 'minimal',
+        reasoningEffort: 'low',
       },
     },
   })

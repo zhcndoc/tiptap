@@ -35,7 +35,7 @@ npx @tiptap/cli@latest add button
 
 ```tsx
 import { Button } from '@/components/tiptap-ui-primitive/button'
-import { BoldIcon } from '@/components/icons/bold-icon'
+import { BoldIcon } from '@/components/tiptap-icons/bold-icon'
 
 export default function MyComponent() {
   return (
@@ -57,12 +57,46 @@ export default function MyComponent() {
 
 ### 按钮
 
-| 名称              | 类型          | 默认值    | 描述                                   |
-| ----------------- | ------------- | --------- | -------------------------------------- |
-| data-style        | string        | undefined | 按钮样式（例如：'ghost', 'primary'）  |
-| data-active-state | 'on' \| 'off' | undefined | 按钮活动状态                           |
-| data-size         | string        | undefined | 按钮大小（例如：'small', 'default'）  |
-| data-appearance   | string        | undefined | 按钮外观                               |
-| data-disabled     | boolean       | undefined | 视觉禁用状态                           |
-| tooltip           | string        | undefined | 工具提示中显示的文本                   |
-| shortcutKeys      | string        | undefined | 工具提示中显示的键盘快捷键             |
+| Name              | Type                            | Default   | Description                                          |
+| ----------------- | ------------------------------- | --------- | ---------------------------------------------------- |
+| variant           | 'ghost' \| 'primary' \| 'check' | undefined | 视觉样式，或 `check` 功能变体                         |
+| size              | 'small' \| 'default' \| 'large' | undefined | 按钮尺寸                                             |
+| tooltip           | ReactNode                       | undefined | 工具提示中显示的内容                                  |
+| shortcutKeys      | string                          | undefined | 工具提示中显示的键盘快捷键                            |
+| showTooltip       | boolean                         | true      | 设置 `tooltip` 时渲染工具提示包装器                   |
+| data-style        | string                          | undefined | 按钮样式，在提供 `variant` 时根据其设置               |
+| data-active-state | 'on' \| 'off'                   | undefined | 按钮激活状态                                          |
+| data-size         | string                          | undefined | 按钮尺寸，在提供 `size` 时根据其设置                  |
+| data-appearance   | string                          | undefined | 按钮外观                                             |
+| data-disabled     | boolean                         | undefined | 视觉上的禁用状态                                     |
+
+该按钮会将所有其他 `ButtonHTMLAttributes<HTMLButtonElement>` 转发到底层元素。
+
+### Check 变体
+
+`variant="check"` 会渲染复选框样式的切换按钮：一个全宽行，左侧显示标签，右侧显示勾选指示器。它默认为小尺寸的 ghost 样式，提供 `role="checkbox"`，并渲染自身的指示器，因此你只需提供标签和状态。
+
+使用 `aria-checked` 控制它，该属性默认为 `false`，也接受 `"mixed"`：
+
+```tsx
+import { useState } from 'react'
+import { Button } from '@/components/tiptap-ui-primitive/button'
+import { CaseSensitiveIcon } from '@/components/tiptap-icons/case-sensitive-icon'
+
+export default function MatchCaseOption() {
+  const [matchCase, setMatchCase] = useState(false)
+
+  return (
+    <Button
+      variant="check"
+      aria-checked={matchCase}
+      onClick={() => setMatchCase((current) => !current)}
+    >
+      <CaseSensitiveIcon className="tiptap-button-icon" />
+      <span className="tiptap-button-text">Match case</span>
+    </Button>
+  )
+}
+```
+
+该变体会在元素上设置 `data-variant="check"`，并将指示器渲染为 `.tiptap-button-check`，因此这两者都可用于设置样式。其颜色来自 `button-colors.scss` 中的 `--tt-button-check-*` 自定义属性，并会安装 `check-icon` 组件。

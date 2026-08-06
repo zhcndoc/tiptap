@@ -1,0 +1,146 @@
+---
+title: 选区感知
+meta:
+  title: 选区感知 | Tiptap Server AI 工具包
+  description: 让服务器端 AI 读取和编辑协作者的实时选区。
+  category: AI 工具包
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<EnterpriseCalloutAuto variant="server-ai-toolkit" renderMode="sidebar" />
+
+让 AI 了解用户选中的内容，以便对其进行编辑。
+
+<Callout title="AI 代理聊天机器人指南的后续内容" variant="info">
+  本指南将继续介绍 [AI 代理聊天机器人指南](/ai/ai-toolkit/agents/ai-agent-chatbot)。请先阅读该指南。
+</Callout>
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-read-selection"
+/>
+
+查看 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## `readSelection` 工具
+
+使用 `readSelection` 工具，AI 可以读取用户的选区。此工具仅适用于 Tiptap Cloud 协作文档。
+
+在 `fetch-tools` 请求中与其他工具一起启用：
+
+```ts
+const response = await fetch(`${apiBaseUrl}/v4/ai/toolkit/fetch-tools`, {
+  method: 'POST',
+  headers: await getAuthHeaders(),
+  body: JSON.stringify({
+    editorContext,
+    tools: {
+      readSelection: true,
+      // 其他工具
+      tiptapRead: true,
+      tiptapEdit: true,
+    },
+  }),
+})
+```
+
+`readSelection` 工具读取单个用户的选区。通常，该用户就是向 AI 发出提示的用户。执行工具时，将用户 ID 作为 `tool.config.user` 参数传入。此参数由开发者传入，因此 AI 不会生成该参数。
+
+```ts
+const response = await fetch(`${apiBaseUrl}/v4/ai/toolkit/execute-tool`, {
+  method: 'POST',
+  headers: await getAuthHeaders(documentId),
+  body: JSON.stringify({
+    editorContext,
+    document: { type: 'cloud', id: documentId },
+    tool: {
+      name: 'readSelection',
+      // AI 调用 readSelection 工具时不带输入参数
+      input: {},
+      // 用户 ID 由开发者传入
+      config: { user: 'user-1' },
+    },
+  }),
+})
+```
+
+如需详细了解该工具，请参阅 [REST API 参考](/ai/ai-toolkit/api-reference/rest-api#readselection)。
+
+## 将选区发布到 awareness
+
+服务器会从实时协作 awareness 数据中读取选区。要使这些数据可用，请配置
+[`CollaborationCaret` 扩展](/editor/extensions/functionality/collaboration-caret)，并为用户设置一个与发送到服务器的 `tool.config.user` 匹配的 `id`。在 provider 连接后再创建编辑器，以便光标能够附加。
+
+```tsx
+import { CollaborationCaret } from '@tiptap/extension-collaboration-caret'
+
+const editor = useEditor({
+  extensions: [
+    StarterKit,
+    Collaboration.configure({ document: doc }),
+    CollaborationCaret.configure({
+      provider,
+      // id 用于与服务器上的 readSelection 进行匹配。
+      user: { id: 'user-1', name: 'You', color: '#6a00f5' },
+    }),
+    ServerAiToolkit,
+  ],
+})
+```
+
+## 保留选区
+
+服务器会在工具运行时从 awareness 中读取选区。`CollaborationCaret`
+会在编辑器失去焦点时清除 awareness 中的选区，因此如果用户在发送前点击聊天输入框，
+服务器读取到的将是空选区。
+
+在用户发送消息时重新聚焦编辑器，使 `CollaborationCaret` 重新发布当前选区：
+
+```tsx
+const handleSubmit = () => {
+  if (!input.trim()) return
+  // 将选区重新发布到 awareness：移动到聊天输入框会使编辑器失去焦点，
+  // 并清除 awareness 光标。
+  editor.commands.focus()
+  sendMessage({ text: input })
+  setInput('')
+}
+```
+
+## 最终效果
+
+添加额外的 CSS 样式后，最终得到的是一个可以编辑用户所选内容的聊天机器人：
+
+<CodeDemo
+  isLarge
+  path=""
+  isScrollable
+  src="https://ai-toolkit-demos.vercel.app/server-read-selection"
+/>
+
+请参阅 [GitHub 上的源代码](https://github.com/ueberdosis/ai-toolkit-demos)。
+
+## 限制
+
+### 仅适用于 `default` 字段中的 Tiptap Cloud 文档
+
+`readSelection` 工具从 `CollaborationCaret` 扩展发送的实时更新中读取选区状态。因此，它仅适用于 Tiptap Cloud 协作文档，不兼容以内联方式提供的文档。
+
+协作文档的一个高级选项是存储[多个字段](/editor/extensions/functionality/collaboration#field)。目前，`readSelection` 工具仅支持 `default` 字段。如果你的使用场景涉及多个字段，请[联系我们](mailto:humans@tiptap.dev)。
+
+### AI 模型行为
+
+`readSelection` 会告知 AI 当前选中的内容，但不会强制 AI 仅编辑选区中的内容。能力较弱的 AI 模型可能会重写周围的段落，而不仅仅是选中的文本，尤其是在选中句子的一部分时。
+
+根据我们的测试，启用推理功能的模型（例如将推理强度设置为
+`low` 的 `gpt-5.6-luna`）能够更可靠地将编辑范围限定在选区内。像“仅编辑选中的文本”这样的明确指令也会有所帮助。
+
+## 后续步骤
+
+- 阅读 [`readSelection` REST API 参考](/ai/ai-toolkit/api-reference/rest-api#readselection)
+- 按照[代理部分](/ai/ai-toolkit/agents)中的指南为您的代理添加更多功能

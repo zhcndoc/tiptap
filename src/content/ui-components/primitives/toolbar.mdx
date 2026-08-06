@@ -1,8 +1,8 @@
 ---
 title: 将工具栏 UI 组件添加到 Tiptap
 meta:
-  title: 分隔符 | Tiptap UI 组件
-  description: 在水平或垂直容器中组织操作和控件。详见文档！
+  title: 工具栏 | Tiptap UI 组件
+  description: 在易于访问的水平工具栏中组织操作和控件。了解更多信息，请参阅文档！
   category: UI 组件
 component:
   name: 工具栏
@@ -19,7 +19,7 @@ tags:
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-一个用于在水平或垂直布局中组织操作和控件的容器。
+用于组织相关操作和控件，并支持键盘焦点游移的水平容器。
 
 <CodeDemo
   isScrollable
@@ -48,13 +48,13 @@ npx @tiptap/cli@latest add toolbar
 ```tsx
 import { Toolbar, ToolbarGroup, ToolbarSeparator } from '@/components/tiptap-ui-primitive/toolbar'
 import { Button } from '@/components/tiptap-ui-primitive/button'
-import { BoldIcon } from '@/components/icons/bold-icon'
-import { ItalicIcon } from '@/components/icons/italic-icon'
+import { BoldIcon } from '@/components/tiptap-icons/bold-icon'
+import { ItalicIcon } from '@/components/tiptap-icons/italic-icon'
 import { Spacer } from '@/components/tiptap-ui-primitive/spacer'
 
 export default function MyComponent() {
   return (
-    <Toolbar variant="default">
+    <Toolbar variant="fixed">
       <ToolbarGroup>
         <Button data-style="ghost">
           <BoldIcon className="tiptap-button-icon" />
@@ -84,13 +84,27 @@ export default function MyComponent() {
 
 ### Toolbar
 
-| 名称       | 类型                    | 默认值   | 描述                        |
-| ---------- | ----------------------- | -------- | --------------------------- |
-| variant    | 'default' \| 'floating' | 'default' | 工具栏样式变体             |
-| data-plain | boolean                 | undefined | 是否使用简单样式          |
+| 名称       | 类型                  | 默认值    | 描述               |
+| ---------- | --------------------- | --------- | ------------------ |
+| variant    | 'fixed' \| 'floating' | 'fixed'   | 工具栏样式变体     |
+| data-plain | boolean               | undefined | 是否使用纯样式     |
 
 ### ToolbarSeparator
 
-| 名称        | 类型                       | 默认值    | 描述                        |
-| ----------- | -------------------------- | ---------- | --------------------------- |
-| orientation | 'horizontal' \| 'vertical' | 'vertical' | 分隔符的方向                |
+| 名称        | 类型                       | 默认值     | 描述             |
+| ----------- | -------------------------- | ---------- | ---------------- |
+| orientation | 'horizontal' \| 'vertical' | 'vertical' | 分隔线的方向     |
+
+## 键盘行为
+
+工具栏遵循水平焦点游走模式。禁用的控件会被跳过，包括工具栏打开期间其禁用状态发生变化的情况。
+
+| 按键                      | 行为                                                               |
+| ------------------------- | ------------------------------------------------------------------ |
+| `ArrowLeft`、`ArrowRight` | 在启用的控件之间移动，并在任一端循环。                             |
+| `Home`、`End`             | 移动到第一个或最后一个启用的控件。                                 |
+| `Enter`                   | 激活获得焦点的控件。                                               |
+| `Space`                   | 使用浏览器的标准行为激活获得焦点的原生按钮。                       |
+| `Tab`、`Shift+Tab`        | 离开工具栏，而不是在其控件之间循环。                               |
+
+工具栏不会处理 `Escape`；拥有该工具栏的浮动元素或菜单可以处理此按键。

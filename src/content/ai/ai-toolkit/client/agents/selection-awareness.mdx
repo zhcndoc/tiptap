@@ -32,8 +32,8 @@ import { CodeDemo } from '@/components/CodeDemo'
 它默认包含在传递给 AI 模型的工具定义列表中。
 
 ```ts
-// 服务器端代码
-import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+// 服务端代码
+import { toolDefinitions } from '@tiptap-pro/client-ai-toolkit-ai-sdk'
 
 const definitions = toolDefinitions({
   // 启用 readSelection 工具。
@@ -62,8 +62,8 @@ const result = await toolkit.executeTool({
 如果你的应用不需要读写选区功能，可以通过在工具定义中将 `readSelection` 选项设置为 `false` 来禁用该工具。
 
 ```ts
-// 服务器端代码
-import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+// 服务端代码
+import { toolDefinitions } from '@tiptap-pro/client-ai-toolkit-ai-sdk'
 
 const definitions = toolDefinitions({
   // 禁用 readSelection 工具。
@@ -101,7 +101,7 @@ toolkit.setActiveSelection({ from: 10, to: 20 })
 
 `readSelection` 工具会告知 AI 选中的内容，但不会强制它只能编辑该选区。因此，AI 模型可能会编辑周围的段落，而不只是选中的内容。
 
-在我们的测试中，我们发现启用了推理的模型（例如将推理力度设为 `low` 的 `gpt-5.4-mini`）在被明确要求时，更能将编辑范围限制在选区内。
+在我们的测试中，我们发现，在启用推理功能的模型（例如将推理力度设置为 `low` 的 `gpt-5.6-luna`）被要求这样做时，更擅长将编辑范围限制在选区内。
 
 另一个方案是改为实现 [插入内容工作流](/ai/ai-toolkit/client/workflows/insert-content)。此工作流可用于限制可编辑区域，因此 AI 可以严格只重写选区。
 

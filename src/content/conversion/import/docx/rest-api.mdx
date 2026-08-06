@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v2.25.0
+    label: v2.39.1
 meta:
   title: 导入 DOCX REST API | Tiptap Conversion
   description: 了解如何通过 Conversion REST API 将 .docx 文件导入为 Tiptap JSON 格式。
@@ -14,6 +14,7 @@ meta:
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
 
@@ -34,6 +35,8 @@ DOCX 导入 API 会将 `.docx` 文件转换为 Tiptap 的 JSON 格式。它使�
   您还可以前往我们的 [Postman
   集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60) 体验 Document Conversion API。
 </Callout>
+
+<RegionalEndpoints />
 
 ## 导入 DOCX
 
@@ -211,7 +214,6 @@ DOCX 导入扩展提供了一个 `verbose` 配置属性，帮助您控制导入�
 ```bash
 curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -F "file=@/path/to/your/file.docx" \
     -F "placeholders={}"
 ```
@@ -221,7 +223,6 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
 ```bash
 curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -F "file=@/path/to/your/file.docx" \
     -F 'placeholders={"page":"page","total":"total"}'
 ```
@@ -295,6 +296,61 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
   }
 }
 ```
+
+## 响应中的页面布局和列表编号
+
+另外两个字段描述的是整个文档，而不是文档内容。
+
+| 字段               | 类型    | 描述                                                                                                                                                           |
+| ------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pageLayout`       | `Object` | 从文档的节属性中读取的页面大小、方向和边距。值的单位为 twips。请参阅[应用页面布局](#应用页面布局)。                |
+| `numberingFormats` | `Array`  | 文档有序列表背后的编号定义。每个列表节点都带有一个 `numberingFormat` 属性，用于命名此处对应的条目。                      |
+
+当文档没有可报告的内容时，这两个字段都会被省略。
+
+将 `numberingFormats` 注册到编辑器中，以便列表保留其编号；同时将其传递给导出器，以便往返转换时保留编号。[有序列表编号](/conversion/export/docx/ordered-list-numbering)页面介绍了完整流程。
+
+### 应用页面布局
+
+`pageLayout` 报告的是 Word 中的设置，而不是[Pages 扩展](/pages/getting-started/overview)所采用的设置，因此在使用前需要进行转换：
+
+```json
+{
+  "width": 12240,
+  "height": 15840,
+  "orientation": "portrait",
+  "margins": { "top": 1440, "right": 1440, "bottom": 1440, "left": 1440, "header": 720, "footer": 720 }
+}
+```
+
+每个度量值的单位都是 twips，而 Pages 的 `setPageFormat` 需要像素和 `id`。请使用 ConvertKit 的 OOXML 注册表中的 `twipsToPixels`，而不是自行编写转换逻辑，这样数值才能与转换服务使用的数值保持一致：
+
+```ts
+import { twipsToPixels } from '@tiptap-pro/extension-convert-kit/ooxml-registry'
+
+// 对于没有节属性的文档，该字段不存在。
+if (pageLayout) {
+  editor.commands.setPageFormat({
+    id: 'docx-import',
+    width: twipsToPixels(pageLayout.width),
+    height: twipsToPixels(pageLayout.height),
+    margins: {
+      top: twipsToPixels(pageLayout.margins.top),
+      right: twipsToPixels(pageLayout.margins.right),
+      bottom: twipsToPixels(pageLayout.margins.bottom),
+      left: twipsToPixels(pageLayout.margins.left),
+    },
+  })
+}
+```
+
+`header` 和 `footer` 边距没有对应的 `setPageFormat` 设置，因此将它们省略。
+
+<Callout variant="info" title="使用共享的单位辅助函数">
+  OOXML 注册表导出了管道两端使用的转换函数，包括 `twipsToPixels`、`pixelsToTwips`、`halfPointsToPixels`、`emuToPixels` 和 `twipsToPoints`，以及 `TWIPS_PER_PIXEL` 等常量。使用这些函数可以让你的数值与导入器和导出器中的数值完全一致。自行编写计算逻辑通常会导致文档往返转换后出现轻微偏差。
+</Callout>
+
+当注册了 Pages 扩展时，[编辑器扩展](/conversion/import/docx/editor-extension)会为你完成此转换，因此只有在 REST 路径中才需要手动进行转换。
 
 ## 响应中的评论
 
@@ -386,16 +442,15 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
 ```bash
 curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -F "file=@/path/to/your/file.docx" \
     -F "extractCssStyles=true"
 ```
 
 ### 响应字段
 
-| Field       | Type     | Description                                                                                                                                                                                                                                             |
+| 字段        | 类型     | 描述                                                                                                                                                                                                                                             |
 | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cssStyles` | `Object` | An object keyed by CSS selector, where each value is an object of CSS properties. Empty (`{}`) when the document has no extractable default styles. The field is omitted from the response entirely when `extractCssStyles` is not set or is `"false"`. |
+| `cssStyles` | `Object` | 以 CSS 选择器为键的对象，其中每个值都是一个 CSS 属性对象。当文档没有可提取的默认样式时为空对象（`{}`）。当未设置 `extractCssStyles` 或其值为 `"false"` 时，该字段会完全从响应中省略。 |
 
 ### 支持的选择器
 
@@ -461,41 +516,58 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
 
 您可以通过请求体中的 `prosemirrorNodes` 和 `prosemirrorMarks` 覆盖导入时的默认 `node/mark` 类型。如果您的编辑器使用自定义的 `nodes/marks`，希望导入的 `JSON` 采用它们，则需要提供这些映射。
 
-例如，如果您的 schema 使用名为 `textBlock` 的自定义节点替代默认的段落，可以在请求体中包含 `"{\"textBlock\":\"paragraph\"}"`。
+在每个条目中，键是默认类型名称，值是您希望在导入的 JSON 中使用的名称。例如，如果您的架构将段落称为 `textBlock`，请在请求体中发送 `"{\"paragraph\":\"textBlock\"}"`，这样每个导入的段落都会成为 `textBlock`。
 
-您也可以类似地调整标题、列表、加粗或斜体等标记。
+您也可以类似地调整标题、列表以及粗体或斜体等标记。名称区分大小写，因此请严格使用下方列出的名称。
 
 #### 默认节点
 
-| Name                | Description                                                              |
-| ------------------- | ------------------------------------------------------------------------ |
-| `paragraph`         | 定义用于段落转换的 ProseMirror 类型                                       |
-| `heading`           | 定义用于标题转换的 ProseMirror 类型                                         |
-| `blockquote`        | 定义用于引用块转换的 ProseMirror 类型                                       |
-| `codeblock`         | 定义用于代码块转换的 ProseMirror 类型                                       |
-| `bulletlist`       | 定义用于无序列表转换的 ProseMirror 类型                                      |
-| `orderedlist`      | 定义用于有序列表转换的 ProseMirror 类型                                      |
-| `listitem`         | 定义用于列表项转换的 ProseMirror 类型                                        |
-| `hardbreak`        | 定义用于硬换行转换的 ProseMirror 类型                                        |
-| `horizontalrule`   | 定义用于水平分割线转换的 ProseMirror 类型                                     |
-| `table`            | 定义用于表格转换的 ProseMirror 类型                                          |
-| `tablecell`        | 定义用于表格单元格转换的 ProseMirror 类型                                     |
-| `tableheader`      | 定义用于表头转换的 ProseMirror 类型                                          |
-| `tablerow`         | 定义用于表格行转换的 ProseMirror 类型                                        |
-| `image`            | 定义用于图片转换的 ProseMirror 标记                                          |
-| `footnoteReference` | 定义用于脚注引用转换的 ProseMirror 类型                                      |
-| `endnoteReference` | 定义用于尾注引用转换的 ProseMirror 类型                                      |
+| 名称                | 描述                                                              |
+| ------------------- | ----------------------------------------------------------------- |
+| `paragraph`         | 定义段落转换所使用的 ProseMirror 类型                             |
+| `heading`           | 定义标题转换所使用的 ProseMirror 类型                              |
+| `blockquote`        | 定义块引用转换所使用的 ProseMirror 类型                            |
+| `bulletList`        | 定义无序列表转换所使用的 ProseMirror 类型                          |
+| `orderedList`       | 定义有序列表转换所使用的 ProseMirror 类型                          |
+| `listItem`          | 定义列表项转换所使用的 ProseMirror 类型                            |
+| `hardBreak`         | 定义硬换行转换所使用的 ProseMirror 类型                            |
+| `horizontalRule`    | 定义水平线转换所使用的 ProseMirror 类型                            |
+| `table`             | 定义表格转换所使用的 ProseMirror 类型                              |
+| `tableCell`         | 定义表格单元格转换所使用的 ProseMirror 类型                        |
+| `tableHeader`       | 定义表格表头转换所使用的 ProseMirror 类型                          |
+| `tableRow`          | 定义表格行转换所使用的 ProseMirror 类型                            |
+| `image`             | 定义图像转换所使用的 ProseMirror 类型                              |
+| `footnoteReference` | 定义脚注引用转换所使用的 ProseMirror 类型                          |
+| `endnoteReference`  | 定义尾注引用转换所使用的 ProseMirror 类型                          |
+| `tableOfContents`   | 定义目录转换所使用的 ProseMirror 类型                              |
+| `pageBreak`         | 定义分页符转换所使用的 ProseMirror 类型                            |
+| `columns`           | 定义多栏节转换所使用的 ProseMirror 类型                            |
+| `column`            | 定义单栏转换所使用的 ProseMirror 类型                              |
+| `blockThread`       | 定义块级评论线程转换所使用的 ProseMirror 类型                      |
+| `bookmark`          | 定义书签目标转换所使用的 ProseMirror 类型                          |
 
 #### 默认标记
 
-| Name            | Description                                                         |
-| --------------- | ------------------------------------------------------------------- |
-| `bold`          | 定义用于加粗转换的 ProseMirror 标记                                         |
-| `italic`        | 定义用于斜体转换的 ProseMirror 标记                                         |
-| `underline`     | 定义用于下划线转换的 ProseMirror 标记                                       |
-| `strikethrough` | 定义用于删除线转换的 ProseMirror 标记                                       |
-| `link`          | 定义用于链接转换的 ProseMirror 标记                                         |
-| `code`          | 定义用于代码转换的 ProseMirror 标记                                         |
+| 名称            | 描述                                                         |
+| --------------- | ------------------------------------------------------------ |
+| `bold`          | 定义粗体转换所使用的 ProseMirror 标记                         |
+| `italic`        | 定义斜体转换所使用的 ProseMirror 标记                         |
+| `underline`     | 定义下划线转换所使用的 ProseMirror 标记                       |
+| `strikethrough` | 定义删除线转换所使用的 ProseMirror 标记                       |
+| `link`          | 定义链接转换所使用的 ProseMirror 标记                         |
+| `superscript`   | 定义上标转换所使用的 ProseMirror 标记                         |
+| `subscript`     | 定义下标转换所使用的 ProseMirror 标记                         |
+| `inlineThread`  | 定义行内评论线程转换所使用的 ProseMirror 标记                 |
+
+<Callout variant="info" title="代码块和行内代码目前无法重命名">
+  代码块类型和行内代码标记始终会分别导入为 `codeBlock` 和 `code`。目前通过 `prosemirrorNodes` 或 `prosemirrorMarks` 重命名它们不会生效。如果您的架构使用不同的名称，请在导入后进行映射。
+</Callout>
+
+#### 将 Word 样式映射到标记
+
+`prosemirrorMarks` 接受第二种类型的条目。当键是 Word 字符样式的名称，而不是上述标记之一时，任何使用该样式的文本运行都会获得您指定的标记。例如，`"{\"Strong\":\"bold\"}"` 表示每个使用 `Strong` 样式的文本运行都会获得 `bold` 标记。
+
+您可以通过这种方式将自定义 Word 样式引入您的架构。有关完整的操作流程，请参阅[自定义标记映射](/conversion/import/docx/custom-mark-mapping)。
 
 ## 支持与限制
 

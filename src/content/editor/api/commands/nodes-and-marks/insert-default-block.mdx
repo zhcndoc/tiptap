@@ -1,0 +1,44 @@
+---
+title: insertDefaultBlock 命令
+meta:
+  title: insertDefaultBlock 命令 | Tiptap 编辑器文档
+  description: 在 Tiptap 中使用 insertDefaultBlock 命令，在指定位置插入架构的默认块。更多信息请参阅文档！
+  category: 编辑器
+---
+
+`insertDefaultBlock` 命令会在指定位置插入架构的默认内容块类型。块类型会使用 `defaultBlockAt()` 自动确定，因此由架构决定在插入位置适合插入什么内容。
+
+这对于插入上下文相关的空块非常有用，例如在文档或引用块中插入段落，而无需硬编码节点类型。
+
+当指定位置无法插入有效的默认块时，该命令会返回 `false`（例如，当位置位于文本块内部时）。它不会静默地重新定位。
+
+## 参数
+
+`options: InsertDefaultBlockOptions`
+
+- `pos: number | ResolvedPos` – 插入块的位置。接受数值偏移量或已解析的 ProseMirror 位置。默认为当前光标位置。
+- `attrs: Record<string, any>` – 应用于插入节点的属性。仅保留节点类型 `spec.attrs` 中定义的键；未知属性将被过滤掉。
+- `content: Content | ProseMirrorNode | Fragment` – 要插入块中的内容。接受纯文本、HTML 字符串或 ProseMirror 节点/片段。
+- `updateSelection: boolean` – 是否将选区移动到新插入的块。默认为 `true`。
+
+## 使用 insertDefaultBlock 命令
+
+```js
+// 在当前选择位置插入
+editor.commands.insertDefaultBlock()
+
+// 在指定位置插入
+editor.commands.insertDefaultBlock({ pos: 0 })
+
+// 插入文本内容
+editor.commands.insertDefaultBlock({ pos: 0, content: 'Hello' })
+
+// 插入 HTML 内容
+editor.commands.insertDefaultBlock({ pos: 0, content: '<strong>bold</strong>' })
+
+// 插入标题（当标题是该位置的默认块时）
+editor.commands.insertDefaultBlock({ pos: 0, attrs: { level: 2 }, content: 'Title' })
+
+// 插入时不更新选择
+editor.commands.insertDefaultBlock({ pos: 0, content: 'Hello', updateSelection: false })
+```

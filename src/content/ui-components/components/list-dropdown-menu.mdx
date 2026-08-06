@@ -112,7 +112,7 @@ export default function MyEditor() {
 | onOpenChange        | (isOpen: boolean) => void                            | -                                         | 下拉菜单打开状态变化时的回调函数         |
 | portal              | boolean                                              | false                                     | 是否在 Portal 中渲染下拉菜单             |
 
-## Hooks
+## 钩子
 
 ### `useListDropdownMenu()`
 
@@ -129,7 +129,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/tiptap-ui-primitive/dropdown-menu'
-import { ButtonGroup } from '@/components/tiptap-ui-primitive/button'
+import { ButtonGroup } from '@/components/tiptap-ui-primitive/button-group'
 
 function MyListDropdown() {
   const { filteredLists, canToggle, isActive, isVisible, Icon, activeType } = useListDropdownMenu({
@@ -164,24 +164,24 @@ function MyListDropdown() {
 
 #### 属性
 
-| 名称                  | 类型                | 默认值                                   | 描述                                       |
-| --------------------- | ------------------- | ----------------------------------------- | -------------------------------------------- |
-| editor                | Editor \| null      | undefined                               | Tiptap 编辑器实例                          |
-| types                 | ListType[]          | ["bulletList", "orderedList", "taskList"] | 要显示在下拉菜单中的列表类型数组            |
-| hideWhenUnavailable   | boolean             | false                                   | 是否在没有可用列表类型时隐藏下拉菜单          |
+| 名称                | 类型                | 默认值                                   | 描述                              |
+| ------------------- | ------------------- | ---------------------------------------- | --------------------------------- |
+| editor              | Editor \| null      | undefined                                | Tiptap 编辑器实例                 |
+| types               | ListType[]          | ["bulletList", "orderedList", "taskList"] | 要显示在下拉菜单中的列表类型数组 |
+| hideWhenUnavailable | boolean             | false                                    | 是否在没有可用列表类型时隐藏下拉菜单 |
 
 #### 返回值
 
-| 名称            | 类型                    | 描述                                       |
-| --------------- | ----------------------- | ------------------------------------------ |
-| isVisible       | boolean                 | 下拉菜单是否应该显示                        |
-| activeType      | ListType \| undefined   | 当前激活的列表类型                          |
-| isActive        | boolean                 | 是否有列表类型当前处于激活状态              |
-| canToggle       | boolean                 | 是否可以切换任何列表类型                    |
-| types           | ListType[]              | 配置中的列表类型数组                        |
-| filteredLists   | ListOption[]            | 根据可用类型过滤后的列表选项数组            |
-| label           | string                  | 下拉菜单的辅助功能文本标签                    |
-| Icon            | React.FC                | 用于当前激活列表类型或默认图标的组件         |
+| 名称          | 类型                  | 描述                               |
+| ------------- | --------------------- | ---------------------------------- |
+| isVisible     | boolean               | 下拉菜单是否应该显示               |
+| activeType    | ListType \| undefined | 当前激活的列表类型                 |
+| isActive      | boolean               | 是否有列表类型当前处于激活状态     |
+| canToggle     | boolean               | 是否可以切换任何列表类型           |
+| types         | ListType[]            | 配置中的列表类型数组               |
+| filteredLists | ListOption[]          | 根据可用类型过滤后的列表选项数组   |
+| label         | string                | 下拉菜单的辅助功能文本标签         |
+| Icon           | React.FC              | 用于当前激活列表类型或默认图标的组件 |
 
 ## 工具函数
 
@@ -268,7 +268,7 @@ console.log('当前列表类型:', activeType)
 #### 参数
 
 | 名称             | 类型             | 描述                      |
-| ---------------- | ---------------- | -------------------------- |
+| ---------------- | ------------ | -------------------------- |
 | editor           | Editor \| null   | Tiptap 编辑器实例          |
 | availableTypes   | ListType[]       | 要检查的列表类型数组        |
 

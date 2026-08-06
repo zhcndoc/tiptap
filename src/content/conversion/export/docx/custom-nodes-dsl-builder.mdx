@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.20.0
+    label: v0.26.1
 meta:
   title: DOCX 自定义节点的 DSL 构建器 | Tiptap Conversion
   description: 一个带类型、流畅的 TypeScript API，用于编写 DOCX 自定义节点 DSL。提供编译时包含安全性、每个属性的自动补全，以及与 REST API 消费的相同线缆格式。
@@ -220,7 +220,7 @@ textRun({
 
 ### `externalHyperlink(props)`
 
-包裹一个或多个 `TextRun` 子元素的行内元素。`link` 属性在类型层面是**必需**的，因此 `externalHyperlink({})` 会导致 TypeScript 错误。
+包裹一个或多个 `TextRun` 子元素的行内元素。`link` 属性在类型层面是**必需的**，因此 `externalHyperlink({})` 会导致 TypeScript 错误。
 
 ```ts
 externalHyperlink({ link: ref('node.attrs.href') }).children([
@@ -451,7 +451,7 @@ childrenInline({
 
 ### `applyMarks` 的适用范围更窄
 
-`textRun().applyMarks(...)` 和 `externalHyperlink().applyMarks(...)` 仅接受 `'node'` 或 `marks('node')...` 构建器。这里的 wire format 会拒绝 `'default'` 和 `'none'`，因为它们只适用于子节点标记。
+`textRun().applyMarks(...)` 和 `externalHyperlink().applyMarks(...)` 仅接受 `'node'` 或 `marks('node')...` 构建器。这里的线格式会拒绝 `'default'` 和 `'none'`，因为它们只适用于子节点标记。
 
 构建器会在运行时强制执行这一点：将 `marks('default')` 传给 `applyMarks` 时会抛出有帮助的错误，而不是生成一个日后会导致 DSL 编译器失败的负载。
 
@@ -471,17 +471,17 @@ textRun().applyMarks(marks('default')) //              ✗ 在构建时抛出
 // 段落只接受行内子节点。
 paragraph().children(childrenBlock())
 //                  ^^^^^^^^^^^^^^^^
-// Type 'ChildrenBlockBuilder' is not assignable to type 'ParagraphChildSpec'.
+// 类型“ChildrenBlockBuilder”不能赋给类型“ParagraphChildSpec”。
 
 // Table.rows 需要 TableRow 构建器。
 table().rows(paragraph())
 //           ^^^^^^^^^^^
-// Type 'ParagraphBuilder' is not assignable to type 'TableRowBuilder'.
+// 类型“ParagraphBuilder”不能赋给类型“TableRowBuilder”。
 
 // TableRow 的子节点必须是 TableCell 构建器。
 tableRow().children([tableRow()])
 //                   ^^^^^^^^^^
-// Type 'TableRowBuilder' is not assignable to type 'TableCellBuilder'.
+// 类型“TableRowBuilder”不能赋给类型“TableCellBuilder”。
 
 // TableCell 的子节点是块级；会拒绝行内子节点委托。
 tableCell().children(childrenInline())
@@ -490,17 +490,17 @@ tableCell().children(childrenInline())
 // TextRun 是叶子节点，没有子节点。
 textRun({ text: 'hi' }).children
 //                       ^^^^^^^^
-// Property 'children' does not exist on type 'TextRunBuilder'.
+// 类型“TextRunBuilder”上不存在属性“children”。
 
 // externalHyperlink.link 是必需的。
 externalHyperlink({})
 //                ^^
-// Property 'link' is missing in type '{}' but required in type 'ExternalHyperlinkProps'.
+// 类型“{}”中缺少属性“link”，但类型“ExternalHyperlinkProps”中要求该属性。
 
 // applyMarks 拒绝 'default' / 'none'。
 textRun().applyMarks('default')
 //                   ^^^^^^^^^
-// Argument of type '"default"' is not assignable to parameter of type 'ApplyMarksPolicy | MarkPolicyBuilder'.
+// 类型“"default"”不能赋给类型“ApplyMarksPolicy | MarkPolicyBuilder”。
 ```
 
 这些规则与运行时的 [`DOCX_DSL_INVALID_CONTEXT`](/conversion/export/docx/custom-nodes-dsl#error-codes) 规则一一对应：约束相同，只是更早暴露。
@@ -511,7 +511,7 @@ textRun().applyMarks('default')
 
 `styleOverrides` 的一种常见模式是：先声明一个带边框和底纹的命名 `Hintbox` 段落样式，然后在 DSL 规则中通过 `style: 'Hintbox'` 引用它。现在，`paragraph()` 构建器直接暴露了 `border` 和 `shading` 属性，因此装饰可以直接内联在元素上——不再需要 `styleOverrides` 块。
 
-The named-style label still has a job: **round-trip identity**. The DOCX writer emits `<w:pStyle w:val="Hintbox"/>` whether or not `Hintbox` is declared in `styles.xml`. The import side reads that pStyle to reconstruct the matching custom node.
+命名样式标签仍然有其作用：**往返一致性标识**。无论 `Hintbox` 是否在 `styles.xml` 中声明，DOCX 写入器都会生成 `<w:pStyle w:val="Hintbox"/>`。导入端会读取该 pStyle，以重建匹配的自定义节点。
 
 ```ts
 docxNode('hintbox')
@@ -537,7 +537,7 @@ docxNode('hintbox')
   .toJSON()
 ```
 
-This pairs naturally with [`cssStyles.extractFromDocument`](/conversion/export/docx/css-to-docx): let CSS handle headings, body fonts, lists, and other generic selectors; let the DSL handle anything tied to a custom node type.
+这与 [`cssStyles.extractFromDocument`](/conversion/export/docx/css-to-docx) 配合得十分自然：让 CSS 处理标题、正文​​字体、列表和其他通用选择器；让 DSL 处理与自定义节点类型相关的内容。
 
 <Callout variant="warning" title="OOXML 陷阱：`solid` 底纹会绘制前景">
   在 OOXML 中，带有 `w:val="solid"` 的 `<w:shd>` 会以 100% 覆盖率绘制**前景**。`fill`
@@ -792,8 +792,8 @@ import type {
 
 ## 相关内容
 
-- [Custom-nodes DSL (JSON reference)](/conversion/export/docx/custom-nodes-dsl)：wire format 的完整规范性描述。builder 只是其上的一层语法糖；有关运行时语义、错误代码和资源限制，请查阅参考文档。
-- [Function-based custom nodes](/conversion/export/docx/custom-nodes)：仅用于浏览器内自定义的 JavaScript 回调变体。
-- [CSS to DOCX](/conversion/export/docx/css-to-docx)：与 builder 自然配合，用于通用与自定义的分离。
-- [Style overrides](/conversion/export/docx/styles)：手动命名样式声明。对于希望向 Word 的样式选择器公开的字符/段落样式，它仍然有用；但仅仅用于装饰自定义节点时已不再需要。
+- [自定义节点 DSL（JSON 参考）](/conversion/export/docx/custom-nodes-dsl)：wire format 的完整规范性描述。构建器只是其上的一层语法糖；有关运行时语义、错误代码和资源限制，请查阅参考文档。
+- [基于函数的自定义节点](/conversion/export/docx/custom-nodes)：仅用于浏览器内自定义的 JavaScript 回调变体。
+- [CSS 转 DOCX](/conversion/export/docx/css-to-docx)：与构建器自然配合，用于通用与自定义的分离。
+- [样式覆盖](/conversion/export/docx/styles)：手动命名样式声明。对于希望向 Word 的样式选择器公开的字符/段落样式，它仍然有用；但仅仅用于装饰自定义节点时已不再需要。
 - [DOCX REST API](/conversion/export/docx/rest-api)：相同的 `customNodeDsl` 载荷，通过 HTTP 发送。

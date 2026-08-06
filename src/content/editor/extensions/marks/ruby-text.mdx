@@ -1,0 +1,154 @@
+---
+title: Ruby 文本扩展
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@tiptap/extension-ruby-text?label=version
+    url: https://www.npmjs.com/package/@tiptap/extension-ruby-text
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@tiptap/extension-ruby-text.svg
+    url: https://npmcharts.com/compare/@tiptap/extension-ruby-text?minimal=true
+    label: 下载量
+extension:
+  name: Ruby 文本
+  link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-ruby-text
+  description: 使用 HTML Ruby 注音添加阅读指南，包括振假名。
+  type: mark
+  icon: Languages
+meta:
+  title: Ruby 文本扩展 | Tiptap 编辑器文档
+  description: 为你的 Tiptap 编辑器添加 HTML Ruby 文本注释和振假名。
+  category: 编辑器
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+Ruby Text 扩展支持 [HTML ruby 注音标记](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby)。Ruby 注音标记为中日韩文本提供读音指南，例如日语中的振假名。它与 Ruby 编程语言无关。
+
+<CodeDemo path="/Marks/RubyText" />
+
+## 安装
+
+```bash
+npm install @tiptap/extension-ruby-text
+```
+
+## 用法
+
+将扩展添加到编辑器，然后为选中的文本应用注音。
+
+```js
+import { Editor } from '@tiptap/core'
+import RubyText from '@tiptap/extension-ruby-text'
+
+const editor = new Editor({
+  extensions: [
+    // 其他扩展 ...
+    RubyText,
+  ],
+})
+
+editor.commands.setRubyText({ rt: 'とうきょう' })
+```
+
+该扩展会将注音渲染为 HTML ruby 文本。
+
+```html
+<ruby><rb>東京</rb><rt>とうきょう</rt></ruby>
+```
+
+<Callout title="HTML 解析" variant="info">
+  该扩展支持带有 `rb` 子元素或直接基础文本的 ruby 元素。它会忽略 `rp`
+  回退元素。不带 `rt` 注音的 ruby 元素不会被解析为 Ruby Text 标记。
+</Callout>
+
+## 设置
+
+### HTMLAttributes
+
+添加到渲染的 `<ruby>` 元素中的自定义 HTML 属性。
+
+默认值：`{}`
+
+```js
+RubyText.configure({
+  HTMLAttributes: {
+    class: 'ruby-text',
+  },
+})
+```
+
+### allowClickToEdit
+
+控制点击注音时是否打开内联编辑器。
+
+默认值：`true`
+
+```js
+RubyText.configure({
+  allowClickToEdit: false,
+})
+```
+
+只有在 Tiptap 编辑器可编辑时，内联编辑器才可用。禁用后，注音将以非交互编辑的方式显示。
+
+### renderAnnotationEditor
+
+渲染用于编辑注音的自定义元素。返回的元素会替换 `<rt>` 元素中的默认输入框。
+
+回调函数会接收当前的 `annotation`、Tiptap `editor` 以及 `submit` 和 `dismiss` 函数。调用 `submit(value)` 保存注音，或调用 `dismiss()` 关闭编辑器而不进行修改。在返回的元素或其某个后代元素上添加 `autofocus`，即可在编辑器打开时自动获得焦点。
+
+```js
+RubyText.configure({
+  renderAnnotationEditor: ({ annotation, submit, dismiss }) => {
+    const input = document.createElement('input')
+
+    input.value = annotation
+    input.setAttribute('autofocus', '')
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        dismiss()
+      }
+
+      if (event.key === 'Enter') {
+        submit(input.value)
+      }
+    })
+
+    return input
+  },
+})
+```
+
+未设置此选项时，扩展会渲染一个文本输入框。按下 <kbd>Enter</kbd> 保存注音，或按下 <kbd>Escape</kbd>、让输入框失去焦点来关闭编辑器。当 IME 输入法组合处于活动状态时，Enter 和 Escape 不会关闭输入框。
+
+## 命令
+
+### setRubyText()
+
+为选中的文本添加注音。
+
+```js
+editor.commands.setRubyText({ rt: 'かんじ' })
+```
+
+### toggleRubyText()
+
+为选中的文本添加或移除注音。
+
+```js
+editor.commands.toggleRubyText({ rt: 'かんじ' })
+```
+
+### unsetRubyText()
+
+移除注音。
+
+```js
+editor.commands.unsetRubyText()
+```
+
+## 源代码
+
+[packages/extension-ruby-text/](https://github.com/ueberdosis/tiptap/tree/main/packages/extension-ruby-text/)

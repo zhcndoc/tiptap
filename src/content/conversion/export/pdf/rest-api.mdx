@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v2.25.0
+    label: v2.39.1
 meta:
     title: PDF REST API | Tiptap 转换
     description: 了解如何使用 Tiptap Conversion REST API v2 将 Tiptap JSON 文档导出为 PDF 格式。
@@ -15,6 +15,7 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
+import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <EnterpriseCalloutAuto variant="pdf" renderMode="sidebar" disableWaitlist />
 
@@ -32,6 +33,8 @@ PDF 导出 API 将 Tiptap JSON 文档转换为 PDF 文件。
 <Callout title="查看 Postman 集合" variant="hint">
     您也可以通过访问我们的[Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60)来试用文档转换 API。
 </Callout>
+
+<RegionalEndpoints />
 
 ## 导出 PDF
 
@@ -63,24 +66,24 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 
 ### 请求体
 
-| Name                 | Type     | Description                                                            | Default     |
-| -------------------- | -------- | ---------------------------------------------------------------------- | ----------- |
-| `doc`                | `String` | 以字符串形式表示的 Tiptap JSON 文档                                      | `N/A`       |
-| `exportType`         | `string` | 期望的导出类型                                                       | `blob`      |
-| `styleOverrides`     | `Object` | 样式覆盖                                                        | `{}`        |
-| `pageSize`           | `Object` | 页面大小配置                                                | `undefined` |
-| `pageMargins`        | `Object` | 页面边距配置                                             | `undefined` |
-| `headers`            | `Object` | 页面页眉配置                                              | `undefined` |
-| `footers`            | `Object` | 页面页脚配置                                              | `undefined` |
-| `customFonts`        | `Array`  | 要提供的自定义字体文件（仅限本地部署）                      | `undefined` |
-| `tableOverrides`     | `Object` | 传递到 DOCX 步骤的表级渲染覆盖             | `undefined` |
-| `paragraphOverrides` | `Object` | 传递到 DOCX 步骤的段落级渲染覆盖         | `undefined` |
-| `textRunOverrides`   | `Object` | 传递到 DOCX 步骤的文本运行渲染覆盖                | `undefined` |
-| `tableCellOverrides` | `Object` | 传递到 DOCX 步骤的表格单元格渲染覆盖              | `undefined` |
-| `imageOverrides`     | `Object` | 传递到 DOCX 步骤的图片渲染覆盖                   | `undefined` |
-| `headerFooterOverrides` | `Object` | 作用于页眉/页脚内容的按字段覆盖（与元素覆盖相同的五个键）。参见 [元素覆盖](#element-overrides)。 | `undefined` |
-| `placeholders`       | `Object \| false` | 页码标记在纯文本页眉/页脚中的重命名映射（`{ page?, total? }`），与 `Pages.configure({ placeholders })` 匹配。传入 `false` 可禁用替换。参见 [自定义标记名称](/conversion/export/docx/rest-api#custom-token-names-placeholders)。 | `undefined` |
-| `customNodeDsl` | `Object` | 用于将自定义 Tiptap 节点渲染到导出文件中的 [自定义节点 DSL](/conversion/export/docx/custom-nodes-dsl) 规则。 | `undefined` |
+| 名称                     | 类型                | 描述                                                                 | 默认值     |
+| ------------------------ | ------------------- | -------------------------------------------------------------------- | ---------- |
+| `doc`                    | `String`            | 以字符串形式表示的 Tiptap JSON 文档                                  | `N/A`      |
+| `exportType`             | `string`            | 期望的导出类型                                                       | `blob`     |
+| `styleOverrides`         | `Object`            | 样式覆盖                                                             | `{}`       |
+| `pageSize`               | `Object`            | 页面大小配置                                                         | `undefined` |
+| `pageMargins`            | `Object`            | 页面边距配置                                                         | `undefined` |
+| `headers`                | `Object`            | 页面页眉配置                                                         | `undefined` |
+| `footers`                | `Object`            | 页面页脚配置                                                         | `undefined` |
+| `customFonts`            | `Array`             | 要提供的自定义字体文件（仅限本地部署）                               | `undefined` |
+| `tableOverrides`         | `Object`            | 传递到 DOCX 步骤的表级渲染覆盖                                       | `undefined` |
+| `paragraphOverrides`     | `Object`            | 传递到 DOCX 步骤的段落级渲染覆盖                                     | `undefined` |
+| `textRunOverrides`       | `Object`            | 传递到 DOCX 步骤的文本运行渲染覆盖                                   | `undefined` |
+| `tableCellOverrides`     | `Object`            | 传递到 DOCX 步骤的表格单元格渲染覆盖                                 | `undefined` |
+| `imageOverrides`         | `Object`            | 传递到 DOCX 步骤的图片渲染覆盖                                       | `undefined` |
+| `headerFooterOverrides`  | `Object`            | 作用于页眉/页脚内容的按字段覆盖（与元素覆盖相同的五个键）。参见 [元素覆盖](#element-overrides)。 | `undefined` |
+| `placeholders`           | `Object \| false`   | 页码标记在纯文本页眉/页脚中的重命名映射（`{ page?, total? }`），与 `Pages.configure({ placeholders })` 匹配。传入 `false` 可禁用替换。参见 [自定义标记名称](/conversion/export/docx/rest-api#custom-token-names-placeholders)。 | `undefined` |
+| `customNodeDsl`          | `Object`            | 用于将自定义 Tiptap 节点渲染到导出文件中的 [自定义节点 DSL](/conversion/export/docx/custom-nodes-dsl) 规则。 | `undefined` |
 
 #### 页面大小配置
 
@@ -108,7 +111,7 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 
 | 属性                | 类型                  | 说明                                                                                                          |
 | ------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `evenAndOddHeaders` | `boolean`             | 是否为奇数页和偶数页使用不同的页眉                                                              |
+| `evenAndOddHeaders` | `boolean`             | 是否为奇数页和偶数页使用不同的页眉                                                                              |
 | `differentFirstPage` | `boolean`             | 是否在首页使用不同的页眉。当为 `true` 时，第一页将使用 `first` 值而不是 `default`。 |
 | `default`           | `string \| Object`    | 每一页的标准默认页眉，或在启用 `evenAndOddHeaders` 时奇数页的页眉。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
 | `first`             | `string \| Object`    | 首页页眉。仅在 `differentFirstPage` 设置为 `true` 时使用。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
@@ -129,11 +132,11 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 
 | 属性                | 类型                  | 说明                                                                                                          |
 | ------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `evenAndOddFooters` | `boolean`             | 是否为奇数页和偶数页使用不同的页脚                                                              |
+| `evenAndOddFooters` | `boolean`             | 是否为奇数页和偶数页使用不同的页脚                                                                              |
 | `differentFirstPage` | `boolean`             | 是否在首页使用不同的页脚。当为 `true` 时，第一页将使用 `first` 值而不是 `default`。 |
 | `default`           | `string \| Object`    | 每一页的标准默认页脚，或在启用 `evenAndOddFooters` 时奇数页的页脚。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
-| `first`             | `string \| Object`    | 首页页脚。仅在 `differentFirstPage` 设置为 `true` 时使用。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
-| `even`              | `string \| Object`    | 在启用 `evenAndOddFooters` 选项时，偶数页的页脚。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
+| `first`              | `string \| Object`    | 首页页脚。仅在 `differentFirstPage` 设置为 `true` 时使用。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
+| `even`               | `string \| Object`    | 在启用 `evenAndOddFooters` 选项时，偶数页的页脚。可接受纯文本、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
 
 ### 带页眉和页脚的示例
 

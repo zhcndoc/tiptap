@@ -37,7 +37,7 @@ meta:
 ### 示例
 
 ```ts
-import { createProofreaderWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { createProofreaderWorkflow } from '@tiptap-pro/client-ai-toolkit-tool-definitions'
 import { Output, streamText } from 'ai'
 import { openai } from '@ai-sdk/openai'
 
@@ -48,10 +48,10 @@ const { content } = apiEndpointRequest
 const workflow = createProofreaderWorkflow()
 
 const result = streamText({
-  model: openai('gpt-5.4-mini'),
+  model: openai('gpt-5.6-luna'),
   // 系统提示
-  system: workflow.systemPrompt,
-  // 用户消息，包含内容和任务
+  instructions: workflow.systemPrompt,
+  // 包含文档内容和任务的用户消息
   prompt: JSON.stringify({
     content,
     task: '纠正所有语法和拼写错误',
@@ -81,8 +81,8 @@ const result = streamText({
 ### 示例
 
 ```ts
-import { createInsertContentWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
-import { streamText } from 'ai'
+import { createInsertContentWorkflow } from '@tiptap-pro/client-ai-toolkit-tool-definitions'
+import { createTextStreamResponse, streamText, toTextStream } from 'ai'
 import { openai } from '@ai-sdk/openai'
 
 // 从 API 端点请求中获取任务和选区信息
@@ -92,17 +92,17 @@ const { task, replace } = apiEndpointRequest
 const workflow = createInsertContentWorkflow()
 
 const result = streamText({
-  model: openai('gpt-5.4-mini'),
+  model: openai('gpt-5.6-luna'),
   // 系统提示
-  system: workflow.systemPrompt,
-  // 用户消息，包含任务和内容对象
+  instructions: workflow.systemPrompt,
+  // 包含任务和内容的 JSON 对象形式的用户消息
   prompt: JSON.stringify({
     task,
     replace,
   }),
 })
 
-return result.toTextStreamResponse()
+return createTextStreamResponse({ stream: toTextStream({ stream: result.stream }) })
 ```
 
 ## `proofreaderWorkflow`
@@ -170,7 +170,7 @@ const result = toolkit.proofreaderWorkflow({
 ### 示例
 
 ```ts
-import { createTiptapEditWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { createTiptapEditWorkflow } from '@tiptap-pro/client-ai-toolkit-tool-definitions'
 import { Output, streamText } from 'ai'
 import { openai } from '@ai-sdk/openai'
 
@@ -181,8 +181,8 @@ const { content, task } = apiEndpointRequest
 const workflow = createTiptapEditWorkflow()
 
 const result = streamText({
-  model: openai('gpt-5.4-mini'),
-  system: workflow.systemPrompt,
+  model: openai('gpt-5.6-luna'),
+  instructions: workflow.systemPrompt,
   prompt: JSON.stringify({ content, task, context }),
   output: Output.object({ schema: workflow.zodOutputSchema }),
 })
@@ -225,7 +225,10 @@ const toolkit = getAiToolkit(editor)
 // 获取带哈希的文档内容
 const { content } = toolkit.tiptapRead()
 
-const operations = await callApiEndpoint({ content, task: '使文本更正式' })
+const operations = await callApiEndpoint({
+  content: readResult.content,
+  task: 'Make the text more formal',
+})
 
 // 应用编辑操作
 const result = toolkit.tiptapEditWorkflow({
@@ -257,7 +260,7 @@ const result = toolkit.tiptapEditWorkflow({
 ### 示例
 
 ```ts
-import { createEditThreadsWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { createEditThreadsWorkflow } from '@tiptap-pro/client-ai-toolkit-tool-definitions'
 import { Output, streamText } from 'ai'
 import { openai } from '@ai-sdk/openai'
 
@@ -268,8 +271,8 @@ const { content, threads, task } = apiEndpointRequest
 const workflow = createEditThreadsWorkflow()
 
 const result = streamText({
-  model: openai('gpt-5.4-mini'),
-  system: workflow.systemPrompt,
+  model: openai('gpt-5.6-luna'),
+  instructions: workflow.systemPrompt,
   prompt: JSON.stringify({ content, threads, task }),
   output: Output.object({ schema: workflow.zodOutputSchema }),
 })
@@ -368,8 +371,8 @@ if (result.success) {
 ### 示例
 
 ```ts
-import { createTemplateWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
-import { Output, streamText } from 'ai'
+import { createTemplateWorkflow } from '@tiptap-pro/client-ai-toolkit-tool-definitions'
+import { createTextStreamResponse, Output, streamText, toTextStream } from 'ai'
 import { openai } from '@ai-sdk/openai'
 
 const { htmlTemplate, task } = apiEndpointRequest
@@ -377,13 +380,13 @@ const { htmlTemplate, task } = apiEndpointRequest
 const workflow = createTemplateWorkflow({ htmlTemplate })
 
 const result = streamText({
-  model: openai('gpt-5.4-mini'),
-  system: workflow.systemPrompt,
+  model: openai('gpt-5.6-luna'),
+  instructions: workflow.systemPrompt,
   prompt: JSON.stringify({ task, context }),
   output: Output.object({ schema: workflow.zodOutputSchema }),
 })
 
-return result.toTextStreamResponse()
+return createTextStreamResponse({ stream: toTextStream({ stream: result.stream }) })
 ```
 
 ## `templateWorkflow`
@@ -404,7 +407,8 @@ return result.toTextStreamResponse()
 ### 示例
 
 ```ts
-import { experimental_useObject as useObject } from '@ai-sdk/react'
+import { useEffect } from 'react'
+import { useObject } from '@ai-sdk/react'
 import { getAiToolkit } from '@tiptap-pro/client-ai-toolkit'
 import { z } from 'zod'
 
@@ -490,7 +494,7 @@ editor.commands.unsetTemplateSlot()
 
 从 Tiptap JSON 文档中返回字段名称的所有匹配模板字段出现实例。
 
-搜索涵盖 `_templateSlot`, `_templateIf` 和 `_templateAttributes`。每个匹配项包括节点内容以及存储在该字段出现实例上的可选 `_templateFieldMetadata` 对象。
+搜索涵盖 `_templateSlot`、`_templateIf` 和 `_templateAttributes`。每个匹配项包括节点内容以及存储在该字段出现实例上的可选 `_templateFieldMetadata` 对象。
 
 ### 参数
 
@@ -516,7 +520,7 @@ const matches = getTemplateFieldMatches({
   fieldName: 'intro',
 })
 
-matches.forEach(match => {
+matches.forEach((match) => {
   console.log(match.fieldType)
   console.log(match.metadata)
   console.log(match.content)

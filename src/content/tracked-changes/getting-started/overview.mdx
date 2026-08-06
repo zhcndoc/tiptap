@@ -11,6 +11,22 @@ meta:
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
+import { Requirements, RequirementItem } from '@/components/Requirements'
+import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+
+<Requirements>
+  <RequirementItem label="1. 获取访问权限">
+    <a href="https://tiptap.dev/contact-sales?form=tracked-changes">联系我们的团队</a>以获取付费的变更跟踪附加组件的访问权限。
+  </RequirementItem>
+  <RequirementItem label="2. 访问私有注册表">
+    变更跟踪扩展发布在 Tiptap 的私有 npm 注册表中。请按照[设置指南](/guides/pro-extensions)对 Tiptap 的私有 npm 注册表进行身份验证。
+  </RequirementItem>
+  <RequirementItem label="3. 安装扩展">
+    使用 npm 或你首选的软件包管理器从私有注册表安装扩展。
+  </RequirementItem>
+</Requirements>
+
+<EnterpriseCalloutAuto variant="tracked-changes" renderMode="sidebar" />
 
 将“Tracked Changes”扩展为协作编辑工作流启用建议模式。启用后，所有编辑都会以提议形式出现，可以被接受或拒绝，类似于文字处理软件中的变更跟踪。
 
@@ -18,29 +34,35 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ## 功能
 
-该扩展跟踪四种类型的变更：
+该扩展会跟踪七种类型的更改：
 
-- **插入** (`add`) — 添加到文档的新内容
-- **删除** (`delete`) — 标记为待移除的现有内容
-- **替换** (`replace`) — 被删除并同时替换为新内容的内容
-- **标记变更** (`markChange`) — 应用于现有文本的格式或其他标记级变更
+- **插入**（`add`）— 添加到文档中的新内容
+- **删除**（`delete`）— 标记为删除的现有内容
+- **替换**（`replace`）— 同时被删除并替换为新内容的内容
+- **标记更改**（`markChange`）— 应用于现有文本的格式或其他标记级别的更改
+- **块拆分**（`split`）— 按下 Enter 键添加的段落分隔
+- **列表缩进**（`sink`）— 使用 Tab 键将列表项嵌套到更深一层
+- **列表减少缩进**（`lift`）— 使用 Shift-Tab 将列表项向外移出一层
 
 每条建议都包含元数据，包括创建者、创建时间和唯一标识符。
 
 ## 主要功能
 
-- **建议模式** — 为每个用户单独切换跟踪的开关
-- **接受和拒绝** — 按单个、批量、范围或按用户审阅建议
-- **建议分组** — 连续编辑会自动合并为单条建议
-- **嵌套建议** — 不同作者在待处理建议堆栈中的编辑会作为它们自己的建议叠加，而不是覆盖原建议
-- **协作就绪** — 可与基于 Yjs 的实时协作配合使用
+- **建议模式** — 按用户切换跟踪的开启和关闭
+- **接受和拒绝** — 单独、批量、按范围或按用户审阅建议
+- **建议分组** — 连续编辑会自动合并为单个建议
+- **块拆分跟踪** — 按下 Enter 会标记段落分隔符本身，同时保持文本可读
+- **嵌套建议** — 待处理建议中的跨作者编辑会作为独立建议堆叠，而不会覆盖原建议
+- **支持协作** — 适用于基于 Yjs 的实时协作
 - **评论集成** — 将建议链接到评论线程，以支持审阅工作流
-- **原子节点支持** — 跟踪图片、水平分割线及其他非文本内容的变更
+- **Atom 节点支持** — 跟踪图片、水平线和其他非文本内容的更改
 - **表格支持** — 跟踪行、单元格和列的插入与删除，包括单元格选择
-- **完整查询 API** — 可通过程序查找、筛选和检查建议
+- **完整查询 API** — 以编程方式查找、筛选和检查建议
 
-## 下一步
+<EnterpriseCalloutAuto variant="tracked-changes" renderMode="inline" />
+
+## 后续步骤
 
 - [安装扩展](/tracked-changes/getting-started/install) 以开始使用
 - 学习 [基本用法](/tracked-changes/usage/basic-usage) 模式
-- 探索 [命令](/tracked-changes/api-reference/commands) 和 [工具函数](/tracked-changes/api-reference/utilities) API
+- 探索 [命令](/tracked-changes/api-reference/commands) 和 [工具函数](/tracked-changes/api-reference/utilities) API。

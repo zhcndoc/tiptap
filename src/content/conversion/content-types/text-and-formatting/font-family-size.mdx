@@ -41,13 +41,15 @@ new Editor({ extensions: [ConvertKit] })
 
 转换服务会读取 `<w:rFonts>` 中的 `w:ascii` 属性，如果 `w:ascii` 不存在，则回退到 `w:hAnsi`。原始属性值会按原样存储到 `textStyle.fontFamily` 中（例如，`"Courier New"`）。
 
-字体大小来自半磅单位的 `<w:sz>`，并会转换为像素：
+字体大小来自 `<w:sz>` 中的半点值，并使用 ConvertKit 的 OOXML 注册表中的 `halfPointsToPixels` 将其转换为像素：
 
-```
-pixels = halfPoints * 0.5 * (96 / 72)
+```ts
+import { halfPointsToPixels } from '@tiptap-pro/extension-convert-kit/ooxml-registry'
+
+halfPointsToPixels(24) // 12pt -> 16px
 ```
 
-结果会通过 `Math.round()` 四舍五入到最接近的整数像素。标准尺寸如 12pt（16px）、14pt（19px）和 18pt（24px）都能顺利转换。结果会存储为 `textStyle.fontSize`（例如，`"16px"`）。
+请使用该辅助函数，而不是自行编写算术运算，这样计算出的值才能与导入器完全一致。结果会通过 `Math.round()` 四舍五入到最接近的整数像素。12pt（16px）、14pt（19px）和 18pt（24px）等标准大小都可以无损转换。结果会存储为 `textStyle.fontSize`（例如，`"16px"`）。
 
 字母间距也会从文本运行上的 `<w:spacing>` 中提取（从 twips 转换为像素），并存储为 `textStyle.letterSpacing`。无论是 ConvertKit 自带的 `TextStyleKit` 还是 [CSS 注入](/conversion/import/docx/css-injection) 都不会渲染此属性。字母间距是“已提取但默认不渲染”的典型案例。要让它在编辑器中可见，请为 `TextStyle` 扩展一个 `letterSpacing` 属性，并在 `renderHTML` 中输出 `style="letter-spacing: ..."`。[转换内容的样式设置](/conversion/getting-started/guides/styling-converted-content#extending-extensions-for-unsupported-attributes) 指南中有可直接复制的示例。导出时不会保留字母间距。
 
@@ -73,10 +75,12 @@ npm install @tiptap-pro/extension-convert-kit
   从 DOCX 导入的值本身已经是单一字体名称，因此不会受到影响。
 </Callout>
 
-字体大小支持单位感知。没有单位的值，或 `px` 值，会被视为像素并转换为半磅：
+字体大小会识别单位。不带单位的值或带 `px` 的值会被视为像素，并通过 `pixelsToHalfPoints` 转换为半磅：
 
-```
-halfPoints = pixels * 1.5
+```ts
+import { pixelsToHalfPoints } from '@tiptap-pro/extension-convert-kit/ooxml-registry'
+
+pixelsToHalfPoints(16) // 16px -> 24 半磅（12pt）
 ```
 
 带有单位的值会按其单位处理，而不是当作像素读取：

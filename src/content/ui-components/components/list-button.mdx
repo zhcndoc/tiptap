@@ -76,7 +76,7 @@ export default function MyEditor() {
     <ListButton
       editor={editor}
       type="bulletList"
-      text="Bullet List"
+      text="项目符号列表"
       hideWhenUnavailable={true}
       showShortcut={true}
       onToggled={() => console.log('List toggled!')}
@@ -96,7 +96,7 @@ export default function MyEditor() {
 | onToggled           | () => void                                 | -        | 成功切换列表后触发的回调                           |
 | showShortcut        | boolean                                     | false    | 是否显示快捷键提示                                 |
 
-## Hooks
+## 钩子
 
 ### `useList()`
 
@@ -182,15 +182,16 @@ import { isListActive } from '@/components/tiptap-ui/list-button'
 const active = isListActive(editor, 'taskList')
 ```
 
-### `getListOption(type)`
+### `listLabels`、`listIcons` 和 `LIST_SHORTCUT_KEYS`
 
-获取指定列表类型的配置对象。
+用于构建自定义列表控件的按类型查找映射。每个映射都以 `ListType` 为键。
 
 ```tsx
-import { getListOption } from '@/components/tiptap-ui/list-button'
+import { LIST_SHORTCUT_KEYS, listIcons, listLabels } from '@/components/tiptap-ui/list-button'
 
-const option = getListOption('bulletList')
-// 返回示例: { label: "Bullet List", type: "bulletList", icon: ListIcon }
+const Icon = listIcons.bulletList // ListIcon
+const label = listLabels.bulletList // "Bullet List"
+const shortcut = LIST_SHORTCUT_KEYS.bulletList // "mod+shift+8"
 ```
 
 ## 键盘快捷键

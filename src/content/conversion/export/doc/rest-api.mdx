@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v2.25.0
+    label: v2.39.1
 meta:
     title: DOC REST API | Tiptap 转换
     description: 了解如何使用 Tiptap Conversion REST API v2 将 Tiptap JSON 文档导出为 DOC 格式（传统 Microsoft Word）。
@@ -15,6 +15,7 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
+import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <EnterpriseCalloutAuto variant="doc" renderMode="sidebar" disableWaitlist />
 
@@ -36,6 +37,8 @@ DOC 导出 API 将 Tiptap JSON 文档转换为 DOC 文件（传统 Microsoft Wor
 <Callout title="查看 Postman 集合" variant="hint">
     您也可以通过我们的 <a href="https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60" target="_blank" rel="noopener noreferrer">Postman 集合</a> 来体验文档转换 API。
 </Callout>
+
+<RegionalEndpoints />
 
 ## 导出 DOC
 
@@ -60,7 +63,7 @@ curl --output document.doc -X POST "https://api.tiptap.dev/v2/convert/export/doc
 
 ### 必填请求头
 
-| Name            | Description                                                                                                                               |
+| 名称            | 描述                                                                                                                               |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `Authorization` | 用于验证请求的 JWT 令牌。示例：`Bearer your-jwt-token`                                                                                   |
 | `Content-Type`  | 必须为 `application/json`                                                                                                                 |

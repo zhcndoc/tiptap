@@ -19,7 +19,7 @@ import { Callout } from '@/components/ui/Callout'
 
 - [React](https://react.dev/) + [Next.js](https://nextjs.org/)
 - [Vercel 提供的 AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
-- Tiptap AI 工具包
+- Tiptap AI 工具包。
 
 ## 项目概述
 
@@ -46,7 +46,7 @@ npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/react @ai-sdk/openai zo
 </Callout>
 
 ```bash
-npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
+npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/client-ai-toolkit-tool-definitions
 ```
 
 ## 服务器设置
@@ -66,8 +66,8 @@ npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/ai-toolkit-tool-definition
 ```ts
 // app/api/proofreader/route.ts
 import { openai } from '@ai-sdk/openai'
-import { createProofreaderWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
-import { Output, streamText } from 'ai'
+import { createProofreaderWorkflow } from '@tiptap-pro/client-ai-toolkit-tool-definitions'
+import { createTextStreamResponse, Output, streamText, toTextStream } from 'ai'
 
 export async function POST(req: Request) {
   const { content } = await req.json()
@@ -77,9 +77,9 @@ export async function POST(req: Request) {
   const workflow = createProofreaderWorkflow()
 
   const result = streamText({
-    model: openai('gpt-5.4-mini'),
+    model: openai('gpt-5.6-luna'),
     // 系统提示
-    system: workflow.systemPrompt,
+    instructions: workflow.systemPrompt,
     // 用户消息
     prompt: JSON.stringify({
       content,
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
     output: Output.object({ schema: workflow.zodOutputSchema }),
   })
 
-  return result.toTextStreamResponse()
+  return createTextStreamResponse({ stream: toTextStream({ stream: result.stream }) })
 }
 ```
 
@@ -109,10 +109,14 @@ export async function POST(req: Request) {
 // app/proofreader/page.tsx
 'use client'
 
-import { experimental_useObject as useObject } from '@ai-sdk/react'
+import { useObject } from '@ai-sdk/react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { AiToolkit, getAiToolkit, proofreaderWorkflowOutputSchema } from '@tiptap-pro/client-ai-toolkit'
+import {
+  AiToolkit,
+  getAiToolkit,
+  proofreaderWorkflowOutputSchema,
+} from '@tiptap/pro-client-ai-toolkit'
 import { useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
@@ -261,7 +265,7 @@ await toolkit.proofreaderWorkflow({
 })
 ```
 
-请参阅 [review changes](/ai/ai-toolkit/client/agents/review-changes) 指南，了解更多关于审阅界面的信息。
+请参阅 [审阅更改](/ai/ai-toolkit/client/agents/review-changes) 指南，了解更多关于审阅界面的信息。
 
 请查看 [AI Toolkit 演示](https://github.com/ueberdosis/ai-toolkit-demos)，了解如何将 AI Toolkit 工作流程与审阅界面结合使用的示例。
 

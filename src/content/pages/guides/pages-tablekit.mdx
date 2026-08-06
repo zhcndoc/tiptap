@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: experiment
   - type: version
-    label: v0.2.4
+    label: v0.2.11
 meta:
   title: PagesTableKit | Tiptap Pages
   description: 为 Pages 分页扩展量身定制的表格扩展。适用于任何 Pages 配置；与 DOCX 导入配合使用，可忠实渲染 Word 文档。实验性功能；API 可能会更改。
@@ -31,16 +31,16 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
   </RequirementItem>
 </Requirements>
 
-## Which setup is right for me?
+## 哪种设置适合我？
 
-<Callout title="Two scenarios, one editor stack" variant="info">
-  PagesTableKit is useful in both scenarios, and the difference is how table content gets into the editor, not how you configure the editor. The base extensions are the same; the second scenario adds the Import extension on top.
+<Callout title="两种场景，同一套编辑器堆栈" variant="info">
+  PagesTableKit 在这两种场景中都很有用，区别在于表格内容如何进入编辑器，而不是如何配置编辑器。基础扩展相同；第二种场景会在此基础上添加 Import 扩展。
 </Callout>
 
-- **Pages only workflow.** You are building a paginated editor (print-friendly layouts, letter-style documents, reports), and you need tables to paginate correctly. The content is handwritten.
-- **Pages + DOCX import workflow.** You are importing `.docx` files and rendering them in a paginated editor. You need tables to paginate, **and** to faithfully reflect the original DOCX formatting (declared width, row height, indentation).
+- **仅 Pages 工作流。** 你正在构建一个分页编辑器（适合打印的布局、信件样式的文档、报告），并且需要表格能够正确分页。内容由手动输入。
+- **Pages + DOCX 导入工作流。** 你正在导入 `.docx` 文件，并在分页编辑器中渲染这些文件。你需要表格能够分页，**并且忠实反映原始 DOCX 的格式**（声明的宽度、行高、缩进）。
 
-Both scenarios use the same editor stack: `ConvertKit` (for schema) + `TableKit` (for pagination-safe tables) + `Pages` (for layout). Scenario B additionally adds `ImportDocx`. Each section below will indicate which scenario it applies to.
+两种场景都使用相同的编辑器堆栈：`ConvertKit`（用于架构）+ `TableKit`（用于支持安全分页的表格）+ `Pages`（用于布局）。场景 B 会额外添加 `ImportDocx`。下面的每个部分都会说明其适用的场景。
 
 <CodeDemo isPro path="/Extensions/ImportDocxCssStylesPages" />
 
@@ -200,7 +200,7 @@ import { TableKit } from '@tiptap-pro/extension-pages-tablekit'
 TableKit,
 ```
 
-每个打包的扩展都可以配置（或用 `false` 禁用），通过 `TableKit.configure()`：
+每个打包的扩展都可以通过 `TableKit.configure()` 进行配置（或设置为 `false` 以禁用）：
 
 ```ts
 TableKit.configure({

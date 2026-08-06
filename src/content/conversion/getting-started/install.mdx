@@ -23,15 +23,15 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 ## 身份验证
 
-Most conversion extensions and REST API endpoints require a signed JWT. The DOCX export extension is the exception and works without credentials.
+大多数转换扩展和 REST API 端点都需要签名 JWT。DOCX 导出扩展是例外，无需凭据即可使用。
 
-Set the `aud` claim to `"Convert"` and grant the format and direction actions the integration uses. To create a key pair and sign a token, see [Authentication](/authentication).
+将 `aud` 声明设置为 `"Convert"`，并授予集成所使用的格式和方向操作。要创建密钥对并签署令牌，请参阅 [身份验证](/authentication)。
 
-### Actions
+### 操作
 
-Each conversion direction has its own action, so a token scoped to exactly the operations a feature needs never silently widens when a new direction is added:
+每个转换方向都有自己的操作，因此，令牌的作用域始终严格限定为某项功能所需的操作；即使新增了转换方向，也不会被静默扩大：
 
-| Action | Grants |
+| 操作 | 授予权限 |
 | --- | --- |
 | `Convert:Import:Docx` | 导入 DOCX |
 | `Convert:Export:Docx` | 导出 DOCX |
@@ -45,7 +45,7 @@ Each conversion direction has its own action, so a token scoped to exactly the o
 
 不带明确格式的旧路由（`POST /v2/import`、`POST /v2/export`）分别检查 `Convert:Import:Docx` 和 `Convert:Export:Docx`。
 
-### Example token
+### 示例令牌
 
 ```json
 {
@@ -62,13 +62,13 @@ Each conversion direction has its own action, so a token scoped to exactly the o
 
 使用此令牌请求 `POST /v2/export/pdf` 会成功。`POST /v2/export/odt` 会返回 `permission_denied` 错误，指出缺少的操作权限。
 
-Send the token in the `Authorization: Bearer <jwt>` header for REST calls, or pass it through the `token` option on the editor extensions. You do not send an App ID.
+对于 REST 调用，请将令牌放在 `Authorization: Bearer <jwt>` 标头中；对于编辑器扩展，请通过 `token` 选项传递令牌。请求只需要令牌即可。
 
-<Callout title="Importing comments" variant="hint">
-  导入包含批注的文档时，会将这些批注写入 Document Server。请将 `Documents:Write` 与你的 `Convert:Import:*` 操作一并包含，这样导入才能保存这些批注。参见 [cross-service actions](/authentication#cross-service-actions)。
+<Callout title="导入批注" variant="hint">
+  导入包含批注的文档时，会将这些批注写入 Document Server。请将 `Documents:Write` 与你的 `Convert:Import:*` 操作一并包含，这样导入才能保存这些批注。参见 [跨服务操作](/authentication#cross-service-actions)。
 </Callout>
 
-### Error responses
+### 错误响应
 
 当令牌缺少所需权限时，服务会返回 `403 Forbidden`，内容如下：
 
@@ -81,8 +81,8 @@ Send the token in the `Authorization: Bearer <jwt>` header for REST calls, or pa
 
 如果环境的订阅根本不包含 Convert，则响应为 `403`，且 `code: feature_not_available`。上游云错误会被清晰映射：`429 rate_limited`、`503 service_unavailable`，以及 `401 token_expired` / `signature_invalid`，这样你的客户端就能区分无效令牌和临时性的云端问题。
 
-<Callout title="Maintaining an existing integration?" variant="info">
-  之前的 App ID 和 secret 流程记录在 [Legacy authentication](/authentication/legacy) 中，并且仍然可用。
+<Callout title="正在维护现有集成？" variant="info">
+  之前的 App ID 和 secret 流程记录在 [旧版身份验证](/authentication/legacy) 中，并且仍然可用。
 </Callout>
 
 ## 安装包
@@ -115,11 +115,10 @@ npm install @tiptap-pro/extension-export-epub
 npm install @tiptap-pro/extension-export-markdown
 ```
 
-<Callout title="DOCX 导出不需要身份验证" variant="info">
-  `@tiptap-pro/extension-export-docx` 包完全在客户端处理转换。无需 JWT、
-  App ID 或服务器调用。
+<Callout title="DOCX 导出无需身份验证" variant="info">
+  `@tiptap-pro/extension-export-docx` 软件包完全在客户端处理转换。无需令牌或服务器调用。
 </Callout>
 
-## Next Step
+## 下一步
 
-Select your format in the sidebar to view the complete setup and configuration guide for each extension and REST API.
+在侧边栏中选择您的格式，以查看每个扩展和 REST API 的完整设置与配置指南。

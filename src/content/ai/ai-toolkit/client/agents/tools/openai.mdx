@@ -6,7 +6,7 @@ meta:
   category: AI 工具包
 ---
 
-`@tiptap-pro/ai-toolkit-openai` 包提供了可以添加到你基于 [OpenAI 的 JavaScript SDK](https://github.com/openai/openai-node) 构建的 AI 代理中的工具定义。
+`@tiptap-pro/client-ai-toolkit-openai` 包提供了工具定义，你可以将其添加到使用 [OpenAI 的 JavaScript SDK](https://github.com/openai/openai-node) 构建的 AI 代理中。
 
 模型生成的工具调用随后可以在客户端使用 [`executeTool` 方法](/ai/ai-toolkit/client/api-reference/execute-tool) 来执行。
 
@@ -15,20 +15,20 @@ meta:
 安装该包。
 
 ```bash
-npm install @tiptap-pro/ai-toolkit-openai
+npm install @tiptap-pro/client-ai-toolkit-openai
 ```
 
 将工具定义提供给你的 OpenAI 模型。
 
 ```ts
 import OpenAI from 'openai'
-import { toolDefinitions } from '@tiptap-pro/ai-toolkit-openai'
+import { toolDefinitions } from '@tiptap-pro/client-ai-toolkit-openai'
 
 const openai = new OpenAI()
 
 const response = await openai.responses.create({
-  model: 'gpt-5.4-mini',
-  input: [{ role: 'user', content: '帮助我编辑这份文档' }],
+  model: 'gpt-5.6-luna',
+  input: [{ role: 'user', content: 'Help me edit this document' }],
   tools: toolDefinitions(),
 })
 ```
@@ -37,7 +37,7 @@ const response = await openai.responses.create({
 
 ```ts
 import OpenAI from 'openai'
-import { toolDefinitions } from '@tiptap-pro/ai-toolkit-openai'
+import { toolDefinitions } from '@tiptap-pro/client-ai-toolkit-openai'
 
 const openai = new OpenAI()
 
@@ -60,8 +60,8 @@ const customTools = [
 ]
 
 const response = await openai.responses.create({
-  model: 'gpt-5.4-mini',
-  input: [{ role: 'user', content: '天气怎么样，顺便帮我编辑这份文档' }],
+  model: 'gpt-5.6-luna',
+  input: [{ role: 'user', content: 'What is the weather like and help me edit this document' }],
   tools: [...toolDefinitions(), ...customTools],
 })
 ```

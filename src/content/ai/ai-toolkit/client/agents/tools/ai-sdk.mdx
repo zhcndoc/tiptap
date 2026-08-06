@@ -8,7 +8,7 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 
-`@tiptap-pro/ai-toolkit-ai-sdk` 包提供了可添加到你基于 [Vercel 的 AI SDK](https://ai-sdk.dev/) 构建的 AI 代理中的工具定义。
+`@tiptap-pro/client-ai-toolkit-ai-sdk` 包提供了工具定义，你可以将其添加到使用 [Vercel 的 AI SDK](https://ai-sdk.dev/) 构建的 AI 代理中。
 
 模型生成的工具调用随后可以使用 [`executeTool` 方法](/ai/ai-toolkit/client/api-reference/execute-tool) 来执行。
 
@@ -17,7 +17,7 @@ import { Callout } from '@/components/ui/Callout'
 安装该包。
 
 ```bash
-npm install @tiptap-pro/ai-toolkit-ai-sdk
+npm install @tiptap-pro/client-ai-toolkit-ai-sdk
 ```
 
 将工具定义传递给 `generateText` 或 `streamText` 函数的 `tools` 参数。
@@ -25,13 +25,13 @@ npm install @tiptap-pro/ai-toolkit-ai-sdk
 ```ts
 import { openai } from '@ai-sdk/openai'
 import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage } from 'ai'
-import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { toolDefinitions } from '@tiptap-pro/client-ai-toolkit-ai-sdk'
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
   const agent = new ToolLoopAgent({
-    model: openai('gpt-5.4-mini'),
+    model: openai('gpt-5.6-luna'),
     tools: toolDefinitions(),
   })
 
@@ -47,14 +47,14 @@ export async function POST(req: Request) {
 ```ts
 import { openai } from '@ai-sdk/openai'
 import { createAgentUIStreamResponse, ToolLoopAgent, tool, UIMessage } from 'ai'
-import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { toolDefinitions } from '@tiptap-pro/client-ai-toolkit-ai-sdk'
 import { z } from 'zod'
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
   const agent = new ToolLoopAgent({
-    model: openai('gpt-5.4-mini'),
+    model: openai('gpt-5.6-luna'),
     tools: {
       // AI 工具包中的工具定义
       ...toolDefinitions(),

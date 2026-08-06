@@ -55,15 +55,15 @@ export default function MyEditor() {
 
 #### 属性
 
-| 名称                   | 类型               | 默认值       | 说明                                            |
-| ---------------------- | ------------------ | ------------ | ----------------------------------------------- |
-| `editor`               | `Editor \| null`   | `undefined`  | Tiptap 编辑器实例                               |
-| `text`                 | `string`           | `undefined`  | 按钮的可选文字标签                              |
-| `hideWhenUnavailable`  | `boolean`          | `false`      | 当无法删除时隐藏按钮                            |
-| `onDeleted`            | `() => void`       | `undefined`  | 成功删除后触发的回调                            |
-| `showShortcut`         | `boolean`          | `false`      | 显示键盘快捷键标识（如果可用）                  |
+| 名称                  | 类型             | 默认值      | 说明                           |
+| --------------------- | ---------------- | ----------- | ------------------------------ |
+| `editor`              | `Editor \| null` | `undefined` | Tiptap 编辑器实例              |
+| `text`                | `string`         | `undefined` | 按钮的可选文字标签             |
+| `hideWhenUnavailable` | `boolean`        | `false`     | 当无法删除时隐藏按钮           |
+| `onDeleted`           | `() => void`     | `undefined` | 成功删除后触发的回调           |
+| `showShortcut`        | `boolean`        | `false`     | 显示键盘快捷键标识（如果可用） |
 
-## Hooks
+## 钩子
 
 ### `useDeleteNode()`
 
@@ -151,19 +151,23 @@ const success = deleteNodeAtPosition(editor, position, nodeSize)
 
 - **Backspace（退格键）**：删除选中的节点或块
 
-使用 `<DeleteNodeButton />` 组件或 `useDeleteNode()` 钩子时，该快捷键会自动注册。请注意，这增强了默认退格键的行为，使其适用于节点选择。
+使用 `<DeleteNodeButton />` 组件或 `useDeleteNode()` hook 时，会自动注册该快捷键。编辑器扩展会继续保留对其已处理的 Backspace 事件的所有权；共享删除快捷键仅会在事件尚未处理时运行，并且只有在删除成功后才会阻止浏览器默认行为。成功的位置删除操作会单独创建一个撤销步骤。
 
-## 需求
+## Requirements
 
-### 依赖
+### Dependencies
 
-- `@tiptap/react` - Tiptap React 核心集成
-- `react-hotkeys-hook` - 键盘快捷键管理
+- `@tiptap/react` - Core Tiptap React integration
+- `@tiptap/pm` - ProseMirror selection and history utilities
+- `@tiptap/starter-kit` - Core editor extensions and keymaps
+- `react-hotkeys-hook` - Keyboard shortcut management
 
-### 引用组件
+### Referenced Components
 
-- `use-tiptap-editor`（钩子）
-- `button`（基础组件）
-- `badge`（基础组件）
-- `tiptap-utils`（库）
-- `trash-icon`（图标）
+- `use-tiptap-editor` (hook)
+- `use-is-breakpoint` (hook)
+- `button` (primitive)
+- `badge` (primitive)
+- `tiptap-utils` (lib)
+- `trash-icon` (icon)
+- `styles` (shared styles)

@@ -1,20 +1,19 @@
 ---
 title: REST API
 meta:
-  title: REST API | Tiptap Server AI Toolkit
+  title: REST API | Tiptap Server AI 工具包
   description: Server AI 工具包 REST API 端点的完整参考。
   category: AI 工具包
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-Server AI Toolkit REST API 包含用于获取可用工具和执行工具调用的端点
+服务器 AI 工具包 REST API 包含用于获取可用工具和执行工具调用的端点
 
-<Callout title="旧版端点" variant="info">
-  V4 是 Server AI Toolkit 端点当前使用的 API 版本。V3 端点已弃用；新项目请使用
+<Callout title="遗留端点" variant="info">
+  V4 是服务器 AI 工具包端点的当前 API 版本。V3 端点已弃用；新工作请使用
   v4。v4 还将工具定义端点重命名为 `/v4/ai/toolkit/fetch-tools`；
-  诸如 `/v3/ai/toolkit/tools` 之类的旧名称属于 v3 API。有关旧版
-  端点，请参阅 [v3 REST API
+  `/v3/ai/toolkit/tools` 等旧名称属于 v3 API。有关遗留端点，请参阅 [v3 REST API
   参考](/ai/ai-toolkit/api-reference/rest-api-v3)。
 </Callout>
 
@@ -69,7 +68,7 @@ const JWT_TOKEN = await new SignJWT({
 
 可选字段可以省略、`null` 或 `undefined`。
 
-## 终端点
+## 终端点。
 
 ### 获取工具定义
 
@@ -96,6 +95,7 @@ POST /v4/ai/toolkit/fetch-tools
 - `getThreads` (`boolean`, optional)
 - `editThreads` (`boolean`, optional)
 - `readDocument` (`boolean`, optional)
+- `readSelection` (`boolean`, optional)
 - `proofread` (`boolean | { meta?: string }`, optional): 当你希望 AI 在每次校对编辑中
   包含一个额外的元数据字段时设置 `meta`，例如简短说明。
 
@@ -138,25 +138,21 @@ HTTP 错误会返回：
 
 此端点可能返回：
 
-- `401` with `access_control_auth_required` or `missing_token`: 请求未包含
-  Tiptap Access Control JWT。
-- `401` with an access-control code such as `token_expired` or `signature_invalid`: JWT
-  被 Access Control 拒绝。
-- `403` with `feature_not_available`: 当前环境未启用 Server AI Toolkit。
-- `403` with `insufficient_permissions`: JWT 未授予 `AI:Toolkit`。
-- `403` with `origin_not_allowed`: 请求的 `Origin` 不允许用于当前环境。
-- `422` with `validation_failed`: 请求体与端点 schema 不匹配。响应中
-  包含 `error.issues`，即验证问题列表。
-- `429` with `rate_limited`: Access Control 速率限制了身份验证。
-- `429`: 服务端速率限制器阻止了该请求。此响应使用不同的顶层
-  结构：
+- `401` with `access_control_auth_required` or `missing_token`: 请求未包含 Tiptap Access Control JWT。
+- `401` with an access-control code such as `token_expired` or `signature_invalid`: JWT 未通过 Access Control 的验证。
+- `403` with `feature_not_available`: 环境未启用服务器端 AI Toolkit。
+- `403` with `insufficient_permissions`: JWT 未授予 `AI:Toolkit` 权限。
+- `403` with `origin_not_allowed`: 请求的 `Origin` 不被该环境允许。
+- `422` with `validation_failed`: 请求体与端点 schema 不匹配。响应包含 `error.issues`，其中列出验证问题。
+- `422` with `tool_config_validation_failed`: 请求体中提供的工具配置无效。响应包含 `error.data.issues`，其中列出验证问题。
+- `429` with `rate_limited`: Access Control 对身份验证请求进行了速率限制。
+- `429`: 服务器端速率限制器阻止了请求。此响应使用不同的顶层结构：
   - `error` (`string`): 速率限制错误消息。
-  - `retryAfter` (`number`, optional): 重试前等待的秒数。
-  - `limit` (`number`, optional): 当前窗口的请求限制。
-  - `window` (`number`, optional): 速率限制窗口，单位为秒。
+  - `retryAfter` (`number`, optional): 重试前需要等待的秒数。
+  - `limit` (`number`, optional): 当前时间窗口内的请求限制。
+  - `window` (`number`, optional): 速率限制窗口的秒数。
 - `500` with `internal_server_error`: 发生了意外的服务器错误。
-- `500` with `missing_cloud_api_token`: 云服务缺少内部身份验证
-  配置。
+- `500` with `missing_cloud_api_token`: 云服务缺少内部身份验证配置。
 - `503` with `service_unavailable`: Access Control 暂时不可用。
 
 ### 执行工具
@@ -299,7 +295,8 @@ POST /v4/ai/toolkit/stream-tool
 - `format` (`'json' | 'shorthand'`, optional, default: `'json'`): 工具输入和
   输出的文档格式。参见 [Tiptap Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand)。
 - `reviewOptions` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`): 控制编辑是直接应用还是作为可审阅更改。
-- `delayMs` (`number`, optional, default: `5`): `tiptapEdit` 增量输出中每个字符的延迟，单位为毫秒。必须介于 `0` 和 `1000` 之间。使用 `0` 可尽可能快地应用编辑。
+- `delayMs` (`number`, optional, default: `5`): `tiptapEdit` 增量输出中每个字符的延迟，单位为毫秒。必须介于
+  `0` 和 `1000` 之间。使用 `0` 可尽可能快地应用编辑。
 
 然后发送：
 
@@ -396,8 +393,8 @@ POST /v4/ai/toolkit/stream-tool
 - `totalNodeCount`（`number`）：文档中顶层节点的总数。
 - `nodeRange`（`[number, number]`）：读取的顶层节点范围。
 - `content`（`JSONContent[] | string`）：所返回范围内的文档内容。当 `format` 为
-  `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand`
-  时，这是一个 Tiptap Shorthand 字符串。
+  `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为
+  `shorthand` 时，这是一个 Tiptap Shorthand 字符串。
 
 错误响应：
 
@@ -429,6 +426,30 @@ POST /v4/ai/toolkit/stream-tool
 - `success`（`false`）：表示编辑请求失败。
 - `reason`（`'validationError' | 'unexpectedError'`）：错误类别。
 - `error`（`string`）：错误信息。
+
+### `readSelection`
+
+读取用户当前的编辑器选择内容。
+
+此工具仅兼容 Tiptap Cloud 协作文档。在[多字段文档](/editor/extensions/functionality/collaboration#field)中，仅支持 `default` 字段。
+
+工具配置（`tool.config`）：
+
+- `user`（`string`，必需）：要读取其选择内容的用户 ID。必须与[协作光标扩展](/editor/extensions/functionality/collaboration-caret)中定义的 `user.id` 相同。
+
+工具输出（`tool.output`）：
+
+成功响应：
+
+- `success`（`true`）：表示请求成功。
+- `isEmpty`（`false`）：已解析出非空选择内容。
+- `content`（`JSONContent[] | string`）：包含选择内容的文档节点，并使用特殊标记界定选择范围。
+- `nodeRange`（`[number, number]`）：选择所在的节点范围。
+
+成功响应（空选择）：
+
+- `success`（`true`）：表示请求成功。
+- `isEmpty`（`true`）：选择内容为空。
 
 ### `getThreads`
 

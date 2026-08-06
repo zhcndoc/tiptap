@@ -42,7 +42,17 @@ meta:
   text-decoration: underline;
 }
 
-/* 按用户样式化建议 */
+/* 标记更改（添加或删除的格式） */
+[data-suggestion-type="markChange"] {
+  background-color: rgba(255, 200, 0, 0.2);
+}
+
+/* 建议的块拆分（由跟踪的 Enter 创建的块） */
+[data-suggestion-type="blockSplit"] {
+  box-shadow: inset 2px 0 0 rgb(59, 130, 246);
+}
+
+/* 按用户设置建议样式 */
 [data-suggestion-user="user-123"] {
   border-bottom: 2px solid blue;
 }
@@ -52,18 +62,42 @@ meta:
 
 | 属性 | 描述 |
 | --- | --- |
-| `data-suggestion` | 建议标记元素上始终存在 |
-| `data-suggestion-id` | 唯一建议 ID |
-| `data-suggestion-type` | `'add'`、`'delete'`、`'replaceDeletion'` 或 `'replaceInsertion'` |
+| `data-suggestion` | 始终存在于建议标记元素上 |
+| `data-suggestion-id` | 唯一的建议 ID |
+| `data-suggestion-type` | 内部类型：`'add'`、`'delete'`、`'replaceDeletion'`、`'replaceInsertion'`、`'markChange'`、`'sink'`、`'lift'` 或 `'blockSplit'` |
 | `data-suggestion-user` | 创建建议的用户 ID |
-| `data-suggestion-created` | 建议创建时的 ISO 时间戳 |
+| `data-suggestion-created` | 创建建议时的 ISO 时间戳 |
 | `data-suggestion-user-metadata` | JSON 序列化的用户元数据对象（仅在设置了 `userMetadata` 时存在） |
+
+`data-suggestion-type` 保存的是内部的 [SuggestionNodeType](/tracked-changes/api-reference/types#suggestionnodetype)，而不是公开类型。[块拆分](/tracked-changes/usage/advanced-usage#block-splits) 在这里是 `blockSplit`，尽管查询 API 将其报告为 `split`。
+
+## 区块拆分标记
+
+建议的区块拆分还会在**拆分前**的区块末尾渲染一个标记，用于显示断点添加的位置。默认标记是一个 class 为 `tiptap-tracked-change-split-marker` 的 `<span>`：
+
+```css
+.tiptap-tracked-change-split-marker {
+  color: rgb(59, 130, 246);
+  opacity: 0.7;
+  margin-left: 0.15em;
+  user-select: none;
+}
+```
+
+每个标记还带有 `data-tracked-change-split="true"`，因此你也可以定位自定义标记：
+
+```css
+[data-tracked-change-split] {
+  color: rgb(59, 130, 246);
+}
+```
+
+该标记是一个小部件，而不是文档内容。此扩展始终为其设置 `contenteditable="false"`，并禁用选择和指针事件，因此无法在其中输入、选中或点击。使用 [`blockSplitMarker`](/tracked-changes/getting-started/install#blocksplitmarker) 更改字符或元素，或将其设置为 `null` 以不渲染任何内容。
 
 ## 已知限制
 
 此扩展处于积极开发中，未来几个月将会有重大变更。已知以下限制，未来版本会予以解决：
 
-- 属性或标记的更改（如切换加粗、修改链接 URL）不会被追踪
-- 节点类型的更改（如将段落转换为标题）不会被追踪
-- 插入新行或移除基于文本的节点（如删除整个段落）未被处理
-- 没有明确的建议模式能单独渲染“干净”的文档版本与追踪版本并存
+- 仅支持对行内建议进行嵌套。不支持跨越整个块的嵌套建议
+- 不会跟踪节点类型的更改（例如将段落转换为标题）
+- 没有显式的建议模式，可以在跟踪版本旁渲染一个单独的“干净”文档

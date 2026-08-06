@@ -17,8 +17,8 @@ import { CodeDemo } from '@/components/CodeDemo'
   [跟踪更改](/tracked-changes/getting-started/overview) 扩展目前处于 Alpha 阶段。
 </Callout>
 
-<Callout title="继续自 AI agent chatbot 指南" variant="info">
-  本指南承接 [AI agent chatbot
+<Callout title="继续自 AI 智能体聊天机器人指南" variant="info">
+  本指南承接 [AI 智能体聊天机器人
   指南](/ai/ai-toolkit/client/agents/ai-agent-chatbot)。请先阅读它。
 </Callout>
 
@@ -40,14 +40,14 @@ API 端点与 [AI agent chatbot 指南](/ai/ai-toolkit/client/agents/ai-agent-ch
 ```ts
 // app/api/tracked-changes/route.ts
 import { openai } from '@ai-sdk/openai'
-import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { toolDefinitions } from '@tiptap-pro/client-ai-toolkit-ai-sdk'
 import { createAgentUIStreamResponse, ToolLoopAgent, type UIMessage } from 'ai'
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
   const agent = new ToolLoopAgent({
-    model: openai('gpt-5.4-mini'),
+    model: openai('gpt-5.6-luna'),
     instructions:
       '你是一个可以编辑富文本文档的助手。在使用 tiptapEdit 之前先使用 tiptapRead。',
     tools: toolDefinitions(),

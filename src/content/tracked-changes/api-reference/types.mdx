@@ -15,8 +15,11 @@ meta:
 查询 API 返回的公开建议类型：
 
 ```ts
-type SuggestionType = 'add' | 'delete' | 'replace' | 'markChange'
+type SuggestionType = 'add' | 'delete' | 'replace' | 'markChange' | 'sink' | 'lift' | 'split'
 ```
+
+- `sink` 和 `lift` 是待处理的列表项嵌套更改（Tab 和 Shift-Tab）
+- `split` 是建议的[块拆分](/tracked-changes/usage/advanced-usage#block-splits)。接受后会保留两个块，拒绝后会将它们重新合并
 
 ## SuggestionMarkType
 
@@ -25,6 +28,18 @@ type SuggestionType = 'add' | 'delete' | 'replace' | 'markChange'
 ```ts
 type SuggestionMarkType = 'add' | 'delete' | 'replaceDeletion' | 'replaceInsertion' | 'markChange'
 ```
+
+## SuggestionNodeType
+
+存储在节点属性中的内部类型。涵盖每一种标记级类型，以及只能存在于节点级别的结构变体：
+
+```ts
+type SuggestionNodeType = SuggestionMarkType | 'sink' | 'lift' | 'blockSplit'
+```
+
+`blockSplit` 是公共 `split` 类型在节点级别的对应类型。它出现在 `suggestionType` 节点属性和 `data-suggestion-type` DOM 属性中，因此在 CSS 选择器中使用 `blockSplit`，而在筛选或根据 `suggestion.type` 进行切换时使用 `split`。
+
+使用 `nodeSuggestionTypeToSuggestionType` 进行转换（参见[类型辅助工具](#type-helpers)）。
 
 ## SuggestionMarkChangeOperation
 
@@ -46,7 +61,7 @@ type SuggestionMarkChange = {
 }
 ```
 
-## Suggestion
+## 建议
 
 表示文档中发现的建议：
 
@@ -90,7 +105,7 @@ type Suggestion = {
 
 作者 A 插入 `"Hello world"`，然后作者 B 在 `"world"` 前插入 `"great "`（嵌套在 A 的新增内容中）：
 
-| Suggestion        | `text`          | `fullText`            |
+| 建议              | `text`          | `fullText`            |
 | ----------------- | --------------- | --------------------- |
 | A (add, user-1)   | `"Hello world"` | `"Hello great world"` |
 | B (add, user-2)   | `"great "`      | `"great "`            |
@@ -124,6 +139,12 @@ outer.fullText // "Hello great world"  → 当你需要字面范围时使用
 
 在构建更丰富的 UI 时，请使用 `insertedNodes` 和 `deletedNodes` 来检查节点类型和属性，例如在建议文本旁显示节点类型徽标。
 
+对于 `split` 建议：
+- `text` 始终为空，因为块级拆分既不会添加文本，也不会删除文本
+- `from` 和 `to` 覆盖第二个块，即拆分后创建的块
+
+请为拆分建议自行渲染标签（例如“段落分隔”），而不要使用 `suggestion.text`。
+
 ## SuggestionMarkAttrs
 
 存储在建议标记上的属性：
@@ -155,7 +176,7 @@ type SuggestionChangedEventPayload = {
 
 - `oldSuggestion` — 变更前建议的快照
 - `suggestion` — 当前（更新后的）建议
-- `transaction` — 导致变更的 ProseMirror 事务
+- `transaction` — 导致变更的 ProseMirror 事务。
 
 ## SuggestionRangeChangedEventPayload
 
@@ -171,6 +192,14 @@ type SuggestionRangeChangedEventPayload = {
 }
 ```
 
+## BlockSplitMarkerRenderer
+
+构建在块拆分处显示的标记元素。每个标记调用一次，因此每次都必须返回一个新元素：
+
+```ts
+type BlockSplitMarkerRenderer = () => HTMLElement
+```
+
 ## TrackedChangesOptions
 
 扩展的配置选项：
@@ -184,10 +213,13 @@ type TrackedChangesOptions = {
   onSuggestionCreate?: (suggestion: Suggestion) => void
   onSuggestionAccept?: (id: string) => void
   onSuggestionReject?: (id: string) => void
+  blockSplitMarker?: string | HTMLElement | BlockSplitMarkerRenderer | null
 }
 ```
 
-## 类型辅助
+- `blockSplitMarker` — 在建议的块拆分处渲染的标记。默认为 `'¶'`。将其设置为 `null` 可不渲染标记。请参阅 [blockSplitMarker](/tracked-changes/getting-started/install#blocksplitmarker)。
+
+## 类型辅助工具
 
 该扩展导出了用于处理建议类型的常量和辅助函数：
 
@@ -198,6 +230,7 @@ import {
   isDeleteLikeType,
   isReplaceMarkType,
   markTypeToSuggestionType,
+  nodeSuggestionTypeToSuggestionType,
 } from '@tiptap-pro/extension-tracked-changes'
 
 // 常量
@@ -206,6 +239,10 @@ SUGGESTION_TYPES.DELETE           // 'delete'
 SUGGESTION_TYPES.REPLACE_DELETION  // 'replaceDeletion'
 SUGGESTION_TYPES.REPLACE_INSERTION // 'replaceInsertion'
 SUGGESTION_TYPES.MARK_CHANGE      // 'markChange'
+SUGGESTION_TYPES.SINK             // 'sink'
+SUGGESTION_TYPES.LIFT             // 'lift'
+SUGGESTION_TYPES.BLOCK_SPLIT      // 'blockSplit' (节点级别)
+SUGGESTION_TYPES.SPLIT            // 'split' (查询 API)
 
 // 检查标记类型是否表示添加内容（匹配 'add' 和 'replaceInsertion'）
 isAddLikeType('add') // true
@@ -221,4 +258,8 @@ isReplaceMarkType('replaceDeletion') // true
 // 将标记级别类型转换为公开建议类型
 markTypeToSuggestionType('replaceDeletion') // 'replace'
 markTypeToSuggestionType('add') // 'add'
+
+// 将节点级别类型转换为面向用户的建议类型
+nodeSuggestionTypeToSuggestionType('blockSplit') // 'split'
+nodeSuggestionTypeToSuggestionType('replaceInsertion') // 'replace'
 ```

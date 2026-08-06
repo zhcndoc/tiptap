@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.3.0
+    label: v0.8.0
 meta:
   title: ConvertKit | Tiptap Conversion
   description: 一个打包的 Tiptap 扩展，用于为从 DOCX 导入的内容配置编辑器。
@@ -90,17 +90,17 @@ new Editor({
 
 ConvertKit 在单个 `@tiptap-pro/extension-convert-kit` 包中捆绑了 **30** 个扩展。下面的列表是参考资料，帮助你了解编辑器 schema 中会出现哪些内容；你不需要单独安装或注册这些扩展。
 
-| Category   | Extensions                                                                                                                                                          |
+| 类别       | 扩展                                                                                                                                                              |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Core       | `Document`, `Text`, `Paragraph`_, `Heading`_                                                                                                                        |
-| Marks      | `Bold`, `Italic`, `Underline`, `Strike`, `Code`, `Link`                                                                                                             |
-| Blocks     | `Blockquote`, `HorizontalRule`, `HardBreak`, `CodeBlock`, `PageBreak`                                                                                               |
-| Lists      | `BulletList`, `OrderedList`, `ListItem`, `ListKeymap`, `OrderedListNumbering`†                                                                                      |
-| Media      | `Image`\*                                                                                                                                                           |
-| Styling    | `TextStyleKit` (`TextStyle`, `Color`, `BackgroundColor`, `FontFamily`, `FontSize`, `LineHeight`), `TextAlign`, `Highlight` (multicolor), `Superscript`, `Subscript` |
-| UI helpers | `Dropcursor`, `Gapcursor`                                                                                                                                           |
-| History    | `UndoRedo`                                                                                                                                                          |
-| Tables     | `ConvertTableKit` (Table*, TableRow*, TableCell*, TableHeader*)                                                                                                     |
+| 核心       | `Document`、`Text`、`Paragraph`_、`Heading`_                                                                                                                        |
+| 标记       | `Bold`、`Italic`、`Underline`、`Strike`、`Code`、`Link`                                                                                                             |
+| 块         | `Blockquote`、`HorizontalRule`、`HardBreak`、`CodeBlock`、`PageBreak`                                                                                               |
+| 列表       | `BulletList`、`OrderedList`、`ListItem`、`ListKeymap`、`OrderedListNumbering`†                                                                                      |
+| 媒体       | `Image`\*                                                                                                                                                           |
+| 样式       | `TextStyleKit`（`TextStyle`、`Color`、`BackgroundColor`、`FontFamily`、`FontSize`、`LineHeight`）、`TextAlign`、`Highlight`（多颜色）、`Superscript`、`Subscript` |
+| UI 辅助工具 | `Dropcursor`、`Gapcursor`                                                                                                                                           |
+| 历史记录   | `UndoRedo`                                                                                                                                                          |
+| 表格       | `ConvertTableKit`（Table*、TableRow*、TableCell*、TableHeader*）                                                                                                     |
 
 标记为 `*` 的扩展是自定义的、支持 DOCX 的 Tiptap 基础扩展覆写。请参阅下一节了解它们新增了什么。标记为 `†` 的扩展已捆绑但**默认关闭**：请通过同名配置项启用它们（参见 [配置参考](#configuration-reference)）。
 
@@ -108,15 +108,15 @@ ConvertKit 还导出与 `OrderedListNumbering` 配套、用于编辑器预览渲
 
 ### 在 Tiptap 基础扩展上新增的属性
 
-| Extension                   | Added attributes                                                                                            | Source                                                                                                                |
+| 扩展                        | 新增属性                                                                                                  | 来源                                                                                                                  |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `Paragraph`                 | `spacingBefore`, `spacingAfter`, `lineHeight`, `fontSize`, `indent`, `firstLineIndent`, `contextualSpacing` | paragraph mark 上的 DOCX `w:pPr` + `w:rPr`                                                                              |
-| `Heading`                   | same as `Paragraph`                                                                                         | paragraph mark 上的 DOCX `w:pPr` + `w:rPr`                                                                              |
-| `Image`                     | `cropTop`, `cropBottom`, `cropLeft`, `cropRight`                                                            | drawings 上的 DOCX `a:srcRect`                                                                                          |
-| `Table`                     | `width`, `indent` (+ `cellMinWidth: 1` 默认值，相较于 Tiptap 的 `25`)                                       | DOCX `w:tblW`, `w:tblInd`, `w:tblGrid`                                                                                |
-| `TableRow`                  | `height`, `heightRule` (`exact` / `atLeast`)                                                                | DOCX `w:trHeight` + `w:hRule`                                                                                         |
-| `TableCell` / `TableHeader` | `background`, `verticalAlign`, 每边边框（top/bottom/left/right 上的 `width` / `style` / `color`）           | DOCX `w:tcPr`                                                                                                         |
-| `OrderedListNumbering`†     | `numberingFormat`                                                                                           | `ExportDocx` numbering format registry. See [Ordered list numbering](/conversion/export/docx/ordered-list-numbering). |
+| `Paragraph`                 | `spacingBefore`、`spacingAfter`、`lineHeight`、`fontSize`、`indent`、`firstLineIndent`、`contextualSpacing` | 段落标记上的 DOCX `w:pPr` + `w:rPr`                                                                                     |
+| `Heading`                   | 与 `Paragraph` 相同                                                                                         | 段落标记上的 DOCX `w:pPr` + `w:rPr`                                                                                     |
+| `Image`                     | `cropTop`、`cropBottom`、`cropLeft`、`cropRight`                                                            | 图形上的 DOCX `a:srcRect`                                                                                               |
+| `Table`                     | `width`、`indent`（以及默认值为 `1` 的 `cellMinWidth`，相较于 Tiptap 的 `25`）                                | DOCX `w:tblW`、`w:tblInd`、`w:tblGrid`                                                                                |
+| `TableRow`                  | `height`、`heightRule`（`exact` / `atLeast`）                                                               | DOCX `w:trHeight` + `w:hRule`                                                                                          |
+| `TableCell` / `TableHeader` | `background`、`verticalAlign`、每边边框（top/bottom/left/right 上的 `width` / `style` / `color`）            | DOCX `w:tcPr`                                                                                                         |
+| `OrderedListNumbering`†     | `numberingFormat`                                                                                           | `ExportDocx` 编号格式注册表。请参阅 [有序列表编号](/conversion/export/docx/ordered-list-numbering)。 |
 
 ### CSS 重置会规范什么
 
@@ -147,7 +147,7 @@ ConvertKit 还导出与 `OrderedListNumbering` 配套、用于编辑器预览渲
 - **精确行高溢出。** 具有 `heightRule: "exact"` 的行会通过 `.cell-content` 包装器的 `overflow: hidden` 裁剪溢出内容。比声明高度更高的内容不可见。
 - **过宽表格宽度。** 声明宽度超过容器的表格会以 `max-width: 100%` 渲染。声明的宽度会保留在 `attrs.width` 中，但视觉上会被限制。
 - **多页布局。** ConvertKit 不进行分页。如果你需要跨页表格、真实的页面容器、页眉/页脚，或者希望页面分隔符在视觉上生效，请将 ConvertKit 与 [Pages extension](/pages/getting-started/overview) 配合使用，并为表格扩展使用 [PagesTableKit](/pages/guides/pages-tablekit)。
-- **脚注、尾注、评论。** 不会渲染。转换器会把它们作为段落输出或直接丢弃；ConvertKit 不会添加任何脚注/评论 UI。
+- **脚注、尾注、评论。** 不会渲染。转换器会把它们作为段落输出或直接丢弃；ConvertKit 不会添加任何脚注/评论 UI】【。
 
 ## 你应该预期到
 
@@ -156,10 +156,10 @@ ConvertKit 还导出与 `OrderedListNumbering` 配套、用于编辑器预览渲
 - 与 Tiptap Pro 其余扩展生态完全兼容。`@tiptap-pro/extension-import-docx` 和 `@tiptap-pro/extension-export-docx` 是天然的配套扩展；如果你需要分页，`@tiptap-pro/extension-pages-tablekit` 可以叠加使用。
 - **紧凑的默认排版。** CSS 重置会将段落外边距清零，并应用紧凑的行高。如果你使用 ConvertKit 来处理并非从 DOCX 导入的内容，请在其基础上叠加你自己的排版规则。这种重置是有意为之，而不是我们期望默认就视觉上足够精美的样式。
 
-## 不要预期到
+## 不要期待
 
 - **超出节点属性级别的 DOCX 保真度。** ConvertKit 会接入 Convert API 生成的属性。如果转换器没有解析某个 DOCX 特性，ConvertKit 就无法渲染它。
-- **表格的自动缩放手柄。** ConvertKit 的 Table 扩展继承自 `@tiptap/extension-table`，并支持标准的缩放行为，但默认的 `cellMinWidth: 1` 意味着手柄可以把列拖到 1 px 宽，这通常不是你在手动编辑时想要的。将 DOCX 导入与手动创作混合使用时，请覆盖 `table.cellMinWidth`。
+- **表格的自动缩放手柄。** ConvertKit 的 Table 扩展继承自 `@tiptap/extension-table`，并支持标准的缩放行为，但默认的 `cellMinWidth: 1` 意味着手柄可以将列拖动到 1 px 宽，这通常不是你在手动编辑时想要的效果。将 DOCX 导入与手动创作混合使用时，请覆盖 `table.cellMinWidth`。
 
 ## ConvertKit 不覆盖的内容
 

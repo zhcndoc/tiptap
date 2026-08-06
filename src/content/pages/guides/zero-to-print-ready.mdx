@@ -93,7 +93,7 @@ const editor = new Editor({
 
 ### 3a. 配置 DOCX 导出
 
-DOCX 导出扩展完全在浏览器中运行：不需要 JWT、不需要 App ID，也不需要服务器调用。你可以通过 `onCompleteExport` 回调进行配置，该回调会接收导出结果：
+DOCX 导出扩展完全在浏览器中运行：无需令牌，也无需调用服务器。你可以通过 `onCompleteExport` 回调进行配置，该回调会接收导出结果：
 
 ```ts
 import { ExportDocx } from '@tiptap-pro/extension-export-docx'
@@ -189,9 +189,9 @@ editor
 
 当导入的文档包含页眉和页脚时，Pages 扩展会自动识别它们；它们会在每个渲染页面的顶部和底部显示，无需额外配置。
 
-<Callout title="Where to get your token" variant="hint">
-  参见 [Conversion install guide](/conversion/getting-started/install) 进行设置，以及
-  [Authentication](/authentication) 了解如何签名 token。请在服务端签名 token，且永远不要
+<Callout title="获取你的 token" variant="hint">
+  参见 [转换安装指南](/conversion/getting-started/install) 进行设置，以及
+  [身份验证](/authentication) 了解如何签名 token。请在服务端签名 token，且永远不要
   在浏览器中暴露你的签名密钥。
 </Callout>
 

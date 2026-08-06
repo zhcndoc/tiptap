@@ -19,7 +19,7 @@ tags:
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-一个对 Tiptap 编辑器完全可访问的文本颜色按钮。支持键盘快捷键应用前景色到选中文本，并提供灵活的自定义选项。
+一个对 Tiptap 编辑器完全可访问的文本颜色按钮。支持使用键盘快捷键将前景色应用于选中的文本，并提供灵活的自定义选项。
 
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/color-text-popover" />
 
@@ -61,11 +61,11 @@ export default function MyEditor() {
 | `hideWhenUnavailable`  | `boolean`             | `false`      | 当颜色样式不可用时隐藏弹出框                 |
 | `onColorChanged`       | `ColorChangeHandler`  | `undefined`  | 颜色应用时触发的回调                          |
 
-## Hooks
+## 钩子
 
 ### `useColorTextPopover()`
 
-一个自定义 Hook，帮助你构建自己的颜色弹出框，完全控制行为与渲染。
+一个自定义钩子，帮助你构建自己的颜色弹出框，完全控制行为与渲染。
 
 #### 用法
 
@@ -126,7 +126,7 @@ function MyColorPopover() {
 | `activeTextStyle`    | `object`             | 当前文本样式属性（包含颜色）           |
 | `activeHighlight`    | `object`             | 当前高亮样式属性（包含颜色）           |
 | `handleColorChanged` | `ColorChangeHandler` | 处理颜色选择变化的函数                 |
-| `label`              | `string`             | 触发按钮的辅助文本（无障碍）           |
+| `label`               | `string`             | 触发按钮的辅助文本（无障碍）           |
 | `Icon`               | `React.FC`           | 颜色弹出按钮使用的图标组件             |
 
 ## 颜色管理
@@ -148,7 +148,8 @@ const { recentColors, addRecentColor, isInitialized } = useRecentColors(3)
 根据颜色值从颜色数组中查找对应颜色对象。
 
 ```tsx
-import { getColorByValue, TEXT_COLORS } from '@/components/tiptap-ui/color-text-popover'
+import { getColorByValue } from '@/components/tiptap-ui/color-text-popover'
+import { TEXT_COLORS } from '@/components/tiptap-ui/color-text-button'
 
 const blueColor = getColorByValue('var(--tt-color-text-blue)', TEXT_COLORS)
 // 返回: { label: "蓝色文本", value: "var(--tt-color-text-blue)", ... }
@@ -186,4 +187,4 @@ const shouldShow = shouldShowColorTextPopover({
 - `text-color-small-icon`（图标）
 - `color-text-button`（组件）
 - `color-highlight-button`（组件）
-- `tiptap-utils`（库）
+- `tiptap-utils`（库）。

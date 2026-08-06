@@ -19,7 +19,7 @@ import { Callout } from '@/components/ui/Callout'
 
 - [React](https://react.dev/) + [Next.js](https://nextjs.org/)
 - [Vercel AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
-- Tiptap AI 工具包
+- Tiptap AI 工具包。
 
 ## 项目概览
 
@@ -46,7 +46,7 @@ npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/react @ai-sdk/openai zo
 </Callout>
 
 ```bash
-npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
+npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/client-ai-toolkit-tool-definitions
 ```
 
 ## 服务器设置
@@ -66,8 +66,8 @@ npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/ai-toolkit-tool-definition
 ```ts
 // app/api/tiptap-edit-workflow/route.ts
 import { openai } from '@ai-sdk/openai'
-import { createTiptapEditWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
-import { Output, streamText } from 'ai'
+import { createTiptapEditWorkflow } from '@tiptap-pro/client-ai-toolkit-tool-definitions'
+import { createTextStreamResponse, Output, streamText, toTextStream } from 'ai'
 
 export async function POST(req: Request) {
   const { content, task, context } = await req.json()
@@ -77,9 +77,9 @@ export async function POST(req: Request) {
   const workflow = createTiptapEditWorkflow()
 
   const result = streamText({
-    model: openai('gpt-5.4-mini'),
+    model: openai('gpt-5.6-luna'),
     // 系统提示
-    system: workflow.systemPrompt,
+    instructions: workflow.systemPrompt,
     // 用户消息
     prompt: JSON.stringify({
       content,
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
     output: Output.object({ schema: workflow.zodOutputSchema }),
   })
 
-  return result.toTextStreamResponse()
+  return createTextStreamResponse({ stream: toTextStream({ stream: result.stream }) })
 }
 ```
 
@@ -107,7 +107,7 @@ export async function POST(req: Request) {
 // app/tiptap-edit-workflow/page.tsx
 'use client'
 
-import { experimental_useObject as useObject } from '@ai-sdk/react'
+import { useObject } from '@ai-sdk/react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import {
@@ -233,12 +233,12 @@ toolkit.tiptapEditWorkflow({
 
 ## 显示复审界面
 
-在审阅界面中显示更改，以便用户接受或拒绝它们。
+在审阅界面中显示更改，以便用户接受或拒绝这些更改。
 
 有两种方法：
 
-- 使用 [**Tracked Changes**](/tracked-changes/getting-started/overview) 扩展来渲染审阅界面。更改会作为文档的一部分保留，并对其他用户可见。
-- **AI Toolkit suggestions**：一种基于装饰的界面，具有临时性，仅对当前文档用户可见。
+- 使用 [**跟踪更改**](/tracked-changes/getting-started/overview) 扩展来渲染审阅界面。更改会作为文档的一部分保留，并对其他用户可见。
+- **AI Toolkit 建议**：一种基于装饰的界面，具有临时性，仅对当前文档用户可见。
 
 通过设置 `reviewOptions` 参数来配置审阅界面。更改将以建议的形式显示，用户可以接受或拒绝。
 
@@ -246,17 +246,17 @@ toolkit.tiptapEditWorkflow({
 await toolkit.tiptapEditWorkflow({
   // ... 其他选项
 
-  // 使用 Tracked Changes 显示审阅界面
+  // 使用跟踪更改显示审阅界面
   reviewOptions: { mode: 'trackedChanges' },
 
-  // 使用 AI Toolkit suggestions 显示审阅界面
+  // 使用 AI Toolkit 建议显示审阅界面
   reviewOptions: { mode: 'review' },
 })
 ```
 
-查看 [review changes](/ai/ai-toolkit/client/agents/review-changes) 指南以了解更多关于审阅界面的信息。
+查看 [审阅更改](/ai/ai-toolkit/client/agents/review-changes) 指南，了解更多关于审阅界面的信息。
 
-查看 [AI Toolkit demos](https://github.com/ueberdosis/ai-toolkit-demos)，获取在审阅界面中使用 AI Toolkit 工作流的示例。
+查看 [AI Toolkit 演示](https://github.com/ueberdosis/ai-toolkit-demos)，获取在审阅界面中使用 AI Toolkit 工作流的示例。
 
 ## 相关指南
 

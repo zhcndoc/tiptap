@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.6.1
+    label: v0.6.2
 meta:
   title: DOC 中的自定义页面布局 | Tiptap 转换
   description: 了解如何使用 Export DOC 扩展自定义 DOC 页面和边距大小。
@@ -17,14 +17,14 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 <EnterpriseCalloutAuto variant="doc" renderMode="sidebar" disableWaitlist />
 
-<Requirements>
+<要求>
   <RequirementItem label="1. 启用试用或订阅">
     在你的账户中开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
   </RequirementItem>
   <RequirementItem label="2. 从私有注册表安装">
     要安装此前端扩展，请按照 [设置指南](/guides/pro-extensions) 通过身份验证以访问 Tiptap 的私有 npm 注册表。
   </RequirementItem>
-</Requirements>
+</要求>
 
 DOC 导出扩展支持自定义页面尺寸和边距，允许您创建符合需求的精确布局文档。无论您需要 A5 页面、自定义纸张大小，还是特定的边距配置，都可以直接在扩展中进行设置。
 
@@ -74,14 +74,14 @@ ExportDoc.configure({
 
 ### 配置选项
 
-| Property | Type     | Description                                                                                                                                  | Default    |
-| -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `top`    | `string` | 页面顶部边距。可以为负值。必须是一个数值，后跟有效单位（cm、in、pt、pc、mm、px）。                                                           | `"1cm"`    |
-| `bottom` | `string` | 页面底部边距。可以为负值。必须是一个数值，后跟有效单位（cm、in、pt、pc、mm、px）。                                                            | `"1cm"`    |
-| `left`   | `string` | 页面左边距。必须是一个正数，后跟有效单位（cm、in、pt、pc、mm、px）。                                                                          | `"1cm"`    |
-| `right`  | `string` | 页面右边距。必须是一个正数，后跟有效单位（cm、in、pt、pc、mm、px）。                                                                         | `"1cm"`    |
-| `header` | `string` | 从页面上边缘到页眉顶部的距离。应小于 `top`。必须是一个带单位的正数。                                                                           | `"1.25cm"` |
-| `footer` | `string` | 从页面下边缘到页脚底部的距离。应小于 `bottom`。必须是一个带单位的正数。                                                                        | `"1.25cm"` |
+| 属性     | 类型     | 描述                                                                                                                                       | 默认值     |
+| -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `top`    | `string` | 页面顶部边距。可以为负值。必须是一个数值，后跟有效单位（cm、in、pt、pc、mm、px）。                                                          | `"1cm"`    |
+| `bottom` | `string` | 页面底部边距。可以为负值。必须是一个数值，后跟有效单位（cm、in、pt、pc、mm、px）。                                                           | `"1cm"`    |
+| `left`   | `string` | 页面左边距。必须是一个正数，后跟有效单位（cm、in、pt、pc、mm、px）。                                                                         | `"1cm"`    |
+| `right`  | `string` | 页面右边距。必须是一个正数，后跟有效单位（cm、in、pt、pc、mm、px）。                                                                        | `"1cm"`    |
+| `header` | `string` | 从页面上边缘到页眉顶部的距离。应小于 `top`。必须是一个带单位的正数。                                                                          | `"1.25cm"` |
+| `footer` | `string` | 从页面下边缘到页脚底部的距离。应小于 `bottom`。必须是一个带单位的正数。                                                                       | `"1.25cm"` |
 
 ```js
 import { ExportDoc } from '@tiptap-pro/extension-export-doc'
@@ -204,7 +204,7 @@ editor
 ```js
 ExportDoc.configure({
   token: 'YOUR_TOKEN',
-  // US Letter size in inches
+  // 以英寸为单位的 US Letter 尺寸
   pageSize: {
     width: '8.5in',
     height: '11in',

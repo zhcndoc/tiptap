@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.10.0
+    label: v0.12.3
 meta:
     title: CSS 注入（导入 DOCX）| Tiptap Conversion
     description: 从 DOCX 文件中提取默认样式作为 CSS，并在导入时将它们注入到你的 Tiptap 编辑器中。
@@ -144,29 +144,29 @@ editor
 - **跨文档合并。** 每次导入都会替换之前的 `<style>` 标签。连续导入两个 DOCX 文件时，你只能得到第二个文档的样式。如果你需要合并，可以从 `onImport` 中读取两个 `cssStyles` 对象并自行合并。
 - **往返保证。** 提取再导出的循环并不是无损的；反向方向及其自身注意事项请参见 [CSS to DOCX](/conversion/export/docx/css-to-docx) 导出页面。
 
-## Configuration Reference
+## 配置参考
 
 ```ts
 ImportDocx.configure({
   cssStyles: {
-    enabled?: boolean,     // Default: false. Enable extraction.
-    autoInject?: boolean,  // Default: false. Append <style> tags to document.head.
-    selector?: string,     // Default: '.tiptap'. Scope of the injected rules.
+    enabled?: boolean,     // 默认值：false。启用提取。
+    autoInject?: boolean,  // 默认值：false。将 <style> 标签追加到 document.head。
+    selector?: string,     // 默认值：'.tiptap'。注入规则的作用域。
   },
 })
 ```
 
-Override on a per-call basis:
+按调用覆盖：
 
 ```ts
 editor.chain().importDocx({
   file,
-  cssStyles: { enabled, autoInject, selector }, // any subset
-  onImport(context) { /* context.cssStyles available here */ },
+  cssStyles: { enabled, autoInject, selector }, // 可使用任意子集
+  onImport(context) { /* context.cssStyles 在此处可用 */ },
 })
 ```
 
-REST API query parameters (if you call `/import/docx` directly):
+REST API 查询参数（如果直接调用 `/import/docx`）：
 
 ```
 POST /import/docx?extractCssStyles=true
@@ -174,6 +174,6 @@ POST /import/docx?extractCssStyles=true
 
 ## 相关
 
-- [CSS to DOCX (导出)](/conversion/export/docx/css-to-docx)：反向方向。将你的编辑器 CSS 重新编译为 DOCX 样式定义。
+- [CSS to DOCX（导出）](/conversion/export/docx/css-to-docx)：反向方向。将你的编辑器 CSS 重新编译为 DOCX 样式定义。
 - [ConvertKit](/conversion/import/docx/convertkit)：配套扩展包，为 Paragraph、Heading、Table 等添加 DOCX 感知属性。
-- [REST API: CSS 样式提取](/conversion/import/docx/rest-api#css-style-extraction-experimental)：原始的 `extractCssStyles` 参数和完整响应结构。
+- [REST API：CSS 样式提取](/conversion/import/docx/rest-api#css-style-extraction-experimental)：原始的 `extractCssStyles` 参数和完整响应结构。

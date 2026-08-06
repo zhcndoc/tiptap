@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.20.0
+    label: v0.26.1
 meta:
     title: CSS 转 DOCX | Tiptap 转换
     description: 在导出时将编辑器中的 CSS 规则编译为 DOCX 样式定义。
@@ -55,13 +55,13 @@ npm i @tiptap-pro/extension-export-docx@^0.16.0
 
 ## 工作原理
 
-三个步骤：
+分为三个步骤：
 
-1. **收集 CSS。** 导出器会从两个可能来源读取你的样式（你可以任意选择其一或同时使用两者）：
+1. **收集 CSS。** 导出器会从两个可能的来源读取你的样式（你可以任选其一，也可以同时使用两者）：
    - 你在 `configure()` 中传入的显式 `styles` 对象
    - 浏览器的实时样式表（如果 `extractFromDocument: true`），作用域限定在你的编辑器根节点（editor root）
-2. **编译每个选择器。** 编译器在一个固定映射（import 侧相同的 16 个选择器）中查找每个选择器，把每个 CSS 属性转换为它的 DOCX 等效项，并丢弃那些无法映射的属性。
-3. **合并到样式目录（styles catalog）。** 编译后的 DOCX 样式片段会合并进导出选项的样式目录，然后交给 DOCX 写入器（writer）。
+2. **编译每个选择器。** 编译器会在一个固定映射（导入端相同的 16 个选择器）中查找每个选择器，将每个 CSS 属性转换为对应的 DOCX 属性，并丢弃无法映射的属性。
+3. **合并到样式目录（styles catalog）。** 编译后的 DOCX 样式片段会合并到导出选项的样式目录中，然后交给 DOCX 写入器（writer）。
 
 ```ts
 import { ExportDocx } from '@tiptap-pro/extension-export-docx'
@@ -75,13 +75,13 @@ ExportDocx.configure({
     },
     // 可选：也从实时浏览器样式表中提取规则
     extractFromDocument: true,
-    // 可选：用于 rem/em 解析的基准
+    // 可选：用于解析 rem/em 的基准字体大小
     baseFontSize: 16,
   },
 })
 ```
 
-当 `extractFromDocument: true` 时，导出器会遍历 `document.styleSheets`，找到在你的编辑器根节点作用域下匹配这 16-selector 映射的规则，并将它们与任何显式 `styles` 合并。**逐属性而言，后者/显式样式优先（wins per-property）。**
+当 `extractFromDocument: true` 时，导出器会遍历 `document.styleSheets`，查找作用域位于你的编辑器根节点内、且匹配这 16 个选择器映射的规则，并将它们与显式传入的 `styles` 合并。**对于每个属性，后者/显式样式优先（逐属性生效）。**
 
 ## 适用项
 
@@ -158,6 +158,6 @@ ExportDocx.configure({
 
 ## 相关
 
-- [CSS injection (import)](/conversion/import/docx/css-injection)：反向方向。
-- [Export styles](/conversion/export/docx/styles)：原始的 DOCX 导出样式指南（手动样式定义，不基于 CSS）。
+- [CSS 注入（导入）](/conversion/import/docx/css-injection)：反向方向。
+- [导出样式](/conversion/export/docx/styles)：原始的 DOCX 导出样式指南（手动样式定义，不基于 CSS）。
 - [REST API](/conversion/export/docx/rest-api)：DOCX 导出端点。

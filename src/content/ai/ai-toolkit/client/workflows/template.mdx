@@ -79,7 +79,7 @@ AI 会生成含有每个键对应值的 JSON 对象：
 
 - [React](https://react.dev/) + [Next.js](https://nextjs.org/)
 - [Vercel AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
-- Tiptap AI 工具包
+- Tiptap AI 工具包。
 
 ## 项目概览
 
@@ -106,7 +106,7 @@ npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/openai zod
 </Callout>
 
 ```bash
-npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions
+npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/client-ai-toolkit-tool-definitions
 ```
 
 ## 服务端设置
@@ -120,8 +120,8 @@ npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/ai-toolkit-tool-definition
 ```ts
 // app/api/template-workflow/route.ts
 import { openai } from '@ai-sdk/openai'
-import { createTemplateWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
-import { Output, streamText } from 'ai'
+import { createTemplateWorkflow } from '@tiptap-pro/client-ai-toolkit-tool-definitions'
+import { createTextStreamResponse, Output, streamText, toTextStream } from 'ai'
 
 export async function POST(req: Request) {
   const { htmlTemplate, task } = await req.json()
@@ -131,8 +131,8 @@ export async function POST(req: Request) {
   const workflow = createTemplateWorkflow({ htmlTemplate })
 
   const result = streamText({
-    model: openai('gpt-5.4-mini'),
-    system: workflow.systemPrompt,
+    model: openai('gpt-5.6-luna'),
+    instructions: workflow.systemPrompt,
     prompt: JSON.stringify({
       task,
       context: '与任务相关的额外背景信息',
@@ -140,7 +140,7 @@ export async function POST(req: Request) {
     output: Output.object({ schema: workflow.zodOutputSchema }),
   })
 
-  return result.toTextStreamResponse()
+  return createTextStreamResponse({ stream: toTextStream({ stream: result.stream }) })
 }
 ```
 
@@ -154,7 +154,7 @@ export async function POST(req: Request) {
 // app/template-workflow/page.tsx
 'use client'
 
-import { experimental_useObject as useObject } from '@ai-sdk/react'
+import { useObject } from '@ai-sdk/react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { AiToolkit, getAiToolkit } from '@tiptap-pro/client-ai-toolkit'
@@ -251,7 +251,7 @@ export default function Page() {
 
 ## 在文档部分插入模板
 
-要将模板结果插入到特定区域，而不是替换整个文档，请设置 `position` 选项。它可以接受一个位置或一个 [Range](/ai/ai-toolkit/client/advanced-guides/concepts#range)。
+要将模板结果插入到特定区域，而不是替换整个文档，请设置 `position` 选项。它可以接受一个位置或一个 [范围](/ai/ai-toolkit/client/advanced-guides/concepts#range)。
 
 ```ts
 // 在特定范围插入模板结果
@@ -354,7 +354,7 @@ editor.commands.unsetTemplateAttributes()
 
 ## 填充后保留模板字段
 
-默认情况下，`templateWorkflow` 方法填充模板后会移除所有 `_templateSlot` 属性。设置 `preserveSlotAttr` 为 `true`，可在填充节点上保留这些属性：
+默认情况下，`templateWorkflow` 方法填充模板后会移除所有 `_templateSlot` 属性。将 `preserveSlotAttr` 设置为 `true`，即可在填充后的节点上保留这些属性：
 
 ```tsx
 toolkit.templateWorkflow({
@@ -366,11 +366,11 @@ toolkit.templateWorkflow({
 })
 ```
 
-当启用 `preserveSlotAttr` 时，每个填充节点都会保留其 `_templateSlot` 属性。这允许你：
+启用 `preserveSlotAttr` 后，每个填充后的节点都会保留其 `_templateSlot` 属性。这使你能够：
 
-- **识别 AI 填充的内容**：检查文档的哪些部分是由 AI 生成的。
-- **重新填充模板字段**：将填充后的文档用作新模板以重新生成特定部分。
-- **保持字段元数据可用**：稍后从填充后的文档中读取 `_templateFieldMetadata`。
+- **识别 AI 填充的内容**：检查文档中的哪些部分由 AI 生成。
+- **重新填充模板字段**：将填充后的文档用作新模板，以重新生成特定部分。
+- **保留字段元数据**：稍后从填充后的文档中读取 `_templateFieldMetadata`。
 
 ## 重新填充模板字段
 
@@ -420,7 +420,7 @@ for (const match of matches) {
 
 - `fieldType`：匹配是否来自 `_templateSlot`、`_templateIf` 或 `_templateAttributes`
 - `metadata`：`_templateFieldMetadata` 对象，或 `null`
-- `content`：匹配节点的内容（Tiptap JSON 格式），空节点则为 `null`
+- `content`：匹配节点的内容（Tiptap JSON 格式），空节点则为 `null`。
 
 ## 控制哪些模板字段是必填的
 
@@ -452,4 +452,4 @@ const workflow = createTemplateWorkflow({
 
 - `templateWorkflow` 方法的 [API 参考](/ai/ai-toolkit/client/api-reference/workflows#templateworkflow)
 - `createHtmlTemplate` 方法的 [API 参考](/ai/ai-toolkit/client/api-reference/workflows#createhtmltemplate)
-- `createTemplateWorkflow` 工具的 [API 参考](/ai/ai-toolkit/client/api-reference/workflows#createtemplateworkflow-server-side-utility)
+- `createTemplateWorkflow` 工具的 [API 参考](/ai/ai-toolkit/client/api-reference/workflows#createtemplateworkflow-server-side-utility)。

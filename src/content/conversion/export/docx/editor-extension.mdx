@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.23.0
+    label: v0.26.1
 meta:
   title: 导出 DOCX | Tiptap 转换
   description: 了解如何使用我们文档中的 Export 扩展，将 Tiptap 编辑器内容导出为 DOCX（Word）文件。
@@ -170,7 +170,7 @@ exportDocx: (options?: ExportDocxOptions) =>
 | numberingFormats      | 多级有序列表编号格式定义的注册表。每个条目的 `id` 与最外层 `<ol>` 上的 `numberingFormat` 属性匹配；未知/缺失的 id 将回退为普通的 `1. 2. 3.` 编号。将其与 `@tiptap-pro/extension-convert-kit` 中的 `OrderedListNumbering` 和 `generateNumberingFormatCss` 搭配使用。[查看有序列表编号](/conversion/export/docx/ordered-list-numbering) | `undefined`                         |
 | headerFooterOverrides | 仅作用于页眉/页脚内容的字段级覆盖；它们会完全替换页眉和页脚中匹配的全局正文覆盖。仅适用于从 [Pages 扩展](/pages/getting-started/overview) 自动提取的页眉/页脚。[查看 `headerFooterOverrides`](/conversion/export/docx/styles#headerfooteroverrides)                                                                          | `undefined`                         |
 | footnotes             | 以注释 id 为键的脚注内容（`Record<string, JSONContent>`）。正文中每个 `noteId` 有对应条目的 `footnoteReference` 节点都会导出为真正的 Word 脚注。启用时会从 [Pages 脚注](/pages/core-concepts/footnotes) 自动提取；仅在需要覆盖时传入此选项。                                                                                                                  | 自动从 Pages 提取                    |
-| endnotes              | 以注释 id 为键的尾注内容（`Record<string, JSONContent>`）。正文中每个 `noteId` 有对应条目的 `endnoteReference` 节点都会导出为真正的 Word 尾注。启用时会从 [Pages 尾注](/pages/core-concepts/endnotes) 自动提取；仅在需要覆盖时传入此选项。                                                                                                                       | 自动从 Pages 提取                    |
+| endnotes             | 以注释 id 为键的尾注内容（`Record<string, JSONContent>`）。正文中每个 `noteId` 有对应条目的 `endnoteReference` 节点都会导出为真正的 Word 尾注。启用时会从 [Pages 尾注](/pages/core-concepts/endnotes) 自动提取；仅在需要覆盖时传入此选项。                                                                                                                       | 自动从 Pages 提取                    |
 | fonts                 | 要嵌入的自定义 TTF/OTF 字体，以便即使在未安装这些字体的机器上，文件也能按预期字体呈现。[查看字体](/conversion/export/docx/fonts)                                                                                                                                                                                                                                                | `undefined`                         |
 | embedFonts            | 自动检测文档使用的字体，通过页面的 `@font-face` 规则（带有 Google Fonts 回退）定位它们，通过 Convert Service 将 WOFF2 转换为 TTF，并将其嵌入。仅限浏览器。[查看字体](/conversion/export/docx/fonts)                                                                                                                                                        | `false`                             |
 | token                 | Tiptap Convert JWT，仅在 `embedFonts` 需要转换 WOFF2 字体时发送。[查看字体](/conversion/export/docx/fonts)                                                                                                                                                                                                                                                                                         | `undefined`                         |
@@ -328,12 +328,12 @@ DOCX 导出会自动尊重编辑器设置的节点级属性，而不是始终从
 
 | 功能                                      | 描述                                                                                                                                                                                               |
 | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **图像 `width`/`height`**                | 当图像在编辑器中已调整大小时，将使用用户设置的尺寸。优先级：`imageOverrides.transformation` > `node.attrs.width/height` > intrinsic dimensions                              |
+| **图像 `width`/`height`**                | 当图像在编辑器中已调整大小时，将使用用户设置的尺寸。优先级：`imageOverrides.transformation` > `node.attrs.width/height` > 固有尺寸                              |
 | **图像 `alt` 文本**                      | 映射到 docx 的 `altText` 属性，用于可访问性元数据                                                                                                                                          |
 | **表格单元格 `colwidth`**                 | 来自编辑器中调整后的列的每个单元格像素数组，可在导出中生成精确的列宽                                                                                                             |
 | **表格单元格 `rowspan`**                  | 跨多行的单元格会被正确导出                                                                                                                                                       |
 | **段落 `textAlign: 'justify'`**      | 正确映射到 `AlignmentType.JUSTIFIED`（之前会落入左对齐）                                                                                                                 |
-| **文本运行 `backgroundColor`**            | `textStyle` mark 的 `backgroundColor` 会导出为纯色字符底纹                                                                                                                                    |
+| **文本运行 `backgroundColor`**            | `textStyle` 标记的 `backgroundColor` 会导出为纯色字符底纹                                                                                                                                    |
 | **段落/标题 `lineHeight`**        | 比例行高（无单位倍数，如 `1.5`，或百分比，如 `150%`）会写入 DOCX 行距。固定的 `px`/`pt` 行高没有对应的比例值，因此会被跳过 |
 | **段落/标题间距**             | `spacingBefore` 和 `spacingAfter` 会写为段前/段后间距                                                                                                                        |
 | **段落/标题缩进**         | `indent` 和 `firstLineIndent` 会写为左缩进和首行缩进；负的 `firstLineIndent` 会变为悬挂缩进                                                                      |
@@ -341,9 +341,9 @@ DOCX 导出会自动尊重编辑器设置的节点级属性，而不是始终从
 
 ## 预期内容
 
-- **无需身份验证。** 导出完全在浏览器中运行（或使用同一包在你的 Node.js 服务器上运行）。不需要 JWT、App ID 或 API 调用。
-- **浏览器和服务端环境均受支持**，并且使用同一个包。上面的服务端示例展示了 Node.js 路径；浏览器路径是默认路径。
-- **同步结果交付。** `onCompleteExport` 回调会直接接收导出的文件，具体类型取决于 `exportType`，可以是 `Blob`、`Buffer`、`Stream` 或 `string`。
+- **无需身份验证。** 导出完全在浏览器中运行（或在使用同一软件包的 Node.js 服务器上运行）。无需令牌，也不会调用 API。
+- **同时支持浏览器和服务器端环境**，使用的是同一个软件包。上面的服务器端示例展示了 Node.js 路径；浏览器路径为默认路径。
+- **同步返回结果。** `onCompleteExport` 回调会直接接收导出的文件，其类型根据 `exportType` 的不同，可以是 `Blob`、`Buffer`、`Stream` 或 `string`。
 
 ## 不要期待
 

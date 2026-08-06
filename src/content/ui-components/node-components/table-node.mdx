@@ -224,7 +224,7 @@ import { Highlight } from '@tiptap/extension-highlight'
 import { NodeBackground } from '@/components/tiptap-extension/node-background-extension'
 import { NodeAlignment } from '@/components/tiptap-extension/node-alignment-extension'
 
-import { ButtonGroup } from '@/components/tiptap-ui-primitive/button'
+import { ButtonGroup } from '@/components/tiptap-ui-primitive/button-group'
 
 import { TableTriggerButton } from '@/components/tiptap-node/table-node/ui/table-trigger-button'
 import { TableKit } from '@/components/tiptap-node/table-node/extensions/table-node-extension'
@@ -603,7 +603,7 @@ function MyToolbar() {
 
 ### 菜单组件
 
-#### `<TableAlignmentMenu />`
+#### `<TableAlignMenu />`
 
 提供表格单元格对齐选项的菜单组件。
 
@@ -615,10 +615,10 @@ function MyToolbar() {
 **示例用法：**
 
 ```tsx
-import { TableAlignmentMenu } from '@/components/tiptap-node/table-node/ui/table-alignment-menu'
+import { TableAlignMenu } from '@/components/tiptap-node/table-node/ui/table-alignment-menu'
 
 function MyToolbar() {
-  return <TableAlignmentMenu orientation="row" index={0} />
+  return <TableAlignMenu orientation="row" index={0} />
 }
 ```
 
@@ -651,7 +651,7 @@ function CustomDeleteButton() {
 - `can[Action]: boolean` - 是否可执行该操作
 - `handle[Action]: () => boolean` - 执行该操作
 - `label: string` - 操作的 UI 标签
-- `Icon: ComponentType` - 操作的图标组件
+- `Icon: ComponentType` - 操作的图标组件。
 
 ## 分页支持
 
@@ -720,7 +720,7 @@ import '@/components/tiptap-node/table-node/styles/table-node.scss'
 - `use-tiptap-editor`（hook）
 - `tiptap-utils`（库）
 - `tiptap-table-utils`（库）
-- 各种表格操作组件和工具函数
+- 各种表格操作组件和工具函数。
 
 ## 功能亮点
 
@@ -735,11 +735,11 @@ import '@/components/tiptap-node/table-node/styles/table-node.scss'
 - ✅ **键盘快捷键**：高效的键盘导航
 - ✅ **响应式设计**：适用于桌面端和移动设备
 - ✅ **深色模式支持**：内置深色模式主题
-- ✅ **无障碍性**：ARIA 标签和键盘导航
+- ✅ **无障碍性**：ARIA 标签和键盘导航。
 
 ## 相关扩展
 
 - **Node Alignment Extension** - 支持单元格对齐
 - **UniqueID Extension** - 可选，用于示例模板中为表格生成唯一 ID（也用于其它块级节点）
 - **Color Extension** - 支持单元格背景颜色
-- **TextStyle Extension** - 支持单元格内文本样式
+- **TextStyle Extension** - 支持单元格内文本样式。

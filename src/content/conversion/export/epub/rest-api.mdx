@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v2.25.0
+    label: v2.39.1
 meta:
     title: EPUB REST API | Tiptap 转换
     description: 了解如何使用 Tiptap Conversion REST API v2 将 Tiptap JSON 文档导出为 EPUB 格式。
@@ -15,6 +15,7 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
+import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <EnterpriseCalloutAuto variant="epub" renderMode="sidebar" disableWaitlist />
 
@@ -32,6 +33,8 @@ EPUB 导出 API 将 Tiptap JSON 文档转换为 EPUB 文件。
 <Callout title="查看 Postman 集合" variant="hint">
     您也可以通过访问我们的[Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60)来试用文档转换 API。
 </Callout>
+
+<RegionalEndpoints />
 
 ## 导出 EPUB
 
@@ -56,14 +59,14 @@ curl --output document.epub -X POST "https://api.tiptap.dev/v2/convert/export/ep
 
 ### 必要请求头
 
-| Name            | Description                                                                                                                               |
+| 名称            | 描述                                                                                                                               |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `Authorization` | 用于验证请求的 JWT 令牌。示例：`Bearer your-jwt-token`                                                               |
 | `Content-Type`  | 必须为 `application/json`                                                                                                                |
 
 ### 请求体参数
 
-| Name                 | Type     | Description                                                            | Default     |
+| 名称                 | 类型     | 描述                                                            | 默认值     |
 | -------------------- | -------- | ---------------------------------------------------------------------- | ----------- |
 | `doc`                | `String` | Tiptap JSON 文档字符串                                                 | `N/A`       |
 | `exportType`         | `string` | 预期的导出类型                                                       | `blob`      |

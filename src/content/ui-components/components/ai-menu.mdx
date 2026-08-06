@@ -56,7 +56,7 @@ import { AiMenu } from '@/components/tiptap-ui/ai-menu'
 import { AiAskButton } from '@/components/tiptap-ui/ai-ask-button'
 
 // --- UI 基础组件 ---
-import { ButtonGroup } from '@/components/tiptap-ui-primitive/button'
+import { ButtonGroup } from '@/components/tiptap-ui-primitive/button-group'
 
 // --- 工具 ---
 import { TIPTAP_AI_APP_ID } from '@/lib/tiptap-collab-utils'
@@ -142,10 +142,10 @@ const AiEditor = ({ aiToken }: { aiToken: string }) => {
 
 #### 属性
 
-| 名称               | 类型               | 默认值     | 描述                                                                                  |
-| ------------------ | ------------------ | ---------- | ------------------------------------------------------------------------------------- |
-| `editor`           | `Editor \| null`   | `undefined`| Tiptap 编辑器实例                                                                     |
-| `anchorToSelection`| `boolean`          | `false`    | 若为 `true`，菜单锚点定位于当前文本选区，覆盖整个编辑器宽度，并动态响应滚动。             |
+| 名称                | 类型             | 默认值      | 描述                                                               |
+| ------------------- | ---------------- | ----------- | ------------------------------------------------------------------ |
+| `editor`            | `Editor \| null` | `undefined` | Tiptap 编辑器实例                                                  |
+| `anchorToSelection` | `boolean`        | `false`     | 若为 `true`，菜单锚点定位于当前文本选区，覆盖整个编辑器宽度，并动态响应滚动。 |
 
 ### `<AiMenuStateProvider />`
 
@@ -167,10 +167,10 @@ function App() {
 
 #### 属性
 
-| 名称               | 类型                | 默认值     | 描述                                                                                  |
-| ------------------ | ------------------- | ---------- | ------------------------------------------------------------------------------------- |
-| `editor`           | `Editor \| null`    | `undefined`| Tiptap 编辑器实例                                                                     |
-| `anchorToSelection`| `boolean`           | `false`    | 若为 `true`，菜单锚点定位于当前文本选区，覆盖整个编辑器宽度，并动态响应滚动。             |
+| 名称                | 类型              | 默认值      | 描述                                                               |
+| ------------------- | ----------------- | ----------- | ------------------------------------------------------------------ |
+| `editor`            | `Editor \| null`  | `undefined` | Tiptap 编辑器实例                                                  |
+| `anchorToSelection` | `boolean`         | `false`     | 若为 `true`，菜单锚点定位于当前文本选区，覆盖整个编辑器宽度，并动态响应滚动。 |
 
 ## Hooks
 
@@ -449,7 +449,7 @@ AI 菜单提供若干内置操作，按类别组织：
 
 - **继续写作**：生成内容的延续部分
 - **摘要**：对所选文本进行总结
-- **翻译到**：将内容翻译成不同语言
+- **翻译到**：将内容翻译成不同语言。
 
 ## 状态管理
 
@@ -513,7 +513,7 @@ updateState({ tone: 'professional' })
 - `card`（基础组件）
 - `combobox`（基础组件）
 - `tiptap-utils`（工具库）
-- `sparkles-icon`, `stop-circle-2-icon`（图标）
+- `sparkles-icon`, `stop-circle-2-icon`（图标）。
 
 ## 配置
 

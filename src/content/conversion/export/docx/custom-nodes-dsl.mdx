@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.20.0
+    label: v0.26.1
 meta:
   title: DOCX 的自定义节点 DSL | Tiptap 转换
   description: 用于描述 Tiptap 自定义节点应如何渲染为 DOCX 的可序列化 JSON 描述。可同时用于编辑器扩展和转换 REST API。
@@ -139,27 +139,27 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 
 ---
 
-## CustomNodeRule
+## 自定义节点规则
 
-A rule describing a ProseMirror node type:
+描述 ProseMirror 节点类型的规则：
 
 ```jsonc
 {
   "type": "hintbox",
   "nodeKind": "block",
   "render": {
-    /* RenderProgram */
+    /* 渲染程序 */
   },
 }
 ```
 
-| Field       | Type                            | Default  | Description                                                                                        |
+| 字段       | 类型                            | 默认值  | 描述                                                                                               |
 | ---------- | ------------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `type`     | `string`                        | Required | The PM node type matched by this rule (for example, `"hintbox"` or `"mention"`).                                |
-| `nodeKind` | `"block" \| "inline" \| "auto"` | `"auto"` | The type declared by the source PM node. `"auto"` allows the validator to infer it from the rule's emit shape. |
-| `render`   | `RenderProgram \| null`         | Required | The content to render. `null` will delete the matched PM node and all of its **descendants**.                     |
+| `type`     | `string`                        | 必填     | 此规则匹配的 PM 节点类型（例如 `"hintbox"` 或 `"mention"`）。                                      |
+| `nodeKind` | `"block" \| "inline" \| "auto"` | `"auto"` | 源 PM 节点声明的类型。`"auto"` 允许验证器根据规则的发射形状推断类型。                             |
+| `render`   | `RenderProgram \| null`         | 必填     | 要渲染的内容。`null` 将删除匹配的 PM 节点及其所有**后代节点**。                                  |
 
-If you want a wrapper node to output no content while still rendering its child nodes normally, use `render: { emit: { "$children": { "as": "block" } } }` instead of `render: null`.
+如果希望包装节点不输出任何内容，但仍正常渲染其子节点，请使用 `render: { emit: { "$children": { "as": "block" } } }`，而不是 `render: null`。
 
 ---
 
@@ -211,7 +211,7 @@ If you want a wrapper node to output no content while still rendering its child 
 | 字段              | 类型                         | 默认值     | 说明                                                                                                                                                |
 | ------------------ | ---------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `element`          | `ElementName`                | required    | 允许的元素之一（见 [元素目录](#element-catalog)）。                                                                                 |
-| `props`           | `Record<string, ValueExpr>`  | `{}`        | 元素属性。每个值都可以是字面量或任意 [值表达式](#value-expressions)。未知的属性键会依据该元素的属性 schema 拒绝。 |
+| `props`            | `Record<string, ValueExpr>`  | `{}`        | 元素属性。每个值都可以是字面量或任意 [值表达式](#value-expressions)。未知的属性键会依据该元素的属性 schema 拒绝。 |
 | `children`         | `RenderNode \| RenderNode[]` | `undefined` | 子渲染节点。元素的适配器决定允许哪些内容（见 [包含关系](#containment)）。                                                      |
 | `applyMarks`       | `ApplyMarksPolicy`           | `undefined` | 仅对 inline 元素有效。将该规则自身 PM 节点上的 marks 合并到运行中。参见 [marks](#marks-system)。                                               |
 | `inheritOverrides` | `boolean`                    | `true`      | 当为 `false` 时，仅对该元素跳过全局 `*Overrides` 套件（例如 `paragraphOverrides`）。                                                       |
@@ -304,7 +304,7 @@ If you want a wrapper node to output no content while still rendering its child 
 | 元素                | 类型         | 允许出现在      | 子元素类型                | 备注                                                                                                                                                    |
 | ------------------- | ------------ | --------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Paragraph`         | `block`      | document, block | `inline`                | 标准文本块。                                                                                                                                     |
-| `TextRun`         | `inline`     | inline          | (leaf)                  | 标准文本片段。                                                                                                                                       |
+| `TextRun`           | `inline`     | inline          | (leaf)                  | 标准文本片段。                                                                                                                                       |
 | `ExternalHyperlink` | `inline`     | inline          | `inline` (仅限 TextRun) | 将一个或多个 `TextRun` 包裹在超链接中。                                                                                                             |
 | `Table`             | `block`      | document, block | `table-row`             | 子元素填充到 `rows` 中，而不是 `children`。                                                                                                                |
 | `TableRow`          | `table-row`  | table-row       | `table-cell`            | 表格中的一行。                                                                                                                                      |
@@ -454,7 +454,7 @@ Spacing 和 indent 的值使用 **twips**（1 twip = 1/20 磅）。如果你更�
 
 表达式语言是**刻意保持精简**的。没有字符串拼接运算符（请使用 `$template`），没有数组索引（请使用精确的属性路径），没有 `eval`，也没有通用计算能力。下面这五种原语足以覆盖实际自定义节点渲染器的需求。
 
-### `$ref`: 读取 PM 节点属性
+### `$ref`：读取 PM 节点属性
 
 ```jsonc
 {
@@ -488,7 +488,7 @@ Spacing 和 indent 的值使用 **twips**（1 twip = 1/20 磅）。如果你更�
 - 路径中的任何位置出现 `__proto__`、`prototype`、`constructor` 片段 → `DOCX_DSL_INVALID_REF`（防止原型污染）。
 - 解析结果为函数值 → `DOCX_DSL_INVALID_REF`。
 
-### `$template`: 字符串插值
+### `$template`：字符串插值
 
 ```jsonc
 { "$template": "@{node.attrs.label}" }
@@ -496,7 +496,7 @@ Spacing 和 indent 的值使用 **twips**（1 twip = 1/20 磅）。如果你更�
 
 始终返回字符串。替换项使用 `{path}`（路径语法与 `$ref` 相同）。`{{` 和 `}}` 用于转义字面量大括号。解析后的长度上限为 `maxTemplateLength`（默认 2000）；超出时会在运行时以 `DOCX_DSL_RESOURCE_LIMIT` 拒绝。
 
-### `$op`: 带类型计算
+### `$op`：带类型计算
 
 ```jsonc
 { "$op": "mul", "args": [{ "$ref": "node.attrs.size" }, 2] }
@@ -513,7 +513,7 @@ Spacing 和 indent 的值使用 **twips**（1 twip = 1/20 磅）。如果你更�
 
 没有 `concat` 运算符；字符串请使用 `$template`。也没有隐式数字强制转换，因此 `{ "$op": "add", "args": ["3", 1] }` 会以 `DOCX_DSL_RUNTIME_TYPE_MISMATCH` 拒绝。
 
-### `$unit`: 单位 / 类型转换辅助
+### `$unit`：单位 / 类型转换辅助
 
 ```jsonc
 { "$unit": "pointsToTwips", "value": 12 }
@@ -952,7 +952,7 @@ DSL 在每个导出 REST 端点（`/export/docx`、`/export/pdf`、`/export/odt`
 
 ## 故意未包含的内容
 
-这些是**明确的边界**，不是 bug：
+这些是**明确的边界**，不是缺陷：
 
 - **对数组属性的循环。** v1 中没有 `$each`。该形状被保留（`DOCX_DSL_RESERVED_SHAPE`），因此以后可以在不破坏任何当前已编译载荷的情况下添加它。在此之前，请通过父级（块）发出可变长度集合，并使用 `$children` 分发其条目。
 - **跨规则属性访问。** 子规则不能读取其父规则的 PM 节点。可行的例外是父规则上的 `$children: { as: "inline", marks: "node" }`，它会将父级的 marks 转发给子 run。

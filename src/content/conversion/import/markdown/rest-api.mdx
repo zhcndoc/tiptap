@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v2.25.0
+    label: v2.39.1
 meta:
     title: 导入 Markdown REST API | Tiptap 转换
     description: 了解如何使用 Tiptap Conversion REST API v2 将 Markdown 文件导入为 Tiptap JSON 格式。
@@ -14,6 +14,7 @@ meta:
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <EnterpriseCalloutAuto variant="markdown" renderMode="sidebar" disableWaitlist />
 
@@ -31,6 +32,8 @@ Markdown 导入 API 将 `.md` 文件转换为 Tiptap JSON 格式。
 <Callout title="探索 Postman 集合" variant="hint">
     您也可以通过访问我们的 [Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60) 来尝试文档转换 API。
 </Callout>
+
+<RegionalEndpoints />
 
 ## 导入 Markdown
 
@@ -52,7 +55,7 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/markdown" \
 
 ### 必需的头部信息
 
-| Name            | Description                                                                                                                               |
+| 名称            | 描述                                                                                                                               |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `Authorization` | 用于对请求进行身份验证的 JWT 令牌。示例：`Bearer your-jwt-token`                                                               |
 
@@ -93,7 +96,7 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/markdown" \
 
 ### 错误响应
 
-| Status | Code                                    | Description                          |
+| 状态码 | 代码                                    | 描述                          |
 | ------ | --------------------------------------- | ------------------------------------ |
 | 400    | `NO_FILE_PROVIDED`                      | 未提供文件                 |
 | 400    | `INVALID_FILE_TYPE`                     | 文件不是 `.md` 或 `.markdown`     |

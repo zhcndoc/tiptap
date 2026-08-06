@@ -218,7 +218,11 @@ export const sidebarConfig: SidebarConfig = {
               href: '/ui-components/components/reset-all-formatting-button',
             },
             {
-              title: '斜杠命令触发按钮',
+              title: 'Search and replace',
+              href: '/ui-components/components/search-and-replace',
+            },
+            {
+              title: 'Slash trigger button',
               href: '/ui-components/components/slash-command-trigger-button',
             },
             {

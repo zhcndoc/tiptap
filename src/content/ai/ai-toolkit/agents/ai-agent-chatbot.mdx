@@ -233,12 +233,12 @@ export async function handleChatRequest(request: Request): Promise<Response> {
   )
 
   const agent = new ToolLoopAgent({
-    model: openai('gpt-5.4-mini'),
-    instructions: `你是一个可以编辑富文本文档的助手。
-在你的回复中，请简洁并直奔主题。不过，你在文档中生成的内容不需要简洁直白：相反，它应尽可能贴合用户的请求。
-在调用任何工具之前，请先用一句话或更少的话，简要说明你打算做什么，作为对任务的高层概述，就像人类作者会描述的那样。
-规则：在你的回复中，不要提供任何工具调用的细节。
-规则：在你的回复中，不要提供文档 HTML 内容的任何细节。
+    model: openai('gpt-5.6-luna'),
+    instructions: `You are an assistant that can edit rich text documents.
+In your responses, be concise and to the point. However, the content you generate in the document does not need to be concise and to the point: instead, it should follow the user's request as closely as possible.
+Before calling any tools, summarize you're going to do (in a sentence or less), as a high-level view of the task, as a human writer would describe it.
+Rule: In your responses, do not provide any details of the tool calls.
+Rule: In your responses, do not provide any details of the HTML content of the document.
 
 ${prompt}`,
     tools,
@@ -465,4 +465,4 @@ if (body.docChanged && body.document) {
 
 - 允许你的 AI 使用 [自定义节点指南](/ai/ai-toolkit/advanced-guides/custom-nodes) 生成自定义元素
 - 在 [Agents 部分](/ai/ai-toolkit/agents) 了解更多可用工具
-- 浏览 [REST API 参考](/ai/ai-toolkit/api-reference/rest-api) 以查看完整的端点文档
+- 浏览 [REST API 参考](/ai/ai-toolkit/api-reference/rest-api) 以查看完整的端点文档。

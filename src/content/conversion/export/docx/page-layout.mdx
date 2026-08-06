@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.20.0
+    label: v0.26.1
 meta:
   title: DOCX 中的自定义页面布局 | Tiptap Conversion
   description: 了解如何使用导出扩展来自定义您的 DOCX（Word）页面和页边距大小。
@@ -40,7 +40,7 @@ DOCX 导出扩展现在支持自定义页面尺寸和边距，允许您创建符
 
 所有页面尺寸和边距测量均支持以下通用单位：
 
-| Unit | Description           |
+| 单位 | 描述                  |
 | ---- | --------------------- |
 | `cm` | 厘米（默认）          |
 | `in` | 英寸                  |
@@ -51,10 +51,10 @@ DOCX 导出扩展现在支持自定义页面尺寸和边距，允许您创建符
 
 ### 配置选项
 
-| Property | Type                       | Description                              | Default                |
+| 属性     | 类型                       | 描述                                      | 默认值                 |
 | -------- | -------------------------- | ---------------------------------------- | ---------------------- |
-| `width`  | `PositiveUniversalMeasure` | 页面宽度。必须为正值                          | `"21.0cm"`（A4 宽度） |
-| `height` | `PositiveUniversalMeasure` | 页面高度。必须为正值                          | `"29.7cm"`（A4 高度） |
+| `width`  | `PositiveUniversalMeasure` | 页面宽度。必须为正值                     | `"21.0cm"`（A4 宽度） |
+| `height` | `PositiveUniversalMeasure` | 页面高度。必须为正值                     | `"29.7cm"`（A4 高度） |
 
 <Callout title="PositiveUniversalMeasure">
   `PositiveUniversalMeasure` 是一个表示带单位的正长度的字符串，例如
@@ -82,14 +82,14 @@ ExportDocx.configure({
 
 ### 配置选项
 
-| Property | Type                       | Description                                                                                                                                | Default                 |
-| -------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
-| `top`    | `UniversalMeasure`         | 页面顶部边距。<br />可以为负值。                                                                                                            | `"1.0cm"`               |
-| `bottom` | `UniversalMeasure`         | 页面底部边距。<br />可以为负值。                                                                                                            | `"1.0cm"`               |
-| `left`   | `PositiveUniversalMeasure` | 页面左边距。必须为正值。                                                                                                                     | `"1.0cm"`               |
-| `right`  | `PositiveUniversalMeasure` | 页面右边距。必须为正值。                                                                                                                     | `"1.0cm"`               |
-| `header` | `PositiveUniversalMeasure` | 从页面顶部边缘到页眉顶部的距离。应小于 `top`，这样页眉才能位于正文内容上方。                                                               | Word 默认值 `"1.25cm"`  |
-| `footer` | `PositiveUniversalMeasure` | 从页面底部边缘到底部页脚的距离。应小于 `bottom`，这样页脚才能位于正文内容下方。                                                            | Word 默认值 `"1.25cm"`  |
+| 属性      | 类型                       | 描述                                                                                                                                    | 默认值                    |
+| --------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `top`     | `UniversalMeasure`         | 页面顶部边距。<br />可以为负值。                                                                                                        | `"1.0cm"`                 |
+| `bottom`  | `UniversalMeasure`         | 页面底部边距。<br />可以为负值。                                                                                                        | `"1.0cm"`                 |
+| `left`    | `PositiveUniversalMeasure` | 页面左边距。必须为正值。                                                                                                                 | `"1.0cm"`                 |
+| `right`   | `PositiveUniversalMeasure` | 页面右边距。必须为正值。                                                                                                                 | `"1.0cm"`                 |
+| `header`  | `PositiveUniversalMeasure` | 从页面顶部边缘到页眉顶部的距离。应小于 `top`，这样页眉才能位于正文内容上方。                                                               | Word 默认值 `"1.25cm"`    |
+| `footer`  | `PositiveUniversalMeasure` | 从页面底部边缘到底部页脚的距离。应小于 `bottom`，这样页脚才能位于正文内容下方。                                                             | Word 默认值 `"1.25cm"`    |
 
 <Callout title="UniversalMeasure">
   `UniversalMeasure` 是一个表示带单位长度的字符串，例如 `"21cm"`、`"8.5in"`、

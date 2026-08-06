@@ -4,10 +4,10 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.6.1
+    label: v0.6.2
 meta:
   title: 导出 PDF | Tiptap 转换
-  description: 了解如何在我们的文档中使用 Export PDF 扩展将 Tiptap 编辑器内容导出为 PDF 文件。
+  description: 了解如何在我们的文档中使用导出 PDF 扩展将 Tiptap 编辑器内容导出为 PDF 文件。
   category: 转换
 ---
 
@@ -76,19 +76,19 @@ const editor = new Editor({
 })
 ```
 
-| 参数               | 类型                     | 描述                                                                                                                                                                                      | 默认值                                |
-| ------------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `endpoint`         | `string`                 | 用于转换的 Tiptap API 端点                                                                                                                                                               | `'https://api.tiptap.dev/v2/convert'` |
-| `token`            | `string`                 | 用于身份验证的 Tiptap JWT                                                                                                                                                                | `''`                                  |
-| `styleOverrides`   | `Record<string, string>` | 要应用于导出的样式覆盖                                                                                                                                                                   | `undefined`                           |
-| `headers`          | `HeaderConfig`           | 导出文档的页眉配置                                                                                                                                                                        | `undefined`                           |
-| `footers`          | `FooterConfig`           | 导出文档的页脚配置                                                                                                                                                                        | `undefined`                           |
-| `pageSize`         | `PageSize`               | 页面大小配置                                                                                                                                                                             | `undefined`                           |
-| `pageMargins`      | `PageMargins`            | 页面边距配置                                                                                                                                                                             | `undefined`                           |
-| `customNodes`      | `CustomNodeDefinition[]` | 用于基于 DOCX 的转换的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`）                                                                                                           | `undefined`                           |
-| `customFonts`      | `CustomFont[]`           | 为 PDF 导出提供的自定义字体文件（仅限本地部署）                                                                                                                                         | `undefined`                           |
-| `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调                                                                                                                                                                 | 如果未提供则抛出错误                  |
-| `onExportError`    | `(error: Error) => void` | 可选回调；当导出流程被拒绝时触发（动态导入失败、DOCX 转换失败、网络错误、非 OK 响应）。未提供时，错误会通过 `console.error` 记录。                                                   | `undefined`                           |
+| 参数               | 类型                     | 描述                                                                                                                                                                                              | 默认值                               |
+| ------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
+| `endpoint`         | `string`                 | 用于转换的 Tiptap API 端点                                                                                                                                                                       | `'https://api.tiptap.dev/v2/convert'` |
+| `token`            | `string`                 | 用于身份验证的 Tiptap JWT，参见[身份验证](/authentication)                                                                                                                                       | `''`                                  |
+| `styleOverrides`   | `Record<string, string>` | 应用于导出的样式覆盖                                                                                                                                                                             | `undefined`                           |
+| `headers`          | `HeaderConfig`           | 导出文档的页眉配置                                                                                                                                                                               | `undefined`                           |
+| `footers`          | `FooterConfig`           | 导出文档的页脚配置                                                                                                                                                                               | `undefined`                           |
+| `pageSize`         | `PageSize`               | 页面大小配置                                                                                                                                                                                     | `undefined`                           |
+| `pageMargins`      | `PageMargins`            | 页面边距配置                                                                                                                                                                                     | `undefined`                           |
+| `customNodes`      | `CustomNodeDefinition[]` | 基于 DOCX 转换的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`）                                                                                                                        | `undefined`                           |
+| `customFonts`      | `CustomFont[]`           | 为 PDF 导出提供的自定义字体文件（仅限本地部署）                                                                                                                                                  | `undefined`                           |
+| `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调                                                                                                                                                                         | 未提供时抛出错误                      |
+| `onExportError`    | `(error: Error) => void` | 导出流程被拒绝时调用的可选回调（动态导入失败、DOCX 转换失败、网络错误、非 OK 响应）。省略时，错误将通过 `console.error` 记录。 | `undefined`                           |
 
 ### 页眉和页脚插槽值
 
@@ -143,7 +143,7 @@ type FooterSlotValue = string | TiptapNodeContent | Footer | (() => Promise<Foot
 | `width`  | `string` | 页面宽度。必须是一个正数，后跟有效单位（cm、in、pt、pc、mm、px）。                              | `"21cm"`   |
 | `height` | `string` | 页面高度。必须是一个正数，后跟有效单位（cm、in、pt、pc、mm、px）。                             | `"29.7cm"` |
 
-### PageMargins
+### 页面边距
 
 | 属性     | 类型     | 描述                                                                                                         | 默认值  |
 | -------- | -------- | ------------------------------------------------------------------------------------------------------------ | ------- |
@@ -152,7 +152,7 @@ type FooterSlotValue = string | TiptapNodeContent | Footer | (() => Promise<Foot
 | `left`   | `string` | 页面左边距。必须是一个正数，后跟有效单位（cm、in、pt、pc、mm、px）。                                      | `"1cm"` |
 | `right`  | `string` | 页面右边距。必须是一个正数，后跟有效单位（cm、in、pt、pc、mm、px）。                                      | `"1cm"` |
 
-### CustomFont
+### 自定义字体
 
 <Callout title="仅限本地部署" variant="warning">
   自定义字体仅可用于本地部署。如果你有兴趣在 Tiptap 的云服务中使用自定义
@@ -291,7 +291,7 @@ editor
 
 - **需要身份验证。** 导出会将文档发送到 Convert 服务，该服务需要携带 `aud: "Convert"` 的签名令牌（`token`）。请在你的服务器上签发令牌，切勿在浏览器中暴露签名密钥。参见 [身份验证](/authentication)。
 - **你可能需要处理的 HTTP 响应：** `401`（缺少或无效的 JWT）、`403`（该操作不允许你的应用使用——最常见的是你的套餐不包含某种格式，或在云计划下使用 `customFonts`）、`5xx`（临时性的服务端错误；请使用退避重试）。
-- **自定义字体是 Enterprise / 本地部署功能。** 在云计划中，携带 `customFonts` 的请求会返回 `403`。如需启用，请联系我们了解 [Enterprise plan](https://tiptap.dev/pricing) 或运行本地部署。
+- **自定义字体是企业版 / 本地部署功能。** 在云计划中，携带 `customFonts` 的请求会返回 `403`。如需启用，请联系我们了解 [企业版计划](https://tiptap.dev/pricing) 或运行本地部署。
 - **每个请求都会在响应前端到端处理完毕。** 非常大的文档可能需要更长时间才能返回；请相应地设置你这边的请求超时时间。
 
 ## 不要预期

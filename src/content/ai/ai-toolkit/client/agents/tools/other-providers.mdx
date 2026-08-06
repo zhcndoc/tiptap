@@ -12,12 +12,10 @@ Tiptap AI 工具包提供了最流行的 AI 提供商库的工具定义，例如
 
 ## 获取工具定义
 
-首先，为 Tiptap 的私有 npm 注册表配置身份验证。请按照[私有注册表指南](/guides/pro-extensions)设置 `.npmrc` 文件并添加您的访问令牌。
-
-认证完成后，在包含 `.npmrc` 的目录下运行此 shell 脚本：
+使用 `@tiptap-pro/client-ai-toolkit-tool-definitions` 包中的 `toolDefinitions()` 函数，以通用格式获取工具定义：
 
 ```ts
-import { toolDefinitions } from '@tiptap-pro/ai-toolkit-tool-definitions'
+import { toolDefinitions } from '@tiptap-pro/client-ai-toolkit-tool-definitions'
 
 const tools = toolDefinitions()
 ```

@@ -1,0 +1,303 @@
+---
+title: 查找和替换扩展
+tags:
+  - type: image
+    src: https://img.shields.io/npm/v/@tiptap/extension-find-and-replace.svg?label=version
+    url: https://www.npmjs.com/package/@tiptap/extension-find-and-replace
+    label: 版本
+  - type: image
+    src: https://img.shields.io/npm/dm/@tiptap/extension-find-and-replace.svg
+    url: https://npmcharts.com/compare/@tiptap/extension-find-and-replace?minimal=true
+    label: 下载量
+meta:
+  title: 查找和替换扩展 | Tiptap 编辑器文档
+  description: 使用查找和替换扩展在 Tiptap 编辑器中搜索、高亮、导航和替换文本。
+  category: 编辑器
+extension:
+  name: 查找和替换
+  link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-find-and-replace
+  description: 在编辑器中搜索、高亮、导航和替换文本。
+  type: extension
+  icon: Search
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+查找和替换扩展会搜索文档、突出显示匹配项，并提供用于导航和替换的命令。它是无界面的，因此你可以构建控件，并将其放置在应用程序中的任意位置。
+
+<CodeDemo path="/Extensions/FindAndReplace" />
+
+## 安装
+
+```bash
+npm install @tiptap/extension-find-and-replace
+```
+
+## 用法
+
+```js
+import { Editor } from '@tiptap/core'
+import FindAndReplace from '@tiptap/extension-find-and-replace'
+import StarterKit from '@tiptap/starter-kit'
+
+new Editor({
+  extensions: [StarterKit, FindAndReplace],
+})
+```
+
+请参阅[自定义 UI 指南](/guides/find-and-replace)，了解完整的 React 和 Vue 示例。
+
+## 设置
+
+这些选项用于设置初始状态。编辑器运行时，使用以下命令更新搜索内容。
+
+### searchTerm
+
+要搜索的初始文本。在正则表达式模式下，这是正则表达式的源代码。
+
+默认值：`''`
+
+```js
+FindAndReplace.configure({
+  searchTerm: 'Tiptap',
+})
+```
+
+### replaceTerm
+
+替换命令使用的初始文本。
+
+默认值：`''`
+
+```js
+FindAndReplace.configure({
+  replaceTerm: 'Editor',
+})
+```
+
+### caseSensitive
+
+搜索是否严格区分大小写。
+
+默认值：`false`
+
+```js
+FindAndReplace.configure({
+  caseSensitive: true,
+})
+```
+
+### useRegex
+
+是否将 `searchTerm` 作为正则表达式处理。
+
+默认值：`false`
+
+```js
+FindAndReplace.configure({
+  useRegex: true,
+  searchTerm: 'colou?r',
+})
+```
+
+无效或被判定为不安全的模式不会返回结果。正则表达式模式仅控制匹配：替换文本会按字面插入，因此不会展开 `$1` 等捕获组引用。
+
+### wholeWord
+
+是否仅匹配完整单词。启用 `useRegex` 时会忽略此选项。
+
+默认值：`false`
+
+```js
+FindAndReplace.configure({
+  wholeWord: true,
+})
+```
+
+### searchDebounceMs
+
+`setSearchTerm()` 更新搜索结果前的延迟时间，单位为毫秒。将其设置为 `0` 可立即更新结果。
+
+默认值：`250`
+
+```js
+FindAndReplace.configure({
+  searchDebounceMs: 0,
+})
+```
+
+### injectCSS
+
+是否注入默认的结果高亮样式。禁用此选项后可提供自定义样式。
+
+默认值：`true`
+
+```js
+FindAndReplace.configure({
+  injectCSS: false,
+})
+```
+
+### injectNonce
+
+应用于注入样式元素的 nonce。当内容安全策略要求 nonce 时，请设置此项。
+
+默认值：`undefined`
+
+```js
+FindAndReplace.configure({
+  injectNonce: 'your-nonce-here',
+})
+```
+
+## 命令
+
+### setSearchTerm()
+
+设置搜索词并高亮每个匹配项。
+
+```js
+editor.commands.setSearchTerm('Tiptap')
+```
+
+### setReplaceTerm()
+
+设置由 `replace()` 和 `replaceAll()` 使用的文本。
+
+```js
+editor.commands.setReplaceTerm('Editor')
+```
+
+### setCaseSensitive()
+
+启用或禁用大小写敏感匹配。
+
+```js
+editor.commands.setCaseSensitive(true)
+```
+
+### setUseRegex()
+
+启用或禁用正则表达式匹配。
+
+```js
+editor.commands.setUseRegex(true)
+```
+
+### setWholeWord()
+
+启用或禁用全词匹配。启用正则表达式模式时，此设置无效。
+
+```js
+editor.commands.setWholeWord(true)
+```
+
+### goToNextResult()
+
+选择下一个结果。导航到最后一个结果后会循环回第一个结果。
+
+```js
+editor.commands.goToNextResult()
+```
+
+### goToPreviousResult()
+
+选择上一个结果。导航到第一个结果后会循环回最后一个结果。
+
+```js
+editor.commands.goToPreviousResult()
+```
+
+### replace()
+
+替换选中的结果，并选择下一个可用结果。
+
+```js
+editor.commands.replace()
+```
+
+### replaceAll()
+
+替换当前结果集中的每个结果。
+
+```js
+editor.commands.replaceAll()
+```
+
+### clearSearch()
+
+清除搜索词并移除每个结果的高亮。
+
+```js
+editor.commands.clearSearch()
+```
+
+## 存储
+
+该扩展将其当前状态保存在 `editor.storage.findAndReplace` 中。
+
+### searchTerm
+
+当前搜索词。
+
+```js
+editor.storage.findAndReplace.searchTerm
+```
+
+### replaceTerm
+
+当前替换文本。
+
+```js
+editor.storage.findAndReplace.replaceTerm
+```
+
+### caseSensitive、useRegex 和 wholeWord
+
+当前匹配选项。
+
+```js
+editor.storage.findAndReplace.caseSensitive
+editor.storage.findAndReplace.useRegex
+editor.storage.findAndReplace.wholeWord
+```
+
+### results
+
+按文档顺序排列的匹配项。每个结果都有 `from` 和 `to` 两个 ProseMirror 位置。
+
+```js
+editor.storage.findAndReplace.results
+```
+
+### currentIndex
+
+所选结果的索引；未选择任何结果时为 `null`。
+
+```js
+editor.storage.findAndReplace.currentIndex
+```
+
+## 搜索行为
+
+当文档或搜索选项发生变化时，匹配项会更新。一个匹配项可以跨越带有不同标记的文本节点，但绝不会跨越文本块或非文本内联节点，例如硬换行或提及。
+
+`replaceAll()` 会替换命令运行时存在的匹配项。如果替换文本也符合搜索条件，那么这些新匹配项会在事务完成后保留在存储中。
+
+## 设置样式
+
+默认情况下，结果会以黄色高亮显示，选中的结果会以橙色高亮显示。禁用 `injectCSS` 以替换这些样式。
+
+```css
+.find-and-replace-result {
+  background-color: rgb(255 225 0 / 0.4);
+}
+
+.find-and-replace-result-current {
+  background-color: rgb(255 165 0 / 0.55);
+}
+```
+
+## 源代码
+
+[packages/extension-find-and-replace/](https://github.com/ueberdosis/tiptap/tree/main/packages/extension-find-and-replace/)

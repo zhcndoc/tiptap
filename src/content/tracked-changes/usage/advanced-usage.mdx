@@ -10,7 +10,7 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 
-Tracked Changes 扩展的高级行为和集成模式。
+跟踪更改扩展的高级行为和集成模式。
 
 ## 建议分组
 
@@ -30,7 +30,7 @@ Tracked Changes 扩展的高级行为和集成模式。
 
 - 文档永远不会包含嵌套的删除标记
 - 相关删除在视觉上分组显示
-- 保留最初删除操作的原作者信息
+- 保留最初删除操作的原作者信息。
 
 ## 混合内容处理
 
@@ -40,6 +40,60 @@ Tracked Changes 扩展的高级行为和集成模式。
 - **原始内容**（不带 `add` 标记的文本）会被标记为 `delete` 建议
 
 这种行为符合用户预期：删除仅为建议的文本（尚未被接受的）时，文本直接消失。原始文档内容的删除需要明确的接受操作。
+
+## 块拆分
+
+当用户在段落、标题或表格单元格内按下 Enter 时，只会跟踪块边界，文本本身保持不变。在 `<p>First sentence.Second sentence.</p>` 的两个句子之间按下 Enter 后，会生成：
+
+```html
+<p>First sentence.</p>
+<p data-suggestion data-suggestion-type="blockSplit">Second sentence.</p>
+```
+
+`Second sentence.` 在第二个块中保持普通文本。第一个块中没有删除副本，因此在拆分待处理期间文档仍然易于阅读。第一个块的末尾会渲染一个 `¶` 标记，用于显示添加换行的位置。请参阅 [`blockSplitMarker`](/tracked-changes/getting-started/install#blocksplitmarker) 以进行配置或移除。
+
+这与文字处理器显示跟踪的段落换行的方式一致。
+
+### 接受、拒绝和取消
+
+| 操作 | 结果 |
+| --- | --- |
+| **接受**拆分 | suggestion 属性会被移除。保留两个普通块。 |
+| **拒绝**拆分 | 第二个块会合并回第一个块，恢复原来的单个块。 |
+| 在拆分块的开头按 **Backspace** | 取消拆分，效果与拒绝拆分相同。 |
+| 在拆分前的块末尾按 **Delete** | 取消拆分，效果与拒绝拆分相同。 |
+
+Backspace 和 Delete 只会取消由**当前用户**创建的拆分。编辑其周围内容不会合并其他作者创建的拆分。
+
+拆分已经拆分过的块会创建第二个彼此独立的 `split` suggestion。在拆分出的块中输入会创建一个普通的 `add` suggestion，与拆分相互独立。
+
+### `split` 与 `blockSplit`
+
+同一项变更会根据读取位置的不同而使用不同名称：
+
+- 查询 API 中的 `suggestion.type` 是 `'split'`
+- 节点属性和 `data-suggestion-type` DOM 属性是 `'blockSplit'`
+
+请对 `'split'` 进行筛选和切换。请针对 `'blockSplit'` 编写 CSS。完整映射请参阅 [SuggestionNodeType](/tracked-changes/api-reference/types#suggestionnodetype)。
+
+`split` suggestion 的 `text` 为空，因为没有添加或移除任何文本。它的 `from` 和 `to` 覆盖第二个块。在审阅界面中，请为拆分使用单独的标签，而不要渲染 `suggestion.text`，因为它会是空白的。
+
+### 列表项
+
+拆分列表项时会保留之前的行为，而不会创建 `split` suggestion：
+
+- 在列表项的**末尾**按 Enter，会将新的 `<li>` 标记为 `add`
+- 在列表项**中间**按 Enter，会作为替换进行跟踪，因此拒绝后会恢复为单个列表项，同时不会丢失文本
+
+列表项中间的拆分是一个 `type: 'replace'` 的 suggestion。请对 `'replace'` 进行筛选。内部会将其存储为一对 `replaceDeletion` / `replaceInsertion` 标记，但这些是标记级别的值，不会作为 `suggestion.type` 出现——只有在编写 CSS 时，才会在 `data-suggestion-type` 中遇到它们。
+
+### 边界情况
+
+其中两种情况涉及已删除的内容，具体适用哪一种取决于光标所在的位置：
+
+- 在整个内容都处于待删除状态的块的**最开头**按 Enter，会在其上方插入一个新的空块，并将其标记为 `add`。这样用户就有可以输入内容的位置。拒绝会只移除这个空块，而保留待处理的删除。这同时适用于标记为 `delete` 的块节点，以及每个文本子节点都带有 delete 标记的块。
+- 在已删除文本中的**其他任何位置**按 Enter 都会被忽略。在删除仍处于待处理状态时，待删除的内容无法被重新组织。
+- 在插入的包装器（例如建议插入的 blockquote）内部进行拆分时，仍由外层 suggestion 覆盖，而不会添加嵌套的拆分。
 
 ## 嵌套和堆叠建议
 
@@ -64,7 +118,7 @@ Tracked Changes 扩展的高级行为和集成模式。
 
 ## 标记追踪
 
-Tracked Changes 还可以将现有文本上的标记级编辑追踪为 `markChange` 建议。这包括简单的格式标记，如 `bold` 和 `italic`，以及带有属性的标记，如 `link` 或 `highlight`。
+修订还可以将现有文本上的标记级编辑追踪为 `markChange` 建议。这包括简单的格式标记，如 `bold` 和 `italic`，以及带有属性的标记，如 `link` 或 `highlight`。
 
 标记追踪的行为如下：
 
@@ -100,7 +154,7 @@ editor.commands.addTrackedMark({
 
 如果用户应用了一个标记，然后在同一文本上撤销了相同的标记更改，追踪的标记更改可以相互抵消，而不是留下冗余的建议。这有助于在审查期间保持嵌套和重叠的标记建议稳定。
 
-默认情况下，Tracked Changes 忽略 `suggestion` 标记本身和内联评论/线程标记，因此这些内部标记不会创建递归的追踪建议。你也可以选择退出追踪额外的标记：
+默认情况下，修订忽略 `suggestion` 标记本身和内联评论/线程标记，因此这些内部标记不会创建递归的追踪建议。你也可以选择退出追踪额外的标记：
 
 ```js
 TrackedChanges.configure({
@@ -158,7 +212,7 @@ const editor = new Editor({
 
 ## 评论集成
 
-Tracked Changes 扩展与 [评论](/editor/extensions/functionality/comments) 扩展集成，支持将建议和评论线程一起处理的复审流程。该集成基于两个扩展提供的事件系统构建。
+跟踪更改扩展与 [评论](/editor/extensions/functionality/comments) 扩展集成，支持将建议和评论线程一起处理的复审流程。该集成基于两个扩展提供的事件系统构建。
 
 当两个扩展同时激活时，评论线程会自动通过线程元数据与建议关联，实现双向同步：
 
@@ -169,7 +223,7 @@ Tracked Changes 扩展与 [评论](/editor/extensions/functionality/comments) �
 
 当建议内容发生变化（例如用户在跟踪插入中继续输入）时，关联线程的元数据会更新以保持同步。
 
-这意味着用户可以通过建议 UI 或评论面板审阅变更，两者保持一致。
+这意味着用户可以通过建议界面或评论面板审阅变更，两者保持一致。
 
 ## 代码块兼容性
 

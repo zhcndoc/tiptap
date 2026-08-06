@@ -20,11 +20,10 @@ import { CodeDemo } from '@/components/CodeDemo'
 </Callout>
 
 <Callout title="从《与 Tracked Changes 一起使用》指南继续" variant="info">
-  本指南是对 [Use with Tracked Changes
-  guide](/ai/ai-toolkit/client/agents/review-changes/tracked-changes) 的延续。请先阅读它。
+  本指南是对[《与 Tracked Changes 一起使用》指南](/ai/ai-toolkit/client/agents/review-changes/tracked-changes)的延续。请先阅读它。
 </Callout>
 
-你可以让 AI 为每一处更改提供理由。每条理由都会成为一个评论线程，并通过 [Comments](/comments/getting-started/overview) 扩展链接到其对应的跟踪更改。本指南建立在 [Use with Tracked Changes](/ai/ai-toolkit/client/agents/review-changes/tracked-changes) 集成之上，并且需要单独授权的 Tracked Changes 扩展。
+你可以让 AI 为每一处更改提供理由。每条理由都会成为一个评论线程，并通过[评论](/comments/getting-started/overview)扩展链接到其对应的跟踪更改。本指南建立在[《与 Tracked Changes 一起使用》](/ai/ai-toolkit/client/agents/review-changes/tracked-changes)集成之上，并且需要单独授权的 Tracked Changes 扩展。
 
 <CodeDemo isLarge path="" isScrollable src="https://ai-toolkit-demos.vercel.app/tracked-changes-comments" />
 
@@ -37,17 +36,17 @@ import { CodeDemo } from '@/components/CodeDemo'
 ```ts
 // app/api/tracked-changes-comments/route.ts
 import { openai } from '@ai-sdk/openai'
-import { toolDefinitions } from '@tiptap-pro/ai-toolkit-ai-sdk'
+import { toolDefinitions } from '@tiptap-pro/client-ai-toolkit-ai-sdk'
 import { createAgentUIStreamResponse, ToolLoopAgent, type UIMessage } from 'ai'
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
   const agent = new ToolLoopAgent({
-    model: openai('gpt-5.4-mini'),
-    instructions: `你是一个可以编辑富文本文档的助手。
-规则：先使用 tiptapRead，再使用 tiptapEdit。
-规则：在编辑文档时，始终在 meta 字段中为每项更改提供简要说明。`,
+    model: openai('gpt-5.6-luna'),
+    instructions: `你是一名可以编辑富文本​​档的助手。
+规则：使用 tiptapRead 之后再使用 tiptapEdit。
+规则：编辑文档时，始终在 meta 字段中为每项更改提供简要理由。`,
     tools: toolDefinitions({
       operationMeta:
         '简要说明此更改为何能改进文档。',

@@ -55,7 +55,7 @@ import { UiState } from '@/components/tiptap-extension/ui-state-extension'
 import { AiProvider, useAi } from '@/components/contexts/ai-context'
 
 // --- UI 原语 ---
-import { ButtonGroup } from '@/components/tiptap-ui-primitive/button'
+import { ButtonGroup } from '@/components/tiptap-ui-primitive/button-group'
 
 // --- Tiptap 节点 ---
 import '@/components/tiptap-node/blockquote-node/blockquote-node.scss'
@@ -151,11 +151,11 @@ const AiEditor = ({ aiToken }: { aiToken: string }) => {
 | `onImproved`           | `() => void`        | `undefined`                         | 成功改进文本后触发的回调                              |
 | `portal`               | `boolean`           | `false`                             | 是否在 portal 中渲染下拉菜单                          |
 
-## Hooks
+## 钩子
 
 ### `useImproveDropdown()`
 
-一个自定义 Hook，用于构建完全掌控渲染和行为的改进下拉菜单。
+一个自定义钩子，用于构建完全掌控渲染和行为的改进下拉菜单。
 
 #### 使用示例
 
@@ -241,7 +241,7 @@ function MyImproveDropdown() {
 ### 高级选项
 
 - **调整语气** - 修改文本语气（专业、随意、亲切等）
-- **翻译** - 将文本翻译为不同语言
+- **翻译** - 将文本翻译为不同语言。
 
 ## 工具函数
 
@@ -271,17 +271,16 @@ const shouldShow = shouldShowImproveDropdown({
 })
 ```
 
-### `executeAICommand(editor, command, textOptions?)`
+### `executeAICommand(command)`
 
-程序化执行 AI 改进命令，对当前选区进行处理。
+运行针对当前选区的 AI 改进命令。它绑定到钩子解析出的编辑器，因此请从 `useImproveDropdown()` 中获取它，而不要导入它。
 
 ```tsx
-import { executeAICommand } from '@/components/tiptap-ui/improve-dropdown'
+import { useImproveDropdown } from '@/components/tiptap-ui/improve-dropdown'
 
-const success = executeAICommand(editor, 'fixSpellingAndGrammar')
-if (success) {
-  console.log('语法已成功修正！')
-}
+const { executeAICommand } = useImproveDropdown({ editor })
+
+executeAICommand('fixSpellingAndGrammar')
 ```
 
 ## 需求

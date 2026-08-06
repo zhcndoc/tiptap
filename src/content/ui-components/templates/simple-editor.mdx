@@ -63,7 +63,7 @@ npx @tiptap/cli@latest init simple-editor
 安装后，在您的 React 或 Next.js 项目中使用 SimpleEditor 组件：
 
 ```jsx
-import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor'
+import { SimpleEditor } from '@/components/tiptap-templates/simple/components/simple-editor'
 
 export default function App() {
   return <SimpleEditor />
@@ -74,15 +74,16 @@ export default function App() {
 
 一个完全响应式的富文本编辑器，内置对常见格式化和布局工具的支持。所有组件都是开源的，并且易于扩展。
 
-- **响应式设计**：默认支持移动端
+- **响应式设计**：默认适配移动设备
 - **深色和浅色模式**：开箱即用
-- **格式化**：粗体、斜体、下划线
-- **列表**：项目符号、编号、有框选项
+- **格式设置**：粗体、斜体、下划线
+- **列表**：项目符号、有序列表、复选框
 - **文本对齐**：左对齐、居中、右对齐、两端对齐
-- **标题**：通过下拉菜单支持多个级别
+- **标题**：通过下拉菜单选择多个级别
 - **图片上传**
-- **链接编辑**：用于添加和编辑链接的 UI
-- **撤销 / 重做**：历史管理
+- **链接编辑**：用于添加和编辑链接的界面
+- **查找和替换**：使用匹配选项查找文本并进行替换，由[查找和替换扩展](/editor/extensions/functionality/find-and-replace)提供支持
+- **撤销 / 重做**：历史记录管理
 
 ### 使用的参考组件
 
@@ -122,6 +123,7 @@ export default function App() {
 - `list-button`
 - `list-dropdown-menu`
 - `mark-button`
+- `search-and-replace`
 - `text-align-button`
 - `undo-redo-button`
 

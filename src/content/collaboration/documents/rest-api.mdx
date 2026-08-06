@@ -32,17 +32,17 @@ REST API 直接从您的文档服务器以自定义 URL 公开：
 https://YOUR_APP_ID.collab.tiptap.cloud/
 ```
 
-将 `YOUR_APP_ID` 替换为您的文档服务器 ID，该 ID 在 [Cloud 控制台](https://cloud.tiptap.dev/v2/configuration/document-server) 中标示为“Document server ID”。
+将 `YOUR_APP_ID` 替换为您的文档服务器 ID，该 ID 在 [Cloud 控制台](https://cloud.tiptap.dev/v2/configuration/document-server) 中标示为“文档服务器 ID”。
 
 ### 身份验证
 
-使用携带 `Documents:Api:All` 权限的签名 token 对您的 API 请求进行身份验证，并通过 `Authorization: Bearer <jwt>` 发送。有关如何签名 token，请参阅 [身份验证](/authentication)。
+使用携带 `Documents:Api:All` 权限的签名令牌对您的 API 请求进行身份验证，并通过 `Authorization: Bearer <jwt>` 发送。有关如何签名令牌，请参阅 [身份验证](/authentication)。
 
-<Callout title="将此 token 保留在服务端" variant="warning">
-  `Documents:Api:All` 可访问每个 Document Server API 端点，包括受管理的设置。请将携带该权限的 token 视为管理员凭证。请在您的服务器上签名，保持其短期有效，并且绝不要暴露给客户端。
+<Callout title="将此令牌保留在服务端" variant="warning">
+  `Documents:Api:All` 可访问每个文档服务器 API 端点，包括受管理的设置。请将携带该权限的令牌视为管理员凭证。请在您的服务器上签名，保持其短期有效，并且绝不要暴露给客户端。
 </Callout>
 
-之前的 API secret 仍然有效，并在 [旧版身份验证](/authentication/legacy) 中有文档说明。
+之前的 API 密钥仍然有效，并在 [旧版身份验证](/authentication/legacy) 中有文档说明。
 
 ### 文档标识符
 如果您的文档标识符包含斜杠 (`/`)，请将其编码为 `%2F`，例如，使用 `encodeURIComponent`。
@@ -309,7 +309,7 @@ POST /api/documents/:identifier/versions/:versionId/revertTo
 
 此调用允许您将文档回退到特定的先前版本，通过应用与文档先前状态对应的更新。
 
-如果文档成功回退，该端点返回 HTTP 状态 `204`，如果文档或版本未找到，则返回 `404`。
+如果文档成功回退，该端点将返回 HTTP 状态 `200`；如果未找到文档或版本，则返回 `404`。
 
 ```bash
 curl --location --request POST 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_NAME/versions/VERSION_ID/revertTo' \
@@ -453,3 +453,4 @@ curl --location 'https://YOUR_APP_ID.collab.tiptap.cloud/api/documents/DOCUMENT_
 --header 'Authorization: YOUR_SECRET_FROM_SETTINGS_AREA' \
 --header 'Content-Type: application/json' \
 --data '{ "type": "ping", "payload": "hello" }'
+```

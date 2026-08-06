@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.4.2
+    label: v0.4.3
 meta:
     title: EPUB 中的自定义页面布局 | Tiptap 转换
     description: 了解如何使用 Export EPUB 扩展自定义您的 EPUB 页面和边距大小。
@@ -28,29 +28,29 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 EPUB 导出扩展支持自定义页面尺寸和边距，允许您创建符合需求的精确布局文档。无论您需要 A5 页面、自定义纸张尺寸，还是特定的边距设置，都可以直接在扩展中配置这些参数。
 
-## Page Size Configuration
+## 页面尺寸配置
 
-Use the `pageSize` option to define custom page dimensions for exported EPUB files. Page size configuration supports width and height values in multiple measurement units.
+使用 `pageSize` 选项为导出的 EPUB 文件定义自定义页面尺寸。页面尺寸配置支持使用多种测量单位设置宽度和高度。
 
-### Supported Units
+### 支持的单位
 
-All page size and margin measurements support the following units:
+所有页面尺寸和边距测量值均支持以下单位：
 
-| Unit | Description            |
-|------|------------------------|
-| `cm` | centimeters (default unit) |
-| `in` | inches                 |
-| `pt` | points                 |
-| `pc` | picas                  |
-| `mm` | millimeters            |
-| `px` | pixels                 |
+| 单位 | 描述                     |
+|------|--------------------------|
+| `cm` | 厘米（默认单位）         |
+| `in` | 英寸                     |
+| `pt` | 点                       |
+| `pc` | 派卡                     |
+| `mm` | 毫米                     |
+| `px` | 像素                     |
 
-### Configuration Options
+### 配置选项
 
-| Property | Type     | Description                                                                                             | Default Value |
-|----------|----------|---------------------------------------------------------------------------------------------------------|---------------|
-| `width`  | `string` | Page width. Must be a positive number followed by a valid unit (`cm`, `in`, `pt`, `pc`, `mm`, `px`).  | `"21cm"`      |
-| `height` | `string` | Page height. Must be a positive number followed by a valid unit (`cm`, `in`, `pt`, `pc`, `mm`, `px`).  | `"29.7cm"`    |
+| 属性     | 类型     | 描述                                                                                              | 默认值        |
+|----------|----------|---------------------------------------------------------------------------------------------------|---------------|
+| `width`  | `string` | 页面宽度。必须是后跟有效单位（`cm`、`in`、`pt`、`pc`、`mm`、`px`）的正数。 | `"21cm"`      |
+| `height` | `string` | 页面高度。必须是后跟有效单位（`cm`、`in`、`pt`、`pc`、`mm`、`px`）的正数。 | `"29.7cm"`    |
 
 ```js
 import { ExportEpub } from '@tiptap-pro/extension-export-epub'
@@ -58,8 +58,8 @@ import { ExportEpub } from '@tiptap-pro/extension-export-epub'
 ExportEpub.configure({
   token: 'YOUR_TOKEN',
   pageSize: {
-    width: '14.8cm',    // A5 width
-    height: '21cm',     // A5 height
+    width: '14.8cm',    // A5 宽度
+    height: '21cm',     // A5 高度
   },
 })
 ```
@@ -157,7 +157,7 @@ editor
 ```js
 ExportEpub.configure({
   token: 'YOUR_TOKEN',
-  // US Letter size in inches
+  // 以英寸为单位的 US Letter 尺寸
   pageSize: {
     width: '8.5in',
     height: '11in',

@@ -2,11 +2,11 @@
 title: 图像节点 Pro
 meta:
   title: 图像节点 Pro | Tiptap UI 组件
-  description: 在 Tiptap 编辑器中添加图片，支持对齐控制、下载功能及浮动工具栏管理。
+  description: 为你的 Tiptap 编辑器添加可调整大小的图像，支持可编辑说明、键盘导航、对齐控制和浮动工具栏。
   category: UI 组件
 component:
   name: 图像节点 Pro
-  description: 一个用于 Tiptap 编辑器的增强图片节点组件，带有浮动工具栏、对齐控制和高级管理功能。
+  description: 增强型图像节点组件，支持可编辑说明、键盘安全导航、调整大小、对齐控制和浮动工具栏。
   type: node-component
   isFree: false
   isCloud: false
@@ -20,7 +20,7 @@ tags:
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 
-An enhanced image node component for Tiptap editors. Features drag-to-resize, editable captions, floating toolbar controls, image alignment options, download functionality, and advanced management capabilities with responsive styling and accessibility features.
+适用于 Tiptap 编辑器的增强型图片节点组件。支持拖动调整大小、编辑图片说明、键盘安全导航、浮动工具栏控件、图片对齐选项、下载功能、响应式样式以及无障碍交互模式。
 
 <CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-node/image-node-pro" />
 
@@ -29,62 +29,116 @@ An enhanced image node component for Tiptap editors. Features drag-to-resize, ed
 通过 Tiptap CLI 添加该组件：
 
 ```bash
-npx @tiptap/cli@latest add image-node-pro
+npx @tiptap/cli@latest add image-node-pro floating-element toolbar
 ```
 
-<Callout title="源码在哪里？" variant="info">
-  上方预览是一个实时演示。要获取其完整源码——包括图片节点 **以及** 它引用的每个组件——请运行上面的安装命令。Tiptap UI 组件会以可编辑的源文件形式复制到你的项目中（位于 `@/components/…` 下），而不是作为 npm 包提供。这就是为什么下面示例中的导入会解析为你自己代码库中的文件，而不是 `node_modules` 中的某个模块。有关 CLI 为你添加的完整列表，请参见 [引用的组件](#referenced-components)。
+<Callout title="源代码在哪里？" variant="info">
+  上方的预览是一个实时演示。该命令会安装 Image Node Pro，以及下方示例中使用的 `FloatingElement`
+  和 `Toolbar` 包装器。Tiptap UI Components 会作为可编辑的源文件复制到你的项目中（位于
+  `@/components/…` 下），而不是作为 npm 包安装。这就是导入路径会解析到你自己的代码库中的文件，
+  而不是 `node_modules` 中模块的原因。
 </Callout>
 
-## Components
+### 更新现有安装
 
-### `<ImageNode />`
+UI Components 会被复制到你的项目中，因此现有安装不会自动更新。
+要获取完整的图像、浮动元素和工具栏修复，请启用覆盖选项重新安装：
 
-一个增强型图片节点组件，带浮动工具栏、对齐控制及高级管理功能。
+```bash
+npx @tiptap/cli@latest add image-node-pro floating-element toolbar -o
+```
 
-#### 使用示例
+<Callout title="请先检查本地自定义内容" variant="warning">
+  `-o` 标志会覆盖已安装的组件文件。在运行更新之前，请提交或检查本地自定义内容。
+</Callout>
+
+## 用法
 
 ```tsx
-import { useEditor, EditorContent } from '@tiptap/react'
+import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
 import { StarterKit } from '@tiptap/starter-kit'
 import { Image } from '@/components/tiptap-node/image-node/image-node-extension'
+import { ImageNodeFloating } from '@/components/tiptap-node/image-node/image-node-floating'
+import { Toolbar, ToolbarGroup } from '@/components/tiptap-ui-primitive/toolbar'
+import { FloatingElement } from '@/components/tiptap-ui-utils/floating-element'
+
+import '@/components/tiptap-node/image-node/image-node.scss'
 
 export default function ImageEditor() {
   const editor = useEditor({
     immediatelyRender: false,
-    extensions: [
-      StarterKit,
-      Image.configure({
-        HTMLAttributes: {
-          class: 'custom-image-class',
-        },
-      }),
-    ],
-    content: '<img src="/images/example.png" alt="Image" data-align="center" />',
+    extensions: [StarterKit, Image],
+    content: '<img src="/images/example.png" alt="图像" data-align="center" />',
   })
 
-  return <EditorContent editor={editor} />
+  return (
+    <EditorContext.Provider value={{ editor }}>
+      <EditorContent editor={editor} />
+
+      <FloatingElement>
+        <Toolbar variant="floating">
+          <ToolbarGroup>
+            <ImageNodeFloating />
+          </ToolbarGroup>
+        </Toolbar>
+      </FloatingElement>
+    </EditorContext.Provider>
+  )
 }
 ```
 
-#### 特性
+这里需要使用 `EditorContext.Provider`，因为 `ImageNodeFloating` 渲染的操作会从上下文中读取编辑器。`FloatingElement` 会相对于选中的图像定位控件，而 `Toolbar` 则提供无障碍工具栏交互模型。
 
-- 拖拽调整大小：悬停在图片上并拖动任一侧的手柄即可设置宽度
-- 可编辑图片说明文字
+## 功能
+
+- 拖动调整大小：将鼠标悬停在图像上，拖动任一侧的控制柄来设置其宽度
+- 可编辑的图像说明
 - 带对齐控制的浮动工具栏
-- 图片下载功能
+- 图像下载功能
 - 删除节点按钮
 - 对齐选项（左对齐、居中、右对齐）
-- 支持自定义 HTML 属性
-- 增强的可访问性
-- 响应式图片尺寸
+- 序列化无说明和带说明的图像时，保留已配置的 HTML 属性
+- 增强的无障碍支持
+- 响应式图像尺寸
 - 选中高亮
+- 在节点前后插入内容后，保持稳定的图像选中状态
+- 在无说明图像周围以及进入或离开可见说明时支持键盘导航
+- 对图像删除和调整大小提供可预测的撤销边界
+- 适用于只读模式的说明和调整大小控件
+
+### 选中和说明行为
+
+Image Node Pro 会在周围内容发生变化时跟踪其文档位置，因此在图像前插入或编辑块后，点击图像仍会创建节点选中状态。无说明图像在键盘导航时表现得像原子块：插入符会跳过其隐藏的说明内容，而不会进入不可见的文本位置。可见说明仍然可以编辑和导航。
+
+当焦点离开图像或按下 `Escape` 时，空说明会关闭。已有内容的说明会保持可见，包括在只读编辑器中。图像删除和调整大小的提交使用独立的撤销边界，因此第一次撤销会恢复被删除的图像或之前的尺寸，而不会同时撤销最近的说明编辑。
+
+### 键盘行为
+
+| 按键                                              | 行为                                                                                                                                  |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `ArrowUp`、`ArrowDown`、`ArrowLeft`、`ArrowRight` | 在无说明图像周围移动时不会进入隐藏的说明内容，并可在可见说明的边界处进入或离开说明。                                      |
+| `Enter`                                           | 离开选中的图像或说明，并移动到图像之后已有的段落或新建的段落中。                                       |
+| `Shift+Enter`、`Mod+Enter`                        | 当编辑器模式支持硬换行时，在编辑说明的过程中插入硬换行。                                              |
+| `Backspace`、`Delete`                             | 在说明内部正常编辑文本。在图像边界处，先选中图像；再次按下该按键会删除选中的图像。 |
+| `Escape`                                          | 返回图像节点选中状态，并在说明为空时关闭说明。                                                                |
+| `Mod+A`                                           | 在非空说明中，先选中说明内容，然后逐步扩展到整个文档。                                        |
+
+浮动图像工具栏使用水平循环焦点。按 `Tab` 进入工具栏，使用 `ArrowLeft`、
+`ArrowRight`、`Home` 和 `End` 在控件之间移动，然后按 `Enter`（或在按钮上使用原生的
+`Space`）激活当前聚焦的控件。按 `Tab` 和 `Shift+Tab` 会离开工具栏，而不是将焦点限制在其中。
+
+### HTML 输入和输出
+
+无说明图像会序列化为 `<img>` 元素。带有可见说明或已有内容说明的图像会序列化为包含一个 `<img>` 和一个 `<figcaption>` 的 `<figure>`。在两种形式中，已配置的 `HTMLAttributes` 都会应用到序列化后的 `<img>` 上。
+
+解析 HTML 时，正数的 `width` 和 `height` 值会被规范化为数字；无效、零值或负值尺寸会被忽略。`allowBase64` 选项会一致地应用于单独的图像和 `<figure>` 内的图像。只有当 `<figure>` 恰好包含一个有效的直接子级 `<img>` 时，才会将其视为单个带说明的图像。包含多个图像的 `<figure>` 不会被折叠为一个节点；符合条件的图像仍会保持独立。
 
 ## 扩展
 
 ### `Image`（增强版）
 
-Tiptap 图片扩展的增强版本，增加了对齐支持及浮动工具栏集成。
+扩展 Tiptap 的 Image 扩展，支持内联标题内容、figure 解析与序列化、
+对齐属性、隔离式键盘行为，以及经过跟踪的可调整大小的 React 节点视图。
 
 #### 使用示例
 
@@ -98,7 +152,12 @@ const editor = useEditor({
 
 ## 浮动工具栏组件
 
-图片节点包含多个浮动工具栏组件，选中图片时会显示：
+`ImageNodeFloating` 渲染图片操作组。当它挂载在 `FloatingElement` 和
+`Toolbar` 内部时，选中图片后会显示这些控件。
+
+### `<ImageNodeFloating />`
+
+组合了针对选中图片的对齐、标题、下载、替换和删除操作。
 
 ### `<DeleteNodeButton />`
 
@@ -112,6 +171,15 @@ const editor = useEditor({
 
 控制图片对齐，支持左对齐、居中、右对齐选项。
 
+### `<ImageCaptionButton />`
+
+显示或隐藏选中图片的可编辑标题。
+
+### `<ImageUploadButton />`
+
+当编辑器架构包含 `imageUpload` 扩展时，替换选中的图片。如果该扩展不可用，替换
+操作将保持隐藏。
+
 ## 工作原理
 
 图片节点系统通过多个集成层次实现：
@@ -123,26 +191,33 @@ const editor = useEditor({
 5. **节点管理**：通过工具栏操作处理图片删除和下载功能
 6. **状态集成**：与 Tiptap 的节点系统和命令架构无缝集成
 
-浮动工具栏在选中图片时自动出现，快速访问对齐控制、下载功能及删除节点操作。
+按照上述方式挂载 `FloatingElement`、`Toolbar` 和 `ImageNodeFloating` 后，选中图片会打开浮动工具栏，其中包含对齐、标题、下载、可选的替换和删除控件。
 
 ## 需求
 
 ### 依赖
 
-- `@tiptap/extension-image` - 核心图片扩展
+- `@tiptap/core` - 核心类型和 HTML 属性工具
+- `@tiptap/extension-image` - 核心图像扩展
+- `@tiptap/pm` - ProseMirror 模型、选择、事务和历史记录工具
 - `@tiptap/react` - React 集成
-- `sass` / `sass-embedded` - 用于 SCSS 编译
+- `sass` - SCSS 编译器开发依赖
+- `sass-embedded` - Embedded Sass 开发依赖
 
 ### 相关组件
 
-CLI 会自动在图片节点旁安装以下组件——你无需手动添加。它们是图片节点从你项目内部导入的文件：
+`image-node-pro` 注册表项目会自动安装以下直接注册表依赖：
 
-- `use-tiptap-editor` (hook)
-- `tiptap-utils` (lib)
-- `delete-node-button` (component)
-- `image-download-button` (component)
-- `image-align-button` (component)
-- `image-caption-button` (component)
-- `image-upload-button` (component)
-- `refresh-ccw-icon` (icon)
-- `separator` (primitive)
+- `image-node`（节点组件和样式）
+- `use-tiptap-editor`（钩子）
+- `tiptap-utils`（库）
+- `delete-node-button`（组件）
+- `image-download-button`（组件）
+- `image-align-button`（组件）
+- `image-caption-button`（组件）
+- `image-upload-button`（组件）
+- `refresh-ccw-icon`（图标）
+- `separator`（基础组件）
+- `styles`（共享样式）
+
+快速开始安装命令会单独添加 `floating-element` 和 `toolbar`，因为它们负责组合 Image Node Pro 周围的上下文工具栏，而不是由图像节点本身导入。

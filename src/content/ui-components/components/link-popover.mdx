@@ -48,7 +48,6 @@ npx @tiptap/cli@latest add link-popover
 ```tsx
 import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
 import { StarterKit } from '@tiptap/starter-kit'
-import { Link } from '@/components/tiptap-extension/link-extension'
 import { LinkPopover } from '@/components/tiptap-ui/link-popover'
 
 import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
@@ -56,7 +55,11 @@ import '@/components/tiptap-node/paragraph-node/paragraph-node.scss'
 export default function MyEditor() {
   const editor = useEditor({
     immediatelyRender: false,
-    extensions: [StarterKit, Link.configure({ openOnClick: false })],
+    extensions: [
+      StarterKit.configure({
+        link: { openOnClick: false, enableClickSelection: true },
+      }),
+    ],
     content: `
         <p>点击按钮打开链接弹出框。</p>
         <p><a href="https://www.tiptap.dev">Tiptap</a></p>
@@ -111,7 +114,7 @@ export default function MyEditor() {
 <LinkContent editor={editor} />
 ```
 
-## Hooks
+## 钩子
 
 ### `useLinkPopover()`
 
@@ -158,17 +161,17 @@ function MyLinkButton() {
 
 #### 返回值说明
 
-| Name         | Type                                                   | Description                                       |
-| ------------ | ------------------------------------------------------ | ------------------------------------------------- |
-| `isVisible`  | `boolean`                                              | Whether the link functionality should be rendered |
-| `canSet`     | `boolean`                                              | If a link can be set in the current context       |
-| `isActive`   | `boolean`                                              | If a link is currently active/selected            |
-| `url`        | `string`                                               | Current URL value for the link                    |
-| `setUrl`     | `React.Dispatch<React.SetStateAction<string \| null>>` | Function to update the URL state                  |
-| `setLink`    | `() => void`                                           | Function to apply the link in the editor          |
-| `removeLink` | `() => void`                                           | Function to remove the link from the editor       |
-| `label`      | `string`                                               | Accessible label text for the button              |
-| `Icon`       | `React.FC`                                             | Icon component for the link button                |
+| 名称         | 类型                                                   | 描述                                       |
+| ------------ | ------------------------------------------------------ | ------------------------------------------ |
+| `isVisible`  | `boolean`                                              | 是否应渲染链接功能                         |
+| `canSet`     | `boolean`                                              | 当前上下文中是否可以设置链接               |
+| `isActive`   | `boolean`                                              | 链接当前是否处于激活或选中状态             |
+| `url`        | `string`                                               | 链接的当前 URL 值                          |
+| `setUrl`     | `React.Dispatch<React.SetStateAction<string \| null>>` | 更新 URL 状态的函数                        |
+| `setLink`    | `() => void`                                           | 在编辑器中应用链接的函数                   |
+| `removeLink` | `() => void`                                           | 从编辑器中移除链接的函数                   |
+| `label`      | `string`                                               | 按钮的无障碍标签文本                       |
+| `Icon`       | `React.FC`                                             | 链接按钮的图标组件                         |
 
 ### `useLinkHandler()`
 
@@ -199,19 +202,19 @@ function MyCustomLinkInterface() {
 
 #### 参数说明
 
-| Name        | Type             | Default     | Description                         |
-| ----------- | ---------------- | ----------- | ----------------------------------- |
-| `editor`    | `Editor \| null` | `undefined` | The Tiptap editor instance          |
-| `onSetLink` | `() => void`     | `undefined` | Callback fired after setting a link |
+| 名称        | 类型             | 默认值     | 描述                 |
+| ----------- | ---------------- | ----------- | -------------------- |
+| `editor`    | `Editor \| null` | `undefined` | Tiptap 编辑器实例    |
+| `onSetLink` | `() => void`     | `undefined` | 设置链接后的回调     |
 
 #### 返回值说明
 
-| Name         | Type                                                   | Description                                 |
-| ------------ | ------------------------------------------------------ | ------------------------------------------- |
-| `url`        | `string`                                               | Current URL value for the link              |
-| `setUrl`     | `React.Dispatch<React.SetStateAction<string \| null>>` | Function to update the URL state            |
-| `setLink`    | `() => void`                                           | Function to apply the link in the editor    |
-| `removeLink` | `() => void`                                           | Function to remove the link from the editor |
+| 名称         | 类型                                                   | 描述                           |
+| ------------ | ------------------------------------------------------ | ------------------------------ |
+| `url`        | `string`                                               | 链接的当前 URL 值              |
+| `setUrl`     | `React.Dispatch<React.SetStateAction<string \| null>>` | 更新 URL 状态的函数            |
+| `setLink`    | `() => void`                                           | 在编辑器中应用链接的函数       |
+| `removeLink` | `() => void`                                           | 从编辑器中移除链接的函数       |
 
 ## 工具函数
 
@@ -246,27 +249,28 @@ if (isActive) {
 链接弹出框支持以下键盘操作：
 
 - **Enter**：应用当前输入框中 URL 作为链接（当焦点在 URL 输入框时）
-- **Escape**：关闭弹出框（标准弹出框行为）
+- **Escape**：关闭弹出框（标准弹出框行为）。
 
-## 需求
+## Requirements
 
-### 依赖
+### Dependencies
 
-- `@tiptap/react` - Tiptap React 核心集成
-- `@tiptap/extension-link` - 链接功能扩展
+- `@tiptap/react` - Core Tiptap React integration
+- `@tiptap/starter-kit` - Provides the Link extension through its `link` option
 
-### 使用到的参考组件
+### Referenced Components
 
-- `use-tiptap-editor`（钩子）
-- `use-mobile`（钩子）
-- `use-link-popover`（钩子）
-- `button`（原语）
-- `popover`（原语）
-- `card`（原语）
-- `input`（原语）
-- `separator`（原语）
-- `tiptap-utils`（库）
-- `corner-down-left-icon`（图标）
-- `external-link-icon`（图标）
-- `link-icon`（图标）
-- `trash-icon`（图标）
+- `use-tiptap-editor` (hook)
+- `use-is-breakpoint` (hook)
+- `use-link-popover` (hook)
+- `button` (primitive)
+- `button-group` (primitive)
+- `popover` (primitive)
+- `card` (primitive)
+- `input` (primitive)
+- `separator` (primitive)
+- `tiptap-utils` (lib)
+- `corner-down-left-icon` (icon)
+- `external-link-icon` (icon)
+- `link-icon` (icon)
+- `trash-icon` (icon)

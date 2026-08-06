@@ -1,0 +1,419 @@
+---
+title: 搜索和替换
+meta:
+  title: 搜索和替换 | Tiptap UI 组件
+  description: 为你的 Tiptap 编辑器添加完整的搜索和替换面板，支持导航、匹配选项、正则表达式和键盘快捷键。
+  category: UI 组件
+component:
+  name: 搜索和替换
+  description: 使用匹配选项、正则表达式和键盘快捷键搜索、导航和替换文档文本。
+  type: 组件
+  isFree: true
+  isCloud: false
+  isOpen: true
+  isNew: true
+  icon: Search
+tags:
+  - type: mit
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+import { Callout } from '@/components/ui/Callout'
+
+一个适用于 Tiptap 编辑器的无障碍搜索和替换面板。它提供实时结果高亮、从 1 开始计数的结果计数器、循环导航、匹配大小写和全字匹配选项、正则表达式搜索，以及替换或全部替换操作。
+
+该组件负责管理搜索状态和编辑器命令，但刻意不负责自身的位置或打开状态。你可以将它停靠在角落、放置在弹出框中，或以内联方式渲染。
+
+<CodeDemo isScrollable src="https://template.tiptap.dev/preview/tiptap-ui/search-and-replace" />
+
+<Callout title="需要 Find and Replace 扩展" variant="warning">
+  在同一个编辑器上注册 `@tiptap/extension-find-and-replace`。如果没有该扩展，面板
+  仍会渲染，但其控件默认处于禁用状态。如果扩展缺失时不应渲染面板，请将
+  `hideWhenUnavailable` 设置为 `true`。
+</Callout>
+
+## 安装
+
+通过 Tiptap CLI 添加该组件：
+
+```bash
+npx @tiptap/cli@latest add search-and-replace
+```
+
+## 设置
+
+在编辑器中注册 [查找和替换扩展](/editor/extensions/functionality/find-and-replace)。UI 组件包含 `.find-and-replace-result` 和 `.find-and-replace-result-current` 的样式，因此在使用随附的 SCSS 时，请禁用扩展注入的高亮 CSS。
+
+```tsx
+import { FindAndReplace } from '@tiptap/extension-find-and-replace'
+import { StarterKit } from '@tiptap/starter-kit'
+
+const editor = useEditor({
+  immediatelyRender: false,
+  extensions: [
+    StarterKit,
+    FindAndReplace.configure({
+      injectCSS: false,
+    }),
+  ],
+})
+```
+
+搜索输入的变化会直接发送到扩展。扩展的 `searchDebounceMs` 选项控制结果更新的时机；UI 不会额外添加第二个防抖。
+
+## 组件
+
+### `<SearchAndReplace />`
+
+完整的搜索和替换面板。当你希望内置的 `Mod+F` 快捷键能够重新打开已关闭的面板时，请保持组件处于挂载状态，并通过 `open` 控制它。
+
+#### 用法
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { EditorContent, EditorContext, useEditor } from '@tiptap/react'
+import { FindAndReplace } from '@tiptap/extension-find-and-replace'
+import { StarterKit } from '@tiptap/starter-kit'
+
+import { SearchAndReplace, SearchAndReplaceButton } from '@/components/tiptap-ui/search-and-replace'
+
+export default function MyEditor() {
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit,
+      FindAndReplace.configure({
+        injectCSS: false,
+      }),
+    ],
+    content: '<p>Search this document for Tiptap.</p>',
+  })
+
+  return (
+    <EditorContext.Provider value={{ editor }}>
+      <SearchAndReplaceButton
+        tabIndex={0}
+        aria-expanded={isSearchOpen}
+        data-active-state={isSearchOpen ? 'on' : 'off'}
+        onClick={() => setIsSearchOpen((current) => !current)}
+      />
+
+      <div style={{ position: 'relative' }}>
+        <SearchAndReplace
+          open={isSearchOpen}
+          onOpen={() => setIsSearchOpen(true)}
+          onClose={() => setIsSearchOpen(false)}
+          style={{
+            position: 'absolute',
+            top: '0.5rem',
+            right: '0.5rem',
+            zIndex: 10,
+          }}
+        />
+
+        <EditorContent editor={editor} />
+      </div>
+    </EditorContext.Provider>
+  )
+}
+```
+
+当打开的 `SearchAndReplace` 面板变为 `open={false}` 时，组件仍保持挂载状态，关闭的面板不再显示，结果高亮会被移除，已输入的搜索和替换值则会保留。再次打开时，会重新应用已保存的搜索内容。卸载组件会彻底清除搜索内容和待处理的工作。
+
+当用户点击面板外部时，面板不会自动关闭。如果你的布局需要点击外部区域关闭面板，请在管理 `open` 的组件中处理该行为。
+
+浏览结果时只会移动高亮显示。编辑器选区会保持在用户离开时的位置，因此工具栏状态、浮动菜单以及链接弹出框等弹出层不会响应当前匹配项。
+
+#### 属性
+
+有两个独立的状态控制面板：`open` 决定已挂载的面板是显示还是关闭，`hideWhenUnavailable` 决定组件是否实际渲染。
+
+组件还会将 `HTMLAttributes<HTMLDivElement>`（`children` 除外）转发到根面板。
+
+| 名称                    | 类型                    | 默认值                                    | 描述                                                                                                                               |
+| ----------------------- | ----------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `editor`                | `Editor \| null`        | 来自 `EditorContext` 的编辑器              | Tiptap 编辑器实例。                                                                                                               |
+| `hideWhenUnavailable`   | `boolean`               | `false`                                   | 当查找和替换扩展不可用时不渲染任何内容。否则面板仍会渲染，但控件会被禁用。                                                        |
+| `scrollIntoViewOptions` | `ScrollIntoViewOptions` | `{ block: 'nearest', inline: 'nearest' }` | 将当前结果滚动到可视区域时使用的选项。当用户偏好减少动画时，平滑滚动会变为即时滚动。                                           |
+| `open`                  | `boolean`               | `true`                                    | 已挂载面板是否打开。关闭面板会保留已输入的值，但会暂停结果高亮。                                                                 |
+| `onClose`               | `() => void`            | `undefined`                               | 点击关闭按钮或按下 `Escape` 时调用。回调必须更新受控的 `open` 状态。                                                              |
+| `onOpen`                | `() => void`            | `undefined`                               | 面板关闭时按下 `Mod+F` 会调用。当快捷键应重新打开面板时，请提供此回调。                                                          |
+| `enableShortcut`        | `boolean`               | `true`                                    | 当组件处于挂载状态且扩展可用时，为整个页面绑定 `Mod+F`，包括面板关闭期间。                                                        |
+| `autoFocusSearch`       | `boolean`               | `true`                                    | 面板打开且编辑器准备就绪时，聚焦并选中搜索输入框。                                                                               |
+| `className`             | `string`                | `undefined`                               | 为根面板添加类名，同时不会移除 `tiptap-search-replace`。                                                                         |
+
+### `<SearchAndReplaceContent />`
+
+`SearchAndReplace` 的完全等效别名。当面板作为内联内容嵌入时使用此名称，例如嵌入折叠的移动端工具栏中。它接受相同的 `SearchAndReplaceProps`。
+
+```tsx
+<SearchAndReplaceContent
+  editor={editor}
+  open={isSearchOpen}
+  onOpen={() => setIsSearchOpen(true)}
+  onClose={() => setIsSearchOpen(false)}
+/>
+```
+
+### `<SearchAndReplaceButton />`
+
+基于共享 `Button` 基础组件构建的展示型触发器。它会渲染搜索图标、工具提示和 `Mod+F` 快捷键提示，但不会管理面板状态，也不会执行编辑器命令。
+
+```tsx
+<SearchAndReplaceButton
+  tabIndex={0}
+  aria-expanded={isSearchOpen}
+  data-active-state={isSearchOpen ? 'on' : 'off'}
+  onClick={() => setIsSearchOpen((current) => !current)}
+/>
+```
+
+该按钮接受共享的 `ButtonProps`。其默认 `tabIndex` 为 `-1`，因为工具栏基础组件会通过循环 Tab 停止点管理焦点。当你将其作为独立按钮渲染在受管理的工具栏之外时，请设置 `tabIndex={0}`。
+
+## 正则表达式模式
+
+开启 **使用正则表达式**，将搜索词作为正则表达式源进行处理。该扩展使用兼容 RE2 的引擎编译这些模式，因此不支持环视和反向引用。正则表达式模式处于激活状态时，匹配大小写和全词匹配选项仍然可用，同时面板会添加用于将输入框填充为示例模式的按钮。
+
+无效模式以及引擎判定为不安全的模式会返回零个结果，而不会抛出异常。正则表达式只影响匹配：替换文本会按字面插入，因此不会展开 `$1` 等捕获引用。
+
+有关扩展级选项和匹配规则（包括每个选项在正则表达式模式下的行为），请参阅[查找和替换扩展文档](/editor/extensions/functionality/find-and-replace)。
+
+## Hooks
+
+### `useSearchAndReplace()`
+
+一个无头 Hook，公开与预构建面板所使用的相同响应式编辑器状态和操作。
+
+#### 使用方法
+
+```tsx
+import { useSearchAndReplace } from '@/components/tiptap-ui/search-and-replace'
+
+function CustomSearchPanel({ editor }) {
+  const {
+    isVisible,
+    canSearch,
+    searchTerm,
+    replaceTerm,
+    resultCountLabel,
+    caseSensitive,
+    canNavigate,
+    canReplace,
+    setSearchTerm,
+    setReplaceTerm,
+    toggleCaseSensitive,
+    goToNext,
+    replaceCurrent,
+  } = useSearchAndReplace({
+    editor,
+    hideWhenUnavailable: true,
+  })
+
+  if (!isVisible) return null
+
+  return (
+    <div role="search">
+      <input
+        aria-label="Search"
+        value={searchTerm}
+        disabled={!canSearch}
+        onChange={(event) => setSearchTerm(event.target.value)}
+      />
+      <input
+        aria-label="Replace"
+        value={replaceTerm}
+        disabled={!canSearch}
+        onChange={(event) => setReplaceTerm(event.target.value)}
+      />
+      <span>{resultCountLabel}</span>
+      <button
+        type="button"
+        aria-pressed={caseSensitive}
+        disabled={!canSearch}
+        onClick={toggleCaseSensitive}
+      >
+        Match case
+      </button>
+      <button type="button" disabled={!canNavigate} onClick={goToNext}>
+        Next
+      </button>
+      <button type="button" disabled={!canReplace} onClick={replaceCurrent}>
+        Replace
+      </button>
+    </div>
+  )
+}
+```
+
+#### 配置
+
+| 名称                    | 类型                    | 默认值                             | 描述                                                                                   |
+| ----------------------- | ----------------------- | ---------------------------------- | -------------------------------------------------------------------------------------- |
+| `editor`                | `Editor \| null`        | `EditorContext` 中的 Editor        | Tiptap 编辑器实例。                                                                     |
+| `hideWhenUnavailable`   | `boolean`               | `false`                            | 查找和替换扩展不可用时，Hook 是否报告 `isVisible: false`。                              |
+| `scrollIntoViewOptions` | `ScrollIntoViewOptions` | `DEFAULT_SCROLL_INTO_VIEW_OPTIONS` | 用于显示当前结果且不改变焦点的选项。                                                     |
+
+#### 返回值
+
+| 名称                  | 类型                      | 描述                                                                                                      |
+| --------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `editor`              | `Editor \| null`          | 解析后的编辑器实例。                                                                                        |
+| `isVisible`           | `boolean`                 | 搜索 UI 是否应当渲染。                                                                                     |
+| `canSearch`           | `boolean`                 | 编辑器是否包含查找和替换扩展。                                                                             |
+| `searchTerm`          | `string`                  | 即时搜索输入值。                                                                                            |
+| `replaceTerm`         | `string`                  | 即时替换输入值。                                                                                            |
+| `appliedSearchTerm`   | `string`                  | 扩展在防抖后当前应用的搜索词。                                                                               |
+| `total`               | `number`                  | 当前结果数量。                                                                                              |
+| `currentIndex`        | `number \| null`          | 当前结果的从零开始的索引；未选中结果时为 `null`。                                                            |
+| `resultCountLabel`    | `string`                  | 从一开始计数的标签，例如 `1 / 8`；没有结果时为 `0 / 0`。                                                     |
+| `caseSensitive`       | `boolean`                 | 扩展存储中的当前区分大小写状态。                                                                            |
+| `wholeWord`           | `boolean`                 | 扩展存储中的当前全字匹配状态。                                                                              |
+| `useRegex`            | `boolean`                 | 扩展存储中的当前正则表达式状态。                                                                            |
+| `canNavigate`         | `boolean`                 | 是否至少可以选中一个结果。                                                                                  |
+| `canReplace`          | `boolean`                 | 编辑器可编辑、存在当前结果且替换文本非空时为真。                                                            |
+| `canReplaceAll`       | `boolean`                 | 编辑器可编辑、存在结果且替换文本非空时为真。                                                                |
+| `setSearchTerm`       | `(value: string) => void` | 立即更新输入值，并将非空值转发给扩展。空文本会立即清除结果。                                                |
+| `setReplaceTerm`      | `(value: string) => void` | 更新 Hook 和扩展中的替换值。                                                                                |
+| `toggleCaseSensitive` | `() => void`              | 切换区分大小写匹配。                                                                                        |
+| `toggleWholeWord`     | `() => void`              | 切换全字匹配。                                                                                              |
+| `toggleUseRegex`      | `() => void`              | 切换正则表达式匹配。                                                                                        |
+| `goToNext`            | `() => boolean`           | 选择下一个结果，并在到达末尾时循环到开头。                                                                  |
+| `goToPrevious`        | `() => boolean`           | 选择上一个结果，并在到达开头时循环到末尾。                                                                  |
+| `replaceCurrent`      | `() => boolean`           | 替换当前结果，并在可能时前进到下一个结果。                                                                  |
+| `replaceAll`          | `() => boolean`           | 替换当前结果集中的所有结果。                                                                                |
+| `applySearch`         | `() => void`              | 重新应用存储的搜索值和替换值，例如重新打开已挂载的面板时。                                                   |
+| `suspendSearch`       | `() => void`              | 清除高亮和待处理任务，同时保留 Hook 的输入值。                                                               |
+| `clearSearch`         | `() => void`              | 清除输入值、待处理任务和高亮。                                                                              |
+| `label`               | `string`                  | 可访问性标签：`Search and replace`。                                                                       |
+| `shortcutKeys`        | `string`                  | 主快捷键：`mod+f`。                                                                                         |
+| `Icon`                | `React.ComponentType`     | 搜索图标组件。                                                                                              |
+
+导出的 `UseSearchAndReplaceReturn` 类型是此 Hook 的推断返回类型。
+
+## 工具
+
+### 可用性和存储辅助函数
+
+```tsx
+import {
+  getFindAndReplaceStorage,
+  isFindAndReplaceAvailable,
+  shouldShowSearchAndReplace,
+} from '@/components/tiptap-ui/search-and-replace'
+
+const available = isFindAndReplaceAvailable(editor)
+const storage = getFindAndReplaceStorage(editor)
+const visible = shouldShowSearchAndReplace({
+  editor,
+  hideWhenUnavailable: true,
+})
+```
+
+- `isFindAndReplaceAvailable(editor)` 检查是否已注册 `findAndReplace` 扩展。
+- `getFindAndReplaceStorage(editor)` 返回其响应式存储对象，或返回 `null`。
+- `shouldShowSearchAndReplace({ editor, hideWhenUnavailable })` 应用组件的可见性规则。
+
+### 结果格式化和滚动
+
+```tsx
+import {
+  DEFAULT_SCROLL_INTO_VIEW_OPTIONS,
+  formatResultCount,
+  scrollCurrentResultIntoView,
+} from '@/components/tiptap-ui/search-and-replace'
+
+formatResultCount(null, 0) // "0 / 0"
+formatResultCount(0, 8) // "1 / 8"
+
+scrollCurrentResultIntoView(editor, {
+  block: 'center',
+  inline: 'nearest',
+})
+```
+
+`scrollCurrentResultIntoView()` 根据文档位置解析当前匹配项并滚动到该位置，同时不会移动焦点。当焦点位于编辑器内部时不会执行任何操作，并且会遵循 `prefers-reduced-motion` 设置。
+
+### 导出的常量
+
+| 常量                              | 值                                        | 用途                                           |
+| --------------------------------- | ----------------------------------------- | ---------------------------------------------- |
+| `SEARCH_AND_REPLACE_SHORTCUT_KEY` | `mod+f`                                   | 打开搜索面板或将焦点重新置于搜索框。           |
+| `NEXT_RESULT_SHORTCUT_KEY`        | `mod+shift+f`                             | 在面板内选择下一个结果。                       |
+| `PREVIOUS_RESULT_SHORTCUT_KEY`    | `mod+shift+d`                             | 在面板内选择上一个结果。                       |
+| `SEARCH_RESULT_CLASS`              | `find-and-replace-result`                 | 扩展为每个匹配项渲染的类。                     |
+| `SEARCH_RESULT_CURRENT_CLASS`      | `find-and-replace-result-current`         | 扩展为当前匹配项渲染的类。                     |
+| `DEFAULT_SCROLL_INTO_VIEW_OPTIONS` | `{ block: 'nearest', inline: 'nearest' }` | 当前结果滚动对齐的默认设置。                   |
+
+该模块还导出 `SearchAndReplaceProps`、`SearchAndReplaceContentProps`、`UseSearchAndReplaceConfig`、`UseSearchAndReplaceReturn` 和 `SearchAndReplaceEditorState`。
+
+## 键盘快捷键
+
+| 按键               | 行为                                                                                                                                            |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Mod+F`            | 打开时聚焦并选中搜索输入框。关闭时，如果提供了 `onOpen`，则调用它；否则仍可使用浏览器原生搜索。 |
+| `ArrowDown`        | 搜索打开且存在结果时，选择下一个结果。                                                                                 |
+| `ArrowUp`          | 搜索打开且存在结果时，选择上一个结果。                                                                             |
+| `Enter` in Search  | 选择下一个结果。                                                                                                                        |
+| `Enter` in Replace | 启用替换时，替换当前结果。                                                                                        |
+| `Mod+Shift+F`      | 面板获得焦点时，选择下一个结果。                                                                                        |
+| `Mod+Shift+D`      | 面板获得焦点时，选择上一个结果。                                                                                    |
+| `Escape`           | 面板获得焦点时，调用 `onClose`。                                                                                                |
+
+面板外的普通方向键导航不会接管编辑器内容、表单字段或其他文本输入框。
+
+组件挂载且扩展可用期间，无论面板处于打开还是关闭状态，`Mod+F` 都会在整个页面范围内被捕获——包括其他输入框和 contenteditable 区域——因此浏览器的页面内查找不会与您自己的搜索发生冲突。当某个布局需要将 `Mod+F` 交给浏览器时，请将 `enableShortcut` 设置为 `false`。
+
+## 样式与公开选择器
+
+面板默认未设置定位，宽度为 `19rem`，且 `max-width: 100%`。在不超过 `480px` 的视口中，它可以拉伸至可用宽度。通过 `className`、`style` 或外层布局组件添加定位。
+
+以下类可用于公开样式设置和查询：
+
+- `tiptap-search-replace`
+- `tiptap-search-replace-header`
+- `tiptap-search-replace-count`
+- `tiptap-search-replace-nav-group`
+- `tiptap-search-replace-inputs`
+- `tiptap-search-replace-options`
+- `tiptap-search-replace-actions`
+- `button-group`
+
+该组件还提供：
+
+- 根面板上的 `role="dialog"` 和 `aria-label="Search and replace"`，结果计数器通过 `aria-live="polite"` 播报。
+- 根面板上的 `data-open="true|false"`。
+- 操作按钮和正则表达式文档链接上的 `data-search-replace-action="prev|next|close|replace|replace-all|regex-docs"`。
+- 输入框上的 `data-field="search-query|replace-query"`。
+- 匹配控件上的 `data-option="match-case|whole-words|use-regex"`。
+- 每个用于填充正则表达式示例的按钮上的 `data-regex-example="<pattern>"`。
+
+结果高亮选择器为 `.find-and-replace-result` 和 `.find-and-replace-result-current`。如果覆盖这些选择器，请在扩展上保留 `injectCSS: false`，以便只有一个高亮样式表控制结果。
+
+## 要求
+
+### 依赖项
+
+- `@tiptap/react` - Tiptap React 核心集成
+- `@tiptap/extension-find-and-replace` - 搜索状态、匹配、导航和替换命令
+- `@tiptap/starter-kit` - 已安装示例中使用的基础编辑器扩展
+- `react-hotkeys-hook` - 键盘快捷键处理
+
+### 可选依赖项
+
+- `sass` - SCSS 样式支持
+- `sass-embedded` - 选择嵌入式实现的项目所使用的 Sass 编译器
+
+### 引用的组件
+
+- `use-tiptap-editor` 和 `use-composed-ref` 钩子
+- `tiptap-utils`
+- `button`、`button-group`、`card`、`input-group`、`separator` 和 `switch` 基础组件
+- `search-icon`、`arrow-right-icon`、`external-link-icon`、`chevron-up-icon`、`chevron-down-icon`、`close-icon`、`case-sensitive-icon` 和 `whole-word-icon`
+- `styles` 共享样式基础
+
+`button` 基础组件还会安装其 `check` 变体所使用的 `check-icon`。
+
+如需了解与框架无关的命令和存储示例，请参阅[自定义查找和替换 UI 指南](/guides/find-and-replace)。

@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v2.25.0
+    label: v2.39.1
 meta:
   title: DOCX 导出 REST API | Tiptap Conversion
   description: 了解如何通过 Conversion REST API 将 Tiptap JSON 文档导出为 DOCX 格式。
@@ -15,6 +15,7 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
+import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
 
@@ -32,10 +33,11 @@ DOCX 导出 API 会将 Tiptap JSON 文档转换为 `.docx`（Microsoft Word）�
 
 REST API 支持 [样式覆盖](/conversion/export/docx/styles)、通过 DSL 进行的 [自定义节点渲染](/conversion/export/docx/custom-nodes-dsl)、页面大小和页边距、页眉/页脚、评论线程，以及元素级覆盖（`tableOverrides`、`paragraphOverrides`、`textRunOverrides`、`tableCellOverrides`、`imageOverrides`）。它不接受基于 JavaScript 函数的选项。对于基于函数的自定义节点 API，请使用 [编辑器扩展](/conversion/export/docx/editor-extension)，它同样也可在服务器端工作。
 
-<Callout title="查看 postman 集合" variant="hint">
-  您也可以前往我们的 [Postman
-  Collection](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60) 体验 Document Conversion API。
+<Callout title="查看 Postman 集合" variant="hint">
+  您也可以前往我们的 [Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60) 体验文档转换 API。
 </Callout>
+
+<RegionalEndpoints />
 
 ## 导出 DOCX
 
@@ -92,7 +94,7 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 | `imageOverrides`        | `Object`          | 图片渲染覆盖                                                                                                                                                                                                                                                                                                                                                               | `undefined` |
 | `headerFooterOverrides` | `Object`          | 作用域限定为页眉/页脚内容的按字段覆盖（与元素覆盖具有相同的五个键）。参见 [元素覆盖](#element-overrides)。                                                                                                                                                                                                                                                                    | `undefined` |
 | `customNodeDsl`         | `Object`          | [自定义节点 DSL](/conversion/export/docx/custom-nodes-dsl) 规则                                                                                                                                                                                                                                                                                                            | `undefined` |
-| `placeholders`          | `Object \| false` | 可选的 `{ page?, total? }` 重命名映射，需与 `Pages.configure({ placeholders })` 匹配，这样纯文本页眉/页脚中重命名后的标记（例如 `{p}` / `{pages}`）会变成动态的 `PAGE` / `NUMPAGES` 字段。传入 `false` 可完全禁用替换（导出的 `.docx` 中将保留字面量 `{page}` / `{total}` 文本）。参见 [自定义标记名称](#custom-token-names-placeholders)。 | `undefined` |
+| `placeholders`         | `Object \| false` | 可选的 `{ page?, total? }` 重命名映射，需与 `Pages.configure({ placeholders })` 匹配，这样纯文本页眉/页脚中重命名后的标记（例如 `{p}` / `{pages}`）会变成动态的 `PAGE` / `NUMPAGES` 字段。传入 `false` 可完全禁用替换（导出的 `.docx` 中将保留字面量 `{page}` / `{total}` 文本）。参见 [自定义标记名称](#custom-token-names-placeholders)。 | `undefined` |
 | `comments`              | `Object`          | 作为原生 Word 注释嵌入的评论线程：`{ threads: [...] }`。每个线程包含其消息、作者、日期和已解决状态，并锚定到文档的 `inlineThread` / `blockThread` 标记。参见 [评论](#comments)。                                                                                                                              | `undefined` |
 
 #### 页面尺寸配置
@@ -157,7 +159,7 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 | `first`              | `string`  | 首页页眉。仅当 `differentFirstPage` 设为 `true` 时使用。可接受纯文本字符串或字符串化的 Tiptap JSONContent 以实现富文本格式。                                 |
 | `even`               | `string`  | 启用 `evenAndOddHeaders` 选项时的偶数页页眉。可接受纯文本字符串或字符串化的 Tiptap JSONContent 以实现富文本格式。                                          |
 
-<Callout title="纯文本 vs. Tiptap JSONContent">
+<Callout title="纯文本与 Tiptap JSONContent">
   每个页眉值都可以是 **纯文本字符串**（生成简单、无样式的页眉）或 **字符串化的 Tiptap JSONContent** 对象（可启用加粗、斜体、链接等富文本格式）。当传入 JSONContent 时，请在请求体中发送前使用 `JSON.stringify()` 将对象转为字符串。
 </Callout>
 
@@ -186,11 +188,11 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 | `first`              | `string`  | 首页页脚。仅当 `differentFirstPage` 设为 `true` 时使用。可接受纯文本字符串或字符串化的 Tiptap JSONContent 以实现富文本格式。                                 |
 | `even`               | `string`  | 启用 `evenAndOddFooters` 选项时的偶数页页脚。可接受纯文本字符串或字符串化的 Tiptap JSONContent 以实现富文本格式。                                          |
 
-<Callout title="纯文本 vs. Tiptap JSONContent">
+<Callout title="纯文本与 Tiptap JSONContent">
   每个页脚值都可以是 **纯文本字符串**（生成简单、无样式的页脚）或 **字符串化的 Tiptap JSONContent** 对象（可启用加粗、斜体、链接等富文本格式）。当传入 JSONContent 时，请在请求体中发送前使用 `JSON.stringify()` 将对象转为字符串。
 </Callout>
 
-<Callout title="`{page}` / `{total}` tokens become live Word fields" variant="info">
+<Callout title="`{page}` / `{total}` 标记将变为动态 Word 字段" variant="info">
   REST API 会将纯文本页眉/页脚中的 `{page}`、`{total}` 以及 `{numpages}` 同义词转换为导出的 `.docx` 中动态的 Word `PAGE` / `NUMPAGES` 字段。自定义标记名称（例如 `{p}` / `{pages}`）需要传入可选的 `placeholders` 重命名映射。参见下方 [自定义标记名称](#custom-token-names-placeholders)。传入 `"placeholders": false` 可改为让这些标记以字面文本形式保留。
 </Callout>
 
@@ -244,7 +246,6 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 ```bash
 curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -H "X-App-Id: YOUR_APP_ID" \
     -H "Content-Type: application/json" \
     -d '{
       "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Reviewed text\",\"marks\":[{\"type\":\"inlineThread\",\"attrs\":{\"data-thread-id\":\"T1\"}}]}]}]}",

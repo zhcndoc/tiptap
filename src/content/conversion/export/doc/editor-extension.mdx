@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v0.6.1
+    label: v0.6.2
 meta:
   title: 导出 DOC | Tiptap 转换
   description: 了解如何在我们的文档中使用 Export DOC 扩展将 Tiptap 编辑器内容导出为 DOC（旧版 Word）文件。
@@ -81,17 +81,17 @@ const editor = new Editor({
 })
 ```
 
-| 参数               | 类型                     | 描述                                                                                      | 默认值                                |
-| ------------------ | ------------------------ | ----------------------------------------------------------------------------------------- | ------------------------------------- |
-| `endpoint`         | `string`                 | 用于转换的 Tiptap API 端点                                                           | `'https://api.tiptap.dev/v2/convert'` |
-| `token`            | `string`                 | 用于身份验证的 Tiptap JWT                                                                | `''`                                  |
-| `styleOverrides`   | `Record<string, string>` | 要应用到导出的样式覆盖                                                           | `undefined`                           |
-| `headers`          | `HeaderConfig`           | 导出文档的页眉配置                                                   | `undefined`                           |
-| `footers`          | `FooterConfig`           | 导出文档的页脚配置                                                   | `undefined`                           |
-| `pageSize`         | `PageSize`               | 页面大小配置                                                                          | `undefined`                           |
-| `pageMargins`      | `PageMargins`            | 页面边距配置                                                                       | `undefined`                           |
+| 参数               | 类型                     | 描述                                                                                                  | 默认值                                  |
+| ------------------ | ------------------------ | ----------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `endpoint`         | `string`                 | 用于转换的 Tiptap API 端点                                                                              | `'https://api.tiptap.dev/v2/convert'` |
+| `token`            | `string`                 | 用于身份验证的 Tiptap JWT，参见[身份验证](/authentication)                                                                | `''`                                  |
+| `styleOverrides`   | `Record<string, string>` | 应用于导出的样式覆盖                                                                                   | `undefined`                           |
+| `headers`          | `HeaderConfig`           | 导出文档的页眉配置                                                                                      | `undefined`                           |
+| `footers`          | `FooterConfig`           | 导出文档的页脚配置                                                                                      | `undefined`                           |
+| `pageSize`         | `PageSize`               | 页面大小配置                                                                                           | `undefined`                           |
+| `pageMargins`      | `PageMargins`            | 页面边距配置                                                                                           | `undefined`                           |
 | `customNodes`      | `CustomNodeDefinition[]` | 用于基于 DOCX 转换的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`） | `undefined`                           |
-| `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调                                               | 如果未提供则抛出错误          |
+| `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调                                                                                | 未提供时抛出错误          |
 
 ### HeaderConfig
 

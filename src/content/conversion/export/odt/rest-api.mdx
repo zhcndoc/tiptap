@@ -4,7 +4,7 @@ tags:
   - type: start
   - type: beta
   - type: version
-    label: v2.25.0
+    label: v2.39.1
 meta:
     title: ODT REST API | Tiptap 转换
     description: 了解如何使用 Tiptap 转换 REST API v2 将 Tiptap JSON 文档导出为 ODT（OpenDocument 文本）格式。
@@ -15,6 +15,7 @@ import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 import ElementOverridesRestApi from '../_shared/_element-overrides-rest-api.mdx'
+import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <EnterpriseCalloutAuto variant="odt" renderMode="sidebar" disableWaitlist />
 
@@ -34,13 +35,15 @@ ODT 导出 API 将 Tiptap JSON 文档转换为 OpenDocument Text（`.odt`）文�
     集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ebc-8bad-4484-8cb0-d995ee23ae60) 来体验文档转换 API。
 </Callout>
 
+<RegionalEndpoints />
+
 ## 导出 ODT
 
 `POST /v2/convert/export/odt`
 
 `/v2/convert/export/odt` 端点将 Tiptap JSON 文档转换为 ODT 格式。发送带有文档 JSON 正文的 `POST` 请求，即可接收可下载的 ODT 文件。
 
-### 示例 (cURL)
+### 示例（cURL）
 
 ```bash
 curl --output document.odt -X POST "https://api.tiptap.dev/v2/convert/export/odt" \

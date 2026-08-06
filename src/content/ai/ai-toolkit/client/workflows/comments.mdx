@@ -25,7 +25,7 @@ import { Callout } from '@/components/ui/Callout'
 - [React](https://react.dev/) + [Next.js](https://nextjs.org/)
 - [Vercel 的 AI SDK](https://ai-sdk.dev/) + [OpenAI](https://openai.com/) 模型
 - Tiptap AI 工具包
-- Tiptap 评论扩展
+- Tiptap 评论扩展。
 
 ## 项目概览
 
@@ -54,7 +54,7 @@ npm install @tiptap/react @tiptap/starter-kit ai @ai-sdk/react @ai-sdk/anthropic
 </Callout>
 
 ```bash
-npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/ai-toolkit-tool-definitions @tiptap-pro/extension-comments
+npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/client-ai-toolkit-tool-definitions @tiptap-pro/extension-comments
 ```
 
 ## 服务器配置
@@ -72,8 +72,8 @@ npm install @tiptap-pro/client-ai-toolkit @tiptap-pro/ai-toolkit-tool-definition
 ```ts
 // app/api/comments-workflow/route.ts
 import { openai } from '@ai-sdk/openai'
-import { createEditThreadsWorkflow } from '@tiptap-pro/ai-toolkit-tool-definitions'
-import { Output, streamText } from 'ai'
+import { createEditThreadsWorkflow } from '@tiptap-pro/client-ai-toolkit-tool-definitions'
+import { createTextStreamResponse, Output, streamText, toTextStream } from 'ai'
 
 export async function POST(req: Request) {
   const { content, threads, task } = await req.json()
@@ -83,9 +83,9 @@ export async function POST(req: Request) {
   const workflow = createEditThreadsWorkflow()
 
   const result = streamText({
-    model: openai('gpt-5.4-mini'),
+    model: openai('gpt-5.6-luna'),
     // 系统提示
-    system: workflow.systemPrompt,
+    instructions: workflow.systemPrompt,
     // 用户消息
     prompt: JSON.stringify({
       content,
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
     output: Output.object({ schema: workflow.zodOutputSchema }),
   })
 
-  return result.toTextStreamResponse()
+  return createTextStreamResponse({ stream: toTextStream({ stream: result.stream }) })
 }
 ```
 
@@ -111,10 +111,14 @@ export async function POST(req: Request) {
 // app/comments-workflow/page.tsx
 'use client'
 
-import { experimental_useObject as useObject } from '@ai-sdk/react'
+import { useObject } from '@ai-sdk/react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { AiToolkit, getAiToolkit, editThreadsWorkflowOutputSchema } from '@tiptap-pro/client-ai-toolkit'
+import {
+  AiToolkit,
+  getAiToolkit,
+  editThreadsWorkflowOutputSchema,
+} from '@tiptap-pro/client-ai-toolkit'
 import { Comments } from '@tiptap-pro/extension-comments'
 import { useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
@@ -233,26 +237,26 @@ export default function Page() {
 
 查看[GitHub 上的源码](https://github.com/ueberdosis/ai-toolkit-demos)。
 
-## 文档部分评论
+## Commenting on a Section of the Document
 
-要仅向文档的子部分添加评论，请在 `tiptapRead` 上设置 `range` 选项。此参数接受一个包含要读取区域的 [Range](/ai/ai-toolkit/client/advanced-guides/concepts#range)。
+To add comments only to a subsection of the document, set the `range` option on `tiptapRead`. This parameter accepts a [Range](/ai/ai-toolkit/client/advanced-guides/concepts#range) containing the area to read.
 
-例如，只对选中的内容评论：
+For example, to comment only on the selected content:
 
 ```ts
 const range = editor.state.selection
 
-// 只读取文档中选中的部分
+// Only read the selected part of the document
 const { content } = toolkit.tiptapRead({ range })
 const { threads } = toolkit.getThreads()
 
 const operations = callApi(content, threads)
 
-// 应用评论操作
+// Apply comment operations
 toolkit.editThreadsWorkflow({ operations, workflowId })
 ```
 
-对于大型文档，您可以使用 [`tiptapReadChunks`](/ai/ai-toolkit/client/api-reference/read-the-document#tiptapreadchunks) 方法将文档拆分为多个块并并行处理。每个块都包含一个 [Range](/ai/ai-toolkit/client/advanced-guides/concepts#range)，表示该块的区域。
+For large documents, you can use the [`tiptapReadChunks`](/ai/ai-toolkit/client/api-reference/read-the-document#tiptapreadchunks) method to split the document into multiple chunks and process them in parallel. Each chunk contains a [Range](/ai/ai-toolkit/client/advanced-guides/concepts#range) representing the area of that chunk.
 
 ## 相关指南
 

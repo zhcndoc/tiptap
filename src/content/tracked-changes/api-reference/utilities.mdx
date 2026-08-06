@@ -24,7 +24,7 @@ meta:
 
 | 选项 | 类型 | 说明 |
 | --- | --- | --- |
-| `type` | `'add' \| 'delete' \| 'replace'` | 按建议类型过滤 |
+| `type` | `SuggestionType` | 按[建议类型](/tracked-changes/api-reference/types#suggestiontype)过滤 |
 | `userId` | `string` | 按用户 ID 过滤 |
 | `id` | `string` | 按建议 ID 过滤 |
 
@@ -42,6 +42,7 @@ const allSuggestions = findSuggestions(editor)
 const insertions = findSuggestions(editor, 'suggestion', { type: 'add' })
 const deletions = findSuggestions(editor, 'suggestion', { type: 'delete' })
 const replacements = findSuggestions(editor, 'suggestion', { type: 'replace' })
+const splits = findSuggestions(editor, 'suggestion', { type: 'split' })
 
 // 按用户查找建议
 const userSuggestions = findSuggestions(editor, 'suggestion', { userId: 'user-123' })
