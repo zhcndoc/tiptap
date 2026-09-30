@@ -527,7 +527,7 @@ editor.commands.exportDocx({
 当您希望页眉/页脚内容与正文 **不同** 时，请使用 `headerFooterOverrides`。它接受相同的六个字段，并且只针对页眉/页脚内容替换相应的正文级覆盖。每个字段都是完整替换，而不是深度合并：未定义的字段会回退到同名的正文级覆盖。
 
 ```ts
-import { BorderStyle } from 'docx'
+import { Docx, ExportDocx } from '@tiptap-pro/extension-export-docx'
 
 ExportDocx.configure({
   onCompleteExport: (result) => {
@@ -536,12 +536,12 @@ ExportDocx.configure({
   // 正文表格将使用 1pt 网格边框
   tableOverrides: {
     borders: {
-      top: { style: BorderStyle.SINGLE, size: 4, color: '000000' },
-      bottom: { style: BorderStyle.SINGLE, size: 4, color: '000000' },
-      left: { style: BorderStyle.SINGLE, size: 4, color: '000000' },
-      right: { style: BorderStyle.SINGLE, size: 4, color: '000000' },
-      insideHorizontal: { style: BorderStyle.SINGLE, size: 4, color: '000000' },
-      insideVertical: { style: BorderStyle.SINGLE, size: 4, color: '000000' },
+      top: { style: Docx.BorderStyle.SINGLE, size: 4, color: '000000' },
+      bottom: { style: Docx.BorderStyle.SINGLE, size: 4, color: '000000' },
+      left: { style: Docx.BorderStyle.SINGLE, size: 4, color: '000000' },
+      right: { style: Docx.BorderStyle.SINGLE, size: 4, color: '000000' },
+      insideHorizontal: { style: Docx.BorderStyle.SINGLE, size: 4, color: '000000' },
+      insideVertical: { style: Docx.BorderStyle.SINGLE, size: 4, color: '000000' },
     },
   },
   // 页眉/页脚表格（例如页面页眉中的布局表格）将
@@ -549,12 +549,12 @@ ExportDocx.configure({
   headerFooterOverrides: {
     tableOverrides: {
       borders: {
-        top: { style: BorderStyle.NONE },
-        bottom: { style: BorderStyle.NONE },
-        left: { style: BorderStyle.NONE },
-        right: { style: BorderStyle.NONE },
-        insideHorizontal: { style: BorderStyle.NONE },
-        insideVertical: { style: BorderStyle.NONE },
+        top: { style: Docx.BorderStyle.NONE },
+        bottom: { style: Docx.BorderStyle.NONE },
+        left: { style: Docx.BorderStyle.NONE },
+        right: { style: Docx.BorderStyle.NONE },
+        insideHorizontal: { style: Docx.BorderStyle.NONE },
+        insideVertical: { style: Docx.BorderStyle.NONE },
       },
     },
   },

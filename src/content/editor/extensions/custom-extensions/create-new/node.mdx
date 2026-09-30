@@ -372,4 +372,12 @@ const CustomImage = Image.extend({
 })
 ```
 
-关于节点视图有很多内容需要学习，因此请前往我们指南中关于节点视图的 [专门部分](/editor/extensions/custom-extensions/node-views) 获取更多信息。如果你正在寻找一个实际的例子，查看 [`TaskItem`](/editor/extensions/nodes/task-item) 节点的源代码。这个节点使用节点视图来渲染复选框。
+关于节点视图有很多内容需要学习，因此请前往我们指南中关于节点视图的[专门部分](/editor/extensions/custom-extensions/node-views)获取更多信息。如果你正在寻找一个实际的例子，查看 [`TaskItem`](/editor/extensions/nodes/task-item) 节点的源代码。这个节点使用节点视图来渲染复选框。
+
+### `addDecorations`
+
+节点会继承 [扩展 API](/editor/extensions/custom-extensions/create-new/extension#adddecorations) 中的 `addDecorations` 钩子。使用它可以添加**仅影响视图**的[装饰](/editor/core-concepts/decorations)，例如高亮、搜索结果、注释和轻量级小部件。这些内容会在编辑器中渲染，但不会修改或序列化文档。
+
+<Callout title="装饰与节点视图" variant="info">
+  当内容属于文档时，请使用[节点视图](#addnodeview-advanced)。当标记纯粹是视觉效果且位于文档之外时，请使用[装饰](/editor/core-concepts/decorations)。
+</Callout>

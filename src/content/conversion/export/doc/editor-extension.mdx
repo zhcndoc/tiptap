@@ -15,6 +15,7 @@ import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <EnterpriseCalloutAuto variant="doc" renderMode="sidebar" disableWaitlist />
 
@@ -64,7 +65,7 @@ const editor = new Editor({
   extensions: [
     // 其他扩展 ...
     ExportDoc.configure({
-      endpoint: 'https://api.tiptap.dev/v2/convert',
+      region: 'eu', // 'eu' or 'us'
       token: 'YOUR_TOKEN',
       styleOverrides: {},
       headers: {},
@@ -83,7 +84,8 @@ const editor = new Editor({
 
 | 参数               | 类型                     | 描述                                                                                                  | 默认值                                  |
 | ------------------ | ------------------------ | ----------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `endpoint`         | `string`                 | 用于转换的 Tiptap API 端点                                                                              | `'https://api.tiptap.dev/v2/convert'` |
+| `endpoint`         | 用于转换的 Tiptap API 端点。设置后会覆盖 `region`                                                                    | `undefined`                           |
+| `region`           | 未设置 `endpoint` 时使用的 Tiptap Cloud 区域，可选 `'eu'` 或 `'us'`                              | `'eu'`                                |
 | `token`            | `string`                 | 用于身份验证的 Tiptap JWT，参见[身份验证](/authentication)                                                                | `''`                                  |
 | `styleOverrides`   | `Record<string, string>` | 应用于导出的样式覆盖                                                                                   | `undefined`                           |
 | `headers`          | `HeaderConfig`           | 导出文档的页眉配置                                                                                      | `undefined`                           |
@@ -92,6 +94,9 @@ const editor = new Editor({
 | `pageMargins`      | `PageMargins`            | 页面边距配置                                                                                           | `undefined`                           |
 | `customNodes`      | `CustomNodeDefinition[]` | 用于基于 DOCX 转换的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`） | `undefined`                           |
 | `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调                                                                                | 未提供时抛出错误          |
+
+
+<RegionalEndpoints />
 
 ### HeaderConfig
 
@@ -147,7 +152,8 @@ exportDoc: (options?: ExportDocCommandOptions) => ReturnType
 
 | 属性               | 类型                     | 描述                                               |
 | ------------------ | ------------------------ | --------------------------------------------------------- |
-| `endpoint`         | `string`                 | 为此次特定导出覆盖 API 端点        |
+| `endpoint`         | 为此次特定导出覆盖 API 端点        |
+| `region`           | `'eu' | 'us'`     | 为此次特定导出覆盖区域              |
 | `token`            | `string`                 | 为此次特定导出覆盖 JWT 令牌           |
 | `styleOverrides`   | `Record<string, string>` | 为此次特定导出覆盖样式覆盖         |
 | `headers`          | `HeaderConfig`           | 为此次特定导出覆盖页眉配置    |
@@ -156,6 +162,7 @@ exportDoc: (options?: ExportDocCommandOptions) => ReturnType
 | `pageMargins`      | `PageMargins`            | 为此次特定导出覆盖页面边距            |
 | `customNodes`      | `CustomNodeDefinition[]` | 为此次特定导出覆盖自定义节点定义 |
 | `onCompleteExport` | `(result: Blob) => void` | 为此次特定导出覆盖回调            |
+
 
 ```js
 import { ExportDoc } from '@tiptap-pro/extension-export-doc'

@@ -27,6 +27,28 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 <CodeDemo path="/Marks/Textstyle" />
 
+## 应用字体大小
+
+`TextStyle` 提供 `<span>` 标记，而 [`FontSize`](/editor/extensions/functionality/fontsize) 等扩展会添加具体的样式属性。安装 text-style 包，并将这两个扩展与包含文档 schema 的编辑器（例如 `StarterKit` 提供的 schema）一起使用：
+
+```bash
+npm install @tiptap/extension-text-style @tiptap/starter-kit
+```
+
+```ts
+import { Editor } from '@tiptap/core'
+import { TextStyle, FontSize } from '@tiptap/extension-text-style'
+import StarterKit from '@tiptap/starter-kit'
+
+const editor = new Editor({
+  extensions: [StarterKit, TextStyle, FontSize],
+})
+
+editor.chain().focus().setFontSize('18px').run()
+```
+
+该命令会将选中的文本渲染为带有行内 `font-size: 18px` 样式的 `span`。
+
 ## 安装
 
 ```bash

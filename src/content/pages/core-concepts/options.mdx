@@ -127,6 +127,10 @@ interface PagesOptions {
    *  默认值为 ConvertKit；请镜像主编辑器的扩展栈以保持 schema 对齐。 */
   headerFooterExtensions?: Extensions | ((ctx: HeaderFooterExtensionsContext) => Extensions)
 
+  /** 解析以 HTML 提供的页眉和页脚内容。
+   * 默认为 `{ preserveWhitespace: 'full' }`。 */
+  headerFooterParseOptions?: ParseOptions
+
   /** 当 `setPageFormat()` 成功，或 configure() 应用了新格式时调用。 */
   onPageFormatChange?: (pageFormat: PageFormat) => void
 
@@ -246,6 +250,7 @@ interface PagesOptions {
 | `editableHeader`                     | `boolean`                           | `true`               | 允许通过双击打开页眉覆盖层                                                                                                                                     |
 | `editableFooter`                     | `boolean`                           | `true`               | 允许通过双击打开页脚覆盖层                                                                                                                                     |
 | `headerFooterExtensions`             | `Extensions \| (ctx) => Extensions` | `ConvertKit`         | 内部页眉/页脚编辑器的扩展；传入回调可按子类型附加 `Collaboration`（见 [为 Pages 添加协作](/pages/guides/collaboration-with-pages)）。 |
+| `headerFooterParseOptions`           | `ParseOptions`                      | `{ preserveWhitespace: 'full' }` | 将 HTML 作为页眉和页脚内容解析时使用的选项。默认保留重复空格。 |
 | `onDblClickHeaderFooterPreventClose` | `(event: MouseEvent) => boolean`    | `undefined`          | 防止在外部双击时关闭（页眉 + 页脚）                                                                                                                            |
 | `onDblClickHeaderPreventClose`       | `(event: MouseEvent) => boolean`    | `undefined`          | 防止在外部双击时关闭（仅页眉）                                                                                                                                |
 | `onDblClickFooterPreventClose`       | `(event: MouseEvent) => boolean`    | `undefined`          | 防止在外部双击时关闭（仅页脚）                                                                                                                                |
@@ -254,6 +259,7 @@ interface PagesOptions {
 | `footerAccentColor`                  | `string`                            | `accentColor` value  | 仅页脚覆盖层的强调色                                                                                                                                             |
 | `toolbarGradient`                    | `boolean`                           | `true`               | 在编辑覆盖层工具栏后显示白色渐隐渐变（页眉、页脚、脚注、尾注）。设为 `false` 可使用平面工具栏。                                                  |
 | `placeholders`                       | `false \| { page?, total? }`        | `undefined`          | 重命名 `{page}` / `{total}` 标记，或设为 `false` 以禁用                                                                                                                            |
+
 
 ### 脚注
 
@@ -324,6 +330,8 @@ interface PagesOptions {
 | `setHeaderEven`               | `header: PagesHeaderFooter` | 设置偶数页页眉内容                                  |
 | `setFooterOdd`               | `footer: PagesHeaderFooter` | 设置奇数页页脚内容                                   |
 | `setFooterEven`               | `footer: PagesHeaderFooter` | 设置偶数页页脚内容                                  |
+| `unsetHeader`                 | `headerType?: HeaderType`   | 清除页眉插槽；省略参数时清除默认插槽。 |
+| `unsetFooter`                 | `footerType?: FooterType`   | 清除页脚插槽；省略参数时清除默认插槽。 |
 | `setHeaderEditable`           | `enabled: boolean`          | 锁定或解锁页眉覆盖层（控制 `editableHeader`）。 |
 | `setFooterEditable`           | `enabled: boolean`          | 锁定或解锁页脚覆盖层（控制 `editableFooter`）。 |
 | `openHeaderEditor`            | `{ pageNumber: number }`    | 为特定页面打开页眉编辑器（从 1 开始编号）。            |
@@ -334,6 +342,7 @@ interface PagesOptions {
 | `setAccentColor`              | `color: string`             | 为两个编辑器覆盖层设置强调色                      |
 | `setHeaderAccentColor`        | `color: string`             | 仅为页眉覆盖层设置强调色                   |
 | `setFooterAccentColor`        | `color: string`             | 仅为页脚覆盖层设置强调色                   |
+
 
 ### 脚注命令
 

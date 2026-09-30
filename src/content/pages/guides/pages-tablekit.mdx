@@ -117,8 +117,10 @@ const editor = new Editor({
 - **分页安全的表格渲染。** 表格位于页面内容区域内，不会在水平方向溢出。
 - **保留列比例。** 当每个单元格都带有 `colwidth` 时，列会按比例缩小以适配页面。10 % / 40 % / 50 % 的列分配在任何页面宽度下都会渲染为 10 / 40 / 50。
 - **行高行为。**
-  - `heightRule: "exact"`：行会按声明的高度渲染，并裁剪溢出的内容。
+  - `heightRule: "exact"`：行会按声明的高度渲染；放不下的内容和单元格边框会被裁剪。
   - `heightRule: "atLeast"`（或未设置）：当内容或更窄的列本会导致裁剪时，行会在垂直方向增长。
+- **合并单元格。** 每个单元格都会保持在自己的列中，包括合并单元格下方的行。向下合并的单元格会在其覆盖的每一行保留边框和背景。如果边框来自你自己的 CSS，请参阅[设置合并单元格样式](#styling-merged-cells)。
+- **非常窄的列。** 单元格左右两侧的边距最多分别占单元格宽度的四分之一，因此单元格不会溢出到下一列。
 - **实时更新。** 增加、删除或重新排序单元格的编辑会立即重新布局该行。
 
 ### 仅 DOCX 专属行为（场景 B）
@@ -131,6 +133,28 @@ const editor = new Editor({
 - **负值 DOCX 缩进。** DOCX 中的负值 `w:tblInd`（Word 会把它渲染到纸张边缘的槽位/留白处）会保留到 `attrs.indent` 中，但会在视觉上被钳制为 0，防止表格推到页面边缘之外。
 - **单元格背景、垂直对齐、每侧边框。** 会从 DOCX 导入直接传递过来，无需额外处理。
 
+## 设置合并单元格样式
+
+在合并单元格覆盖范围内、除第一行之外的行中，合并单元格通过 `.tiptap-merged-cell-continuation` 元素绘制。该元素会从单元格属性（例如 DOCX 导入得到的属性）获取边框和背景。你自己的 CSS 边框不会应用到它，因此请补充这些样式：
+
+```css
+.my-document .tiptap-merged-cell-continuation {
+  border-left: 1px solid #d5d5d5;
+  border-right: 1px solid #d5d5d5;
+}
+
+.my-document .tiptap-merged-cell-continuation[data-merged-cell-end] {
+  border-bottom: 1px solid #d5d5d5;
+}
+
+.my-document .tiptap-merged-cell-continuation[data-merged-cell='tableHeader'] {
+  background-color: #f1f1f1;
+}
+```
+
+- `data-merged-cell` 是合并单元格的节点类型：`tableCell` 或 `tableHeader`。
+- `data-merged-cell-end` 会设置在单元格覆盖的最后一行。请在那里绘制底部边框。PagesTableKit 会隐藏合并单元格自身的底部边框。
+
 ## 不支持的内容
 
 <Callout variant="warning" title="这些是有意设定的限制">
@@ -142,6 +166,7 @@ const editor = new Editor({
 - **不带 Pages 扩展的编辑器。** PagesTableKit 是为 Pages 的分页布局设计的；它依赖 Pages 将行限制在页面内。在标准编辑器中，行无法正确渲染，过宽的表格会在水平方向溢出。请改用普通表格扩展。
 - **手动编写且混合使用 `colwidth` / 不使用 `colwidth` 的行。** 当**每个**单元格都带有列宽时，才会触发按比例收缩行为。如果某些单元格带宽度而某些没有，列的渲染比例可能与你预期不同。
 - **列宽拖拽控制柄。** 支持来自 `@tiptap/extension-table` 的拖拽调整大小，但最终渲染宽度可能会按比例而不是你拖到的精确像素值呈现，尤其是在每个单元格已经带有列宽时。
+- **高大的合并单元格。** 跨行合并单元格的第一行会增长以容纳该单元格的全部内容，因此表格可能比 Word 中更高。
 
 ### 仅 DOCX 限制（场景 B）
 
@@ -152,7 +177,7 @@ const editor = new Editor({
 
 ### 行必须能放进单个页面
 
-当表格行放不下当前页面时，Pages 会将**整行**作为一个原子单元移到下一页。这与 Microsoft Word 不同，Word 会在视觉上把很高的行跨页拆分。PagesTableKit 目前不支持行中间的分页拆分。
+默认情况下，当表格行放不下当前页面时，Pages 会将整行移到下一页。这与 Microsoft Word 不同，Word 会将高大的行拆分到多个页面。
 
 如果某一行的高度大于页面内容区域，那么即使把它移到下一页，它也仍然放不下：编辑器会继续尝试把它往后移动，并陷入无限循环。最终会导致无限分页循环和损坏的编辑器。
 
@@ -162,7 +187,7 @@ const editor = new Editor({
 - 继承了非常高的精确高度行的 DOCX 导入：这些行是为比目标页面格式更大的纸张编写的。
 - 单元格内嵌套的表格：这可能导致外层行比页面更高。
 
-行内分页拆分在路线图中。ETA：待定。
+要将高大的行（包括带有合并单元格或嵌套表格的行）拆分到多个页面，请启用[行分页拆分](/pages/guides/row-fragmentation)。
 
 ## 预期会发生什么
 
@@ -215,12 +240,25 @@ TableKit.configure({
 })
 ```
 
-PagesTableKit 没有任何独有的配置项；每个键都会透传到其底层扩展的标准选项。
+这些键都会透传到其底层扩展的标准选项。
+
+PagesTableKit 还新增了一个自己的选项：
+
+```ts
+TableKit.configure({
+  // 让高大的行继续到下一页，而不是整体下移。
+  // 实验性功能，默认关闭。
+  experimentalRowFragmentation: true,
+})
+```
+
+请参阅[跨越分页符的行](/pages/guides/row-fragmentation)，了解它的行为以及适用的行类型。
 
 ## 相关内容
 
-- [页面概览](/pages/getting-started/overview)：PagesTableKit 所需的分页扩展。
-- [表格中的页面](/pages/guides/table-with-pages)：在 Pages 中编写表格的一般指南。
+- [Pages 概览](/pages/getting-started/overview)：PagesTableKit 所需的分页扩展。
+- [跨越分页符的行](/pages/guides/row-fragmentation)：让高大的行继续到下一页。
+- [页面中的表格](/pages/guides/table-with-pages)：在 Pages 中编写表格的一般指南。
 - [ConvertKit](/conversion/import/docx/convertkit)：支持 DOCX 的编辑器套件；用于场景 B。
 - [编辑器扩展（导入 DOCX）](/conversion/import/docx/editor-extension)：`ImportDocx` 扩展如何将 Word 内容导入你的编辑器。
 - [CSS 注入（导入）](/conversion/import/docx/css-injection)：将 DOCX 样式目录提取为 CSS，以便在分页内容中保持一致的排版。

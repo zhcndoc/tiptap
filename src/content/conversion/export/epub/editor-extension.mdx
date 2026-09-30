@@ -14,6 +14,7 @@ meta:
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <EnterpriseCalloutAuto variant="epub" renderMode="sidebar" disableWaitlist />
 
@@ -57,7 +58,7 @@ const editor = new Editor({
   extensions: [
     // 其他扩展 ...
     ExportEpub.configure({
-      endpoint: 'https://api.tiptap.dev/v2/convert',
+      region: 'eu', // 'eu' or 'us'
       token: 'YOUR_TOKEN',
       styleOverrides: {},
       headers: {},
@@ -76,7 +77,8 @@ const editor = new Editor({
 
 | 参数               | 类型                     | 描述                                                                                      | 默认值                               |
 | ------------------ | ------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------- |
-| `endpoint`         | `string`                 | 用于转换的 Tiptap API 端点                                                           | `'https://api.tiptap.dev/v2/convert'` |
+| `endpoint`         | 用于转换的 Tiptap API 端点。设置后会覆盖 `region` | `undefined` |
+| `region`           | 未设置 `endpoint` 时使用的 Tiptap Cloud 区域，可选 `'eu'` 或 `'us'` | `'eu'` |
 | `token`            | `string`                 | 用于身份验证的 Tiptap JWT，参见[身份验证](/authentication)                                                                | `''`                                  |
 | `styleOverrides`   | `Record<string, string>` | 应用于导出的样式覆盖                                                           | `undefined`                           |
 | `headers`          | `HeaderConfig`           | 导出文档的页眉配置                                                   | `undefined`                           |
@@ -85,6 +87,9 @@ const editor = new Editor({
 | `pageMargins`      | `PageMargins`            | 页面边距配置                                                                       | `undefined`                           |
 | `customNodes`      | `CustomNodeDefinition[]` | 用于基于 DOCX 的转换的自定义节点定义（需要 `@tiptap-pro/extension-export-docx`） | `undefined`                           |
 | `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调                                               | 未提供时抛出错误          |
+
+
+<RegionalEndpoints />
 
 ### HeaderConfig
 
@@ -140,7 +145,8 @@ exportEpub: (options?: ExportEpubCommandOptions) => ReturnType
 
 | Property           | Type                     | Description                                               |
 | ------------------ | ------------------------ | --------------------------------------------------------- |
-| `endpoint`         | `string`                 | 覆盖此特定导出的 API 端点        |
+| `endpoint`         | 为此次特定导出覆盖 API 端点 |
+| `region`           | 为此次特定导出覆盖区域，可选 `'eu'` 或 `'us'` |
 | `token`            | `string`                 | 覆盖此特定导出的 JWT 令牌           |
 | `styleOverrides`   | `Record<string, string>` | 覆盖此特定导出的样式覆盖         |
 | `headers`          | `HeaderConfig`           | 覆盖此特定导出的页眉配置    |
@@ -149,6 +155,7 @@ exportEpub: (options?: ExportEpubCommandOptions) => ReturnType
 | `pageMargins`      | `PageMargins`           | 覆盖此特定导出的页边距            |
 | `customNodes`      | `CustomNodeDefinition[]` | 覆盖此特定导出的自定义节点定义 |
 | `onCompleteExport` | `(result: Blob) => void` | 覆盖此特定导出的回调            |
+
 
 ```js
 import { ExportEpub } from '@tiptap-pro/extension-export-epub'

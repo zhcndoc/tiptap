@@ -8,6 +8,10 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 
+<Callout title="暂不适用于本地部署" variant="warning" size="md">
+  本页介绍的身份验证模型目前仅适用于 Tiptap Cloud。如果你运行的是本地部署版本，请改用[旧版身份验证](/authentication/legacy)。我们计划在 2026 年 9 月为本地部署版本提供新的身份验证方式。
+</Callout>
+
 Tiptap 服务使用 JWT（JSON Web Tokens）进行身份验证和授权。你在服务器上生成并签名令牌，然后将它们传递给 Tiptap 服务。每个令牌都会标识你的环境、列出它可以访问的服务，以及它被授权在你的资源上执行的操作。
 
 <Callout title="仍在使用 App ID 和按服务的密钥？" variant="hint">

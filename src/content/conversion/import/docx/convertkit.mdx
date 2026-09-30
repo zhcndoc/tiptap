@@ -42,7 +42,7 @@ DOCX 文件包含了基础 Tiptap 扩展并不了解的格式元数据：段落�
 
 **ConvertKit 是一个单一扩展，用于配置你的编辑器以导入 DOCX 内容。** 引入它后，你将获得：
 
-- 30 个捆绑扩展，彼此联动以处理 Convert API 生成的一切内容。
+- 32 个捆绑扩展，彼此联动以处理 Convert API 生成的一切内容。
 - 自定义的 Paragraph、Heading、Image、Table、TableRow、TableCell 和 TableHeader 扩展，可接受 DOCX 特定属性。
 - 在编辑器创建时注入的一小段 CSS 重置，用于规范浏览器默认样式，从而让 DOCX 间距值能够准确渲染。
 - 每个捆绑扩展都可以单独配置或禁用。
@@ -88,14 +88,14 @@ new Editor({
 
 ### 内置扩展
 
-ConvertKit 在单个 `@tiptap-pro/extension-convert-kit` 包中捆绑了 **30** 个扩展。下面的列表是参考资料，帮助你了解编辑器 schema 中会出现哪些内容；你不需要单独安装或注册这些扩展。
+ConvertKit 在单个 `@tiptap-pro/extension-convert-kit` 包中捆绑了 **32** 个扩展。下面的列表是参考资料，帮助你了解编辑器 schema 中会出现哪些内容；你不需要单独安装或注册这些扩展。
 
 | 类别       | 扩展                                                                                                                                                              |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 核心       | `Document`、`Text`、`Paragraph`_、`Heading`_                                                                                                                        |
 | 标记       | `Bold`、`Italic`、`Underline`、`Strike`、`Code`、`Link`                                                                                                             |
 | 块         | `Blockquote`、`HorizontalRule`、`HardBreak`、`CodeBlock`、`PageBreak`                                                                                               |
-| 列表       | `BulletList`、`OrderedList`、`ListItem`、`ListKeymap`、`OrderedListNumbering`†                                                                                      |
+| 列表       | `BulletList`、`OrderedList`、`ListItem`、`ListKeymap`、`TaskList`、`TaskItem`、`OrderedListNumbering`†                                                            |
 | 媒体       | `Image`\*                                                                                                                                                           |
 | 样式       | `TextStyleKit`（`TextStyle`、`Color`、`BackgroundColor`、`FontFamily`、`FontSize`、`LineHeight`）、`TextAlign`、`Highlight`（多颜色）、`Superscript`、`Subscript` |
 | UI 辅助工具 | `Dropcursor`、`Gapcursor`                                                                                                                                           |
@@ -104,19 +104,19 @@ ConvertKit 在单个 `@tiptap-pro/extension-convert-kit` 包中捆绑了 **30** 
 
 标记为 `*` 的扩展是自定义的、支持 DOCX 的 Tiptap 基础扩展覆写。请参阅下一节了解它们新增了什么。标记为 `†` 的扩展已捆绑但**默认关闭**：请通过同名配置项启用它们（参见 [配置参考](#configuration-reference)）。
 
-ConvertKit 还导出与 `OrderedListNumbering` 配套、用于编辑器预览渲染的辅助函数和类型：`generateNumberingFormatCss`、`GenerateNumberingFormatCssOptions`、`NumberingFormatDefinition`、`NumberingLevelDefinition`、`NumberingBaseStyle` 和 `NumberingMarkerFont`。有关端到端流程，请参见 [有序列表编号](/conversion/export/docx/ordered-list-numbering)。
+ConvertKit 还导出与 `OrderedListNumbering` 配套、用于编辑器预览渲染的辅助函数和类型：`generateNumberingFormatCss`、`GenerateNumberingFormatCssOptions`、`NumberingFormatDefinition`、`NumberingLevelDefinition`、`NumberingBaseStyle` 和 `NumberingMarkerFont`。有关端到端流程，请参见[列表编号和项目符号](/conversion/export/docx/ordered-list-numbering)。
 
 ### 在 Tiptap 基础扩展上新增的属性
 
 | 扩展                        | 新增属性                                                                                                  | 来源                                                                                                                  |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `Paragraph`                 | `spacingBefore`、`spacingAfter`、`lineHeight`、`fontSize`、`indent`、`firstLineIndent`、`contextualSpacing` | 段落标记上的 DOCX `w:pPr` + `w:rPr`                                                                                     |
-| `Heading`                   | 与 `Paragraph` 相同                                                                                         | 段落标记上的 DOCX `w:pPr` + `w:rPr`                                                                                     |
-| `Image`                     | `cropTop`、`cropBottom`、`cropLeft`、`cropRight`                                                            | 图形上的 DOCX `a:srcRect`                                                                                               |
-| `Table`                     | `width`、`indent`（以及默认值为 `1` 的 `cellMinWidth`，相较于 Tiptap 的 `25`）                                | DOCX `w:tblW`、`w:tblInd`、`w:tblGrid`                                                                                |
-| `TableRow`                  | `height`、`heightRule`（`exact` / `atLeast`）                                                               | DOCX `w:trHeight` + `w:hRule`                                                                                          |
-| `TableCell` / `TableHeader` | `background`、`verticalAlign`、每边边框（top/bottom/left/right 上的 `width` / `style` / `color`）            | DOCX `w:tcPr`                                                                                                         |
-| `OrderedListNumbering`†     | `numberingFormat`                                                                                           | `ExportDocx` 编号格式注册表。请参阅 [有序列表编号](/conversion/export/docx/ordered-list-numbering)。 |
+| `Paragraph`                 | `spacingBefore`、`spacingAfter`、`lineHeight`、`fontSize`、`indent`、`indentRight`、`firstLineIndent`、`contextualSpacing`、`keepNext`、`keepLines` | 段落标记上的 DOCX `w:pPr` + `w:rPr` |
+| `Heading`                   | 与 `Paragraph` 相同                                                                                         | 段落标记上的 DOCX `w:pPr` + `w:rPr` |
+| `Image`                     | `cropTop`、`cropBottom`、`cropLeft`、`cropRight`                                                            | 图形上的 DOCX `a:srcRect` |
+| `Table`                     | `width`、`indent`、每边表格边框（top/bottom/left/right 上的 `width` / `style` / `color` 以及内部水平和垂直网格）、`cellMarginTop`、`cellMarginRight`、`cellMarginBottom`、`cellMarginLeft`（`cellMinWidth` 默认值为 `1`，而 Tiptap 为 `25`） | DOCX `w:tblW`、`w:tblInd`、`w:tblGrid`、`w:tblBorders`、`w:tblCellMar` |
+| `TableRow`                  | `height`、`heightRule`（`exact` / `atLeast`）                                                               | DOCX `w:trHeight` + `w:hRule` |
+| `TableCell` / `TableHeader` | `background`、`verticalAlign`、每边边框（top/bottom/left/right 上的 `width` / `style` / `color`） | DOCX `w:tcPr` |
+| `OrderedListNumbering`†     | `numberingFormat`，用于 `orderedList` 和 `bulletList` | `ExportDocx` 编号格式注册表，每种列表类型的最外层列表专用。参见[列表编号和项目符号](/conversion/export/docx/ordered-list-numbering)。 |
 
 ### CSS 重置会规范什么
 
@@ -153,6 +153,7 @@ ConvertKit 还导出与 `OrderedListNumbering` 配套、用于编辑器预览渲
 
 - 在编辑器挂载期间，会应用一个小范围的 CSS 重置。页面上多个由 ConvertKit 驱动的编辑器会共享这份重置：它只会插入一次，并且只有在最后一个编辑器被销毁时才会移除。
 - 你应用中 DOCX 导入内容的一致渲染。带有非零 DOCX 裁剪的图片会真正以裁剪后的效果渲染；`heightRule: "atLeast"` 的行在其列收缩时会垂直增高；`verticalAlign: "center"` 的单元格会将内容居中。
+- **列表缩进会定位整个列表项，而不是段落。** 启用 `orderedListNumbering` 后，导入列表段落上的 `indent` 会一起移动整个列表项、标记和文本，而不是只给段落添加内边距。导入的条目会保持 Word 中的位置，不会在每一层嵌套中逐渐偏离自己的标记。详见[单条目缩进](/conversion/export/docx/ordered-list-numbering#indents-on-a-single-item)。
 - 与 Tiptap Pro 其余扩展生态完全兼容。`@tiptap-pro/extension-import-docx` 和 `@tiptap-pro/extension-export-docx` 是天然的配套扩展；如果你需要分页，`@tiptap-pro/extension-pages-tablekit` 可以叠加使用。
 - **紧凑的默认排版。** CSS 重置会将段落外边距清零，并应用紧凑的行高。如果你使用 ConvertKit 来处理并非从 DOCX 导入的内容，请在其基础上叠加你自己的排版规则。这种重置是有意为之，而不是我们期望默认就视觉上足够精美的样式。
 
@@ -196,7 +197,9 @@ ConvertKit.configure({
   orderedList: Partial<OrderedListOptions> | false,
   listItem: Partial<ListItemOptions> | false,
   listKeymap: Partial<ListKeymapOptions> | false,
-  orderedListNumbering: boolean | Partial<OrderedListNumberingOptions>, // 默认：false；使用 `true` 开启，或传入一个选项对象（`defaultFormat`、`formats`）
+  taskList: Partial<TaskListOptions> | false,
+  taskItem: Partial<TaskItemOptions> | false,
+  orderedListNumbering: boolean | Partial<OrderedListNumberingOptions>, // 默认：false；使用 `true` 开启，或传入一个选项对象（`defaultFormat`、`defaultBulletFormat`、`formats`）
   hardBreak: Partial<HardBreakOptions> | false,
   horizontalRule: Partial<HorizontalRuleOptions> | false,
   dropcursor: Partial<DropcursorOptions> | false,
@@ -212,6 +215,12 @@ ConvertKit.configure({
   table: Partial<ConvertTableKitOptions> | false,
 })
 ```
+
+<Callout variant="warning" title="启用 `orderedListNumbering` 会改变项目符号列表 JSON">
+  `bulletList` 和 `orderedList` 都会注册 `numberingFormat`，因此启用该选项后，未指定格式的项目符号列表会在
+  `editor.getJSON()` 中写入 `attrs: { numberingFormat: null }`，而此前完全不会写入 `attrs`。这与有序列表一直以来的结构一致，
+  渲染出的 HTML 不会改变：没有格式的列表仍然是普通的 `<ul>`。逐字节比较项目符号列表的存储 JSON、协作文档和快照测试都会看到这个新键。
+</Callout>
 
 ## 相关
 

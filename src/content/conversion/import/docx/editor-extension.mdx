@@ -17,6 +17,7 @@ import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
 
@@ -37,10 +38,10 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 |                        | 编辑器扩展                          | REST API                         |
 | ---------------------- | ------------------------------------ | -------------------------------- |
-| 运行位置               | 您的编辑器（客户端）                 | Tiptap 云（服务端）              |
+| 运行位置               | 你的编辑器（客户端）                 | Tiptap 云（服务端）              |
 | 脚注和尾注             | 通过 Pages 自动应用；数据在回调中提供 | 在响应中返回                    |
 | 页眉和页脚             | 通过 Pages 扩展自动应用              | 作为单独的数据字段返回          |
-| 未知内容               | 按您的编辑器架构重新写入             | 原始 JSON，不进行架构过滤       |
+| 未知内容               | 按你的编辑器架构重新写入             | 原始 JSON，不进行架构过滤       |
 
 如果您需要服务端处理或原始未过滤的 JSON，请选择 REST API。
 
@@ -90,15 +91,19 @@ const editor = new Editor({
 })
 ```
 
-| 属性                | 描述                                                                                                                                                                                                                                                                      |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `token`             | 由您的服务器为 Convert 服务生成的 JWT。这是请求所需的唯一凭据。有关如何签发 JWT，请参阅[身份验证](/authentication)。                                                                                                                    |
-| `endpoint`          | Convert API 的基础 URL。默认为 `https://api.tiptap.dev/v2/convert`，因此只有在需要指向其他部署时才需要设置此项。                                                                                                                                                  |
-| `imageUploadConfig` | 导入期间图片上传的结构化配置。详情请参阅[图片上传配置](#image-upload-configuration)。                                                                                                                                             |
-| `prosemirrorNodes`  | 重命名导入生成的节点类型，以适配使用不同名称的 schema。请参阅[自定义节点映射](/conversion/import/docx/custom-node-mapping)。                                                                                                                        |
-| `prosemirrorMarks`  | 重命名导入生成的标记类型，并将 Word 字符样式映射到标记。请参阅[自定义标记映射](/conversion/import/docx/custom-mark-mapping)。                                                                                                                    |
-| `cssStyles`         | 选择将文档的默认样式提取为 CSS，以便将其应用到编辑器。请参阅[CSS 注入](/conversion/import/docx/css-injection)。                                                                                                                       |
-| `verbose`           | 一个用于控制导入返回多少诊断输出的 `number`。适用于调试，或进一步了解转换期间发生的情况。详情请参阅[详细输出](#verbose-output)。                                                                                 |
+| 属性                | 描述 |
+| ------------------- | ---- |
+| `token`             | 由你的服务器为 Convert 服务生成的 JWT。这是请求所需的唯一凭据。有关如何签发 JWT，请参阅[身份验证](/authentication)。 |
+| `endpoint`          | Convert API 的基础 URL。仅在需要指向其他部署时设置；设置后会覆盖 `region`。 |
+| `region`            | 执行转换的 Tiptap Cloud 区域，可选 `'eu'` 或 `'us'`。默认为 `'eu'`。设置 `endpoint` 后会忽略此项。 |
+| `imageUploadConfig` | 导入期间图片上传的结构化配置。详情请参阅[图片上传配置](#image-upload-configuration)。 |
+| `prosemirrorNodes`  | 重命名导入生成的节点类型，以适配使用不同名称的 schema。请参阅[自定义节点映射](/conversion/import/docx/custom-node-mapping)。 |
+| `prosemirrorMarks`  | 重命名导入生成的标记类型，并将 Word 字符样式映射到标记。请参阅[自定义标记映射](/conversion/import/docx/custom-mark-mapping)。 |
+| `cssStyles`         | 选择将文档的默认样式提取为 CSS，以便将其应用到编辑器。请参阅[CSS 注入](/conversion/import/docx/css-injection)。 |
+| `trackedChanges`    | 决定如何处理 Word 的插入和删除：保留为建议、应用或丢弃。默认为 `auto`，会根据你的 schema 选择。请参阅[修订记录](/conversion/import/docx/tracked-changes)。 |
+| `taskLists`         | 决定 Word 复选框列表是否转换为 `taskList` / `taskItem` 节点。`'auto'`（默认）会在编辑器 schema 同时包含这两个节点时导入它们，ConvertKit 就是这种情况；`'import'` 强制导入，`'ignore'` 关闭导入。请参阅[任务列表](/conversion/content-types/text-and-formatting/task-lists)。 |
+
+<RegionalEndpoints />
 
 ## 图片上传配置
 
@@ -122,12 +127,12 @@ ImportDocx.configure({
 })
 ```
 
-| 属性          | 类型                     | 必需 | 描述                                                                                                                                                                                                         |
-| ------------- | ------------------------ | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `url`         | `string`                 | 是   | 接收上传图片的端点 URL。必须是有效的 HTTP 或 HTTPS URL。                                                                                                                          |
-| `headers`     | `HeadersInit`            | 否   | 转换服务在上传图片时转发的额外 HTTP 请求头。适用于身份验证（例如 Bearer token、API key）。接受普通对象、`Headers` 实例或键值对数组。 |
-| `method`      | `string`                 | 否   | 用于上传图片的 HTTP 方法。若省略，则默认为转换服务自身的默认值。                                                                                                                  |
-| `queryParams` | `Record<string, string>` | 否   | 由转换服务附加到上传 URL 的查询参数。                                                                                                                                                 |
+| 属性          | 类型                     | 必需 | 描述 |
+| ------------- | ------------------------ | ---- | ---- |
+| `url`         | `string`                 | 是   | 接收上传图片的端点 URL。必须是有效的 HTTP 或 HTTPS URL。生产环境请使用 HTTPS：下面的请求头会随每次上传发送，HTTP 端点会暴露其中携带的凭据。 |
+| `headers`     | `Record<string, string>` | 否   | 转换服务在上传图片时转发的额外 HTTP 请求头。适用于身份验证（例如 Bearer token、API key）。请使用由请求头名称到值组成的普通对象。 |
+| `method`      | `string`                 | 否   | 用于上传图片的 HTTP 方法。默认为 `POST`。 |
+| `queryParams` | `Record<string, string>` | 否   | 由转换服务附加到上传 URL 的查询参数。 |
 
 <Callout title="从 imageUploadCallbackUrl 迁移" variant="warning">
   `imageUploadCallbackUrl` 选项已弃用。请改用 `imageUploadConfig`：
@@ -236,6 +241,8 @@ editor
   .run()
 ```
 
+一次导入会定义整个文档。文件未包含的页眉、页脚、脚注或尾注插槽会被清除，因此页面上不会残留上一次导入的内容。如果文件没有首页或奇偶页变体，这些变体也会被关闭。
+
 如果没有安装 Pages 扩展，页眉和页脚数据仍可在 `onImport` 回调中获取，但不会自动应用到编辑器中。
 
 ### 手动处理
@@ -268,23 +275,31 @@ editor
       // 设置正文内容，不自动应用页眉/页脚
       editor.commands.setContent(context.content)
 
-      // 通过 Pages 扩展命令手动应用页眉和页脚
+      // 通过 Pages 命令应用页眉和页脚。清除文件未包含的插槽，避免上一次导入的内容残留。
       if (header) editor.commands.setHeader(header)
+      else editor.commands.unsetHeader()
       if (footer) editor.commands.setFooter(footer)
+      else editor.commands.unsetFooter()
 
-      if (headerFirstPage || footerFirstPage) {
-        editor.commands.setDifferentFirstPage(true)
-        if (headerFirstPage) editor.commands.setHeaderFirstPage(headerFirstPage)
-        if (footerFirstPage) editor.commands.setFooterFirstPage(footerFirstPage)
-      }
+      editor.commands.setDifferentFirstPage(Boolean(headerFirstPage || footerFirstPage))
+      if (headerFirstPage) editor.commands.setHeaderFirstPage(headerFirstPage)
+      else editor.commands.unsetHeader('first')
+      if (footerFirstPage) editor.commands.setFooterFirstPage(footerFirstPage)
+      else editor.commands.unsetFooter('first')
 
-      if (headerOdd || headerEven || footerOdd || footerEven) {
-        editor.commands.setDifferentOddEven(true)
-        if (headerOdd) editor.commands.setHeaderOdd(headerOdd)
-        if (headerEven) editor.commands.setHeaderEven(headerEven)
-        if (footerOdd) editor.commands.setFooterOdd(footerOdd)
-        if (footerEven) editor.commands.setFooterEven(footerEven)
-      }
+      // Word shows the default header on odd pages, so the odd slot falls back to it
+      const hasOddEven = Boolean(headerOdd || headerEven || footerOdd || footerEven)
+      editor.commands.setDifferentOddEven(hasOddEven)
+      const oddHeader = hasOddEven ? (headerOdd ?? header) : null
+      const oddFooter = hasOddEven ? (footerOdd ?? footer) : null
+      if (oddHeader) editor.commands.setHeaderOdd(oddHeader)
+      else editor.commands.unsetHeader('odd')
+      if (headerEven) editor.commands.setHeaderEven(headerEven)
+      else editor.commands.unsetHeader('even')
+      if (oddFooter) editor.commands.setFooterOdd(oddFooter)
+      else editor.commands.unsetFooter('odd')
+      if (footerEven) editor.commands.setFooterEven(footerEven)
+      else editor.commands.unsetFooter('even')
     },
   })
   .focus()
@@ -366,53 +381,27 @@ editor
 
 如果不使用 Pages，`footnoteReference` / `endnoteReference` 节点需要一个[自定义扩展](/editor/extensions/custom-extensions/extend-existing)才能在编辑器中渲染。`ImportContext` 上的数据已经提供了构建你自己的展示所需的一切。
 
-## 详细输出
+## 警告和错误
 
-DOCX 导入扩展提供了一个 `verbose` 配置属性，用于帮助你控制导入过程中诊断输出的级别。这对于调试或更深入地了解转换过程中发生了什么特别有用。
+`onImport` context 上的每次导入都会返回一个 `logs` 对象，其中包含 `warn` 和 `error` 数组。警告意味着某些内容没有进入文档，因此值得向上传文件的用户展示。
 
-`verbose` 属性是一个位掩码数字，用于确定输出哪些类型的日志消息。该扩展使用以下级别：
-
-| 值 | 级别   | 描述           |
-| ----- | ------------------ | -------------------------- |
-| 1     | `log`   | 一般信息日志     |
-| 2     | `warn`  | 警告                     |
-| 4     | `error` | 错误                     |
-
-<Callout title="详细输出位掩码">
-  你可以将各级别的值相加来组合它们。例如，`verbose: 3` 将同时启用
-  `log`（1）和 `warn`（2）消息。
-</Callout>
-
-详细输出除了 `data` 属性之外，还会再提供一个名为 `logs` 的属性，其中包含 `info`、`warn` 和 `error` 属性；它们各自都是数组，包含与对应详细级别相关的全部信息。
-
-```js
-{
-  "data": {
-    "content": {
-        // Tiptap JSON
-    }
-  },
-  "logs": {
-    "info": [],
-    "warn": [
-      {
-        "message": "在媒体文件中未找到图像文件",
-        "fileName": "image1.gif",
-        "availableMediaFiles": []
+```ts
+editor
+  .chain()
+  .importDocx({
+    file,
+    onImport(context) {
+      for (const warning of context.logs.warn) {
+        console.warn(warning.message)
       }
-    ],
-    "error": [
-      {
-        "message": "图像上传失败：一般错误",
-        "fileName": "image1.gif",
-        "url": "https://your-image-upload-endpoint.com",
-        "error": "无法连接。计算机是否可以访问该 url？",
-        "context": "上传图像时发生一般错误"
-      }
-    ]
-  }
-}
+
+      context.setEditorContent()
+    },
+  })
+  .run()
 ```
+
+最常见的警告是图片无法导入，通常意味着没有设置 `imageUploadConfig`。请参阅[图像处理](/conversion/import/docx/image-handling)。
 
 ## 支持与限制
 

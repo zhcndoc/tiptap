@@ -52,9 +52,7 @@ function Editor() {
   })
 
   // 去重 — 一个建议可能跨越多个文本节点
-  const uniqueSuggestions = Array.from(
-    new Map(suggestions.map(s => [s.id, s])).values(),
-  )
+  const uniqueSuggestions = Array.from(new Map(suggestions.map((s) => [s.id, s])).values())
 
   if (!editor) {
     return null
@@ -87,7 +85,7 @@ function Editor() {
 
 ## 构建 SuggestionList 组件
 
-每条建议有一个 `type`（`add`、`delete` 或 `replace`）、更改的 `text`、用户元数据和时间戳。使用这些信息渲染一个清晰的列表。
+每条建议有一个 `type`、更改的 `text`、用户元数据和时间戳。属性更改建议还会提供已更改的节点类型和值。使用这些信息渲染一个清晰的列表。
 
 ```jsx
 function SuggestionList({ suggestions, onAccept, onReject }) {
@@ -102,7 +100,7 @@ function SuggestionList({ suggestions, onAccept, onReject }) {
   return (
     <div className="suggestion-list">
       <h3>建议（{suggestions.length}）</h3>
-      {suggestions.map(suggestion => (
+      {suggestions.map((suggestion) => (
         <SuggestionItem
           key={suggestion.id}
           suggestion={suggestion}
@@ -123,34 +121,44 @@ function SuggestionList({ suggestions, onAccept, onReject }) {
 
 ```jsx
 function SuggestionItem({ suggestion, onAccept, onReject }) {
-  const typeLabel = {
+  const typeLabels = {
     add: '+ 插入',
     delete: '− 删除',
     replace: '~ 替换',
+    markChange: '~ 格式更改',
+    attributeChange: '~ 属性更改',
+    sink: '→ 列表缩进',
+    lift: '← 列表减少缩进',
   }
+
+  const typeLabel =
+    suggestion.type === 'split'
+      ? `~ ${suggestion.splitKind === 'insertion' ? '新建' : '拆分'} ${suggestion.nodeType ?? '节点'}`
+      : typeLabels[suggestion.type]
 
   // 从块级节点建议中推导节点类型标签
   const nodes = suggestion.insertedNodes ?? suggestion.deletedNodes
-  const nodeType = nodes?.[0]?.type
+  const nodeType = suggestion.nodeType ?? nodes?.[0]?.type
 
   return (
     <div className="suggestion-item">
-      <div className="suggestion-item__type">
-        {typeLabel[suggestion.type]}
-      </div>
+      <div className="suggestion-item__type">{typeLabel}</div>
 
-      {nodeType && (
-        <span className="suggestion-item__node-badge">
-          {nodeType}
-        </span>
-      )}
+      {nodeType && <span className="suggestion-item__node-badge">{nodeType}</span>}
 
       <div className="suggestion-item__text">
-        "{suggestion.text}"
-        {suggestion.type === 'replace' && suggestion.replacedText && (
-          <span className="suggestion-item__replaced-text">
-            {' '}(原文："{suggestion.replacedText}")
-          </span>
+        {suggestion.type === 'attributeChange' ? (
+          <AttributeChanges changes={suggestion.attributeChanges ?? []} />
+        ) : (
+          <>
+            "{suggestion.text}"
+            {suggestion.type === 'replace' && suggestion.replacedText && (
+              <span className="suggestion-item__replaced-text">
+                {' '}(原文："{suggestion.replacedText}")
+              </span>
+            )}
+          </>
+        )}
         )}
       </div>
 
@@ -167,16 +175,26 @@ function SuggestionItem({ suggestion, onAccept, onReject }) {
     </div>
   )
 }
+
+function AttributeChanges({ changes }) {
+  return changes.map((change) => (
+    <div key={change.attributeName}>
+      {change.attributeName}: {JSON.stringify(change.oldValue)} → {JSON.stringify(change.newValue)}
+    </div>
+  ))
+}
 ```
 
 使用 `suggestion.text` 显示每位作者单独贡献的内容——这对审阅面板来说是合适的默认值。当另一位作者在此建议中嵌套了编辑时，`suggestion.fullText` 会与 `suggestion.text` 不同，并包含包括嵌套文本在内的完整范围。你可以将其作为提示显示：
 
 ```jsx
-{suggestion.fullText !== suggestion.text && (
-  <span className="suggestion-item__stacked-hint">
-    with stacked edits: "{suggestion.fullText}"
-  </span>
-)}
+{
+  suggestion.fullText !== suggestion.text && (
+    <span className="suggestion-item__stacked-hint">
+      with stacked edits: "{suggestion.fullText}"
+    </span>
+  )
+}
 ```
 
 查看 [`text` vs `fullText`](/tracked-changes/api-reference/types#text-vs-fulltext) 和 [nested suggestions](/tracked-changes/usage/advanced-usage#nested-and-stacked-suggestions) 以了解完整行为。
@@ -260,7 +278,7 @@ function SuggestionList({ suggestions, onAccept, onReject, onAcceptAll, onReject
         </div>
       )}
 
-      {suggestions.map(suggestion => (
+      {suggestions.map((suggestion) => (
         <SuggestionItem
           key={suggestion.id}
           suggestion={suggestion}

@@ -103,7 +103,8 @@ ExportDocx.configure({
   embedFonts: true,
   // 只有在字体需要 WOFF2 → TTF 转换时才会使用 token
   token: 'your-jwt',
-  endpoint: 'https://api.tiptap.dev/v2/convert', // 可选，这是默认值
+  region: 'eu', // 可选。'eu' 或 'us'
+
   onCompleteExport: (blob) => {
     /* 下载 blob */
   },
@@ -137,7 +138,9 @@ ExportDocx.configure({
 | ------------ | --------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
 | `embedFonts` | 启用自动检测和嵌入。仅限浏览器。                                                         | `false`                             |
 | `token`      | Tiptap Convert JWT，作为 `Authorization` bearer token 发送。仅在 WOFF2 字体需要转换时必需。 | `undefined`                         |
-| `endpoint`   | 用于 WOFF2 → TTF 转换的 Tiptap Convert REST 端点基础地址。                                              | `https://api.tiptap.dev/v2/convert` |
+| `endpoint`   | 用于 WOFF2 → TTF 转换的 Tiptap Convert REST 端点基础地址。设置后会覆盖 `region`。 | `undefined`                         |
+| `region`     | 未设置 `endpoint` 时用于 WOFF2 → TTF 转换的 Tiptap Cloud 区域，可选 `'eu'` 或 `'us'`。 | `'eu'`                              |
+
 
 ## 让编辑器与导出结果一致
 

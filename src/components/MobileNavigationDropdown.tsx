@@ -18,6 +18,7 @@ const options = [
         href: '/collaboration/getting-started/overview',
       },
       { label: '评论', href: '/comments/getting-started/overview' },
+      { label: '比较', href: '/compare/getting-started/overview' },
       {
         label: '修订记录',
         href: '/tracked-changes/getting-started/overview',

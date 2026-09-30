@@ -70,6 +70,7 @@ import { Callout } from '@/components/ui/Callout'
 | [行距](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✓*** |
 | [段落间距](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✓ |
 | [缩进](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✓ |
+| [与下一段保持在一起 / 保持行在一起](/conversion/content-types/text-and-formatting/paragraphs) | ✓ | ✓ | ✓ |
 | [字间距](/conversion/content-types/text-and-formatting/font-family-size) | ✓ | ✕* | ✕ |
 | [段落边框](/conversion/content-types/text-and-formatting/paragraphs) | ✕ | ✕ | ✕ |
 | [Word 样式](/conversion/content-types/structures-and-media/word-styles) | ~ | ~** | ~ |
@@ -98,11 +99,16 @@ import { Callout } from '@/components/ui/Callout'
 | [合并单元格（colspan）](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
 | [合并单元格（rowspan）](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
 | [表头行](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✕ |
+| [表格宽度](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓† |
 | [列宽](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
-| [单元格背景](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✕ |
-| [单元格边框](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✕ |
-| [单元格垂直对齐](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✕ |
-| [行高](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✕ |
+| [表格边框](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [单元格背景](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [单元格边框](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [单元格垂直对齐](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [行高](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [表格级单元格边距](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+
+**†** 设置明确宽度的表格会保持固定宽度。未设置宽度的表格会保持全宽（流式）布局并随页面重新排列，而不会锁定为固定尺寸。
 
 ## 媒体
 
@@ -136,13 +142,20 @@ import { Callout } from '@/components/ui/Callout'
   页眉、页脚、分页符以及分页布局都需要 [Pages 扩展](/pages/getting-started/overview) 才能在编辑器中渲染。没有它，即使转换服务生成了这些内容，也没有地方可供显示。
 </Callout>
 
+## 审阅和协作
+
+| 功能 | 导入 | 编辑器 | 导出 |
+| --- | --- | --- | --- |
+| [修订记录](/conversion/import/docx/tracked-changes) | ~* | ✓* | ~* |
+
+**\*** 在 `preserve` 模式下，插入和删除会以建议的形式往返转换。`accept` 和 `reject` 会在导入期间直接应用或丢弃它们，因此不会有建议进入文档。编辑器渲染需要[修订记录扩展](/tracked-changes/getting-started/overview)。目前尚未携带某些修订类型，包括导入时的段落拆分、格式变化和移动，以及导出时图片上的格式修订和建议。在这些情况下，内容会进入文档，但变化记录不会保留。请参阅[导入修订记录](/conversion/import/docx/tracked-changes)和[导出修订记录](/conversion/export/docx/tracked-changes)。
+
 ## 不支持
 
 这些功能在导入期间不会被转换，或者仅有限转换。
 
 | 功能 | 状态 |
 | --- | --- |
-| 修订和修订记录 | 不会转换。跟踪修订扩展存在，但未与转换连接。 |
 | 目录 | 作为 `tableOfContents` 节点导入（标题和标题范围）。需要一个[自定义扩展](/editor/extensions/custom-extensions/extend-existing)来在编辑器中渲染它。现有的[目录扩展](/editor/extensions/functionality/table-of-contents)是一个用于构建侧边栏导航的无头工具，而不是文档块渲染器。不导出。 |
 | 文本框 | 不会转换。文本框中的内容不会被提取。 |
 | 形状、SmartArt、WordArt | 不会转换。这些元素在导入期间不会被提取。 |

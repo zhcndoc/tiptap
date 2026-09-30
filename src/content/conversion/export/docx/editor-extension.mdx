@@ -15,6 +15,7 @@ import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
 
@@ -88,12 +89,16 @@ const editor = new Editor({
       tableRowOverrides: {}, // 可选。默认值：{}
       tableCellOverrides: {}, // 可选。默认值：{}
       imageOverrides: {}, // 可选。默认值：{}
+      onWarning: undefined, // 可选。默认值：undefined
+      onImageError: 'skip', // 可选。默认值：'skip'
       numberingFormats: undefined, // 可选。默认值：undefined
       headerFooterOverrides: undefined, // 可选。默认值：undefined
       fonts: undefined, // 可选。默认值：undefined
       embedFonts: false, // 可选。默认值：false
       token: undefined, // 可选。默认值：undefined
       endpoint: undefined, // 可选。默认值：undefined
+      region: 'eu', // 可选。'eu' 或 'us'。默认值：'eu'
+
     }),
     // 其他扩展 ...
   ],
@@ -113,6 +118,8 @@ const editor = new Editor({
 | tableRowOverrides    | 所有表格行的基础默认值（例如 `cantSplit`、`tableHeader`、`height`；也会应用于页眉/页脚表格）。可以接受一个应用于每一行的静态对象，或一个接收当前表格行节点并返回 overrides 的函数 `(node) => overrides`。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                         | `{}`                                |
 | tableCellOverrides   | 所有表格单元格的基础默认值（也会应用于页眉/页脚单元格）。可以接受一个应用于每个单元格的静态对象，或一个接收当前表格单元格节点并返回 overrides 的函数 `(node) => overrides`。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                  | `{}`                                |
 | imageOverrides       | 图片属性覆盖（也会应用于页眉/页脚中的图片）。可以接受一个应用于每张图片的静态对象，或一个接收当前图片节点并可基于其属性派生 overrides 的函数 `(node) => overrides`。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                  | `{}`                                |
+| onWarning             | 每当导出跳过图片时调用，提供 `code`、`message` 和 `src`。未设置时，被跳过的图片会发送到 `console.warn`。参见[无法导出的图片](#images-that-cannot-be-exported) | `undefined` |
+| onImageError          | 导出器无法使用图片时的处理方式。`skip` 会将其省略并报告；`throw` 会使整个导出失败。参见[无法导出的图片](#images-that-cannot-be-exported) | `'skip'` |
 | numberingFormats     | 多级有序列表编号格式定义的注册表。每个条目的 `id` 都与最外层 `<ol>` 上的 `numberingFormat` 属性匹配；未知/缺失的 id 会回退为普通的 `1. 2. 3.` 编号。请将此与 `@tiptap-pro/extension-convert-kit` 中的 `OrderedListNumbering` 和 `generateNumberingFormatCss` 配合使用。[查看有序列表编号](/conversion/export/docx/ordered-list-numbering) | `undefined`                         |
 | headerFooterOverrides | 仅作用于页眉/页脚内容的按字段覆盖；它们会完全替换页眉和页脚中与正文范围覆盖相匹配的项。仅适用于从 [Pages 扩展](/pages/getting-started/overview) 自动提取的页眉/页脚。[查看 `headerFooterOverrides`](/conversion/export/docx/styles#headerfooteroverrides)                                                                          | `undefined`                         |
 | footnotes            | 以脚注 id 为键的脚注内容（`Record<string, JSONContent>`）。正文中每个 `noteId` 有对应条目的 `footnoteReference` 节点都会导出为真正的 Word 脚注。启用时会从 [Pages 脚注](/pages/core-concepts/footnotes) 自动提取；仅在需要覆盖时传入此选项。                                                                                                                  | 从 Pages 自动提取                     |
@@ -120,7 +127,11 @@ const editor = new Editor({
 | fonts                | 要嵌入的自定义 TTF/OTF 字体，这样即使在未安装这些字体的机器上，文件也能按预期字体渲染。[查看字体](/conversion/export/docx/fonts)                                                                                                                                                                                                                                                | `undefined`                         |
 | embedFonts           | 自动检测文档使用的字体，通过页面的 `@font-face` 规则定位它们（并回退到 Google Fonts），通过 Convert Service 将 WOFF2 转换为 TTF，然后嵌入。仅限浏览器。[查看字体](/conversion/export/docx/fonts)                                                                                                                                                        | `false`                             |
 | token                | Tiptap Convert JWT，仅在 `embedFonts` 需要转换 WOFF2 字体时发送。[查看字体](/conversion/export/docx/fonts)                                                                                                                                                                                                                                                                                         | `undefined`                         |
-| endpoint             | 用于 WOFF2 → TTF 转换的 Tiptap Convert REST 端点基础地址。[查看字体](/conversion/export/docx/fonts)                                                                                                                                                                                                                                                                                                     | `https://api.tiptap.dev/v2/convert` |
+| endpoint              | 用于 WOFF2 → TTF 转换的 Tiptap Convert REST 端点基础地址。设置后会覆盖 `region`。[查看字体](/conversion/export/docx/fonts) | `undefined` |
+| region                | 未设置 `endpoint` 时用于 WOFF2 → TTF 转换的 Tiptap Cloud 区域，可选 `'eu'` 或 `'us'`。[查看字体](/conversion/export/docx/fonts) | `'eu'` |
+
+<RegionalEndpoints />
+
 
 <Callout title="页码占位符名称在 Pages 中配置，不在这里配置">
   `ExportDocx` 上没有 `placeholders` 选项。若要重命名内置的 `{page}` / `{total}`
@@ -167,6 +178,8 @@ exportDocx: (options?: ExportDocxOptions) =>
 | tableRowOverrides     | 所有表格行的基础默认值（例如 `cantSplit`、`tableHeader`、`height`；也应用于页眉/页脚表格）。可接受应用于每一行的静态对象，或接收当前表格行节点并返回覆盖值的函数 `(node) => overrides`。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                         | `{}`                                |
 | tableCellOverrides    | 所有表格单元格的基础默认值（也应用于页眉/页脚单元格）。可接受应用于每个单元格的静态对象，或接收当前表格单元格节点并返回覆盖值的函数 `(node) => overrides`。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                                                                  | `{}`                                |
 | imageOverrides        | 图片属性覆盖（也应用于页眉/页脚中的图片）。可接受应用于每张图片的静态对象，或接收当前图片节点并从其属性派生覆盖值的函数 `(node) => overrides`。[查看元素覆盖](/conversion/export/docx/styles#element-overrides)                                                                                  | `{}`                                |
+| onWarning             | 每当导出跳过图片时调用，提供 `code`、`message` 和 `src`。未设置时，被跳过的图片会发送到 `console.warn`。参见[无法导出的图片](#images-that-cannot-be-exported) | `undefined` |
+| onImageError          | 导出器无法使用图片时的处理方式。`skip` 会将其省略并报告；`throw` 会使整个导出失败。参见[无法导出的图片](#images-that-cannot-be-exported) | `'skip'` |
 | numberingFormats      | 多级有序列表编号格式定义的注册表。每个条目的 `id` 与最外层 `<ol>` 上的 `numberingFormat` 属性匹配；未知/缺失的 id 将回退为普通的 `1. 2. 3.` 编号。将其与 `@tiptap-pro/extension-convert-kit` 中的 `OrderedListNumbering` 和 `generateNumberingFormatCss` 搭配使用。[查看有序列表编号](/conversion/export/docx/ordered-list-numbering) | `undefined`                         |
 | headerFooterOverrides | 仅作用于页眉/页脚内容的字段级覆盖；它们会完全替换页眉和页脚中匹配的全局正文覆盖。仅适用于从 [Pages 扩展](/pages/getting-started/overview) 自动提取的页眉/页脚。[查看 `headerFooterOverrides`](/conversion/export/docx/styles#headerfooteroverrides)                                                                          | `undefined`                         |
 | footnotes             | 以注释 id 为键的脚注内容（`Record<string, JSONContent>`）。正文中每个 `noteId` 有对应条目的 `footnoteReference` 节点都会导出为真正的 Word 脚注。启用时会从 [Pages 脚注](/pages/core-concepts/footnotes) 自动提取；仅在需要覆盖时传入此选项。                                                                                                                  | 自动从 Pages 提取                    |
@@ -174,7 +187,9 @@ exportDocx: (options?: ExportDocxOptions) =>
 | fonts                 | 要嵌入的自定义 TTF/OTF 字体，以便即使在未安装这些字体的机器上，文件也能按预期字体呈现。[查看字体](/conversion/export/docx/fonts)                                                                                                                                                                                                                                                | `undefined`                         |
 | embedFonts            | 自动检测文档使用的字体，通过页面的 `@font-face` 规则（带有 Google Fonts 回退）定位它们，通过 Convert Service 将 WOFF2 转换为 TTF，并将其嵌入。仅限浏览器。[查看字体](/conversion/export/docx/fonts)                                                                                                                                                        | `false`                             |
 | token                 | Tiptap Convert JWT，仅在 `embedFonts` 需要转换 WOFF2 字体时发送。[查看字体](/conversion/export/docx/fonts)                                                                                                                                                                                                                                                                                         | `undefined`                         |
-| endpoint              | 用于 WOFF2 → TTF 转换的 Tiptap Convert REST 端点基础地址。[查看字体](/conversion/export/docx/fonts)                                                                                                                                                                                                                                                                                                     | `https://api.tiptap.dev/v2/convert` |
+| endpoint              | 用于 WOFF2 → TTF 转换的 Tiptap Convert REST 端点基础地址。设置后会覆盖 `region`。[查看字体](/conversion/export/docx/fonts) | `undefined` |
+| region                | 未设置 `endpoint` 时用于 WOFF2 → TTF 转换的 Tiptap Cloud 区域，可选 `'eu'` 或 `'us'`。[查看字体](/conversion/export/docx/fonts) | `'eu'` |
+
 
 ```js
 // 导入 ExportDocx 扩展
@@ -195,11 +210,15 @@ const editor = new Editor({
       tableRowOverrides: {}, // 可选。默认值：{}
       tableCellOverrides: {}, // 可选。默认值：{}
       imageOverrides: {}, // 可选。默认值：{}
+      onWarning: undefined, // 可选。默认值：undefined
+      onImageError: 'skip', // 可选。默认值：'skip'
       headerFooterOverrides: undefined, // 可选。默认值：undefined
       fonts: undefined, // 可选。默认值：undefined
       embedFonts: false, // 可选。默认值：false
       token: undefined, // 可选。默认值：undefined
       endpoint: undefined, // 可选。默认值：undefined
+      region: 'eu', // 可选。'eu' 或 'us'。默认值：'eu'
+
     }),
     // 其他扩展 ...
   ],
@@ -275,6 +294,9 @@ handleExportDocxBuffer()
  * @param options.tableRowOverrides - 所有表格行的基础默认值
  * @param options.tableCellOverrides - 所有表格单元格的基础默认值
  * @param options.imageOverrides - 图像属性覆盖项
+ * @param options.onWarning - 每当导出跳过图片时调用
+ * @param options.onImageError - 'skip'（默认）或 'throw'
+
  * @example exportDocx({ document: editor.getJSON(), exportType: 'blob', customNodes: [], styleOverrides: {} })
  */
 async function exportDocx({
@@ -288,6 +310,8 @@ async function exportDocx({
   tableRowOverrides,
   tableCellOverrides,
   imageOverrides,
+  onWarning,
+  onImageError,
 }: ExportDocxOptions) {}
 ```
 
@@ -322,6 +346,53 @@ app.post('/export-docx', async (req, res) => {
 })
 ```
 
+## 无法导出的图片
+
+导出会根据图片的 `src` 获取每一张图片。有些图片无法使用：URL 返回 404、主机没有响应，或格式不是 DOCX 可以嵌入的格式。Word 会为粘贴的图表和公式写入 EMF，因此从 Word 文档导出的内容经常包含这种格式。
+
+默认情况下，导出会省略无法使用的图片并继续处理，因此单张损坏的图片不会导致整个文件失败。如果图片是其所在段落中的唯一内容，该段落也会被删除，不会留下空行。
+
+传入 `onWarning` 可查看哪些图片被跳过：
+
+```js
+ExportDocx.configure({
+  onCompleteExport: result => saveAs(result, 'export.docx'),
+  onWarning: warning => {
+    console.log(warning.code, warning.src)
+  },
+})
+```
+
+每条警告包含：
+
+| 字段          | 描述 |
+| ------------- | ---- |
+| `code`        | `image-missing-src`、`image-request-failed`、`image-fetch-failed` 或 `image-unsupported-type` |
+| `message`     | 可读的摘要，可安全记录到日志 |
+| `src`         | 图片 URL（如果节点提供了 URL） |
+| `status`      | 主机返回失败时的 HTTP 状态 |
+| `contentType` | 对于不支持的格式，检测到的类型 |
+
+未设置 `onWarning` 时，被跳过的图片会通过 `console.warn` 报告。`onWarning` 内抛出的异常会被吞掉，因此处理程序中的错误不会破坏导出。
+
+如果希望导出直接失败，请将 `onImageError` 设置为 `'throw'`。抛出的错误可能是 `ImageMissingSrcError`、`ImageRequestError`、`ImageFetchError` 或 `UnsupportedImageTypeError`；这些错误都从包中导出，并且都继承自 `ImageConversionError`：
+
+```js
+import { ImageConversionError } from '@tiptap-pro/extension-export-docx'
+
+try {
+  await exportDocx({ document, onImageError: 'throw' })
+} catch (error) {
+  if (error instanceof ImageConversionError) {
+    console.log(`Could not use ${error.src}: ${error.code}`)
+  }
+}
+```
+
+<Callout title="不会解析相对图片 URL" variant="hint">
+  导出会严格按照存储的 `src` 执行。诸如 `/img/chart.png` 的相对 URL 没有可用于解析的 origin，因此会报告 `image-request-failed` 并被跳过。请存储导出器可以访问的绝对 URL。
+</Callout>
+
 ## 节点属性推断
 
 DOCX 导出会自动尊重编辑器设置的节点级属性，而不是始终从头计算值。这意味着，调整大小后的图像、已调整的表格列以及其他编辑器级自定义内容都会保留在导出的文档中。
@@ -330,14 +401,23 @@ DOCX 导出会自动尊重编辑器设置的节点级属性，而不是始终从
 | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **图像 `width`/`height`**                | 当图像在编辑器中已调整大小时，将使用用户设置的尺寸。优先级：`imageOverrides.transformation` > `node.attrs.width/height` > 固有尺寸                              |
 | **图像 `alt` 文本**                      | 映射到 docx 的 `altText` 属性，用于可访问性元数据                                                                                                                                          |
-| **表格单元格 `colwidth`**                 | 来自编辑器中调整后的列的每个单元格像素数组，可在导出中生成精确的列宽                                                                                                             |
+| **表格单元格 `colwidth`**                 | 来自编辑器中调整后的列的每个单元格像素数组，可在导出中生成精确的列宽。在流式表格中，列会保留其比例 |
 | **表格单元格 `rowspan`**                  | 跨多行的单元格会被正确导出                                                                                                                                                       |
+| **表格 `width`**                         | 设置明确 `width` 的表格会按固定宽度导出；未设置宽度的表格会以全宽（流式）布局导出，并随页面重新排列 |
+| **表格边框**                             | 表格自身的边框（外边缘以及内部水平和垂直网格）会导出；无边框表格仍保持无边框 |
+| **单元格背景色**                         | 导出为单元格底纹 |
+| **单元格边框**                            | 按边设置的单元格边框（`width` / `style` / `color`）会导出；不同于表格边框的单元格边框会作为覆盖值保留 |
+| **单元格垂直对齐**                        | `top` / `middle` / `bottom` 会导出为单元格垂直对齐方式 |
+| **表格行 `height` / `heightRule`**       | 行高会导出；`exact` 会裁切到指定高度，`atLeast` 会将其视为最小高度 |
+| **单元格边距**                            | 表格节点上的 `cellMarginTop` / `cellMarginRight` / `cellMarginBottom` / `cellMarginLeft` 会导出为表格单元格边距；未设置时使用 Word 默认值 |
 | **段落 `textAlign: 'justify'`**      | 正确映射到 `AlignmentType.JUSTIFIED`（之前会落入左对齐）                                                                                                                 |
 | **文本运行 `backgroundColor`**            | `textStyle` 标记的 `backgroundColor` 会导出为纯色字符底纹                                                                                                                                    |
-| **段落/标题 `lineHeight`**        | 比例行高（无单位倍数，如 `1.5`，或百分比，如 `150%`）会写入 DOCX 行距。固定的 `px`/`pt` 行高没有对应的比例值，因此会被跳过 |
+| **段落/标题 `lineHeight`**        | 比例行高（无单位倍数，如 `1.5`，或百分比，如 `150%`）会写为随字体大小缩放的相对行高。固定的 `px`/`pt` 行高会写为精确行高 |
 | **段落/标题间距**             | `spacingBefore` 和 `spacingAfter` 会写为段前/段后间距                                                                                                                        |
-| **段落/标题缩进**         | `indent` 和 `firstLineIndent` 会写为左缩进和首行缩进；负的 `firstLineIndent` 会变为悬挂缩进                                                                      |
+| **段落/标题缩进**         | `indent`、`indentRight` 和 `firstLineIndent` 会写为左、右和首行缩进；负的 `firstLineIndent` 会变为悬挂缩进 |
 | **段落/标题 `contextualSpacing`** | 在导出中抑制相邻同样式段落之间的间距                                                                                                                            |
+| **段落/标题 `keepNext` / `keepLines`** | 会写为 Word 的“与下一段保持一致”和“保持行在一起”分页提示 |
+
 
 ## 预期内容
 

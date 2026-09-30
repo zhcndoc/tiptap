@@ -19,6 +19,7 @@ export type CtaBarData = {
   label: string
   button: { text: string; href: string }
   productHunt?: { imageSrc: string; href: string; alt: string }
+  hideAt?: Date
 }
 
 export const CTA_BAR: CtaBarData = {
@@ -27,6 +28,7 @@ export const CTA_BAR: CtaBarData = {
     text: 'Learn more',
     href: 'https://tiptap.dev/blog/release-notes/ai-toolkit-now-in-beta',
   },
+  hideAt: new Date('2026-08-15T23:59:00+01:00'),
 }
 
 export const VERSIONS: Array<VersionData> = [

@@ -61,6 +61,9 @@ const provider = new HocuspocusProvider({
   onStateless: ({ payload }) => {
     // ...
     // provider 也可以发送自定义消息到服务器: provider.sendStateless('任意字符串负载')
+  },
+  onMaxAttemptsFailed: ({ error }) => {
+    // 仅在设置了 `maxAttempts` 时相关。由底层 HocuspocusProviderWebsocket 处理，详见下文。
   }
 });
 ```
@@ -96,19 +99,37 @@ provider.off("onMessage", onMessage);
 
 ## 事件列表
 
-| 名称                 | 说明                                                                   |
-| -------------------- | --------------------------------------------------------------------- |
-| open                 | 当 WebSocket 连接创建时。                                               |
-| connect              | 当 provider 成功连接到服务器时。                                       |
-| authenticated        | 当客户端成功认证时。                                                   |
-| authenticationFailed | 当客户端认证未成功时。                                                 |
-| status               | 当连接状态发生变化时。                                                 |
-| message              | 当收到一条消息时。                                                     |
-| outgoingMessage      | 当即将发送一条消息时。                                                 |
-| synced               | 当 Y.js 文档成功同步（初始同步）时。                                  |
-| close                | 当 WebSocket 连接关闭时。                                              |
-| disconnect           | 当 provider 断开连接时。                                               |
-| destroy              | 当 provider 将被销毁时。                                               |
-| awarenessUpdate      | 当 awareness 更新时（详情见 https://docs.yjs.dev/api/about-awareness）|
-| awarenessChange      | 当 awareness 发生改变时（详情见 https://docs.yjs.dev/api/about-awareness）|
-| stateless            | 当收到无状态消息时。                                                   |
+| 名称                 | 说明 |
+| -------------------- | ---- |
+| open                 | 当 WebSocket 连接创建时。 |
+| connect              | 当 provider 成功连接到服务器时。 |
+| authenticated        | 当客户端成功认证时。 |
+| authenticationFailed | 当客户端认证未成功时。 |
+| status               | 当连接状态发生变化时。 |
+| message              | 当收到一条消息时。 |
+| outgoingMessage      | 当即将发送一条消息时。 |
+| synced               | 当 Y.js 文档成功同步（初始同步）时。 |
+| close                | 当 WebSocket 连接关闭时。 |
+| disconnect           | 当 provider 断开连接时。 |
+| destroy              | 当 provider 将被销毁时。 |
+| awarenessUpdate      | 当 awareness 更新时（详情见 https://docs.yjs.dev/api/about-awareness）。 |
+| awarenessChange      | 当 awareness 发生改变时（详情见 https://docs.yjs.dev/api/about-awareness）。 |
+| stateless            | 当收到无状态消息时。 |
+
+## HocuspocusProviderWebsocket 事件
+
+上面的事件属于代表单个文档的 `HocuspocusProvider`。它下面的 WebSocket 连接（即可能被多个文档共享的 `HocuspocusProviderWebsocket`）还有一个专属事件：
+
+| 名称              | 说明 |
+| ----------------- | ---- |
+| maxAttemptsFailed | 当所有 `maxAttempts` 次重连尝试都失败且 provider 停止重试时。 |
+
+该事件不会转发给文档 provider，因此请在 socket 上绑定它：
+
+```js
+provider.configuration.websocketProvider.on("maxAttemptsFailed", ({ error }) => {
+  // …
+});
+```
+
+将 `onMaxAttemptsFailed` 传给 `HocuspocusProvider` 构造函数同样有效，前提是让 provider 自己创建 socket。请参阅[处理重连失败](/hocuspocus/provider/configuration#reacting-to-failed-reconnects)。

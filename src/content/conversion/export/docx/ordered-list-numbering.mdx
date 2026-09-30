@@ -1,14 +1,15 @@
 ---
-title: 为 DOCX 导出自定义有序列表编号
+title: 为 DOCX 导出自定义列表编号和项目符号
 tags:
   - type: 开始
   - type: 测试版
 meta:
-  title: 有序列表编号格式 | Tiptap 转换
-  description: 定义可在 DOCX 导出中保留的多级有序列表编号格式，涵盖基础样式、标记模板、对齐、缩进和字体。
+  title: 列表编号格式 | Tiptap 转换
+  description: 定义可在 DOCX 导出中保留的多级编号格式和装饰性项目符号层级，涵盖基础样式、标记模板、对齐、缩进和字体。
   category: 转换
 ---
 
+import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
@@ -25,7 +26,9 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
   </RequirementItem>
 </Requirements>
 
-`@tiptap-pro/extension-export-docx` 接受一个可选的 **编号格式定义** 注册表（多级标记样式、标记文本、对齐、缩进和字体），并通过外层 `<ol>` 上的一个属性按列表进行选择。具有匹配 id 的列表会按对应定义导出；没有对应定义的列表则按普通 `1. 2. 3.` 导出。
+`@tiptap-pro/extension-export-docx` 接受一个可选的 **编号格式定义** 注册表（多级标记样式、标记文本、对齐、缩进和字体），并通过外层 `<ol>` 或 `<ul>` 上的属性按列表进行选择。具有匹配 id 的列表会按对应定义导出；没有对应定义的列表则保留其类型对应的默认层级。
+
+当层级使用 `baseStyle: 'bullet'` 时，格式表示的是字形层级而不是计数器，因此同一个注册表也可以承载装饰性项目符号。请参阅[项目符号层级](#bullet-ladders)。
 
 此功能为可选启用。未提供 `numberingFormats` 的使用者不会看到任何行为变化。
 
@@ -35,11 +38,12 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 | 导出                                                                             | 包                                   | 用途                                                                                                                                                                                                                                                                                                                                   |
 | -------------------------------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OrderedListNumbering`                                                         | `@tiptap-pro/extension-convert-kit` | Tiptap 扩展，为 `orderedList` 添加 `numberingFormat` 属性，并提供 `setOrderedListNumberingFormat(id)` 和 `toggleOrderedListWithFormat(format?)` 命令，还会通过 `editor.storage.orderedListNumbering` 跟踪光标选区处的活动格式。由 `ConvertKit` 注册（通过 `orderedListNumbering: true`，或带有 `defaultFormat` / `formats` 的选项对象启用）。在粘贴、JSON、协作同步和程序化编辑中强制仅最外层编号。 |
+| `OrderedListNumbering`                                                         | `@tiptap-pro/extension-convert-kit` | Tiptap 扩展，为 `orderedList` 和 `bulletList` 添加 `numberingFormat` 属性，并提供 `setOrderedListNumberingFormat(id)`、`toggleOrderedListWithFormat(format?)`、`setBulletListNumberingFormat(id)`、`toggleBulletListWithFormat(format?)` 和 `registerNumberingFormats(formats)` 命令，还会通过 `editor.storage.orderedListNumbering` 跟踪选区处每种列表的活动格式。由 `ConvertKit` 注册（通过 `orderedListNumbering: true`，或带有 `defaultFormat` / `defaultBulletFormat` / `formats` 的选项对象启用）。在粘贴、JSON、协作同步和程序化编辑中强制仅最外层编号。 |
 | `generateNumberingFormatCss(formats, options?)`                                | `@tiptap-pro/extension-convert-kit` | 纯函数、无依赖，返回用于编辑器预览的 CSS 文本：相同的注册表，相同的视觉效果。                                                                                                                                                                                                                          |
 | `NumberingFormatDefinition`, `NumberingLevelDefinition`, `NumberingMarkerFont` | `@tiptap-pro/extension-convert-kit` | 你的注册表遵循的数据结构。结构上与 `ExportDocx` 的 `numberingFormats` 配置兼容。                                                                                                                                                                                                                              |
 | `ExportDocx.configure({ numberingFormats })`                                   | `@tiptap-pro/extension-export-docx` | 将注册表传递给导出器，使 `.docx` 包含匹配的定义。                                                                                                                                                                                                                                                        |
 | `LevelFormat`, `IRunOptions`, `PositiveUniversalMeasure`                       | `@tiptap-pro/extension-export-docx` | 从 `docx` 重新导出，因此你无需再添加第二个依赖项。                                                                                                                                                                                                                                                                             |
+
 
 面向最终用户的选择器 UI 并不属于这些包；这属于应用层关注点，取决于你的组件库。
 
@@ -104,13 +108,21 @@ editor.chain().focus().toggleOrderedListWithFormat('outline').run()
 ConvertKit.configure({ orderedListNumbering: true })
 ```
 
-不要传 `true`，而是传入一个选项对象来配置两件事：
+<Callout variant="warning" title="项目符号列表会在存储的 JSON 中增加属性">
+  启用此功能后，`bulletList` 和 `orderedList` 都会注册 `numberingFormat`，因此未指定格式的项目符号列表在 `editor.getJSON()` 中会写入
+  `attrs: { numberingFormat: null }`，而此前完全不会写入 `attrs`。这与有序列表一直以来的结构一致，渲染出的 HTML
+  不会改变：没有格式的列表仍然是普通的 `<ul>`。逐字节比较项目符号列表的存储 JSON、协作文档和快照测试都会看到这个新键。
+</Callout>
+
+请传入选项对象而不是 `true`，以配置三项内容：
 
 ```ts
 ConvertKit.configure({
   orderedListNumbering: {
     // 新建有序列表时开始使用的格式 id。默认为 `null`（普通的 `1. 2. 3.`）。
     defaultFormat: 'outline',
+    // 新建项目符号列表时开始使用的格式 id。
+    defaultBulletFormat: 'arrows',
     // 传给 ExportDocx 的相同定义。提供后，
     // 会据此生成并自动注入编辑器预览 CSS，
     // 因此屏幕上的标记会与导出结果一致，无需额外接线。
@@ -119,10 +131,11 @@ ConvertKit.configure({
 })
 ```
 
-| Option          | Default | Description                                                                                                                                                                                                                                                                                                                                              |
-| --------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `defaultFormat` | `null`  | 应用于新建有序列表的编号格式 id（`numberingFormat` 属性的默认值）。仅对最外层列表进行格式化；嵌套列表保持不变。                                                                                                                                                                                                                                                   |
-| `formats`       | `null`  | 用于生成并注入编辑器预览 CSS 的编号格式定义，与你传给 `ExportDocx.configure({ numberingFormats })` 的数组相同。使用相同格式配置的编辑器会共享一份预览样式表，而使用不同格式配置的编辑器则会获得各自独立的样式表，因此每个编辑器始终显示正确的标记；共享样式表只有在最后一个使用它的编辑器被销毁后才会移除。 |
+| Option                | Default | Description                                                                                                                                                                                                                                                                                                                                              |
+| --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `defaultFormat`       | `null`  | 应用于新建**有序**列表的编号格式 id（`numberingFormat` 属性的默认值）。仅对最外层列表进行格式化；嵌套的有序列表保持不变。 |
+| `defaultBulletFormat` | `null`  | 应用于新建**项目符号**列表的格式 id。两者相互独立，因此任一默认值都不会应用到另一种列表。 |
+| `formats`             | `null`  | 用于生成并注入编辑器预览 CSS 的编号格式定义，与你传给 `ExportDocx.configure({ numberingFormats })` 的数组相同。使用相同格式配置的编辑器会共享一份预览样式表，而使用不同格式配置的编辑器则会获得各自独立的样式表，因此每个编辑器始终显示正确的标记；共享样式表只有在最后一个使用它的编辑器被销毁后才会移除。 |
 
 在这里传入 `formats`，等同于你自己调用 [`generateNumberingFormatCss`](#generatenumberingformatcssformats-options) 并注入其结果：按你的设置选择最合适的方式即可。
 
@@ -135,7 +148,7 @@ editor.chain().focus().setOrderedListNumberingFormat('decimal-paren').run()
 editor.chain().focus().setOrderedListNumberingFormat(null).run()
 ```
 
-当选区不在有序列表中时，该命令返回 `false`。
+当选区不在有序列表中，或者有另一种列表位于选区与该有序列表之间时，该命令返回 `false`，因为另一种列表会终止层级。要判断命令是否会找到列表，请使用 `editor.can().setOrderedListNumberingFormat(null)`，不要使用 `editor.isActive('orderedList')`：两者只会在这种情况下产生差异，而只有 `can()` 与命令实际行为一致。
 
 ### 以某种格式开始新列表
 
@@ -151,12 +164,69 @@ editor.chain().focus().toggleOrderedListWithFormat().run()
 
 当选区已经位于有序列表中时，该命令会切换关闭该列表，与 `toggleOrderedList` 的行为一致。链式调用 `toggleOrderedList().setOrderedListNumberingFormat(format)` 会得到相同的最终状态；只是单个命令更方便，也会处理关闭切换的情况。
 
+省略参数与传入 `null` 并不相同。省略参数时，新列表会使用配置的 `defaultFormat`；传入 `null` 时，新列表不会使用任何格式。
+
+两个命令对 `editor.can()` 的回答含义不同，因此工具栏需要同时使用它们。`toggleOrderedListWithFormat` 与普通切换命令的判断方式相同：在普通段落中它会返回 `true`，因为可以创建列表；可以据此禁用“以此格式开始列表”的按钮。`setOrderedListNumberingFormat` 判断的是是否已有列表可供修改，在同一个普通段落中会返回 `false`。请使用 setter 的结果选择要运行的命令，而不是用它来禁用按钮：
+
+```ts
+// 一个“应用此格式”按钮，在两种位置都执行正确的操作。
+if (editor.can().setOrderedListNumberingFormat(null)) {
+  editor.chain().focus().setOrderedListNumberingFormat(id).run()
+} else {
+  editor.chain().focus().toggleOrderedListWithFormat(id).run()
+}
+```
+
+<Callout variant="warning" title="切换命令会越过另一种列表">
+  另一种列表会终止 **set** 命令的层级，但不会终止 **toggle** 命令；后者仍将当前位置视为非列表并进入创建分支。
+  当选区位于嵌套在 `<ol>` 中的 `<ul>` 内时，`toggleOrderedListWithFormat` 会将内部 `<ul>` 转换为 `<ol>`，
+  然后把格式写入外层 `<ol>`，也就是用户原本没有编辑的列表。如果其中是任务列表，它会展平任务列表并将其项目提升到外层 `<ol>`，从而丢失复选框。
+  toggle 自身的 `can()` 在这两种位置都会返回 `true`，因此无法发出警告；上面的分支会在 setter 返回 `false` 时进入 toggle。
+  如果工具栏应当保留任务列表，就必须自行检查 `editor.isActive('taskList')`。
+</Callout>
+
+### 项目符号列表
+
+项目符号列表有对应的一组命令，目标是最外层的 `bulletList` 祖先：
+
+```ts
+editor.chain().focus().setBulletListNumberingFormat('arrows').run()
+editor.chain().focus().toggleBulletListWithFormat('arrows').run()
+```
+
+上面的规则同样适用于项目符号命令，此时使用 `defaultBulletFormat` 而不是 `defaultFormat`。`setBulletListNumberingFormat` 在四种位置返回 `false`：不在任何列表中、位于有序列表中、位于任务列表中，以及只有跨过有序列表或任务列表才能到达的项目符号列表中。任务列表不是项目符号列表，因此会像有序列表一样终止层级。请根据 `editor.can().setBulletListNumberingFormat(null)` 分支；在这四种位置它都会返回 `false`，与上面的有序列表命令一致。
+
+`toggleBulletListWithFormat` 的可达范围与有序列表对应命令相同：在任务列表内部使用它会将整个任务列表转换为普通项目符号列表，从而丢失复选框。
+
+### 编辑器运行后添加格式
+
+`formats` 只会在创建编辑器时读取一次。稍后才出现的注册表（通常是 DOCX 导入从文件中重建的注册表）应通过 `registerNumberingFormats(formats)` 注册。该命令会按 id 合并并刷新注入的预览样式表，因此文档中已有的列表会立即获得其标记：
+
+```ts
+editor.commands.registerNumberingFormats(formatsFromTheImport)
+```
+
+按 id 合并意味着重复调用是安全的：重新注册某个 id 会替换现有条目，而不是添加第二个条目，因此两次导入同一个文件只会保留一个定义。你在 `formats` 中配置的 id 也会以同样方式替换，因此导入的文档可以覆盖同名的项目规范。
+
+完整注册表（已配置的格式以及之后注册的所有格式）位于扩展的 storage 中。将它传给导出器即可完成往返：
+
+```ts
+ExportDocx.configure({ numberingFormats: editor.storage.orderedListNumbering.numberingFormats })
+```
+
+启用 `orderedListNumbering` 后，`ImportDocx` 扩展会自动调用 `registerNumberingFormats`，因此导入的文档无需额外接线即可渲染自己的标记。以其他方式加载内容时，请手动调用它。
+
+### 读取活动格式
+
 要在工具栏中反映当前激活的格式，请从扩展的 storage 中读取它；当选区和文档发生变化时，它会保持同步：
 
 ```ts
-const activeFormatId = editor.storage.orderedListNumbering.activeNumberingFormat
-// 一个格式 id，或者在选区不在有序列表中时为 `null`
+const activeOrdered = editor.storage.orderedListNumbering.activeNumberingFormat
+const activeBullet = editor.storage.orderedListNumbering.activeBulletNumberingFormat
+// 一个格式 id；如果选区不在该类型的列表中，则为 `null`
 ```
+
+Each field answers what its own command would target, so only one is set at a time: inside a bullet list nested in an ordered one, the bullet field reports that list and the ordered field reads `null`.
 
 ## `NumberingFormatDefinition`
 
@@ -169,7 +239,7 @@ interface NumberingFormatDefinition {
 
 | 字段    | 类型                         | 描述                                                                                                                            |
 | ------ | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`     | `string`                     | 在你的 `numberingFormats[]` 中唯一。序列化到 orderedList 的 `numberingFormat` 属性中。                                |
+| `id`     | `string`                     | 在你的 `numberingFormats[]` 中唯一。会序列化到声明该格式的最外层 `orderedList` 或 `bulletList` 的 `numberingFormat` 属性中。 |
 | `levels` | `NumberingLevelDefinition[]` | 每个嵌套深度对应一项。必须非空。当列表嵌套深度超过数组长度时，深度 `N` 会复用 `levels[N % levels.length]`。 |
 
 ## `NumberingLevelDefinition`
@@ -183,6 +253,9 @@ interface NumberingLevelDefinition {
   numberIndent?: number | string
   textIndent?: number | string
   markerFont?: NumberingMarkerFont
+  suffix?: 'tab' | 'space' | 'nothing'
+  isLegalNumbering?: boolean
+  linkedStyle?: string
 }
 ```
 
@@ -190,13 +263,16 @@ ConvertKit 的类型使用普通字符串字面量，因此该包不会引入 `d
 
 | 字段          | 默认值                  | 描述                                                                                                                                                                                                                                                               |
 | -------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `baseStyle`    | (必填)                   | 计数器字形，对应于匹配的 docx [`LevelFormat`](https://docx.js.org/api/enums/LevelFormat.html) 值。拉丁/数字样式（`'decimal'`、`'decimalZero'`、`'upperLetter'`、`'lowerLetter'`、`'upperRoman'`、`'lowerRoman'`、`'none'`）以及许多区域样式（例如 `'hebrew1'`、`'thaiNumbers'`、`'hindiNumbers'`、`'japaneseCounting'`、`'koreanDigital'`、`'chineseCounting'`、`'ideographDigital'`）会映射到匹配的 CSS 计数器样式，因此预览会渲染其原生字形。没有对应 CSS 等价形式的样式（例如 `'chicago'`、`'ordinal'`、`'cardinalText'`），以及任何无法识别的字符串，都会在**仅编辑器预览中**回退为 `decimal`；导出的 `.docx` 始终会保留你设置的精确 `LevelFormat`。 |
-| `textTemplate` | (必填)                   | 使用 Word 的 `<w:lvlText>` 语法的标记文本（见下文）。                                                                                                                                                                                                               |
-| `startAt`      | `1`                      | 初始计数值。                                                                                                                                                                                                                                                      |
-| `alignment`    | `'left'`                 | 数字区域内的标记文本对齐方式。                                                                                                                                                                                                                             |
-| `numberIndent` | Word 的每级默认值        | 从页面边距到标记的距离。Twips 数值或 docx 风格的度量字符串（`'0.63cm'`、`'0.25in'`、`'18pt'`）。                                                                                                                                              |
-| `textIndent`   | Word 的每级默认值        | 从页面边距到正文文本的距离。应大于 `numberIndent`。                                                                                                                                                                                    |
-| `markerFont`   | 无                       | 仅标记的 run 格式（见下文 [`NumberingMarkerFont`](#numberingmarkerfont)）。可随 DOCX 导出保留，并会在编辑器预览中由 `generateNumberingFormatCss` 反映。                                                                                        |
+| `baseStyle`    | (必填)                   | 计数器字形；项目符号层级也可以使用字面值 `'bullet'`，详见[项目符号层级](#bullet-ladders)。除此之外对应匹配的 docx [`LevelFormat`](https://docx.js.org/api/enums/LevelFormat.html) 值。拉丁/数字样式（`'decimal'`、`'decimalZero'`、`'upperLetter'`、`'lowerLetter'`、`'upperRoman'`、`'lowerRoman'`、`'none'`）以及许多区域样式（例如 `'hebrew1'`、`'thaiNumbers'`、`'hindiNumbers'`、`'japaneseCounting'`、`'koreanDigital'`、`'chineseCounting'`、`'ideographDigital'`）会映射到匹配的 CSS 计数器样式，因此预览会渲染其原生字形。没有对应 CSS 等价形式的样式（例如 `'chicago'`、`'ordinal'`、`'cardinalText'`），以及任何无法识别的字符串，都会在**仅编辑器预览中**回退为 `decimal`；导出的 `.docx` 始终会保留你设置的精确 `LevelFormat`。 |
+| `textTemplate` | (必填)                   | 使用 Word 的 `<w:lvlText>` 语法的标记文本（见下文）。在 `'bullet'` 层级中，它就是项目符号字形本身。 |
+| `startAt`      | `1`                      | 初始计数值。 |
+| `alignment`    | `'left'`                 | 标记相对于 `numberIndent` 的对齐方式。请参阅[标记对齐](#marker-alignment)。 |
+| `numberIndent` | Word 的每级默认值        | 从页面边距到标记的距离。Twips 数值或 docx 风格的度量字符串（`'0.63cm'`、`'0.25in'`、`'18pt'`）。 |
+| `textIndent`   | Word 的每级默认值        | 从页面边距到正文文本的距离。应大于 `numberIndent`。单个条目可以位于其他位置，参见[单条目缩进](#indents-on-a-single-item)。 |
+| `markerFont`   | 无                       | 仅标记的 run 格式（见下文 [`NumberingMarkerFont`](#numberingmarkerfont)）。可随 DOCX 导出保留，并会在编辑器预览中由 `generateNumberingFormatCss` 反映。在 `'bullet'` 层级中，`font` 用于指定 Word 符号字体项目符号所需的字体。 |
+| `suffix`       | `'tab'`                  | Word 的“编号后跟随内容”（`w:suff`）。制表符会将标记填充到 `textIndent`；`'space'` 会在标记后绘制一个不换行空格，`'nothing'` 不绘制空格，因此正文会直接跟随标记。编辑器预览会遵循此设置。 |
+| `isLegalNumbering` | `false`              | Word 的“法律样式编号”（`w:isLgl`）：指向罗马数字或字母层级的 `%N` 会改绘为阿拉伯数字，因此 `Article IV.2` 会变成 `Article 4.2`。阿拉伯层级保持其计数形式，因此 `decimalZero` 仍会补零（`01.1` 而不是 `1.1`）；不计数的层级仍不会绘制内容。编辑器预览会遵循此设置。 |
+| `linkedStyle`  | 无                     | Word 的“将层级链接到样式”（`w:pStyle`）：使用该样式的段落会在此层级编号。值是类似 `'Heading1'` 的样式 id。带有链接层级的格式在**整个文档中是同一个列表**，因此不同列表会继续编号而不会重新开始。仅导出支持；编辑器预览没有等效功能。 |
 
 ## `NumberingMarkerFont`
 
@@ -227,6 +303,7 @@ interface NumberingMarkerFont {
 - `%1` 到 `%9` 引用的是 1 基索引的嵌套深度上的计数器。因此，无论 `textTemplate` 属于哪一层，`%1` 始终表示“最外层的计数器”。
 - 其他所有字符都会按字面量渲染。
 - 以非数字结尾的孤立 `%`（例如 `"50%"`）会被保留。
+- 指向不计数层级、`'bullet'` 或 `'none'` 层级的 `%N` 不会绘制任何内容。
 
 要让每一层显示自己的计数器，请按层级使用递增的 `%N`。要让某一层包含父级计数器（法律式大纲），请把它们串联起来：在第 1 层使用 `'%1.%2.'` 时会渲染为 `'1.1.'`。
 
@@ -240,11 +317,48 @@ interface NumberingMarkerFont {
 | 第 0 层的 `'§ %1 —'`    | `§ 1 —`                   |
 | 第 2 层的 `'(%3)'`      | `(1)`                     |
 
-## 架构约定：仅限最外层
+## 项目符号层级
 
-`numberingFormat` 属性只应放在**最外层** `<ol>` 上。一个定义会声明整个多级列表的所有嵌套层级。`OrderedListNumbering` 会在解析时强制执行这一点：如果粘贴的 HTML 中，嵌套的 `<ol>` 上带有 `data-numbering-format`，该属性会被移除。
+Word 从 `w:lvlText` 中的字形绘制项目符号，因此箭头、菱形或星号是文档携带的内容，而不是阅读者的 Word 决定的内容。层级使用 `baseStyle: 'bullet'` 的格式表示这样的项目符号层级，`bulletList` 通过同一个 `numberingFormat` 属性选择它：
 
-同一个最外层 `<ol>` 下的所有嵌套层级共享一个计数器作用域，并且子级会在父级递增时重新开始，就像 Word 的行为一样。
+```ts
+numberingFormats: [
+  {
+    id: 'arrows',
+    levels: [
+      { baseStyle: 'bullet', textTemplate: '➔' },
+      { baseStyle: 'bullet', textTemplate: '◆' },
+    ],
+  },
+]
+// { type: 'bulletList', attrs: { numberingFormat: 'arrows' }, content: [...] }
+```
+
+在 `'bullet'` 层级中，`textTemplate` 就是字形本身，`markerFont.font` 指定绘制它所使用的字体，这是 Word 符号字体项目符号所需的设置。层级上的其他配置（包括缩进）与计数器层级相同。只有精确的 `bullet` 值会将层级标记为项目符号层级，其他 `baseStyle` 仍然是计数器层级。
+
+项目符号层级不计数，因此指向它的 `%N` 不会绘制内容。在项目符号层级上，`'Item %1:'` 会在 Word 和预览中都渲染为 `Item :`。`'none'` 的行为相同，`isLegalNumbering` 也不会改变这一点：法律编号可以将计数器改绘为阿拉伯数字，但无法为没有计数器的层级创建计数器。
+
+格式不绑定某一种列表类型。它会应用于声明它的列表，就像 Word 的 `numId` 无论列表外观如何都会指向一个定义：因此 `<ol>` 上的字形层级会绘制项目符号，而 `<ul>` 上的计数器层级会进行计数。`generateNumberingFormatCss` 会同时从 `ul` 和 `ol` 读取属性，因此预览和导出在两种情况下都保持一致。
+
+嵌套在同类型列表中的列表会在自己的深度使用外层列表的层级，因此一个多级列表只保留一个定义。
+
+### 任务列表
+
+任务列表会渲染为 `ul`，但它不是项目符号层级中的一个层级。任务列表会保留复选框，而嵌套在任务列表中的项目符号列表也会保留自己的 `numberingFormat`。
+
+任务列表同样会终止层级链，就像另一种列表一样。命令和 `active…` storage 字段会在这里停止，因此只有通过任务列表才能到达的项目符号列表又是最外层列表，并携带自己的格式。
+
+<Callout variant="info" title="两侧计算嵌套深度的方式不同">
+  编辑器预览只通过**同类型**列表计算嵌套，而导出会计算**所有**外层列表。因此，位于任务列表或另一种列表下方的列表，在屏幕上会绘制其格式的第一级，但在 Word 中会绘制更深的层级。请将多级层级保持在同一种列表中，以避免这种差异。
+</Callout>
+
+## Schema 约定：各自类型的最外层
+
+`numberingFormat` 属性应放在每种列表类型的**最外层**列表上。一个定义会声明该多级列表所有嵌套层级。`OrderedListNumbering` 会在解析时强制执行这一点：如果粘贴的 HTML 中，嵌套在另一个 `<ol>` 中的 `<ol>` 或嵌套在另一个 `<ul>` 中的 `<ul>` 带有 `data-numbering-format`，该属性会被移除。
+
+另一种列表类型会开始自己的层级，也会**终止**当前链：通过 `<ol>` 到达的 `<ul>` 又是最外层列表，因此即使外层还有另一个 `<ul>`，它也会保留自己的格式。命令和 `active…` storage 字段也会在此边界停止，因此每个命令都指向导出和预览实际绘制的列表。
+
+同一个最外层列表下的所有嵌套层级共享一个计数器作用域，并且子级会在父级递增时重新开始，就像 Word 的行为一样。
 
 ## 循环规则
 
@@ -266,6 +380,62 @@ interface NumberingMarkerFont {
 | 7    | `2940` (2.04″) | `2580` (1.79″) | `360`   |
 | 8    | `3240` (2.25″) | `2880` (2.00″) | `360`   |
 
+## Marker alignment
+
+`alignment` says where the marker sits in relation to `numberIndent`, the position its level gives it. Word justifies the marker against that single point, and the editor preview does the same.
+
+| `alignment`        | Where the marker lands                                                                                    |
+| ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `'left'` (default) | Starts at `numberIndent` and grows to the right.                                                             |
+| `'right'`          | Ends at `numberIndent` and grows to the left, so markers of different widths line up on their right edge.   |
+| `'center'`         | Straddles `numberIndent`, half its width on each side.                                                       |
+
+Body text sits at `textIndent` whichever you pick, so a right-aligned marker leaves a wider gap between itself and the text than a left-aligned marker of the same width. Under `'left'` and `'center'`, a marker wider than that gap pushes the body text of its own item further right; a right-aligned marker grows into the space before `numberIndent` instead and never moves the text. Either way only that one item's text moves: a list nested inside the item still starts at the position its own level gives it.
+
+```ts
+// Roman numerals get wider as they count up. Right alignment keeps their
+// periods in one column and the text in another.
+levels: [{ baseStyle: LevelFormat.UPPER_ROMAN, textTemplate: '%1.', alignment: 'right' }]
+```
+
+A `suffix` of `'space'` or `'nothing'` drops the padded marker column, so under `'left'` and `'center'` the body text follows the marker directly instead of waiting for `textIndent`. Combined with `'right'` the marker still ends at `numberIndent`, which leaves the body text starting there as well.
+
+<Callout variant="info" title="An imported format carries no alignment">
+  The registry a DOCX import hands back does not report the alignment the source document used, so
+  an imported ladder draws left-aligned even where Word right-aligned it. Set `alignment` on the
+  formats you define in code.
+</Callout>
+
+## Indents on a single item
+
+A level places every item that belongs to it, but a single item can sit somewhere else. When the paragraph inside a list item carries an `indent` attribute, that item's marker and body text both move to it and the level's `textIndent` no longer applies to that item. A negative `firstLineIndent` on the same paragraph sets that item's gap between marker and text, in place of the level's distance from `numberIndent` to `textIndent`. A heading inside a list item is read the same way.
+
+```ts
+// Sits further right than its level puts it, with a 24px gap for the marker.
+{
+  type: 'listItem',
+  content: [
+    {
+      type: 'paragraph',
+      attrs: { indent: 96, firstLineIndent: -24 },
+      content: [{ type: 'text', text: 'Positioned by the item, not by the level' }],
+    },
+  ],
+}
+```
+
+Imported documents rely on this. The import writes each list paragraph's own Word indent onto the paragraph node as `indent` and `firstLineIndent` (see [ConvertKit](/conversion/import/docx/convertkit)), so the items land where the source document drew them rather than on the level's ladder.
+
+Conditions and limits:
+
+- It applies only to a list that names a format the editor knows about, whether from `formats` or from [`registerNumberingFormats`](#adding-formats-after-the-editor-is-running). Without one nothing positions the item, so the paragraph keeps rendering the indent itself as `padding-left` and `text-indent`, exactly as a paragraph outside a list does. The same holds when `orderedListNumbering` is off.
+- A task list is not part of a numbering ladder, so an item in a checklist keeps its indent on the paragraph.
+- A **positive** `firstLineIndent` is an ordinary first-line indent rather than a marker gap. It stays on the paragraph and indents the first line of the item's text.
+- `indentRight` is left alone. A list positions the left edge of its items, not the right.
+- A list item holding more than one block takes its position from the first block. The later blocks line up with it and do not render an indent of their own.
+- The attributes stay on the node, so `ExportDocx` writes the same indent back out and a DOCX round trip keeps it.
+- The editor positions the item and clears the paragraph's own `padding-left` and `text-indent` with an inline style. A rule of your own on that paragraph needs `!important` to take the block back.
+
 ## `generateNumberingFormatCss(formats, options?)`
 
 返回 CSS 文本，由你决定如何注入（例如 `<style>` 标签、CSS-in-JS 层、由构建流水线提供的样式表等）。该函数是纯函数且无依赖，可安全地在启动时或注册表发生变化时调用。
@@ -282,26 +452,29 @@ generateNumberingFormatCss(formats, {
 | `scope`    | `'.tiptap.ProseMirror'` | 为每条生成的规则添加 CSS 选择器前缀作用域。传入空字符串可输出不带作用域的结果（适合注入到 Shadow DOM 或你自己的 CSS 层中）。                          |
 | `maxDepth` | `9`                     | 要生成规则的最大嵌套深度。较小的值会生成更小的样式表。                                                                                               |
 
-生成的 CSS 会将每个列表标记及其正文文本定位到与 Word 渲染的绝对位置一致，包括每一层嵌套深度的阶梯式缩进。如果你需要为主题定制覆盖某些内容（深色模式、RTL、字体缩放），可以把输出包裹在你自己的选择器或作用域中，并依赖级联规则。
+生成的 CSS 会将每个列表标记及其正文文本定位到与 Word 渲染的绝对位置一致，包括每一层嵌套深度的阶梯式缩进。它会在列表及其每个条目上设置左边距和内边距，因此格式化列表内部 `ul`、`ol` 或 `li` 上优先级更低的自定义规则会被覆盖；垂直间距由你自行控制。如需为主题定制覆盖某些内容（深色模式、RTL、字体缩放），可以把输出包裹在你自己的选择器或作用域中，并依赖级联规则。
+
+列表项需要使用 `box-sizing: border-box`。条目规则会将百分比宽度与内边距结合使用；没有该设置时，位于层级右侧的条目会超出列表的右边缘。ConvertKit 的 CSS 重置会在 `.tiptap` 内设置该属性，这覆盖默认作用域；如果在其他位置注入 CSS，请自行添加。
+
+每个格式都会同时生成 `ul[data-numbering-format="…"]` 和 `ol[data-numbering-format="…"]` 规则，因为格式会应用于声明它的任意列表。随后每条链会通过自己的元素（`ul:not([data-type="taskList"])` 或 `ol`）使用 `> li >` 进入下一级，因此任务列表会保留复选框，而层级会在另一种列表处停止，不会穿透它。
 
 ## 解析规则
 
-- 匹配的 id 会使用相应的定义来渲染该多级列表的每一层（包括所有嵌套的 `<ol>`）。
-- 未匹配的 id（拼写错误、缺少属性、空的 `numberingFormats`）会渲染为普通的 `1. 2. 3.` 编号。
-- 引用相同格式的同级多级列表会独立重新开始，每个都从各自的 `startAt` 开始。
+- 匹配的 id 会使用相应的定义来渲染该多级列表的每一层（包括所有同类型的嵌套列表）。
+- 未匹配的 id（拼写错误、缺少属性、空的 `numberingFormats`）会保留该列表类型的默认层级：有序列表使用普通的 `1. 2. 3.`，项目符号列表使用内置字形层级。
+- 引用相同格式的同级多级列表会独立重新开始，每个都从各自的 `startAt` 开始。例外是任一层级带有 `linkedStyle` 的格式：它在整个文档中属于同一个列表，因此不同列表会继续编号。
 
 ## 已知限制
 
 导出器刻意没有建模的 Word 功能：
 
-| 功能                                                                                                      | 变通方案 / 范围                                                                    |
-| --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| 强制父级计数器引用无论基础样式如何都以阿拉伯数字显示（Word 的“法律编号”覆盖）                             | 为相同视觉输出定义一个所有层级都为 `DECIMAL` 的单独格式。                          |
-| 按层级自定义计数器重启                                                                                      | 始终使用 Word 的默认行为（子级会在父级递增时重新开始）。                           |
-| 标记文本后缀（标记与正文之间的制表符 / 空格 / 无）                                                          | 始终为 `tab`（Word 的默认值）。                                                     |
-| 在独立列表之间延续编号                                                                                      | 每个列表都会独立从其 `startAt` 开始。                                               |
-| 按条目覆盖标记                                                                                              | 使用一个单独的列表从不同的计数值开始。                                             |
-| DOCX → 编辑器导入                                                                                           | 由 `@tiptap-pro/extension-import-docx` 单独处理。                                   |
+| 功能                                    | 变通方案 / 范围                                                                    |
+| -------------------------------------- | ---------------------------------------------------------------------------------- |
+| 按层级自定义计数器重启（Word 的“在第 N 层后重启列表”，`w:lvlRestart`） | 始终使用 Word 的默认行为（子级会在父级递增时重新开始）。 |
+| 图片项目符号（`w:lvlPicBulletId`）       | 改用 `markerFont.font` 指定符号字体。 |
+| 在独立列表之间延续编号 | 每个列表都会独立从其 `startAt` 开始。 |
+| 按条目覆盖标记（为单个条目使用不同字形或计数值） | 使用一个单独的列表从不同的计数值开始。条目的位置是另一个问题，参见[单条目缩进](#indents-on-a-single-item)。 |
+| DOCX → 编辑器导入                       | 由 `@tiptap-pro/extension-import-docx` 处理，它会将重建的格式提供给编辑器。参见[编辑器运行后添加格式](#adding-formats-after-the-editor-is-running)。 |
 
 ## 另请参阅
 

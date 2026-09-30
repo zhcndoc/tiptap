@@ -10,7 +10,7 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 
-Tables 使用 `table`、`tableRow`、`tableCell` 和 `tableHeader` 节点类型在 DOCX 和 Tiptap 之间转换。基础结构、colspan 和列宽都可以无损往返。表头行导入正确，但导出时不会保留。单元格级样式在导出时会丢失。
+Tables 使用 `table`、`tableRow`、`tableCell` 和 `tableHeader` 节点类型在 DOCX 和 Tiptap 之间转换。基础结构、colspan、列宽以及单元格和表格级样式（边框、背景、垂直对齐、行高）都可以无损往返。表头行可以正确导入，但导出时不会保留。
 
 ## 你需要了解的内容
 
@@ -32,22 +32,24 @@ Tables 使用 `table`、`tableRow`、`tableCell` 和 `tableHeader` 节点类型�
 
 | 功能 | 导入 | 编辑器（使用 ConvertKit 时） | 导出 | 说明 |
 | --- | --- | --- | --- | --- |
-| 基础表格 | Supported | Supported | Supported | DOCX 输出中为固定布局 |
+| 基础表格 | 支持 | 支持 | 支持 | 默认全宽（流式）布局；设置明确宽度的表格会按固定宽度导出 |
 | 表头行 | 仅在源 DOCX 在行的 `<w:trPr>` 中显式包含 `<w:tblHeader/>` 标记时检测到 | 渲染为 `tableHeader` 节点 | 不保留 | 只是在视觉上把第一行格式化为表头（加粗、底色），但没有应用“Repeat as header row”属性的 Word 用户，导入后不会得到 `tableHeader` 节点 |
-| colspan | Supported | Supported | Supported | 完整往返 |
-| rowspan | Supported | Supported | Supported | 会在处理单元格前对所有行进行预扫描，以构建完整的 rowspan 映射 |
-| 列宽 | Supported | Supported | Supported | 导入时以像素数组形式存储在 `colwidth` 中，导出时转换为 twips |
-| 单元格背景色 | Supported | Supported | 每个单元格不保留 | 导入时捕获 `background`，导出时不读取。可通过 `tableCellOverrides.shading` 设置一个全局颜色 |
-| 单元格边框 | Supported | Supported（按边分别支持 `borderTop/Bottom/Left/Right` × `Width/Style/Color`） | 不保留 | 边框属性会在导入时捕获，导出时不读取 |
-| 单元格垂直对齐 | Supported | Supported | 不保留 | 导入时捕获 `verticalAlign`（`top`、`middle`、`bottom`），导出时不读取 |
-| 行高 | Supported | Supported（`exact` 通过 `.cell-content` 包装器裁切；`atLeast` 会增长） | 不保留 | 导入时捕获 `height` 和 `heightRule`，导出时不读取 |
-| 全局表格样式 | N/A | N/A | Supported | 通过 `tableOverrides` 和 `tableCellOverrides` 实现 |
+| colspan | 支持 | 支持 | 支持 | 完整往返 |
+| rowspan | 支持 | 支持 | 支持 | 会在处理单元格前对所有行进行预扫描，以构建完整的 rowspan 映射 |
+| 列宽 | 支持 | 支持 | 支持 | 以像素数组形式存储在 `colwidth` 中，导出时转换为 twips。流式表格中调整过的列会保留其比例 |
+| 表格边框 | 支持 | 支持（外边缘和内部网格） | 支持 | 表格自身的外边框和内部边框可以往返转换；无边框表格仍保持无边框 |
+| 单元格背景色 | 支持 | 支持 | 支持 | `background` 会作为单元格底纹往返转换 |
+| 单元格边框 | 支持 | 支持（按边分别支持 `borderTop/Bottom/Left/Right` × `Width/Style/Color`） | 支持 | 单元格边框可以往返转换；不同于表格边框的单元格边框会作为覆盖值保留 |
+| 单元格垂直对齐 | 支持 | 支持 | 支持 | `verticalAlign`（`top`、`middle`、`bottom`）可以往返转换 |
+| 行高 | 支持 | 支持（`exact` 通过 `.cell-content` 包装器裁切；`atLeast` 会增长） | 支持 | `height` 和 `heightRule` 可以往返转换 |
+| 单元格边距 | 支持 | 支持 | 支持 | 表格自身的单元格边距（表格节点上的 `cellMarginTop`、`cellMarginRight`、`cellMarginBottom`、`cellMarginLeft`）可以往返转换。未设置这些属性的表格使用 Word 的默认间距 |
+| 全局表格样式 | 不适用 | 不适用 | 支持 | 通过 `tableOverrides` 和 `tableCellOverrides` 实现 |
 
 ## 导入
 
 使用 [编辑器扩展](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入表格。两者生成的输出完全相同。
 
-转换服务会读取 DOCX 表格，并生成 `table`、`tableRow`、`tableCell` 或 `tableHeader` 节点。列宽会以像素值数组的形式存储在 `colwidth` 属性中。单元格背景色、边框和垂直对齐会作为单元格属性捕获。行高和高度规则会作为行属性捕获。
+转换服务会读取 DOCX 表格，并生成 `table`、`tableRow`、`tableCell` 或 `tableHeader` 节点。列宽会以像素值数组的形式存储在 `colwidth` 属性中。单元格背景色、边框和垂直对齐会作为单元格属性捕获。行高和高度规则会作为行属性捕获。表格自身的边框和单元格边距会作为表格属性捕获。
 
 只有当源 DOCX 在该行的 `<w:trPr>` 内显式包含 `<w:tblHeader/>` 时，某一行才会被输出为 `tableHeader`。这就是 Word 在用户为表格启用“Repeat as header row at the top of each page”时写入的标记。仅在视觉上被格式化为表头（加粗、底色、字体更大）但没有该属性的文档，导入后会作为普通 `tableCell` 行。若要在应用侧把第一行标记为表头，可以在 `setEditorContent()` 之前，于 `onImport` 回调中遍历导入的 JSON，并将每个单元格的 `type` 从 `tableCell` 改为 `tableHeader`。
 
@@ -108,12 +110,12 @@ new Editor({
 
 使用 [编辑器扩展](/conversion/export/docx/editor-extension) 或 [REST API](/conversion/export/docx/rest-api) 导出表格。该扩展支持 [`tableOverrides` 和 `tableCellOverrides`](/conversion/export/docx/styles#element-overrides) 作为全局表格样式默认值。REST API 不接受这些覆盖配置。
 
-导出器会生成固定布局的 DOCX 表格。它会读取 `colwidth` 属性并将像素值转换为 twips。如果没有设置 `colwidth`，各列会在可用页面宽度内平均分配。
+设置明确宽度的表格会按固定宽度导出；未设置宽度的表格会以全宽（流式）布局导出，并随页面重新排列。列宽来自每个单元格的 `colwidth`；未设置时会平均分配。在流式表格中，调整过的列会保留其比例。
 
-表头行不会被保留。导出器会用 `new TableRow({ children: cells })` 以完全相同的方式创建所有行，并且不会根据 `tableHeader` 节点类型在 DOCX 行上设置 `tableHeader: true`。表头行语义会在输出中丢失。合并单元格（colspan 和 rowspan）可以正确导出。
+表头行不会被保留：所有行都会以相同方式导出，因此第一行的表头语义会在输出中丢失。合并单元格（colspan 和 rowspan）可以正确导出。
 
-<Callout title="单元格级样式不会被导出" variant="warning">
-  单元格背景色（`background`）和按单元格设置的边框在导出时不会被读取。所有单元格都会获得默认的单线边框。如果你需要在输出中使用自定义表格样式，请在编辑器扩展上使用 [`tableOverrides` 和 `tableCellOverrides`](/conversion/export/docx/styles#element-overrides) 来设置全局默认值。REST API 不提供这些覆盖配置。
+<Callout title="单元格和表格样式可以往返导出" variant="info">
+  表格边框（外边缘和内部网格）、单元格边距、单元格背景色、单元格边框、垂直对齐和行高都会写入 DOCX。无边框表格仍保持无边框。未设置自身单元格边距的表格使用 Word 的默认间距。你仍然可以在编辑器扩展上使用 [`tableOverrides` 和 `tableCellOverrides`](/conversion/export/docx/styles#element-overrides) 设置文档级默认值；REST API 不提供这些覆盖配置。
 </Callout>
 
 ### 覆盖系统
@@ -138,4 +140,4 @@ ExportDocx.configure({
 })
 ```
 
-这些覆盖会全局应用于导出文档中的所有表格。不支持在导出时对单个单元格进行样式设置。
+这些覆盖会作为文档范围的默认值应用。每个单元格自身的样式（背景色、按边设置的边框、垂直对齐）以及表格自身的边框和单元格边距，会在导出时根据节点属性覆盖这些默认值。

@@ -43,57 +43,66 @@ import { Callout } from '@/components/ui/Callout'
 
 ## 块拆分
 
-当用户在段落、标题或表格单元格内按下 Enter 时，只会跟踪块边界，文本本身保持不变。在 `<p>First sentence.Second sentence.</p>` 的两个句子之间按下 Enter 后，会生成：
+扩展使用 `splitKind` 区分两种块拆分：
+
+| 拆分类型 | 发生时机 | 接受 | 拒绝 |
+| -------- | -------- | ---- | ---- |
+| `insertion` | 在块末尾按 Enter | 保留新块 | 移除新块 |
+| `structural` | 在已有内容中间按 Enter | 保留两个块 | 再次合并两个块 |
+
+两种拆分的 `suggestion.type` 都是 `'split'`。建议面板会使用受影响的 `nodeType` 生成标签，例如末尾拆分显示 `new paragraph`，中间拆分显示 `split heading`。
+
+可以在[修订记录演示](/tracked-changes/examples/simple)中尝试这些场景。
+
+### 末尾拆分是插入拆分
+
+在段落末尾按 Enter 时，扩展会创建一个带有 `split` 建议的新段落：
 
 ```html
-<p>First sentence.</p>
-<p data-suggestion data-suggestion-type="blockSplit">Second sentence.</p>
+<p>First paragraph.</p>
+<p data-suggestion data-suggestion-type="blockSplit">Second paragraph.</p>
 ```
 
-`Second sentence.` 在第二个块中保持普通文本。第一个块中没有删除副本，因此在拆分待处理期间文档仍然易于阅读。第一个块的末尾会渲染一个 `¶` 标记，用于显示添加换行的位置。请参阅 [`blockSplitMarker`](/tracked-changes/getting-started/install#blocksplitmarker) 以进行配置或移除。
+返回的 `findSuggestions()` 建议如下：
 
-这与文字处理器显示跟踪的段落换行的方式一致。
+```ts
+{
+  type: 'split',
+  splitKind: 'insertion',
+  nodeType: 'paragraph',
+  text: 'Second paragraph.',
+  fullText: 'Second paragraph.',
+}
+```
 
-### 接受、拒绝和取消
+拆分后输入的文本会保留在同一个插入拆分中，建议文本会随着新块变化。如果再次在该块末尾按 Enter，第二次拆分会获得独立的建议和 ID。
 
-| 操作 | 结果 |
-| --- | --- |
-| **接受**拆分 | suggestion 属性会被移除。保留两个普通块。 |
-| **拒绝**拆分 | 第二个块会合并回第一个块，恢复原来的单个块。 |
-| 在拆分块的开头按 **Backspace** | 取消拆分，效果与拒绝拆分相同。 |
-| 在拆分前的块末尾按 **Delete** | 取消拆分，效果与拒绝拆分相同。 |
+在标题或列表项末尾拆分时规则相同。对于列表项，新的 `<li>` 就是插入的块。拆分标记会出现在它之前的段落末尾，也就是前一个列表项内。
 
-Backspace 和 Delete 只会取消由**当前用户**创建的拆分。编辑其周围内容不会合并其他作者创建的拆分。
+### 中间拆分是结构拆分
 
-拆分已经拆分过的块会创建第二个彼此独立的 `split` suggestion。在拆分出的块中输入会创建一个普通的 `add` suggestion，与拆分相互独立。
+在已有内容中按 Enter 时，扩展会跟踪新的边界，但不会将第二个块视为新插入的内容。例如，将 `<p>HelloWorld</p>` 在 `Hello` 和 `World` 之间拆分会创建一个结构拆分：
+
+```html
+<p>Hello</p>
+<p data-suggestion data-suggestion-type="blockSplit">World</p>
+```
+
+该建议的 `splitKind` 为 `'structural'`，`nodeType` 为 `'paragraph'`。在这个例子中，其 `text` 和 `fullText` 都包含第二个块中的文本，即 `"World"`。
+
+对于标题，中间拆分使用 `nodeType: 'heading'`，并获得诸如 `split heading` 的标签。列表项内部的中间拆分会保留列表项的替换行为，而不会创建结构 `split` 建议。
+
+### 独立接受和拒绝拆分
+
+接受任一种拆分都会保留两个块并清除建议。拒绝插入拆分会移除新块；拒绝结构拆分会将两个块重新合并。
+
+连续的末尾拆分保持独立。接受或拒绝一个拆分不会影响其他拆分。扩展不会将所有连续的末尾拆分合并为一个建议。
+
+拆分标记会渲染在拆分前一个块的末尾。请参阅 [`blockSplitMarker`](/tracked-changes/getting-started/install#blocksplitmarker) 进行配置或移除。
 
 ### `split` 与 `blockSplit`
 
-同一项变更会根据读取位置的不同而使用不同名称：
-
-- 查询 API 中的 `suggestion.type` 是 `'split'`
-- 节点属性和 `data-suggestion-type` DOM 属性是 `'blockSplit'`
-
-请对 `'split'` 进行筛选和切换。请针对 `'blockSplit'` 编写 CSS。完整映射请参阅 [SuggestionNodeType](/tracked-changes/api-reference/types#suggestionnodetype)。
-
-`split` suggestion 的 `text` 为空，因为没有添加或移除任何文本。它的 `from` 和 `to` 覆盖第二个块。在审阅界面中，请为拆分使用单独的标签，而不要渲染 `suggestion.text`，因为它会是空白的。
-
-### 列表项
-
-拆分列表项时会保留之前的行为，而不会创建 `split` suggestion：
-
-- 在列表项的**末尾**按 Enter，会将新的 `<li>` 标记为 `add`
-- 在列表项**中间**按 Enter，会作为替换进行跟踪，因此拒绝后会恢复为单个列表项，同时不会丢失文本
-
-列表项中间的拆分是一个 `type: 'replace'` 的 suggestion。请对 `'replace'` 进行筛选。内部会将其存储为一对 `replaceDeletion` / `replaceInsertion` 标记，但这些是标记级别的值，不会作为 `suggestion.type` 出现——只有在编写 CSS 时，才会在 `data-suggestion-type` 中遇到它们。
-
-### 边界情况
-
-其中两种情况涉及已删除的内容，具体适用哪一种取决于光标所在的位置：
-
-- 在整个内容都处于待删除状态的块的**最开头**按 Enter，会在其上方插入一个新的空块，并将其标记为 `add`。这样用户就有可以输入内容的位置。拒绝会只移除这个空块，而保留待处理的删除。这同时适用于标记为 `delete` 的块节点，以及每个文本子节点都带有 delete 标记的块。
-- 在已删除文本中的**其他任何位置**按 Enter 都会被忽略。在删除仍处于待处理状态时，待删除的内容无法被重新组织。
-- 在插入的包装器（例如建议插入的 blockquote）内部进行拆分时，仍由外层 suggestion 覆盖，而不会添加嵌套的拆分。
+查询 API 返回 `suggestion.type: 'split'`。节点属性和 `data-suggestion-type` DOM 属性使用 `'blockSplit'`。使用 `findSuggestions()` 时请按 `'split'` 筛选和切换；只有在针对渲染节点编写 CSS 时才使用 `'blockSplit'`。完整映射请参阅 [SuggestionNodeType](/tracked-changes/api-reference/types#suggestionnodetype)。
 
 ## 嵌套和堆叠建议
 
@@ -105,12 +114,12 @@ Backspace 和 Delete 只会取消由**当前用户**创建的拆分。编辑其�
 
 ### 接受和拒绝规则
 
-| 操作                          | 结果                                                                                   |
-| ----------------------------- | -------------------------------------------------------------------------------------- |
-| 接受一个**内层**建议           | 内层建议被应用；**外层**建议保持不变。                                                  |
-| 拒绝一个**内层**建议           | 内层建议被丢弃；**外层**建议保持不变。                                                  |
-| 接受一个**外层**建议           | 外层建议被应用；其中的**嵌套建议会保留**，并继续作为各自独立的待处理建议存在。           |
-| 拒绝一个**外层**建议           | 外层建议会被丢弃，**其中的嵌套编辑也会一并丢弃**，因为它们所依附的内容被移除了。        |
+| 操作                          | 结果 |
+| ----------------------------- | ---- |
+| 接受一个**内层**建议           | 内层建议被应用；**外层**建议保持不变。 |
+| 拒绝一个**内层**建议           | 内层建议被丢弃；**外层**建议保持不变。 |
+| 接受一个**外层**建议           | 外层建议被应用；其中的**嵌套建议会保留**，并继续作为各自独立的待处理建议存在。 |
+| 拒绝一个**外层**建议           | 外层建议会被丢弃，**其中的嵌套编辑也会一并丢弃**，因为它们所依附的内容被移除了。 |
 
 <Callout title="仅支持行内" variant="info">
   仅支持行内建议的嵌套。块级嵌套建议（例如跨整块的嵌套建议）不在支持范围内。
@@ -164,6 +173,30 @@ TrackedChanges.configure({
 
 当你的应用程序具有装饰性或特定于集成的标记且绝不应出现在追踪变更中时，使用此选项。
 
+## 节点属性追踪
+
+更新现有节点的属性会创建 `attributeChange` 建议，而不是替换整个节点。这适用于图片等原子节点，也适用于带有自定义属性的非原子节点。
+
+建议待处理期间，文档中包含提议的属性值。建议通过 `attributeChanges` 暴露之前的值和提议的值，因此审阅界面可以解释这次变更：
+
+```ts
+{
+  type: 'attributeChange',
+  nodeType: 'image',
+  attributeChanges: [
+    {
+      attributeName: 'src',
+      oldValue: 'https://example.com/old.png',
+      newValue: 'https://example.com/new.png',
+    },
+  ],
+}
+```
+
+接受建议会保留提议值。拒绝建议会恢复每个 `oldValue`。如果同一作者在审阅前再次修改属性，建议会保留原始的 `oldValue` 并更新 `newValue`。将属性改回原始值会从待处理建议中移除该属性；当这是最后一个变更属性时，扩展会取消 `attributeChange` 建议。
+
+使用 `[data-suggestion-type="attributeChange"]` 为受影响的节点设置样式。有关 DOM 和 API 详情，请参阅[样式](/tracked-changes/api-reference/styling)和 [SuggestionAttributeChange](/tracked-changes/api-reference/types#suggestionattributechange)。
+
 ## 表格支持
 
 该扩展会追踪表格内的结构性变更，包括行、单元格和列操作。
@@ -198,7 +231,7 @@ const editor = new Editor({
 
 ## 原子节点追踪
 
-扩展会自动追踪对原子节点（如图片、水平线和其他非文本内容）的更改。这些节点不能拥有标记，因此扩展使用节点属性（`suggestionId`、`suggestionType`、`suggestionUserId`、`suggestionCreatedAt`、`suggestionUserMetadata`）代替。这一过程是透明的——原子节点会在相同的建议查询中出现，并且可以像其他建议一样被接受或拒绝。
+扩展会自动追踪对原子节点（如图片、水平线和其他非文本内容）的更改。这些节点不能拥有标记，因此扩展使用节点属性（`suggestionId`、`suggestionType`、`suggestionUserId`、`suggestionCreatedAt`、`suggestionUserMetadata`）代替。对这些节点的属性更新会被跟踪为 `attributeChange` 建议；其他更改会出现在相同的建议查询中，并且可以像其他建议一样被接受或拒绝。
 
 ## 协作兼容性
 
@@ -231,7 +264,10 @@ const editor = new Editor({
 
 ```js
 import { CodeBlock } from '@tiptap/extension-code-block'
-import { TrackedChanges, withSuggestionMarkOnCodeBlock } from '@tiptap-pro/extension-tracked-changes'
+import {
+  TrackedChanges,
+  withSuggestionMarkOnCodeBlock,
+} from '@tiptap-pro/extension-tracked-changes'
 import StarterKit from '@tiptap/starter-kit'
 
 const TrackableCodeBlock = withSuggestionMarkOnCodeBlock(CodeBlock)

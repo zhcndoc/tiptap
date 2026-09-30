@@ -15,11 +15,30 @@ meta:
 查询 API 返回的公开建议类型：
 
 ```ts
-type SuggestionType = 'add' | 'delete' | 'replace' | 'markChange' | 'sink' | 'lift' | 'split'
+type SuggestionType =
+  | 'add'
+  | 'delete'
+  | 'replace'
+  | 'markChange'
+  | 'attributeChange'
+  | 'sink'
+  | 'lift'
+  | 'split'
 ```
 
 - `sink` 和 `lift` 是待处理的列表项嵌套更改（Tab 和 Shift-Tab）
-- `split` 是建议的[块拆分](/tracked-changes/usage/advanced-usage#block-splits)。接受后会保留两个块，拒绝后会将它们重新合并
+- `split` 是建议的[块拆分](/tracked-changes/usage/advanced-usage#block-splits)。使用 `splitKind` 区分末尾拆分和中间拆分。
+
+## SuggestionSplitKind
+
+描述 `split` 建议如何改变文档：
+
+```ts
+type SuggestionSplitKind = 'insertion' | 'structural'
+```
+
+- `insertion` 在块末尾按 Enter 创建新块时产生。拒绝会移除新块。
+- `structural` 在已有内容中按 Enter 拆分时产生。拒绝会再次合并两个块。
 
 ## SuggestionMarkType
 
@@ -34,7 +53,7 @@ type SuggestionMarkType = 'add' | 'delete' | 'replaceDeletion' | 'replaceInserti
 存储在节点属性中的内部类型。涵盖每一种标记级类型，以及只能存在于节点级别的结构变体：
 
 ```ts
-type SuggestionNodeType = SuggestionMarkType | 'sink' | 'lift' | 'blockSplit'
+type SuggestionNodeType = SuggestionMarkType | 'attributeChange' | 'sink' | 'lift' | 'blockSplit'
 ```
 
 `blockSplit` 是公共 `split` 类型在节点级别的对应类型。它出现在 `suggestionType` 节点属性和 `data-suggestion-type` DOM 属性中，因此在 CSS 选择器中使用 `blockSplit`，而在筛选或根据 `suggestion.type` 进行切换时使用 `split`。
@@ -61,6 +80,20 @@ type SuggestionMarkChange = {
 }
 ```
 
+## SuggestionAttributeChange
+
+描述存储在 `attributeChange` 建议中的一次属性变更：
+
+```ts
+type SuggestionAttributeChange = {
+  attributeName: string
+  oldValue: unknown
+  newValue: unknown
+}
+```
+
+`oldValue` 是建议产生前的值。建议待处理期间，文档中存在的是 `newValue` 所表示的提议值。
+
 ## 建议
 
 表示文档中发现的建议：
@@ -69,6 +102,8 @@ type SuggestionMarkChange = {
 type Suggestion = {
   id: string
   type: SuggestionType
+  // Only present for 'split' suggestions:
+  splitKind?: SuggestionSplitKind
   userId: string
   createdAt: string
   updatedAt: string
@@ -83,6 +118,10 @@ type Suggestion = {
   replacedText?: string
   // 仅存在于 'markChange' 建议中：
   markChanges?: SuggestionMarkChange[]
+  // 仅在 'attributeChange' 建议中存在：
+  attributeChanges?: SuggestionAttributeChange[]
+  // 仅在 'attributeChange' 和 'split' 建议中存在：
+  nodeType?: string
   // 仅在建议影响块级节点时存在：
   insertedNodes?: JSONContent[]
   deletedNodes?: JSONContent[]
@@ -107,14 +146,14 @@ type Suggestion = {
 
 | 建议              | `text`          | `fullText`            |
 | ----------------- | --------------- | --------------------- |
-| A (add, user-1)   | `"Hello world"` | `"Hello great world"` |
-| B (add, user-2)   | `"great "`      | `"great "`            |
+| A（add，user-1）  | `"Hello world"` | `"Hello great world"` |
+| B（add，user-2）  | `"great "`      | `"great "`            |
 
 ```ts
 import { findSuggestions } from '@tiptap-pro/extension-tracked-changes'
 
 const suggestions = findSuggestions(editor)
-const outer = suggestions.find(s => s.userId === 'user-1')
+const outer = suggestions.find((s) => s.userId === 'user-1')
 
 outer.text // "Hello world"        → 在审阅侧边栏中显示这个
 outer.fullText // "Hello great world"  → 当你需要字面范围时使用
@@ -132,6 +171,11 @@ outer.fullText // "Hello great world"  → 当你需要字面范围时使用
 - `text` 包含受影响的文本内容
 - `markChanges` 包含跟踪的标记操作，包括标记名称和属性
 
+对于 `attributeChange` 建议：
+- `nodeType` 是已更新节点的 schema 名称
+- `attributeChanges` 列出每个属性修改前和提议的值
+- 接受建议会保留提议值；拒绝建议会恢复之前的值
+
 对于块级节点建议（例如插入或删除一个段落或标题）：
 - `text` 始终包含受影响节点的实际文本内容——绝不使用 `[nodeName]` 占位符
 - `insertedNodes` 包含每个插入节点的完整 JSON 表示
@@ -140,10 +184,13 @@ outer.fullText // "Hello great world"  → 当你需要字面范围时使用
 在构建更丰富的 UI 时，请使用 `insertedNodes` 和 `deletedNodes` 来检查节点类型和属性，例如在建议文本旁显示节点类型徽标。
 
 对于 `split` 建议：
-- `text` 始终为空，因为块级拆分既不会添加文本，也不会删除文本
-- `from` 和 `to` 覆盖第二个块，即拆分后创建的块
+- `splitKind` 为 `'insertion'` 时表示末尾拆分，为 `'structural'` 时表示中间拆分
+- `nodeType` 是受影响块的名称，例如 `paragraph`、`heading` 或 `listItem`
+- `text` 包含受影响块中的当前文本。末尾拆分后输入的文本也会包含在此字段中。
+- `fullText` 包含受影响块中的完整当前文本。对于拆分建议，它通常与 `text` 相同。
+- `from` 和 `to` 覆盖拆分后的块
 
-请为拆分建议自行渲染标签（例如“段落分隔”），而不要使用 `suggestion.text`。
+请使用 `splitKind` 和 `nodeType` 渲染诸如 `new paragraph` 或 `split heading` 的标签。不要使用会让末尾拆分和中间拆分看起来相同的通用标签。
 
 ## SuggestionMarkAttrs
 
@@ -234,15 +281,16 @@ import {
 } from '@tiptap-pro/extension-tracked-changes'
 
 // 常量
-SUGGESTION_TYPES.ADD              // 'add'
-SUGGESTION_TYPES.DELETE           // 'delete'
-SUGGESTION_TYPES.REPLACE_DELETION  // 'replaceDeletion'
+SUGGESTION_TYPES.ADD // 'add'
+SUGGESTION_TYPES.DELETE // 'delete'
+SUGGESTION_TYPES.REPLACE_DELETION // 'replaceDeletion'
 SUGGESTION_TYPES.REPLACE_INSERTION // 'replaceInsertion'
-SUGGESTION_TYPES.MARK_CHANGE      // 'markChange'
-SUGGESTION_TYPES.SINK             // 'sink'
-SUGGESTION_TYPES.LIFT             // 'lift'
-SUGGESTION_TYPES.BLOCK_SPLIT      // 'blockSplit' (节点级别)
-SUGGESTION_TYPES.SPLIT            // 'split' (查询 API)
+SUGGESTION_TYPES.MARK_CHANGE // 'markChange'
+SUGGESTION_TYPES.ATTRIBUTE_CHANGE // 'attributeChange'
+SUGGESTION_TYPES.SINK // 'sink'
+SUGGESTION_TYPES.LIFT // 'lift'
+SUGGESTION_TYPES.BLOCK_SPLIT // 'blockSplit'（节点级别）
+SUGGESTION_TYPES.SPLIT // 'split'（查询 API）
 
 // 检查标记类型是否表示添加内容（匹配 'add' 和 'replaceInsertion'）
 isAddLikeType('add') // true

@@ -3,7 +3,7 @@ title: 在你的编辑器中跟踪更改
 tags:
   - type: addon
     tooltip: 将跟踪更改添加到你的订阅
-  - type: alpha
+  - type: beta
 meta:
   title: 跟踪更改 | Tiptap 跟踪更改文档
   description: 在你的 Tiptap 编辑器中启用跟踪更改和建议模式，以实现协作编辑和文档审核。
@@ -15,8 +15,9 @@ import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 <Requirements>
-  <RequirementItem label="1. 获取访问权限">
-    <a href="https://tiptap.dev/contact-sales?form=tracked-changes">联系我们的团队</a>以获取付费的变更跟踪附加组件的访问权限。
+  <RequirementItem label="1. 获取附加组件">
+    修订记录是一个不包含在任何套餐中的付费附加组件。你可以在[免费试用](https://cloud.tiptap.dev/v2?trial=true)期间测试，或在[控制台](https://cloud.tiptap.dev/v2/billing)中购买。
+  </RequirementItem>
   </RequirementItem>
   <RequirementItem label="2. 访问私有注册表">
     变更跟踪扩展发布在 Tiptap 的私有 npm 注册表中。请按照[设置指南](/guides/pro-extensions)对 Tiptap 的私有 npm 注册表进行身份验证。
@@ -34,13 +35,14 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 ## 功能
 
-该扩展会跟踪七种类型的更改：
+该扩展会跟踪八种类型的更改：
 
 - **插入**（`add`）— 添加到文档中的新内容
 - **删除**（`delete`）— 标记为删除的现有内容
 - **替换**（`replace`）— 同时被删除并替换为新内容的内容
 - **标记更改**（`markChange`）— 应用于现有文本的格式或其他标记级别的更改
-- **块拆分**（`split`）— 按下 Enter 键添加的段落分隔
+- **属性更改**（`attributeChange`）— 对现有节点属性的更新，例如图片的 `src` 或自定义节点的配置
+- **块拆分**（`split`）— 块末尾拆分使用 `splitKind: 'insertion'`，已有内容中的拆分使用 `splitKind: 'structural'`
 - **列表缩进**（`sink`）— 使用 Tab 键将列表项嵌套到更深一层
 - **列表减少缩进**（`lift`）— 使用 Shift-Tab 将列表项向外移出一层
 
@@ -51,7 +53,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 - **建议模式** — 按用户切换跟踪的开启和关闭
 - **接受和拒绝** — 单独、批量、按范围或按用户审阅建议
 - **建议分组** — 连续编辑会自动合并为单个建议
-- **块拆分跟踪** — 按下 Enter 会标记段落分隔符本身，同时保持文本可读
+- **块拆分跟踪** — 独立接受和拒绝末尾拆分与中间拆分
 - **嵌套建议** — 待处理建议中的跨作者编辑会作为独立建议堆叠，而不会覆盖原建议
 - **支持协作** — 适用于基于 Yjs 的实时协作
 - **评论集成** — 将建议链接到评论线程，以支持审阅工作流

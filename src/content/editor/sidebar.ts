@@ -532,6 +532,10 @@ export const sidebarConfig: SidebarConfig = {
           title: '模式定义',
         },
         {
+          href: '/editor/core-concepts/decorations',
+          title: 'Decorations',
+        },
+        {
           href: '/editor/core-concepts/keyboard-shortcuts',
           title: '键盘快捷键',
         },
@@ -924,6 +928,10 @@ export const sidebarConfig: SidebarConfig = {
         {
           href: '/editor/api/node-positions',
           title: '节点位置',
+        },
+        {
+          href: '/editor/api/decorations',
+          title: '装饰',
         },
         {
           title: '可调整大小的节点视图',

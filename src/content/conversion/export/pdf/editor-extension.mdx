@@ -15,6 +15,7 @@ import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 import { Requirements, RequirementItem } from '@/components/Requirements'
 import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
+import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <EnterpriseCalloutAuto variant="pdf" renderMode="sidebar" disableWaitlist />
 
@@ -59,7 +60,7 @@ const editor = new Editor({
   extensions: [
     // 其他扩展 ...
     ExportPdf.configure({
-      endpoint: 'https://api.tiptap.dev/v2/convert',
+      region: 'eu', // 'eu' or 'us'
       token: 'YOUR_TOKEN',
       styleOverrides: {},
       headers: {},
@@ -78,7 +79,8 @@ const editor = new Editor({
 
 | 参数               | 类型                     | 描述                                                                                                                                                                                              | 默认值                               |
 | ------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
-| `endpoint`         | `string`                 | 用于转换的 Tiptap API 端点                                                                                                                                                                       | `'https://api.tiptap.dev/v2/convert'` |
+| `endpoint`         | 用于转换的 Tiptap API 端点。设置后会覆盖 `region` | `undefined` |
+| `region`           | 未设置 `endpoint` 时使用的 Tiptap Cloud 区域，可选 `'eu'` 或 `'us'` | `'eu'` |
 | `token`            | `string`                 | 用于身份验证的 Tiptap JWT，参见[身份验证](/authentication)                                                                                                                                       | `''`                                  |
 | `styleOverrides`   | `Record<string, string>` | 应用于导出的样式覆盖                                                                                                                                                                             | `undefined`                           |
 | `headers`          | `HeaderConfig`           | 导出文档的页眉配置                                                                                                                                                                               | `undefined`                           |
@@ -90,7 +92,10 @@ const editor = new Editor({
 | `onCompleteExport` | `(result: Blob) => void` | 接收导出文件 Blob 的回调                                                                                                                                                                         | 未提供时抛出错误                      |
 | `onExportError`    | `(error: Error) => void` | 导出流程被拒绝时调用的可选回调（动态导入失败、DOCX 转换失败、网络错误、非 OK 响应）。省略时，错误将通过 `console.error` 记录。 | `undefined`                           |
 
+<RegionalEndpoints />
+
 ### 页眉和页脚插槽值
+
 
 每个页眉和页脚插槽（`default`、`first`、`even`）都接受五种形态中的任意一种；请选择与你的数据相匹配的形式。前三种仅使用 `@tiptap-pro/extension-export-pdf` 即可；后两种还需要安装 `@tiptap-pro/extension-export-docx`（它们会走先 DOCX 后 PDF 的导出路径，并且采用懒加载，因此不会影响仅使用 PDF 的消费者）。
 
@@ -183,7 +188,8 @@ exportPdf: (options?: ExportPdfCommandOptions) => ReturnType
 
 | Property           | Type                     | Description                                                       |
 | ------------------ | ------------------------ | ----------------------------------------------------------------- |
-| `endpoint`         | `string`                 | 覆盖此特定导出的 API 端点                                       |
+| `endpoint`         | 为此次特定导出覆盖 API 端点 |
+| `region`           | 为此次特定导出覆盖区域，可选 `'eu'` 或 `'us'` |
 | `token`            | `string`                 | 覆盖此特定导出的 JWT 令牌                                      |
 | `styleOverrides`   | `Record<string, string>` | 覆盖此特定导出的样式覆盖项                                     |
 | `headers`          | `HeaderConfig`           | 覆盖此特定导出的页眉配置                                       |
@@ -194,6 +200,7 @@ exportPdf: (options?: ExportPdfCommandOptions) => ReturnType
 | `customFonts`      | `CustomFont[]`           | 覆盖此特定导出的自定义字体（仅限本地部署）                    |
 | `onCompleteExport` | `(result: Blob) => void` | 覆盖此特定导出的回调                                           |
 | `onExportError`    | `(error: Error) => void` | 覆盖此特定导出的错误处理器                                     |
+
 
 ```js
 import { ExportPdf } from '@tiptap-pro/extension-export-pdf'

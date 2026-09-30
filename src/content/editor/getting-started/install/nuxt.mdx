@@ -45,7 +45,6 @@ npm install @tiptap/vue-3 @tiptap/pm @tiptap/starter-kit
 
 这是让 Tiptap 与 Vue 一起快速启动的最简单方法。它将为你提供一个非常基本的 Tiptap 版本，没有任何按钮。别担心，你将很快能够添加更多功能。
 
-由于 Nuxt 使用服务端渲染（SSR），我们设置了 `immediatelyRender: false`，以防止编辑器在服务器上渲染。编辑器需要浏览器 API，而这些在 SSR 期间不可用，所以这个选项确保它只在客户端水合后渲染。
 
 ```html
 <template>
@@ -59,8 +58,7 @@ npm install @tiptap/vue-3 @tiptap/pm @tiptap/starter-kit
   const editor = useEditor({
     content: `<p>我正在使用 Vue.js 运行 Tiptap。🎉</p>`,
     extensions: [StarterKit],
-    // 不在服务器端渲染，仅在客户端水合后渲染
-    immediatelyRender: false,
+
   })
 </script>
 ```
@@ -107,8 +105,7 @@ npm install @tiptap/vue-3 @tiptap/pm @tiptap/starter-kit
   const editor = useEditor({
     content: props.modelValue,
     extensions: [StarterKit],
-    // 不在服务器端渲染，仅在客户端水合后渲染
-    immediatelyRender: false,
+
     onUpdate: ({ editor }) => {
       // HTML
       emit('update:modelValue', editor.getHTML())

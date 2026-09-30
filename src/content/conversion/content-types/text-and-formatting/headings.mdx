@@ -84,7 +84,7 @@ ConvertKit.configure({
 
 ### 丢失内容
 
-标准 `Heading` 扩展的 schema 只定义了 `level`。安装 ConvertKit 后，自定义 Heading 还会渲染 `spacingBefore`、`spacingAfter`、`lineHeight`、`fontSize`、`indent`、`firstLineIndent` 和 `contextualSpacing`。没有 ConvertKit 时，这些属性在 `setEditorContent()` 时会被剥离。
+标准 `Heading` 扩展的 schema 只定义了 `level`。安装 ConvertKit 后，自定义 Heading 还会渲染 `spacingBefore`、`spacingAfter`、`lineHeight`、`fontSize`、`indent`、`indentRight`、`firstLineIndent` 和 `contextualSpacing`，并在 JSON 中保留 `keepNext` 和 `keepLines`。没有 ConvertKit 时，这些属性在 `setEditorContent()` 时会被剥离。
 
 无论编辑器如何设置，以下内容都会丢失：
 

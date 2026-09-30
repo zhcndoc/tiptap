@@ -3,20 +3,21 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { ChevronDownIcon } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-import { useMemo } from 'react'
+import { Fragment, useMemo } from 'react'
 import { NavLink } from './NavLink'
 import { NavLinkButton } from './ui/NavLinkButton'
 import { cn } from '@/utils'
 
 const options = [
-  { label: '编辑器', href: '/editor/getting-started/overview' },
-  { label: '协作', href: '/collaboration/getting-started/overview' },
+  { label: '编辑器', href: '/editor/getting-started/overview', dividerBelow: true },
   { label: '内容 AI', href: '/ai/ai-toolkit/overview' },
+  { label: '协作', href: '/collaboration/getting-started/overview' },
   { label: '评论', href: '/comments/getting-started/overview' },
-  { label: '修订记录', href: '/tracked-changes/getting-started/overview' },
-  { label: '快照', href: '/collaboration/documents/snapshot' },
+  { label: '比较', href: '/compare/getting-started/overview' },
   { label: '转换', href: '/conversion/getting-started/overview' },
   { label: '页面', href: '/pages/getting-started/overview' },
+  { label: '快照', href: '/collaboration/documents/snapshot' },
+  { label: '修订记录', href: '/tracked-changes/getting-started/overview' },
 ]
 
 export const ProductDropdown = () => {
@@ -50,9 +51,14 @@ export const ProductDropdown = () => {
               Documentations
             </div>
             {options.map((option) => (
-              <DropdownMenu.Item key={option.href} asChild>
-                <NavLink href={option.href}>{option.label}</NavLink>
-              </DropdownMenu.Item>
+              <Fragment key={option.href}>
+                <DropdownMenu.Item asChild>
+                  <NavLink href={option.href}>{option.label}</NavLink>
+                </DropdownMenu.Item>
+                {option.dividerBelow ? (
+                  <DropdownMenu.Separator className="my-2 mx-2.5 h-px bg-grayAlpha-200" />
+                ) : null}
+              </Fragment>
             ))}
           </div>
           <div className="block lg:hidden">

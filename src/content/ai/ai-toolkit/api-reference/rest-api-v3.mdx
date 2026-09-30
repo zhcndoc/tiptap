@@ -125,6 +125,7 @@ Tiptap Cloud 文档示例：
 
 - `"json"`：标准 JSON 表示形式
 - `"shorthand"`：Tiptap Shorthand，一种适用于提示词和模型输出的高效令牌格式
+- `"shorthandV2"`：Tiptap Shorthand V2，一种适用于提示词和模型输出的高效令牌格式
 
 ## 工具端点
 
@@ -138,13 +139,13 @@ POST /v3/ai/toolkit/tools
 
 请求体：
 
-- `editorContext` (`EditorContext`, 必需). 来自 `getEditorContext` 函数的编辑器上下文。请参阅[安装指南](/ai/ai-toolkit/install)。
-- `tools?` (`Record<string, boolean>`, 可选)：启用或禁用单个工具。请参阅
+- `editorContext` (`EditorContext`，必需)：来自 `getEditorContext` 函数的编辑器上下文。请参阅[安装指南](/ai/ai-toolkit/install)。
+- `tools?` (`Record<string, boolean>`，可选)：启用或禁用单个工具。请参阅
   [工具参考](#available-tools)
   了解支持的键。
-- `operationMeta?` (`string`, 可选，默认值：`""`)
-- `format?` (`'json' | 'shorthand'`, 可选，默认值：`'json'`)
-- `schemaAwarenessData?` (`SchemaAwarenessData`, 可选，已弃用)：请改用 `editorContext`。为向后兼容而保留支持。
+- `operationMeta?` (`string`，可选，默认值：`""`)
+- `format?` (`'json' | 'shorthand' | 'shorthandV2'`，可选，默认值：`'json'`)
+- `schemaAwarenessData?` (`SchemaAwarenessData`，可选，已弃用)：请改用 `editorContext`。为向后兼容而保留支持。
 
 响应：
 
@@ -165,16 +166,16 @@ POST /v3/ai/toolkit/execute-tool
 
 请求体：
 
-- `toolName` (`string`, 必需)
-- `input` (必需)：由 AI 模型生成的工具输入。其形状取决于
+- `toolName` (`string`，必需)
+- `input`（必需）：由 AI 模型生成的工具输入。其形状取决于
   `toolName`；请参阅[工具参考](#available-tools)。
-- `editorContext` (`EditorContext`, 除非提供 `schemaAwarenessData`，否则为必需)
-- `schemaAwarenessData?` (`SchemaAwarenessData`, 可选，已弃用)：请改用 `editorContext`。为向后兼容而保留支持。
-- `toolConfig?` (可选)：由开发者提供而非由
+- `editorContext` (`EditorContext`，除非提供 `schemaAwarenessData`，否则为必需)
+- `schemaAwarenessData?` (`SchemaAwarenessData`，可选，已弃用)：请改用 `editorContext`。为向后兼容而保留支持。
+- `toolConfig?`（可选）：由开发者提供而非由
   AI 模型提供的工具特定参数。请参阅[工具参考](#available-tools)。
-- `format?` (`'json' | 'shorthand'`, 可选，默认值：`'json'`)
-- `reviewOptions?` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options), 可选，默认值：`{ mode: 'disabled' }`)
-- `experimental_commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`, 可选)：在与线程相关的工具执行期间创建的新线程和评论所附加的元数据。
+- `format?` (`'json' | 'shorthand' | 'shorthandV2'`，可选，默认值：`'json'`)
+- `reviewOptions?` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options)，可选，默认值：`{ mode: 'disabled' }`)
+- `experimental_commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`，可选)：在与线程相关的工具执行期间创建的新线程和评论所附加的元数据。
 - 恰好一个：
   - `document`
   - `experimental_documentOptions`
@@ -184,7 +185,8 @@ POST /v3/ai/toolkit/execute-tool
 - `output`：工具响应，应由 AI 模型读取。请参阅[工具参考](#available-tools)。
 - `toolResult`：以适合开发者解析的格式提供的工具响应。不应由 AI 读取。请参阅[工具参考](#available-tools)。
 - `docChanged`（`boolean`）：文档是否因工具调用而发生更改
-- `document`（`object | null`）：AI 对文档进行更改后的文档
+- `before`（`object`）：工具运行前的文档；始终返回
+- `document`（`object | null`）：工具运行后的文档；如果文档未发生更改，则为 `null`
 
 ### 流式执行工具
 
@@ -213,7 +215,7 @@ POST /v3/ai/toolkit/stream-tool
 
 请求体：
 
-- `format?` (`'json' | 'shorthand'`, 可选，默认：`'json'`). `proofreader` 工作流仅接受 `'shorthand'`。
+- `format?` (`'json' | 'shorthand' | 'shorthandV2'`，可选，默认：`'json'`)。`proofreader` 工作流仅接受 `'shorthand'` 或 `'shorthandV2'`。
 
 响应：
 
@@ -228,7 +230,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/workflows/edit' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
-    "format": "shorthand"
+    "format": "shorthandV2"
   }'
 ```
 
@@ -244,7 +246,7 @@ POST /v3/ai/toolkit/read/read-document
 
 - `range?` (`{ from: number, to: number }`, optional, default: entire document)
 - `schemaAwarenessData` (`SchemaAwarenessData`, required)
-- `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
+- `format?` (`'json' | 'shorthand' | 'shorthandV2'`, optional, default: `'json'`)
 - `chunkSize?` (`number`, optional, default: `32000`)
 - `reviewOptions?` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
 - exactly one of:
@@ -269,7 +271,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/read/read-document' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
     "schemaAwarenessData": { /* 模式感知数据 */ },
-    "format": "shorthand",
+    "format": "shorthandV2",
     "reviewOptions": {
       "mode": "disabled"
     },
@@ -292,7 +294,7 @@ POST /v3/ai/toolkit/read/read-selection
 
 - `range` (`{ from: number, to: number }`, required)
 - `schemaAwarenessData` (`SchemaAwarenessData`, required)
-- `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
+- `format?` (`'json' | 'shorthand' | 'shorthandV2'`, optional, default: `'json'`)
 - `chunkSize?` (`number`, optional, default: `32000`)
 - `reviewOptions?` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
 - exactly one of:
@@ -323,7 +325,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/read/read-selection' \
   --data '{
     "schemaAwarenessData": { /* 模式感知数据 */ },
     "range": { "from": 10, "to": 42 },
-    "format": "shorthand",
+    "format": "shorthandV2",
     "experimental_documentOptions": {
       "documentId": "your-document-id"
     }
@@ -340,9 +342,9 @@ POST /v3/ai/toolkit/read/threads
 
 请求体：
 
-- `schemaAwarenessData` (`SchemaAwarenessData`, 必需)
-- `format` (`'json' | 'shorthand'`, 必需)
-- `experimental_documentOptions` (`{ documentId: string, userId?: string, field?: string | null }`, 必需)
+- `schemaAwarenessData` (`SchemaAwarenessData`，必需)
+- `format` (`'json' | 'shorthand' | 'shorthandV2'`，必需)
+- `experimental_documentOptions` (`{ documentId: string, userId?: string, field?: string | null }`，必需)
 
 响应：
 
@@ -361,7 +363,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/read/threads' \
   --header 'X-App-Id: YOUR_APP_ID' \
   --data '{
     "schemaAwarenessData": { /* 模式感知数据 */ },
-    "format": "shorthand",
+    "format": "shorthandV2",
     "experimental_documentOptions": {
       "documentId": "your-document-id",
       "userId": "ai-assistant"
@@ -380,7 +382,7 @@ POST /v3/ai/toolkit/execute-workflow/insert-content
 - `input` (`unknown`, required): 生成的插入内容负载
 - `range?` (`{ from: number, to: number }`, optional)
 - `schemaAwarenessData` (`SchemaAwarenessData`, required)
-- `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
+- `format?` (`'json' | 'shorthand' | 'shorthandV2'`, optional, default: `'json'`)
 - `chunkSize?` (`number`, optional, default: `32000`)
 - `reviewOptions?` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
 - exactly one of:
@@ -406,7 +408,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/insert-content' \
     "schemaAwarenessData": { /* 模式感知数据 */ },
     "input": "This is the replacement content.",
     "range": { "from": 10, "to": 42 },
-    "format": "shorthand",
+    "format": "shorthandV2",
     "reviewOptions": {
       "mode": "disabled"
     },
@@ -427,7 +429,7 @@ POST /v3/ai/toolkit/execute-workflow/tiptap-edit
 
 - `input` (`object`, required): 编辑工作流操作
 - `schemaAwarenessData` (`SchemaAwarenessData`, required)
-- `format?` (`'json' | 'shorthand'`, optional, default: `'json'`)
+- `format?` (`'json' | 'shorthand' | 'shorthandV2'`, optional, default: `'json'`)
 - `chunkSize?` (`number`, optional, default: `32000`)
 - `reviewOptions?` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
 - exactly one of:
@@ -461,7 +463,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/tiptap-edit' \
         }
       ]
     },
-    "format": "shorthand",
+    "format": "shorthandV2",
     "reviewOptions": {
       "mode": "disabled"
     },
@@ -482,7 +484,7 @@ POST /v3/ai/toolkit/execute-workflow/proofreader
 
 - `input` (`object`, required): 校对者操作
 - `schemaAwarenessData` (`SchemaAwarenessData`, required)
-- `format` (`'shorthand'`, required)
+- `format` (`'shorthand' | 'shorthandV2'`, required)
 - `chunkSize?` (`number`, optional, default: `32000`)
 - `reviewOptions?` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`)
 - exactly one of:
@@ -508,7 +510,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/proofreader' \
     "input": {
       "operations": []
     },
-    "format": "shorthand",
+    "format": "shorthandV2",
     "reviewOptions": {
       "mode": "trackedChanges",
       "trackedChangesOptions": {
@@ -529,11 +531,11 @@ POST /v3/ai/toolkit/execute-workflow/threads
 
 请求体：
 
-- `input` (`object`, 必需)：线程操作
-- `schemaAwarenessData` (`SchemaAwarenessData`, 必需)
-- `format?` (`'json' | 'shorthand'`, 可选，默认：`'json'`)
-- `experimental_documentOptions` (`{ documentId: string, userId?: string, field?: string | null }`, 必需)
-- `experimental_commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`, 可选)：工作流创建的新线程和评论所附加的元数据。
+- `input` (`object`，必需)：线程操作
+- `schemaAwarenessData` (`SchemaAwarenessData`，必需)
+- `format?` (`'json' | 'shorthand' | 'shorthandV2'`，可选，默认：`'json'`)
+- `experimental_documentOptions` (`{ documentId: string, userId?: string, field?: string | null }`，必需)
+- `experimental_commentsOptions?` (`{ threadData?: Record<string, unknown>, commentData?: Record<string, unknown> }`，可选)：工作流创建的新线程和评论所附加的元数据。
 
 响应：
 
@@ -561,7 +563,7 @@ curl --location 'BASE_URL/v3/ai/toolkit/execute-workflow/threads' \
         }
       ]
     },
-    "format": "shorthand",
+    "format": "shorthandV2",
     "experimental_documentOptions": {
       "documentId": "your-document-id",
       "userId": "ai-assistant"
@@ -682,12 +684,12 @@ async function streamToolWithRetry(body: unknown, maxRetries = 3) {
 
 成功响应：
 
-- `success` (`true`): 表示读取请求成功。
-- `totalNodeCount` (`number`): 文档中顶层节点总数。
-- `nodeRange` (`[number, number]`): 读取的顶层节点范围。
-- `content` (`JSONContent[] | string`): 返回范围内的文档内容。当 `format` 为
-  `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand`
-  时，这是一个 Tiptap Shorthand 字符串。
+- `success` (`true`)：表示读取请求成功。
+- `totalNodeCount` (`number`)：文档中顶层节点总数。
+- `nodeRange` (`[number, number]`)：读取的顶层节点范围。
+- `content` (`JSONContent[] | string`)：返回范围内的文档内容。当 `format` 为
+  `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 或 `shorthandV2` 时，这是一个 Tiptap Shorthand
+  字符串。
 
 错误响应：
 
@@ -752,25 +754,25 @@ async function streamToolWithRetry(body: unknown, maxRetries = 3) {
 
 成功响应：
 
-- `success` (`true`): 表示读取请求成功。
-- `totalThreadCount` (`number`): 文档中的线程总数。
-- `threadRange` (`[number, number]`): 读取的线程范围，格式为 `[from, to)`。
-- `threads` (`array`): 返回的线程对象。
-  - `id` (`string`): 唯一线程标识符。
-  - `nodeRange` (`[number, number] | null`): 线程所在的节点范围；如果线程未在文档中被标注，则为 `null`。
-  - `content` (`JSONContent[] | string | null`): 线程标记的内容。当 `format` 为
-    `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 时，这是一个 Tiptap
+- `success` (`true`)：表示读取请求成功。
+- `totalThreadCount` (`number`)：文档中的线程总数。
+- `threadRange` (`[number, number]`)：读取的线程范围，格式为 `[from, to)`。
+- `threads` (`array`)：返回的线程对象。
+  - `id` (`string`)：唯一线程标识符。
+  - `nodeRange` (`[number, number] | null`)：线程所在的节点范围；如果线程未在文档中被标注，则为 `null`。
+  - `content` (`JSONContent[] | string | null`)：线程标记的内容。当 `format` 为
+    `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 或 `shorthandV2` 时，这是一个 Tiptap
     Shorthand 字符串。`null` 表示线程未在文档中被标注。
-  - `comments` (`array`): 线程中的评论。
-    - `id` (`string`): 唯一评论标识符。
-    - `content` (`string`): 评论文本。
-    - `userId` (`string`): 创建该评论的用户 ID。
-    - `createdAt` (`string`): 评论创建时的 ISO 时间戳。
-    - `updatedAt` (`string`): 评论最后更新时间的 ISO 时间戳。
-  - `resolvedAt?` (`string | null`): 线程被解决时的 ISO 时间戳；如果未解决，则为 `null`。
-  - `createdAt` (`string`): 线程创建时的 ISO 时间戳。
-  - `updatedAt` (`string`): 线程最后更新时间的 ISO 时间戳。
-  - `data?` (`Record<string, unknown>`): 公开的线程元数据。
+  - `comments` (`array`)：线程中的评论。
+    - `id` (`string`)：唯一评论标识符。
+    - `content` (`string`)：评论文本。
+    - `userId` (`string`)：创建该评论的用户 ID。
+    - `createdAt` (`string`)：评论创建时的 ISO 时间戳。
+    - `updatedAt` (`string`)：评论最后更新时间的 ISO 时间戳。
+  - `resolvedAt?` (`string | null`)：线程被解决时的 ISO 时间戳；如果未解决，则为 `null`。
+  - `createdAt` (`string`)：线程创建时的 ISO 时间戳。
+  - `updatedAt` (`string`)：线程最后更新时间的 ISO 时间戳。
+  - `data?` (`Record<string, unknown>`)：公开的线程元数据。
 
 错误响应：
 
@@ -836,9 +838,9 @@ async function streamToolWithRetry(body: unknown, maxRetries = 3) {
 
 成功响应：
 
-- `success` (`true`): 表示文档读取成功。
-- `content` (`JSONContent[] | string`): 整个有效文档内容。当 `format` 为 `json` 时，
-  这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 时，这是一个 Tiptap Shorthand 字符串。
+- `success` (`true`)：表示文档读取成功。
+- `content` (`JSONContent[] | string`)：整个有效文档内容。当 `format` 为 `json` 时，
+  这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 或 `shorthandV2` 时，这是一个 Tiptap Shorthand 字符串。
 
 <Callout title="返回整个文档" variant="warning">
   该工具输出包含整个文档的内容，这可能会超出上下文窗口。为避免这种情况，你必须自行管理上下文窗口。
@@ -852,7 +854,7 @@ async function streamToolWithRetry(body: unknown, maxRetries = 3) {
 
 对文档进行小幅编辑。针对 AI 只进行一两个词的小编辑场景进行了优化。例如，对文档进行校对或检查拼写错误。
 
-此工具仅支持 `format: "shorthand"`。
+此工具支持 `format: "shorthand"` 和 `format: "shorthandV2"`。
 
 #### 工具配置（`toolConfig`）
 

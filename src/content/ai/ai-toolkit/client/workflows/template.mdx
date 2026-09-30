@@ -9,8 +9,8 @@ meta:
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 
-<Callout title="实验性功能" variant="warning">
-  此功能属于实验性质，将来版本中可能会发生变化。
+<Callout title="已弃用" variant="warning">
+  如果你的使用场景涉及模板和插槽填充，请[发送邮件联系我们](mailto:humans@tiptap.dev)。
 </Callout>
 
 使用 AI 生成的内容填充结构化的 Tiptap 模板，并将结果插入编辑器中。
@@ -280,12 +280,7 @@ const editor = new Editor({
   你可以将 `TemplateField` 与 `AiToolkit` 扩展一起使用，或者单独使用它，若你只需要模板字段支持而不需要完整的 AI 工具包功能。
 </Callout>
 
-<CodeDemo
-  isLarge
-  path=""
-  isScrollable
-  src="https://deploy-preview-405--tiptap-pro.netlify.app/preview/Extensions/AiToolkitTemplateEditor/"
-/>
+<CodeDemo isLarge path="/Extensions/AiToolkitTemplateEditor/" isScrollable />
 
 `TemplateField` 扩展提供命令，用于在当前选择的节点上设置和取消模板属性：
 

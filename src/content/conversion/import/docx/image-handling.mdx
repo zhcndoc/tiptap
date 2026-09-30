@@ -82,20 +82,71 @@ ImportDocx.configure({
 
 ### 回调处理流程
 
-此端点可以使用任何 Web 框架或云函数实现。您需要集成的关键步骤如下：
+1. **接收文件：** 读取原始请求体，并从 `File-Name` 请求头获取文件名。请参阅[请求内容](#what-the-request-looks-like)。
+2. **存储图像：** 将图像保存到可通过 URL 访问的位置。这可以是 AWS S3 存储桶、Cloudinary 等存储服务，或你服务器上的公共文件夹。为保存的文件生成公共 URL。
+3. **返回 URL：** 返回 `2xx` 响应，并在 JSON 请求体中包含图像的绝对 URL，例如 `{ "url": "https://my-cdn.com/uploads/unique-image-name.png" }`。请参阅[响应必须包含的内容](#what-the-response-must-contain)。
 
-1. **接收文件：** 请求将包含图像文件数据，您需要在服务器上解析这些数据。
-2. **存储图像：** 将图像保存到可通过 URL 访问的位置。这可以是 AWS S3 存储桶、Cloudinary 等存储服务，或您服务器上的公共文件夹。为保存的文件生成公共 URL 或路径。
-3. **返回 URL：** 发送包含图像 URL 的 JSON 响应。例如：`{ "url": "https://my-cdn.com/uploads/unique-image-name.png" }`。确保发送 HTTP 200 状态码。转换器将在编辑器内容中使用提供的 URL。
+<a id="what-the-request-looks-like"></a>
+### 请求内容
 
-Tiptap 转换服务随后将该 URL 插入到 Tiptap JSON 中，作为图像节点的 `src`。
+每张图片对应一个请求，图片本身作为原始请求体发送。
+
+| 部分           | 值                                                                        |
+| -------------- | ---------------------------------------------------------------------------- |
+| 方法           | `POST`，或你配置的 `method`                                               |
+| 请求体         | 原始图片字节。不是 `multipart/form-data`，也没有 `file` 字段                |
+| `Content-Type` | 图片的 MIME 类型，例如 `image/png`                                          |
+| `File-Name`    | 图片文件名，例如 `image1.png`                                               |
+
+因此，请将请求体读取为 blob 或 buffer，而不是表单数据。
+
+有两点需要注意：
+
+- **你的 `headers` 和 `queryParams` 也会发送**，因此可以用来验证请求。`Content-Type` 和 `File-Name` 由转换服务设置，你不能用自己的值替换它们。
+- **`File-Name` 来自 DOCX 内部**，Word 会将图片编号为 `image1`、`image2` 等，并在每个文档中从 1 重新开始。因此不同导入中会出现相同名称，它更像标签而不是唯一键。如果根据它构建存储键，请加入文档级唯一信息，以区分不同导入。
+
+你的端点应在 10 秒内响应。响应较慢会被视为该图片上传失败。最多会同时运行三次上传，因此端点需要处理并发请求。
+
+无论图片类型如何，文档中的每张图片都会被发送。对于 `png`、`jpeg`、`gif`、`bmp`、`tiff`、`webp`、`svg`、`emf` 和 `wmf`，`Content-Type` 会根据文件扩展名设置。其他类型会以 `application/octet-stream` 发送，请在自己的服务端决定保留哪些类型。单张图片的大小和文档中的图片数量均不设限制。
+
+<a id="what-the-response-must-contain"></a>
+### 响应必须包含的内容
+
+响应状态必须为 `2xx`，并且 JSON 请求体中包含字符串类型的 `url`：
+
+```json
+{ "url": "https://my-cdn.com/uploads/unique-image-name.png" }
+```
+
+`url` 必须是包含主机名的绝对 `http` 或 `https` URL。转换服务会严格使用你返回的值，除了去除值两侧的空白外，不会重新编码或规范化，因此签名 URL 仍能保持有效。
+
+#### 相对 URL 会被拒绝，不会被解析
+
+类似 `/uploads/image1.png` 的路径会被拒绝。转换在我们的服务器上运行，而不是在你的页面中运行，因此没有可用于解析的 origin；猜测 origin 可能会生成悄悄指向错误位置的 URL。请自行返回完整 URL。出于同样原因，`//my-cdn.com/image1.png` 这样的协议相对值也会被拒绝。
+
+#### URL 无法使用时
+
+该图片会被跳过，文档的其余部分仍会正常导入。上传失败、超时或返回非 JSON 内容时也会如此。失败的上传不会重试，也不会导致整个导入失败。
+
+无论哪种情况，导入的[详细日志](/conversion/import/docx/editor-extension#verbose-output)都会包含指明文件名的消息。当端点已响应但其 `url` 无法使用时，消息还会包含以下原因之一：
+
+| 原因 | 常见原因 |
+| ---- | -------- |
+| 响应不包含 `url` 字段 | JSON 没有 `url` 键，使用了 `location` 或 `src` 等其他键，或将 `url` 设置为 `null` |
+| `url` 字段不是字符串 | `url` 保存的是数字或对象 |
+| `url` 字段为空 | `url` 为 `""` 或只包含空白字符 |
+| URL 包含空格或控制字符，无法按原样使用 | 值中存在未编码的空格或换行。返回前请进行百分号编码 |
+| URL 是相对 URL，服务端运行时没有页面可供解析 | 类似 `/uploads/image1.png` 的路径，或协议相对的 `//my-cdn.com/image1.png` |
+| URL 不是格式正确的绝对 http(s) URL | 缺少斜杠（例如 `https:/my-cdn.com/image1.png`），或完全没有主机名 |
+| 只能使用 http 和 https URL | 使用了 `s3://` 或 `data:` 等协议 |
+
+报告的 URL 会在查询字符串之前截断，因此签名 URL 中的令牌不会写入日志。
 
 ### 重要注意事项
-
-- **公共可访问性：** 您提供的端点 URL 必须能够从互联网访问，因为 Tiptap 的云服务将调用它。它不能是 localhost 或位于防火墙后面。同样，返回的图像 URL 应该是公开可访问的（或者至少对需要查看文档的任何人可访问）
-- **正确的响应格式：** 您的端点应该准确返回一个带有 url 字段的 JSON 对象。如果转换服务无法解析响应或找不到 URL，图像将不会被插入。
-- **安全性：** Tiptap 不限制您使用哪个端点。您可以通过 `imageUploadConfig` 选项传递自定义请求头（例如 `Authorization: Bearer ...`）和查询参数进行身份验证。转换服务将在上传图像时转发这些请求头。在您的端实现任何必要的身份验证（例如，在请求头中验证 Bearer 令牌或 API 密钥）。
-- **图像持久性：** 您返回的 URL 将在编辑器内容中继续使用。例如，导入后，您的编辑器将包含带有 src: "https://my-cdn.com/uploads/unique-image-name.png" 的图像节点。之后任何导出或查看该内容的人都会尝试加载该 URL。确保图像在这些 URL 上保持可用（不要立即删除它们）
+- **公共可访问性：** 你提供的端点 URL 必须能够从互联网访问，因为 Tiptap 的云服务将调用它。它不能是 localhost 或位于防火墙后面。同样，返回的图像 URL 应该是公开可访问的（或者至少对需要查看文档的任何人可访问）。
+- **正确的响应格式：** 你的端点必须返回一个带有 `url` 字段的 JSON 对象，其中包含绝对 `http` 或 `https` URL。其他任何形式都会导致图片被跳过，原因会写入导入的详细日志。请参阅[响应必须包含的内容](#what-the-response-must-contain)。
+- **安全性：** Tiptap 不限制你使用哪个端点。你可以通过 `imageUploadConfig` 选项传递自定义请求头（例如 `Authorization: Bearer ...`）和查询参数进行身份验证。转换服务将在上传图像时转发这些请求头。在你的端实现任何必要的身份验证，例如验证请求头中的 Bearer 令牌或 API 密钥。
+- **图像持久性：** 你返回的 URL 将在编辑器内容中继续使用。例如，导入后编辑器会包含 `src: "https://my-cdn.com/uploads/unique-image-name.png"` 的图像节点。之后任何导出或查看该内容的人都会尝试加载该 URL。请确保图像在这些 URL 上保持可用，不要立即删除它们。
 
 ### 服务器实现示例
 
@@ -136,19 +187,12 @@ Tiptap 转换服务随后将该 URL 插入到 Tiptap JSON 中，作为图像节�
  const app = new Hono() as Hono<any>
 
  app.post('/upload', async (c) => {
-   // 如果您使用的是 v2 导入，需要这段代码
-   const file = await c.req.blob()
 
+   const file = await c.req.blob()
    const filename = c.req.header('File-Name')
    const fileType = c.req.header('Content-Type')
-   // end
-   // 如果您使用的是 v1 导入，需要这段代码
-   const body = await c.req.parseBody()
-   const file = body['file']
-
-   const filename = file.name
-   const fileType = file.type
-   // end
+   // Word 会在每个文档中从 image1 重新开始编号，因此构建存储键时要加入唯一信息。
+   const key = `${crypto.randomUUID()}-${filename}`
 
    if (!file) {
      return c.json({ error: '未上传文件' }, 400)
@@ -159,7 +203,7 @@ Tiptap 转换服务随后将该 URL 插入到 Tiptap JSON 中，作为图像节�
        client: s3,
        params: {
          Bucket: AWS_S3_BUCKET,
-         Key: filename,
+         Key: key,
          Body: file,
          ContentType: fileType,
        },
@@ -197,21 +241,12 @@ Tiptap 转换服务随后将该 URL 插入到 Tiptap JSON 中，作为图像节�
      // 处理 /upload 端点上的文件上传
      if (url.pathname === '/upload') {
 
-       // 如果您使用的是 v2 导入，需要这段代码
-       const file = await req.blob()
 
+       const file = await req.blob()
        const filename = req.headers.get('File-Name')!
        const fileType = req.headers.get('Content-Type')!
-       // end
-       // 如果您使用的是 v1 导入，需要这段代码
-       const body = await req.formData()
-       const file = body.get('file')
-
-       const filename = file.name
-       const fileType = file.type
-       // end
-
-       const file = await req.blob()
+       // Word 会在每个文档中从 image1 重新开始编号，因此构建存储键时要加入唯一信息。
+       const key = `${crypto.randomUUID()}-${filename}`
 
        if (!file) {
          return new Response(JSON.stringify({ error: '未上传文件' }), {
@@ -223,9 +258,11 @@ Tiptap 转换服务随后将该 URL 插入到 Tiptap JSON 中，作为图像节�
        }
 
        try {
-         // 文件已包含名称和类型，因此我们可以直接使用它
-         const s3File = s3Client.file(filename, { type: fileType })
+
+         // 使用自己的键存储，并使用请求中的类型
+         const s3File = s3Client.file(key, { type: fileType })
          // 将文件写入 S3
+
          await s3File.write(file)
 
          return new Response(

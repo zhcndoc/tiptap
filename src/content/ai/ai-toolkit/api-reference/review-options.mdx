@@ -32,19 +32,18 @@ const response = await fetch(`${apiBaseUrl}/v4/ai/toolkit/execute-tool`, {
 
 ## `ReviewOptions`
 
-- `mode?` (`'disabled' | 'trackedChanges'`): 控制编辑是直接应用，还是写入为跟踪更改。默认值：`'disabled'`
+- `mode?` (`'disabled' | 'trackedChanges'`)：控制编辑是直接应用，还是写入为跟踪更改。默认值：`'disabled'`
   - `'disabled'`：编辑会直接应用到文档中。
   - `'trackedChanges'`：编辑会使用 [Tracked Changes](/tracked-changes/getting-started/overview) 扩展编码为跟踪更改，以便用户可以接受或拒绝单独的更改。
-- `trackedChangesOptions?` (`{ userId: string, userMetadata?: Record<string, unknown> | null }`): `trackedChanges` 模式的作者元数据。`userId` 用于标识建议的作者。省略时默认为 `'AI'`。`userMetadata` 存储额外的作者信息，例如显示名称。默认值为 `null`。
-- `useDiffUtility?` (`boolean`): 是否使用 diff 工具来重建跟踪更改。为 `true` 时，会通过细粒度 diff 计算更改。为 `false` 或未提供时，会直接应用范围级别的跟踪更改。
-- `diffUtilityOptions?` (`object`): 用于从修改前/后的文档状态重建跟踪更改的高级选项。
-  - `simplifyChanges?` (`boolean`, default: `true`): 在生成跟踪更改之前简化附近的更改。
-  - `ignoreAttributes?` (`string[]`, default: `['id', 'data-thread-id', '_hash']`): 在 diff 过程中忽略特定的节点属性。
-  - `ignoreMarks?` (`string[]`, default: `['inlineThread']`): 在 diff 过程中忽略特定的标记。
-  - `changeMergeDistance?` (`number | null`, default: auto-calculated): 在此距离内合并附近的更改。设为 `null` 可禁用合并。
-  - `mode?` (`'inline' | 'block' | 'smart'`, default: `'smart'`): 生成跟踪更改时使用的 diff 策略。
-  - `groupInlineChanges?` (`number`, default: `1`): 将此距离内的行内编辑分组。
-  - `expandBlockChanges?` (`string[]`, default: `['listItem']`): 应作为块级更改展开的节点类型。
+- `trackedChangesOptions?` (`{ userId?: string, userMetadata?: Record<string, unknown> | null }`)：`trackedChanges` 模式的作者元数据。`userId` 用于标识建议的作者。省略时使用请求中的 `user`；如果请求中没有该值，则默认为 `'AI'`。`userMetadata` 存储额外的作者信息，例如显示名称。默认值为 `null`。
+- `diffUtilityOptions?` (`object`)：用于从修改前/后的文档状态重建跟踪更改的高级选项。
+  - `simplifyChanges?` (`boolean`, default: `true`)：在生成跟踪更改之前简化附近的更改。
+  - `ignoreAttributes?` (`string[]`, default: `['id', 'data-thread-id', '_hash']`)：在 diff 过程中忽略特定的节点属性。
+  - `ignoreMarks?` (`string[]`, default: `['inlineThread']`)：在 diff 过程中忽略特定的标记。
+  - `changeMergeDistance?` (`number | null`, default: auto-calculated)：在此距离内合并附近的更改。设为 `null` 可禁用合并。
+  - `mode?` (`'inline' | 'block' | 'smart'`, default: `'smart'`)：生成跟踪更改时使用的 diff 策略。
+  - `groupInlineChanges?` (`number`, default: `1`)：将此距离内的行内编辑分组。
+  - `expandBlockChanges?` (`string[]`, default: `['listItem']`)：应作为块级更改展开的节点类型。
 
 ## 典型配置
 

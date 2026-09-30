@@ -36,14 +36,95 @@ import { Callout } from '@/components/ui/Callout'
   "appName": "", // 您的文档服务器名称
   "name": "", // 文档名称（如果需要，经过 URI 编码）
   "time": 0, // 当前时间的 ISO 字符串（Date.getTime()）
-  "tiptapJson": {}, // 来自 Tiptap 的 JSON 输出（见 https://tiptap.dev/guide/output#option-1-json）： TiptapTransformer.fromYdoc()
+  "tiptapJson": {}, // 来自 Tiptap 的 JSON 输出（见 https://tiptap.dev/guide/output#option-1-json）：TiptapTransformer.fromYdoc()
   "ydocState"?: {}, // 可选，包含整个 yDoc 的 base64 编码。此项可在运行时配置中启用（见 https://tiptap.dev/docs/collaboration/operations/configure 中的 `webhook_include_ydoc_state`）
-  "clientsCount": 100,// 当前连接客户端数量
+  "clientsCount": 100, // 当前连接客户端数量
   "type": "", // 有效载荷类型（如果文档已更改，则为 DOCUMENT）；仅在您使用 webhooks v2 时可用
   "trigger": "", // 触发事件的原因（通常是 "document.saved"）；仅在您使用 webhooks v2 时可用
+  "changedFields": [], // 内容发生变化的文档字段名称（见下文）
   "users": [] // 自上一个 webhook 以来更改内容的用户列表（JWT 的 "sub" 字段）
 }
 ```
+
+## 内容变化
+
+`document.saved` 会在文档每次写入数据库时触发，但并非每次写入都是内容变化。最常见的例子是：当你向
+`TiptapCollabProvider` 传入 `user` 时，提供程序会在每次连接时将该客户端记录到文档中，因此即使没有人输入任何内容，
+仅打开文档也会产生保存操作，进而触发 webhook。
+
+有两种方式可以区分这两种情况。
+
+### `changedFields` 数组
+
+每个 `document.saved` 和 `content.changed` 有效载荷都会列出内容与上次报告的变化不同的文档字段：
+
+```json
+{
+  "changedFields": ["default"]
+}
+```
+
+如果打开文档但未编辑，得到的就是 `"changedFields": []`，因为提供程序写入的客户端记录属于内部字段，不计入内容。
+
+所有 webhook 版本都会发送 `changedFields`。
+
+<Callout title="空数组不代表一定没有变化" variant="warning">
+  当没有内容变化时，`changedFields` 为空；但当服务器无法确定发生了什么变化时它也为空，例如文档从未加载就被写入。
+  请将空数组理解为“未报告变化”，而不是“没有变化”。如果你需要一个可以据此执行操作的信号，请使用下面的
+  `content.changed`：只有在确认存在内容变化时才会发送该事件。
+</Callout>
+
+### `content.changed` 事件
+
+`content.changed` 是一个单独的触发事件，会发送到同一个 webhook URL，并携带与 `document.saved` 相同的有效载荷，
+但**仅在内容确实发生变化时**发送。如果你的集成目前监听 `document.saved` 并忽略不包含编辑的保存操作，可以改为订阅
+`content.changed`，不再执行这项检查。
+
+它还覆盖了 `document.saved` 无法覆盖的一种情况：如果观察到编辑的服务器在计划保存前关闭，另一台服务器会持久化内容，
+并将其报告为 `content.changed`。该次保存不会发送 `document.saved`。
+
+有两个要求：
+
+1. 将 `webhook_version` 设置为 `2` 或更高版本。版本 1 的有效载荷不包含 `trigger` 字段，因此无法区分这两个事件。
+2. 使用 `webhook_events` 显式订阅该事件，详见下文。
+
+### 选择接收哪些事件
+
+`webhook_events` 是一个以逗号分隔的允许列表，用于指定要接收的触发事件：
+
+| 值                               | 结果                                                                          |
+| -------------------------------- | ----------------------------------------------------------------------------- |
+| 未设置                           | 除 `content.changed` 之外的所有事件，这是此设置存在之前端点收到的事件集合       |
+| `document.saved,content.changed` | 仅这两个事件                                                                    |
+| `*`                              | 所有事件，包括未来版本新增的事件                                                |
+| `none`                           | 不接收任何事件                                                                  |
+
+无法识别的条目会被忽略。如果某个值只包含无法识别的条目，则不会回退到默认值，而是什么都不发送；这样拼写错误会明确失败，
+不会悄悄恢复为接收全部事件。
+
+可用事件：`document.saved`、`content.changed`、`user.connected`、`user.disconnected`、`thread.added`、
+`thread.updated`、`thread.resolved`、`thread.deleted`、`comment.added`、`comment.updated`、`comment.deleted`、
+`document.reverted`、`version.created`。
+
+### 选择哪些字段计入内容
+
+默认情况下，所有不是 Tiptap Collaboration 内部字段的字段都会计入内容，也就是名称不以 `__tiptapcollab__` 开头的字段。
+设置 `content_fields` 可改变这一行为：
+
+| 值                        | 结果                                                    |
+| ------------------------- | ------------------------------------------------------- |
+| 未设置                    | 所有不带 `__tiptapcollab__` 前缀的字段                   |
+| `default`                 | 仅主编辑器字段                                          |
+| `default,body`            | 这两个字段                                              |
+| `body*`                   | 每个条目中的一个 `*` 表示 glob，因此匹配此前缀的所有字段 |
+| `__tiptapcollab__threads` | 将评论活动计为内容变化                                  |
+| `*`                       | 所有字段，包括内部字段                                  |
+
+该值会**替换**默认规则，而不是缩小默认规则；因此你可以将 `__tiptapcollab__threads` 这类内部字段重新加入统计范围。
+由于这些是 Yjs 字段名，条目区分大小写。
+
+修改此设置会在下一次保存时生效。刚添加到集合中的字段尚无记录状态，因此会报告一次变化，之后恢复稳定。移除字段本身不算变化，
+它表示“停止监视此字段”。
 
 ## 重试
 

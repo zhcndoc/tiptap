@@ -4,7 +4,7 @@ tags:
   - type: beta
 meta:
   title: Markdown 编辑器 API | Tiptap 编辑器文档
-  description: 了解 Tiptap 编辑器 API 中的 `content` 和 `contentAsMarkdown` 选项，用于处理 HTML、Markdown 和 Tiptap JSON 内容。
+  description: 了解 Tiptap 编辑器 API 中用于处理 HTML、Markdown 和 Tiptap JSON 内容的 `content` 和 `contentType` 选项。
   category: 编辑器
 ---
 
@@ -51,7 +51,7 @@ const marked = editor.markdown.instance
 
 编辑器内容支持 **HTML**、**Markdown** 或 **Tiptap JSON** 格式作为值。
 
-> **注意**：要支持 Markdown，必须将 `editor.contentAsMarkdown` 设置为 `true`。
+> **注意**：当初始 `content` 值为 Markdown 时，请设置 `contentType: 'markdown'`。
 
 - **类型**：`string | object`
 - **默认值**：`''`

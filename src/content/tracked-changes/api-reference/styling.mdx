@@ -8,7 +8,7 @@ meta:
   category: 追踪更改
 ---
 
-建议标记渲染为带有数据属性的 `<span>` 元素，可通过 CSS 定向。
+建议标记和节点级建议会渲染数据属性，可通过 CSS 定向。
 
 ## CSS 选择器
 
@@ -47,6 +47,12 @@ meta:
   background-color: rgba(255, 200, 0, 0.2);
 }
 
+/* 节点属性更改 */
+[data-suggestion-type="attributeChange"] {
+  outline: 2px solid rgb(59, 130, 246);
+  outline-offset: 2px;
+}
+
 /* 建议的块拆分（由跟踪的 Enter 创建的块） */
 [data-suggestion-type="blockSplit"] {
   box-shadow: inset 2px 0 0 rgb(59, 130, 246);
@@ -62,12 +68,13 @@ meta:
 
 | 属性 | 描述 |
 | --- | --- |
-| `data-suggestion` | 始终存在于建议标记元素上 |
+| `data-suggestion` | 始终存在于建议标记元素和节点级建议元素上 |
 | `data-suggestion-id` | 唯一的建议 ID |
-| `data-suggestion-type` | 内部类型：`'add'`、`'delete'`、`'replaceDeletion'`、`'replaceInsertion'`、`'markChange'`、`'sink'`、`'lift'` 或 `'blockSplit'` |
+| `data-suggestion-type` | 内部类型：`'add'`、`'delete'`、`'replaceDeletion'`、`'replaceInsertion'`、`'markChange'`、`'attributeChange'`、`'sink'`、`'lift'` 或 `'blockSplit'` |
 | `data-suggestion-user` | 创建建议的用户 ID |
 | `data-suggestion-created` | 创建建议时的 ISO 时间戳 |
 | `data-suggestion-user-metadata` | JSON 序列化的用户元数据对象（仅在设置了 `userMetadata` 时存在） |
+| `data-suggestion-attribute-changes` | JSON 序列化的属性更改（仅在 `attributeChange` 建议中存在） |
 
 `data-suggestion-type` 保存的是内部的 [SuggestionNodeType](/tracked-changes/api-reference/types#suggestionnodetype)，而不是公开类型。[块拆分](/tracked-changes/usage/advanced-usage#block-splits) 在这里是 `blockSplit`，尽管查询 API 将其报告为 `split`。
 

@@ -105,16 +105,16 @@ export default () => {
 
 ## 更改节点视图的默认内容标签
 
-默认情况下，`ReactNodeViewRenderer` 渲染的节点视图将始终包含一个包裹的 `div`。如果您想更改此节点的类型，可以将 `contentDOMElementTag` 添加到 `ReactNodeViewRenderer` 选项：
+对于非叶子节点视图，`ReactNodeViewRenderer` 会在包裹元素内创建一个可编辑的内容元素。块节点默认为 `div`，行内节点默认为 `span`。使用 `contentDOMElementTag` 可以覆盖其标签：
 
 ```js
-// 这将把 div 转变为 header 标签
+// 这将把可编辑内容元素设置为 header 标签
 return ReactNodeViewRenderer(Component, { contentDOMElementTag: 'header' })
 ```
 
-## 更改包裹的 DOM 元素
+## 更改外层包裹元素
 
-要更改包裹 DOM 元素的标签，您可以在 `ReactNodeViewRenderer` 函数上使用 `as` 选项来更改默认标签名称。
+`ReactNodeViewRenderer` 创建的外层元素默认为块节点的 `div` 和行内节点的 `span`。使用 `as` 选项可以覆盖它。它与 `contentDOMElementTag` 相互独立，后者控制内层可编辑内容元素：
 
 ```js
 import { Node } from '@tiptap/core'

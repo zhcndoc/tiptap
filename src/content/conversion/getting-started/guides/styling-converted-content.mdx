@@ -48,14 +48,19 @@ Tiptap 是无头的。它会转换文档结构（节点、标记、属性），�
 
 | 样式 | 节点属性 | 格式 | 使用标准扩展 | 使用 [ConvertKit](/conversion/import/docx/convertkit) |
 | --- | --- | --- | --- | --- |
-| 文本对齐 | `textAlign` | `"left"`, `"center"`, `"right"`, `"justify"` | 需要 `TextAlign` | 已渲染（已包含 TextAlign） |
+| 文本对齐 | `textAlign` | `"left"`、`"center"`、`"right"`、`"justify"` | 需要 `TextAlign` | 已渲染（已包含 TextAlign） |
 | 段前间距 | `spacingBefore` | 数值（像素） | 不渲染 | `margin-top: Npx` |
 | 段后间距 | `spacingAfter` | 数值（像素） | 不渲染 | `margin-bottom: Npx` |
 | 左缩进 | `indent` | 数值（像素） | 不渲染 | `padding-left: Npx` |
-| 首行缩进 | `firstLineIndent` | 数值（像素） | 不渲染 | `text-indent: Npx` |
+| 右缩进 | `indentRight` | 数值（像素） | 不渲染 | `padding-right: Npx` |
+| 首行缩进 | `firstLineIndent` | 数值（像素） | 不渲染 | `text-indent: Npx`（负值表示悬挂缩进） |
 | 行高 | `lineHeight` | 字符串（例如 `"1.5"`、`"24px"`） | 不渲染 | `line-height: <value>` |
 | 字体大小（段落标记） | `fontSize` | 字符串（例如 `"11pt"`） | 不渲染（由标记级 `textStyle.fontSize` 通过 `FontSize` 渲染） | `font-size: <value>`（用于空白段落） |
 | 上下文间距 | `contextualSpacing` | 布尔值 | 不渲染 | `data-contextual-spacing="true"` + 注入的 CSS 规则，用于抑制相邻上下文间距段落之间的外边距 |
+| 与下一段保持在一起 | `keepNext` | 布尔值 | 不渲染 | 保留在 JSON 中用于导出，不生成 CSS |
+| 保持行在一起 | `keepLines` | 布尔值 | 不渲染 | 保留在 JSON 中用于导出，不生成 CSS |
+
+`indent` 和 `firstLineIndent` 在列表项内的段落上有不同的读取方式。当列表声明了编辑器注册的编号格式时，这两个属性会共同定位整个列表项、标记和文本，而不是只给段落添加内边距。没有注册格式的列表会像表格所示，在段落上渲染为 `padding-left` 和 `text-indent`。请参阅[单条目缩进](/conversion/export/docx/ordered-list-numbering#indents-on-a-single-item)。
 
 <Callout variant="warning" title="Schema validation strips unrecognized attributes">
   当你调用 `setEditorContent()` 时，ProseMirror 会根据编辑器的 schema 校验内容。未在节点规范中定义的属性会被移除。`context.content` 中的原始 JSON 仍然包含所有属性，但一旦内容加载进编辑器后，它们就会丢失。要保留这些属性，请安装 [ConvertKit](/conversion/import/docx/convertkit)（它会为上面所有属性扩展 schema），或者自行扩展节点 schema。

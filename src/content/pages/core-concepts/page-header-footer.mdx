@@ -32,7 +32,22 @@ Pages.configure({
 })
 ```
 
-### 初始配置（HTML）
+### HTML 字符串中的空白
+
+页眉和页脚 HTML 中的重复空格会被保留。`<p>Ref.   2026-09</p>` 在 `header` 和 `footer` 选项、`setHeader` 和 `setFooter` 以及内联编辑器中都会保持三个空格。以 JSON 提供的内容不会重新解析，因此也会保留其中的空格。打开和关闭内联编辑器不会改变存储的内容。
+
+如果希望恢复浏览器默认的空白规则，让连续空格折叠为一个空格，请传入自己的解析选项：
+
+```js
+Pages.configure({
+  header: '<p>Ref.   2026-09</p>',
+  headerFooterParseOptions: { preserveWhitespace: false },
+})
+```
+
+### 模板占位符
+
+使用 `{page}` 和 `{total}` 占位符实现动态页码。它们适用于 HTML 字符串和 JSONContent，并会在渲染时替换：
 
 ```js
 Pages.configure({
@@ -225,6 +240,17 @@ editor.commands.resetFooterBottomMargin()
 <Callout title="输入验证" variant="info">
     `setFooterBottomMargin` 会拒绝负值和 `NaN`；在这些情况下，该命令会返回 `false` 并记录警告。
 </Callout>
+
+## 清除页眉或页脚
+
+`unsetHeader` 和 `unsetFooter` 会清空插槽并释放其预留的页面空间。不传参数时清除默认插槽；传入 `'first'`、`'odd'` 或 `'even'` 可清除对应变体。
+
+```js
+editor.commands.unsetHeader()
+editor.commands.unsetFooter('first')
+```
+
+在协作中，被清除的插槽会像 `setHeader` 一样同步到每个已连接的客户端。DOCX 导入会对导入文件未携带的每个插槽使用这些命令。
 
 ## 首页不同
 

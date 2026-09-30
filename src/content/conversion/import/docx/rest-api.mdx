@@ -20,7 +20,7 @@ import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <Requirements>
     <RequirementItem label="1. 激活试用或订阅">
-        在您的账户中开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅起始计划](https://cloud.tiptap.dev/v2/billing)。
+        在你的账户中开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 配置 Convert 应用">
        使用带有 `aud: "Convert"` 的签名令牌对 REST 调用进行身份验证。请参阅 [身份验证](/authentication)。
@@ -61,41 +61,27 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
 
 ### 必需的请求头
 
-| 名称            | 描述                                                                                                                               |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization` | 用于验证请求的 JWT 令牌。示例：`Bearer your-jwt-token`                                                                               |
+| 名称            | 描述                                                                 |
+| --------------- | ------------------------------------------------------------------- |
+| `Authorization` | 用于验证请求的 JWT 令牌。示例：`Bearer your-jwt-token` |
 
 ### 请求体
 
-| 名称                | 类型                | 描述                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `file`              | `File`              | 要转换的文件                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `imageUploadConfig` | `JSON string`       | 用于配置图片上传的 JSON 对象。包含 `url`（必需），以及可选的 `headers`、`method` 和 `queryParams`。完整结构请参见 [编辑器扩展文档](/conversion/import/docx/editor-extension#image-upload-configuration)。                                                                                                                                                                                                                                                                                                                                                         |
-| `prosemirrorNodes`  | `Object string`     | 用于转换的自定义节点映射，[查看更多信息](/conversion/import/docx/custom-node-mapping)。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `prosemirrorMarks`  | `Object string`     | 用于转换的自定义标记映射，[查看更多信息](/conversion/import/docx/custom-mark-mapping)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `verbose`           | `string \| number`  | 一个配置属性，用于帮助您控制导入过程中诊断输出的级别。这对于调试或更深入了解转换过程中的发生情况尤其有用。更多信息请参见 [详细输出](#import-verbose-output)                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `extractCssStyles`  | `"true" \| "false"` | **实验性。** 当为 `"true"` 时，响应会包含一个 `cssStyles` 字段，其中 DOCX 样式目录会转换为与 CSS 兼容的键值对。默认值为 `"false"`。有关输出结构和注意事项，请参见 [CSS 样式提取](#css-style-extraction-experimental)。                                                                                                                                                                                                                                                                                                                                 |
-| `placeholders`      | `JSON string`       | 可选将 Word 的 `PAGE` / `NUMPAGES` 字段代码在页眉和页脚中转换为标准 `{page}` / `{numpages}` 文本标记。发送 `{}`（空对象）可使用默认配置启用；发送 `{ "page"?: string, "total"?: string }` 可使用重命名映射启用（例如 `{"total":"pages"}` 会使 `NUMPAGES` 返回为 `{pages}`）；或发送 `false` 显式禁用。若省略（默认），则保留 Word 的缓存显示值作为纯文本。该行为与编辑器的 `Pages.configure({ placeholders })` 选项一致；编辑器扩展会自动将其转发到此处。请参见 [页码字段](#page-number-fields)。 |
-| `documentName`      | `String`            | 目标 Tiptap Collaboration 文档名称。当请求中提供的令牌对此文档拥有 `Documents:Write` 权限时，服务会将导入的评论线程与 Document Server 协调，使其在导入时即处于实时状态。请参见 [评论](#comments-in-the-response)。可选；如果令牌缺少该权限或环境中没有 Document Server，则会被忽略。                                                                                                                                                                                                                                        |
+| 名称                | 类型                | 描述 |
+| ------------------- | ------------------- | ---- |
+| `file`              | `File`              | 要转换的文件 |
+| `imageUploadConfig` | `JSON string`       | 用于配置图片上传的 JSON 对象。包含 `url`（必需），以及可选的 `headers`、`method` 和 `queryParams`。完整结构请参见[编辑器扩展文档](/conversion/import/docx/editor-extension#image-upload-configuration)。 |
+| `prosemirrorNodes`  | `Object string`     | 用于转换的自定义节点映射，[查看更多信息](/conversion/import/docx/custom-node-mapping)。 |
+| `prosemirrorMarks`   | `Object string`     | 用于转换的自定义标记映射，[查看更多信息](/conversion/import/docx/custom-mark-mapping)。 |
+| `extractCssStyles`  | `"true" \| "false"` | **实验性。** 当为 `"true"` 时，响应会包含一个 `cssStyles` 字段，其中 DOCX 样式目录会转换为与 CSS 兼容的键值对。默认值为 `"false"`。有关输出结构和注意事项，请参见[CSS 样式提取](#css-style-extraction-experimental)。 |
+| `placeholders`      | `JSON string`       | 可选将 Word 的 `PAGE` / `NUMPAGES` 字段代码在页眉和页脚中转换为标准 `{page}` / `{numpages}` 文本标记。发送 `{}`（空对象）可使用默认配置启用；发送 `{ "page"?: string, "total"?: string }` 可使用重命名映射启用（例如 `{"total":"pages"}` 会使 `NUMPAGES` 返回为 `{pages}`）；或发送 `false` 显式禁用。若省略（默认），则保留 Word 的缓存显示值作为纯文本。该行为与编辑器的 `Pages.configure({ placeholders })` 选项一致；编辑器扩展会自动将其转发到此处。请参见[页码字段](#page-number-fields)。 |
+| `documentName`      | `String`            | 目标 Tiptap Collaboration 文档名称。当请求中提供的令牌对此文档拥有 `Documents:Write` 权限时，服务会将导入的评论线程与 Document Server 协调，使其在导入时即处于实时状态。请参见[评论](#comments-in-the-response)。可选；如果令牌缺少该权限或环境中没有 Document Server，则会被忽略。 |
+| `taskLists`         | `"import" \| "ignore"` | 决定 Word 复选框列表是否转换为 `taskList` / `taskItem` 节点。默认为 `"ignore"`，会将其作为项目符号或有序列表导入。当编辑器注册了任务节点时，请发送 `"import"`。请参阅[任务列表](/conversion/content-types/text-and-formatting/task-lists)。 |
+| `trackedChanges`    | `String`            | 决定如何处理 Word 的插入和删除：`preserve` 保留为建议，`accept` 应用它们，`reject` 丢弃它们。默认为 `accept`。请参阅[修订记录](/conversion/import/docx/tracked-changes)。 |
 
-### 导入详细输出
+### 响应中的警告和错误
 
-DOCX 导入扩展提供了一个 `verbose` 配置属性，帮助您控制导入过程中的诊断输出级别。此功能特别适合调试或获取转换过程的更多细节。
-
-`verbose` 属性是一个位掩码数字，用于决定输出哪些类型的日志信息。扩展使用以下级别：
-
-| 值   | 级别   | 描述                |
-| ---- | ------ | ------------------- |
-| 1     | `log`   | 一般信息日志         |
-| 2     | `warn`  | 警告                 |
-| 4     | `error` | 错误                 |
-
-<Callout title="详细输出位掩码">
-  您可以通过将各级别的值相加来组合它们。例如，`verbose: 3` 将同时启用
-  `log`（1）和 `warn`（2）消息。
-</Callout>
-
-详细输出会在返回的 `data` 属性外，增加一个名为 `logs` 的属性，包含 `info`、`warn` 和 `error` 三个数组，分别保存对应级别的日志信息。
+每个响应都会在 `data` 旁边携带一个 `logs` 对象，其中包含 `warn` 和 `error` 数组。警告意味着某些内容没有进入文档，因此值得向上传文件的用户展示。
 
 ```js
 {
@@ -105,12 +91,10 @@ DOCX 导入扩展提供了一个 `verbose` 配置属性，帮助您控制导入�
     }
   },
   "logs": {
-    "info": [],
     "warn": [
       {
-        "message": "未在媒体文件中找到图片文件",
-        "fileName": "image1.gif",
-        "availableMediaFiles": []
+        "message": "已跳过图片：未提供 imageUploadConfig，因此无法导入图片。",
+        "fileName": "image1.gif"
       }
     ],
     "error": [
@@ -301,14 +285,14 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
 
 另外两个字段描述的是整个文档，而不是文档内容。
 
-| 字段               | 类型    | 描述                                                                                                                                                           |
-| ------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pageLayout`       | `Object` | 从文档的节属性中读取的页面大小、方向和边距。值的单位为 twips。请参阅[应用页面布局](#应用页面布局)。                |
-| `numberingFormats` | `Array`  | 文档有序列表背后的编号定义。每个列表节点都带有一个 `numberingFormat` 属性，用于命名此处对应的条目。                      |
+| 字段               | 类型    | 描述 |
+| ------------------ | ------- | ---- |
+| `pageLayout`       | `Object` | 从文档的节属性中读取的页面大小、方向和边距。值的单位为 twips。请参阅[应用页面布局](#applying-the-page-layout)。 |
+| `numberingFormats` | `Array`  | 文档有序列表和项目符号列表背后的编号定义。每个列表节点都带有一个 `numberingFormat` 属性，用于命名此处对应的条目。 |
 
 当文档没有可报告的内容时，这两个字段都会被省略。
 
-将 `numberingFormats` 注册到编辑器中，以便列表保留其编号；同时将其传递给导出器，以便往返转换时保留编号。[有序列表编号](/conversion/export/docx/ordered-list-numbering)页面介绍了完整流程。
+将 `numberingFormats` 注册到编辑器中，以便列表保留其编号；同时将其传递给导出器，以便往返转换时保留编号。[列表编号和项目符号](/conversion/export/docx/ordered-list-numbering)页面介绍了完整流程。
 
 ### 应用页面布局
 
@@ -319,7 +303,14 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
   "width": 12240,
   "height": 15840,
   "orientation": "portrait",
-  "margins": { "top": 1440, "right": 1440, "bottom": 1440, "left": 1440, "header": 720, "footer": 720 }
+  "margins": {
+    "top": 1440,
+    "right": 1440,
+    "bottom": 1440,
+    "left": 1440,
+    "header": 720,
+    "footer": 720
+  }
 }
 ```
 
@@ -348,6 +339,7 @@ if (pageLayout) {
 
 <Callout variant="info" title="使用共享的单位辅助函数">
   OOXML 注册表导出了管道两端使用的转换函数，包括 `twipsToPixels`、`pixelsToTwips`、`halfPointsToPixels`、`emuToPixels` 和 `twipsToPoints`，以及 `TWIPS_PER_PIXEL` 等常量。使用这些函数可以让你的数值与导入器和导出器中的数值完全一致。自行编写计算逻辑通常会导致文档往返转换后出现轻微偏差。
+</Callout>
 </Callout>
 
 当注册了 Pages 扩展时，[编辑器扩展](/conversion/import/docx/editor-extension)会为你完成此转换，因此只有在 REST 路径中才需要手动进行转换。
@@ -560,7 +552,8 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
 | `inlineThread`  | 定义行内评论线程转换所使用的 ProseMirror 标记                 |
 
 <Callout variant="info" title="代码块和行内代码目前无法重命名">
-  代码块类型和行内代码标记始终会分别导入为 `codeBlock` 和 `code`。目前通过 `prosemirrorNodes` 或 `prosemirrorMarks` 重命名它们不会生效。如果您的架构使用不同的名称，请在导入后进行映射。
+  代码块类型和行内代码标记始终会分别导入为 `codeBlock` 和 `code`。目前通过 `prosemirrorNodes` 或 `prosemirrorMarks` 重命名它们不会生效。如果你的 schema 使用不同的名称，请在导入后进行映射。
+</Callout>
 </Callout>
 
 #### 将 Word 样式映射到标记

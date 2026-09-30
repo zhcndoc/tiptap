@@ -24,19 +24,20 @@ meta:
 
 ### HocuspocusProviderWebsocket
 
-| 设置                       | 描述                                                                                                                                             | 默认值       |
-|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
-| `url`                      | Hocuspocus/WebSocket 服务器的 URL。                                                                                                              | `''`        |
-| `WebSocketPolyfill`        | 在 Node.js 环境中运行时：传入 WebSocket 的 polyfill，例如 ws。                                                                                   | `WebSocket` |
-| `timeout`                  | 毫秒为单位的超时时间。如果超时非零，则设置一个 setTimeout 定时器触发。如果触发超时，后续尝试将终止。                                            | `0`         |
-| `factor`                   | 用于以指数方式增长延迟的因子选项。                                                                                                               | `2`         |
-| `maxAttempts`              | 最大尝试次数，若为 0，则尝试次数无上限。                                                                                                        | `0`         |
-| `minDelay`                 | 当抖动（jitter）启用时，用于设置延迟的下限。如果关闭抖动，则此属性无效。                                                                        | `1000`      |
-| `maxDelay`                 | 用于设置当启用因子调整时的延迟上限。如果不需要上限，可设置为 0。                                                                                 | `30000`     |
-| `jitter`                   | 若为 true，则当前迭代的延迟将在 minDelay 与计算得出的延迟之间随机取整数值。                                                                       | `true`      |
-| `messageReconnectTimeout`  | 如果在配置的 messageReconnectTimeout 时间内未收到消息，则关闭连接。                                                                               | `30000`     |
-| `delay`                    | 每次尝试之间的延迟时间（毫秒）。可传入因子以实现延迟指数增长。                                                                                    | `1000`      |
-| `initialDelay`             | 首次尝试前的等待时间。该选项通常为 0，因为通常希望首次尝试立即进行。                                                                               | `0`         |
+| 设置                       | 描述 |
+|----------------------------|------|
+| `url`                      | Hocuspocus/WebSocket 服务器的 URL。 |
+| `WebSocketPolyfill`        | 在 Node.js 环境中运行时：传入 WebSocket 的 polyfill，例如 ws。 |
+| `timeout`                  | 毫秒为单位的超时时间。如果超时非零，则设置一个 setTimeout 定时器触发。如果触发超时，后续尝试将终止。 |
+| `factor`                   | 用于以指数方式增长延迟的因子选项。 |
+| `maxAttempts`              | 最大尝试次数，若为 0，则尝试次数无上限。 |
+| `minDelay`                 | 当抖动（jitter）启用时，用于设置延迟的下限。如果关闭抖动，则此属性无效。 |
+| `maxDelay`                 | 用于设置当启用因子调整时的延迟上限。如果不需要上限，可设置为 0。 |
+| `jitter`                   | 若为 true，则当前迭代的延迟将在 minDelay 与计算得出的延迟之间随机取整数值。 |
+| `messageReconnectTimeout`  | 如果在配置的 messageReconnectTimeout 时间内未收到消息，则关闭连接。 |
+| `delay`                    | 每次尝试之间的延迟时间（毫秒）。可传入因子以实现延迟指数增长。 |
+| `initialDelay`             | 首次尝试前的等待时间。该选项通常为 0，因为通常希望首次尝试立即进行。 |
+| `onMaxAttemptsFailed`      | 当所有 `maxAttempts` 次重连尝试都失败且 provider 停止重试时，以 `{ error }` 调用。默认的 `maxAttempts: 0` 会无限重试，因此不会触发。请参阅[处理重连失败](#reacting-to-failed-reconnects)。 |
 
 ## 使用
 
@@ -61,3 +62,48 @@ const provider = new HocuspocusProvider({
 在每个窗口内，缓冲的 Yjs 更新会通过 `Y.mergeUpdates` 合并为一条消息，而感知信息会折叠为每个已变更客户端的最新状态。这个窗口是固定批次，而不是会重置的防抖，因此即使用户持续输入，额外延迟也会被限制在 `flushDelay` 之内——请保持较小（例如 `500`），以避免延迟其他客户端看到的内容。
 
 你可以通过调用 `provider.flushPendingUpdates()`，强制立即发送当前窗口中缓冲的所有内容。
+
+## 处理重连失败
+
+默认的 `maxAttempts: 0` 会让 provider 无限重连，因此连接失败永远不会成为最终状态。如果将 `maxAttempts` 设置为某个数字，provider 会在用尽尝试次数后放弃，并通过 `onMaxAttemptsFailed` 告知你。这里适合展示“你已离线”状态或“重试”按钮：
+
+```js
+import { HocuspocusProvider } from '@hocuspocus/provider'
+
+const provider = new HocuspocusProvider({
+  url: 'ws://127.0.0.1:1234',
+  name: 'example-document',
+  maxAttempts: 5,
+  onMaxAttemptsFailed: ({ error }) => {
+    console.error('Could not connect to the server:', error)
+  },
+})
+```
+
+`error` 是最后一次尝试失败的原因：可能是 WebSocket 错误，也可能是 socket 关闭时从未发出错误，此时它是一个携带关闭代码和原因的 `Error`。
+
+这是 `HocuspocusProviderWebsocket` 事件。它不会转发给 `HocuspocusProvider`，因为一个 socket 可能被多个文档共享。将 `onMaxAttemptsFailed` 传给 `HocuspocusProvider` 可以正常工作（该选项会传给它创建的 socket），但稍后绑定监听器时必须绑定在 socket 上：
+
+```js
+import { HocuspocusProvider, HocuspocusProviderWebsocket } from '@hocuspocus/provider'
+
+const socket = new HocuspocusProviderWebsocket({
+  url: 'ws://127.0.0.1:1234',
+  maxAttempts: 5,
+})
+
+socket.on('maxAttemptsFailed', ({ error }) => {
+  // …
+})
+
+const provider = new HocuspocusProvider({
+  websocketProvider: socket,
+  name: 'example-document',
+})
+```
+
+放弃并不是永久状态。可以在 websocket provider 上调用 `connect()`，开始新一轮尝试，例如从“重试”按钮触发：
+
+```js
+provider.configuration.websocketProvider.connect()
+```

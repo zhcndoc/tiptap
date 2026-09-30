@@ -96,4 +96,12 @@ When exporting, the `src` URL of each image node is fetched and the binary data 
 
 If a node has `width` and `height` attributes (in pixels), these values are converted to points (1px = 0.75pt). If no dimensions are set, the exporter automatically detects the intrinsic size. If detection fails, the image defaults to 800x400 pixels.
 
-The `alt` attribute on an image node is mapped to the alt text field of the DOCX image.
+The `alt` 属性会映射到 DOCX 图片的替代文本字段。
+
+### 无法获取图片时
+
+如果图片 URL 返回 404、其主机没有响应，或其格式不受支持，该图片会从文档中省略，文档的其余部分仍会正常导出。如果该图片是其所在段落中的唯一内容，该段落也会被删除，因此不会留下空行。
+
+EMF 是常见情况：Word 会为粘贴的图表和公式写入 EMF，而 DOCX 导出无法嵌入这种格式。
+
+传入 `onWarning` 可查看被跳过的图片，或将 `onImageError` 设置为 `'throw'` 以在导出时直接失败。请参阅[无法导出的图片](/conversion/export/docx/editor-extension#images-that-cannot-be-exported)。

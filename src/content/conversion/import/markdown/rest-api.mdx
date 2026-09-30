@@ -20,7 +20,7 @@ import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 
 <Requirements>
     <RequirementItem label="1. 激活试用版或订阅">
-        从您的账户开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Starter 计划](https://cloud.tiptap.dev/v2/billing)。
+        从你的账户开始 [免费试用](https://cloud.tiptap.dev/v2?trial=true) 或 [订阅 Start 计划](https://cloud.tiptap.dev/v2/billing)。
     </RequirementItem>
     <RequirementItem label="2. 配置 Convert 应用">
         使用带有 `aud: "Convert"` 的签名令牌对 REST 调用进行身份验证。参见 [身份验证](/authentication)。
@@ -30,7 +30,7 @@ import RegionalEndpoints from '../../_shared/_regional-endpoints.mdx'
 Markdown 导入 API 将 `.md` 文件转换为 Tiptap JSON 格式。
 
 <Callout title="探索 Postman 集合" variant="hint">
-    您也可以通过访问我们的 [Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60) 来尝试文档转换 API。
+    你也可以通过访问我们的 [Postman 集合](https://www.postman.com/tiptap-platform/workspace/tiptap-workspace/collection/33042171-bcc93ecb-8bad-4484-8cb0-d995ee23ae60) 来尝试文档转换 API。
 </Callout>
 
 <RegionalEndpoints />
@@ -50,21 +50,20 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/markdown" \
 ```
 
 <Callout title="需要订阅" variant="warning">
-    该端点需要有效的 Tiptap 订阅。更多详情请参考我们的 [定价页面](https://tiptap.dev/pricing)。
+    该端点需要有效的 Tiptap 订阅。更多详情请参考我们的[定价页面](https://tiptap.dev/pricing)。
 </Callout>
 
 ### 必需的头部信息
 
-| 名称            | 描述                                                                                                                               |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization` | 用于对请求进行身份验证的 JWT 令牌。示例：`Bearer your-jwt-token`                                                               |
+| 名称            | 描述                                                                 |
+| --------------- | ------------------------------------------------------------------- |
+| `Authorization` | 用于对请求进行身份验证的 JWT 令牌。示例：`Bearer your-jwt-token` |
 
 ### 请求体
 
 | 名称       | 类型      | 必需 | 描述                                     |
 | ---------- | --------- | ---- | ---------------------------------------- |
 | `file`     | `File`    | 是   | 要转换的 Markdown 文件（`.md` 或 `.markdown`） |
-| `verbose`  | `string`  | 否   | 日志详细程度（位掩码：1=日志，2=警告，4=错误） |
 
 ### 响应（200 OK）
 
@@ -97,10 +96,10 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/markdown" \
 ### 错误响应
 
 | 状态码 | 代码                                    | 描述                          |
-| ------ | --------------------------------------- | ------------------------------------ |
-| 400    | `NO_FILE_PROVIDED`                      | 未提供文件                 |
-| 400    | `INVALID_FILE_TYPE`                     | 文件不是 `.md` 或 `.markdown`     |
-| 422    | `FAILED_TO_GET_FILE_ARRAY_BUFFER`       | 读取文件缓冲区失败           |
+| ------ | --------------------------------------- | ----------------------------- |
+| 400    | `NO_FILE_PROVIDED`                      | 未提供文件                    |
+| 400    | `INVALID_FILE_TYPE`                     | 文件不是 `.md` 或 `.markdown` |
+| 422    | `FAILED_TO_GET_FILE_ARRAY_BUFFER`       | 读取文件缓冲区失败            |
 | 500    | `FAILED_TO_CONVERT_MARKDOWN_TO_TIPTAP_JSON` | 无法将 Markdown 转换为 JSON |
 
 ## 支持与限制

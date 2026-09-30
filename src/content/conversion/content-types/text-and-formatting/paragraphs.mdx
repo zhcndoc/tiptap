@@ -29,8 +29,9 @@ import { Callout } from '@/components/ui/Callout'
 | 文本对齐 | 支持 | 支持（TextAlign） | 支持 |
 | 行高 | 支持（段落属性） | 支持（`line-height: <value>`） | 支持（比例值作为相对行距，固定 `px`/`pt` 作为精确行距） |
 | 段落间距（前/后） | 支持（`spacingBefore`、`spacingAfter` 属性） | 支持（`margin-top` / `margin-bottom`） | 支持 |
-| 缩进 | 支持（`indent`、`firstLineIndent` 属性） | 支持（`padding-left` / `text-indent`） | 支持（负的首行缩进会变为悬挂缩进） |
+| 缩进 | 支持（`indent`、`indentRight`、`firstLineIndent` 属性） | 支持（`padding-left` / `padding-right` / `text-indent`） | 支持（左、右和首行缩进；悬挂缩进会导入为负的首行缩进，并再次导出为悬挂缩进） |
 | 上下文间距 | 支持（`contextualSpacing` 属性） | 支持（`data-contextual-spacing` + 注入的 CSS 规则） | 支持 |
+| 与下一段保持在一起 / 保持行在一起 | 支持（`keepNext`、`keepLines` 属性） | 保留在 JSON 中，不影响视觉效果 | 支持 |
 
 ## 导入
 
@@ -62,7 +63,7 @@ import { Callout } from '@/components/ui/Callout'
 
 ### 会丢失什么
 
-转换服务会从 Word 源中提取段落级属性，例如 `spacingBefore`、`spacingAfter`、`lineHeight`、`indent`、`firstLineIndent` 和 `contextualSpacing`。ConvertKit 的自定义 Paragraph 会将它们全部渲染为内联 CSS。如果你将其替换为标准 Paragraph（或通过 `ConvertKit.configure({ paragraph: false })` 禁用该插槽），这些值会保留在原始 JSON 中，但在内容加载到编辑器时会被剥离。无论哪种设置，段落级边框和背景颜色在导入期间都不会被提取。
+转换服务会从 Word 源中提取段落级属性，例如 `spacingBefore`、`spacingAfter`、`lineHeight`、左缩进 `indent`、右缩进 `indentRight`、`firstLineIndent`、`contextualSpacing`、`keepNext` 和 `keepLines`。悬挂缩进会导入为负的 `firstLineIndent`。段落命名样式中的值（例如“正文”或“Normal”样式提供的间距或缩进）也会解析到这些属性中，而不仅仅是直接格式设置。ConvertKit 的自定义 Paragraph 会将这些属性全部渲染为内联 CSS，但 `keepNext` 和 `keepLines` 会保留在 JSON 中用于导出，且不影响视觉效果。如果你将其替换为标准 Paragraph（或通过 `ConvertKit.configure({ paragraph: false })` 禁用该插槽），这些值会保留在原始 JSON 中，但在内容加载到编辑器时会被剥离。无论哪种设置，段落级边框和背景颜色在导入期间都不会被提取。
 
 ## 编辑器渲染
 
@@ -86,8 +87,9 @@ ConvertKit 还会注册 `TextAlign`，并将其预配置为 `['paragraph', 'head
 
 - 所有文本内容和行内标记
 - 文本对齐方式会从段落节点属性中读取并映射到 Word 对齐方式
-- 行高会从 `lineHeight` 段落属性中读取（块级 `textStyle` 标记仍然优先）。比例值（无单位倍数，例如 `1.5`，或百分比，例如 `150%`）会写为随字体大小缩放的相对行距。带有绝对单位的固定值（`24px`、`18pt`、`1cm`）会写为精确行高，因此编辑器中设置的间距会被保留。`em` 和 `rem` 等相对字体单位本身没有绝对值，会保留为文档默认值。
-- 段落间距（`spacingBefore` / `spacingAfter`）、左缩进和首行缩进（`indent` / `firstLineIndent`）以及上下文间距（`contextualSpacing`）会从段落节点属性中读取。负的首行缩进会写为悬挂缩进。这些属性也适用于诸如引用块之类的样式化段落。
+- 行高会从 `lineHeight` 段落属性中读取（块级 `textStyle` 标记仍然优先）。比例值（无单位倍数，例如 `1.5`，或百分比，例如 `150%`）会写为随字体大小缩放的相对行距。带有绝对单位的固定值（`24px`、`18pt`、`1cm`）会写为精确行高，因此编辑器中设置的间距会被保留。 `em` 和 `rem` 等相对字体单位本身没有绝对值，会保留为文档默认值。
+- 段落间距（`spacingBefore` / `spacingAfter`）、左、右和首行缩进（`indent` / `indentRight` / `firstLineIndent`）以及上下文间距（`contextualSpacing`）会从段落节点属性中读取。负的首行缩进会写为悬挂缩进。这些属性也适用于诸如引用块之类的样式化段落。
+- 与下一段保持在一起（`keepNext`）和保持行在一起（`keepLines`）会写为 Word 的分页提示。
 
 <Callout title="行距会被保留，但不会做到像素级一致" variant="info">
   行距会被保留，但导出的文档不会与编辑器逐像素完全一致。

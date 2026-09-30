@@ -123,9 +123,12 @@ ImportDocx.configure({
 
 为了让导出实现往返转换，`ExportDocx` 需要知道如何写出你的自定义节点。传入一个 `customNodes` 条目，其 `type` 与 Tiptap 节点名称匹配，并且其 `render(node)` 函数返回一个（或多个）`docx` 库对象：
 
+<Callout variant="warning" title="使用 Docx 构建这些对象，不要直接导入 docx">
+  `@tiptap-pro/extension-export-docx` 会将文档库重新导出为 `Docx`，导出器识别的就是这一份副本。如果你使用自己安装的 `docx` 中的 `new Paragraph()` 构建结果，导出时会将其丢弃。只有构造函数需要来自该副本；`BorderStyle` 和 `WidthType` 等枚举只是普通字符串，两种来源都可以使用。
+</Callout>
+
 ```ts
-import { Paragraph, TextRun } from 'docx'
-import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+import { Docx, ExportDocx } from '@tiptap-pro/extension-export-docx'
 
 ExportDocx.configure({
   customNodes: [
@@ -140,8 +143,8 @@ ExportDocx.configure({
           .map((leaf) => leaf.text ?? '')
           .join('')
 
-        return new Paragraph({
-          children: [new TextRun({ text, bold: true })],
+        return new Docx.Paragraph({
+          children: [new Docx.TextRun({ text, bold: true })],
         })
       },
     },
@@ -152,7 +155,7 @@ ExportDocx.configure({
 })
 ```
 
-`render` 函数会使用 Tiptap 节点进行调用，并且必须返回以下之一：`Paragraph`、`Paragraph[]`、`Table`、`TextRun`、`ExternalHyperlink` 或 `null`（返回 `null` 会在导出中移除该节点）。完整 API 和更复杂的示例请参见[自定义节点导出](/conversion/export/docx/custom-nodes)。
+`render` 函数会使用 Tiptap 节点进行调用，并且必须返回以下之一：`Paragraph`、`Paragraph[]`、`Table`、`TextRun`、`ExternalHyperlink`、`InternalHyperlink`、`Bookmark` 或 `null`（返回 `null` 会在导出中移除该节点）。完整 API 和更复杂的示例请参见[自定义节点导出](/conversion/export/docx/custom-nodes)。
 
 ## 预期结果
 
@@ -167,8 +170,8 @@ ExportDocx.configure({
 
 ## 下一步
 
-- [自定义节点映射](/conversion/import/docx/custom-node-mapping): `prosemirrorNodes` 的完整参考
-- [自定义标记映射](/conversion/import/docx/custom-mark-mapping): `prosemirrorMarks` 的完整参考
-- [自定义节点导出](/conversion/export/docx/custom-nodes): 导出端 `customNodes` 的完整参考
-- [转换内容样式设置](/conversion/getting-started/guides/styling-converted-content): 在导入内容上分层应用 CSS 的模式
-- [调试](/conversion/getting-started/guides/debugging): 诊断 schema 不匹配和详细的导入日志
+- [自定义节点映射](/conversion/import/docx/custom-node-mapping)：`prosemirrorNodes` 的完整参考
+- [自定义标记映射](/conversion/import/docx/custom-mark-mapping)：`prosemirrorMarks` 的完整参考
+- [自定义节点导出](/conversion/export/docx/custom-nodes)：导出端 `customNodes` 的完整参考
+- [转换内容样式设置](/conversion/getting-started/guides/styling-converted-content)：在导入内容上分层应用 CSS 的模式
+- [调试](/conversion/getting-started/guides/debugging)：诊断 schema 不匹配并查看转换警告

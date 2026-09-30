@@ -80,10 +80,10 @@ POST /v4/ai/toolkit/fetch-tools
 
 请求体：
 
-- `editorContext` (`object`, required): 由 `getEditorContext` 返回的编辑器上下文。
-- `tools` (`Record<string, boolean | ToolConfig>`, optional, default: `{}`): 启用、禁用或
+- `editorContext` (`object`，必需)：由 `getEditorContext` 返回的编辑器上下文。
+- `tools` (`Record<string, boolean | ToolConfig>`，可选，默认：`{}`)：启用、禁用或
   配置工具。工具默认处于禁用状态。
-- `format` (`'json' | 'shorthand'`, optional, default: `'json'`): 工具
+- `format` (`'json' | 'shorthand' | 'shorthandV2'`，可选，默认：`'json'`)：工具
   定义和模型输出所使用的文档格式。参见 [Tiptap
   Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand)。
 
@@ -95,6 +95,8 @@ POST /v4/ai/toolkit/fetch-tools
 - `getThreads` (`boolean`, optional)
 - `editThreads` (`boolean`, optional)
 - `readDocument` (`boolean`, optional)
+- `replaceDocument` (`boolean`, optional)
+- `createDocument` (`boolean`, optional): Alias for `replaceDocument`.
 - `readSelection` (`boolean`, optional)
 - `proofread` (`boolean | { meta?: string }`, optional): 当你希望 AI 在每次校对编辑中
   包含一个额外的元数据字段时设置 `meta`，例如简短说明。
@@ -122,7 +124,7 @@ curl --location 'BASE_URL/v4/ai/toolkit/fetch-tools' \
         "meta": "简要解释此次编辑。"
       }
     },
-    "format": "shorthand"
+    "format": "shorthandV2"
   }'
 ```
 
@@ -165,27 +167,29 @@ POST /v4/ai/toolkit/execute-tool
 
 请求体：
 
-- `editorContext` (`object`, required): `getEditorContext` 返回的编辑器上下文。
-- `document` (`object`, required): 要对其执行工具的文档。API 需要从 Tiptap Cloud 文档读取并写入时，使用
+- `editorContext` (`object`，必需)：`getEditorContext` 返回的编辑器上下文。
+- `document` (`object`，必需)：要对其执行工具的文档。API 需要从 Tiptap Cloud 文档读取并写入时，使用
   `{ "type": "cloud", "id": "your-document-id" }`。当你想在请求体中提供
   Tiptap JSON 文档时，使用 `{ "type": "inline", "content": { /* Tiptap JSON 文档 */ } }`。
-- `user` (`string`, optional): 归因于 AI 执行编辑的标识符。
-- `field` (`string`, optional, default: `"default"`): 要在云文档中定位的协作字段。文档存储多个可编辑字段时使用此项，例如标题和正文。
-- `tool` (`object`, required): 要执行的工具调用。
-  - `name` (`string`, required): 工具名称，例如 `"tiptapRead"`。
-  - `input` (`object`, required): AI 生成的工具输入。这是一个与该工具的 schema 和工具定义相匹配的对象。每个工具的 schema 和工具定义可从
+- `user` (`string`，可选)：版本历史中编辑的作者。它还会设置 AI 生成的评论、线程和修订记录建议所关联的用户；
+  如需设置修订记录建议的作者，请使用 `reviewOptions.trackedChangesOptions.userId`。
+- `field` (`string`，可选，默认：`"default"`)：要在云文档中定位的协作字段。文档存储多个可编辑字段时使用此项，例如标题和正文。
+- `tool` (`object`，必需)：要执行的工具调用。
+  - `name` (`string`，必需)：工具名称，例如 `"tiptapRead"`。
+  - `input` (`object`，必需)：AI 生成的工具输入。这是一个与该工具的 schema 和工具定义相匹配的对象。每个工具的 schema 和工具定义可从
     `/v4/ai/toolkit/fetch-tools` 端点获取。
-  - `config` (`unknown`, optional): 开发者提供的工具特定配置。
-- `format` (`'json' | 'shorthand'`, optional, default: `'json'`): 工具输入和输出的文档格式。参见 [Tiptap Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand)。
-- `reviewOptions` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`): 控制编辑是直接应用还是作为可审阅更改应用。
+  - `config` (`unknown`，可选)：由开发者提供的工具特定配置。
+- `format` (`'json' | 'shorthand' | 'shorthandV2'`，可选，默认：`'json'`)：工具输入和输出的文档格式。参见 [Tiptap Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand)。
+- `reviewOptions` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options)，可选，默认：`{ mode: 'disabled' }`)：控制编辑是直接应用还是作为可审阅更改应用。
 
 响应：
 
-- `tool` (`object`): 已执行的工具及其输出。
-  - `name` (`string`): 工具名称。
-  - `output` (`object`): 提供给 AI 的工具输出。
-- `docChanged` (`boolean`): 文档是否发生了变化。
-- `document` (`object | null`): 更新后的文档；如果文档未更改则为 `null`。
+- `tool` (`object`)：已执行的工具及其输出。
+  - `name` (`string`)：工具名称。
+  - `output` (`object`)：提供给 AI 的工具输出。
+- `docChanged` (`boolean`)：文档是否发生了变化。
+- `before` (`JSONContent`)：工具执行前的 Tiptap JSON 文档。
+- `document` (`JSONContent | null`)：工具执行后的 Tiptap JSON 文档；如果文档未更改则为 `null`。变化可能包括文档内容以及节点 `_hash` 属性的修改；这些属性用作唯一标识符，使 AI 能够选择文档节点。
 
 示例：
 
@@ -206,7 +210,7 @@ curl --location 'BASE_URL/v4/ai/toolkit/execute-tool' \
         "from": 0
       }
     },
-    "format": "shorthand"
+    "format": "shorthandV2"
   }'
 ```
 
@@ -283,19 +287,18 @@ POST /v4/ai/toolkit/stream-tool
 
 请求分批发送。第一部分包含：
 
-- `editorContext` (`object`, required): 由 `getEditorContext` 返回的编辑器上下文。
-- `document` (`object`, required): 要将编辑流式写入的云文档：
+- `editorContext` (`object`，必需)：由 `getEditorContext` 返回的编辑器上下文。
+- `document` (`object`，必需)：要将编辑流式写入的云文档：
   `{ "type": "cloud", "id": "your-document-id" }`。内联文档不支持
   流式传输。
-- `user` (`string`, optional): 归因于 AI 执行编辑的标识符。
-- `field` (`string`, optional, default: `"default"`): 要在云文档中定位的协作字段。
-- `tool` (`object`, required): 要执行的工具调用，不包含 `tool.input`。
-  - `name` (`string`, required): 工具名称，例如 `"tiptapEdit"`。
-  - `config` (`unknown`, optional): 开发者提供的工具特定配置。
-- `format` (`'json' | 'shorthand'`, optional, default: `'json'`): 工具输入和
-  输出的文档格式。参见 [Tiptap Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand)。
-- `reviewOptions` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options), optional, default: `{ mode: 'disabled' }`): 控制编辑是直接应用还是作为可审阅更改。
-- `delayMs` (`number`, optional, default: `5`): `tiptapEdit` 增量输出中每个字符的延迟，单位为毫秒。必须介于
+- `user` (`string`，可选)：版本历史、评论和线程中编辑的作者（例如与 `editThreads` 一起使用）。它不会设置修订记录建议的作者；如需设置修订记录作者，请使用 `reviewOptions.trackedChangesOptions.userId`。
+- `field` (`string`，可选，默认：`"default"`)：要在云文档中定位的协作字段。流式传输仅支持 `default` 字段；使用任何其他值都会被拒绝。
+- `tool` (`object`，必需)：要执行的工具调用，不包含 `tool.input`。
+  - `name` (`string`，必需)：工具名称，例如 `"tiptapEdit"`。
+  - `config` (`unknown`，可选)：开发者提供的工具特定配置。
+- `format` (`'json' | 'shorthand' | 'shorthandV2'`，可选，默认：`'json'`)：工具输入和输出的文档格式。参见 [Tiptap Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand)。
+- `reviewOptions` ([`ReviewOptions`](/ai/ai-toolkit/api-reference/review-options)，可选，默认：`{ mode: 'disabled' }`)：控制编辑是直接应用还是作为可审阅更改。
+- `delayMs` (`number`，可选，默认：`5`)：`tiptapEdit` 增量输出中每个字符的延迟，单位为毫秒。必须介于
   `0` 和 `1000` 之间。使用 `0` 可尽可能快地应用编辑。
 
 然后发送：
@@ -381,6 +384,11 @@ POST /v4/ai/toolkit/stream-tool
 
 分块读取文档，以避免上下文窗口溢出。
 
+工具输入（`tool.input`）：
+
+- `from` (`number`，必需)：要读取的第一个顶层节点的从零开始的索引。必须是
+  非负整数。
+
 工具配置（`tool.config`）：
 
 - `chunkSize`（`number`，可选）：每次工具调用中读取的最大字符数。默认值：`32000`
@@ -393,8 +401,8 @@ POST /v4/ai/toolkit/stream-tool
 - `totalNodeCount`（`number`）：文档中顶层节点的总数。
 - `nodeRange`（`[number, number]`）：读取的顶层节点范围。
 - `content`（`JSONContent[] | string`）：所返回范围内的文档内容。当 `format` 为
-  `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为
-  `shorthand` 时，这是一个 Tiptap Shorthand 字符串。
+  `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 或
+  `shorthandV2` 时，这是一个 Tiptap Shorthand 字符串。
 
 错误响应：
 
@@ -405,6 +413,14 @@ POST /v4/ai/toolkit/stream-tool
 ### `tiptapEdit`
 
 编辑文档内容。
+
+工具输入（`tool.input`）：
+
+- `operations`（`array`，必需）：一个或多个编辑操作，按顺序应用。
+  - `type`（`'replace' | 'insertBefore' | 'insertAfter'`，必需）：要执行的编辑类型。
+  - `target`（`string`，必需）：选择要应用操作的文档节点，或整个文档。它是所选节点的 `_hash` 属性值，或用于选择整个文档的 `"doc"`。
+  - `content`（`JSONContent[] | string`，必需）：要替换或插入的内容。当 `format` 为 `json` 时使用 Tiptap JSON 片段；当 `format` 为 `shorthand` 或 `shorthandV2` 时使用 Tiptap Shorthand 字符串。要删除节点，请使用空片段。
+  - `meta`（`string`，可选）：操作的元数据。当向 `fetch-tools` 传入 `tiptapEdit.meta` 选项时，此字段为必需。
 
 工具配置（`tool.config`）：
 
@@ -427,11 +443,44 @@ POST /v4/ai/toolkit/stream-tool
 - `reason`（`'validationError' | 'unexpectedError'`）：错误类别。
 - `error`（`string`）：错误信息。
 
+### `replaceDocument`
+
+Replaces the entire document with new content.
+
+Tool input (`tool.input`):
+
+- `content` (`JSONContent | string`, required): The replacement document content. Use a Tiptap JSON
+  document when `format` is `json`, or a Tiptap Shorthand string when `format` is `shorthand` or
+  `shorthandV2`.
+
+Tool config (`tool.config`):
+
+`null`
+
+Tool output (`tool.output`):
+
+Success response:
+
+- `success` (`true`): Indicates that the document was replaced successfully.
+
+Error response:
+
+- `success` (`false`): Indicates that the document could not be replaced.
+- `error` (`string`): Error message.
+
+### `createDocument`
+
+Alias for `replaceDocument`. It accepts the same input and returns the same output.
+
 ### `readSelection`
 
 读取用户当前的编辑器选择内容。
 
 此工具仅兼容 Tiptap Cloud 协作文档。在[多字段文档](/editor/extensions/functionality/collaboration#field)中，仅支持 `default` 字段。
+
+工具输入（`tool.input`）：
+
+此工具不接受任何输入。传入空对象（`{}`）。
 
 工具配置（`tool.config`）：
 
@@ -455,6 +504,10 @@ POST /v4/ai/toolkit/stream-tool
 
 从云文档中读取评论线程。
 
+工具输入（`tool.input`）：
+
+- `from`（`number`，必需）：要读取的第一个线程的从零开始的索引。必须是非负整数。
+
 工具配置（`tool.config`）：
 
 - `chunkSize`（`number`，可选）：每次工具调用中读取的最大字符数。默认值：`32000`
@@ -470,7 +523,7 @@ POST /v4/ai/toolkit/stream-tool
   - `id`（`string`）：唯一线程标识符。
   - `nodeRange`（`[number, number] | null`）：线程所在的节点范围；如果线程未在文档中标注，则为 `null`。
   - `content`（`JSONContent[] | string | null`）：线程标记的内容。当 `format` 为
-    `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 时，这是一个 Tiptap Shorthand
+    `json` 时，这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 或 `shorthandV2` 时，这是一个 Tiptap Shorthand
     字符串。`null` 表示线程未在文档中标注。
   - `comments`（`array`）：线程中的评论。
     - `id`（`string`）：唯一评论标识符。
@@ -492,6 +545,17 @@ POST /v4/ai/toolkit/stream-tool
 ### `editThreads`
 
 创建和更新评论线程。
+
+工具输入（`tool.input`）：
+
+- `operations`（`array`，必需）：一个或多个线程操作，按顺序应用。每个操作具有以下形状之一：
+  - `createThread`：`type`（`'createThread'`，必需）、`nodeHash`（`string`，必需）和 `content`（`JSONContent[] | string`，必需）。当 `format` 为 `json` 时，`content` 是添加了 `inlineThread` 标记的 Tiptap JSON 片段；当 `format` 为 `shorthand` 或 `shorthandV2` 时，它是 Tiptap Shorthand 字符串。
+  - `createComment`：`type`（`'createComment'`，必需）、`threadId`（`string`，必需）和 `content`（`string`，必需）。
+  - `updateComment`：`type`（`'updateComment'`，必需）、`threadId`（`string`，必需）、`commentId`（`string`，必需）和 `content`（`string`，必需）。
+  - `removeComment`：`type`（`'removeComment'`，必需）、`threadId`（`string`，必需）和 `commentId`（`string`，必需）。
+  - `removeThread`：`type`（`'removeThread'`，必需）和 `threadId`（`string`，必需）。
+  - `resolveThread`：`type`（`'resolveThread'`，必需）和 `threadId`（`string`，必需）。
+  - `unresolveThread`：`type`（`'unresolveThread'`，必需）和 `threadId`（`string`，必需）。
 
 工具配置（`tool.config`）：
 
@@ -522,6 +586,10 @@ POST /v4/ai/toolkit/stream-tool
   `readDocument` 会返回完整文档。对于大型文档，请改用 `tiptapRead`。
 </Callout>
 
+工具输入（`tool.input`）：
+
+此工具不接受任何输入。传入空对象（`{}`）。
+
 工具配置（`tool.config`）：
 
 `null`
@@ -532,11 +600,21 @@ POST /v4/ai/toolkit/stream-tool
 
 - `success`（`true`）：表示文档读取成功。
 - `content`（`JSONContent[] | string`）：整个有效文档内容。当 `format` 为 `json` 时，
-  这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 时，这是一个 Tiptap Shorthand 字符串。
+  这是一个 Tiptap JSON 片段。当 `format` 为 `shorthand` 或 `shorthandV2` 时，这是一个 Tiptap Shorthand 字符串。
 
 ### `proofread`
 
 应用校对编辑。
+
+工具支持 `format: "shorthand"` 和 `format: "shorthandV2"`。
+
+工具输入（`tool.input`）：
+
+- `operations`（`array`，必需）：一个或多个校对操作，按顺序应用。
+  - `target`（`string`，必需）：选择要应用操作的文档节点，或整个文档。它是所选节点的 `_hash` 属性值，或用于选择整个文档的 `"doc"`。
+  - `delete`（`string`，必需）：要删除的确切文本。只会替换目标节点中第一次出现的文本。
+  - `insert`（`string`，必需）：要插入的修正文本，用于替换 `delete`。
+  - `meta`（`string`，可选）：操作的元数据。当向 `fetch-tools` 传入 `proofread.meta` 选项时，此字段为必需。
 
 工具配置（`tool.config`）：
 

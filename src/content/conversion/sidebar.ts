@@ -72,6 +72,10 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/conversion/import/docx/image-handling',
                 },
                 {
+                  title: '修订记录',
+                  href: '/conversion/import/docx/tracked-changes',
+                },
+                {
                   title: '分页符',
                   href: '/conversion/import/docx/page-breaks',
                 },
@@ -140,8 +144,12 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/conversion/export/docx/fonts',
                 },
                 {
-                  title: 'Ordered list numbering',
+                  title: 'List numbering and bullets',
                   href: '/conversion/export/docx/ordered-list-numbering',
+                },
+                {
+                  title: 'Tracked changes',
+                  href: '/conversion/export/docx/tracked-changes',
                 },
                 {
                   title: 'Headers & footers',
@@ -275,6 +283,10 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: '列表',
               href: '/conversion/content-types/text-and-formatting/lists',
+            },
+            {
+              title: '任务列表',
+              href: '/conversion/content-types/text-and-formatting/task-lists',
             },
             {
               title: '制表符',

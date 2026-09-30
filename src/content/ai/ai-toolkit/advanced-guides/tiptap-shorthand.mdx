@@ -2,26 +2,20 @@
 title: Tiptap 简写
 meta:
   title: Tiptap 简写 | Tiptap AI 工具包
-  description: 使用 Tiptap 简写可将 AI token 成本降低高达 80%，这是一种为 Server AI 工具包设计的 token 高效文档格式。
+  description: 使用 Tiptap 简写可将 AI token 成本降低高达 50%，这是一种为 Server AI 工具包设计的 token 高效文档格式。
   category: AI 工具包
 tags:
-  - type: alpha
+  - type: beta
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-Tiptap 简写是一种用于表示 Tiptap 文档的高效 Token 格式。与标准 JSON 相比，它可以将 AI Token 成本降低多达 80%，同时不损失准确性。
+Tiptap 简写是一种用于表示 Tiptap 文档的高效 Token 格式。与 Tiptap JSON 相比，它可以将 AI Token 成本降低多达 50%，同时不损失准确性。
 
-<Callout title="Alpha 版本" variant="warning">
+<Callout title="Beta 版本" variant="info">
 
-Tiptap 简写目前处于 alpha 开发阶段。在生产部署中，我们
-建议使用 `"json"` 格式（Tiptap JSON）。我们建议你
-先使用 JSON 格式构建应用，然后再考虑迁移到简写。
-
-<br></br>
-
-如果你对 Tiptap
-简写带来的优势感兴趣，欢迎 [联系我们](https://tiptap.dev/contact-sales)。
+Tiptap 简写目前处于 beta 阶段。如果你对 Tiptap 简写带来的优势感兴趣，欢迎
+[联系我们](https://tiptap.dev/contact-sales)。
 
 </Callout>
 
@@ -29,7 +23,8 @@ Tiptap 简写目前处于 alpha 开发阶段。在生产部署中，我们
 
 通过在 JSON 请求体中设置 `format` 参数，定义 AI 用于读取和编辑文档的格式。此参数适用于所有 Server AI 工具包端点。
 
-`format` 的默认值为 `"json"`。要启用 Tiptap 简写格式，请在**所有** API 请求中传入 `format: "shorthand"` 参数。
+`format` 的默认值为 `"json"`。要启用 Tiptap 简写格式，请在**所有** API 请求中传入
+`format: "shorthandV2"` 参数。`shorthandV2` 格式可用于所有支持 `shorthand` 格式的场景。
 
 例如，请求获取工具定义：
 
@@ -38,7 +33,7 @@ curl -X POST https://api.tiptap.dev/v4/ai/toolkit/fetch-tools \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "format": "shorthand",
+    "format": "shorthandV2",
     "editorContext": {}
   }'
 ```
@@ -46,8 +41,8 @@ curl -X POST https://api.tiptap.dev/v4/ai/toolkit/fetch-tools \
 无需进行其他更改。
 
 <Callout title="格式一致性" variant="warning">
-  在同一会话中的所有 API 调用里使用相同的 `format` 值。不要在单次 AI 交互中混用 `json` 和
-  `shorthand` 格式。
+  在同一会话中的所有 API 调用里使用相同的 `format` 值。不要在单次 AI 交互中混用 `json`、
+  `shorthand` 和 `shorthandV2` 格式。
 </Callout>
 
 ## Tiptap 简写的工作原理

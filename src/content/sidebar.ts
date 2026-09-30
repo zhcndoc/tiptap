@@ -45,6 +45,10 @@ export const sidebarConfig: SidebarConfig = {
           title: '编辑器',
         },
         {
+          href: '/ai/ai-toolkit/overview',
+          title: '内容 AI',
+        },
+        {
           href: '/collaboration/getting-started/overview',
           title: '协作',
         },
@@ -53,16 +57,8 @@ export const sidebarConfig: SidebarConfig = {
           title: '评论',
         },
         {
-          href: '/tracked-changes/getting-started/overview',
-          title: '修订记录',
-        },
-        {
-          href: '/ai/ai-toolkit/overview',
-          title: '内容 AI',
-        },
-        {
-          href: '/collaboration/documents/snapshot',
-          title: '快照',
+          href: '/compare/getting-started/overview',
+          title: '比较',
         },
         {
           href: '/conversion/getting-started/overview',
@@ -71,6 +67,14 @@ export const sidebarConfig: SidebarConfig = {
         {
           href: '/pages/getting-started/overview',
           title: '页面',
+        },
+        {
+          href: '/collaboration/documents/snapshot',
+          title: '快照',
+        },
+        {
+          href: '/tracked-changes/getting-started/overview',
+          title: '修订记录',
         },
       ],
     },

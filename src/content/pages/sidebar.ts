@@ -67,6 +67,11 @@ export const sidebarConfig: SidebarConfig = {
           tags: ['新增'],
         },
         {
+          title: '布局参与者',
+          href: '/pages/core-concepts/layout-participants',
+          tags: ['新增'],
+        },
+        {
           title: '限制',
           href: '/pages/core-concepts/limitations',
         },
@@ -108,6 +113,11 @@ export const sidebarConfig: SidebarConfig = {
           title: 'PagesTableKit',
           href: '/pages/guides/pages-tablekit',
           tags: ['实验性'],
+        },
+        {
+          title: 'Rows that span a page break',
+          href: '/pages/guides/row-fragmentation',
+          tags: ['Experimental'],
         },
         {
           title: 'PageKit',

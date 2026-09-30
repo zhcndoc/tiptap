@@ -103,22 +103,22 @@ const editor = new Editor({
 
 - 内置页面格式：A4、A3、A5、Letter、Legal、Tabloid。你也可以定义具有任意尺寸和边距的自定义格式。
 - 页眉和页脚内容可以是纯文本、HTML 或 Tiptap JSON，并支持 `{page}` / `{total}` 占位符。
-- 首页面以及奇数/偶数页可使用不同的页眉和页脚，类似 Word。
-- 类 Word 的 [脚注](/pages/core-concepts/footnotes)：每页脚注区域，带自动连续编号，会随其引用重新排版并占用页面空间。
-- 类 Word 的 [尾注](/pages/core-concepts/endnotes)：文档末尾的单一列表，使用小写罗马数字和自动编号，跨页面流动，并保留完整页面外壳。
-- 在专用覆盖层中实时编辑页眉、页脚、脚注和尾注。它们会与主文档一起参与协作。参见 [为 Pages 添加协作](/pages/guides/collaboration-with-pages)。
+- 首页以及奇数/偶数页可使用不同的页眉和页脚，类似 Word。
+- 类 Word 的[脚注](/pages/core-concepts/footnotes)：每页脚注区域，带自动连续编号，会随其引用重新排版并占用页面空间。
+- 类 Word 的[尾注](/pages/core-concepts/endnotes)：文档末尾的单一列表，使用小写罗马数字和自动编号，跨页面流动，并保留完整页面外壳。
+- 在专用覆盖层中实时编辑页眉、页脚、脚注和尾注。它们会与主文档一起参与协作。参见[为 Pages 添加协作](/pages/guides/collaboration-with-pages)。
 - 程序化控制：打开或关闭页眉/页脚/脚注/尾注编辑器，对页面格式变化作出响应，对缩放变化作出响应。
 - 可在配置时或运行时通过 `editableHeader` / `editableFooter` / `footnotes.editable` / `endnotes.editable` 选项以及 `setHeaderEditable` / `setFooterEditable` / `setFootnotesEditable` / `setEndnotesEditable` 命令来锁定或解锁每个覆盖层的编辑。
-- 通过 [PagesTableKit](/pages/guides/pages-tablekit) 实现分页安全的表格。表格会按比例缩小以适应页面，固定高度的行会被裁剪，声明的宽度会被保留。
+- 通过 [PagesTableKit](/pages/guides/pages-tablekit) 实现分页安全的表格。表格会按比例缩小以适应页面，固定高度的行会被裁剪，声明的宽度会被保留，带有合并单元格的表格会让每个单元格保持在自己的列中。
 - 与 Tiptap Conversion 往返兼容：导入的 DOCX 页眉、页脚、脚注和尾注会自动应用，而导出的 DOCX、PDF、ODT 和 EPUB 文件会保留页眉、页脚和分页信息。DOCX 导出会写入真正的 Word 脚注和尾注。
 
 ## 不可用的内容
 
 这些是真实且已记录的限制，不是 bug。如果你的工作流依赖其中任何一项，请将该约束视为设计边界。
 
-- **大于一页且不可拆分的块会导致无限布局循环。** 这是在采用 Pages 之前最重要的一项限制。表格行、图形、定位容器以及大多数其他块格式化上下文（BFC）元素都不能跨页拆分。布局只能把整个块移到下一页。如果该块本身就比页面还高，它也无法放下，布局就会不断尝试将其继续前移，始终无法稳定。结果就是编辑器无响应。这是当前在页面之间拆分内容的方法所固有的硬限制，不是近期路线图中的功能项。完整说明（包括如何检测和预防）请参见 [限制](/pages/core-concepts/limitations#oversized-non-splittable-blocks-cause-an-infinite-layout-loop)。表格相关的具体情况见 [PagesTableKit 的已知问题](/pages/guides/pages-tablekit#known-issues)。
+- **大于一页且不可拆分的块会导致无限布局循环。** 这是在采用 Pages 之前最重要的一项限制。表格行、图形、定位容器以及大多数其他块格式化上下文（BFC）元素都不能跨页拆分。布局只能把整个块移到下一页。如果该块本身就比页面还高，它也无法放下，布局就会不断尝试将其继续前移，始终无法稳定。结果就是编辑器无响应。这是当前在页面之间拆分内容的方法所固有的硬限制，不是近期路线图中的功能项。完整说明（包括如何检测和预防）请参见[限制](/pages/core-concepts/limitations#oversized-non-splittable-blocks-cause-an-infinite-layout-loop)。高大的**表格行**是例外：[行分页拆分](/pages/guides/row-fragmentation)可以将其拆分到多个页面，包括带有合并单元格或嵌套表格的行。
 - **没有按页样式，也没有页面模板。** 每一页都使用相同的布局和视觉样式。
-- **没有浏览器打印集成。** 如需可直接打印的输出，请使用 [Conversion 扩展和 REST 端点](/conversion/getting-started/overview)。
+- **没有浏览器打印集成。** 如需可直接打印的输出，请使用[Conversion 扩展和 REST 端点](/conversion/getting-started/overview)。
 
 ## Expectations
 

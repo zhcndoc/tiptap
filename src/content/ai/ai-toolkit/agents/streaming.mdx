@@ -149,8 +149,7 @@ export async function handleStreamEditRequest(request: Request): Promise<Respons
       tiptapEdit: tool({
         description: tiptapEdit.description,
         inputSchema: z.fromJSONSchema(tiptapEdit.inputSchema),
-        // 将采样限制在该工具的输入模式内。
-        strict: true,
+        strict: false,
         onInputStart: () =>
           send({
             version: 1,
@@ -204,7 +203,7 @@ export async function handleStreamEditRequest(request: Request): Promise<Respons
 在你的客户端应用中安装以下依赖：
 
 ```bash
-npm install @ai-sdk/react @tiptap/extension-collaboration @tiptap/react @tiptap/starter-kit @tiptap-pro/provider @tiptap/ai-toolkit ai yjs
+npm install @ai-sdk/react @tiptap/extension-collaboration @tiptap/react @tiptap/starter-kit @tiptap-pro/provider @tiptap/ai-toolkit @tiptap/y-tiptap ai yjs
 ```
 
 </details>
@@ -242,6 +241,66 @@ const { messages, sendMessage, status } = useChat({
     }),
   }),
 })
+```
+
+## 流式传输时淡入文本
+
+流式文本会逐个 token 写入文档。可选的 `AiInsertReveal` 扩展会在文本到达时将其淡入，使编辑内容平滑地显示，而不是突然出现。它是一种仅影响视图的装饰：不会添加标记，也不会触碰文档，因此不会影响接受/拒绝操作或持久化；你自己的输入和其他协作者的输入也不会淡入。
+
+它建立在上面的客户端设置之上：它会显示通过 Collaboration 到达的文本，因此需要先完成该设置。从 `streaming-reveal` 子路径导入它，并将其添加到 `ServerAiToolkit` 之后。它从 `@tiptap/y-tiptap` 读取协作位置，如果该依赖尚未安装，也请一并安装。
+
+将你的协作提供程序传递给它。提供程序的 awareness 用于区分 AI 与其他协作者；没有它就不会显示任何淡入效果。
+
+```tsx
+import { ServerAiToolkit, getEditorContext } from '@tiptap/ai-toolkit'
+import { AiInsertReveal } from '@tiptap/ai-toolkit/streaming-reveal'
+
+const editor = useEditor({
+  immediatelyRender: false,
+  extensions: [
+    StarterKit.configure({ undoRedo: false }),
+    Collaboration.configure({ document: doc }),
+    ServerAiToolkit,
+    AiInsertReveal.configure({ provider }),
+  ],
+})
+```
+
+### CSS 样式
+
+该扩展会为每个刚完成流式传输的文本段添加 `ai-insert-reveal` 类，并设置其 `animation-delay`，使淡入效果在逐 token 重新渲染时从正确的位置继续。扩展不附带 CSS；请为该类添加动画以定义效果。该类会应用在行内元素上，因此请使用适用于行内元素的属性，例如 `opacity`、`color` 或 `filter`。
+
+```css
+.tiptap .ai-insert-reveal {
+  animation: ai-insert-reveal 380ms ease-out both;
+}
+
+@keyframes ai-insert-reveal {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tiptap .ai-insert-reveal {
+    animation: none;
+  }
+}
+```
+
+### 配置
+
+| 选项         | 默认值               | 描述                                                                                                            |
+| ------------ | -------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `provider`   | `null`               | 你的协作提供程序。必需：其 awareness 用于识别 AI；没有它就不会显示淡入效果。                                     |
+| `className`  | `'ai-insert-reveal'` | 应用于每个流式文本段的类。修改它可以运行其他效果或避免类名冲突。                                                   |
+| `durationMs` | `550`                | 每个文本段保留其装饰的时长。请将其设置为不小于 CSS 动画时长，以便淡入效果能够完成。                                  |
+
+```ts
+AiInsertReveal.configure({ provider, durationMs: 700 })
 ```
 
 ## 以跟踪更改形式流式传输

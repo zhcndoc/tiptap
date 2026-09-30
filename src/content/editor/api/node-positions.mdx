@@ -34,9 +34,9 @@ const $myCustomPos = editor.$pos(30)
 您还可以创建自己的 NodePos 实例：
 
 ```js
-// 您需要有一个编辑器实例
-// 和一个您想映射到的位置
-const myNodePos = new NodePos(100, editor)
+// 你需要有一个编辑器实例、一个已解析的文档位置。
+// 如果手头只有数字位置，优先使用 editor.$pos()。
+const myNodePos = new NodePos(editor.state.doc.resolve(100), editor)
 ```
 
 ## 我可以用 NodePos 做什么？
@@ -82,25 +82,25 @@ NodePos 类是您将要操作的主要类。它描述了节点、它的子节点
 
 #### 方法
 
-| 方法             | 参数                             | 返回值               | 描述                                                                                                |
-| ---------------- | -------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------- |
-| `constructor`    | `pos`（数字），`editor`（对象） | `NodePos`             | 在指定的 `editor` 实例中创建给定位置（`pos`）的新的 `NodePos` 实例                              |
-| `closest`        | `nodeType`（字符串）              | `NodePos` 或 `null`   | 在文档结构中向上查找最近匹配的 `NodePos`。如果未找到匹配项，则返回 `null`                        |
-| `querySelector`  | `nodeType`（字符串），`attributes`（对象） | `NodePos` 或 `null` | 在文档结构中向下查找第一个匹配的 `NodePos`。可以通过属性进行过滤                             |
-| `querySelectorAll`| `nodeType`（字符串），`attributes`（对象） | `Array<NodePos>`     | 在文档结构中向下查找所有匹配的 `NodePos` 实例。可以通过属性进行过滤                          |
-| `setAttribute`   | `attributes`（对象）            | `NodePos`             | 在当前 `NodePos` 上设置指定的属性                                                               |
+| 方法             | 参数                                  | 返回值               | 描述 |
+| ---------------- | ------------------------------------- | --------------------- | ---- |
+| `constructor`    | `pos`（ResolvedPos），`editor`（对象） | `NodePos`             | 在指定的 `editor` 实例中给定的已解析位置创建新的 `NodePos` 实例 |
+| `closest`        | `nodeType`（字符串）                   | `NodePos` 或 `null`   | 在文档结构中向上查找最近匹配的 `NodePos`。如果未找到匹配项，则返回 `null` |
+| `querySelector`  | `nodeType`（字符串）、`attributes`（对象） | `NodePos` 或 `null` | 在文档结构中向下查找第一个匹配的 `NodePos`。可以通过属性进行过滤 |
+| `querySelectorAll`| `nodeType`（字符串）、`attributes`（对象） | `Array<NodePos>`     | 在文档结构中向下查找所有匹配的 `NodePos` 实例。可以通过属性进行过滤 |
+| `setAttribute`   | `attributes`（对象）                   | `NodePos`             | 在当前 `NodePos` 上设置指定的属性 |
 
 ##### constructor
 
 **参数**
 
-- `pos` – 您想映射到的位置
-- `editor` – 您想使用的编辑器实例
+- `pos` – 要包装的 `ResolvedPos` 实例（例如 `editor.state.doc.resolve(100)`）
+- `editor` – 你想使用的编辑器实例
 
 **返回值** `NodePos`
 
 ```js
-const myNodePos = new NodePos(100, editor)
+const myNodePos = new NodePos(editor.state.doc.resolve(100), editor)
 ```
 
 ##### closest

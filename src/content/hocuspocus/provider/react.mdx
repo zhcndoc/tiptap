@@ -61,6 +61,36 @@ websocket 组件会为其子树创建一个单独的 `HocuspocusProviderWebsocke
 
 该组件会优雅地处理 React StrictMode 的双重挂载——WebSocket 每个挂载周期只创建一次，并且只有在不是外部提供时才会销毁。
 
+Socket-level options such as `maxAttempts`, `messageReconnectTimeout` or `onMaxAttemptsFailed` are not props on this component. To use them, build the `HocuspocusProviderWebsocket` yourself and pass it as `websocketProvider`:
+
+```tsx
+import { useMemo } from 'react'
+import { HocuspocusProviderWebsocket } from '@hocuspocus/provider'
+import { HocuspocusProviderWebsocketComponent } from '@hocuspocus/provider-react'
+
+function App({ children }) {
+  const websocketProvider = useMemo(
+    () =>
+      new HocuspocusProviderWebsocket({
+        url: 'ws://127.0.0.1:1234',
+        maxAttempts: 5,
+        onMaxAttemptsFailed: ({ error }) => {
+          console.error('Could not connect to the server:', error)
+        },
+      }),
+    [],
+  )
+
+  return (
+    <HocuspocusProviderWebsocketComponent websocketProvider={websocketProvider}>
+      {children}
+    </HocuspocusProviderWebsocketComponent>
+  )
+}
+```
+
+When you provide the socket yourself, you are responsible for destroying it. See [Reacting to failed reconnects](/hocuspocus/provider/configuration#reacting-to-failed-reconnects).
+
 ### HocuspocusRoom
 
 创建一个文档专属的 `HocuspocusProvider`，并将其连接到共享的 WebSocket。必须渲染在 `HocuspocusProviderWebsocketComponent` 内部。
