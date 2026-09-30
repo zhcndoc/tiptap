@@ -126,29 +126,29 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/conversion/export/docx/custom-nodes',
                 },
                 {
-                  title: 'Custom nodes DSL',
+                  title: '自定义节点 DSL',
                   href: '/conversion/export/docx/custom-nodes-dsl',
                   tags: ['Beta'],
                 },
                 {
-                  title: 'Custom nodes DSL builder',
+                  title: '自定义节点 DSL 构建器',
                   href: '/conversion/export/docx/custom-nodes-dsl-builder',
                   tags: ['Beta'],
                 },
                 {
-                  title: 'Styles',
+                  title: '样式',
                   href: '/conversion/export/docx/styles',
                 },
                 {
-                  title: 'Fonts',
+                  title: '字体',
                   href: '/conversion/export/docx/fonts',
                 },
                 {
-                  title: 'List numbering and bullets',
+                  title: '列表编号和项目符号',
                   href: '/conversion/export/docx/ordered-list-numbering',
                 },
                 {
-                  title: 'Tracked changes',
+                  title: '修订记录',
                   href: '/conversion/export/docx/tracked-changes',
                 },
                 {

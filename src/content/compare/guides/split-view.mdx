@@ -1,40 +1,39 @@
 ---
-title: Split view
+title: 分栏视图
 tags:
   - type: beta
   - type: restricted
 meta:
-  title: Split view | Tiptap Docs
-  description: Review changes in two separate panes. Integrates with Tracked Changes.
-  category: Compare
+  title: 分栏视图 | Tiptap 文档
+  description: 在两个独立窗格中审阅变更，并与修订记录集成。
+  category: 比较
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 import { Callout } from '@/components/ui/Callout'
 
-Show [tracked changes](/tracked-changes/getting-started/overview) side by side, with deletions in the left pane and additions in the right pane. Both panes are editable and keep matching blocks aligned.
+将[修订记录](/tracked-changes/getting-started/overview)并排显示：左窗格显示删除内容，右窗格显示新增内容。两个窗格都可以编辑，并会保持对应块对齐。
 
 <CodeDemo isPro path="/Extensions/SplitView" />
 
-## Install
+## 安装
 
-First, [contact our team](https://tiptap.dev/contact-sales?form=pilot-program) to join the Split View pilot program.
+首先，[联系我们](https://tiptap.dev/contact-sales?form=pilot-program)加入分栏视图试点计划。
 
-<Callout title="Separate products" variant="info">
-  [Tracked Changes](/tracked-changes/getting-started/overview) and [Tiptap
-  Compare](/compare/getting-started/overview) are different products than Split View, sold
-  separately.
+<Callout title="独立产品" variant="info">
+  [修订记录](/tracked-changes/getting-started/overview)和 [Tiptap
+  Compare](/compare/getting-started/overview) 是与分栏视图不同的产品，需要单独购买。
 </Callout>
 
-Set up the [private registry](/guides/pro-extensions), then install:
+请先设置[私有注册表](/guides/pro-extensions)，然后安装：
 
 ```bash
 npm install @tiptap-pro/extension-split-view @tiptap-pro/extension-tracked-changes
 ```
 
-## Connect the editors
+## 连接编辑器
 
-Your main editor is the source of truth for editor content. Create two additional editors to show the left and right pane of the split view. Add the `TrackedChanges` extension to all three editors, and add the `SplitView` to the two editors that correspond to the panes.
+主编辑器是编辑器内容的事实来源。再创建两个编辑器，分别显示分栏视图的左右窗格。将 `TrackedChanges` 扩展添加到三个编辑器，并将 `SplitView` 添加到对应窗格的两个编辑器。
 
 ```ts
 import { Editor } from '@tiptap/core'
@@ -46,7 +45,7 @@ const mainEditor = new Editor({
     // ... other extensions
     TrackedChanges,
   ],
-  content: '<p>Start writing here.</p>',
+    content: '<p>从这里开始写作。</p>',
 })
 
 const beforeEditor = new Editor({
@@ -68,11 +67,11 @@ const afterEditor = new Editor({
 let manager = createSplitView({ mainEditor, beforeEditor, afterEditor })
 ```
 
-The content is managed in the main editor. `createSplitView()` connects the panes to the main editor. Edits and accept/reject actions synchronize across all three editors.
+内容由主编辑器管理。`createSplitView()` 将两个窗格连接到主编辑器。编辑以及接受/拒绝操作会在三个编辑器之间同步。
 
-## Arrange the panes
+## 排列窗格
 
-Hide the main editor while split view is open. Give both panes the same top padding and use a shared scrolling container.
+打开分栏视图时隐藏主编辑器。为两个窗格设置相同的顶部内边距，并使用共享的滚动容器。
 
 ```html
 <div id="main" hidden></div>
@@ -94,11 +93,11 @@ Hide the main editor while split view is open. Give both panes the same top padd
 }
 ```
 
-Gray spacers fill height differences or missing blocks. Both spacers use the larger of the two gaps to the next block, measured from your CSS, as their bottom margin. Zero-height spacers add spacing without showing a gray box. Spacers are never saved in the document.
+灰色间隔块用于填充高度差或缺失的块。两个间隔块会使用到下一个块的两个间距中较大者作为底部外边距，该间距根据你的 CSS 测量。高度为零的间隔块只增加间距，不显示灰色方框。间隔块永远不会保存到文档中。
 
-## Switch views
+## 切换视图
 
-Destroy the manager to stop synchronization and remove pane filtering. The editors stay alive.
+销毁管理器以停止同步并移除窗格过滤；编辑器本身仍然保持存活。
 
 ```ts
 manager.destroy()
@@ -106,7 +105,7 @@ document.querySelector('#split')?.setAttribute('hidden', '')
 document.querySelector('#main')?.removeAttribute('hidden')
 ```
 
-To return to split view, reconnect. Both panes receive the main editor's current document.
+要返回分栏视图，请重新连接。两个窗格会接收主编辑器的当前文档。
 
 ```ts
 document.querySelector('#main')?.setAttribute('hidden', '')
@@ -114,42 +113,42 @@ document.querySelector('#split')?.removeAttribute('hidden')
 manager = createSplitView({ mainEditor, beforeEditor, afterEditor })
 ```
 
-Destroy all three editors when your component unmounts. Each editor has its own undo history; split view does not provide shared undo.
+组件卸载时销毁三个编辑器。每个编辑器都有自己的撤销历史；分栏视图不提供共享撤销。
 
-## API reference
+## API 参考
 
 ### `SplitView`
 
-Install in both panes alongside `TrackedChanges`. No configuration is needed. It stays inactive until `createSplitView()` connects the editors.
+将它与 `TrackedChanges` 一起安装在两个窗格中。无需配置；在 `createSplitView()` 连接编辑器之前它保持非活动状态。
 
 ### `createSplitView(options): SplitViewManager`
 
-Returns a `SplitViewManager`. Pass three distinct, mounted editors with identical schemas. An editor can belong to only one active manager.
+返回一个 `SplitViewManager`。传入三个不同且已挂载、schema 相同的编辑器。一个编辑器只能属于一个活动管理器。
 
 | Option         | Type                                               | Description                            |
 | -------------- | -------------------------------------------------- | -------------------------------------- |
-| `mainEditor`   | `Editor`                                           | Supplies the initial document.         |
-| `beforeEditor` | `Editor`                                           | Shows deletions and unchanged content. |
-| `afterEditor`  | `Editor`                                           | Shows additions and unchanged content. |
-| `createSpacer` | `(options: SplitViewSpacerOptions) => HTMLElement` | Optional custom spacer element.        |
+| `mainEditor`   | `Editor`                                           | 提供初始文档。         |
+| `beforeEditor` | `Editor`                                           | 显示删除内容和未变化内容。 |
+| `afterEditor`  | `Editor`                                           | 显示新增内容和未变化内容。 |
+| `createSpacer` | `(options: SplitViewSpacerOptions) => HTMLElement` | 可选的自定义间隔元素。        |
 
-Other suggestion types, such as formatting changes, remain visible in both panes. All three editors retain the full document, including content hidden in a pane. Destroy an existing manager before connecting the same editors again.
+其他类型的建议（例如格式变化）会在两个窗格中继续显示。三个编辑器都保留完整文档，包括在某个窗格中隐藏的内容。再次连接相同编辑器前，请先销毁现有管理器。
 
-### Manager methods
+### 管理器方法
 
 | Method              | Returns               | Description                                                                                       |
 | ------------------- | --------------------- | ------------------------------------------------------------------------------------------------- |
-| `getMainEditor()`   | `Editor \| undefined` | Returns the main editor.                                                                          |
-| `getBeforeEditor()` | `Editor \| undefined` | Returns the Before pane.                                                                          |
-| `getAfterEditor()`  | `Editor \| undefined` | Returns the After pane.                                                                           |
-| `update()`          | `void`                | Schedules alignment after a custom layout or CSS change.                                          |
-| `destroy()`         | `void`                | Stops synchronization, removes spacers and filtering, and releases resources. Safe to call twice. |
+| `getMainEditor()`   | `Editor \| undefined` | 返回主编辑器。                                                                          |
+| `getBeforeEditor()` | `Editor \| undefined` | 返回 Before 窗格。                                                                          |
+| `getAfterEditor()`  | `Editor \| undefined` | 返回 After 窗格。                                                                           |
+| `update()`          | `void`                | 在自定义布局或 CSS 发生变化后安排对齐。                                          |
+| `destroy()`         | `void`                | 停止同步、移除间隔块和过滤并释放资源。可以安全地调用两次。 |
 
-Getters return `undefined` after destruction. Destroying any connected editor also destroys the manager. Content changes, resizing, image loads, and font loading update alignment automatically.
+销毁后 getter 会返回 `undefined`。销毁任何已连接的编辑器也会销毁管理器。内容变化、调整大小、图片加载和字体加载都会自动更新对齐。
 
-### Style spacers
+### 设置间隔块样式
 
-The default spacer is a `div` with class `tiptap-split-view-spacer`. Set its background with CSS:
+默认间隔块是带有 `tiptap-split-view-spacer` 类的 `div`。可以使用 CSS 设置其背景：
 
 ```css
 #split {
@@ -157,7 +156,7 @@ The default spacer is a `div` with class `tiptap-split-view-spacer`. Set its bac
 }
 ```
 
-For a custom element, supply `createSpacer`:
+如需自定义元素，请提供 `createSpacer`：
 
 ```ts
 manager.destroy()
@@ -173,4 +172,4 @@ manager = createSplitView({
 })
 ```
 
-`SplitViewSpacerOptions` contains `document: Document` and `side: 'original' | 'modified'`. The `createSpacer` callback should return an `HTMLElement`; the manager controls its height, margins, and visibility. Custom elements do not receive the default class automatically.
+`SplitViewSpacerOptions` 包含 `document: Document` 和 `side: 'original' | 'modified'`。`createSpacer` 回调应返回 `HTMLElement`；管理器会控制其高度、外边距和可见性。自定义元素不会自动获得默认类名。

@@ -1,15 +1,15 @@
 ---
-title: Styling
+title: 样式
 tags:
   - type: beta
   - type: restricted
 meta:
-  title: Styling | Tiptap Compare Docs
-  description: Style diff suggestions rendered by the Tiptap Compare extension.
-  category: Compare
+  title: 样式 | Tiptap Compare 文档
+  description: 设置 Tiptap Compare 扩展渲染的差异建议样式。
+  category: 比较
 ---
 
-Compare renders its default diff UI with CSS classes. Add your own class or attributes with `displayOptions` when calling a command like [`compareDocuments`](/compare/api-reference/commands#comparedocuments) or [`compareVersions`](/compare/api-reference/commands#compareversions).
+Compare 会使用 CSS 类渲染默认差异 UI。在调用 [`compareDocuments`](/compare/api-reference/commands#comparedocuments) 或 [`compareVersions`](/compare/api-reference/commands#compareversions) 等命令时，可以通过 `displayOptions` 添加自己的类或属性。
 
 ```ts
 editor.commands.compareDocuments({
@@ -24,7 +24,7 @@ editor.commands.compareDocuments({
 
 ## Default CSS classes
 
-Every diff suggestion renders the current document content and the suggested replacement content. The following classes are applied to those elements.
+每条差异建议都会渲染当前文档内容和建议的替换内容。以下类会应用到这些元素。
 
 ### Current content
 
@@ -32,19 +32,19 @@ Every diff suggestion renders the current document content and the suggested rep
 - `.diff-suggestion--selected` — applied when the suggestion is selected.
 - `.diff-suggestion--change-group` — applied when the suggestion contains grouped inline changes.
 
-If the suggestion is created from a change group and it has sub-changes, the sub-changes contain these classes:
+如果建议来自变更组并包含子变更，子变更会包含以下类：
 
 - `.diff-suggestion-sub-change` — applied to each individual change within a group.
 - `.diff-suggestion-sub-change--selected` — applied to a current-content sub-change when its suggestion is selected.
 
-Nested changes are displayed in the current-content side of the review and have these classes:
+嵌套变更会显示在审阅界面的当前内容一侧，并包含以下类：
 
 - `.diff-suggestion-nested-change` — applied to every nested change.
 - `.diff-suggestion-nested-change--inline` — applied when the nested change covers inline content.
 - `.diff-suggestion-nested-change--block` — applied when the nested change covers block content.
 - `.diff-suggestion-nested-change--selected` — applied when the parent suggestion is selected.
 
-Use `displayOptions.getNestedChangeAttributes` to add attributes to a nested change. A returned `class` is appended to these default classes.
+使用 `displayOptions.getNestedChangeAttributes` 为嵌套变更添加属性。返回的 `class` 会追加到这些默认类上。
 
 ### Suggested content
 
@@ -59,13 +59,13 @@ If the suggestion is created from a change group and it has sub-changes, the sub
 
 ## Example CSS styles
 
-The [Compare documents guide](/compare/guides/compare-documents#style-the-changes) includes example CSS stylesheets that work out of the box with the default suggestions that are rendered by the Compare extension.
+[比较文档指南](/compare/guides/compare-documents#style-the-changes)包含可以直接用于 Compare 扩展默认建议的 CSS 样式表示例。
 
-The [Compare versions guide](/compare/guides/compare-versions#style-the-changes) includes a CSS stylesheet for a diff view where changes are marked with a different color depending on their author.
+[比较版本指南](/compare/guides/compare-versions#style-the-changes)包含一个差异视图样式表，可根据作者使用不同颜色标记变化。
 
 ## Custom suggestion rendering
 
-The [renderDecorations](/compare/api-reference/types#custom-decoration-rendering) option gives you full control over how the suggestion is rendered. It's a function that receives a [DiffSuggestion object](/compare/api-reference/types#diffsuggestion) and returns a list of [ProseMirror decorations](https://prosemirror.net/docs/ref/#view.Decorations).
+[`renderDecorations`](/compare/api-reference/types#custom-decoration-rendering) 选项让你完全控制建议的渲染方式。它接收一个 [DiffSuggestion 对象](/compare/api-reference/types#diffsuggestion)，并返回一组 [ProseMirror 装饰](https://prosemirror.net/docs/ref/#view.Decorations)。
 
 ```ts
 editor.commands.compareDocuments({
@@ -83,7 +83,7 @@ editor.commands.compareDocuments({
 })
 ```
 
-To combine your custom decorations with the default decorations displayed by the Compare extension, use the `defaultRenderDecorations` option:
+要将自定义装饰与 Compare 扩展显示的默认装饰结合起来，请使用 `defaultRenderDecorations` 选项：
 
 ```ts
 editor.commands.compareDocuments({
@@ -110,9 +110,9 @@ editor.commands.compareDocuments({
 
 ## Render custom Node Views
 
-To apply different styling to a [Tiptap Node View](/editor/extensions/custom-extensions/node-views) when it's inside a diff suggestion, use the [`getSuggestionNodeViewContext` utility](/compare/api-reference/utilities#getsuggestionnodeviewcontext).
+如果要为差异建议中的 [Tiptap 节点视图](/editor/extensions/custom-extensions/node-views) 应用不同样式，请使用 [`getSuggestionNodeViewContext` 工具](/compare/api-reference/utilities#getsuggestionnodeviewcontext)。
 
-The function returns useful context about the suggestion. Learn more about it in the [API Reference](/compare/api-reference/utilities#getsuggestionnodeviewcontext).
+该函数会返回建议的相关上下文。详情请参阅[API 参考](/compare/api-reference/utilities#getsuggestionnodeviewcontext)。
 
 ```tsx
 import { getSuggestionNodeViewContext } from '@tiptap-pro/compare'

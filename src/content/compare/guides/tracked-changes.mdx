@@ -1,36 +1,35 @@
 ---
-title: Compare documents with Tracked Changes
+title: 使用修订记录比较文档
 tags:
   - type: beta
   - type: restricted
 meta:
-  title: Compare documents with Tracked Changes | Tiptap Compare Docs
-  description: Display document comparisons as tracked changes that users can accept or reject.
-  category: Compare
+  title: 使用修订记录比较文档 | Tiptap Compare 文档
+  description: 将文档比较结果显示为用户可以接受或拒绝的修订记录。
+  category: 比较
 ---
 
 import { Callout } from '@/components/ui/Callout'
 import { CodeDemo } from '@/components/CodeDemo'
 
-Display a document comparison as tracked changes so users can review, accept, or reject each change individually.
+将文档比较结果显示为修订记录，让用户可以逐项审阅、接受或拒绝变化。
 
-<Callout title="Separate product" variant="info">
-  [Tracked Changes](/tracked-changes/getting-started/overview) is a different Tiptap product from
-  Compare, sold separately.
+<Callout title="独立产品" variant="info">
+  [修订记录](/tracked-changes/getting-started/overview) 是与 Compare 不同的 Tiptap 产品，需要单独购买。
 </Callout>
 
 <CodeDemo isPro path="/Extensions/CompareDocumentsTrackedChanges" />
 
 ## Compare documents
 
-Add `Compare` and `TrackedChanges` to the editor that displays the comparison. Use the `compareDocuments` utility to compare the documents, then pass the result to the `displayChangesetAsTrackedChanges` editor command.
+将 `Compare` 和 `TrackedChanges` 添加到显示比较结果的编辑器中。使用 `compareDocuments` 工具比较文档，然后将结果传给 `displayChangesetAsTrackedChanges` 编辑器命令。
 
 ```ts
 import { Editor } from '@tiptap/core'
 import { Compare, compareDocuments } from '@tiptap-pro/compare'
 import { TrackedChanges } from '@tiptap-pro/extension-tracked-changes'
 
-// The editor where the diff will be displayed
+// 显示差异的编辑器
 const editor = new Editor({
   extensions: [
     Compare,
@@ -41,22 +40,22 @@ const editor = new Editor({
 
 const changeset = compareDocuments({
   schema: editor.schema,
-  docA, // Original Tiptap JSON document
-  docB, // Changed Tiptap JSON document
+  docA, // 原始 Tiptap JSON 文档
+  docB, // 变更后的 Tiptap JSON 文档
 })
 
 editor.commands.displayChangesetAsTrackedChanges({ changeset })
 ```
 
-The editor now displays the changes between the two documents as Tracked Changes suggestions. Use the [Tracked Changes commands](/tracked-changes/api-reference/commands) to [accept or reject them](/tracked-changes/usage/basic-usage#accepting-and-rejecting-suggestions).
+编辑器现在会将两个文档之间的变化显示为修订记录建议。使用[修订记录命令](/tracked-changes/api-reference/commands)[接受或拒绝这些建议](/tracked-changes/usage/basic-usage#accepting-and-rejecting-suggestions)。
 
-<Callout title="Tracked Changes must be enabled" variant="warning">
-  Before calling the `displayChangesetAsTrackedChanges` command, make sure Tracked Changes is enabled. For example, by initializing the extension like this: `TrackedChanges.configure({ enabled: true })`
+<Callout title="必须启用修订记录" variant="warning">
+  调用 `displayChangesetAsTrackedChanges` 命令前，请确保已启用修订记录。例如，可以这样初始化扩展：`TrackedChanges.configure({ enabled: true })`
 </Callout>
 
-## Compare versions
+## 比较版本
 
-Use [`compareVersions`](/compare/api-reference/utilities#compareversions) to compare two Yjs version updates. You can then display the diff in the editor using Tracked Changes suggestions.
+使用 [`compareVersions`](/compare/api-reference/utilities#compareversions) 比较两个 Yjs 版本更新，然后可以使用修订记录建议在编辑器中显示差异。
 
 ```ts
 import { compareVersions } from '@tiptap-pro/compare'
@@ -70,13 +69,13 @@ const changeset = compareVersions({
 editor.commands.displayChangesetAsTrackedChanges({ changeset })
 ```
 
-The `compareVersions` utility captures user attribution data for each change and stores it in the `userId` property of that change's metadata. This data is automatically transferred to the Tracked Changes suggestions, allowing the Tracked Changes review UI to show who authored each change.
+`compareVersions` 工具会捕获每个变化的用户归因数据，并将其存储在变化元数据的 `userId` 属性中。这些数据会自动传递到修订记录建议，使修订记录审阅 UI 能显示每项变化的作者。
 
-See the [Compare versions](/compare/guides/compare-versions) guide for more information about retrieving and showing version updates.
+有关获取和显示版本更新的更多信息，请参阅[比较版本](/compare/guides/compare-versions)指南。
 
-## Create tracked changes on the server
+## 在服务器上创建修订记录
 
-Use `TrackedChangesDocumentFactory` when you need a document with tracked changes without an editor instance, such as in a server route or web worker. The schema must include the Tracked Changes extension before you serialize it on the client. See [Compare documents on the server](/compare/guides/server-compare) to learn how to send the documents and schema to your server.
+当你需要在没有编辑器实例的情况下创建包含修订记录的文档（例如在服务器路由或 Web Worker 中）时，请使用 `TrackedChangesDocumentFactory`。客户端序列化 schema 前，schema 必须包含修订记录扩展。请参阅[在服务器上比较文档](/compare/guides/server-compare)，了解如何将文档和 schema 发送到服务器。
 
 ```ts
 import {
@@ -94,4 +93,4 @@ const { doc, trackedChanges } = new TrackedChangesDocumentFactory().fromChangese
 })
 ```
 
-`doc` is a Tiptap JSON document with tracked changes encoded in it. `trackedChanges` contains the metadata and document range for each encoded change, which you can use for additional server-side processing.
+`doc` 是编码了修订记录的 Tiptap JSON 文档。`trackedChanges` 包含每项编码变化的元数据和文档范围，可用于额外的服务器端处理。

@@ -1,23 +1,23 @@
 ---
-title: Utilities
+title: 工具函数
 tags:
   - type: beta
   - type: restricted
 meta:
-  title: Utilities | Tiptap Compare Docs
-  description: Utility functions exported by the Tiptap Compare package.
-  category: Compare
+  title: 工具函数 | Tiptap Compare 文档
+  description: Tiptap Compare 包导出的工具函数。
+  category: 比较
 ---
 
-A list of classes and functions exported by the `@tiptap-pro/compare` package.
+`@tiptap-pro/compare` 包导出的类和函数列表。
 
 ## `Compare`
 
-The Compare Tiptap Editor extension. Add it to the editor that renders the diff. This extension does not take any configuration options.
+Compare Tiptap 编辑器扩展。将它添加到渲染差异的编辑器中。此扩展不接受任何配置选项。
 
 ## `compareDocuments`
 
-Compares two Tiptap JSON documents.
+比较两个 Tiptap JSON 文档。
 
 ### Parameters (`CompareDocumentsOptions`)
 
@@ -28,11 +28,11 @@ Compares two Tiptap JSON documents.
 
 ### Returns (`Changeset`)
 
-Returns a changeset containing both documents and their changes. See [Changeset](/compare/api-reference/utilities#changeset).
+返回包含两个文档及其变化的 changeset。请参阅 [Changeset](/compare/api-reference/utilities#changeset)。
 
 ## `compareFragments`
 
-Compares two Tiptap JSON fragments.
+比较两个 Tiptap JSON 片段。
 
 ### Parameters (`CompareFragmentsOptions`)
 
@@ -43,11 +43,11 @@ Compares two Tiptap JSON fragments.
 
 ### Returns (`Changeset`)
 
-Returns a changeset containing both fragments and their changes. See [Changeset](/compare/api-reference/utilities#changeset).
+返回包含两个片段及其变化的 changeset。请参阅 [Changeset](/compare/api-reference/utilities#changeset)。
 
 ## `compareSteps`
 
-Converts a `StepSequence` into non-overlapping changes.
+将 `StepSequence` 转换为不重叠的变化。
 
 ### Parameters (`CompareStepsOptions`)
 
@@ -57,11 +57,11 @@ Converts a `StepSequence` into non-overlapping changes.
 
 ### Returns (`Changeset`)
 
-Returns a changeset containing the initial and final documents and their changes. Changes include metadata associated with the steps that produced them. See [Changeset](/compare/api-reference/utilities#changeset).
+返回包含初始文档、最终文档及其变化的 changeset。变化包含产生它们的步骤所关联的元数据。请参阅 [Changeset](/compare/api-reference/utilities#changeset)。
 
 ## `compareVersions`
 
-Compares two complete Yjs v2 updates and recovers collaboration metadata when available.
+比较两个完整的 Yjs v2 更新，并在可用时恢复协作元数据。
 
 ### Parameters (`CompareVersionsOptions`)
 
@@ -76,11 +76,11 @@ Compares two complete Yjs v2 updates and recovers collaboration metadata when av
 
 ### Returns (`Changeset`)
 
-Returns a changeset containing both versions and their changes. Changes include metadata from the change history, such as a `userId` when available. See [Changeset](/compare/api-reference/utilities#changeset).
+返回包含两个版本及其变化的 changeset。变化包含来自变更历史的元数据，例如可用时的 `userId`。请参阅 [Changeset](/compare/api-reference/utilities#changeset)。
 
 ## `Changeset`
 
-Represents the result of comparing two documents, fragments, steps, or versions.
+表示比较两个文档、片段、步骤或版本的结果。
 
 ### Properties
 
@@ -92,11 +92,11 @@ Represents the result of comparing two documents, fragments, steps, or versions.
 
 ### `changeset.reverse`
 
-Creates a changeset in the opposite direction, where document A becomes document B, and vice versa.
+创建方向相反的 changeset，其中文档 A 变为文档 B，反之亦然。
 
 #### Parameters
 
-This method has no parameters.
+此方法没有参数。
 
 #### Returns (`Changeset`)
 
@@ -104,11 +104,11 @@ This method has no parameters.
 
 ### `changeset.toJSON`
 
-Serializes the changeset.
+序列化 changeset。
 
 #### Parameters
 
-This method has no parameters.
+此方法没有参数。
 
 #### Returns (`ChangesetJSON`)
 
@@ -118,7 +118,7 @@ This method has no parameters.
 
 ### `Changeset.fromJSON`
 
-Hydrates a changeset from serialized JSON.
+从序列化 JSON 恢复 changeset。
 
 #### Parameters
 
@@ -130,7 +130,7 @@ Hydrates a changeset from serialized JSON.
 
 ## `findDiffSuggestions`
 
-Returns the diff suggestions that are currently shown in the editor.
+返回当前在编辑器中显示的差异建议。
 
 ### Parameters
 
@@ -138,7 +138,7 @@ Returns the diff suggestions that are currently shown in the editor.
 
 ### Returns (`DiffSuggestion[]`)
 
-Each `DiffSuggestion` contains:
+每个 `DiffSuggestion` 包含：
 
 - `id` (`string`): The suggestion ID.
 - `range` (`Range`): The affected range in the editor.
@@ -151,7 +151,7 @@ Each `DiffSuggestion` contains:
 
 ## `getSuggestionNodeViewContext`
 
-Determines whether a [Tiptap Node View](/editor/extensions/custom-extensions/node-views) is inside a diff suggestion, and returns the suggestion's context.
+判断 [Tiptap 节点视图](/editor/extensions/custom-extensions/node-views) 是否位于差异建议中，并返回建议上下文。
 
 ### Parameters
 
@@ -165,7 +165,7 @@ Determines whether a [Tiptap Node View](/editor/extensions/custom-extensions/nod
 
 ## `renderSlice`
 
-Renders a [ProseMirror slice](https://prosemirror.net/docs/ref/#model.Slice) as a document fragment for display in a diff.
+将 [ProseMirror slice](https://prosemirror.net/docs/ref/#model.Slice) 渲染为用于差异显示的文档片段。
 
 ### Parameters (`RenderSliceToHtmlOptions`)
 
@@ -175,15 +175,15 @@ Renders a [ProseMirror slice](https://prosemirror.net/docs/ref/#model.Slice) as 
 
 ### Returns ([`DocumentFragment`](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment))
 
-Returns a [document fragment](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment) containing the rendered slice.
+返回包含渲染后片段的[文档片段](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment)。
 
 ## `generateSuggestionId`
 
-Creates a unique ID for a diff suggestion.
+为差异建议创建唯一 ID。
 
 ### Parameters
 
-This utility has no parameters.
+此工具没有参数。
 
 ### Returns (`string`)
 
@@ -191,7 +191,7 @@ This utility has no parameters.
 
 ## `getVersions`
 
-Requests two snapshots from a collaboration provider.
+从协作提供程序请求两个快照。
 
 ### Parameters
 
@@ -201,14 +201,14 @@ Requests two snapshots from a collaboration provider.
 
 ### Returns (`Promise<{ snapshot: Uint8Array; prevSnapshot: Uint8Array }>`)
 
-The promise resolves with:
+Promise 会解析为：
 
 - `snapshot` (`Uint8Array`): The newer version update.
 - `prevSnapshot` (`Uint8Array`): The older version update.
 
 ## `getDocumentFromVersion`
 
-Hydrates a Tiptap JSON document from a complete Yjs v2 update.
+从完整的 Yjs v2 更新恢复 Tiptap JSON 文档。
 
 ### Parameters (`GetDocumentFromVersionOptions`)
 
@@ -218,7 +218,7 @@ Hydrates a Tiptap JSON document from a complete Yjs v2 update.
 
 ### Returns (`JSONContent`)
 
-The returned JSON document contains:
+返回的 JSON 文档包含：
 
 - `type` (`string`): The Tiptap node type, usually `'doc'` for a complete document.
 - `content?` (`JSONContent[]`): The document's child nodes.
@@ -228,11 +228,11 @@ The returned JSON document contains:
 
 ## `TrackedChangesDocumentFactory`
 
-Creates a Tiptap JSON document with a `Changeset` encoded as [Tracked Changes](/tracked-changes/getting-started/overview). Use this on the server or anywhere an editor instance is unavailable.
+创建一个将 `Changeset` 编码为[修订记录](/tracked-changes/getting-started/overview)的 Tiptap JSON 文档。在服务器或没有编辑器实例的环境中使用它。
 
 ### `fromChangeset`
 
-Converts a changeset into a document containing tracked changes.
+将 changeset 转换为包含修订记录的文档。
 
 #### Parameters (`TrackedChangesDocumentFactoryOptions`)
 
@@ -246,7 +246,7 @@ Converts a changeset into a document containing tracked changes.
 
 ## `serializeSchema`
 
-Serializes a ProseMirror schema into JSON-safe data.
+将 ProseMirror schema 序列化为可安全传输的 JSON 数据。
 
 ### Parameters
 
@@ -254,11 +254,11 @@ Serializes a ProseMirror schema into JSON-safe data.
 
 ### Returns (`SerializedSchema`)
 
-The Tiptap editor schema, encoded as a JSON object, so it can be sent over the network.
+编码为 JSON 对象的 Tiptap 编辑器 schema，可通过网络发送。
 
 ## `deserializeSchema`
 
-Creates a ProseMirror schema from serialized schema data.
+从序列化的 schema 数据创建 ProseMirror schema。
 
 ### Parameters
 
@@ -270,11 +270,11 @@ Creates a ProseMirror schema from serialized schema data.
 
 ## `StepSequence`
 
-Stores a sequence of document states and the metadata for each transition.
+存储一系列文档状态以及每次转换的元数据。
 
 ### `StepSequence.fromInitialDocument`
 
-Creates an empty sequence.
+创建空序列。
 
 #### Parameters
 
@@ -288,7 +288,7 @@ Creates an empty sequence.
 
 ### `StepSequence.fromJSON`
 
-Hydrates a sequence from JSON.
+从 JSON 恢复序列。
 
 #### Parameters (`StepSequenceFromJSONOptions`)
 
@@ -303,7 +303,7 @@ Hydrates a sequence from JSON.
 
 ### `sequence.addStep`
 
-Appends a document transition.
+追加一次文档转换。
 
 #### Parameters (`AddStepOptions`)
 
@@ -314,15 +314,15 @@ Appends a document transition.
 
 #### Returns (`void`)
 
-This method does not return a value.
+此方法不返回值。
 
 ### `sequence.copy` and `sequence.reverse`
 
-`copy` duplicates a sequence. `reverse` returns a sequence that runs from the final document back to the initial document.
+`copy` 复制序列。`reverse` 返回从最终文档回到初始文档的序列。
 
 #### Parameters
 
-These methods have no parameters.
+这些方法没有参数。
 
 #### Returns (`StepSequence`)
 
@@ -332,15 +332,15 @@ These methods have no parameters.
 
 ### `sequence.getSteps`
 
-Returns each recorded document transition.
+返回记录的每次文档转换。
 
 #### Parameters
 
-This method has no parameters.
+此方法没有参数。
 
 #### Returns (`Step[]`)
 
-Each `Step` contains:
+每个 `Step` 包含：
 
 - `before` (`Node`): The document before the transition.
 - `after` (`Node`): The document after the transition.
@@ -350,11 +350,11 @@ Each `Step` contains:
 
 ### `sequence.toJSON`
 
-Serializes the sequence.
+序列化序列。
 
 #### Parameters
 
-This method has no parameters.
+此方法没有参数。
 
 #### Returns (`StepSequenceJSON`)
 

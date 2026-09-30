@@ -340,7 +340,6 @@ if (pageLayout) {
 <Callout variant="info" title="使用共享的单位辅助函数">
   OOXML 注册表导出了管道两端使用的转换函数，包括 `twipsToPixels`、`pixelsToTwips`、`halfPointsToPixels`、`emuToPixels` 和 `twipsToPoints`，以及 `TWIPS_PER_PIXEL` 等常量。使用这些函数可以让你的数值与导入器和导出器中的数值完全一致。自行编写计算逻辑通常会导致文档往返转换后出现轻微偏差。
 </Callout>
-</Callout>
 
 当注册了 Pages 扩展时，[编辑器扩展](/conversion/import/docx/editor-extension)会为你完成此转换，因此只有在 REST 路径中才需要手动进行转换。
 
@@ -553,7 +552,6 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
 
 <Callout variant="info" title="代码块和行内代码目前无法重命名">
   代码块类型和行内代码标记始终会分别导入为 `codeBlock` 和 `code`。目前通过 `prosemirrorNodes` 或 `prosemirrorMarks` 重命名它们不会生效。如果你的 schema 使用不同的名称，请在导入后进行映射。
-</Callout>
 </Callout>
 
 #### 将 Word 样式映射到标记

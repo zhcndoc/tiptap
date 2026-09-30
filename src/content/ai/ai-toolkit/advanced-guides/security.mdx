@@ -1,17 +1,17 @@
 ---
-title: Security recommendations
+title: 安全建议
 meta:
-  title: Security recommendations | Tiptap AI Toolkit
-  description: Learn how to handle prompt injection risks when AI Toolkit tools read user-generated document content.
-  category: AI Toolkit
+  title: 安全建议 | Tiptap AI 工具包
+  description: 了解 AI 工具包读取用户生成的文档内容时如何处理提示注入风险。
+  category: AI 工具包
 ---
 
-## Mitigate prompt injection attacks
+## 缓解提示注入攻击
 
-The AI Toolkit's tools, including `tiptapRead` and `getThreads`, can return content from user-generated documents. Content from untrusted sources may contain a prompt injection attack.
+AI 工具包中的工具（包括 `tiptapRead` 和 `getThreads`）可能会返回用户生成的文档内容。不受信任的来源可能包含提示注入攻击。
 
-The AI Toolkit does not include document content in your system prompt. It returns the content as a tool result instead. However, tool results can still influence an AI model. This can be exploited to create a prompt injection attack by including malicious instructions in the document that the AI model could follow.
+AI 工具包不会将文档内容包含在系统提示中，而是将其作为工具结果返回。不过，工具结果仍然可能影响 AI 模型。攻击者可以在文档中加入恶意指令，诱使 AI 模型遵循这些指令，从而发起提示注入攻击。
 
-If your application needs to mitigate this risk, validate tool output for prompt-injection patterns before passing it to an AI model. Apply the same safeguards you would use for an agent that reads websites or other untrusted sources.
+如果你的应用需要缓解此风险，请在将工具输出传递给 AI 模型之前，验证其中是否包含提示注入模式。请使用与读取网站或其他不受信任来源的代理相同的安全措施。
 
-Additionally, require explicit approval from the user before the AI takes any destructive or consequential action. One way to do so is to [integrate the AI Toolkit with Tracked Changes](/ai/ai-toolkit/agents/tracked-changes), so that the user can accept and reject every document edit that the AI makes.
+此外，在 AI 执行任何破坏性或重要操作之前，都应要求用户明确批准。一种方式是将 [AI 工具包与修订记录集成](/ai/ai-toolkit/agents/tracked-changes)，让用户可以接受或拒绝 AI 对文档执行的每一项编辑。

@@ -1,20 +1,20 @@
 ---
-title: Decorations API
+title: 装饰 API
 meta:
-  title: Decorations API | Tiptap Editor Docs
-  description: API reference for addDecorations, the Decoration class, updateDecorations, and React and Vue widget renderers.
-  category: Editor
+  title: 装饰 API | Tiptap 编辑器文档
+  description: '`addDecorations`、Decoration 类、`updateDecorations` 以及 React 和 Vue 小部件渲染器的 API 参考。'
+  category: 编辑器
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-Decorations are view-only markers attached to positions or ranges in the document. They are declared by extensions and never modify or serialize the document. For concepts, examples, and guidance on when to use decorations, read the [Decorations guide](/editor/core-concepts/decorations). This page is the API reference.
+装饰是附加到文档位置或范围的仅影响视图的标记。它们由扩展声明，永远不会修改或序列化文档。有关概念、示例以及何时使用装饰的建议，请阅读[装饰指南](/editor/core-concepts/decorations)。本页是 API 参考。
 
 ## `addDecorations`
 
-A lifecycle hook on every extension (including nodes and marks). It returns a `DecorationSpec` describing the decorations the extension contributes, or `null` for none. All declarations from all extensions are aggregated into a single ProseMirror plugin by Tiptap's internal decoration manager.
+每个扩展（包括节点和标记）都提供的生命周期钩子。它返回描述扩展所贡献装饰的 `DecorationSpec`，没有装饰时返回 `null`。Tiptap 的内部装饰管理器会将所有扩展的声明聚合到一个 ProseMirror 插件中。
 
-`addDecorations()` is bound to `this` (`{ name, options, storage, editor, type, parent }`) like other extension hooks.
+和其他扩展钩子一样，`addDecorations()` 绑定到 `this`（`{ name, options, storage, editor, type, parent }）。
 
 ```ts
 import { Decoration, Extension } from '@tiptap/core'
@@ -41,18 +41,12 @@ const MyExtension = Extension.create({
 | `shouldUpdate`  | `(props: { editor; tr; oldState; newState }) => boolean`               | Optional for `document` and `changedRanges`. Return `false` to map without rebuilding. Defaults to `tr.docChanged`. |
 | `createInRange` | `(props: { editor; state; view; from; to }) => Decoration[]` | Required only for `changedRanges`. Returns decorations anchored within the supplied block-aligned range.            |
 
-<Callout title="Read state from the state argument, not editor.state" variant="warning">
-  Inside `create()` and `createInRange()`, always read the document from the `state` argument, not
-  `editor.state`. During a transaction, the editor's view state has not been updated yet, so
-  `editor.state` points at the pre-transaction document. The `state` argument is the correct state
-  being built. Tiptap logs a development warning if it detects `editor.state` being read inside
-  `create()`.
+<Callout title="从 state 参数读取状态，而不是 editor.state" variant="warning">
+  在 `create()` 和 `createInRange()` 内始终从 `state` 参数读取文档，而不是读取 `editor.state`。事务执行期间，编辑器视图状态尚未更新，因此 `editor.state` 指向事务前的文档。`state` 参数才是当前正在构建的正确状态。如果检测到在 `create()` 内读取 `editor.state`，Tiptap 会记录开发警告。
 </Callout>
 
-<Callout title="create and createInRange must not throw" variant="warning">
-  `create()` and `createInRange()` run inside ProseMirror's state update cycle. If they throw, the
-  editor can end up in an inconsistent state. Wrap any fallible logic (regex compilation, external
-  data access) in try/catch and return an empty array on failure.
+<Callout title="create 和 createInRange 不得抛出异常" variant="warning">
+  `create()` 和 `createInRange()` 会在 ProseMirror 状态更新循环中运行。如果它们抛出异常，编辑器可能进入不一致状态。请将可能失败的逻辑（正则编译、外部数据访问）放在 try/catch 中，并在失败时返回空数组。
 </Callout>
 
 ### `DecorationUpdateStrategy`
@@ -61,21 +55,17 @@ const MyExtension = Extension.create({
 type DecorationUpdateStrategy = 'document' | 'changedRanges' | 'manual'
 ```
 
-- `document` rebuilds the full set with `create` after document changes. This is the default and is always correct.
-- `changedRanges` maps existing decorations and calls `createInRange` only for changed, block-aligned ranges. Use it only for block-local decorations.
-- `manual` keeps the current decorations until you call `updateDecorations()`.
+- `document` 在文档变化后使用 `create` 重建完整集合。这是默认策略，并且始终正确。
+- `changedRanges` 映射已有装饰，只为发生变化且按块对齐的范围调用 `createInRange`。仅将其用于局部块装饰。
+- `manual` 保留当前装饰，直到调用 `updateDecorations()`。
 
-You can use `shouldUpdate` with `document` and `changedRanges`. You cannot use it with `manual`, because manual decorations only update when you ask them to.
+`document` 和 `changedRanges` 可以使用 `shouldUpdate`。`manual` 不能使用它，因为手动装饰只会在你主动请求时更新。
 
-<Callout title="createInRange contract" variant="warning">
-  `createInRange` must return **only** decorations whose start position lies within `[from, to)`.
-  Use `from` for inline and node decorations, and `pos` for widget decorations. `to` is exclusive:
-  it is the next block's start, and that block rebuilds it, so decorations anchored at `to` are
-  ignored. The last block is the exception, because it owns the end of the document. If a decoration
-  depends on content outside the supplied range, use the `document` strategy instead.
+<Callout title="createInRange 的约定" variant="warning">
+  `createInRange` 必须**只**返回起始位置位于 `[from, to)` 内的装饰。行内和节点装饰使用 `from`，小部件装饰使用 `pos`。`to` 不包含在范围内：它是下一个块的起点，而下一个块会重建该位置，因此锚定在 `to` 的装饰会被忽略。最后一个块是例外，因为它拥有文档末尾。如果装饰依赖提供范围之外的内容，请改用 `document` 策略。
 </Callout>
 
-See [Performance](/editor/core-concepts/decorations#performance) for strategy selection and changed-range correctness constraints.
+有关策略选择和变化范围正确性限制，请参阅[性能](/editor/core-concepts/decorations#performance)。
 
 ## `Decoration`
 

@@ -115,9 +115,9 @@ export const sidebarConfig: SidebarConfig = {
           tags: ['实验性'],
         },
         {
-          title: 'Rows that span a page break',
+          title: '跨越分页符的行',
           href: '/pages/guides/row-fragmentation',
-          tags: ['Experimental'],
+          tags: ['实验性'],
         },
         {
           title: 'PageKit',

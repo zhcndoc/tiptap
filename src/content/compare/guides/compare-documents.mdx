@@ -1,23 +1,23 @@
 ---
-title: Compare documents
+title: 比较文档
 tags:
   - type: beta
   - type: restricted
 meta:
-  title: Compare documents | Tiptap Compare Docs
-  description: Compare two Tiptap JSON documents and show their differences.
-  category: Compare
+  title: 比较文档 | Tiptap Compare 文档
+  description: 比较两个 Tiptap JSON 文档并显示差异。
+  category: 比较
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-Use the [`compareDocuments` command](/compare/api-reference/commands#comparedocuments) to compare two Tiptap JSON documents and display the changes.
+使用 [`compareDocuments` 命令](/compare/api-reference/commands#comparedocuments) 比较两个 Tiptap JSON 文档并显示变化。
 
 <CodeDemo isPro path="/Extensions/CompareDocuments" />
 
-## Compare the documents
+## 比较文档
 
-First, create the documents you want to compare.
+首先，创建要比较的文档。
 
 ```ts
 import { Editor } from '@tiptap/core'
@@ -29,13 +29,13 @@ const editorB = new Editor()
 const docB = editorB.toJSON()
 ```
 
-Create a diff editor with the `Compare` extension. This is the editor where the changes will be displayed. Then call `compareDocuments` with the two Tiptap JSON documents.
+使用 `Compare` 扩展创建差异编辑器，该编辑器用于显示变化。然后将两个 Tiptap JSON 文档传给 `compareDocuments`。
 
 ```ts
 import { Editor } from '@tiptap/core'
 import { Compare } from '@tiptap-pro/compare'
 
-// The diff editor
+// 差异编辑器
 const editor = new Editor({
   extensions: [
     Compare,
@@ -49,11 +49,11 @@ editor.commands.compareDocuments({
 })
 ```
 
-The [`compareDocuments` command](/compare/api-reference/commands#comparedocuments) creates the comparison and immediately displays the changes as suggestions.
+[`compareDocuments` 命令](/compare/api-reference/commands#comparedocuments)会创建比较结果，并立即将变化显示为建议。
 
-## Style the changes
+## 设置变更样式
 
-Compare adds CSS classes to the current document B content and the replacement content from document A. Add these styles to display the changes as a red and green diff.
+Compare 会为当前文档 B 的内容以及文档 A 的替换内容添加 CSS 类。添加以下样式即可将变化显示为红绿差异。
 
 ```css
 .compare-documents {
@@ -135,7 +135,7 @@ code:not(pre code) .diff-suggestion-diff {
 }
 ```
 
-### Colorblind styles
+### 色觉障碍友好样式
 
 The following stylesheet uses orange and blue to display the diff. The colorblind styles are activated when the diff is wrapped inside an element with the `colorblind-mode` class.
 

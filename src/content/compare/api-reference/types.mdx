@@ -1,19 +1,19 @@
 ---
-title: Types
+title: 类型
 tags:
   - type: beta
   - type: restricted
 meta:
-  title: Types | Tiptap Compare Docs
-  description: TypeScript type definitions for the Tiptap Compare package.
-  category: Compare
+  title: 类型 | Tiptap Compare 文档
+  description: Tiptap Compare 包的 TypeScript 类型定义。
+  category: 比较
 ---
 
-The Compare package exports TypeScript types for working with changesets, changes, diff suggestions, document history, and serialized schemas. Parameter interfaces for utilities and commands are documented alongside their respective APIs.
+Compare 包导出用于处理 changeset、变化、差异建议、文档历史和序列化 schema 的 TypeScript 类型。工具函数和命令的参数接口会在各自的 API 中说明。
 
 ## `TrackedChangeMetadata`
 
-Metadata stored on a tracked change created from a changeset.
+存储在由 changeset 创建的修订记录中的元数据。
 
 ```ts
 interface TrackedChangeMetadata extends ChangeMetadata {
@@ -27,11 +27,11 @@ interface TrackedChangeMetadata extends ChangeMetadata {
 }
 ```
 
-`TrackedChangeMarkMutation` describes a formatting change with `operation` (`'added' | 'removed'`), `markName`, and `markAttrs`.
+`TrackedChangeMarkMutation` 描述一次格式变化，包含 `operation`（`'added' | 'removed'`）、`markName` 和 `markAttrs`。
 
 ## `TrackedChangeData`
 
-Pairs the metadata for an encoded tracked change with its range in the generated document.
+将编码后的修订记录元数据与其在生成文档中的范围配对。
 
 ```ts
 interface TrackedChangeData {
@@ -42,7 +42,7 @@ interface TrackedChangeData {
 
 ## `TrackedChangesDocumentFactoryResult`
 
-The result returned by `TrackedChangesDocumentFactory.fromChangeset`.
+`TrackedChangesDocumentFactory.fromChangeset` 返回的结果。
 
 ```ts
 interface TrackedChangesDocumentFactoryResult {
@@ -53,7 +53,7 @@ interface TrackedChangesDocumentFactoryResult {
 
 ## `JSONFragment`
 
-A JSON representation of a ProseMirror fragment.
+ProseMirror 片段的 JSON 表示。
 
 ```ts
 type JSONFragment = JSONContent[] | null
@@ -61,7 +61,7 @@ type JSONFragment = JSONContent[] | null
 
 ## `ChangesetJSON`
 
-JSON-serializable representation of a `Changeset`.
+`Changeset` 的可 JSON 序列化表示。
 
 ```ts
 interface ChangesetJSON {
@@ -73,7 +73,7 @@ interface ChangesetJSON {
 
 ## `ChangeMetadata`
 
-Arbitrary metadata attached to a change or document step.
+附加到变化或文档步骤的任意元数据。
 
 ```ts
 /**
@@ -86,7 +86,7 @@ type ChangeMetadata = Record<string, unknown>
 
 ## `Change`
 
-Represents one difference between two documents.
+表示两个文档之间的一项差异。
 
 ```ts
 /**
@@ -110,7 +110,7 @@ interface Change {
 
 ## `ChangeScope`
 
-Whether a change covers inline or block content.
+变化覆盖行内内容还是块级内容。
 
 ```ts
 type ChangeScope = 'inline' | 'block'
@@ -118,7 +118,7 @@ type ChangeScope = 'inline' | 'block'
 
 ## `NestedChange`
 
-Later change contained in a parent `Change`. Its range is an absolute position in the final document (`docB`).
+包含在父级 `Change` 中的后续变化。其范围是最终文档（`docB`）中的绝对位置。
 
 ```ts
 interface NestedChange {
@@ -130,7 +130,7 @@ interface NestedChange {
 
 ## `DiffOptions`
 
-Controls how document and fragment comparisons are calculated.
+控制文档和片段比较的计算方式。
 
 ```ts
 /** Options that control filtering and diff behavior. */
@@ -156,7 +156,7 @@ type DiffOptions = {
 
 ## `DiffSuggestion`
 
-Represents a proposed replacement displayed in the editor.
+表示在编辑器中显示的提议替换。
 
 ```ts
 /** A proposed change to a range of editor content. */
@@ -182,7 +182,7 @@ interface DiffSuggestion {
 
 ## `DiffSuggestionNestedChange`
 
-A nested change contained inside a diff suggestion.
+包含在差异建议中的嵌套变化。
 
 ```ts
 interface DiffSuggestionNestedChange extends NestedChange {
@@ -192,7 +192,7 @@ interface DiffSuggestionNestedChange extends NestedChange {
 
 ## `DisplayOptions`
 
-Controls the default rendering of a diff suggestion.
+控制差异建议的默认渲染方式。
 
 ```ts
 /** Options for how to display a diff suggestion in the editor. */
@@ -226,9 +226,9 @@ interface NestedChangeAttributesOptions {
 }
 ```
 
-## Custom decoration rendering
+## 自定义装饰渲染
 
-Use these types with `DisplayOptions.renderDecorations` to replace or adjust the default rendering.
+将这些类型与 `DisplayOptions.renderDecorations` 一起使用，以替换或调整默认渲染。
 
 ```ts
 /** Options passed to `defaultRenderDecorations`. */
@@ -267,7 +267,7 @@ type RenderDecorations = (options: RenderDecorationsOptions) => Decoration[]
 
 ## `Step`
 
-Represents one transition in a `StepSequence`.
+表示 `StepSequence` 中的一次转换。
 
 ```ts
 /** One document transition in a step sequence. */
@@ -287,7 +287,7 @@ interface Step {
 
 ## `StepSequenceJSON`
 
-JSON-serializable state for a `StepSequence`.
+`StepSequence` 的可 JSON 序列化状态。
 
 ```ts
 /** JSON-serializable state for a step sequence. */

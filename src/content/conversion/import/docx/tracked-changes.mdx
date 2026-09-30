@@ -1,13 +1,13 @@
 ---
-title: Import tracked changes from DOCX
+title: 从 DOCX 导入修订记录
 tags:
   - type: addon
     tooltip: Add Tracked Changes to your subscription
   - type: beta
 meta:
-  title: Import tracked changes | Tiptap Conversion
-  description: Import Word insertions and deletions as reviewable suggestions, or apply or discard them during the import.
-  category: Conversion
+  title: 导入修订记录 | Tiptap 转换
+  description: 将 Word 插入和删除导入为可审阅建议，或在导入期间应用或丢弃它们。
+  category: 转换
 ---
 
 import { Callout } from '@/components/ui/Callout'
@@ -16,7 +16,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 <EnterpriseCalloutAuto variant="docx" renderMode="sidebar" disableWaitlist />
 
-<Callout title="Tracked Changes add-on" variant="hint">
+<Callout title="修订记录附加组件" variant="hint">
   Tracked Changes is a paid add-on that isn't included in any plan. Test it during the free trial
   or purchase it in [your dashboard](https://cloud.tiptap.dev/v2/billing). Once [integrated in
   your editor](/tracked-changes/getting-started/install), it works with Conversion to round-trip
@@ -41,7 +41,7 @@ import { EnterpriseCalloutAuto } from '@/components/EnterpriseCalloutAuto'
 
 A Word document that has been reviewed carries a record of who inserted and removed what. On import you decide what happens to that record: keep it as suggestions you can review in the editor, apply it, or discard it.
 
-## Choosing a mode
+## 选择模式
 
 | Mode       | What happens                                                                      |
 | ---------- | --------------------------------------------------------------------------------- |
@@ -50,7 +50,7 @@ A Word document that has been reviewed carries a record of who inserted and remo
 | `reject`   | Deletions are restored as ordinary text and insertions are removed                |
 | `auto`     | Editor extension only. Picks `preserve` or `accept` based on your editor's schema |
 
-## With the editor extension
+## 使用编辑器扩展
 
 `ImportDocx` takes a `trackedChanges` option, and defaults to `auto`:
 
@@ -73,7 +73,7 @@ You can also decide per import, which wins over the configured value:
 editor.commands.importDocx({ file, trackedChanges: 'preserve' })
 ```
 
-### What `auto` does
+### `auto` 的行为
 
 `auto` looks for the tracked changes `suggestion` mark in your editor's schema. If it is there, the mode becomes `preserve`. If it is not, the mode becomes `accept`. If you renamed that mark through `prosemirrorMarks`, `auto` looks for the name you gave it.
 
@@ -85,7 +85,7 @@ This matters because the editor drops marks its schema does not know while keepi
   text.
 </Callout>
 
-## With the REST API
+## 使用 REST API
 
 Send `trackedChanges` as a form field. It accepts `preserve`, `accept` and `reject`, and defaults to `accept`.
 
@@ -98,7 +98,7 @@ curl -X POST https://api.tiptap.dev/v2/convert/import/docx \
 
 The default is `accept` rather than `preserve` so that callers who send nothing keep receiving plain content, and never receive suggestion marks their editor cannot render.
 
-## What preserved suggestions look like
+## 保留的建议形式
 
 Text carrying a change gets a `suggestion` mark:
 
@@ -130,7 +130,7 @@ Word writes one record per run of text, so a single edit is often split into sev
 
 Inserted or deleted images and other standalone content carry the same information as node attributes instead of a mark: `suggestionId`, `suggestionType`, `suggestionUserId`, `suggestionCreatedAt`, `suggestionUpdatedAt` and `suggestionUserMetadata`.
 
-## Where suggestions are kept
+## 建议的保留位置
 
 Suggestions are preserved in the body of the document, including inside table cells.
 
@@ -138,7 +138,7 @@ Headers, footers, comments and footnotes are edited separately from the main doc
 
 This is deliberate. Those parts usually run on a schema with no `suggestion` mark, and preserving there would strip the mark while leaving the text behind, turning a deletion into real content. Configuring the header and footer editors with the tracked changes extension does not change the import behaviour today.
 
-## What is not imported yet (work in progress)
+## 尚未导入的内容（开发中）
 
 For these two the text arrives in full, and only the record of the change is missing:
 
@@ -149,7 +149,7 @@ Moves are the exception, and worth checking on your own documents:
 
 - **Moves**, where a reviewer relocated a block of text. Word writes a move as two halves, a source and a destination, and neither is recognised yet. Check a moved passage before relying on it.
 
-## Round-trip
+## 往返转换
 
 Exporting a document whose suggestions came from Word writes them back as Word insertions and deletions, with the author and date intact. See [export tracked changes](/conversion/export/docx/tracked-changes).
 

@@ -1,28 +1,28 @@
 ---
-title: 'Highlight Search Terms with Decorations in Vanilla JS'
+title: '使用装饰在原生 JavaScript 中高亮搜索词'
 meta:
-  title: 'Highlight Search Terms with Decorations in Vanilla JS | Tiptap Editor Docs'
+  title: '使用装饰在原生 JavaScript 中高亮搜索词 | Tiptap 编辑器文档'
   description: Build a term highlighter for a vanilla Tiptap editor with inline, node, and widget decorations.
   category: Editor
 ---
 
 import { Callout } from '@/components/ui/Callout'
 
-In this tutorial, you will build a term highlighter for a Tiptap editor without React, Vue, or any other framework. The user types a search term into an input field, and every match in the document gets highlighted. Nothing about the document itself changes. The highlights are purely visual.
+本教程将为不使用 React、Vue 或其他框架的 Tiptap 编辑器构建词语高亮功能。用户在输入框中输入搜索词，文档中的每个匹配项都会被高亮。文档本身不会发生变化，高亮效果纯粹影响视觉呈现。
 
-The finished feature uses all three decoration types:
+完成的功能会使用三种装饰类型：
 
 - **Inline decorations** highlight every match with a yellow background.
 - **Node decorations** outline every block that contains at least one match.
 - **Widget decorations** render a small numbered badge after each match.
 
-You will build the widget by hand with plain DOM APIs. No framework widget renderers needed.
+你将使用原生 DOM API 手动构建小部件，无需框架小部件渲染器。
 
-## What are decorations?
+## 什么是装饰？
 
-Decorations are visual markers that sit on top of the document. They change what the user sees, but they do not change the document content. When you save the editor as JSON or HTML, decorations are not included.
+装饰是显示在文档之上的视觉标记。它们会改变用户看到的内容，但不会改变文档内容。将编辑器保存为 JSON 或 HTML 时，装饰不会被包含在其中。
 
-Tiptap has three kinds of decoration:
+Tiptap 有三种装饰类型：
 
 - **Inline** wraps a range of text in a styled span. Use it for highlights.
 - **Node** adds attributes (like a CSS class) to the DOM wrapper of a whole block. Use it to outline paragraphs or headings.
@@ -30,9 +30,9 @@ Tiptap has three kinds of decoration:
 
 You create all three with the `Decoration` class, imported from `@tiptap/core`.
 
-## Set up the editor and search input
+## 设置编辑器和搜索输入框
 
-Start with a basic HTML page that has a search input and a container for the editor:
+先创建一个包含搜索输入框和编辑器容器的基础 HTML 页面：
 
 ```html
 <!-- index.html -->
@@ -42,7 +42,7 @@ Start with a basic HTML page that has a search input and a container for the edi
 <div id="editor"></div>
 ```
 
-Then set up the editor in JavaScript. We import `StarterKit` for basic editing features and a `Highlight` extension that we will create in the next step:
+然后在 JavaScript 中设置编辑器。我们导入 `StarterKit` 提供基础编辑功能，并导入下一步将创建的 `Highlight` 扩展：
 
 ```ts
 // main.ts
@@ -65,13 +65,13 @@ const editor = new Editor({
 })
 ```
 
-The `Highlight` extension does not exist yet. Let us create it.
+`Highlight` 扩展还不存在，下面来创建它。
 
-## Create the highlight extension
+## 创建高亮扩展
 
-Extensions are the building blocks of Tiptap. Every feature, from bold text to code blocks, lives in an extension. We need a custom extension that reads a search term and produces decorations.
+扩展是 Tiptap 的构建块。从粗体文本到代码块，每项功能都存在于扩展中。我们需要一个读取搜索词并生成装饰的自定义扩展。
 
-Start with an empty extension:
+先创建一个空扩展：
 
 ```ts
 // highlight.ts
@@ -159,7 +159,7 @@ export const Highlight = Extension.create<{}, HighlightStorage>({
 
 Now the caller only needs one call: `editor.commands.setSearchTerm('tiptap')`. The command handles storage and the decoration refresh together. We will use it from the input handler later. First, let us add the decoration logic.
 
-## Find and highlight matches
+## 查找并高亮匹配项
 
 This is the core of the extension. We add an `addDecorations` hook that scans the document for matches and returns inline decorations for each one.
 
@@ -230,7 +230,7 @@ export const Highlight = Extension.create<{}, HighlightStorage>({
 })
 ```
 
-<Callout title="Why use the manual update strategy?" variant="info">
+<Callout title="为什么使用手动更新策略？" variant="info">
   The search term comes from outside the document (an input field). When the user types in the
   editor, the document changes but the search term does not. There is no reason to rebuild
   decorations on every keystroke. With `update: 'manual'`, Tiptap only maps existing decorations
@@ -375,7 +375,7 @@ state.doc.descendants((node, pos) => {
 })
 ```
 
-<Callout title="Widget keys explained" variant="info">
+<Callout title="小部件 key 说明" variant="info">
   Every widget needs a `key`. ProseMirror uses the key to decide whether to reuse the widget's DOM
   across redraws or destroy and recreate it. If the key stays the same, the widget stays mounted.
   If the key changes, the widget is recreated.
@@ -386,9 +386,9 @@ state.doc.descendants((node, pos) => {
   [widget keys section](/editor/core-concepts/decorations#widget-keys) in the core concepts guide.
 </Callout>
 
-## The complete extension
+## 完整扩展
 
-Here is the full extension with all three decoration types:
+下面是包含三种装饰类型的完整扩展：
 
 ```ts
 // highlight.ts
@@ -490,7 +490,7 @@ export const Highlight = Extension.create<{}, HighlightStorage>({
 })
 ```
 
-## Connect the search input
+## 连接搜索输入框
 
 The extension is ready. Now we wire up the input field so that when the user types, we call our `setSearchTerm` command. The command stores the term and triggers a decoration rebuild in one step.
 
@@ -512,9 +512,9 @@ searchInput.addEventListener('input', () => {
 
 That is the full flow: the user types, the command stores the term and triggers a rebuild, and Tiptap calls our `create` function which scans the document and returns new decorations.
 
-## Style the decorations
+## 设置装饰样式
 
-The decorations add CSS classes to the document. Add these styles to make them visible:
+装饰会向文档添加 CSS 类。添加以下样式使其可见：
 
 ```css
 /* styles.css */
@@ -545,7 +545,7 @@ The decorations add CSS classes to the document. Add these styles to make them v
 }
 ```
 
-## Next steps
+## 下一步
 
 - Review [decoration types and update strategies](/editor/core-concepts/decorations) in the core concepts guide.
 - Read the full [Decorations API reference](/editor/api/decorations) for every signature and option.
