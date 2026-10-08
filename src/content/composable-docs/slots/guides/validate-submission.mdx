@@ -1,0 +1,88 @@
+---
+title: 验证 Slot 值
+meta:
+  description: 在应用需要时使用内置规则和自定义规则检查 Slot 值。
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+Slot 可以包含用于描述有效内容的规则。
+
+<CodeDemo isPro path="/Examples/SlotValidation" />
+
+当应用需要检查内容时调用 `validateEditorSlots`，例如在保存或提交表单之前。提交是应用行为，不是内置的 Slot 事件。
+
+验证会读取快照并返回结果，不会解析或重写 Slot 值。内置检查和注册的异步验证器只会在调用验证 API 时运行。编辑会使之前的结果失效，并取消待处理的编辑器验证运行，但不会自动开始下一次运行。
+
+要在输入时验证，请注册编辑器 `update` 监听器，并对 `validateEditorSlots` 的调用进行防抖。处理已取消的运行，只显示当前结果，并在 UI 卸载时移除监听器和待处理的计时器。自动调度由宿主应用负责；没有内置的自动验证选项。
+
+```ts
+import { isSlotValidationCurrent, validateEditorSlots } from '@tiptap-pro/extension-slot'
+
+try {
+  const result = await validateEditorSlots({ editor })
+  if (!isSlotValidationCurrent({ editor, result })) {
+    showMessage('文档已更改。请重新提交以验证最新值。')
+  } else if (result.valid) {
+    save(editor.getJSON())
+  } else {
+    showIssues(result.issues)
+  }
+} catch (error) {
+  if (error instanceof Error && error.name === 'AbortError') {
+    showMessage('验证已取消。请重新提交。')
+  } else {
+    throw error
+  }
+}
+```
+
+`isSlotValidationCurrent` 会检查结果是否仍与编辑器当前文档和验证设置匹配。
+
+在 `attrs.config` 中定义必填性、长度、内容类型和模式：
+
+```ts
+const config = {
+  required: true,
+  constraints: {
+    pattern: { source: '^ORD-\\d{4}$', message: 'Use ORD-0000' },
+  },
+}
+
+editor.commands.insertSlot({ config })
+```
+
+对于应用特定的检查，请保存验证器名称并注册其实现：
+
+```ts
+Slot.configure({
+  validators: {
+    registeredPerson: async ({ slot, signal }) => {
+      const found = await directory.find(slot.text, { signal })
+      return found
+        ? []
+        : [
+            {
+              code: 'custom.person',
+              message: 'Choose a registered person.',
+            },
+          ]
+    },
+  },
+})
+
+// 创建 Slot 时包含自定义验证器
+editor.commands.insertSlot({
+  config: {
+    validators: [{ name: 'registeredPerson' }],
+  },
+})
+```
+
+验证可以是异步的，因此会传入 AbortSignal（`signal` 字段）；如果验证期间文档被编辑，可用它取消验证过程。
+
+对于涉及多个字段的检查，请向所属 Slot 添加 `crossFieldRules` 条目，并注册 `crossFieldValidators` 函数。[在 API 参考中了解更多](/composable-docs/slots/api-reference/validation#crossfieldvalidator)。
+
+如果缺少某些验证器或验证器执行失败，`validateEditorSlots` 会返回 `status: 'unavailable'`。
+
+有关验证的更多信息，请参阅 [API 参考](/composable-docs/slots/api-reference/validation#slotvalidator)。

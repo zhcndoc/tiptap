@@ -101,6 +101,20 @@ Comments.configure({
 })
 ```
 
+## respectParentSchema
+
+设置 `respectParentSchema: true` 后，块线程中的本地编辑必须遵循父节点的内容规则。例如，允许段落但不允许列表的 section 中的块线程不能包含列表。扩展能够保留文本时会转换单个无效文本块；无法修复的编辑会被拒绝。
+
+现有的无效块线程不会迁移。只要子块类型不变，其中的文本仍可编辑。请在每个协作客户端上启用此选项。
+
+**默认值：** `false`
+
+```js
+CommentsKit.configure({
+  respectParentSchema: true,
+})
+```
+
 ## useLegacyWrapping
 
 <Callout title="警告" variant="warning">

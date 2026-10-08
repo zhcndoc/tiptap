@@ -1,0 +1,15 @@
+---
+title: 锁定选中的内容
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 锁定选中的内容 | Tiptap 内容保护文档
+  description: 允许用户选择内容并将其标记为锁定，使其无法编辑。
+  category: 可组合文档
+---
+
+要让用户选择任意内容并将其锁定：
+
+1. 在 schema 中定义一个[自定义标记或节点](/editor/extensions/custom-extensions/create-new)，并添加将其应用到选区的编辑器命令。
+2. 定义一条[保护规则](/composable-docs/content-protection/api-reference/policy)，选择带有该标记或节点的内容，并将权限设置为 `edit: false`，使其内容无法编辑。使用 `target: 'mark'` 保护标记内容及其标记，或使用 `target: 'node'` 保护节点、其属性和全部内容。

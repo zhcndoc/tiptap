@@ -1,0 +1,83 @@
+---
+title: 编辑器事件
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 编辑器事件 | Tiptap Slots 文档
+  description: Slot 事件负载和订阅生命周期。
+  category: 可组合文档
+---
+
+使用 `editor.on(name, listener)` 或对应的 `Slot.configure()` 回调订阅。使用 `editor.off(name, listener)` 移除监听器。
+
+```ts
+const onValidation = ({ state }: SlotValidationUpdateEvent) => showValidation(state)
+editor.on('slotValidationUpdate', onValidation)
+// When disposing the UI:
+editor.off('slotValidationUpdate', onValidation)
+```
+
+从 `@tiptap-pro/extension-slot` 导入负载类型。`Editor` 来自 `@tiptap/core`。
+
+## `slotsUpdate`
+
+初始索引和每次应用文档更改时触发。选项：`onSlotsUpdate`。
+
+### 负载（`SlotsUpdateEvent`）
+
+- `editor` (`Editor`)：源编辑器。
+- `snapshot` (`SlotSnapshot`)：更新后的文档和索引。
+
+## `activeSlotChange`
+
+初始状态以及活动条目变化时触发。选项：`onActiveSlotChange`。
+
+### 负载（`ActiveSlotChangeEvent`）
+
+- `editor` (`Editor`)：源编辑器。
+- `slot` (`SlotEntry | null`)：活动 Slot；位于 Slot 外部时为 `null`。
+
+## `slotValidationUpdate`
+
+验证变为待处理、当前或未验证状态时触发，包括显式上下文失效。选项：`onValidationUpdate`。
+
+### 负载（`SlotValidationUpdateEvent`）
+
+- `editor` (`Editor`)：源编辑器。
+- `state` (`SlotValidationState`)：更新后的验证存储。
+
+## `slotValidationError`
+
+编辑器绑定的验证器抛出异常、拒绝或返回格式错误的结果时触发。选项：`onValidationError`。
+
+### 负载（`SlotValidationErrorEvent`）
+
+在 [`SlotValidationError`](/composable-docs/slots/api-reference/validation#slotvalidationerror) 的基础上添加：
+
+- `editor` (`Editor`)：源编辑器。
+
+缺少验证器和已终止的请求不会触发此事件。
+
+## `slotCommandRejected`
+
+实际 Slot 命令被拒绝时触发，包括预检拒绝。选项：`onCommandRejected`。
+
+### 负载（`SlotCommandRejectedEvent`）
+
+在 [`SlotCommandRejection`](/composable-docs/slots/api-reference/types#slotcommandrejection) 的基础上添加：
+
+- `editor` (`Editor`)：源编辑器。
+
+## 传递
+
+- 选项回调和编辑器监听器会收到相同负载。同时注册两者会创建两个订阅。
+- 初始索引和活动 Slot 事件会在编辑器创建后触发。较晚的订阅者会读取存储；事件不会重放。
+- 更新事件会在存储更新后触发。拒绝事件会跟随决策；监听器返回值不会改变决策。
+- 负载数据是只读的。应用 UI 在显示之前必须遵守读取权限。
+- `editor.can()` 和纯验证函数不会触发编辑器事件。
+- `validateEditorSlots` 会触发验证事件。验证器错误会先于最终验证状态更新。
+- 后续写入应由应用调度。
+- 编辑器销毁时会清理扩展拥有的监听器和待处理验证。
+
+有关策略更新和保护拒绝，请参阅[内容保护事件](/composable-docs/content-protection/api-reference/extension#editor-events)。

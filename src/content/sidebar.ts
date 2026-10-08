@@ -61,6 +61,10 @@ export const sidebarConfig: SidebarConfig = {
           title: '比较',
         },
         {
+          href: '/composable-docs/slots/getting-started/overview',
+          title: '可组合文档',
+        },
+        {
           href: '/conversion/getting-started/overview',
           title: '转换',
         },

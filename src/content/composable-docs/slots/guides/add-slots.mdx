@@ -1,0 +1,88 @@
+---
+title: 向文档添加 Slot
+meta:
+  description: 插入、配置、填写并解散可编辑的 Slot 字段。
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+调用 `insertSlot` 命令向文档添加新 Slot。
+
+```ts
+// Inserts new slot at the selection
+editor.commands.insertSlot()
+```
+
+Slot 有两种类型：
+
+- **行内 Slot** 可以包含文本等行内内容
+- **块 Slot** 使用块布局，包含一个或多个段落、标题或其他块节点。
+
+要在保留选中文本内容的同时将其转换为 Slot，请调用 [`wrapInSlot`](/composable-docs/slots/api-reference/commands#wrapinslot)。省略 `range` 时，它会使用编辑器当前选区；也可以传入 `range: { from, to }` 来包裹指定文档范围：
+
+```ts
+editor.commands.wrapInSlot({
+  kind: 'inline',
+  id: 'customer',
+  config: { label: 'Customer name', placeholder: 'Enter a name', required: true },
+})
+```
+
+选择完整块时使用 `kind: 'block'`。`insertSlot` 会替换选中内容，而不是将其包裹起来。
+
+`wrapInSlot` 与 `insertSlot` 一样接受 `id` 和 `config`。省略 `id` 可自动生成。包裹操作会保留选中内容；它没有用于转换内容或推导配置的回调选项。应用可以先检查选区，再将选择的配置传给命令。
+
+创建 Slot 时，可以定义其类型和许多属性，例如唯一 ID、标签以及限制允许内容的一组规则。
+
+```ts
+editor.commands.insertSlot({
+  kind: 'inline',
+  id: 'customer',
+  config: {
+    label: 'Customer name',
+    required: true,
+    constraints: { maxLength: 120 },
+  },
+})
+```
+
+之后，可以在 Slot 中输入内容，或调用 `fillSlot` 命令来填写 Slot。
+
+```ts
+editor.commands.fillSlot({
+  id: 'customer',
+  // Tiptap JSON content
+  content: [{ type: 'text', text: 'Sam Rivera' }],
+})
+```
+
+其他有用的命令：
+
+- `clearSlot({ id })` 清空 Slot。
+- `dissolveSlot({ id })` 移除 Slot 包装并保留其内容，将其变成普通文档内容。
+- `removeSlot({ id })` 移除 Slot 及其内容。
+
+默认启用两个创建快捷方式：
+
+- 输入 `{{{` 可立即创建空的行内 Slot，并将光标放入其中。
+- 在其他内容为空的段落中输入 `[[[` 可立即创建块 Slot，并将光标放入其空段落中。
+
+无需输入结束分隔符或 Enter。设置 `Slot.configure({ shortcuts: false })` 可禁用所有 Slot 输入规则。[输入规则解析器](/composable-docs/slots/api-reference/extension#resolveinputruleslot)可以配置、填写或拒绝新 Slot。
+
+要将分隔符之间的文本也转换为行内 Slot，请配置一对分隔符：
+
+```ts
+Slot.configure({
+  shortcuts: { inline: { open: '{{', close: '}}' } },
+})
+```
+
+输入 `{{Ada}}` 会创建包含“Ada”的行内 Slot。这对分隔符始终创建行内 Slot，包括在空段落中。`{{{` 和 `[[[` 创建快捷方式仍保持启用。请参阅[快捷方式配置](/composable-docs/slots/api-reference/extension#slotshortcuts)来定制或禁用单个规则。
+
+## 示例：Slot 编辑器应用
+
+一个允许用户向文档添加 Slot 的模板编辑器示例。
+
+<CodeDemo isPro path="/Examples/SlotTemplate" />
+
+之后，可以将文档交给另一组用户填写 Slot。为此，请配置文档权限，使用户只能填写 Slot，不能编辑文档的其他部分。[阅读本指南](/composable-docs/slots/guides/fill-only)，了解如何设置编辑器以便用户填写文档 Slot。

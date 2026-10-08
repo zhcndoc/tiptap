@@ -1,0 +1,220 @@
+---
+title: 类型
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 类型 | Tiptap 内容保护文档
+  description: 权限结果、诊断信息、事件和可读内容类型。
+  category: 可组合文档
+---
+
+由 `@tiptap-pro/extension-content-protection` 导出的类型。另请参阅[策略类型](/composable-docs/content-protection/api-reference/policy)和[隐藏内容类型](/composable-docs/content-protection/api-reference/rendering)。
+
+## `PolicyDocumentOptions`
+
+检查文档的工具使用的共享输入。
+
+### 属性
+
+- `policy` (`ContentProtectionPolicy`)：要评估的策略。
+- `document` (`Node`)：要检查的文档。
+
+## `PolicyIssue`
+
+一个配置或输入错误。
+
+### 属性
+
+- `path` (`string`)：无效值的位置。
+- `code` (`'invalidFormat' | 'unsupportedVersion' | 'duplicateRuleId' | 'unknownNodeType' | 'unknownMarkType' | 'unknownAttribute'`)：错误类别。
+- `message` (`string`)：面向用户的解释。
+
+## `ProtectionConfigurationError`
+
+继承自 `Error`。工具或扩展收到无效策略时抛出。
+
+### 属性
+
+- `issues` (`PolicyIssue[]`)：配置诊断信息。
+- `name` (`string`)：错误类名称。
+- `message` (`string`)：失败摘要。
+
+## `ProtectionInputError`
+
+继承自 `ProtectionConfigurationError`。工具输入无效、schema 不兼容或缺少扩展状态时抛出。
+
+### 属性
+
+- `issues` (`PolicyIssue[]`)：输入诊断信息。
+- `name` (`string`)：错误类名称。
+- `message` (`string`)：失败摘要。
+
+## `ProtectionOperationKind`
+
+正在检查的变更。
+
+| 值                      | 操作                              |
+| ----------------------- | --------------------------------- |
+| `'insertNode'`          | 插入节点。                         |
+| `'removeNode'`          | 移除节点。                         |
+| `'changeNodeType'`      | 更改节点类型。                     |
+| `'moveNode'`            | 移动节点。                         |
+| `'changeChildren'`      | 更改直接子节点序列。               |
+| `'insertText'`          | 插入文本。                         |
+| `'removeText'`          | 移除文本。                         |
+| `'changeAttribute'`     | 更改节点属性。                     |
+| `'addMark'`             | 添加标记。                         |
+| `'removeMark'`          | 移除标记。                         |
+| `'changeMarkAttribute'` | 更改标记属性。                     |
+
+## `ProtectionOperation`
+
+描述文档中受影响的部分，但不包含其内容。
+
+### 属性
+
+- `kind` (`ProtectionOperationKind`)：变更类别。
+- `from` (`number`)：事务前文档中的起始位置。
+- `to` (`number`)：该文档中的结束位置。新插入内容映射到其插入点。
+- `nodeType?` (`string`)：受影响的节点类型（如适用）。
+- `markType?` (`string`)：受影响的标记类型（如适用）。
+- `attribute?` (`string`)：受影响的属性（如适用）。
+
+## `PermissionDecision`
+
+解析一项权限的结果。
+
+### 属性
+
+- `allowed` (`boolean`)：是否授予权限。
+- `ruleIds` (`string[]`)：获胜规则中具有 ID 的规则 ID，按声明顺序排列。
+- `ruleIndexes` (`number[]`)：获胜规则从零开始的索引，包括匿名规则。
+- `reasons` (`string[]`)：获胜规则的原因，按声明顺序排列；没有原因的规则会被省略。
+
+## `ProtectionViolation`
+
+事务被拒绝的一个原因。
+
+### 属性
+
+- `code` (`'editDenied' | 'readDenied' | 'unsupportedStep'`)：拒绝类别。
+- `operation` (`ProtectionOperation | null`)：被拒绝的操作；对于不支持的步骤为 `null`。
+- `ruleIds` (`string[]`)：获胜规则 ID（如果提供）。
+- `ruleIndexes` (`number[]`)：获胜规则从零开始的索引。
+- `reasons` (`string[]`)：匹配的拒绝说明。
+
+## `ProtectionCheck`
+
+检查拟议事务的结果。
+
+### 属性
+
+- `allowed` (`boolean`)：所有操作都被允许时为 `true`。
+- `violations` (`ProtectionViolation[]`)：按确定的位置/操作顺序排列的拒绝信息；允许时为空。
+- `documentRevision` (`number | null`)：编辑器文档版本；纯检查时为 `null`。
+- `policyRevision` (`number | null`)：编辑器策略版本；纯检查时为 `null`。
+
+## `ProtectionRejection`
+
+继承 `ProtectionCheck`，并将 `allowed` 固定为 `false`。
+
+## `PermissionSummary`
+
+一个范围的聚合权限。如果某个区域的文本可编辑但属性受保护，可以返回 `edit: 'some'`。
+
+### 属性
+
+- `read` (`'all' | 'some' | 'none'`)：范围中可读取的程度。
+- `edit` (`'all' | 'some' | 'none'`)：评估的编辑操作中全部、部分或没有被允许。
+- `ruleIds` (`string[]`)：产生结果的规则 ID（如果提供）。
+- `ruleIndexes` (`number[]`)：产生结果的规则从零开始的索引。
+
+## `ProtectionSubject`
+
+按 `target` 区分的、用于解释的现有目标。
+
+| `target`                                              | 其他属性                                                                                                            |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `'node'`、`'nodeType'`、`'nodeContent'`、`'children'` | `pos` (`number`)：节点起始位置；文档根节点为 `-1`。                                                                |
+| `'attribute'`                                         | `pos` (`number`)：节点位置。`name` (`string`)：属性名称。                                                           |
+| `'mark'`、`'markType'`、`'markContent'`               | `from` (`number)`、`to` (`number)`：标记范围。`type` (`string`)：标记名称。                                          |
+| `'markAttribute'`                                     | `from` (`number)`、`to` (`number)`：标记范围。`type` (`string)`：标记名称。`name` (`string)`：属性名称。             |
+
+指定的标记必须覆盖整个范围。位置无效、标记不存在或属性名称未知时会抛出 `ProtectionInputError`。
+
+## `ProtectionExplanation`
+
+一个主体的权限决策。
+
+### 属性
+
+- `subject` (`ProtectionSubject`)：检查的目标。
+- `read` (`PermissionDecision | null`)：读取决策；对于 `children` 为 `null`。
+- `edit` (`PermissionDecision`)：有效的编辑决策，包括读取限制。
+- `concealedBy` (`string[]`)：隐藏此目标的外层拒绝读取规则 ID。匿名规则没有可纳入的 ID。
+
+## `PolicyUpdate`
+
+已安装的策略变化。
+
+### 属性
+
+- `policy` (`ContentProtectionPolicy`)：新策略。
+- `policyRevision` (`number`)：更新后的版本。
+
+## `ContentProtectionRejectedEvent`
+
+继承 `ProtectionRejection`，并添加 `editor` (`Editor`)：拒绝事务的编辑器。包含诊断信息，不包含事务或隐藏内容。
+
+## `ContentProtectionPolicyUpdateEvent`
+
+继承 `PolicyUpdate`，并添加 `editor` (`Editor`)：策略发生变化的编辑器。
+
+## `ContentProtectionPolicyErrorEvent`
+
+### 属性
+
+- `editor` (`Editor`)：拒绝策略更新的编辑器。
+- `issues` (`PolicyIssue[]`)：配置诊断信息。
+
+## `ReadableMark`
+
+可读投影中的可见标记。
+
+### 属性
+
+- `type` (`string`)：标记类型名称。
+- `attrs?` (`Record<string, JsonValue>`)：可见标记属性。
+
+## `ReadableNode`
+
+按 `kind` 区分的展示树条目。这不是 Tiptap JSON 节点。
+
+### `kind: 'node'`
+
+- `type` (`string`)：可见节点类型，或部分隐藏内容的投影包装器。
+- `attrs?` (`Record<string, JsonValue>`)：可见节点属性。
+- `marks?` (`ReadableMark[]`)：可见标记。
+- `content` (`ReadableNode[]`)：可读子节点。
+
+### `kind: 'text'`
+
+- `text` (`string`)：可见文本。
+- `marks` (`ReadableMark[]`)：可见标记。
+
+### `kind: 'redacted'`
+
+- `inline` (`boolean`)：占位符是否占据行内位置。
+- `label` (`string`)：通过 `redactionText` 提供的中性替换文本。
+
+已隐藏条目不包含原始类型、ID、属性、标记、文本或内容长度。
+
+## `ReadableContent`
+
+[`getReadableContent`](/composable-docs/content-protection/api-reference/utilities#getreadablecontent) 的输出。
+
+### 属性
+
+- `content` (`ReadableNode[]`)：展示树，在需要时保留部分祖先包装器。
+- `text` (`string`)：该树的纯文本表示。

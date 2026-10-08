@@ -1,0 +1,67 @@
+---
+title: 为代码添加评论
+meta:
+  title: 代码评论 | Tiptap 评论文档
+  description: 通过扩展 Code 和 CodeBlock schema，在行内代码和代码块中启用评论线程。
+  category: 评论
+---
+
+要评论行内代码或代码块中的文本，请扩展代码扩展，允许使用 `CommentsKit` 中的 `inlineThread` 标记。
+
+默认情况下，`Code` 排除所有其他标记，`CodeBlock` 不允许任何标记。当你在代码中添加评论，或将带评论的文本设置为代码格式时，这些规则会移除评论锚点。有关该行为和维护者建议，请参阅 [issue #6398](https://github.com/ueberdosis/tiptap/issues/6398)。
+
+## 允许在行内代码中添加评论
+
+扩展 [Code](/editor/extensions/marks/code)，将 `excludes` 设为空值，使代码标记可以与 `inlineThread` 共存：
+
+```js
+import Code from '@tiptap/extension-code'
+
+const CodeWithComments = Code.extend({
+  excludes: '',
+})
+```
+
+这也允许代码与粗体、斜体等其他标记共存。要保留这些排除规则，请将 `excludes` 设置为空格分隔的标记名称列表。不要将 `inlineThread` 放入该列表。
+
+## 允许在代码块中添加评论
+
+扩展 [CodeBlock](/editor/extensions/nodes/code-block)，允许其文本使用 `inlineThread`：
+
+```js
+import CodeBlock from '@tiptap/extension-code-block'
+
+const CodeBlockWithComments = CodeBlock.extend({
+  marks: 'inlineThread',
+})
+```
+
+这样可以保留评论锚点，同时阻止其他标记进入代码块。如果你使用 [CodeBlockLowlight](/editor/extensions/nodes/code-block-lowlight)，请对该扩展应用同样的 `marks: 'inlineThread'` 覆盖设置。
+
+## 注册扩展后的扩展
+
+如果使用 [StarterKit](/editor/extensions/functionality/starterkit)，请先禁用其内置的 `Code` 和 `CodeBlock` 扩展，再注册替代扩展：
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { CommentsKit } from '@tiptap-pro/extension-comments'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit.configure({
+      code: false,
+      codeBlock: false,
+    }),
+    CodeWithComments,
+    CodeBlockWithComments,
+    CommentsKit.configure({
+      provider: collabProvider,
+    }),
+  ],
+})
+```
+
+将现有的 `TiptapCollabProvider` 实例用作 `collabProvider`。保留[安装指南](/comments/getting-started/install)中的协作设置。
+
+在每个协作客户端上应用相同的 schema 覆盖设置。然后使用常规的 [`setThread` 命令](/comments/integrate/editor-commands#setthread-content-data-commentdata)为选中的代码添加评论。这些覆盖设置会在你将带评论的文本设置为代码格式时保留评论锚点，但不会恢复已在默认 schema 下删除的线程。

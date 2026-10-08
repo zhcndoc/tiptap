@@ -19,6 +19,7 @@ const options = [
       },
       { label: '评论', href: '/comments/getting-started/overview' },
       { label: '比较', href: '/compare/getting-started/overview' },
+      { label: '可组合文档', href: '/composable-docs/slots/getting-started/overview' },
       {
         label: '修订记录',
         href: '/tracked-changes/getting-started/overview',

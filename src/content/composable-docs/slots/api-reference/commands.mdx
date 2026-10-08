@@ -1,0 +1,224 @@
+---
+title: 命令
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 命令 | Tiptap Slots 文档
+  description: 用于创建、填写和导航 Slot 的类型化命令。
+  category: 可组合文档
+---
+
+使用 `editor.commands`、`editor.chain()` 或 `editor.can()` 前，请添加 `Slot`。除非另有说明，每个命令都接受一个选项对象。
+
+参数无效、目标缺失或不明确、违反 schema 或权限被拒绝时，命令返回 `false`。无效的草稿内容也会被接受；验证不会阻止编辑。
+
+- 每次调用最多写入一个事务。无操作调用不会添加撤销记录。
+- 被拒绝的 Slot 命令会取消其链中组合的写入。
+- `editor.can()` 不触发事件、不运行验证器，也不会生成真实 ID。分发时会使用实际 ID 再次检查。
+- JSON 内容必须符合 schema。命令不会解析 HTML，也不会静默强制转换内容。
+
+`JSONContent` 来自 `@tiptap/core`。[配置](/composable-docs/slots/api-reference/concepts)和[结果类型](/composable-docs/slots/api-reference/types)由 Slot 软件包导出。
+
+## `insertSlot`
+
+插入 Slot 或替换当前选区。
+
+```ts
+editor.commands.insertSlot()
+```
+
+### 参数（可选的 `InsertSlotOptions`）
+
+- `kind?` (`SlotKind`)：`'block'` 或 `'inline'`。省略时，如果插入位置的父节点接受行内内容（包括空段落），则为 `'inline'`；否则为 `'block'`。使用 `at` 或当前选区起点。
+- `id?` (`string`)：唯一且非空的 ID。省略时自动生成。
+- `config?` (`SlotConfig`)：嵌入配置。默认值为 `{}`。
+- `content?` (`JSONContent[]`)：初始内容。省略时依次使用 `defaultContent`，然后使用该类型的空内容。
+- `at?` (`number`)：文档位置。省略时替换当前选区。
+
+### 返回值（`boolean`）
+
+插入成功时为 `true`，否则为 `false`。放置位置必须在不包裹或提升周围内容的情况下符合 schema。
+
+每次插入时，`defaultContent` 中的嵌套 Slot 都会获得新 ID，并重新映射它们之间的引用。显式 `content` 会保留提供的 ID；如果 ID 与现有 ID 重复，则会被拒绝。
+
+## `wrapInSlot`
+
+将现有内容包裹到 Slot 中。
+
+### 参数（`WrapSlotOptions`）
+
+- `kind` (`SlotKind`)：`'block'` 或 `'inline'`。
+- `id?` (`string`)：唯一且非空的 ID。省略时自动生成。
+- `config?` (`SlotConfig`)：嵌入配置。默认值为 `{}`。
+- `range?` (`{ from: number; to: number }`)：非空范围。默认值为当前选区。
+
+### 返回值（`boolean`）
+
+包裹成功时为 `true`，否则为 `false`。行内范围必须共享一个行内父节点；块范围必须包含完整的同级块。
+
+## `fillSlot`
+
+替换内容，同时保留 Slot ID 和配置。
+
+### 参数（`FillSlotOptions`）
+
+- `id` (`string`)：目标 Slot ID。
+- `content` (`JSONContent[]`)：替换内容。对于块 Slot，`[]` 会创建空段落。
+
+### 返回值（`boolean`）
+
+接受时为 `true`，否则为 `false`。替换父 Slot 可能移除嵌套 Slot，并需要移除它们的权限。
+
+## `fillSlots`
+
+以原子方式填写多个 Slot。
+
+### 参数
+
+- `values` (`FillSlotOptions[]`)：ID 和替换内容。
+
+### 返回值（`boolean`）
+
+所有填写都成功时为 `true`，包括空批次。目标重复、目标存在祖先/后代关系或任一填写被拒绝时为 `false`。
+
+## `clearSlot`
+
+使用该类型的空内容替换内容。嵌套 Slot 会被移除。
+
+### 参数（`SlotTarget`）
+
+- `id` (`string`)：目标 Slot ID。
+
+### 返回值（`boolean`）
+
+清空成功时为 `true`，否则为 `false`。不会恢复 `defaultContent`。
+
+## `dissolveSlot`
+
+移除包装器并保留其内容，包括嵌套 Slot。
+
+### 参数（`SlotTarget`）
+
+- `id` (`string`)：目标 Slot ID。
+
+### 返回值（`boolean`）
+
+解散成功时为 `true`；结果无法放入父节点或编辑被拒绝时为 `false`。
+
+## `removeSlot`
+
+移除包装器及其全部内容。
+
+### 参数（`SlotTarget`）
+
+- `id` (`string`)：目标 Slot ID。
+
+### 返回值（`boolean`）
+
+移除成功时为 `true`；父节点会变得不符合 schema 或编辑被拒绝时为 `false`。
+
+## `selectSlotContent`
+
+选择内容但不选择包装器。
+
+### 参数（`SlotTarget`）
+
+- `id` (`string`)：目标 Slot ID。
+
+### 返回值（`boolean`）
+
+选择成功时为 `true`；目标缺失、不明确或被隐藏时为 `false`。
+
+## `moveSlot`
+
+移动完整的 Slot 节点。
+
+### 参数（`SlotTarget & { to: number }`）
+
+- `id` (`string`)：目标 Slot ID。
+- `to` (`number`)：事务前坐标中的目标位置。
+
+### 返回值（`boolean`）
+
+移动成功时为 `true`；目标位于 Slot 内、父节点无效或编辑被拒绝时为 `false`。
+
+## `updateSlotConfig`
+
+在一次可撤销编辑中替换完整配置。
+
+### 参数（`SlotTarget & { config: SlotConfig }`）
+
+- `id` (`string`)：目标 Slot ID。
+- `config` (`SlotConfig`)：完整替换，而不是补丁。
+
+### 返回值（`boolean`）
+
+接受时为 `true`，否则为 `false`。现有内容不会改变，但可能在新规则下变得无效。
+
+## `repairSlotIds`
+
+保留每个 ID 的第一个有效出现位置，并为缺失或后续重复条目分配新 ID。
+
+### 参数
+
+无。
+
+### 返回值（`boolean`）
+
+修复成功或内容已经有效时为 `true`；生成或保护机制拒绝修复时为 `false`。不明确的跨字段引用保持不变。
+
+## `focusSlot`
+
+聚焦 Slot 内可到达的位置，并将其滚动到可见区域。
+
+### 参数（`SlotTarget & { edge?: 'start' | 'end' }`）
+
+- `id` (`string`)：目标 Slot ID。
+- `edge?` (`'start' | 'end'`)：要聚焦的一端。默认值为 `'start'`。
+
+### 返回值（`boolean`）
+
+聚焦成功时为 `true`；目标被隐藏或没有可到达的内容位置时为 `false`。
+
+## `focusNextSlot`
+
+聚焦文档顺序中的下一个 Slot，包括嵌套 Slot。跳过被隐藏的 Slot。
+
+### 参数（`NavigateSlotOptions`）
+
+- `fromId?` (`string`)：起始 Slot。默认值为当前最内层 Slot。
+- `wrap?` (`boolean`)：是否从另一端继续。默认值为 `false`。
+
+整个选项对象是可选的。
+
+### 返回值（`boolean`）
+
+焦点移动时为 `true`，否则为 `false`。没有活动 Slot 时，从第一个可到达的 Slot 开始。
+
+## `focusPreviousSlot`
+
+聚焦文档顺序中的上一个 Slot，包括嵌套 Slot。跳过被隐藏的 Slot。
+
+### 参数（`NavigateSlotOptions`）
+
+- `fromId?` (`string`)：起始 Slot。默认值为当前最内层 Slot。
+- `wrap?` (`boolean`)：是否从另一端继续。默认值为 `false`。
+
+整个选项对象是可选的。
+
+### 返回值（`boolean`）
+
+焦点移动时为 `true`，否则为 `false`。没有活动 Slot 时，从最后一个可到达的 Slot 开始。
+
+## `invalidateSlotValidation`
+
+增加上下文版本，终止待处理的验证并清除缓存结果。
+
+### 参数
+
+无。
+
+### 返回值（`boolean`）
+
+失效后为 `true`。不会更改文档内容或撤销历史，并会触发 `slotValidationUpdate`。

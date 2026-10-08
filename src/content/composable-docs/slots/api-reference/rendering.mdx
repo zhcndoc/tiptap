@@ -1,0 +1,103 @@
+---
+title: 渲染和 NodeView
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 渲染和 NodeView | Tiptap Slots 文档
+  description: 定制 Slot 标记、NodeView 和视图更新。
+  category: 可组合文档
+---
+
+将 `BlockSlot` 和 `InlineSlot` 作为普通 Tiptap 节点扩展进行定制。将它们传给 `Slot`，即可保留命令、索引和验证行为。
+
+## HTML 属性
+
+```ts
+Slot.configure({
+  blockSlot: BlockSlot.configure({ HTMLAttributes: { class: 'block-field' } }),
+  inlineSlot: InlineSlot.configure({ HTMLAttributes: { class: 'inline-field' } }),
+})
+```
+
+- `HTMLAttributes` (`Record<string, string>`)：外层元素属性。默认值为 `{}`。
+- 必需的 `data-slot-*` 属性优先于自定义属性。
+- 软件包不提供工具栏、边框或颜色。请在应用中设置包装器样式。
+
+### 序列化属性
+
+| 属性               | 值                      | 用途                              |
+| ------------------ | ----------------------- | --------------------------------- |
+| `data-slot-kind`   | `'block'` 或 `'inline'` | 标识节点类型。                     |
+| `data-slot-id`     | Slot ID                 | 保留标识。                        |
+| `data-slot-config` | 转义后的 JSON            | 保留嵌入配置。                    |
+
+块 Slot 的默认包装器是 `div`，行内 Slot 的默认包装器是 `span`。可访问名称使用 `config.label`，没有时回退到 ID。
+
+### 仅视图属性
+
+| 属性                    | 值                     | 用途                                   |
+| ----------------------- | ---------------------- | -------------------------------------- |
+| `data-slot-empty`       | `'true'` 或 `'false'`  | 设置空字段样式。                       |
+| `data-slot-active`      | `'true'` 或 `'false'`  | 设置活动字段样式。                     |
+| `data-slot-placeholder` | 已配置的占位符         | 字段为空时提供文本。                   |
+
+这些属性和占位符展示不会持久化到 JSON、序列化 HTML 或剪贴板内容中。
+
+## 自定义 NodeView
+
+```ts
+const CustomBlockSlot = BlockSlot.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(MySlotView)
+  },
+})
+
+Slot.configure({ blockSlot: CustomBlockSlot })
+```
+
+`ReactNodeViewRenderer` 来自 `@tiptap/react`。JavaScript 和 Vue 使用各自标准的 Tiptap NodeView API。
+
+### 约定
+
+- 保留规范的节点名称、`id`/`config` 属性、内容表达式以及 defining/isolating 行为。
+- 只通过 `Slot` 注册定制实例。实例在编辑器创建时固定。
+- 提供一个可编辑的 `contentDOM`，或框架的 `NodeViewContent` 等价物。
+- 让 Tiptap 渲染文档内容。不要从 `node.content` 再渲染一份副本。
+- 将控件和标签标记为不可编辑。通过命令执行编辑。
+- 行内包装器和内容容器必须使用兼容行内布局的元素，例如 `span`。
+- 自定义视图负责可见标签和占位符。默认占位符文本不会添加到自定义视图。
+- 保留选区、嵌套编辑、IME 和光标行为。不要吞掉必要的内容事件或变更。
+
+有关框架 API，请参阅 [Tiptap NodeView](/editor/extensions/custom-extensions/node-views)。
+
+## 验证和权限更新
+
+当只有属性发生变化时，使用 [`subscribeSlotViewUpdates`](/composable-docs/slots/api-reference/utilities#subscribeslotviewupdates) 刷新 UI。
+
+```ts
+const unsubscribe = subscribeSlotViewUpdates({ editor, onUpdate: refresh })
+// When disposing the view:
+unsubscribe()
+```
+
+- 从 `editor.storage.slot` 读取快照、活动字段和验证状态。
+- 导入的 ID 不明确时，使用 `getPos()` 和条目位置。
+- 使用 `editor.can()` 检查命令可用性，并使用内容保护查询获取解释。
+- 只渲染当前验证结果。显示消息或内容前应用读取权限。
+- 挂载视图不会开始验证。
+
+## HTML 序列化
+
+- `addNodeView` 控制编辑器 UI；`renderHTML` 控制导出的 HTML。
+- 自定义 `renderHTML` 必须保留三个序列化属性和一个内容插槽。
+- 根据当前节点生成属性，并正确进行转义。
+- 自定义 `parseHTML` 必须保留 ID 和完整配置。保留默认解析器作为回退。
+- HTML 中格式错误的配置 JSON 会变成 `config: null`，并产生验证问题。
+- UI 控件、占位符和验证消息属于 NodeView，不属于导出内容。
+
+## 已隐藏内容
+
+内容保护会使用自己的[隐藏内容渲染器](/composable-docs/content-protection/api-reference/rendering)替换被隐藏的节点。原始 Slot NodeView 不会继续挂载。
+
+可读取的父节点可能包含被隐藏的子节点。其自定义控件不得在其他位置显示这些子节点的文本、属性或 JSON。完整源文档仍保留在客户端内存中。

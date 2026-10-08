@@ -1,0 +1,153 @@
+---
+title: 工具
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 工具 | Tiptap Slots 文档
+  description: Slot 读取器、视图订阅和填写策略。
+  category: 可组合文档
+---
+
+从 `@tiptap-pro/extension-slot` 导入这些函数。每个函数都接受一个选项对象；`createSlotFillingPolicy` 也接受无参数调用。
+
+`Editor` 来自 `@tiptap/core`；`Schema` 来自 `@tiptap/pm/model`。请参阅[共享类型](/composable-docs/slots/api-reference/types)。
+
+## `createSlotSnapshot`
+
+在没有编辑器的情况下捕获不可变文档和 Slot 索引。
+
+### 参数
+
+- `document` (`SlotDocument`)：完整文档。
+- `schema?` (`Schema`)：用于检查 JSON 的 schema。对于 ProseMirror 节点，会自动使用其 schema。
+
+### 返回值（`SlotSnapshot`）
+
+返回文档、条目和不透明的快照 ID。两个版本都为 `null`。输入格式错误时抛出 `SlotInputError`。
+
+没有 schema 时，JSON 检查会覆盖结构和 Slot 数据；不会确认其与编辑器 schema 的兼容性。
+
+## `getSlots`
+
+按文档顺序读取每个 Slot，包括嵌套 Slot。
+
+### 参数
+
+传入 `{ document, schema? }` 或 `{ snapshot }`。
+
+- `document` (`SlotDocument`)：完整文档。
+- `schema?` (`Schema`)：用于 JSON 检查的可选 schema；对于 ProseMirror 节点隐式使用。
+- `snapshot` (`SlotSnapshot`)：要读取的现有快照，而不是创建新快照。
+
+### 返回值（`SlotEntry[]`）
+
+只读条目。输入格式错误时抛出 `SlotInputError`。
+
+## `getSlot`
+
+按 ID 读取一个 Slot。
+
+### 参数
+
+传入 `{ document, schema?, id }` 或 `{ snapshot, id }`。
+
+- `document` (`SlotDocument`)：完整文档。
+- `id` (`string`)：精确的 Slot ID。
+- `schema?` (`Schema`)：用于 JSON 检查的可选 schema；对于 ProseMirror 节点隐式使用。
+- `snapshot` (`SlotSnapshot`)：要搜索的现有快照，而不是创建新快照。
+
+### 返回值（`SlotEntry | null`）
+
+匹配的条目；不存在时为 `null`。匹配重复或输入格式错误时抛出 `SlotInputError`。
+
+## `subscribeSlotViewUpdates`
+
+将应用 UI 或 NodeView 订阅到编辑器状态变化。需要 `Slot`。
+
+### 参数
+
+- `editor` (`Editor`)：要观察的编辑器。
+- `onUpdate` (`() => void`)：读取刷新后的公开存储。会立即调用，之后在文档、选区、验证和事务更新时调用。
+
+### 返回值（`() => void`）
+
+幂等的取消订阅函数。销毁视图时调用它。订阅不会编辑内容或开始验证。
+
+## `createSlotFillingPolicy`
+
+创建允许用户填写现有 Slot、同时保护周围文档和字段定义的策略。需要 [内容保护](/composable-docs/content-protection/getting-started/overview) 才能执行该策略。
+
+```ts
+const policy = createSlotFillingPolicy({ editableSlotIds: ['summary', 'decision'] })
+```
+
+### 参数（`SlotFillingPolicyOptions`）
+
+- `editableSlotIds?` (`string[]`)：可填写的 ID 及其后代内容。省略时允许每个 Slot，包括未来字段；`[]` 表示没有可编辑字段。
+- `documentType?` (`string`)：根节点名称。默认值为 `'doc'`。
+- `ruleIdPrefix?` (`string`)：生成规则 ID 的前缀。默认值为 `'slotFilling'`。
+
+### 返回值（`SlotFillingPolicy`）
+
+普通策略 JSON，可赋值给 `ContentProtectionPolicy`。不会检查或更改文档。参数无效时抛出 `SlotInputError`；重复 ID 会去重并排序。未知 ID 不匹配任何内容。
+
+### 生成的规则
+
+ID 使用 `<ruleIdPrefix>.<suffix>`。
+
+| 后缀                 | 优先级   | 效果                                                        |
+| -------------------- | -------- | ------------------------------------------------------------ |
+| `documentContent`    | `0`      | 拒绝编辑根内容。                                             |
+| `documentAttributes` | `0`      | 拒绝编辑所有根属性。                                           |
+| `fillableContent`    | `10`     | 允许编辑选定 Slot 及其后代的内容。                             |
+| `slotStructure`      | `20`     | 拒绝插入、移除、重新设置类型或移动 Slot 节点。                  |
+| `slotAttributes`     | `20`     | 拒绝更改所有 Slot 属性。                                       |
+
+### 行为
+
+- 允许父 Slot 也会允许编辑未列出的嵌套 Slot 内容。要限制后代，请添加优先级高于 `10` 的内容拒绝规则。列出的子 Slot 可以在未列出的父 Slot 中编辑。
+- 如果清空或替换父 Slot 会移除嵌套 Slot，则操作会被拒绝。
+- 允许的 Slot 内，普通文本和格式仍可编辑。Slot 验证不会阻止编辑。
+- 不会生成读取规则。现有读取限制仍然适用。
+- ID 会选择所有匹配的出现位置。分配字段前请验证导入的标识问题。
+- 使用 `setContentProtectionPolicy({ policy })` 替换策略；修改已安装对象不会产生影响。
+- 更高优先级的应用规则可以覆盖这些规则。组合策略时请使用唯一前缀。
+
+## `SlotFillingPolicy`
+
+### 属性
+
+- `version` (`1`)：策略格式版本。
+- `rules` (`SlotFillingRule[]`)：生成的五条规则。
+
+## `SlotFillingRule`
+
+### 属性
+
+- `id` (`string`)：生成的唯一规则 ID。
+- `priority` (`number`)：规则优先级。
+- `selector` (`{ target: 'nodeType'; node: SlotFillingNodeMatch } | { target: 'nodeContent'; node: SlotFillingNodeMatch } | { target: 'attribute'; node: SlotFillingNodeMatch; names?: string[] }`)：目标和匹配条件。
+- `permissions` (`{ edit: boolean }`)：是否允许编辑。
+- `reason?` (`string`)：可选诊断说明。
+
+### 选择器属性
+
+- `target` (`'nodeType' | 'nodeContent' | 'attribute'`)：受保护的操作类别。
+- `node` (`SlotFillingNodeMatch`)：要匹配的节点。
+- `names?` (`string[]`)：`attribute` 规则的属性名称。省略时表示所有属性。
+
+## `SlotFillingNodeMatch`
+
+### 属性
+
+- `types` (`string[]`)：精确的节点类型名称。
+- `attributes?` (`{ name: 'id'; operator: 'in'; values: string[] }[]`)：ID 过滤器。省略时匹配选定类型的所有节点。
+
+### 属性过滤器属性
+
+- `name` (`'id'`)：Slot 标识属性。
+- `operator` (`'in'`)：成员关系比较。
+- `values` (`string[]`)：接受的精确且区分大小写的 ID。
+
+有关优先级和选择器行为，请参阅[策略语言](/composable-docs/content-protection/api-reference/policy)。验证函数在[验证](/composable-docs/slots/api-reference/validation)中单独说明。

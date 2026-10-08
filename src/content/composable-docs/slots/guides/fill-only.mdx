@@ -1,0 +1,62 @@
+---
+title: 仅允许填写
+meta:
+  description: 使用现成策略保护文档内容并分配单独的 Slot。
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+要阻止用户编辑 Slot 之外的内容，请使用 [`ContentProtection`](/composable-docs/content-protection/getting-started/overview) 扩展。
+
+<CodeDemo isPro path="/Examples/SlotFilling" />
+
+`ContentProtection` 扩展接受[内容保护策略](/composable-docs/content-protection/api-reference/policy)。使用 [`createSlotFillingPolicy` 工具](/composable-docs/slots/api-reference/utilities#createslotfillingpolicy)允许编辑 Slot 内的内容，同时保护其配置和周围文档。
+
+```ts
+import { Slot, createSlotFillingPolicy } from '@tiptap-pro/extension-slot'
+import { ContentProtection } from '@tiptap-pro/extension-content-protection'
+
+const extensions = [
+  StarterKit,
+  Slot,
+  ContentProtection.configure({
+    policy: createSlotFillingPolicy(),
+  }),
+]
+```
+
+要允许用户编辑选定的 Slot，请将其 ID 传给策略创建器。这也会允许编辑嵌套 Slot 中的内容。使用[更高优先级的规则](/composable-docs/content-protection/guides/example-policies#protect-nested-content)限制嵌套内容。
+
+```ts
+editor.commands.setContentProtectionPolicy({
+  policy: createSlotFillingPolicy({
+    editableSlotIds: ['summary', 'justification'],
+  }),
+})
+```
+
+## 按角色分配 Slot
+
+角色属于你的应用。要按 ID 前缀分配 Slot，请读取当前 ID，在宿主应用中筛选，然后将准确的 ID 传给 `createSlotFillingPolicy`：
+
+```ts
+import { getSlots } from '@tiptap-pro/extension-slot'
+
+function applyRole(role: 'Auditor' | 'Reviewer') {
+  const prefix = role === 'Auditor' ? 'audit-' : 'review-'
+  const editableSlotIds = getSlots({ document: editor.state.doc }).flatMap(({ id }) =>
+    id && (id.startsWith(prefix) || id.startsWith('all-')) ? [id] : [],
+  )
+  editor.commands.setContentProtectionPolicy({
+    policy: createSlotFillingPolicy({ editableSlotIds }),
+  })
+}
+```
+
+当角色或 Slot ID 集合变化时调用 `applyRole`。策略包含准确的 ID，不会持续重新评估前缀。可编辑的父 Slot 也允许编辑其嵌套内容，因此当嵌套 Slot 需要不同分配时，请使用更高优先级的规则。
+
+## 协作
+
+Slots 可以与 [Tiptap 协作](/editor/extensions/functionality/collaboration)一起使用。将 `Slot` 与 `Collaboration` 和 `ContentProtection` 一起加入，并使用 `StarterKit.configure({ undoRedo: false })` 禁用 StarterKit 的本地撤销/重做。
+
+Slot 内容、ID 和配置会通过共享文档同步。每个协作者都可以使用自己的 `editableSlotIds`：它们限制本地编辑，但不会拒绝其他协作者的更新。协作撤销/重做也会同步，不进行本地策略检查。共享内容变化时，Slot 快照和验证会刷新；验证结果和策略保留在本地。

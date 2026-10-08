@@ -1,0 +1,155 @@
+---
+title: 类型
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 类型 | Tiptap Slots 文档
+  description: Slot 快照、条目、验证结果和诊断信息。
+  category: 可组合文档
+---
+
+从 `@tiptap-pro/extension-slot` 导入这些类型。返回的快照和集合对调用者是只读的。
+
+`Editor` 和 `JSONContent` 来自 `@tiptap/core`；文档 `Node` 和 `Schema` 来自 `@tiptap/pm/model`。
+
+## `JsonValue`
+
+类型：`null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue }`。
+
+数字必须是有限值。函数、类实例和循环值都是无效配置数据。可选的 `undefined` 属性会被省略。
+
+## `SlotKind`
+
+类型：`'block' | 'inline'`。决定使用哪种 Slot 节点。
+
+## `SlotDocument`
+
+类型：`JSONContent | Node`。完整的 Tiptap JSON 或 ProseMirror 文档。
+
+## `SlotEntry`
+
+一个已索引的 Slot，包括格式错误的导入条目。
+
+### 属性
+
+- `id` (`string | null`)：Slot ID；缺失或无效时为 `null`。
+- `kind` (`SlotKind`)：块或行内。
+- `path` (`number[]`)：从文档根节点开始的子节点索引，用于区分重复 ID 条目。
+- `parentId` (`string | null`)：最近的包含 Slot ID；没有时为 `null`。
+- `depth` (`number`)：嵌套深度；顶层 Slot 的深度为 `0`。
+- `pos` (`number`)：Slot 节点前的位置。
+- `contentFrom` (`number`)：Slot 内的起始位置。
+- `contentTo` (`number`)：Slot 内的结束位置。
+- `config` (`SlotConfig | null`)：解析后的配置；无效时为 `null`。
+- `rawConfig` (`JsonValue`)：原始配置，包括格式错误的 JSON 值。
+- `content` (`JSONContent[]`)：当前子内容。
+- `text` (`string`)：验证文本投影。
+- `empty` (`boolean`)：内容是否为空，与必填性或有效性无关。
+
+位置只适用于生成它们的快照。请参阅[测量](/composable-docs/slots/api-reference/validation#measurements)。
+
+## `SlotSnapshot`
+
+一起捕获的不可变文档和索引。
+
+### 属性
+
+- `id` (`string`)：不透明的快照标识。
+- `document` (`JSONContent`)：捕获的文档。
+- `slots` (`SlotEntry[]`)：按文档顺序排列的 Slot，包括嵌套字段。
+- `documentRevision` (`number | null`)：编辑器文档版本；独立快照为 `null`。
+- `contextRevision` (`number | null`)：编辑器验证上下文版本；独立快照为 `null`。
+
+## `SlotIssue`
+
+### 属性
+
+- `code` (`string`)：内置或 `custom.*` 诊断代码。
+- `severity` (`'error' | 'warning'`)：该问题是否导致验证失败。
+- `category` (`'content' | 'configuration' | 'identity' | 'unavailable'`)：失败类型。
+- `slotId` (`string | null`)：受影响的 ID（如果可用）。
+- `path` (`number[] | null`)：条目路径；字段缺失时为 `null`。
+- `message` (`string`)：回退显示文本。
+- `source` (`'builtin' | 'validator' | 'crossField'`)：产生问题的检查。
+- `validator?` (`string`)：应用验证器名称（如适用）。
+- `ownerId?` (`string`)：跨字段规则所属者（如适用）。
+- `ruleId?` (`string`)：显式跨字段规则 ID（如果提供）。
+- `ruleIndex?` (`number`)：跨字段规则从零开始的索引。
+- `details?` (`Record<string, JsonValue>`)：结构化诊断数据（如果可用）。
+
+### 内置代码
+
+| 代码                                                                                                | 含义                                                  |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `required`                                                                                        | 必填字段为空。                                          |
+| `disallowedBlock`、`disallowedInline`、`disallowedText`、`disallowedMark`、`disallowedAttributes` | 内容与允许的类型或属性不匹配。                         |
+| `minLength`、`maxLength`、`minChildren`、`maxChildren`                                            | 值超出配置的范围。                                      |
+| `pattern`、`value`                                                                                | 文本不符合模式或可接受值列表。                         |
+| `nestedSlot`、`nestedKind`、`maxDepth`                                                            | 嵌套 Slot 违反所属 Slot 的规则。                       |
+| `missingId`、`duplicateId`、`missingSlot`                                                         | 字段标识缺失、不明确或不存在。                         |
+| `invalidConfiguration`                                                                            | 配置无法使用。                                          |
+| `unknownNodeType`、`unknownMarkType`                                                              | schema 中不存在已配置的类型。                          |
+| `missingValidator`、`validatorFailed`、`invalidValidatorResult`                                   | 应用检查不可用。                                        |
+
+使用代码和 details 进行本地化。自定义消息和 details 不得在应用 UI 中暴露隐藏内容。
+
+## `SlotValidationEntry`
+
+### 属性
+
+- `slotId` (`string | null`)：已验证的 ID（如果可用）。
+- `path` (`number[]`)：快照中的条目路径。
+- `empty` (`boolean`)：Slot 是否为空。
+- `status` (`'valid' | 'invalid' | 'unavailable'`)：条目结果。
+- `issues` (`SlotIssue[]`)：条目诊断信息。
+
+## `SlotValidationResult`
+
+### 属性
+
+- `snapshotId` (`string`)：已验证的快照标识。
+- `documentRevision` (`number | null`)：捕获的文档版本。
+- `contextRevision` (`number | null`)：捕获的应用上下文版本。
+- `valid` (`boolean`)：只有不存在错误问题或不可用检查时才为 `true`。
+- `status` (`'valid' | 'invalid' | 'unavailable'`)：聚合结果；不可用优先。
+- `scope` (`'document' | 'slot'`)：验证范围。
+- `entries` (`SlotValidationEntry[]`)：已验证条目。
+- `issues` (`SlotIssue[]`)：所有问题，包括文档中缺失的预期字段。
+
+## `InputIssue`
+
+### 属性
+
+- `path` (`string`)：提供参数中的位置。
+- `code` (`string`)：机器可读的失败代码。
+- `message` (`string`)：诊断描述。
+
+## `SlotConfigIssue`
+
+与 `InputIssue` 具有相同属性的配置诊断：`path` (`string`)、`code` (`string`) 和 `message` (`string`)。
+
+## `SlotInputError`
+
+继承 `Error`。报告格式错误的 API 输入。
+
+### 构造函数
+
+- `message` (`string`)：错误摘要。
+- `issues?` (`InputIssue[]`)：详细诊断。省略时使用 `message` 创建一个 `invalidInput` 问题。
+
+### 属性
+
+- `name` (`string`)：`'SlotInputError'`。
+- `message` (`string`)：错误摘要。
+- `issues` (`InputIssue[]`，readonly)：输入诊断信息。
+
+## `SlotCommandRejection`
+
+### 属性
+
+- `command` (`string`)：被拒绝的命令名称。
+- `code` (`'missingSlot' | 'ambiguousSlot' | 'invalidInput' | 'schemaMismatch' | 'idGenerationFailed' | 'protected' | 'overlappingTargets' | 'invalidSelection' | 'unsupportedContext'`)：拒绝原因。
+- `slotIds` (`string[]`)：相关目标 ID。
+
+有关输入类型，请参阅[命令](/composable-docs/slots/api-reference/commands)；有关验证器类型，请参阅[验证](/composable-docs/slots/api-reference/validation)；有关负载，请参阅[事件](/composable-docs/slots/api-reference/events)。

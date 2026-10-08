@@ -1,0 +1,78 @@
+---
+title: 扩展
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 扩展 | Tiptap 内容保护文档
+  description: 内容保护选项、存储和编辑器事件。
+  category: 可组合文档
+---
+
+## `ContentProtection`
+
+根据策略检查文档编辑，并用占位符替换已隐藏的内容。该扩展不会向 schema 添加节点、标记或属性。
+
+```ts
+import { ContentProtection } from '@tiptap-pro/extension-content-protection'
+
+ContentProtection.configure({ policy })
+```
+
+### 选项（`ContentProtectionOptions`）
+
+- `policy` (`ContentProtectionPolicy`)：当前[策略](/composable-docs/content-protection/api-reference/policy)。默认值为 `{ version: 1, rules: [] }`，允许所有读取和编辑。
+- `redactionText` (`string`)：默认占位符文本、可访问名称和剪贴板文本。默认值为 `'[Hidden content]'`，不能为空。
+- `renderRedaction` (`RedactionRenderer | null`)：创建用于替换 `read: false` 策略隐藏内容的 UI。它会接收安全的占位符属性，包括 `redactionText` 提供的文本和可访问标签，并返回带可选生命周期回调的 DOM 元素。可以用它设置自定义标签或宿主控制项（例如请求访问按钮）；它不会接收隐藏内容，也不能授予访问权限。默认值为 `null`，使用内置占位符。参见[已隐藏内容](/composable-docs/content-protection/api-reference/rendering)。
+- `onRejected` (`(event: ContentProtectionRejectedEvent) => void`)：策略拒绝文档编辑后调用。编辑不会应用；可以使用 `event.violations` 向用户说明原因，例如在通知中展示。这是 `contentProtectionRejected` 事件的选项形式，不是用于决定是否允许编辑的回调。默认为空操作，因此被拒绝的编辑不会显示应用通知。
+- `onPolicyUpdate` (`(event: ContentProtectionPolicyUpdateEvent) => void`)：`contentProtectionPolicyUpdate` 的监听器。默认为空操作。
+- `onPolicyError` (`(event: ContentProtectionPolicyErrorEvent) => void`)：`contentProtectionPolicyError` 的监听器。默认为空操作。
+
+初始选项无效时会抛出 [`ProtectionConfigurationError`](/composable-docs/content-protection/api-reference/types#protectionconfigurationerror)。
+
+### 存储（`ContentProtectionStorage`）
+
+可通过 `editor.storage.contentProtection` 访问。
+
+- `policy` (`ContentProtectionPolicy`，readonly)：当前策略。
+- `policyRevision` (`number`，readonly)：从 `0` 开始；策略变化时递增。
+- `documentRevision` (`number`，readonly)：从 `0` 开始；每次应用改变内容的事务时递增。
+
+### `storage.checkTransaction`
+
+检查拟议事务但不应用它。等同于 [`checkProtectedTransaction`](/composable-docs/content-protection/api-reference/utilities#checkprotectedtransaction)。
+
+#### 参数
+
+- `transaction` (`Transaction`)：根据编辑器当前状态创建的事务，以 `{ transaction }` 形式传入。
+
+#### 返回值（`ProtectionCheck`）
+
+权限结果、违规信息和当前版本。如果事务的起始文档不匹配，则抛出 `ProtectionInputError`。
+
+### `storage.isReadable`
+
+检查整个范围在当前策略下是否可读。
+
+接受一个选项对象：`{ document, range }`。
+
+#### 参数
+
+- `document` (`Node`)：要检查的文档。
+- `range` (`{ from: number; to: number }`)：要检查的文档范围。
+
+#### 返回值（`boolean`）
+
+整个范围可读时返回 `true`，否则返回 `false`。
+
+### 编辑器事件
+
+使用 `editor.on(name, listener)` 注册，并使用 `editor.off(name, listener)` 移除。选项回调会接收相同的负载。
+
+| 事件                           | 负载                                 | 触发时机                             |
+| ------------------------------- | ------------------------------------ | -------------------------------------- |
+| `contentProtectionRejected`     | `ContentProtectionRejectedEvent`     | 事务被拒绝。                          |
+| `contentProtectionPolicyUpdate` | `ContentProtectionPolicyUpdateEvent` | 安装了不同的有效策略。                 |
+| `contentProtectionPolicyError`  | `ContentProtectionPolicyErrorEvent`  | 策略替换无效。                         |
+
+请参阅[事件负载](/composable-docs/content-protection/api-reference/types#contentprotectionrejectedevent)。试运行检查不会触发事件；`renderRedaction` 是工厂函数，不是事件监听器。

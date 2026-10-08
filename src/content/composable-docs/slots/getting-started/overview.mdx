@@ -1,0 +1,59 @@
+---
+title: Slots
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: Slots | Tiptap 文档
+  description: 使用嵌入且可验证的 Slot 字段构建可编辑的文档模板。
+  category: 可组合文档
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+使用 **Slots**，可以将文档变成带有可填写字段的模板和表单。定义规则来验证每个 Slot 的内容，并使用内容保护控制谁可以编辑它。
+
+## 安装
+
+首先，[联系我们](https://tiptap.dev/contact-sales?form=pilot-program)加入 Tiptap 可组合文档试点计划。
+
+然后，按照[私有注册表指南](/guides/pro-extensions)配置包管理器。
+
+然后，安装软件包：
+
+```bash
+npm install @tiptap/core @tiptap/starter-kit @tiptap-pro/extension-slot
+```
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { Slot } from '@tiptap-pro/extension-slot'
+
+const editor = new Editor({
+  extensions: [StarterKit, Slot],
+  content: {
+    type: 'doc',
+    // Pass a document with slots, or let the user create them
+    content: [
+      // An example slot
+      {
+        type: 'blockSlot',
+        attrs: {
+          id: 'summary',
+          config: { label: 'Summary', required: true },
+        },
+        content: [{ type: 'paragraph' }],
+      },
+    ],
+  },
+})
+```
+
+<Callout title="仅支持客户端" variant="info">
+  Slots 目前仅支持客户端。如果你希望在服务器上填写 Slot，请[联系我们](https://tiptap.dev/contact-sales?form=pilot-program)。
+</Callout>
+
+## 后续步骤
+
+阅读[快速入门指南](/composable-docs/slots/guides/add-slots)，了解如何向文档添加 Slot。然后，[设置文档以便用户填写 Slot](/composable-docs/slots/guides/fill-only)。

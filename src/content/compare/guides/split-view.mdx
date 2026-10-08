@@ -2,7 +2,8 @@
 title: 分栏视图
 tags:
   - type: beta
-  - type: restricted
+  - type: addon
+    tooltip: 联系我们将 Compare 添加到计划
 meta:
   title: 分栏视图 | Tiptap 文档
   description: 在两个独立窗格中审阅变更，并与修订记录集成。
@@ -18,14 +19,11 @@ import { Callout } from '@/components/ui/Callout'
 
 ## 安装
 
-首先，[联系我们](https://tiptap.dev/contact-sales?form=pilot-program)加入分栏视图试点计划。
+首先，[联系我们](https://tiptap.dev/contact-sales)购买 Compare 附加功能并将其添加到你的计划中。
 
-<Callout title="独立产品" variant="info">
-  [修订记录](/tracked-changes/getting-started/overview)和 [Tiptap
-  Compare](/compare/getting-started/overview) 是与分栏视图不同的产品，需要单独购买。
-</Callout>
+获得访问权限后，请按照[私有注册表指南](/guides/pro-extensions)配置包管理器。
 
-请先设置[私有注册表](/guides/pro-extensions)，然后安装：
+然后，安装软件包：
 
 ```bash
 npm install @tiptap-pro/extension-split-view @tiptap-pro/extension-tracked-changes
@@ -114,6 +112,16 @@ manager = createSplitView({ mainEditor, beforeEditor, afterEditor })
 ```
 
 组件卸载时销毁三个编辑器。每个编辑器都有自己的撤销历史；分栏视图不提供共享撤销。
+
+## 与 Pages 扩展一起使用
+
+要比较分页文档，请将 `Pages` 扩展添加到两个分栏窗格，并为它们使用匹配的页面格式、边距、页眉、页脚和缩放比例。Split View 会自动检测 Pages，并使跨页面边界的块保持对齐。请使用共享的水平滚动容器。
+
+<Callout title="独立产品" variant="info">
+  [Pages](/pages/getting-started/overview) 扩展是与 Split View 不同的产品。
+</Callout>
+
+<CodeDemo isPro path="/Extensions/SplitViewPages" />
 
 ## API 参考
 

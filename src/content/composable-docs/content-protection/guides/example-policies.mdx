@@ -1,0 +1,198 @@
+---
+title: 策略示例
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 策略示例 | Tiptap 内容保护文档
+  description: 用于标题、属性、隐藏内容、模板和表格的简单及组合策略。
+  category: 可组合文档
+---
+
+将这些策略中的任意一个传给 `ContentProtection.configure({ policy })`。指定的节点、标记和属性必须存在于编辑器的 schema 中。
+
+```ts
+import type { ContentProtectionPolicy } from '@tiptap-pro/extension-content-protection'
+```
+
+## 保护标题
+
+```ts
+const policy = {
+  version: 1,
+  rules: [
+    {
+      selector: { target: 'node', node: { types: ['heading'] } },
+      permissions: { edit: false },
+    },
+  ],
+} satisfies ContentProtectionPolicy
+```
+
+保护标题，包括其类型、文本、格式和属性。改用 `target: 'nodeType'` 可以固定结构，同时允许编辑文本和属性。
+
+## 固定标题级别
+
+```ts
+const policy = {
+  version: 1,
+  rules: [
+    {
+      selector: {
+        target: 'attribute',
+        node: { types: ['heading'] },
+        names: ['level'],
+      },
+      permissions: { edit: false },
+    },
+  ],
+} satisfies ContentProtectionPolicy
+```
+
+阻止更改标题的 `level` 属性。标题文本仍可编辑，标题本身仍可移除。
+
+## 保留标题并允许编辑文本
+
+```ts
+const policy = {
+  version: 1,
+  rules: [
+    {
+      selector: {
+        target: ['nodeType', 'attribute'],
+        node: { types: ['heading'] },
+        names: ['level'],
+      },
+      permissions: { edit: false },
+    },
+  ],
+} satisfies ContentProtectionPolicy
+```
+
+保留标题并阻止更改级别，同时允许更改其文本和格式。与 `target: 'node'` 不同，这不会锁定整个标题。
+
+## 保留标题中的链接目标
+
+```ts
+const policy = {
+  version: 1,
+  rules: [
+    {
+      selector: {
+        target: ['markType', 'markAttribute'],
+        mark: {
+          types: ['link'],
+          within: { types: ['heading'] },
+        },
+        names: ['href'],
+      },
+      permissions: { edit: false },
+    },
+  ],
+} satisfies ContentProtectionPolicy
+```
+
+阻止在标题中添加或移除链接以及更改链接目标。链接文本和其他属性仍可编辑。标题外的链接不受影响。标题是祖先条件；此规则不会保护标题本身。
+
+有关受多个祖先约束的目标数组，请参阅[嵌套祖先匹配](/composable-docs/content-protection/api-reference/policy#nested-ancestor-matching)。
+
+## 隐藏引用块
+
+```ts
+const policy = {
+  version: 1,
+  rules: [
+    {
+      selector: { target: 'node', node: { types: ['blockquote'] } },
+      permissions: { read: false },
+    },
+  ],
+} satisfies ContentProtectionPolicy
+```
+
+使用[已隐藏内容](/composable-docs/content-protection/api-reference/rendering)替换引用块并阻止编辑。原始内容仍保留在客户端文档中。
+
+## 仅允许编辑引用块内部
+
+```ts
+const policy = {
+  version: 1,
+  rules: [
+    {
+      selector: { target: 'nodeContent', node: { types: ['doc'] } },
+      permissions: { edit: false },
+    },
+    {
+      priority: 10,
+      selector: { target: 'nodeContent', node: { types: ['blockquote'] } },
+      permissions: { edit: true },
+    },
+    {
+      priority: 20,
+      selector: { target: 'nodeType', node: { types: ['blockquote'] } },
+      permissions: { edit: false },
+    },
+  ],
+} satisfies ContentProtectionPolicy
+```
+
+锁定文档，然后允许更改现有引用块内部的内容。最后一条规则保护引用块本身，包括嵌套引用块；其属性仍由文档范围的规则保护。
+
+## 保护嵌套内容
+
+```ts
+const policy = {
+  version: 1,
+  rules: [
+    {
+      selector: { target: 'nodeContent', node: { types: ['doc'] } },
+      permissions: { edit: false },
+    },
+    {
+      priority: 10,
+      selector: { target: 'nodeContent', node: { types: ['blockquote'] } },
+      permissions: { edit: true },
+    },
+    {
+      priority: 20,
+      selector: {
+        target: 'nodeContent',
+        node: { types: ['blockquote'], within: { types: ['blockquote'] } },
+      },
+      permissions: { edit: false },
+    },
+  ],
+} satisfies ContentProtectionPolicy
+```
+
+允许编辑外层引用块内部，同时保护每个深度的嵌套引用块内容。嵌套拒绝规则胜出是因为其优先级，而不是选择器深度。要同时保护嵌套节点的类型、存在性和属性，请对嵌套拒绝规则使用 `target: 'node'`。
+
+## 保护表格列和表头
+
+```ts
+const policy = {
+  version: 1,
+  rules: [
+    {
+      selector: { target: 'children', node: { types: ['tableRow'] } },
+      permissions: { edit: false },
+    },
+    {
+      selector: { target: 'node', node: { types: ['tableHeader'] } },
+      permissions: { edit: false },
+    },
+    {
+      selector: {
+        target: 'attribute',
+        node: { types: ['tableCell', 'tableHeader'] },
+        names: ['colspan', 'rowspan'],
+      },
+      permissions: { edit: false },
+    },
+  ],
+} satisfies ContentProtectionPolicy
+```
+
+保护现有行中的单元格序列、表头文本和表头单元格，也会阻止更改单元格跨度。正文单元格内容仍可编辑，完整正文行可以添加或移除。
+
+有关选择器类型和规则优先级，请参阅[策略语言](/composable-docs/content-protection/api-reference/policy)；如需仅编辑 Slot，请使用 [Slot 填写辅助工具](/composable-docs/slots/api-reference/utilities#createslotfillingpolicy)。

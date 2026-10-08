@@ -1,0 +1,110 @@
+---
+title: 配置
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 配置 | Tiptap Slots 文档
+  description: 嵌入式 Slot 配置、内容规则和默认值。
+  category: 可组合文档
+---
+
+Slot 会将规则存储在 `attrs.config` 中。请求验证时，规则会报告无效内容；它们不会阻止编辑或更改 schema。
+
+## `SlotConfig`
+
+### 属性
+
+- `label?` (`string`)：可访问名称。省略时使用 Slot ID。
+- `instructions?` (`string`)：面向应用的说明。省略时无说明。
+- `placeholder?` (`string`)：空 Slot 的仅视图文本。省略时无占位符。
+- `defaultContent?` (`JSONContent[]`)：插入时省略 `content` 的初始内容。省略时使用该类型的空内容。
+- `required?` (`boolean`)：空内容是否导致验证失败。默认值为 `false`。
+- `allowedBlocks?` (`SlotContentType[]`)：允许的直接非 Slot 块子节点。省略时允许任何已安装的块类型，`[]` 表示不允许。
+- `allowedInline?` (`SlotContentType[]`)：允许的非文本、非 Slot 行内后代。省略时允许任何已安装的行内类型，`[]` 表示不允许。
+- `allowText?` (`boolean`)：文本是否有效。默认值为 `true`。
+- `allowedMarks?` (`SlotContentType[]`)：允许的标记。省略时允许任何已安装的标记，`[]` 表示不允许。
+- `constraints?` (`SlotConfig['constraints']`)：下文列出的值约束。省略时不限制值。
+- `nesting?` (`SlotConfig['nesting']`)：下文列出的嵌套 Slot 规则。默认值为 `{ allowed: false }`。
+- `validators?` (`ValidatorReference[]`)：应用检查。默认值为 `[]`。
+- `crossFieldRules?` (`CrossFieldRule[]`)：涉及其他字段的检查。默认值为 `[]`。
+- `metadata?` (`Record<string, JsonValue>`)：应用拥有的 JSON。默认无元数据；软件包不为其赋予任何含义。
+
+```ts
+const config: SlotConfig = {
+  required: true,
+  allowedBlocks: [{ type: 'paragraph' }],
+  constraints: { maxLength: 600 },
+}
+```
+
+### `constraints`
+
+- `minLength?` (`number`)：Unicode 码点表示的最小文本长度。省略时无下限。
+- `maxLength?` (`number`)：Unicode 码点表示的最大文本长度。省略时无上限。
+- `minChildren?` (`number`)：块 Slot 的最少直接子节点数。省略时无下限。
+- `maxChildren?` (`number`)：块 Slot 的最多直接子节点数。省略时无上限。
+- `pattern?` (`{ source: string; flags?: string; message?: string }`)：正则表达式测试。省略时不进行模式检查。
+- `values?` (`string[]`)：接受的精确文本值。省略时不限制，`[]` 表示任何非空值都无效。
+
+计数必须是非负整数；最小值不能超过最大值。子节点计数包括嵌套 Slot，以及空块 Slot 中的空段落。
+
+### `constraints.pattern`
+
+- `source` (`string`)：JavaScript 正则表达式源。添加 `^` 和 `$` 可匹配完整文本。
+- `flags?` (`string`)：`i`、`m`、`s`、`u` 的组合。默认值为 `''`。不支持有状态标志 `g` 和 `y`。
+- `message?` (`string`)：失败消息。省略时使用内置消息。
+
+### `nesting`
+
+- `allowed` (`boolean`)：后代 Slot 是否有效。
+- `kinds?` (`SlotKind[]`)：允许的后代类型。省略时允许两种类型，但仍受 schema 限制；`[]` 表示不允许。
+- `maxDepth?` (`number`)：所属 Slot 下的最大 Slot 边数。直接嵌套 Slot 的深度为 `1`。省略时不限制。
+
+每个祖先的嵌套限制都会生效。行内 Slot 不能包含块 Slot。
+
+## `SlotContentType`
+
+### 属性
+
+- `type` (`string`)：精确的 schema 节点或标记名称。
+- `attributes?` (`Record<string, JsonValue[]>`)：每个属性允许的值。省略时不限制属性。每个值列表必须非空。
+
+允许列表中的条目按 OR 组合；条目中的属性按 AND 组合。值使用不进行强制转换的结构相等比较。
+
+`allowedBlocks` 检查直接非 Slot 子节点。嵌套 Slot 由 `nesting` 检查，而不是由块允许列表检查。行内、文本和标记规则检查后代，但会在嵌套 Slot 处停止；嵌套 Slot 使用自己的配置。
+
+## `ValidatorReference`
+
+### 属性
+
+- `name` (`string`)：已配置 `validators` 注册表中的键。
+- `params?` (`JsonValue`)：验证器参数。默认值为 `null`。
+
+## `CrossFieldRule`
+
+### 属性
+
+- `id?` (`string`)：可选诊断标识符，在所属 Slot 内唯一。没有 ID 时，诊断信息使用 `ruleIndex`。
+- `validator` (`string`)：`crossFieldValidators` 中的键。
+- `fields` (`string[]`)：引用的 Slot ID，包括所属 Slot。
+- `params?` (`JsonValue`)：验证器参数。默认值为 `null`。
+
+在所属 Slot 处评估一次。结果只能针对声明的字段。请参阅[自定义验证器](/composable-docs/slots/api-reference/validation#slotvalidator)。
+
+## 默认值和标识
+
+- 显式插入内容（包括 `[]`）会覆盖 `defaultContent`。
+- 默认值只在创建时复制。加载、清空或更改配置不会重新填写 Slot。
+- 嵌套默认 Slot 会获得新 ID；内部跨字段引用会重新映射。
+- 复制/粘贴会创建新的 Slot ID，并重新映射复制片段内的引用。外部引用保持不变。
+- 内部拖动会保留 ID。当 ID 不再被使用时，本地剪切/粘贴可以保留 ID。
+- 缺失或重复的导入 ID 会保留并报告诊断信息。请显式使用 `repairSlotIds`。
+
+## 配置错误
+
+未知键、无效 JSON、格式错误的模式和无效计数会产生配置问题。感知 schema 的检查还会报告未知节点和标记类型。应用特定的数据请使用 `metadata`。
+
+`allowedBlocks`、`constraints.minChildren` 和 `constraints.maxChildren` 只适用于块 Slot。在行内 Slot 上使用它们属于配置错误。创建命令会拒绝这些配置；导入的文档会保留它们以便验证诊断。
+
+在分配配置前，请参阅 [`validateSlotConfig`](/composable-docs/slots/api-reference/validation#validateslotconfig) 检查配置。

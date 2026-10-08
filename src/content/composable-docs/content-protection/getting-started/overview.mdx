@@ -1,0 +1,81 @@
+---
+title: 内容保护
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 内容保护 | Tiptap 文档
+  description: 控制用户可以编辑或阅读 Tiptap 文档中的哪些部分。
+  category: 可组合文档
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+内容保护控制用户可以编辑或阅读文档中的哪些部分。使用策略为节点、标记、属性和内容定义权限。
+
+<Callout title="仅支持客户端" variant="info">
+  内容保护仅应用于客户端。如需服务端内容保护，请[联系我们](https://tiptap.dev/contact-sales?form=pilot-program)。
+</Callout>
+
+## 安装
+
+首先，[联系我们](https://tiptap.dev/contact-sales?form=pilot-program)加入内容保护试点计划。
+
+获得访问权限后，请按照[私有注册表设置指南](/guides/pro-extensions)操作，然后安装软件包：
+
+```bash
+npm install @tiptap/core @tiptap/starter-kit @tiptap/y-tiptap yjs @tiptap-pro/extension-content-protection
+```
+
+将扩展添加到编辑器中。
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import {
+  ContentProtection,
+  type ContentProtectionPolicy,
+} from '@tiptap-pro/extension-content-protection'
+
+const policy: ContentProtectionPolicy = {
+  version: 1,
+  rules: [
+    {
+      selector: { target: 'node', node: { types: ['heading'] } },
+      permissions: { edit: false },
+    },
+  ],
+}
+
+const editor = new Editor({
+  extensions: [StarterKit, ContentProtection.configure({ policy })],
+})
+```
+
+提供一个定义可编辑内容的[策略](/composable-docs/content-protection/api-reference/policy)。
+
+你也可以在编辑器运行时更新内容保护规则：
+
+```ts
+editor.commands.setContentProtectionPolicy({ policy })
+```
+
+请参阅 [API 参考](/composable-docs/content-protection/api-reference/extension) 和[策略语言](/composable-docs/content-protection/api-reference/policy)。
+
+## 协作
+
+内容保护支持 [Tiptap 协作](/editor/extensions/functionality/collaboration)。每个协作者都可以有不同的本地策略。本地编辑会根据该策略检查；协作绑定产生的更新会被接受，以保持所有编辑器与共享文档同步。这包括初始同步和协作撤销/重做，即使当前本地策略会拒绝相应编辑。读取权限仍会控制每个协作者可以查看和复制的内容。
+
+```ts
+import Collaboration from '@tiptap/extension-collaboration'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit.configure({ undoRedo: false }),
+    Collaboration.configure({ document: ydoc }),
+    ContentProtection.configure({ policy: localPolicy }),
+  ],
+})
+```
+
+这里，`ydoc` 是连接到协作提供商的共享 Y.Doc，`localPolicy` 是应用分配给该用户的策略。安装 `@tiptap/extension-collaboration` 以使用此设置。策略保留在本地，不会存储在共享文档中。这些客户端权限不会授权传入的协作更新；请在应用和协作服务中强制执行共享文档的访问控制。

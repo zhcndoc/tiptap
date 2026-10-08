@@ -131,6 +131,12 @@ interface PagesOptions {
    * 默认为 `{ preserveWhitespace: 'full' }`。 */
   headerFooterParseOptions?: ParseOptions
 
+  /** 在页眉和页脚覆盖层工具栏中、关闭按钮之前渲染自定义控件。 */
+  renderOverlayActions?: RenderOverlayActions
+
+  /** 页眉、页脚、脚注和尾注覆盖层的可翻译标签。 */
+  overlayLabels?: OverlayLabels
+
   /** 当 `setPageFormat()` 成功，或 configure() 应用了新格式时调用。 */
   onPageFormatChange?: (pageFormat: PageFormat) => void
 
@@ -251,6 +257,8 @@ interface PagesOptions {
 | `editableFooter`                     | `boolean`                           | `true`               | 允许通过双击打开页脚覆盖层                                                                                                                                     |
 | `headerFooterExtensions`             | `Extensions \| (ctx) => Extensions` | `ConvertKit`         | 内部页眉/页脚编辑器的扩展；传入回调可按子类型附加 `Collaboration`（见 [为 Pages 添加协作](/pages/guides/collaboration-with-pages)）。 |
 | `headerFooterParseOptions`           | `ParseOptions`                      | `{ preserveWhitespace: 'full' }` | 将 HTML 作为页眉和页脚内容解析时使用的选项。默认保留重复空格。 |
+| `renderOverlayActions`               | `(ctx) => HTMLElement \| { element, destroy? } \| null` | `undefined` | 页眉和页脚覆盖层工具栏中的自定义控件。参见[自定义覆盖层工具栏](/pages/core-concepts/page-header-footer#customizing-the-overlay-toolbar)。 |
+| `overlayLabels`                      | `OverlayLabels`                     | `undefined`          | 每个覆盖层的可翻译标签。参见[翻译覆盖层标签](/pages/core-concepts/page-header-footer#translating-overlay-labels)。 |
 | `onDblClickHeaderFooterPreventClose` | `(event: MouseEvent) => boolean`    | `undefined`          | 防止在外部双击时关闭（页眉 + 页脚）                                                                                                                            |
 | `onDblClickHeaderPreventClose`       | `(event: MouseEvent) => boolean`    | `undefined`          | 防止在外部双击时关闭（仅页眉）                                                                                                                                |
 | `onDblClickFooterPreventClose`       | `(event: MouseEvent) => boolean`    | `undefined`          | 防止在外部双击时关闭（仅页脚）                                                                                                                                |

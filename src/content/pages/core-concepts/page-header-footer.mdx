@@ -545,6 +545,50 @@ function DocumentEditor() {
 }
 ```
 
+### 自定义覆盖层工具栏
+
+可以通过两种方式添加控件，请根据控件所属位置进行选择。
+
+- 对于同样适用于文档正文的格式控件，请使用上面的模式，即跟随 `editor.storage.pages.activeEditor` 的外部工具栏。
+- 对于属于页眉或页脚覆盖层本身、应放在关闭按钮旁边的控件，请使用 `renderOverlayActions`。
+
+`renderOverlayActions` 会在每次构建覆盖层工具栏时运行：打开覆盖层、缩放比例变化以及页眉类型变化时都会运行。返回一个元素；如果需要清理钩子（例如卸载 React portal），请返回 `{ element, destroy }`。返回 `null` 则不渲染任何内容。
+
+```ts
+Pages.configure({
+  renderOverlayActions: ({ innerEditor }) => {
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.textContent = 'Insert date'
+    button.onclick = () => {
+      innerEditor.chain().focus().insertContent(new Date().toLocaleDateString()).run()
+    }
+    return button
+  },
+})
+```
+
+上下文会提供父级 `editor`、正在编辑的 `innerEditor`、`kind`（`'header'` 或 `'footer'`）、`subType`（`'default'`、`'first'`、`'odd'` 或 `'even'`）、`pageNumber` 和 `close()`。
+
+请将状态保存在返回元素之外。每次重新构建都会销毁插槽并再次渲染。
+
+### 翻译覆盖层标签
+
+每个覆盖层标签都通过 `overlayLabels` 处理。每个标签条目都是一个函数，因此可以使用任意 i18n 库。缺失的条目会保留英文默认值。`close` 是一个字符串，会成为每个关闭按钮的可访问名称和工具提示。
+
+```ts
+Pages.configure({
+  overlayLabels: {
+    header: ({ subType, pageNumber }) =>
+      subType === 'first' ? t('pages.header.first') : t('pages.header.page', { pageNumber }),
+    footer: ({ subType, pageNumber }) => t('pages.footer', { subType, pageNumber }),
+    footnotes: ({ pageNumber }) => t('pages.footnotes', { pageNumber }),
+    endnotes: () => t('pages.endnotes'),
+    close: t('common.close'),
+  },
+})
+```
+
 ## 访问页眉和页脚内容
 
 用户通过页眉或页脚编辑器修改内容后，内容会存储在扩展的存储区。这对于保存文档或导出为 DOCX 等格式非常有用。

@@ -15,20 +15,19 @@
 4. **测试更改**：确保您的更改正常工作且不会引入任何问题。
    - 使用 `pnpm dev` 命令在本地运行文档，在浏览器中预览更改。
    - 使用 `pnpm lint` 命令运行代码风格检查。
-5. **创建 Changeset**：运行 `pnpm changeset` 来创建新的 changeset。选择合适的更改类型（补丁、次版本或主版本），并写一个有意义的消息描述您的更改。
-6. **提交更改**：使用清晰且描述性的提交信息提交您的更改。推荐使用 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) 格式。
-7. **推送到您的 Fork**：将更改推送到您在 GitHub 上的 Fork 仓库。
-8. **创建 Pull Request**：向原仓库的 `main` 分支提交 Pull Request。Pull Request 中请包含：
+5. **提交更改**：使用清晰且描述性的提交信息提交您的更改。推荐使用 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) 格式。
+6. **推送到您的 Fork**：将更改推送到您在 GitHub 上的 Fork 仓库。
+7. **创建 Pull Request**：向原仓库的 `main` 分支提交 Pull Request。Pull Request 中请包含：
    - 一个清晰的标题，概述您的更改。
    - 如果您的 PR 记录的是 [Tiptap 仓库](https://github.com/ueberdosis/tiptap) 中的更改，请添加引入该更改的 Tiptap 仓库 PR 链接。
    - 添加任何相关的问题或讨论的链接。
    - 详细描述您所做的更改。
    - 任何有助于维护者理解您更改的相关信息。
-9. **审查和合并**：等待维护者审查您的更改。经批准后，您的更改将被合并。
+8. **审查和合并**：等待维护者审查您的更改。经批准后，您的更改将被合并。
 
-## 创建版本
+## 发布文档
 
-我们使用 [changesets](https://github.com/changesets/changesets) 来管理版本。要创建新版本，请在终端运行 `npx changeset version`。该命令会处理所有 changesets（如果分支不是预发布版本），创建新版本，并相应更新 `CHANGELOG.md` 文件。
+文档会在更改推送到 `main` 后自动发布。文档没有版本化发布，因此贡献不需要 changeset 或版本升级。
 
 ## 许可协议
 

@@ -1,0 +1,128 @@
+---
+title: 工具
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 工具 | Tiptap 内容保护文档
+  description: 用于验证策略、检查权限和导出可读内容的函数。
+  category: 可组合文档
+---
+
+从 `@tiptap-pro/extension-content-protection` 导入这些函数。每个函数都接受一个选项对象。直接传入策略 JSON；独立工具会根据文档或事务的 schema 验证策略，无效策略会抛出 `ProtectionConfigurationError`。
+
+`Editor` 来自 `@tiptap/core`；`Node` 和 `Schema` 来自 `@tiptap/pm/model`；`Transaction` 来自 `@tiptap/pm/state`。
+
+## `validateContentProtectionPolicy`
+
+验证策略语法；提供 schema 时，还会验证引用的类型和属性。
+
+### 参数
+
+- `policy` (`unknown`)：要验证的值。
+- `schema?` (`Schema`)：用于名称检查的 schema。省略时仅检查语法。
+
+### 返回值（`{ valid: boolean; issues: PolicyIssue[] }`）
+
+- `valid` (`boolean`)：验证是否通过。
+- `issues` (`PolicyIssue[]`)：配置错误；有效时为空。
+
+## `checkProtectedTransaction`
+
+根据编辑器当前策略检查事务，但不应用事务或触发事件。编辑器中必须包含 `ContentProtection`。
+
+### 参数
+
+- `editor` (`Editor`)：持有当前策略的编辑器。
+- `transaction` (`Transaction`)：根据编辑器当前状态创建的事务。
+
+### 返回值（`ProtectionCheck`）
+
+权限结果、违规信息和当前版本。缺少扩展或起始文档不匹配时抛出 `ProtectionInputError`。分发时会再次检查权限。
+
+## `checkContentProtectionTransaction`
+
+不依赖编辑器检查事务。
+
+### 参数
+
+- `policy` (`ContentProtectionPolicy`)：要评估的策略。
+- `transaction` (`Transaction`)：拟议事务。
+
+### 返回值（`ProtectionCheck`）
+
+权限结果和违规信息。两个版本都为 `null`。输入不兼容时抛出 `ProtectionInputError`。
+
+## `getProtection`
+
+汇总编辑器中的读取和编辑权限。需要 `ContentProtection`。
+
+### 参数
+
+- `editor` (`Editor`)：要检查的编辑器。
+- `range?` (`{ from: number; to: number }`)：要汇总的范围。默认值为当前选区。
+
+### 返回值（`PermissionSummary`）
+
+聚合权限和匹配的规则标识符。折叠范围会检查光标处的文本插入；对于特定编辑，请使用事务检查。
+
+## `summarizeContentProtection`
+
+不依赖编辑器汇总权限。
+
+### 参数
+
+- `policy` (`ContentProtectionPolicy`)：要评估的策略。
+- `document` (`Node`)：要检查的文档。
+- `range` (`{ from: number; to: number }`)：要汇总的范围。
+
+### 返回值（`PermissionSummary`）
+
+聚合读取和编辑权限。输入无效时抛出 `ProtectionInputError`。
+
+## `explainProtection`
+
+解释编辑器中一个现有目标的权限。需要 `ContentProtection`。
+
+### 参数
+
+- `editor` (`Editor`)：要检查的编辑器。
+- `subject` (`ProtectionSubject`)：要检查的节点、属性或标记范围。
+
+### 返回值（`ProtectionExplanation`）
+
+读取/编辑决策和外层隐藏规则。目标无效或缺少扩展时抛出 `ProtectionInputError`。
+
+## `explainContentProtection`
+
+不依赖编辑器解释权限。
+
+### 参数
+
+- `policy` (`ContentProtectionPolicy`)：要评估的策略。
+- `document` (`Node`)：要检查的文档。
+- `subject` (`ProtectionSubject`)：要检查的现有目标。
+
+### 返回值（`ProtectionExplanation`）
+
+读取/编辑决策和外层隐藏规则。输入无效时抛出 `ProtectionInputError`。
+
+## `getReadableContent`
+
+创建展示树和纯文本，并用占位符替换已隐藏区域。
+
+### 参数
+
+- `document` (`Node`)：要检查的文档。
+- `policy` (`ContentProtectionPolicy`)：要评估的策略。
+- `range?` (`{ from: number; to: number }`)：要包含的内容。默认值为整个文档。
+- `redactionText?` (`string`)：替换文本。默认值为 `'[Hidden content]'`。不会自动读取编辑器选项。
+
+### 返回值（`ReadableContent`）
+
+- `content` (`ReadableNode[]`)：可见内容和已隐藏区域。这不是 Tiptap JSON，不得传给 `setContent`。
+- `text` (`string`)：可见文本；文本块之间和硬换行处使用换行符。非文本叶节点使用 `U+FFFC`；隐藏区域使用 `redactionText`。末尾不会添加换行符。
+
+输入无效时抛出 `ProtectionInputError`。不会更改文档、解析外部值、生成 HTML 或调用 `renderRedaction`。
+
+请参阅[结果类型](/composable-docs/content-protection/api-reference/types)和[策略类型](/composable-docs/content-protection/api-reference/policy)。

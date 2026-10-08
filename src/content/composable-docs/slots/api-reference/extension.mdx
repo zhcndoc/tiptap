@@ -1,0 +1,175 @@
+---
+title: 扩展
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 扩展 | Tiptap Slots 文档
+  description: Slot 选项、节点扩展和编辑器存储。
+  category: 可组合文档
+---
+
+从 `@tiptap-pro/extension-slot` 导入 `Slot`、`BlockSlot` 和 `InlineSlot`。
+
+## `Slot`
+
+安装两个 Slot 节点、命令、索引和编辑行为。扩展和存储名称为 `slot`。
+
+```ts
+Slot.configure({ validators: { registeredPerson } })
+```
+
+### 选项（`SlotOptions`）
+
+- `blockSlot` (`Node`)：块节点扩展。默认值为 `BlockSlot`。
+- `inlineSlot` (`Node`)：行内节点扩展。默认值为 `InlineSlot`。
+- `generateId` (`() => string`)：创建文档唯一 ID。默认使用 UUID 生成器。
+- `validators` (`Record<string, SlotValidator>`)：命名字段验证器。默认值为 `{}`；注册前引用的验证器不可用。
+- `crossFieldValidators` (`Record<string, CrossFieldValidator>`)：命名跨字段验证器。默认值为 `{}`；注册前引用的验证器不可用。
+- `getValidationContext` (`() => unknown`)：每次验证请求捕获一次应用数据。默认返回 `undefined`。
+- `shortcuts` (`false | SlotShortcuts`)：类型化创建和可选的分隔符转换。默认使用 `{{{` 立即创建行内 Slot，使用 `[[[` 创建块 Slot。设置为 `false` 可禁用所有 Slot 输入规则。
+- `resolveInputRuleSlot` (`SlotInputRuleResolver`)：插入前解析匹配的快捷方式。默认返回 `undefined`，保留捕获内容和快捷方式配置。参见[解析输入规则](#resolveinputruleslot)。
+- `onSlotsUpdate` (`(event: SlotsUpdateEvent) => void`)：`slotsUpdate` 监听器。默认为空操作。
+- `onActiveSlotChange` (`(event: ActiveSlotChangeEvent) => void`)：`activeSlotChange` 监听器。默认为空操作。
+- `onValidationUpdate` (`(event: SlotValidationUpdateEvent) => void`)：`slotValidationUpdate` 监听器。默认为空操作。
+- `onValidationError` (`(event: SlotValidationErrorEvent) => void`)：`slotValidationError` 监听器。默认为空操作。
+- `onCommandRejected` (`(event: SlotCommandRejectedEvent) => void`)：`slotCommandRejected` 监听器。默认为空操作。
+
+这里的 `Node` 是来自 `@tiptap/core` 的扩展类型。请参阅[验证器](/composable-docs/slots/api-reference/validation)和[事件负载](/composable-docs/slots/api-reference/events)。
+
+### 配置规则
+
+- 只注册一次 `Slot`。通过其选项传入定制节点；不要再单独注册这些节点。
+- 两个节点选项都是必需的，并在编辑器创建时固定。它们不接受 `false`。
+- 自定义节点必须保留其名称、属性和 schema 行为。
+- 无效节点实例、重复注册和无效快捷方式会导致初始化失败。
+- ID 生成会最多重试冲突五次。失败时会以 `idGenerationFailed` 拒绝命令。
+
+## `BlockSlot` 和 `InlineSlot`
+
+普通 Tiptap 节点扩展，支持 `.configure()` 和 `.extend()`。
+
+### 选项
+
+- `HTMLAttributes` (`Record<string, string>`)：外层元素的属性。默认值为 `{}`。必需的 `data-slot-*` 属性优先。
+
+### 节点属性
+
+- `id` (`string | null`)：文档范围内区分大小写的标识符。默认值为 `null`；命令会生成缺失的 ID。导入时缺失或重复的 ID 会产生验证问题。
+- `config` (`SlotConfig`)：嵌入式[配置](/composable-docs/slots/api-reference/concepts)。默认值为 `{}`。格式错误的导入 JSON 会保留以便诊断。
+
+| 属性               | `BlockSlot`         | `InlineSlot` |
+| ------------------ | ------------------- | ------------ |
+| 节点名称           | `blockSlot`         | `inlineSlot` |
+| 分组               | `block`             | `inline`     |
+| `inline`           | `false`             | `true`       |
+| 内容表达式         | `block+`            | `inline*`    |
+| `defining`         | `true`              | `true`       |
+| `isolating`        | `true`              | `true`       |
+| 空内容             | 一个空段落           | 无子节点      |
+
+块 Slot 要求 schema 中包含 `paragraph`。有关 NodeView 和 HTML 定制，请参阅[渲染](/composable-docs/slots/api-reference/rendering)。
+
+在行内 Slot 中，Backspace 和 Delete 会删除完整的字素（包括 emoji 和组合字符），同时保留 Slot 包装器。
+
+## `SlotShortcuts`
+
+### 属性
+
+- `inline?` (`SlotShortcut | false`)：行内规则。默认值为 `{ create: '{{{' }`。设置为 `false` 可禁用此类型。
+- `block?` (`SlotShortcut | false`)：块规则。默认值为 `{ create: '[[[' }`。设置为 `false` 可禁用此类型。
+
+输入第三个 `{` 会立即在光标处创建空的行内 Slot，并将光标放入其中。在其他内容为空的文本块中输入第三个 `[` 会将其替换为包含空段落的块 Slot，并将光标放入该段落。两条规则都不需要结束分隔符或 Enter。创建块不会消耗周围文本。
+
+### `SlotShortcut`
+
+- `create?` (`string | false`)：立即创建触发符。行内默认为 `{{{`，块默认为 `[[[`。设置为 `false` 可禁用创建，同时保留成对规则。
+- `open?` (`string`)：可选的非空成对开始分隔符。需要 `close`。
+- `close?` (`string`)：可选的非空成对结束分隔符，且必须不同于 `open`。需要 `open`。
+- `config?` (`SlotConfig`)：新 Slot 的配置。默认值为 `{}`。
+
+配置会与默认值合并。例如，添加行内 `open: '{{', close: '}}'` 对会保留两个立即创建规则。此时 `{{name}}` 会将现有文字转换为 Slot；`{{{` 会立即打开空的行内字段。被拒绝的三字符触发符不会随后被较短的成对开始分隔符消耗。
+
+成对开始分隔符不能通过前缀相互重叠。立即触发符也不能通过前缀相互重叠，成对开始分隔符不能等于或以已启用的创建触发符开头。配置此类成对分隔符前，请禁用冲突的 `create` 触发符。
+
+对于成对转换，捕获的文本会成为 Slot 内容，同时保留文本标记。块分隔符对必须占据整个文本块。转换被拒绝时会保留字面输入；粘贴不会触发这些规则。跨越行内原子（例如 mention 或 Variable）的分隔符对会被 Tiptap 输入规则运行器跳过；这些匹配不会调用解析器。
+
+```ts
+// Retain paired conversion, but disable immediate creation for both kinds.
+Slot.configure({
+  shortcuts: {
+    inline: { create: false, open: '{{', close: '}}' },
+    block: { create: false, open: '[[', close: ']]' },
+  },
+})
+```
+
+## `resolveInputRuleSlot`
+
+使用此同步回调，根据捕获的输入和当前应用上下文选择 Slot 的 ID、配置和初始内容。它会在插入前运行，而不是作为 Slot 已创建的通知。它只由已配置的输入规则使用；普通的 `insertSlot` 和 `wrapInSlot` 调用不会调用它。
+
+```ts
+Slot.configure({
+  shortcuts: { inline: { open: '{{', close: '}}' } },
+  resolveInputRuleSlot({ kind, text, defaults }) {
+    if (kind !== 'inline' || text.trim() !== 'customer-name') {
+      return undefined
+    }
+
+    return {
+      config: {
+        ...defaults.config,
+        label: 'Customer name',
+        placeholder: 'Enter the customer’s name',
+        required: true,
+      },
+      content: [],
+    }
+  },
+})
+```
+
+输入 `{{customer-name}}` 会创建带生成 ID 的空必填字段。其他匹配文本使用普通转换。回调也可以通过闭包读取应用数据，例如选择预设，或拒绝为当前操作者创建字段。
+
+### 参数（`SlotInputRuleContext`）
+
+- `editor` (`Editor`)：检查当前文档、Schema 和扩展存储。不要从回调中分发命令。
+- `kind` (`'inline' | 'block'`)：快捷方式选择的类型。回调不能更改它。
+- `content` (`JSONContent[]`)：不带分隔符的捕获行内内容，同时保留文本标记。保留格式时应使用此结构化值。不支持跨原子的匹配。
+- `text` (`string`)：不带分隔符且不自动修剪的完整捕获文本。适合匹配 `customer-name` 等名称。
+- `delimiters` (`{ open: string; close: string }`)：匹配的分隔符对。立即创建时，`open` 是触发符，`close` 为 `''`。
+- `range` (`{ from: number; to: number }`)：当前文档中被替换的范围。块转换会替换整个文本块。待处理输入可能尚未存在于该文档中；`content` 和 `text` 包含完整捕获内容。
+- `defaults` (`{ config: SlotConfig; content: JSONContent[] }`)：快捷方式配置（或 `{}`）以及准备插入的内容。对于块 Slot，捕获的行内内容会包裹在段落中。
+
+JSON 输入是不可变快照。请返回新对象，不要修改它们。回调必须同步，并且不能写入编辑器。
+
+立即创建也会调用此解析器，传入 `text: ''` 和 `content: []`。行内 Slot 的默认内容为空，块 Slot 的默认内容为空段落。插入后，光标会移到 Slot 内容的开头；如果内容是单独的可选原子，则改为选中该原子。返回 `false` 会保留字面触发符。
+
+### 返回值（`SlotInputRuleResult | false | undefined`）
+
+- `undefined`：使用默认值。
+- `false`：保留完整字面输入，包括分隔符。这是有意拒绝，不会触发拒绝事件。
+- 包含以下任意覆盖项的对象：
+  - `id?` (`string`)：显式唯一且非空的 ID。省略时使用 `generateId`。
+  - `config?` (`SlotConfig`)：整体替换默认配置。显式展开 `defaults.config` 以进行合并。
+  - `content?` (`JSONContent[]`)：替换初始内容，可以包含 Slot schema 中有效的任意节点和标记。省略时保留 `defaults.content`，即使返回的配置包含 `defaultContent`。`[]` 会创建空的行内 Slot，或创建包含空段落的块 Slot。
+
+结果不能更改类型或插入位置。Slot 插入仍会经过 `insertSlot`，包括 ID、Schema 和内容保护检查。与普通插入一样，验证约束不会阻止插入。
+
+回调抛出的错误、Promise 和格式错误的结果会拒绝转换，并触发 `slotCommandRejected`，其中 `command: 'insertSlot'`、`code: 'invalidInput'`。插入被拒绝时使用已有代码，例如 `schemaMismatch` 或 `protected`。不会插入部分 Slot。输入规则撤销仍然可用。
+
+## 存储（`SlotStorage`）
+
+`editor.storage.slot` 中的只读 getter。
+
+- `snapshot` (`SlotSnapshot`)：当前文档和 Slot 索引。
+- `activeSlot` (`SlotEntry | null`)：选区头部最内层的 Slot，或选中的 Slot 节点。在 Slot 外部时为 `null`。
+- `validation` (`SlotValidationState`)：当前验证生命周期和结果。
+
+### `SlotValidationState`
+
+- `status` (`'unvalidated' | 'pending' | 'current'`)：初始为 `'unvalidated'`。验证需要显式请求。
+- `snapshotId` (`string | null`)：正在验证或持有当前结果的快照；其他情况为 `null`。
+- `result` (`SlotValidationResult | null`)：当前结果；未验证或待处理时为 `null`。
+
+文档编辑（包括插件追加的编辑）会刷新快照并清除缓存验证结果。选区变化不会。请参阅[读取类型](/composable-docs/slots/api-reference/types)。

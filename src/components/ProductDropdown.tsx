@@ -18,6 +18,7 @@ const options = [
   { label: '页面', href: '/pages/getting-started/overview' },
   { label: '快照', href: '/collaboration/documents/snapshot' },
   { label: '修订记录', href: '/tracked-changes/getting-started/overview' },
+  { label: '可组合文档', href: '/composable-docs/slots/getting-started/overview' },
 ]
 
 export const ProductDropdown = () => {

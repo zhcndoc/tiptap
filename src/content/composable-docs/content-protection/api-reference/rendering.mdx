@@ -1,0 +1,72 @@
+---
+title: 已隐藏内容
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 已隐藏内容 | Tiptap 内容保护文档
+  description: 自定义隐藏内容占位符及其剪贴板和导出行为。
+  category: 可组合文档
+---
+
+已隐藏内容（策略禁止读取的内容）会被占位符替换。使用 `renderRedaction` 控制其外观和交互。
+
+已隐藏节点不可编辑，包括其类型、属性和内容。这会在事务层面强制执行，而不只是设置 `contenteditable="false"`。请参阅[读取限制](/composable-docs/content-protection/api-reference/policy#read-restrictions)。
+
+```ts
+ContentProtection.configure({
+  policy,
+  renderRedaction: ({ inline, label }) => {
+    const dom = document.createElement(inline ? 'span' : 'div')
+    dom.className = 'restricted-content'
+    dom.textContent = `🔒 ${label}`
+    return { dom }
+  },
+})
+```
+
+## 选项
+
+- `renderRedaction` (`RedactionRenderer | null`)：占位符工厂函数。默认值为 `null`，使用内置视图。
+- `redactionText` (`string`)：默认可见文本、可访问名称和中性的剪贴板输出。默认值为 `'[Hidden content]'`，不能为空。
+
+## `RedactionRenderer`
+
+类型为 `(props: RedactionViewProps) => RedactionView` 的同步工厂函数。
+
+### 参数（`RedactionViewProps`）
+
+- `key` (`string`)：已挂载区域的不透明标识。它不是文档 ID、位置或内容查找键。
+- `inline` (`boolean`)：视图必须放入文本行内时为 `true`。
+- `text` (`string`)：配置的 `redactionText`。
+- `label` (`string`)：默认可访问名称；与 `redactionText` 的值相同。
+
+属性中不包含原始内容、节点、位置、长度、规则 ID 或 Editor 实例。
+
+### 返回值（`RedactionView`）
+
+- `dom` (`HTMLElement`)：全新的、未挂载的根元素。行内视图必须包含兼容行内布局的元素。
+- `update?` (`(props: RedactionViewProps) => boolean`)：更新现有视图。返回 `true` 可复用视图，返回 `false` 则重新创建。没有此方法时，更新会重新创建视图。
+- `destroy?` (`() => void`)：视图被移除、替换或编辑器销毁时，清理监听器、框架根和 portal。
+
+## 渲染行为
+
+- 扩展会挂载根元素，并设置 `contenteditable="false"` 和 `data-content-protection="redacted"`。
+- 在自定义根元素上设置 `aria-label` 或 `aria-labelledby` 可提供可访问名称。否则扩展会使用 `redactionText`。
+- 根元素可以包含按钮和其他交互控件，但不能提供可编辑文档内容或 `contentDOM`。
+- 隐藏节点不会挂载原始 NodeView。隐藏可见节点会销毁其原始视图。
+- 行内/块上下文发生变化时会重新创建占位符。
+- 无效视图或渲染器失败时会回退到默认占位符，绝不会显示原始内容。
+- 框架渲染器使用其常规的挂载/更新/卸载 API。在 `destroy` 中清理；这不是 `ReactNodeViewRenderer`。
+- 请求访问的控件由应用负责。使用 [`setContentProtectionPolicy`](/composable-docs/content-protection/api-reference/commands#setcontentprotectionpolicy) 更改访问权限。
+
+## 剪贴板和导出
+
+- 复制使用 `redactionText` 和中性的 HTML，不使用自定义视图的 DOM、标签或控件。
+- 如果选中内容中有任何部分无法删除，则剪切会被拒绝；剪贴板保持不变。
+- 拖动会检查源和目标权限，并使用可读的剪贴板输出。
+- [`getReadableContent`](/composable-docs/content-protection/api-reference/utilities#getreadablecontent) 返回展示树和文本。它不会调用 `renderRedaction`；请显式传入自定义 `redactionText`。
+- 部分隐藏的 Slot 会从剪贴板输出中省略其配置。
+- `editor.getJSON()` 和 `editor.getHTML()` 仍包含完整文档。对于必须省略隐藏内容的输出，请使用可读投影。
+
+自定义渲染只会改变视图。完整源文档仍保留在客户端内存中；应用侧边栏和导出功能必须应用相同的读取权限。
