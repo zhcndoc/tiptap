@@ -65,6 +65,18 @@ new Editor({
 })
 ```
 
+### schemaSpec
+
+可选的 `schemaSpec` 设置接受完整的 ProseMirror `SchemaSpec`。可从 `@tiptap/pm/model` 导入此类型。
+
+它定义编辑器的文档结构，而本地扩展负责提供解析、渲染、命令、节点视图和插件。如果省略此设置，Tiptap 会根据扩展构建 schema。
+
+`schemaSpec` 中的每个节点和标记都必须有同名、同类型的本地扩展。每个本地节点和标记也必须出现在此规范中。
+
+此规范会在创建编辑器时应用。通过 `setOptions()` 更改 `schemaSpec` 不会重建 schema。要使用不同的规范，请创建新的编辑器。
+
+示例以及结构和属性规则，请参阅[使用外部 SchemaSpec](/editor/core-concepts/schema#use-an-external-schema-spec)。
+
 ### content
 
 通过 `content` 属性，您可以提供编辑器的初始内容。内容可以是 HTML 或 JSON。
@@ -166,7 +178,7 @@ new Editor({
 
 ### enableInputRules
 
-默认情况下，Tiptap 启用所有 [输入规则](/editor/extensions/custom-extensions/extend-existing#input-rules)。使用 `enableInputRules`，您可以对此进行控制。
+默认情况下，Tiptap 启用所有[输入规则](/editor/api/input-rules)。你可以使用 `enableInputRules` 控制此行为。
 
 ```js
 import { Editor } from '@tiptap/core'
@@ -197,7 +209,7 @@ new Editor({
 
 ### enablePasteRules
 
-默认情况下，Tiptap 启用所有 [粘贴规则](/editor/extensions/custom-extensions/extend-existing#paste-rules)。使用 `enablePasteRules`，您可以对此进行控制。
+默认情况下，Tiptap 启用所有[粘贴规则](/editor/api/paste-rules)。你可以使用 `enablePasteRules` 控制此行为。
 
 ```js
 import { Editor } from '@tiptap/core'

@@ -58,6 +58,8 @@ Slot.configure({ validators: { registeredPerson } })
 - `id` (`string | null`)：文档范围内区分大小写的标识符。默认值为 `null`；命令会生成缺失的 ID。导入时缺失或重复的 ID 会产生验证问题。
 - `config` (`SlotConfig`)：嵌入式[配置](/composable-docs/slots/api-reference/concepts)。默认值为 `{}`。格式错误的导入 JSON 会保留以便诊断。
 
+借助 [Variable 扩展](/composable-docs/variables/guides/bind-slots)，Slot 还支持用于持久化绑定的 `variable` 属性。显式变量值和解析器会使其绑定的 Slot 变为只读。
+
 | 属性               | `BlockSlot`         | `InlineSlot` |
 | ------------------ | ------------------- | ------------ |
 | 节点名称           | `blockSlot`         | `inlineSlot` |

@@ -86,6 +86,97 @@ Comments.configure({
 })
 ```
 
+配置 `onThreadAnchorRemoved` 后，该选项会替代自动清理。其 `defaultHandler()` 仍会遵循 `deleteUnreferencedThreads` 设置。
+
+## onThreadAnchorRemoved
+
+当本地编辑移除线程在文档中的最后一个锚点时运行的回调。锚点可以是行内线程标记或块级线程节点。编辑完成后、清理流程更改线程数据前会运行此回调。它只会在执行编辑的客户端上运行，不会在远程接收更改的客户端上运行。
+
+**默认值：** `undefined`，保留由 `deleteUnreferencedThreads` 控制的自动清理。
+
+将此选项设为 `false` 可在锚点消失时禁用自动清理。除非回调调用 `defaultHandler()`，否则回调会替代清理流程。当 `deleteUnreferencedThreads` 为 `true` 时，默认处理程序会软删除不再被引用的线程。
+
+例如，锚点消失时解决线程并保留其评论：
+
+```js
+CommentsKit.configure({
+  onThreadAnchorRemoved: ({ editor, threadId }) => {
+    editor.commands.resolveThread({ id: threadId })
+  },
+})
+```
+
+回调会收到以下参数：
+
+| 参数             | 说明                               |
+| ---------------- | ---------------------------------- |
+| `editor`         | 线程最后一个锚点被移除的编辑器。   |
+| `threadId`       | 线程 ID。                          |
+| `thread`         | 当前线程数据，包括其评论。         |
+| `field`          | 包含此线程的协同字段。             |
+| `removedBy`      | `'edit'`、`'command'` 或 `'undoRedo'`。 |
+| `defaultHandler` | 运行已配置的默认清理流程。         |
+
+使用 `removeThread({ id })` 显式移除锚点时，`removedBy` 为 `'command'`。调用 `removeThread({ id, deleteThread: true })` 会直接删除线程并跳过此回调。为修订跟踪建议创建的线程由该集成处理，也会跳过此回调。
+
+请在回调中同步调用 `defaultHandler()`。它最多运行一次；回调返回后再调用则无效。例如，记录锚点移除并保留默认清理行为：
+
+```js
+CommentsKit.configure({
+  onThreadAnchorRemoved: ({ threadId, removedBy, defaultHandler }) => {
+    console.log('Thread anchor removed', threadId, removedBy)
+    defaultHandler()
+  },
+})
+```
+
+## onThreadStateChanged
+
+当 Yjs 事务更改编辑器协同字段中已有线程的状态后运行的回调。它会处理本地和远程更改。创建线程、添加评论或更新线程元数据不会触发此回调。
+
+**默认值：** `undefined`，保留默认文档处理行为。永久删除线程会移除其锚点并保留锚点处的文本。解决、重新打开、软删除或恢复线程时会保留其锚点。
+
+将此选项设为 `false` 可禁用线程状态变化时的自动文档处理。除非回调调用 `defaultHandler()`，否则回调会替代该处理流程。
+
+```js
+CommentsKit.configure({
+  onThreadStateChanged: ({ event, threadId, origin, defaultHandler }) => {
+    console.log('Thread state changed', event, threadId, origin)
+    defaultHandler()
+  },
+})
+```
+
+回调会收到以下参数：
+
+| 参数             | 说明                                                                                     |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| `editor`         | 处理状态变化的编辑器。                                                                   |
+| `threadId`       | 线程 ID。                                                                                |
+| `event`          | `'resolved'`、`'unresolved'`、`'deleted'` 或 `'restored'`。                              |
+| `previousThread` | 更改前的线程数据。                                                                       |
+| `thread`         | 更改后的线程数据。永久删除后，此值为 `undefined`。                                       |
+| `field`          | 包含此线程的协同字段。                                                                   |
+| `origin`         | 根据 Yjs 事务确定的 `'local'` 或 `'remote'`。                                            |
+| `defaultHandler` | 运行默认文档处理逻辑。请在回调中同步调用，且最多调用一次；回调返回后调用无效。             |
+
+`'deleted'` 事件同时涵盖软删除和永久删除。`'restored'` 事件表示线程已从软删除状态恢复，不代表其文档锚点也已恢复。
+
+例如，解决线程时移除锚点，但保留线程及其评论：
+
+```js
+CommentsKit.configure({
+  onThreadStateChanged: ({ editor, threadId, event, defaultHandler }) => {
+    if (event === 'resolved') {
+      editor.commands.removeThread({ id: threadId, deleteThread: false })
+    }
+    defaultHandler()
+  },
+})
+```
+
+在此回调中移除锚点不会触发 `onThreadAnchorRemoved`，也不会自动删除已脱离锚点的线程。在此回调中更改线程状态不会再次触发本地状态回调。重新打开线程不会重新创建由自定义处理移除的锚点。
+
 ## trackedChangesIntegration
 
 一个布尔选项，用于控制是否启用自动 [跟踪更改](/editor/extensions/functionality/tracked-changes) 集成。启用后，会根据跟踪更改建议的生命周期事件自动创建、更新、解决或删除线程。

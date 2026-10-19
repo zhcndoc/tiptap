@@ -13,6 +13,8 @@ meta:
 
 参数无效、目标缺失或不明确、违反 schema 或权限被拒绝时，命令返回 `false`。无效的草稿内容也会被接受；验证不会阻止编辑。
 
+借助 [Variable 扩展](/composable-docs/variables/guides/bind-slots)，由显式值或解析器控制的 Slot 会以 `false` 拒绝内容写入。这包括填写、清空、移除、解除或移动受控 Slot，以及通过父级或嵌套 Slot 写入内容。向其中插入或包装内容也会被拒绝。这些拒绝会触发 `slotCommandRejected` 事件，且 `code` 为 `'variableControlled'`；`editor.can()` 会返回 `false`，但不会触发事件。显式设置为 `null` 或 `undefined` 仍会控制该 Slot。绑定到未显式定义变量的 Slot 仍可编辑。
+
 - 每次调用最多写入一个事务。无操作调用不会添加撤销记录。
 - 被拒绝的 Slot 命令会取消其链中组合的写入。
 - `editor.can()` 不触发事件、不运行验证器，也不会生成真实 ID。分发时会使用实际 ID 再次检查。
@@ -70,6 +72,8 @@ editor.commands.insertSlot()
 
 接受时为 `true`，否则为 `false`。替换父 Slot 可能移除嵌套 Slot，并需要移除它们的权限。
 
+即使替换内容与当前内容相同，只要目标或受影响的嵌套 Slot 受变量控制，就会返回 `false`。
+
 ## `fillSlots`
 
 以原子方式填写多个 Slot。
@@ -81,6 +85,8 @@ editor.commands.insertSlot()
 ### 返回值（`boolean`）
 
 所有填写都成功时为 `true`，包括空批次。目标重复、目标存在祖先/后代关系或任一填写被拒绝时为 `false`。
+
+如果任一目标受变量控制，整个批次都会返回 `false`，且不会更改任何 Slot。
 
 ## `clearSlot`
 

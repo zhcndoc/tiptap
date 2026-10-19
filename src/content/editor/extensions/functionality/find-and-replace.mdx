@@ -65,13 +65,15 @@ FindAndReplace.configure({
 
 ### replaceTerm
 
-替换命令使用的初始文本。
+替换命令使用的初始文本。启用正则表达式模式时，替换内容可以重用完整匹配项或捕获组。
 
 默认值：`''`
 
 ```js
 FindAndReplace.configure({
-  replaceTerm: 'Editor',
+  useRegex: true,
+  searchTerm: '(color|colour)',
+  replaceTerm: '[$1]',
 })
 ```
 
@@ -100,19 +102,24 @@ FindAndReplace.configure({
 })
 ```
 
-无效或被判定为不安全的模式不会返回结果。正则表达式模式仅控制匹配：替换文本会按字面插入，因此不会展开 `$1` 等捕获组引用。
+正则表达式模式可以与 `caseSensitive` 和 `wholeWord` 一起使用。模式无效或被判定为不安全时，不会返回结果。正则表达式模式使用兼容 RE2 的语法，因此搜索模式不支持环视和反向引用。
 
 ### wholeWord
 
-是否仅匹配完整单词。启用 `useRegex` 时会忽略此选项。
+是否要求匹配项两侧都具有 Unicode 单词边界。字面搜索和正则表达式搜索均支持此选项。Unicode 单词字符包括字母、组合标记、数字和 `_` 等连接标点。
 
 默认值：`false`
 
 ```js
 FindAndReplace.configure({
+  caseSensitive: true,
+  useRegex: true,
   wholeWord: true,
+  searchTerm: 'cat|catalog',
 })
 ```
+
+例如，此配置会匹配 `cat` 和 `catalog`，但不会匹配 `cats` 或 `Catalog`。较早的结果不符合全词边界时，正则表达式引擎可以尝试后续备选项或更长的匹配。
 
 ### searchDebounceMs
 
@@ -162,15 +169,40 @@ editor.commands.setSearchTerm('Tiptap')
 
 ### setReplaceTerm()
 
-设置由 `replace()` 和 `replaceAll()` 使用的文本。
+设置 `replace()` 和 `replaceAll()` 使用的文本。正则表达式模式下，替换文本可以包含捕获组替换。
 
 ```js
-editor.commands.setReplaceTerm('Editor')
+editor.commands.setReplaceTerm('[$1]')
+```
+
+#### 正则表达式替换标记
+
+启用正则表达式模式时，替换文本支持以下 JavaScript 风格的标记：
+
+| 标记       | 替换内容                 |
+| ---------- | ------------------------ |
+| `$$`       | 字面量 `$`               |
+| `$&`       | 完整匹配项               |
+| `$1`–`$99` | 对应编号的捕获组         |
+| `$<name>`  | 对应名称的捕获组         |
+
+未匹配的捕获组会替换为空字符串。超出模式捕获组数量的一位数字引用会保持不变。对于两位数字引用，遵循 JavaScript 风格的回退规则：如果完整数字没有对应捕获组，但首位数字对应某个捕获组，则插入该捕获组，再接上第二位数字。例如，只有一个捕获组时，`$12` 会插入第 1 组的内容，后接 `2`。带前导零的引用（如 `$01`）也遵循 JavaScript 语义，指向第 1 组。当模式中包含命名组时，未知命名引用会替换为空字符串；否则保持不变。
+
+其他 `$` 序列保持不变。JavaScript 的匹配前内容标记（`$` 后接反引号）和匹配后内容标记（`$'`）不会展开。禁用正则表达式模式时，所有替换文本都会按字面内容插入。
+
+在正则表达式模式下，使用 `$$` 转义开头的美元符号，即可按字面保留受支持的标记。例如，`$$1` 会插入 `$1`。
+
+```js
+editor.commands.setUseRegex(true)
+editor.commands.setSearchTerm('(color|colour)')
+editor.commands.setReplaceTerm('[$1]')
+editor.commands.replaceAll()
+// "color and colour" becomes "[color] and [colour]"
 ```
 
 ### setCaseSensitive()
 
-启用或禁用大小写敏感匹配。
+启用或禁用区分大小写匹配。字面模式和正则表达式模式均支持此选项。
 
 ```js
 editor.commands.setCaseSensitive(true)
@@ -178,7 +210,7 @@ editor.commands.setCaseSensitive(true)
 
 ### setUseRegex()
 
-启用或禁用正则表达式匹配。
+启用或禁用正则表达式匹配。正则表达式模式可以与“区分大小写”和“全词匹配”同时启用。
 
 ```js
 editor.commands.setUseRegex(true)
@@ -186,7 +218,7 @@ editor.commands.setUseRegex(true)
 
 ### setWholeWord()
 
-启用或禁用全词匹配。启用正则表达式模式时，此设置无效。
+启用或禁用支持 Unicode 的全词匹配，可用于字面搜索或正则表达式搜索。
 
 ```js
 editor.commands.setWholeWord(true)
@@ -281,6 +313,8 @@ editor.storage.findAndReplace.currentIndex
 ## 搜索行为
 
 当文档或搜索选项发生变化时，匹配项会更新。一个匹配项可以跨越带有不同标记的文本节点，但绝不会跨越文本块或非文本内联节点，例如硬换行或提及。
+
+“区分大小写”、“正则”和“全词匹配”是相互独立的选项，可以同时启用。在正则表达式全词模式下，边界会围绕最终的正则匹配结果进行检查。这允许备选项和量词继续尝试，直到匹配完整单词。连续匹配可以共享标点边界，因此针对 `cat` 的全词正则表达式会在 `cat-cat.cat` 中找到全部三个匹配项。
 
 `replaceAll()` 会替换命令运行时存在的匹配项。如果替换文本也符合搜索条件，那么这些新匹配项会在事务完成后保留在存储中。
 

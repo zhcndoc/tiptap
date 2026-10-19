@@ -1,0 +1,509 @@
+---
+title: Tiptap Query
+meta:
+  title: Tiptap Query | Tiptap 服务器 AI 工具包
+  description: Tiptap Query 参考，介绍如何使用 tiptapQuery 工具通过 JSON 操作读取、搜索和编辑 Tiptap 文档。
+  category: AI 工具包
+tags:
+  - type: alpha
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+<Callout title="Alpha 阶段" variant="warning">
+  Tiptap Query 目前处于 alpha 阶段，操作格式可能会发生变化。
+</Callout>
+
+Tiptap Query 使用 JSON 操作读取、搜索和编辑 Tiptap 文档。AI 代理通过 `tiptapQuery` 工具使用它。每个操作都会选择内容（例如所有标题或某个词的每次出现），并对其执行操作。此工具可以独立使用：AI 代理无需 `tiptapRead` 或 `tiptapEdit`，即可查找和编辑内容。
+
+```json
+{
+  "operations": [
+    {
+      "selector": [{ "type": "heading" }, { "text": "Old title" }],
+      "action": { "type": "replace", "content": "New title" },
+      "expect": 1
+    }
+  ]
+}
+```
+
+## 启用工具
+
+在[获取工具定义](/ai/ai-toolkit/api-reference/rest-api#fetch-tool-definitions)时启用 `tiptapQuery`：
+
+```json
+{
+  "editorContext": {
+    /* editor context data */
+  },
+  "tools": {
+    "tiptapQuery": true
+  }
+}
+```
+
+若要让 AI 说明所做的更改，请传入 `meta` 指令，而不是 `true`，例如 `{ "meta": "Briefly explain the change." }`。之后，每个更改文档的操作都必须包含 `meta`。读取操作无需此字段。
+
+使用 [`execute-tool`](/ai/ai-toolkit/api-reference/rest-api#execute-a-tool) 端点运行 AI 生成的工具调用：
+
+```json
+{
+  "editorContext": {
+    /* editor context data */
+  },
+  "document": { "type": "cloud", "id": "your-document-id" },
+  "tool": {
+    "name": "tiptapQuery",
+    "input": {
+      "operations": [
+        { "selector": [{ "type": "heading" }], "action": { "type": "read", "view": "summary" } }
+      ]
+    }
+  }
+}
+```
+
+`tiptapQuery` 支持 `json`、`shorthand` 和 `shorthandV2` 格式，并可配合[审阅选项](/ai/ai-toolkit/api-reference/review-options)使用。它不能通过 `stream-tool` 端点使用。
+
+工具配置（`tool.config`）：
+
+- `chunkSize`（`number`，可选，默认值：`32000`）：一次调用中所有读取操作合计返回的最大字符数。该值会限制在 `512` 到 `32000` 之间。
+- `threadData`（`object`，可选）：添加到新建线程的元数据。
+- `commentData`（`object`，可选）：添加到新建评论的元数据。
+
+## 输入
+
+工具输入（`tool.input`）：
+
+- `operations`（`array`，必需）：按顺序运行 1 到 50 个操作。每个操作包含：
+  - `selector`（`array`，必需）：最多包含 12 个步骤，用于选择要读取或编辑的内容。空数组表示选择整个文档。参见[选择器](#selectors)。
+  - `action`（`object`，必需）：对选定内容执行的操作。参见[操作](#actions)。
+  - `expect`（`number`，可选）：选择器必须匹配的确切数量。如果匹配数不同，操作会以 `unexpected_matches` 失败。使用 `expect: 1` 可确保只编辑单个目标。
+  - `meta`（`string`，可选）：更改原因，最多 4,000 个字符。在修订跟踪模式下，如果支持评论，该字段会成为建议上的评论。若 `fetch-tools` 收到 `tiptapQuery` 的 `meta` 指令，则所有更改操作都必须包含此字段。参见[修订跟踪和评论](#tracked-changes-and-comments)。
+
+未知字段会被拒绝。
+
+## 选择器
+
+选择器由一组步骤组成。选择从文档开始，每个步骤都会在上一步选中的内容中搜索。空选择器（`[]`）表示选择整个文档。
+
+| 选择器                                                       | 选中内容                                   |
+| ------------------------------------------------------------ | ------------------------------------------ |
+| `[{ "type": "heading" }]`                                  | 所有标题，包括嵌套标题                     |
+| `[{ "hash": "HASH" }]`                                     | `_hash` 值为该值的节点                     |
+| `[{ "type": "paragraph", "contains": "beta" }]`          | 所有包含文本 `beta` 的段落                 |
+| `[{ "text": "beta", "wholeWord": true }]`                | 单词 `beta` 的每次出现                     |
+| `[{ "type": "bulletList" }, { "text": "late" }]`        | 项目符号列表中 `late` 的每次出现           |
+| `[{ "hash": "HASH" }, { "content": true }]`             | `_hash` 为该值的节点内部内容，不包含节点本身 |
+| `[{ "range": { "from": "START_HASH", "to": "END_HASH" } }]` | 两个同级节点及其间的所有节点               |
+
+### 节点步骤
+
+节点步骤会在上一步的选区中选择节点。一个步骤中的所有筛选条件都必须匹配。
+
+- `type`（`string`，可选）：节点类型，例如 `"heading"`。如果编辑器 schema 未定义该类型，则会以 `invalid_selector` 失败。
+- `hash`（`string`，可选）：节点 `_hash` 属性的值。读取结果会返回找到的节点哈希。
+- `id`（`string`，可选）：节点 `id` 属性的值，例如 [Unique ID](/editor/extensions/functionality/uniqueid) 扩展添加的 ID。多个节点可以匹配同一 ID。
+- `attrs`（`object`，可选）：节点必须具有的属性值，例如 `{ "level": 2 }`。
+- `contains`（`string`，可选）：节点必须包含的文本。按字面内容区分大小写匹配。
+- `scope`（`'descendants' | 'children'`，可选，默认值：`'descendants'`）：搜索所有后代节点，或仅搜索直接子节点。
+- `pick`（`'all' | 'first' | 'last'`，可选，默认值：`'all'`）：保留所有匹配项，或仅保留文档顺序中的第一个或最后一个匹配项。如果不指定 `type`，且匹配项相互嵌套，则无法选取第一个或最后一个匹配项。
+
+串联两个节点步骤时，第二步会在第一步找到的节点内部搜索。它不会选择这些节点之间的节点；要实现此操作，请使用范围步骤。
+
+### 文本步骤
+
+文本步骤会在上一步的选区中选择文本的所有非重叠出现位置。
+
+- `text`（`string`，必需）：要查找的文本，最多 10,000 个字符。按字面内容匹配，不支持正则表达式。
+- `caseSensitive`（`boolean`，可选，默认值：`true`）：设为 `false` 可忽略大小写。
+- `wholeWord`（`boolean`，可选，默认值：`false`）：设为 `true` 仅匹配完整单词。
+- `pick`（`'all' | 'first' | 'last'`，可选，默认值：`'all'`）：保留所有匹配项，或仅保留文档顺序中的第一个或最后一个匹配项。
+
+匹配项可以跨越格式不同的文本，但不会跨越块、硬换行或行内节点。文本步骤之后只能跟随另一个文本步骤。
+
+### 内容步骤
+
+`{ "content": true }` 会选择每个已选节点的内部内容，不包含节点本身。使用此步骤可在保留节点及其属性的同时读取或替换节点的子项。
+
+### 范围步骤
+
+`{ "range": { "from": "START_HASH", "to": "END_HASH" } }` 会选择两个同级节点及其间的所有节点。两个哈希都必须分别唯一对应上一步选区中的一个节点，且 `from` 必须位于 `to` 之前。省略 `to` 可选择到父节点末尾；如果外层范围更早结束，则选择到该范围的末尾。
+
+编辑范围前，请先读取端点的哈希，并在一个操作中编辑整个范围。
+
+## 操作
+
+### `read`
+
+返回选定内容，不更改文档。
+
+- `view`（`'content' | 'text' | 'summary'`，可选，默认值：`'content'`）：每个匹配项的返回格式：
+  - `'content'`：请求 `format` 指定的内容，即 Tiptap JSON 节点或 Tiptap Shorthand 字符串。
+  - `'text'`：纯文本。
+  - `'summary'`：每个节点的哈希、类型、属性和纯文本。
+- `maxChars`（`number`，可选，默认值：`32000`）：返回页面的最大长度，范围为 512 到 32,000 个字符。
+- `cursor`（`string`，可选）：继续上一次读取。不要创建或修改此字段；请传入读取结果返回的完整 `next` 操作。参见[读取较长内容](#read-long-content)。
+
+### `replace`
+
+替换选定内容。
+
+- `content`（`JSONContent[] | string`，必需）：新内容。
+  - 对于文本匹配项，无论使用何种格式，`content` 始终为纯字符串。使用 `""` 删除文本。新文本会保留匹配项起始位置的格式；父节点允许时，`\n` 会转换为硬换行。
+  - 对于节点、内容步骤、范围和整个文档，`format` 为 `json` 时，`content` 是 Tiptap JSON 节点数组；`format` 为 `shorthand` 或 `shorthandV2` 时，则是 [Tiptap Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand) 字符串。如果 schema 允许，空内容（`[]` 或 Tiptap Shorthand 中的 `""`）会删除选定节点。
+
+### `insertBefore` 和 `insertAfter`
+
+将节点作为同级节点插入到每个选定节点或内容范围之前或之后。
+
+- `content`（`JSONContent[] | string`，必需）：要插入的节点，格式与 `replace` 的节点内容相同。
+
+不能使用文本匹配项。要在段落中添加文本，请将文本匹配项替换为较长的文本。要在文档开头或末尾添加节点，请选择 `[{ "content": true }]`。不能使用整个文档（`[]`）进行插入。
+
+### `setAttrs`
+
+将属性合并到每个选定节点。
+
+- `attrs`（`object`，必需）：要设置的属性。编辑器 schema 必须定义这些属性。不能设置 `_hash` 和修订跟踪属性等保留属性。
+
+### `addMark` 和 `removeMark`
+
+为选定文本或选定节点内的所有文本添加或移除标记。
+
+- `mark`（`string`，必需）：编辑器 schema 中的标记类型，例如 `"bold"`。不能使用修订跟踪标记和评论标记。
+- `attrs`（`object`，可选）：`addMark` 的标记属性，例如链接的 `{ "href": "https://tiptap.dev" }`。
+
+无论属性为何，`removeMark` 都会移除该类型的所有标记。
+
+### 新内容中的哈希
+
+工具会为每个新节点添加 `_hash`。你传入内容中的哈希会被忽略。`replace` 将节点替换为单个同类型节点时，新节点会保留旧哈希。新内容中的修订跟踪标记和属性会以 `invalid_content` 错误拒绝。
+
+## 输出
+
+工具输出（`tool.output`）：
+
+- `success`（`boolean`）：所有操作是否均已成功。
+- `operationResults`（`array`）：按顺序为每个已运行的操作返回一个结果。参见下文。
+- `skipped`（`number`）：因较早的操作失败而未运行的操作数量。
+
+`operationResults` 中的每个结果采用以下格式之一。
+
+读取结果：
+
+- `index`（`number`）：该操作在 `operations` 中的位置。
+- `success` (`true`)
+- `complete`（`boolean`）：读取是否返回了所选的全部内容。为 `false` 时，请使用 `next` 再次调用工具。
+- `totalMatches`（`number`）：选择器匹配的数量。选择器为空时，每个顶层节点都计为一个匹配项。
+- `items`（`array`）：返回的匹配项。每一项包含：
+  - `hash`（`string`，可选）：节点哈希。对于文本匹配项，这是包含该匹配项的节点哈希；对于内容步骤，这是其内容被选中的节点哈希。范围项没有哈希。
+  - `type`（`string`）：节点类型；文本匹配项为 `"text"`，内容步骤或范围为 `"content"`。
+  - `attrs`（`object`，可选）：`summary` 视图中的属性值，不包含 `_hash` 和修订跟踪属性。文本匹配项、内容步骤和范围没有 `attrs`。
+  - `text`（`string`）：`text` 和 `summary` 视图中的纯文本。硬换行会转换为 `\n`，其他行内节点会转换为 U+FFFC 字符。
+  - `content`（`JSONContent[] | string`）：`content` 视图中的内容。
+  - `excerpt`（`true`，可选）：此项是无法完全放入页面的节点文本摘录。此时包含 `text`，而不是 `content`。
+- `next`（`object | null`）：用于继续读取的操作；读取完成时为 `null`。
+
+编辑结果：
+
+- `index`（`number`）：该操作在 `operations` 中的位置。
+- `success` (`true`)
+- `matched`（`number`）：该操作编辑的匹配项数量。
+- `changed`（`boolean`）：操作是否更改了文档。编辑没有效果时（例如将粗体文本再次设为粗体），值为 `false`。
+
+失败结果：
+
+- `index`（`number`）：该操作在 `operations` 中的位置。
+- `success` (`false`)
+- `code`（`string`）：错误代码。参见[错误代码](#error-codes)。
+- `error`（`string`）：提供给 AI 的错误消息，最多 2,000 个字符。消息通常会建议如何修正操作。
+
+输入本身无效时，输出为 `{ "success": false, "code": "invalid_input", "error": "..." }`，且不会运行任何操作。
+
+操作失败和无效输入会通过 `tool.output` 报告，`execute-tool` 请求仍会返回 HTTP 状态码 `200`。身份验证、文档访问和服务器错误等其他失败会返回 HTTP 错误，详见 [REST API 参考](/ai/ai-toolkit/api-reference/rest-api#execute-a-tool)。
+
+## 操作运行方式
+
+- 操作按顺序运行。每个操作都能看到之前操作所做的更改。
+- 编辑操作会先查找全部匹配项，再统一修改；如果编辑失败，则一个也不会修改。
+- 编辑操作没有匹配项时会以 `no_matches` 失败。读取操作没有匹配项时则成功返回空列表。
+- 第一个失败的操作会终止此次调用。此前操作的更改会保留，后续操作会跳过；整个调用不会回滚。
+- 即使调用只进行读取，没有 `_hash` 的节点也会获得哈希。重复哈希会被替换，现有哈希不会更改。
+
+## 读取较长内容
+
+一次读取最多返回 `maxChars` 个字符。内容超出限制时，`complete` 为 `false`，`next` 会包含用于继续读取的操作。将 `next` 作为新调用中的操作传入，重复此过程，直到 `next` 为 `null`：
+
+```json
+{
+  "operations": [
+    /* the `next` value of the previous read */
+  ]
+}
+```
+
+无法放入单页的节点会以文本摘录的形式返回，并包含 `excerpt: true`；`next` 会在同一节点中继续读取。因此，读取所需的页面数可能多于匹配项数量，`totalMatches: 1` 并不表示该节点已完整读取。要查看大型节点的结构，请读取其子节点或使用更大的页面。
+
+当文档其他部分发生更改，或已读取的节点仍保留其哈希时，`next` 中的游标仍然有效。已读取的内容以其他方式发生更改时，读取会以 `stale_cursor` 失败。请不带游标重新读取，或从最后读取到的哈希开始读取一个范围。
+
+一次调用中的所有读取操作共享 `chunkSize` 预算。预算用尽后，剩余读取操作会返回空 `items`、`complete: false` 以及各自的 `next` 操作。之后的操作仍会继续运行。
+
+## 修订跟踪和评论
+
+设置 `reviewOptions: { mode: 'trackedChanges' }` 后，每次编辑都会变成可由用户接受或拒绝的建议，而不是直接更改文档。
+
+- 读取会将文档视为所有待处理建议均已接受后再返回。
+- AI 编辑其他内容时，之前调用创建的建议会保留。
+- `meta` 会成为该操作建议上的评论。评论需要 Tiptap Cloud 文档以及支持评论的编辑器 schema。内联文档会生成建议，但不会生成评论。
+- 如果 `setAttrs` 设置了建议无法记录的属性，会以 `invalid_attributes` 拒绝。默认包括 `id` 和 `data-thread-id`（参见[审阅选项](/ai/ai-toolkit/api-reference/review-options)中的 `ignoreAttributes`）。
+- 编辑仅更改被忽略的属性或标记时，会返回 `changed: false`，且不会更改文档。
+
+## 错误代码
+
+| 代码                  | 原因                                                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `invalid_input`       | 输入不符合 schema，例如包含未知字段或操作数量超过 50；不会运行任何操作。                                                                      |
+| `invalid_selector`    | 节点类型未在 schema 中定义、文本步骤之后跟随节点/范围/内容步骤、内容步骤选择了叶节点，或 `pick` 结果不明确。                           |
+| `invalid_range`       | 范围端点在选定范围内没有分别且唯一地对应一个节点，或端点不是按顺序排列的同级节点。                                                            |
+| `no_matches`          | 编辑操作没有选中任何内容。                                                                                                                         |
+| `unexpected_matches`  | 匹配数量与 `expect` 指定的数量不同。                                                                                                       |
+| `too_many_matches`    | 编辑操作选中了超过 10,000 个匹配项。                                                                                                         |
+| `overlapping_matches` | 编辑操作的匹配项彼此重叠。                                                                                                                   |
+| `selection_limit`     | 此次调用的选择器检查了超过 2,000,000 个节点和文本匹配项。                                                                                      |
+| `invalid_target`      | 操作无法应用于此选区，例如在文本匹配项旁插入节点，或为文本设置属性。                                                                            |
+| `invalid_content`     | 内容格式与选区或输出格式不符，或包含修订跟踪数据。                                                                                             |
+| `invalid_operation`   | 编辑器 schema 拒绝了该内容，或无法解析 Tiptap Shorthand。错误消息会列出具体问题。                                                               |
+| `invalid_attributes`  | 属性未知或属于保留属性，或建议无法在修订跟踪模式下记录该属性。                                                                                  |
+| `invalid_mark`        | 标记不是 schema 中的普通标记，或父节点不允许该标记。                                                                                           |
+| `invalid_cursor`      | 游标不是由工具返回的，或已被修改。                                                                                                             |
+| `stale_cursor`        | 已读取的内容发生了更改。                                                                                                                       |
+| `output_limit`        | 单个条目及其后续内容无法放入 `maxChars` 限定的页面中。                                                                                       |
+| `unsupported_content` | Tiptap Shorthand 无法表示该内容。请使用 `text` 或 `summary` 视图读取。                                                                         |
+
+## 限制
+
+| 限制                                                       | 值                       |
+| ---------------------------------------------------------- | ------------------------ |
+| 每次调用的操作数                                           | 50                       |
+| 每个选择器的步骤数                                         | 12                       |
+| `text` 和 `contains` 的长度                                | 10,000 个字符             |
+| `meta` 的长度                                               | 4,000 个字符              |
+| 每次编辑的匹配项数                                         | 10,000                   |
+| 一次调用的选择器检查的节点和文本匹配项数                   | 2,000,000                |
+| 读取页面的大小（`maxChars`）                                | 512 到 32,000 个字符      |
+| 一次调用中所有读取操作返回的字符数（`chunkSize`）           | 512 到 32,000 个字符      |
+| 游标长度                                                   | 2,048 个字符              |
+
+## 示例
+
+以下示例使用的文档包含这些节点：
+
+| 哈希     | 节点                                    | 文本                                                        |
+| -------- | --------------------------------------- | ----------------------------------------------------------- |
+| `k8Tq2m` | 一级标题                                | Launch plan                                                 |
+| `p3Lx7a` | 段落                                    | This plan covers the beta and the public launch.            |
+| `Q9wE4r` | 二级标题                                | Timeline                                                    |
+| `Z2nB6c` | 段落                                    | The beta starts in March. The public launch follows in May. |
+| `m5Ht8v` | 二级标题                                | Risks                                                       |
+| `J7sD1k` | 项目符号列表                            |                                                             |
+| `x4Pq9w` | `J7sD1k` 中包含段落的列表项              | Hiring takes longer than planned.                           |
+| `R1yU5e` | `J7sD1k` 中包含段落的列表项              | The scope changes late.                                     |
+| `W3gN7h` | 二级标题                                | Contacts                                                    |
+| `t5Mz1q` | 段落                                    | Product: Ana. Engineering: Ben.                             |
+
+### 读取大纲
+
+使用 `summary` 视图读取所有标题，而不加载正文：
+
+```json
+{
+  "operations": [
+    { "selector": [{ "type": "heading" }], "action": { "type": "read", "view": "summary" } }
+  ]
+}
+```
+
+输出：
+
+```json
+{
+  "success": true,
+  "operationResults": [
+    {
+      "index": 0,
+      "success": true,
+      "complete": true,
+      "totalMatches": 4,
+      "items": [
+        { "hash": "k8Tq2m", "type": "heading", "attrs": { "level": 1 }, "text": "Launch plan" },
+        { "hash": "Q9wE4r", "type": "heading", "attrs": { "level": 2 }, "text": "Timeline" },
+        { "hash": "m5Ht8v", "type": "heading", "attrs": { "level": 2 }, "text": "Risks" },
+        { "hash": "W3gN7h", "type": "heading", "attrs": { "level": 2 }, "text": "Contacts" }
+      ],
+      "next": null
+    }
+  ],
+  "skipped": 0
+}
+```
+
+### 从标题开始向后读取
+
+从标题哈希处开始一个范围，并省略 `to`，即可读取到文档末尾。添加 `{ "scope": "children" }`，可将范围内的每个节点分别作为一项返回：
+
+```json
+{
+  "operations": [
+    {
+      "selector": [{ "range": { "from": "m5Ht8v" } }, { "scope": "children" }],
+      "action": { "type": "read", "view": "summary", "maxChars": 8000 }
+    }
+  ]
+}
+```
+
+结果包含四项：`Risks` 标题、项目符号列表、`Contacts` 标题及其段落。范围不会在遇到下一个标题时停止。若只需读取一个章节，请将 `to` 设为该章节的最后一个节点。
+
+### 查找并编辑段落
+
+查找包含指定文本的段落：
+
+```json
+{
+  "operations": [
+    {
+      "selector": [{ "type": "paragraph", "contains": "March" }],
+      "action": { "type": "read", "view": "summary" }
+    }
+  ]
+}
+```
+
+读取结果包含一项：哈希为 `Z2nB6c` 的段落。
+
+然后使用该段落的哈希编辑其中的文本：
+
+```json
+{
+  "operations": [
+    {
+      "selector": [{ "hash": "Z2nB6c" }, { "text": "March" }],
+      "action": { "type": "replace", "content": "April" },
+      "expect": 1
+    }
+  ]
+}
+```
+
+编辑操作返回 `matched: 1` 和 `changed: true`。段落现在的内容为：“The beta starts in April. The public launch follows in May.”
+
+### 更改节点类型
+
+要更改节点类型，请选中节点本身，而不是节点中的文本，然后替换节点。以下示例会将联系人段落转换为项目符号列表：
+
+```json
+{
+  "operations": [
+    {
+      "selector": [{ "type": "paragraph", "contains": "Product:" }],
+      "action": {
+        "type": "replace",
+        "content": [
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  { "type": "paragraph", "content": [{ "type": "text", "text": "Product: Ana" }] }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [{ "type": "text", "text": "Engineering: Ben" }]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expect": 1
+    }
+  ]
+}
+```
+
+### 插入节点
+
+在一个段落后插入另一个段落：
+
+```json
+{
+  "operations": [
+    {
+      "selector": [{ "hash": "Z2nB6c" }],
+      "action": {
+        "type": "insertAfter",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [{ "type": "text", "text": "Feedback closes two weeks after launch." }]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+编辑操作返回 `matched: 1` 和 `changed: true`。
+
+### 处理失败的操作
+
+第二个操作预期只匹配一个包含文本 "launch" 的段落，但实际有两个段落包含该文本：
+
+```json
+{
+  "operations": [
+    { "selector": [{ "text": "March" }], "action": { "type": "replace", "content": "April" } },
+    {
+      "selector": [{ "type": "paragraph", "contains": "launch" }],
+      "action": { "type": "addMark", "mark": "italic" },
+      "expect": 1
+    },
+    { "selector": [{ "text": "May" }], "action": { "type": "replace", "content": "June" } }
+  ]
+}
+```
+
+输出：
+
+```json
+{
+  "success": false,
+  "operationResults": [
+    { "index": 0, "success": true, "matched": 1, "changed": true },
+    {
+      "index": 1,
+      "success": false,
+      "code": "unexpected_matches",
+      "error": "Expected 1 matches, found 2. Narrow the selector or read first."
+    }
+  ],
+  "skipped": 1
+}
+```
+
+第一个操作的更改会保留，因此文档现在包含 "April"。第三个操作不会运行。
+
+## 相关页面
+
+- [REST API](/ai/ai-toolkit/api-reference/rest-api)
+- [审阅选项](/ai/ai-toolkit/api-reference/review-options)
+- [Tiptap Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand)

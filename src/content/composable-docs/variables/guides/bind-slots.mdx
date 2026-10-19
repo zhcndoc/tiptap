@@ -1,0 +1,176 @@
+---
+title: 将 Slot 绑定到变量
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 将 Slot 绑定到变量 | Tiptap 文档
+  description: 在编辑器中同步可编辑 Slot 和响应式变量值。
+  category: 可组合文档
+---
+
+将一个或多个 [Slot](/composable-docs/slots/getting-started/overview) 绑定到变量，使其内容与变量保持同步。
+
+## 配置绑定
+
+安装 `@tiptap-pro/extension-slot` 和 `@tiptap-pro/extension-variable`。
+
+首先，为两个 Slot 设置相同名称的 `variable` 属性：
+
+```ts
+const content = {
+  type: 'doc',
+  content: [
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'inlineSlot',
+          attrs: { id: 'customerField', variable: 'customer' },
+          content: [{ type: 'text', text: 'Ada' }],
+        },
+        { type: 'text', text: ' / ' },
+        {
+          type: 'inlineSlot',
+          attrs: { id: 'signatureField', variable: 'customer' },
+          content: [{ type: 'text', text: 'Ada' }],
+        },
+      ],
+    },
+  ],
+}
+```
+
+然后，使用这两个扩展创建编辑器：
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { Slot } from '@tiptap-pro/extension-slot'
+import { Variable } from '@tiptap-pro/extension-variable'
+
+const editor = new Editor({
+  extensions: [StarterKit, Slot, Variable],
+  content,
+})
+```
+
+变量值会直接显示在每个 Slot 中，无需额外的变量节点。
+
+## 由 Slot 提供变量值
+
+未为 `customer` 设置显式值或解析器时，第一个绑定的 Slot 会提供变量值。你可以编辑任一 Slot，或使用命令填写。变量和另一个 Slot 会一起更新：
+
+```ts
+editor.commands.fillSlot({
+  id: 'customerField',
+  content: [{ type: 'text', text: 'Grace' }],
+})
+```
+
+填写成功时，命令会返回 `true`。单纯绑定变量不会使 Slot 变为只读。
+
+如果依赖的解析器失败、新内容无法放入其他绑定的 Slot，或 Content Protection 阻止了同级 Slot 更新，命令会返回 `false`，并保留之前的文档和变量值。`Variable.onError` 会收到错误，`slotCommandRejected` 会报告 `code: 'variableSyncFailed'`。试运行不会执行解析器，也不会预测同步失败。
+
+## 由变量控制 Slot
+
+显式值或解析器的优先级高于 Slot 内容。设置变量会重新填写两个 Slot，并使它们变为只读：
+
+```ts
+editor.commands.setVariable({ name: 'customer', value: 'Lin' })
+```
+
+若要改用解析器：
+
+```ts
+const currentCustomer = { name: 'Lin' }
+editor.commands.setVariables({ variables: { customer: () => currentCustomer.name } })
+```
+
+变量控制 Slot 时，`fillSlot()`、`fillSlots()` 和 `clearSlot()` 都会返回 `false`，且不会更改 Slot 内容，即使替换值与当前值相同也是如此。`editor.can()` 对这些写入操作也会返回 `false`：
+
+```ts
+const filled = editor.commands.fillSlot({
+  id: 'customerField',
+  content: [{ type: 'text', text: 'Grace' }],
+})
+// filled === false; both slots still display "Lin".
+```
+
+批次或命令链中的写入被拒绝时，其中所有写入都不会生效。通过父级或嵌套 Slot 写入内容也会被 Slot 命令拒绝。要更改受控内容，请更新变量。
+
+若要调试或向应用提供反馈，请监听 Slot 扩展的 `slotCommandRejected` 事件：
+
+```ts
+editor.on('slotCommandRejected', ({ command, code, slotIds }) => {
+  if (code === 'variableControlled') {
+    console.log(`${command} refused: a variable controls the slot`, slotIds)
+  }
+})
+```
+
+此类拒绝通过 `slotCommandRejected` 报告，而不是 `Variable.onError`。试运行不会触发事件。Variable 插件拒绝的其他编辑仍会通过 `Variable.onError` 报告。
+
+移除显式定义后，Slot 会重新变为可编辑，其当前内容会成为变量值：
+
+```ts
+editor.commands.removeVariables({ names: ['customer'] })
+```
+
+显式设置为 `null` 或 `undefined` 也会使 Slot 变为只读，此时它们会显示空内容。
+
+## 更改绑定
+
+将现有 Slot 绑定到变量，或更改当前绑定：
+
+```ts
+editor.commands.bindSlotVariable({ id: 'customerField', name: 'customer' })
+```
+
+未知名称会创建一个由 Slot 驱动的变量。如果该变量已有绑定的 Slot，新绑定的 Slot 会采用其当前值。
+
+移除绑定，同时保留 Slot 内容：
+
+```ts
+editor.commands.unbindSlotVariable({ id: 'customerField' })
+```
+
+## 富文本内容
+
+纯文本 Slot 会提供字符串。带格式的 Slot 会提供 Tiptap JSON，并保留标记、换行和结构：
+
+```ts
+editor.commands.setVariable({
+  name: 'customer',
+  value: { type: 'text', text: 'Ada', marks: [{ type: 'bold' }] },
+})
+```
+
+- 内容必须能放入所有绑定的 Slot。多段内容请使用块级 Slot。
+- 另一个已绑定 Slot 内部的绑定会被忽略，但仍会保存；移除外层绑定或将内层 Slot 移到外部后，这些绑定会生效。
+- 其他对象会显示为 JSON 文本。`null` 和 `undefined` 会清空 Slot。
+
+即使用户添加了格式，如果依赖的解析器需要 Slot 的纯文本，也请使用 `getText()`：
+
+```ts
+editor.commands.addVariable({
+  name: 'greeting',
+  value: ({ getText }) => `Hello, ${getText('customer')}!`,
+})
+```
+
+编辑 customer Slot 会自动更新问候语。若要保留 Tiptap JSON，请改用 `get()`。
+
+## 保存和保护
+
+Slot 内容和绑定会随文档一起保存。绑定支持撤销和重做。运行时值和解析器保留在编辑器配置中。
+
+在协同编辑器中，即使客户端本地变量值不同，收到的 Slot 内容仍会保留。光标移动和无关编辑不会恢复本地变量值。显式更新本地变量可以将其值写入共享 Slot。若要让所有客户端显示相同的变量值，请保持运行时定义一致。
+
+使用 [Content Protection](/composable-docs/content-protection/getting-started/overview) 时：
+
+- 本地编辑需要有权限更新每个绑定的 Slot。
+- 无法读取的源 Slot 会隐藏其驱动的变量及依赖值，直到恢复访问权限。
+- 收到的协同编辑仍会应用。本地的额外 Slot 写入需要编辑权限。
+
+同步在客户端编辑器中运行。加载文档时，请重新提供显式值和解析器。

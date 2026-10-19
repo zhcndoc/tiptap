@@ -92,6 +92,9 @@ POST /v4/ai/toolkit/fetch-tools
 - `tiptapRead` (`boolean`, optional)
 - `tiptapEdit` (`boolean | { meta?: string }`, optional): 当你希望 AI 在每次编辑操作中
   包含一个额外的元数据字段时设置 `meta`，例如简短说明。
+- `tiptapQuery` (`boolean | { meta?: string }`, optional): Set `meta` when you want the AI to
+  在你希望 AI 为每个会更改文档的操作添加额外元数据字段时设置 `meta`。参见
+  [`tiptapQuery`](/ai/ai-toolkit/api-reference/tiptap-query).
 - `getThreads` (`boolean`, optional)
 - `editThreads` (`boolean`, optional)
 - `readDocument` (`boolean`, optional)
@@ -442,6 +445,30 @@ POST /v4/ai/toolkit/stream-tool
 - `success`（`false`）：表示编辑请求失败。
 - `reason`（`'validationError' | 'unexpectedError'`）：错误类别。
 - `error`（`string`）：错误信息。
+
+### `tiptapQuery`
+
+<Callout title="Alpha 功能" variant="hint">
+  `tiptapQuery` 目前处于 alpha 阶段
+</Callout>
+
+使用 JSON 操作读取、搜索和编辑文档。它可以独立工作，无需使用 `tiptapRead` 或 `tiptapEdit`。它不能通过 `stream-tool` 使用。
+
+工具输入（`tool.input`）：
+
+- `operations`（`array`，必需）：按顺序运行 1 到 50 个操作。每个操作都会选择内容并读取或编辑内容。操作格式请参见 [`tiptapQuery` 参考](/ai/ai-toolkit/api-reference/tiptap-query)。
+
+工具配置（`tool.config`）：
+
+- `chunkSize`（`number`，可选）：一次工具调用中所有读取操作合计返回的最大字符数。默认值：`32000`
+- `threadData`（`object`，可选）：添加到新建线程的元数据。
+- `commentData`（`object`，可选）：添加到新建评论的元数据。
+
+工具输出（`tool.output`）：
+
+- `success`（`boolean`）：所有操作是否都已成功完成。
+- `operationResults`（`array`）：已运行的每个操作的结果。参见 [`tiptapQuery` 参考](/ai/ai-toolkit/api-reference/tiptap-query#output)。
+- `skipped`（`number`）：因较早的操作失败而未运行的操作数量。
 
 ### `replaceDocument`
 

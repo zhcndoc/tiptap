@@ -14,7 +14,7 @@ import { Callout } from '@/components/ui/Callout'
 
 让我给你一个例子：如果您将类似 `This is <strong>important</strong>` 的内容粘贴到 Tiptap 中，而没有处理 `strong` 标签的扩展，您将只会看到 `This is important` — 没有 strong 标签。
 
-如果您想知道何时发生这种情况，可以在启用 `enableContentCheck` 选项后监听 [`contentError`](/editor/api/events#contenterror) 事件。
+如果想知道何时发生这种情况，可以启用 `enableContentCheck` 选项并监听 [`contentError`](/editor/api/events#list-of-available-events) 事件。
 
 ## 模式是什么样子的
 
@@ -71,6 +71,99 @@ const Text = Node.create({
   group: 'inline',
 })
 ```
+
+## 使用外部 SchemaSpec
+
+将完整的 ProseMirror `SchemaSpec` 传给编辑器的 [`schemaSpec`](/editor/api/editor#schemaspec) 选项，即可将文档结构与本地扩展行为分开定义。当多个编辑器需要共享相同结构，但使用不同的渲染或交互代码时，可以采用这种方式。
+
+此规范控制节点和标记的结构。本地扩展仍负责提供 HTML 解析和渲染、文本序列化、命令、键盘快捷键、节点视图及插件。
+
+```ts
+import { Editor } from '@tiptap/core'
+import Bold from '@tiptap/extension-bold'
+import Document from '@tiptap/extension-document'
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
+import type { SchemaSpec } from '@tiptap/pm/model'
+
+const schemaSpec: SchemaSpec = {
+  nodes: {
+    doc: { content: 'block+' },
+    paragraph: {
+      group: 'block',
+      content: 'inline*',
+      marks: 'bold',
+      attrs: {
+        tone: { default: 'newsletter', validate: 'string' },
+      },
+    },
+    text: { group: 'inline' },
+  },
+  marks: {
+    bold: {},
+  },
+}
+
+const LocalParagraph = Paragraph.extend({
+  addAttributes() {
+    return {
+      tone: {
+        parseHTML: (element) => element.getAttribute('data-tone'),
+        renderHTML: (attributes) => ({ 'data-tone': attributes.tone }),
+      },
+    }
+  },
+})
+
+const editor = new Editor({
+  element: document.querySelector('.editor'),
+  extensions: [Document, LocalParagraph, Text, Bold],
+  schemaSpec,
+  content: '<p>Hello <strong>world</strong>.</p>',
+})
+
+editor.getHTML()
+// '<p data-tone="newsletter">Hello <strong>world</strong>.</p>'
+```
+
+在此示例中，`schemaSpec` 允许粗体文本，并设置 `tone` 属性的默认值。`LocalParagraph` 继承段落渲染行为，并将 `tone` 映射到 HTML 的 `data-tone` 属性。`Bold` 扩展提供 `<strong>` 的解析和渲染，以及 `toggleBold` 命令。
+
+### 匹配扩展
+
+此规范和解析后的扩展必须包含完全相同的节点和标记名称。规范中的节点需要对应的本地节点扩展，标记也需要对应的本地标记扩展。本地节点或标记名称重复时会被拒绝。
+
+不定义节点或标记的扩展可以添加到编辑器中，无需在此规范中声明。例如，仅添加键盘快捷键的扩展不需要对应条目。
+
+如果使用 `StarterKit`，请在规范中包含它启用的所有节点和标记，或禁用未纳入规范的类型。仅包含段落的规范不能与默认 `StarterKit` 配置搭配使用。
+
+本地节点和标记扩展可以只定义行为，其结构字段和属性则完全由 `schemaSpec` 提供。
+
+### 结构规则
+
+外部规范会替换本地结构字段，而不会填补缺失字段。如果省略某个字段，ProseMirror 会使用默认值，而不是本地扩展中的值。
+
+- 对于节点，此规范控制 `content`、`marks`、`group`、`inline`、`atom`、`selectable`、`draggable`、`code`、`whitespace`、`definingAsContext`、`definingForContent`、`defining`、`isolating` 和 `linebreakReplacement`。
+- 对于标记，此规范控制 `inclusive`、`excludes`、`group`、`spanning` 和 `code`。
+- 无论本地扩展优先级如何，此规范都会决定顶层节点以及节点和标记的顺序。
+
+DOM 行为应保留在本地扩展中。外部规范中的 `parseDOM` 和 `toDOM` 字段会被忽略。`tableRole` 和 `allowGapCursor` 等自定义 schema 元数据也由本地扩展提供。
+
+### 属性规则
+
+此规范控制节点和标记的属性名称、默认值、必需性和验证规则。
+
+- 规范中不存在的本地属性会被移除，包括通过 `addGlobalAttributes()` 添加的属性。
+- 匹配的本地属性会保留其 `parseHTML`、`renderHTML`、`rendered` 和 `keepOnSplit` 行为；默认值和验证规则则由此规范提供。
+- 仅在规范中声明的属性会使用 Tiptap 默认的属性解析和渲染方式。如果需要自定义 HTML 表示形式，请定义本地属性钩子。
+- 未设置 `default` 的属性为必需属性。创建使用该属性的内容时，请提供属性值。
+
+### 验证和更新
+
+创建编辑器时，如果 schema 结构无效、结构字段类型无效、缺少本地实现、本地节点或标记类型多于规范，或本地类型名称重复，Tiptap 都会拒绝创建。
+
+此规范只会在创建编辑器时应用。`editor.setOptions({ schemaSpec })` 不会重建 schema。要更改结构，请创建新的编辑器，并迁移现有内容以符合新规范。
+
+如果省略 `schemaSpec`，Tiptap 仍会根据本地扩展构建 schema。
 
 ## 节点和标记
 

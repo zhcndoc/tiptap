@@ -1,0 +1,86 @@
+---
+title: 样式
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 样式 | Tiptap Variables 文档
+  description: 设置变量引用的样式，并定制其行内 NodeView。
+  category: 可组合文档
+---
+
+变量是行内、不可编辑的节点。你可以设置默认视图的样式，或扩展 `Variable` 并使用自己的 NodeView。
+
+## 默认标记和样式
+
+```html
+<span data-type="variable" data-variable="greeting" contenteditable="false">Hello, Ada!</span>
+```
+
+| 属性              | 值                                     |
+| ----------------- | -------------------------------------- |
+| `data-type`       | 始终为 `'variable'`。                  |
+| `data-variable`   | 变量名称；未设置时为 `''`。            |
+| `contenteditable` | 始终为 `'false'`。                     |
+
+默认没有 CSS 类或样式。使用 `HTMLAttributes`（`Record<string, string>`，默认值为 `{}`）为外层元素添加属性：
+
+```ts
+Variable.configure({
+  HTMLAttributes: { class: 'my-variable' },
+})
+```
+
+在样式表中为 `.my-variable` 或 `[data-type='variable']` 设置样式。必需属性优先。选中时，ProseMirror 可能会添加 `ProseMirror-selectednode`。
+
+## 自定义 NodeView
+
+注册定制后的扩展，而不是直接注册 `Variable`：
+
+```ts
+const CustomVariable = Variable.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(MyVariableView)
+  },
+})
+```
+
+`ReactNodeViewRenderer` 来自 `@tiptap/react`。JavaScript 和 Vue 使用各自标准的 [Tiptap NodeView API](/editor/extensions/custom-extensions/node-views)。
+
+- 保留 `variable` 节点名称、`name` 属性，以及行内、原子节点行为。
+- 使用不可编辑的 `span` 包装元素，不设置 `contentDOM` 或 `NodeViewContent`。
+- 使用 `getVariable({ editor, name })` 读取初始值。订阅 [`variablesUpdate`](/composable-docs/variables/api-reference/extension#listen-for-changes) 事件以刷新值；即使节点属性不变，变量值也可能变化。
+- 视图负责维护自己的标记和属性。销毁时请移除监听器和渲染内容。
+
+## 渲染变量值
+
+默认视图会使用编辑器的自定义 NodeView 渲染 Tiptap JSON，将普通对象渲染为 JSON 文本，并将其他值渲染为文本。在自己的视图中使用相同的辅助函数：
+
+```ts
+import { renderVariableValue } from '@tiptap-pro/extension-variable'
+
+const rendered = renderVariableValue({ editor, value })
+container.replaceChildren(rendered.dom)
+```
+
+替换渲染结果或移除视图前，请释放其中的嵌套 NodeView：
+
+```ts
+rendered.destroy()
+```
+
+此操作渲染的是快照。值发生变化时请重新渲染。由于变量值位于文档之外，嵌套 NodeView 调用 `getPos()` 会得到 `undefined`。参见[辅助函数的类型](/composable-docs/variables/api-reference/extension#rendervariablevalue)。
+
+## HTML 序列化
+
+`addNodeView` 控制编辑器界面。`renderHTML` 只会导出空引用以及已配置的 `HTMLAttributes`：
+
+```html
+<span name="greeting" data-type="variable"></span>
+```
+
+`name` 属性会保留变量名称；`data-type` 供解析器识别变量。仅供视图使用的属性和值不会导出。自定义 `renderHTML` 和 `parseHTML` 实现应保留此行为。
+
+绑定 Slot 使用 [Slot 渲染](/composable-docs/slots/api-reference/rendering)。在编辑器中，由显式值或解析器控制的 Slot 会设置 `contenteditable="false"`、`aria-readonly="true"` 和 `data-variable-readonly="true"`。
+
+Content Protection 会使用自己的视图替换隐藏的引用。请始终通过 `getVariable` 读取当前值，确保隐藏值不会泄露。

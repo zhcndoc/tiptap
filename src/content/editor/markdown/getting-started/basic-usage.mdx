@@ -241,7 +241,7 @@ const result = editor.getMarkdown() // 应与原文相同
 - 重写编辑器所有 **内容相关** 命令以支持 Markdown 输入/输出
 - `getMarkdown()` 方法用于将内容序列化为 Markdown
 - 带有 `contentType: 'markdown'` 选项的 `setContent()` 命令来解析 Markdown 输入
-- 通过 `editor.markdown` 访问 [`MarkdownManager`](#markdownmanager) 实例
+- 通过 `editor.markdown` 访问 [`MarkdownManager`](#using-the-markdownmanager-directly) 实例
 
 ### 扩展处理程序
 
@@ -257,7 +257,7 @@ const MyExtension = Node.create({
 })
 ```
 
-这些处理程序实现 Markdown 令牌和 Tiptap 节点之间双向转换，并由 [`MarkdownManager`](../glossary/#markdownmanager) 自动注册，基于它们创建 [Tokenizers](../glossary/#tokenizer) 并注册给 [Lexer](../glossary/#lexer)。
+这些处理程序实现 Markdown 令牌和 Tiptap 节点之间的双向转换，并由 [`MarkdownManager`](#using-the-markdownmanager-directly) 自动注册。`MarkdownManager` 会根据它们创建 [Tokenizers](../glossary/#tokenizer)，并将其注册到 [Lexer](../glossary/#lexer)。
 
 深入了解：
 

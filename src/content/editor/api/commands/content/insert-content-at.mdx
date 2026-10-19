@@ -35,8 +35,8 @@ editor.commands.insertContentAt({ from: 12, to: 16 }, '示例文本')
 // HTML
 editor.commands.insertContentAt(12, '<h1>示例文本</h1>')
 
-// 带修剪空格的 HTML
-editor.commands.insertContentAt(12, '<p>你好，世界</p>', {
+// HTML preserving whitespace
+editor.commands.insertContentAt(12, '<p>Hello world</p>', {
   updateSelection: true,
   parseOptions: {
     preserveWhitespace: 'full',

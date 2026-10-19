@@ -1,0 +1,194 @@
+---
+title: 变量
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 变量 | Tiptap 文档
+  description: 在编辑器中显示响应式值，并同步可编辑的 Slot。
+  category: 可组合文档
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+**变量**可让你在编辑器中显示各种值，例如客户姓名或计算后的总额。值发生变化时，所有对它的引用都会自动更新。
+
+文档会存储变量引用，而变量值由应用管理。你还可以[将变量绑定到 Slot](/composable-docs/variables/guides/bind-slots)，使可编辑内容保持同步。
+
+<CodeDemo isPro path="/Extensions/Variable" />
+
+<Callout title="仅支持客户端" variant="info">
+  变量在每个编辑器实例中运行，不提供服务器 API，也不会在客户端之间同步运行时值。服务端支持已列入路线图。如有兴趣，请发送邮件至{' '}
+  <a href="mailto:humans@tiptap.dev">humans@tiptap.dev</a>。
+</Callout>
+
+## 安装
+
+首先，请[联系我们](https://tiptap.dev/contact-sales?form=pilot-program)，加入 Tiptap Composable Docs 试点计划。
+
+然后，按照[私有注册表指南](/guides/pro-extensions)配置包管理器。
+
+接着，安装相关软件包：
+
+```bash
+npm install @tiptap/core @tiptap/starter-kit @tiptap-pro/extension-variable
+```
+
+## 定义并显示变量
+
+首先，导入编辑器和扩展：
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { Variable } from '@tiptap-pro/extension-variable'
+```
+
+定义名为 `customer` 的变量，并将扩展添加到编辑器中：
+
+```ts
+const editor = new Editor({
+  extensions: [
+    StarterKit,
+    Variable.configure({
+      variables: { customer: 'Ada' },
+    }),
+  ],
+  content: '<p></p>',
+})
+```
+
+在当前选区插入变量引用。它会显示 **Ada**：
+
+```ts
+editor.commands.insertVariable({ name: 'customer' })
+```
+
+更新变量值。现在，每个 `customer` 引用都会显示 **Grace**：
+
+```ts
+editor.commands.setVariable({ name: 'customer', value: 'Grace' })
+```
+
+## 在运行时添加和管理变量
+
+创建编辑器时不必定义所有变量。之后可以使用 `addVariable()` 添加值或解析器，再插入变量引用：
+
+```ts
+editor.commands.addVariable({ name: 'company', value: 'Acme' })
+editor.commands.insertVariable({ name: 'company' })
+
+editor.commands.addVariable({
+  name: 'customerLabel',
+  value: ({ getText }) => `${getText('customer')} at ${getText('company')}`,
+})
+editor.commands.insertVariable({ name: 'customerLabel' })
+```
+
+如果名称为空或已注册，`addVariable()` 会返回 `false`。使用 `setVariable()` 更新现有值，或使用 `setVariables()` 替换值或解析器：
+
+```ts
+editor.commands.setVariable({ name: 'company', value: 'Tiptap' })
+editor.commands.setVariables({
+  variables: { customerLabel: ({ getText }) => getText('customer').toUpperCase() },
+})
+```
+
+使用 `removeVariable()` 移除变量。请先移除依赖它的解析器，或使用 `removeVariables()` 一并移除：
+
+```ts
+editor.commands.removeVariable({ name: 'customerLabel' })
+editor.commands.removeVariable({ name: 'company' })
+```
+
+移除变量后，文档中的现有引用会保留，但显示为空值。再次添加同名变量后，这些引用会恢复显示。运行时定义属于当前编辑器实例，不会保存到文档中，也不会随文档撤销操作而回退。对于绑定的 Slot，移除变量会[将变量还原为 Slot 内容](/composable-docs/variables/api-reference/extension#removevariable)。
+
+批量注册、移除和失败行为，请参阅[命令参考](/composable-docs/variables/api-reference/extension#commands)。
+
+## 值和解析器
+
+可以直接定义变量值，也可以通过函数计算，这类函数称为**解析器**。使用 `get()` 读取其他变量的原始值，或使用 `getText()` 将其作为字符串读取。将编辑器中的 `Variable.configure(...)` 替换为：
+
+```ts
+Variable.configure({
+  variables: {
+    customer: 'Ada',
+    quantity: 3,
+    greeting: ({ getText }) => `Hello, ${getText('customer')}!`,
+  },
+})
+```
+
+使用此配置时，更改 `customer` 也会更新 `greeting`：
+
+```ts
+editor.commands.setVariable({ name: 'customer', value: 'Grace' })
+// greeting becomes "Hello, Grace!"
+```
+
+变量值也可以是对象或数组。不是 Tiptap 内容的对象会以 JSON 形式显示：
+
+```ts
+editor.commands.setVariable({
+  name: 'customer',
+  value: { name: 'Ada', company: 'Acme' },
+})
+```
+
+要分别显示姓名和公司，请使用 `get('customer')` 为每个属性定义解析器，再插入这些变量的引用。`customer.name` 这样的名称不会自动查找对象属性。
+
+使用 Tiptap JSON 显示带格式的内容：
+
+```ts
+editor.commands.setVariable({
+  name: 'customer',
+  value: { type: 'text', text: 'Ada', marks: [{ type: 'bold' }] },
+})
+```
+
+## 将变量值连接到外部数据源
+
+解析器可以读取应用中的数据。创建客户对象、读取其姓名的解析器，以及用于显示姓名的编辑器：
+
+```ts
+let customer = { name: 'Ada' }
+
+const refreshEditor = new Editor({
+  extensions: [
+    StarterKit,
+    Variable.configure({
+      variables: { customer: () => customer.name },
+    }),
+  ],
+  content: '<p></p>',
+})
+refreshEditor.commands.insertVariable({ name: 'customer' })
+```
+
+监听应用事件并刷新解析器：
+
+```ts
+const events = new EventTarget()
+const refresh = () => refreshEditor.commands.refreshVariables({ names: ['customer'] })
+events.addEventListener('customer-change', refresh)
+```
+
+更改数据后发送事件。编辑器现在会显示 **Grace**：
+
+```ts
+customer = { name: 'Grace' }
+events.dispatchEvent(new Event('customer-change'))
+```
+
+编辑器销毁时移除监听器：
+
+```ts
+refreshEditor.on('destroy', () => events.removeEventListener('customer-change', refresh))
+```
+
+## 保存内容
+
+文档保存变量名称，而不是变量值。每个编辑器都会提供自己的变量值。
+
+[绑定 Slot](/composable-docs/variables/guides/bind-slots) 中的文本会作为普通文档内容保存。

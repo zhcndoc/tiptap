@@ -1,0 +1,557 @@
+---
+title: 变量 API
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 变量 API | Tiptap 文档
+  description: Variable 扩展的类型、配置、命令、事件和返回值。
+  category: 可组合文档
+---
+
+从 `@tiptap-pro/extension-variable` 导入扩展和值读取函数：
+
+```ts
+import { Variable, getVariable } from '@tiptap-pro/extension-variable'
+```
+
+以下 Variable 专用类型均由同一软件包导出。`Editor` 和 `JSONContent` 来自 `@tiptap/core`。
+
+## 变量值
+
+### VariableValue
+
+```ts
+type VariableValue = string | number | boolean | bigint | symbol | null | undefined | object
+```
+
+`object` 包括数组、Tiptap JSON 和其他 JavaScript 对象。运行时仍会进行验证：Promise 会被拒绝，且对象必须能够在不抛出异常的情况下调用 `JSON.stringify()`。
+
+| 值                                              | 显示方式                                                          |
+| ----------------------------------------------- | ----------------------------------------------------------------- |
+| `string`                                        | 字面文本。不会解析 HTML 字符串。                                  |
+| `number`、`boolean`、`bigint`、`symbol`          | `String(value)`。数字包括 `NaN` 和无穷大。                         |
+| `null`、`undefined`                             | 空文本。                                                          |
+| 有效的 Tiptap JSON 节点、文档或节点数组         | 使用编辑器 schema 显示富文本内容。                                |
+| 其他对象或数组                                  | `JSON.stringify(value)`；若返回 `undefined`，则显示为空文本。     |
+
+Tiptap JSON 使用 `@tiptap/core` 中的 `JSONContent` 类型。其节点和标记类型必须存在于编辑器 schema 中。不符合该 schema 内容格式的对象会显示为 JSON 文本。
+
+```ts
+import type { JSONContent } from '@tiptap/core'
+
+const label: JSONContent = {
+  type: 'text',
+  text: 'Ada',
+  marks: [{ type: 'bold' }],
+}
+```
+
+变量引用中的富文本值仍为只读，且不会随变量引用一起保存。[绑定的 Slot](/composable-docs/variables/guides/bind-slots) 会照常保存其填写内容。
+
+### VariableResolver and VariableResolverContext
+
+```ts
+type VariableResolver = (context: VariableResolverContext) => VariableValue
+
+interface VariableResolverContext {
+  editor: Editor
+  get: (name: string) => VariableValue
+  getText: (name: string) => string
+}
+```
+
+| 属性      | 类型                              | 行为                                                                                                                      |
+| --------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `editor`  | `Editor`                          | 当前 Tiptap 编辑器，包括其 schema。                                                                                        |
+| `get`     | `(name: string) => VariableValue` | 读取原始值并跟踪依赖关系。名称未知或存在循环依赖时会抛出错误。                                                            |
+| `getText` | `(name: string) => string`        | 将变量作为文本读取，并跟踪与 `get` 相同的依赖关系。名称未知或存在循环依赖时会抛出错误。                                   |
+
+解析器会同步返回结果。使用 `get()` 或 `getText()` 读取其他变量后，该变量更新时解析器会重新运行。可以通过 `editor` 读取信息；在解析器中分发事务可能触发递归更新。通过 `editor` 进行读取不会注册变量依赖关系。
+
+`getText()` 会从符合 schema 的 Tiptap JSON 节点、文档和节点数组中提取文本。它使用 schema 的文本序列化器，保留硬换行，并以两个换行符分隔块。对于 `null` 和 `undefined`，它返回 `''`；对于其他所有值（包括普通对象和数组），它返回 `String(value)`。例如，`{ name: 'Ada' }` 会转换为 `'[object Object]'`。这与变量引用将普通对象显示为 JSON 的方式不同。
+
+如果绑定的源不可读取，`getText()` 会像 `get()` 一样终止解析器并隐藏其值。
+
+```ts
+import type { VariableResolver } from '@tiptap-pro/extension-variable'
+
+const greeting: VariableResolver = ({ getText }) => `Hello, ${getText('customer')}!`
+```
+
+直接赋给 `variables` 的函数会被视为解析器。若要将函数本身用作变量值，请从解析器返回该函数，或将其传给 `setVariable`；函数会以 `String(value)` 的形式显示。
+
+## 配置
+
+### VariableOptions
+
+```ts
+interface VariableOptions {
+  HTMLAttributes: Record<string, string>
+  variables: Record<string, VariableValue | VariableResolver>
+  slots: Record<string, string>
+  shortcuts: false | VariableShortcut
+  resolveInputRuleVariable: VariableInputRuleResolver
+  onUpdate: (options: VariableUpdateOptions) => void
+  onError: (options: VariableErrorOptions) => void
+}
+```
+
+调用 `Variable.configure()` 时，所有选项均为可选。扩展提供以下默认值：
+
+有关样式和自定义视图，请参阅[样式](/composable-docs/variables/api-reference/rendering)。
+
+| 选项                       | 类型                                                | 默认值                      | 说明                                                                                              |
+| -------------------------- | --------------------------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------- |
+| `HTMLAttributes`           | `Record<string, string>`                            | `{}`                        | 默认 NodeView 和导出 HTML 的属性。                                                                |
+| `variables`                | `Record<string, VariableValue \| VariableResolver>` | `{}`                        | 键为变量名称；值为初始值或解析器。                                                                |
+| `slots`                    | `Record<string, string>`                            | `{}`                        | 初始 Slot ID 到变量的绑定。需要安装 `Slot`。建议使用 Slot 属性或绑定命令。                         |
+| `shortcuts`                | `false \| VariableShortcut`                         | `{ open: '{', close: '}' }` | 类型化分隔符。参见[类型化快捷方式](#typed-shortcuts)。                                             |
+| `resolveInputRuleVariable` | `VariableInputRuleResolver`                         | 返回 `undefined`            | 定制或取消输入的变量引用。                                                                        |
+| `onUpdate`                 | `(options: VariableUpdateOptions) => void`          | 空操作函数                  | 接受变量值更改后调用。                                                                            |
+| `onError`                  | `(options: VariableErrorOptions) => void`           | 空操作函数                  | 求值、渲染、Slot 同步或输入规则回调失败时调用。                                                   |
+
+```ts
+Variable.configure({
+  variables: { customer: 'Ada', greeting },
+  slots: { customerField: 'customer', signatureField: 'customer' },
+  onUpdate: ({ values }) => console.log(values.customer),
+  onError: ({ error }) => console.error(error.message),
+})
+```
+
+Slot 绑定会以 `variable: 'customer'` 的形式存储在 Slot 节点上。`variable: null` 会显式解除 Slot 绑定。HTML 使用 `data-slot-variable="customer"`；空属性表示未绑定。如果未设置该属性，则初始 `slots` 配置会提供绑定；编辑器创建时，扩展会将这些初始绑定写入文档。之后的更改建议使用[绑定命令](#bindslotvariable)。
+
+### VariableUpdateOptions
+
+`onUpdate` 和 `variablesUpdate` 事件都会收到以下负载：
+
+```ts
+interface VariableUpdateOptions {
+  editor: Editor
+  values: Readonly<Record<string, VariableValue>>
+}
+```
+
+| 属性     | 类型                                      | 说明                                                                                          |
+| -------- | ----------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `editor` | `Editor`                                  | 变量发生变化的编辑器。                                                                        |
+| `values` | `Readonly<Record<string, VariableValue>>` | 所有当前值，包括重新计算后的依赖变量。键为变量名称，而不是 Slot ID。                           |
+
+`values` 记录会被冻结。其中的对象值不会被克隆或深度冻结。更改对象后请调用 `setVariable`，或刷新提供该值的解析器；仅修改对象本身不会触发更新。
+
+变量名称不会限制其值的类型。将值用作特定对象或基本类型前，请先检查其类型：
+
+```ts
+import type { VariableUpdateOptions } from '@tiptap-pro/extension-variable'
+
+const onVariablesUpdate = ({ values }: VariableUpdateOptions): void => {
+  if (typeof values.customer === 'string') {
+    console.log(values.customer.toUpperCase())
+  }
+}
+```
+
+### VariableErrorOptions
+
+```ts
+interface VariableErrorOptions {
+  editor: Editor
+  error: Error
+}
+```
+
+| 属性     | 类型     | 说明                                                                                      |
+| -------- | -------- | ----------------------------------------------------------------------------------------- |
+| `editor` | `Editor` | 更新失败的编辑器。                                                                        |
+| `error`  | `Error`  | 失败信息，包含易读的 `message`。抛出的非 Error 值会转换为 `Error`。                        |
+
+两个回调都返回 `void`；返回值会被忽略。
+
+初始配置无效或初始解析器失败时，创建编辑器会抛出错误。之后在本地编辑或变量命令中发生求值或 Slot 同步失败时，会保留之前的运行时值并调用 `onError`。
+
+默认 NodeView 无法渲染某个值时，会清除渲染失败的内容并通过 `onError` 报告错误。编辑功能仍可使用，设置有效值后即可恢复显示。
+
+解析器失败时，收到的协同编辑和保护策略更改仍会应用。该解析器的值会变为 `null`，其依赖变量会重新计算，`onError` 会收到错误。
+
+引入重复绑定 Slot ID 的远程编辑仍会保留在文档中。Slot 结构无效期间，由 Slot 驱动的值及其依赖变量不可用，Slot 同步也会暂停。修复结构后，会从 Slot 恢复变量值。
+
+## 命令
+
+通过 `editor.commands` 直接调用时会返回 `boolean`。在命令链中调用相同命令会返回命令链；`.run()` 会返回 `boolean`。
+
+### addVariable
+
+创建编辑器后，注册新值或同步解析器。
+
+```ts
+interface AddVariableOptions {
+  name: string
+  value: VariableValue | VariableResolver
+}
+
+editor.commands.addVariable({ name: 'company', value: 'Acme' })
+editor.commands.addVariable({
+  name: 'greeting',
+  value: ({ getText }) => `Hello, ${getText('customer')}!`,
+})
+```
+
+两个属性均为必需；显式设置为 `undefined` 也是有效值。函数会被视为解析器并立即运行，其依赖项必须已注册。使用 `setVariables()` 可同时注册多个变量及其依赖项。
+
+名称为空，或名称已通过配置、运行时命令或 Slot 绑定注册时，会返回 `false`。这些检查不会调用 `onError`。使用 `setVariable()` 更新现有值，或使用 `setVariables()` 替换解析器。
+
+求值和同步失败时会返回 `false`、调用 `onError`，并保留之前的定义和值。添加变量会更新文档中已有的同名引用，但不会插入新的引用。将其与 `insertVariable()` 串联即可同时完成这两项操作：
+
+```ts
+editor
+  .chain()
+  .addVariable({ name: 'company', value: 'Acme' })
+  .insertVariable({ name: 'company' })
+  .run()
+```
+
+定义属于当前编辑器实例，不会保存到文档中，也不会随文档撤销操作而回退。
+
+### insertVariable
+
+在选区处插入不可编辑的行内引用。
+
+| 参数属性          | 类型     | 必需     | 说明                                                                              |
+| ----------------- | -------- | -------- | --------------------------------------------------------------------------------- |
+| `name`            | `string` | 是       | 通过配置、运行时命令或 Slot 绑定注册的变量。                                      |
+
+参数类型为 `{ name: string }`。没有单独导出的 `InsertVariableOptions` 类型。
+
+```ts
+const inserted: boolean = editor.commands.insertVariable({ name: 'greeting' })
+```
+
+名称未知或无法插入引用时，会返回 `false`。
+
+### setVariable
+
+设置变量值并重新计算其依赖变量。
+
+```ts
+interface SetVariableOptions {
+  name: string
+  value: VariableValue
+}
+```
+
+| 参数属性          | 类型            | 必需     | 说明                                            |
+| ----------------- | --------------- | -------- | ----------------------------------------------- |
+| `name`            | `string`        | 是       | 已注册的变量名称。                              |
+| `value`           | `VariableValue` | 是       | 新值。允许显式设置为 `undefined`。               |
+
+```ts
+const updated: boolean = editor.commands.setVariable({ name: 'customer', value: 'Grace' })
+```
+
+名称未知或更新失败时会返回 `false`。名称未知时不会调用 `onError`。
+
+此操作会使用传入值替换任何现有解析器。绑定的 Slot 会采用新值并变为只读。
+
+### setVariables
+
+在运行时添加变量，或替换变量值和解析器。记录中未包含的名称保持不变。
+
+```ts
+interface SetVariablesOptions {
+  variables: Record<string, VariableValue | VariableResolver>
+}
+```
+
+`variables` 属性为必需。每个键都是变量名称，每个值都是普通值或同步解析器。
+
+```ts
+editor.commands.setVariables({
+  variables: {
+    customer: 'Ada',
+    greeting: ({ getText }) => `Hello, ${getText('customer')}!`,
+  },
+})
+```
+
+解析器会立即运行，依赖值和绑定的 Slot 也会更新。可以在同一次调用中注册解析器及其依赖项。
+
+若要停止重新计算解析器，请用值替换解析器。若要保留当前值：
+
+```ts
+editor.commands.setVariables({
+  variables: { greeting: getVariable({ editor, name: 'greeting' }) },
+})
+```
+
+求值或 Slot 同步失败时会返回 `false` 并调用 `onError`。整个更新都会被拒绝，保留之前的定义和值。
+
+定义属于当前编辑器实例，不会保存到文档中，也不会随文档撤销操作而回退。
+
+### removeVariable
+
+根据与 `removeVariables()` 相同的规则移除一个运行时定义：
+
+```ts
+interface RemoveVariableOptions {
+  name: string
+}
+
+editor.commands.removeVariable({ name: 'greeting' })
+```
+
+`name` 属性为必需。名称未知，或移除未绑定变量后会导致仍存在的解析器缺少依赖项时，会返回 `false`。这些检查不会调用 `onError`。请先移除依赖解析器，或使用 `removeVariables()` 一并移除一组变量。
+
+对于绑定变量，此操作会移除其显式值或解析器，并恢复为可编辑的 Slot 内容。未绑定变量被移除后，其引用仍会保留在文档中并显示空值。再次添加同名变量后，这些引用会恢复显示。
+
+求值或同步失败时会返回 `false`、调用 `onError`，并保留之前的运行时状态。
+
+### removeVariables
+
+同时移除变量及其解析器。
+
+```ts
+interface RemoveVariablesOptions {
+  names: string[]
+}
+```
+
+`names` 属性为必需。空数组不会执行任何操作。
+
+```ts
+editor.commands.removeVariables({ names: ['greeting'] })
+```
+
+对于绑定变量，此操作会移除其显式值或解析器。其 Slot 会变为可编辑，并改为提供变量值。
+
+对于未绑定变量，此操作会将其移除。名称未知，或移除变量后会导致仍存在的解析器缺少依赖项时，会返回 `false`。这些检查不会调用 `onError`。
+
+文档中的现有引用会保留。已移除的未绑定变量引用会显示为空值。
+
+### bindSlotVariable
+
+将 Slot 绑定到变量，或替换其当前绑定。绑定会保存在 Slot 的 `variable` 属性中。
+
+```ts
+interface BindSlotVariableOptions {
+  id: string
+  name: string
+}
+
+editor.commands.bindSlotVariable({ id: 'customerField', name: 'customer' })
+```
+
+两个属性均为必需。`id` 必须唯一标识一个 Slot；`name` 不能为空。未知名称会创建一个由 Slot 提供值的变量。
+
+显式值或解析器具有优先权，并会使 Slot 变为只读。否则，第一个绑定的 Slot 会提供变量值，所有绑定的 Slot 均保持可编辑。添加其他 Slot 时，会将变量当前值复制到该 Slot 中。
+
+另一个绑定 Slot 内部的绑定会保存，但在嵌套期间会被忽略。只有外层绑定生效。移除外层绑定或将内层 Slot 移到外部后，内层绑定会生效。
+
+Slot 缺失或不明确、名称为空，或同步或 Content Protection 拒绝更改时，会返回 `false` 并调用 `onError`。整个更改都会被拒绝。
+
+### unbindSlotVariable
+
+移除绑定并保留 Slot 当前内容。
+
+```ts
+interface UnbindSlotVariableOptions {
+  id: string
+}
+
+editor.commands.unbindSlotVariable({ id: 'customerField' })
+```
+
+`id` 属性为必需，且必须唯一标识一个 Slot。此命令会在该 Slot 上保存 `variable: null`。无法唯一找到 Slot 或更改被拒绝时，会返回 `false` 并调用 `onError`。
+
+由 Slot 驱动的变量失去最后一个绑定 Slot 后，其值会变为 `undefined`。显式值和解析器不受影响。绑定和解除绑定操作支持文档撤销和重做。
+
+两个绑定命令均支持 `editor.can()`，且不会运行解析器或更改绑定。试运行会检查 Slot、名称和更改绑定的权限，但无法预测同步是否会失败。
+
+### refreshVariables
+
+刷新解析器及其依赖值。
+
+```ts
+interface RefreshVariablesOptions {
+  names?: string[]
+}
+```
+
+选项对象和其中的 `names` 属性均为可选。
+
+| `names`                | 行为                                                                      |
+| ---------------------- | ------------------------------------------------------------------------- |
+| 省略或 `undefined`     | 刷新所有已注册的解析器，包括运行时添加的解析器。                            |
+| `string[]`             | 刷新指定变量及其依赖项。名称必须已注册。                                    |
+| `[]`                   | 不运行解析器；使绑定的 Slot 与当前值同步。                                  |
+
+```ts
+const refreshed: boolean = editor.commands.refreshVariables({ names: ['customer'] })
+editor.commands.refreshVariables()
+```
+
+名称未知或更新失败时会返回 `false`。名称未知时不会调用 `onError`。刷新普通值会保留该值不变，但会重新计算其依赖项。
+
+`editor.can().setVariable({ name, value })` 和 `editor.can().refreshVariables()` 会检查变量名称，但不会执行解析器。其 `boolean` 结果无法预测求值或 Slot 写入是否会失败。
+
+`editor.can().setVariables({ variables })` 也会跳过求值。`editor.can().removeVariables({ names })` 会检查名称是否存在，以及剩余解析器是否会失去依赖项。两者都不会更改运行时定义。
+
+`editor.can().addVariable({ name, value })` 会检查名称是否非空且尚未注册，但不会运行解析器。`editor.can().removeVariable({ name })` 会检查与批量移除相同的规则。这两种试运行都不会更改定义，也不会预测求值或 Slot 写入失败。
+
+<a id="read-a-value"></a>
+
+## 读取变量值
+
+### getVariable and GetVariableOptions
+
+```ts
+interface GetVariableOptions {
+  editor: Editor
+  name: string
+}
+```
+
+| 参数属性 | 类型     | 必需 | 说明           |
+| -------- | -------- | ---- | -------------- |
+| `editor` | `Editor` | 是   | 要读取的编辑器。 |
+| `name`   | `string` | 是   | 要读取的变量名。 |
+
+**返回类型：** `VariableValue | undefined`。`VariableValue` 本身也包含 `undefined`。
+
+```ts
+const customer = getVariable({ editor, name: 'customer' })
+if (typeof customer === 'string') console.log(customer.toUpperCase())
+```
+
+此函数会返回值本身，包括对象值和 Tiptap JSON，但不会运行解析器。
+
+| 结果                      | 说明                                                                               |
+| ------------------------- | ---------------------------------------------------------------------------------- |
+| `undefined`               | 配置值为 `undefined`、变量名未知，或未安装扩展。                                   |
+| `null`                    | 配置值为 `null`、绑定源被隐藏，或解析器在远程编辑或策略更改期间执行失败。           |
+| 其他 `VariableValue` 值   | 当前运行时值。                                                                     |
+
+隐藏绑定的 Slot 也会隐藏其依赖变量。恢复访问后会重新计算这些变量。
+
+<a id="typed-shortcuts"></a>
+
+## 类型化快捷方式
+
+输入 `{foo}` 会创建名为 `foo` 的行内引用，即使 `variables` 中没有定义 `foo`。未知名称会显示为空值。这只会创建文档引用，不会创建新的运行时值或解析器。
+
+此规则默认启用。可通过 `Variable.configure({ shortcuts: false })` 将其禁用，或更改分隔符：
+
+```ts
+Variable.configure({
+  shortcuts: { open: '[[', close: ']]' },
+})
+```
+
+```ts
+interface VariableShortcut {
+  open: string
+  close: string
+}
+```
+
+`shortcuts` 的类型为 `false | VariableShortcut`，默认值为 `{ open: '{', close: '}' }`。两个分隔符都必须是非空且互不相同的字符串。捕获的名称区分大小写，不会去除首尾空白。空匹配、嵌套的起始分隔符和代码块会被跳过。粘贴或加载内容不会触发转换。`undoInputRule()` 会还原输入的文本。
+
+### resolveInputRuleVariable
+
+在插入引用前自定义或取消该引用。默认回调会返回 `undefined`，保留捕获的名称。
+
+```ts
+Variable.configure({
+  resolveInputRuleVariable({ text }) {
+    if (text === 'private') return false
+    if (text === 'name') return { name: 'customer' }
+    return undefined
+  },
+})
+```
+
+```ts
+interface VariableInputRuleContext {
+  editor: Editor
+  text: string
+  delimiters: Readonly<VariableShortcut>
+  range: Readonly<{ from: number; to: number }>
+  defaults: Readonly<{ name: string }>
+}
+
+interface VariableInputRuleResult {
+  name?: string
+}
+
+type VariableInputRuleResolver = (
+  context: VariableInputRuleContext,
+) => VariableInputRuleResult | false | undefined
+```
+
+| 上下文属性       | 说明                                           |
+| ---------------- | ---------------------------------------------- |
+| `editor`         | 接收输入的编辑器。                             |
+| `text`           | 两个分隔符之间的文本，不包含分隔符本身。       |
+| `delimiters`     | 配置的起始和结束字符串。                       |
+| `range`          | 待替换的文档位置，位于待处理输入插入之前。     |
+| `defaults`       | 默认引用属性：`{ name: text }`。               |
+
+返回 `false` 可将输入保留为文本。返回 `{ name: 'customer' }` 可覆盖名称；返回 `{}` 或 `undefined` 则使用默认值。覆盖名称必须是非空字符串，但不必对应已配置的变量。回调会同步执行。抛出错误或返回无效结果时会取消转换并调用 `onError`。
+
+## renderVariableValue
+
+使用编辑器的 schema 和自定义 NodeView 在文档外渲染值。
+
+```ts
+interface RenderVariableValueOptions {
+  editor: Editor
+  value: VariableValue
+}
+
+interface RenderedVariableValue {
+  dom: DocumentFragment
+  destroy: () => void
+}
+
+function renderVariableValue(options: RenderVariableValueOptions): RenderedVariableValue
+```
+
+两个选项属性均为必需。`editor` 提供 schema 和 NodeView；`value` 是要显示的当前值。这些接口和函数均由 `@tiptap-pro/extension-variable` 导出。
+
+`dom` 包含渲染后的快照。Tiptap JSON 会保留格式和自定义 NodeView；其他对象会显示为 JSON 文本。替换或移除结果前请调用 `destroy()`。该方法会释放嵌套的 NodeView，可以安全地多次调用。
+
+此辅助函数不会订阅更新。嵌套的 NodeView 没有文档位置，因此其 `getPos()` 会返回 `undefined`。发生渲染错误时，会先清理已创建的 NodeView，再抛出错误。
+
+<a id="listen-for-changes"></a>
+
+## 监听更改
+
+事件名称为 **`variablesUpdate`**，监听器类型为 **`(options: VariableUpdateOptions) => void`**。`onVariablesUpdate` 只是示例中使用的处理函数名称。
+
+使用同一个函数进行订阅和取消订阅：
+
+```ts
+editor.on('variablesUpdate', onVariablesUpdate)
+editor.off('variablesUpdate', onVariablesUpdate)
+```
+
+`editor.on()` 和 `editor.off()` 都会返回编辑器实例。监听器接收与扩展 `onUpdate` 回调相同的 `{ editor, values }` 负载。
+
+命令、刷新后的解析器和 Slot 编辑都可能触发此事件。添加或移除变量也会触发事件，即使变量值为 `undefined`。已移除的名称不会出现在 `values` 中。替换解析器但变量值未更改时，不会触发事件。被拒绝的更新和未发生变化的值也不会触发事件。注册监听器不会发送初始值；请使用 `getVariable` 读取。
+
+<a id="document-reference"></a>
+
+## 文档引用
+
+变量引用只保存名称：
+
+```json
+{ "type": "variable", "attrs": { "name": "customer" } }
+```
+
+| 属性         | 类型             | 说明                                                        |
+| ------------ | ---------------- | ----------------------------------------------------------- |
+| `type`       | `'variable'`     | 扩展的节点名称。                                            |
+| `attrs.name` | `string \| null` | 变量名称。schema 默认值为 `null`；`insertVariable` 要求名称已注册。 |
+
+名称缺失或未知时会显示为空值。运行时值不会包含在文档 JSON、导出的 HTML 或纯文本中。

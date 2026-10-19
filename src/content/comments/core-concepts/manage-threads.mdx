@@ -12,6 +12,8 @@ import { Callout } from '@/components/ui/Callout'
 
 你还可以通过我们的 [评论 REST API](/comments/integrate/rest-api) 从编辑器外部与评论进行交互。
 
+当锚点消失或线程状态发生变化时，你可以配置 [`onThreadAnchorRemoved`](/comments/core-concepts/configure#onthreadanchorremoved) 和 [`onThreadStateChanged`](/comments/core-concepts/configure#onthreadstatechanged)，自定义相应行为。
+
 ## 了解线程
 
 Tiptap 的评论功能将讨论组织成线程，通过区分线程和单个评论，使协作变得清晰且相关。
@@ -62,25 +64,69 @@ const createThread = () => {
 
 ## 接收和监视线程及评论
 
-接收和监视当前文档上的线程可以通过使用 `subscribeToThreads` 函数轻松完成。该函数将注册一个监视器，获取初始线程列表并保持列表的最新状态。
+使用 `@tiptap-pro/extension-comments` 中的 `subscribeToThreads` 保持线程列表最新。传入 `editor` 可在每个线程中包含其在文档中的当前范围。
 
-要取消订阅线程，可以调用 `subscribeToThreads` 函数返回的回调函数。
+回调会立即收到初始列表。传入编辑器后，线程数据或范围发生变化时，后续更新会在一个微任务中批量触发。本地编辑、协同编辑以及撤销或重做都会更新范围。仅选区变化不会触发回调。
 
 ```js
-// 订阅线程
+import { subscribeToThreads } from '@tiptap-pro/extension-comments'
 const unsubscribe = subscribeToThreads({
+  editor,
   provider: yourTiptapCollabProvider,
   callback: (threads) => {
-    // 处理线程，可以将其存储在状态或变量中
+    console.log(threads.map((thread) => ({ id: thread.id, ranges: thread.ranges })))
   },
-  // 可选选项
   getThreadsOptions: {
-    // 只有具有特定类型的线程会被获取/监视，可能的值为 'archived' 和 'unarchived'，
-    // 如果未设置，仅处理未归档的线程
-    // 归档和未归档的线程表示软删除的线程
     types: ['archived', 'unarchived'],
   },
 })
+```
+
+默认情况下只返回未归档的线程。使用 `getThreadsOptions.types` 可包含已归档的线程，它们是软删除的线程。
+
+传入 `editor` 后，订阅默认使用编辑器的协同字段。你可以通过 `getThreadsOptions.field` 指定其他字段。字段过滤也会包含尚未分配字段的旧版线程。
+
+不再需要更新时调用 `unsubscribe()`。提供的编辑器销毁时，订阅也会自动清理。
+
+不传入 `editor` 时，`subscribeToThreads` 返回不带 `ranges` 的 provider 线程记录，并且只监听 provider 的变化。
+
+## 读取当前线程范围
+
+使用 `@tiptap-pro/extension-comments` 中的 `getThreads`，读取带有编辑器中当前锚点的线程记录。编辑器必须安装 `Comments` 或 `CommentsKit`。
+
+```js
+import { getThreads } from '@tiptap-pro/extension-comments'
+
+const threads = getThreads({
+  editor,
+  provider: yourTiptapCollabProvider,
+})
+```
+
+每个结果都会保留 provider 的线程数据，并添加只读的 `ranges` 数组。该包导出了 `ThreadWithPositions<Data, CommentData>` 和 `ThreadRange` 类型。
+
+每个范围包含以下字段：
+
+| 字段   | 说明                                               |
+| ------ | -------------------------------------------------- |
+| `from` | 当前 ProseMirror 文档中的起始位置。                 |
+| `to`   | 当前 ProseMirror 文档中不包含在范围内的结束位置。   |
+| `type` | 标记范围为 `'inline'`，块级线程包装节点为 `'block'`。 |
+
+块级范围包含包装节点。一个线程可以有多个独立锚点，因此 `ranges` 可以包含多个按文档位置排序的条目。提供的编辑器中没有锚点的线程会返回 `ranges: []`。
+
+这些位置描述的是当前文档中的位置，不是永久锚点。编辑后请重新读取，或在调用 `subscribeToThreads` 时传入 `editor`，以接收更新后的范围。
+
+`getThreads` 接受与订阅相同的 `getThreadsOptions` 过滤器，并默认使用编辑器的协同字段。它会保留 provider 的顺序，不会按文档位置对线程排序。
+
+要按文档顺序显示线程，请按第一个范围排序。以下示例会将没有锚点的线程排在最后，并使用线程 ID 打破并列：
+
+```js
+const firstPosition = (thread) => thread.ranges[0]?.from ?? Infinity
+
+const orderedThreads = [...threads].sort(
+  (left, right) => firstPosition(left) - firstPosition(right) || left.id.localeCompare(right.id),
+)
 ```
 
 ## 手动接收和渲染线程
@@ -111,35 +157,49 @@ provider.watchThreads(getThreads)
 provider.unwatchThreads(getThreads)
 ```
 
-假设你想编写一个 React 钩子以获取线程并保持其最新状态，可以这样编写钩子。
+watcher 回调还会收到 Yjs 事件和事务。使用 `transaction.local` 区分本地和远程更改；取消订阅时，将同一个回调传给 `unwatchThreads`：
+
+```js
+const handleThreadChanges = (events, transaction) => {
+  console.log('Thread changes', events, transaction.local ? 'local' : 'remote')
+}
+
+provider.watchThreads(handleThreadChanges)
+
+// 不再需要监视时取消订阅。
+provider.unwatchThreads(handleThreadChanges)
+```
+
+## 在 React 状态中维护线程范围
+
+在 React 钩子中使用可感知编辑器的订阅，以接收线程数据和范围更新：
+
+不传入 `editor` 时，这个钩子也可以正常工作，但收到的 provider 线程记录不包含 `ranges`。
 
 ```jsx
-const useThreads = (provider) => {
+import { subscribeToThreads } from '@tiptap-pro/extension-comments'
+import { useEffect, useState } from 'react'
+
+const useThreads = (provider, editor) => {
   const [threads, setThreads] = useState([])
 
   useEffect(() => {
     if (!provider) {
-      return () => null
+      return
     }
 
-    const getThreads = () => {
-      setThreads(provider.getThreads())
-    }
-
-    getThreads()
-
-    provider.watchThreads(getThreads)
-
-    return () => {
-      provider.unwatchThreads(getThreads)
-    }
-  }, [provider])
+    return subscribeToThreads({
+      editor,
+      provider,
+      callback: setThreads,
+    })
+  }, [provider, editor])
 
   return threads
 }
 ```
 
-现在这些线程将是响应式的，可以用来在你的 UI 中渲染线程。
+使用返回的线程渲染 UI。依赖项发生变化或组件卸载时，React 会调用取消订阅函数。
 
 ## 更新线程
 

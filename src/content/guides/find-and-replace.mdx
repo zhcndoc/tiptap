@@ -95,7 +95,6 @@ function FindAndReplaceControls({ editor }) {
         <input
           type="checkbox"
           checked={state.wholeWord}
-          disabled={state.useRegex}
           onChange={(event) => editor.commands.setWholeWord(event.currentTarget.checked)}
         />
         全字匹配
@@ -182,7 +181,6 @@ export default function FindAndReplaceEditor() {
         <input
           type="checkbox"
           :checked="editor.storage.findAndReplace.wholeWord"
-          :disabled="editor.storage.findAndReplace.useRegex"
           @change="(event) => editor.commands.setWholeWord(event.target.checked)"
         />
         全字匹配
@@ -250,8 +248,42 @@ export default {
 </script>
 ```
 
+## 组合匹配选项
+
+此扩展支持同时使用“区分大小写”、“全词匹配”和“正则”选项。
+这是无头扩展本身的行为，不依赖 React、Vue 或任何特定界面。
+
+例如，以下搜索会同时启用这三个选项：
+
+```js
+editor.commands.setCaseSensitive(true)
+editor.commands.setWholeWord(true)
+editor.commands.setUseRegex(true)
+editor.commands.setSearchTerm('cat|catalog')
+```
+
+在 `Catalog catalog cat cats` 中，它会找到 `catalog` 和 `cat`：
+
+- 启用了“区分大小写”，因此不会匹配 `Catalog`。
+- 启用了“全词匹配”，因此不会匹配 `cats`。
+- `cat|catalog` 仍会匹配完整的 `catalog` 备选项。较短的 `cat` 备选项不会在较长的单词内部匹配。
+
+全词匹配会将 Unicode 字母、组合标记、数字和 `_` 等连接标点视为单词字符。它也支持查找由标点分隔的连续匹配项。
+
+## 重用正则表达式捕获组
+
+启用正则表达式模式后，替换文本可以重用完整匹配项、编号捕获组或命名捕获组。
+
+```js
+editor.commands.setUseRegex(true)
+editor.commands.setSearchTerm('(color|colour)')
+editor.commands.setReplaceTerm('[$1]')
+editor.commands.replaceAll()
+// "color and colour" becomes "[color] and [colour]"
+```
+
+替换标记仅会在正则表达式模式下展开。在字面模式中，`$1` 等替换文本会按字面插入。完整标记列表和未匹配组的处理方式，请参阅[查找与替换扩展参考](/editor/extensions/functionality/find-and-replace#regex-replacement-tokens)。
+
 ## 适配界面
 
 这些示例中的控件只是其中一种选择。你可以将相同的命令和存储功能呈现在通过 `Cmd/Ctrl+F` 打开的对话框、持久侧边栏或紧凑工具栏中。
-
-构建自己的 UI 时，启用正则表达式模式后，请禁用或隐藏全词匹配功能。正则表达式会改变匹配项的查找方式，但替换文本始终会按字面插入。

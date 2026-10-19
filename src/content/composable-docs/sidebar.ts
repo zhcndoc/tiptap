@@ -47,11 +47,25 @@ export const sidebarConfig: SidebarConfig = {
             { title: '类型', href: '/composable-docs/slots/api-reference/types' },
             { title: '配置', href: '/composable-docs/slots/api-reference/concepts' },
             {
-              title: '渲染和 NodeView',
+              title: '样式',
               href: '/composable-docs/slots/api-reference/rendering',
             },
             { title: '编辑器事件', href: '/composable-docs/slots/api-reference/events' },
           ],
+        },
+      ],
+    },
+    {
+      type: 'group',
+      title: '变量',
+      href: '/composable-docs/variables',
+      children: [
+        { title: '概述', href: '/composable-docs/variables/getting-started/overview' },
+        { title: 'Slot 绑定', href: '/composable-docs/variables/guides/bind-slots' },
+        { title: 'API 参考', href: '/composable-docs/variables/api-reference/extension' },
+        {
+          title: '样式',
+          href: '/composable-docs/variables/api-reference/rendering',
         },
       ],
     },

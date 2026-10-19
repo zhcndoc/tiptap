@@ -149,7 +149,7 @@ meta:
 ### 属性
 
 - `command` (`string`)：被拒绝的命令名称。
-- `code` (`'missingSlot' | 'ambiguousSlot' | 'invalidInput' | 'schemaMismatch' | 'idGenerationFailed' | 'protected' | 'overlappingTargets' | 'invalidSelection' | 'unsupportedContext'`)：拒绝原因。
+- `code` (`'missingSlot' | 'ambiguousSlot' | 'invalidInput' | 'schemaMismatch' | 'idGenerationFailed' | 'protected' | 'variableControlled' | 'variableSyncFailed' | 'overlappingTargets' | 'invalidSelection' | 'unsupportedContext'`)：拒绝原因。`variableControlled` 表示命令尝试写入由显式变量值或解析器控制的内容。`variableSyncFailed` 表示变量求值或同级 Slot 同步拒绝了此次写入。
 - `slotIds` (`string[]`)：相关目标 ID。
 
 有关输入类型，请参阅[命令](/composable-docs/slots/api-reference/commands)；有关验证器类型，请参阅[验证](/composable-docs/slots/api-reference/validation)；有关负载，请参阅[事件](/composable-docs/slots/api-reference/events)。
