@@ -61,55 +61,55 @@ curl --output document.pdf -X POST "https://api.tiptap.dev/v2/convert/export/pdf
 
 | 名称            | 描述                                                                                                                               |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization` | 用于验证请求的 JWT 令牌。示例：`Bearer your-jwt-token`                                                               |
-| `Content-Type`  | 必须为 `application/json`                                                                                                                |
+| `Authorization` | The JWT token to authenticate the request. Example: `Bearer your-jwt-token`                                                               |
+| `Content-Type`  | Must be `application/json`                                                                                                                |
 
-### 请求体
+### Body
 
-| 名称                     | 类型                | 描述                                                                 | 默认值     |
-| ------------------------ | ------------------- | -------------------------------------------------------------------- | ---------- |
-| `doc`                    | `String`            | 以字符串形式表示的 Tiptap JSON 文档                                  | `N/A`      |
-| `exportType`             | `string`            | 期望的导出类型                                                       | `blob`     |
-| `styleOverrides`         | `Object`            | 样式覆盖                                                             | `{}`       |
-| `pageSize`               | `Object`            | 页面大小配置                                                         | `undefined` |
-| `pageMargins`            | `Object`            | 页面边距配置                                                         | `undefined` |
-| `headers`                | `Object`            | 页面页眉配置                                                         | `undefined` |
-| `footers`                | `Object`            | 页面页脚配置                                                         | `undefined` |
-| `customFonts`            | `Array`             | 要提供的自定义字体文件（仅限本地部署）                               | `undefined` |
-| `tableOverrides`         | `Object`            | 传递到 DOCX 步骤的表级渲染覆盖                                       | `undefined` |
-| `paragraphOverrides`     | `Object`            | 传递到 DOCX 步骤的段落级渲染覆盖                                     | `undefined` |
-| `textRunOverrides`       | `Object`            | 传递到 DOCX 步骤的文本运行渲染覆盖                                   | `undefined` |
-| `tableCellOverrides`     | `Object`            | 传递到 DOCX 步骤的表格单元格渲染覆盖                                 | `undefined` |
-| `imageOverrides`         | `Object`            | 传递到 DOCX 步骤的图片渲染覆盖                                       | `undefined` |
-| `headerFooterOverrides`  | `Object`            | 作用于页眉/页脚内容的按字段覆盖（与元素覆盖相同的五个键）。参见 [元素覆盖](#element-overrides)。 | `undefined` |
-| `placeholders`           | `Object \| false`   | 页码标记在纯文本页眉/页脚中的重命名映射（`{ page?, total? }`），与 `Pages.configure({ placeholders })` 匹配。传入 `false` 可禁用替换。参见 [自定义标记名称](/conversion/export/docx/rest-api#custom-token-names-placeholders)。 | `undefined` |
-| `customNodeDsl`          | `Object`            | 用于将自定义 Tiptap 节点渲染到导出文件中的 [自定义节点 DSL](/conversion/export/docx/custom-nodes-dsl) 规则。 | `undefined` |
+| Name                 | Type     | Description                                                            | Default     |
+| -------------------- | -------- | ---------------------------------------------------------------------- | ----------- |
+| `doc`                | `String` | Tiptap JSON document as a string                                       | `N/A`       |
+| `exportType`         | `string` | The expected export type                                               | `blob`      |
+| `styleOverrides`     | `Object` | Style overrides                                                        | `{}`        |
+| `pageSize`           | `Object` | Page size configuration                                                | `undefined` |
+| `pageMargins`        | `Object` | Page margins configuration                                             | `undefined` |
+| `headers`            | `Object` | Page header configuration                                              | `undefined` |
+| `footers`            | `Object` | Page footer configuration                                              | `undefined` |
+| `customFonts`        | `Array`  | Custom font files to provision (on-premises only)                      | `undefined` |
+| `tableOverrides`     | `Object` | Table-level rendering overrides forwarded to the DOCX step             | `undefined` |
+| `paragraphOverrides` | `Object` | Paragraph-level rendering overrides forwarded to the DOCX step         | `undefined` |
+| `textRunOverrides`   | `Object` | Text run rendering overrides forwarded to the DOCX step                | `undefined` |
+| `tableCellOverrides` | `Object` | Table cell rendering overrides forwarded to the DOCX step              | `undefined` |
+| `imageOverrides`     | `Object` | Image rendering overrides forwarded to the DOCX step                   | `undefined` |
+| `headerFooterOverrides` | `Object` | Per-field overrides scoped to header/footer content (same five keys as the element overrides). See [Element Overrides](#element-overrides). | `undefined` |
+| `placeholders` | `Object \| false` | 页眉/页脚中页码标记的重命名映射 (`{ page?, total? }`)，与 `Pages.configure({ placeholders })` 匹配。适用于每种槽形状：纯文本、字符串化 Tiptap JSON 或 Tiptap JSON 对象。传递 `false` 以禁用替换。请参阅[自定义代币名称](/conversion/export/docx/rest-api#custom-token-names-placeholders)。 | `undefined` |
+| `customNodeDsl` | `Object` | [Custom-node DSL](/conversion/export/docx/custom-nodes-dsl) rules for rendering custom Tiptap nodes into the exported file. | `undefined` |
 
-#### 页面大小配置
+#### Page Size Configuration
 
-`pageSize` 对象允许您自定义导出 PDF 文档的尺寸：
+The `pageSize` object allows you to customize the dimensions of your exported PDF document:
 
-| 属性      | 类型     | 描述                                                                                       | 默认值     |
-| --------- | -------- | ------------------------------------------------------------------------------------------ | ---------- |
-| `width`   | `string` | 页面宽度。必须是正数，并带有有效单位（cm、in、pt、pc、mm、px）。                           | `"21.0cm"` |
-| `height`  | `string` | 页面高度。必须是正数，并带有有效单位（cm、in、pt、pc、mm、px）。                           | `"29.7cm"` |
+| Property | Type     | Description                                                                                         | Default    |
+| -------- | -------- | --------------------------------------------------------------------------------------------------- | ---------- |
+| `width`  | `string` | The width of the page. Must be a positive number followed by a valid unit (cm, in, pt, pc, mm, px). | `"21.0cm"` |
+| `height` | `string` | The height of the page. Must be a positive number followed by a valid unit (cm, in, pt, pc, mm, px).| `"29.7cm"` |
 
-#### 页面边距配置
+#### Page Margins Configuration
 
-`pageMargins` 对象允许您自定义导出 PDF 的页边距：
+The `pageMargins` object allows you to customize the margins of your exported PDF document:
 
-| 属性      | 类型     | 描述                                                                                                     | 默认值    |
-| --------- | -------- | -------------------------------------------------------------------------------------------------------- | --------- |
-| `top`     | `string` | 页面顶部边距，可以为负数。必须是数字，并带有有效单位（cm、in、pt、pc、mm、px）。                           | `"1.0cm"` |
-| `bottom`  | `string` | 页面底部边距，可以为负数。必须是数字，并带有有效单位（cm、in、pt、pc、mm、px）。                           | `"1.0cm"` |
-| `left`    | `string` | 页面左侧边距。必须是正数，并带有有效单位（cm、in、pt、pc、mm、px）。                                    | `"1.0cm"` |
-| `right`   | `string` | 页面右侧边距。必须是正数，并带有有效单位（cm、in、pt、pc、mm、px）。                                    | `"1.0cm"` |
+| Property | Type     | Description                                                                                                       | Default  |
+| -------- | -------- | ----------------------------------------------------------------------------------------------------------------- | -------- |
+| `top`    | `string` | The top margin of the page. Can be negative. Must be a number followed by a valid unit (cm, in, pt, pc, mm, px).  | `"1.0cm"`|
+| `bottom` | `string` | The bottom margin of the page. Can be negative. Must be a number followed by a valid unit (cm, in, pt, pc, mm, px).| `"1.0cm"`|
+| `left`   | `string` | The left margin of the page. Must be a positive number followed by a valid unit (cm, in, pt, pc, mm, px).         | `"1.0cm"`|
+| `right`  | `string` | The right margin of the page. Must be a positive number followed by a valid unit (cm, in, pt, pc, mm, px).        | `"1.0cm"`|
 
-#### 页眉配置
+#### Headers Configuration
 
-`headers` 对象允许您自定义导出 PDF 文档的页眉。每个插槽（`default`、`first`、`even`）都接受以下任一形式：纯文本字符串、字符串化的 Tiptap JSONContent，或直接在 JSON 请求体中发送的 Tiptap JSONContent 对象。
+The `headers` object allows you to customize the headers of your exported PDF document. Each slot (`default`, `first`, `even`) accepts any of: a plain text string, a stringified Tiptap JSONContent, or a Tiptap JSONContent object sent directly in the JSON body.
 
-| 属性                | 类型                  | 说明                                                                                                          |
+| Property            | Type                  | Description                                                                                                          |
 | ------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `evenAndOddHeaders` | `boolean`             | 是否为奇数页和偶数页使用不同的页眉                                                                              |
 | `differentFirstPage` | `boolean`             | 是否在首页使用不同的页眉。当为 `true` 时，第一页将使用 `first` 值而不是 `default`。 |

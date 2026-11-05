@@ -10,6 +10,22 @@ meta:
 
 该扩展导出了用于处理建议的 TypeScript 类型。
 
+## WithoutTrackedChangesOptions
+
+[`withoutTrackedChanges()`](/tracked-changes/api-reference/utilities#withouttrackedchanges) 的选项，通过拒绝副本上的待处理建议来导出基础文档 JSON。
+
+```ts
+import type { JSONContent } from '@tiptap/core'
+import type { Schema } from '@tiptap/pm/model'
+
+interface WithoutTrackedChangesOptions {
+	content: string | JSONContent
+	schema: Schema
+}
+```
+
+两个字段均为必填字段。 `content` 是 HTML 或完整的文档 JSON 对象。 `schema` 是源文档的架构，包括 `TrackedChanges` 以及所有自定义节点和标记。
+
 ## SuggestionType
 
 查询 API 返回的公开建议类型：
@@ -94,7 +110,18 @@ type SuggestionAttributeChange = {
 
 `oldValue` 是建议产生前的值。建议待处理期间，文档中存在的是 `newValue` 所表示的提议值。
 
-## 建议
+## SuggestionNodeTypeChange
+
+描述 `attributeChange` 建议的原始和建议的架构节点类型：
+
+```ts
+interface SuggestionNodeTypeChange {
+  oldValue: string
+  newValue: string
+}
+```
+
+## Suggestion
 
 表示文档中发现的建议：
 
@@ -120,7 +147,8 @@ type Suggestion = {
   markChanges?: SuggestionMarkChange[]
   // 仅在 'attributeChange' 建议中存在：
   attributeChanges?: SuggestionAttributeChange[]
-  // 仅在 'attributeChange' 和 'split' 建议中存在：
+  nodeTypeChange?: SuggestionNodeTypeChange
+  // Only present for 'attributeChange' and 'split' suggestions:
   nodeType?: string
   // 仅在建议影响块级节点时存在：
   insertedNodes?: JSONContent[]
@@ -183,12 +211,10 @@ outer.fullText // "Hello great world"  → 当你需要字面范围时使用
 
 在构建更丰富的 UI 时，请使用 `insertedNodes` 和 `deletedNodes` 来检查节点类型和属性，例如在建议文本旁显示节点类型徽标。
 
-对于 `split` 建议：
-- `splitKind` 为 `'insertion'` 时表示末尾拆分，为 `'structural'` 时表示中间拆分
-- `nodeType` 是受影响块的名称，例如 `paragraph`、`heading` 或 `listItem`
-- `text` 包含受影响块中的当前文本。末尾拆分后输入的文本也会包含在此字段中。
-- `fullText` 包含受影响块中的完整当前文本。对于拆分建议，它通常与 `text` 相同。
-- `from` 和 `to` 覆盖拆分后的块
+- `nodeType` 是更新节点的当前架构名称
+- `nodeTypeChange`（如果存在）包含原始和建议的架构名称a [节点类型更改](/tracked-changes/usage/advanced-usage#node-type-changes)。这些建议使用`attributeChange`； `SuggestionType` 不变。
+- `attributeChanges` lists each attribute's previous and proposed values
+- accepting keeps the proposed values; rejecting restores the previous values
 
 请使用 `splitKind` 和 `nodeType` 渲染诸如 `new paragraph` 或 `split heading` 的标签。不要使用会让末尾拆分和中间拆分看起来相同的通用标签。
 
@@ -257,6 +283,7 @@ type TrackedChangesOptions = {
   userId: string
   userMetadata?: Record<string, unknown> | null
   ignoredTrackingMarks: string[]
+  nodeTypeChangeTypes: string[]
   onSuggestionCreate?: (suggestion: Suggestion) => void
   onSuggestionAccept?: (id: string) => void
   onSuggestionReject?: (id: string) => void
@@ -264,7 +291,8 @@ type TrackedChangesOptions = {
 }
 ```
 
-- `blockSplitMarker` — 在建议的块拆分处渲染的标记。默认为 `'¶'`。将其设置为 `null` 可不渲染标记。请参阅 [blockSplitMarker](/tracked-changes/getting-started/install#blocksplitmarker)。
+- `nodeTypeChangeTypes` — 符合类型建议的文本块名称。必须列出源和目标。默认为 `[]`。使用 Tiptap Collaboration（Y.js 文档）时，保留此默认值以跟踪类型转换作为替换；不支持非空列表。请参阅[nodeTypeChangeTypes](/tracked-changes/getting-started/install#nodetypechangetypes)。
+- `blockSplitMarker` — the marker rendered at a suggested block split. Defaults to `'¶'`. Set it to `null` to render no marker. See [blockSplitMarker](/tracked-changes/getting-started/install#blocksplitmarker).
 
 ## 类型辅助工具
 

@@ -1,0 +1,16 @@
+---
+title: 简易白板
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 简易白板示例 | Tiptap 编辑器文档
+  description: React 和 Vue 中的白板，带有用于工具、撤消、重做、缩放、文件和图像的按钮，白板上有便签、形状、箭头和笔线。
+  category: 编辑器
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+React 和 Vue 示例展示了一个包含便签、形状、箭头和笔画的白板，以及工具、撤销、重做、缩放、文件和图像操作。颜色按钮会为选中形状及后续新增形状设置颜色；箭头按钮会设置选中箭头及后续箭头的线条、虚线和箭头端点。示例会在白板调色板中加入 `pink`。导出会将白板保存为 JSON 文件，导入可替换当前白板或将形状添加到现有白板。PNG 和 SVG 可将选中形状或整个白板保存为图像，复制操作则会将其复制为 PNG。图像按钮用于添加图像文件；也可以粘贴或拖放图像。由于该示例没有服务器，图像会以数据 URL 保存在白板中。白板初始包含便签、形状、箭头和笔画。按工具快捷键（例如 <kbd>N</kbd> 添加便签）即可选择工具。
+
+<CodeDemo isPro path="/Extensions/Whiteboard" />

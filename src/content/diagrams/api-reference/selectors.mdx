@@ -1,0 +1,277 @@
+---
+title: '类、数据属性和自定义属性'
+intro: '在样式表中使用这些名称。在 <code>.tiptap</code> 处启动选择器。'
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '类、数据属性和自定义属性 | Tiptap 图表文档'
+  description: '在样式表中使用这些名称。'
+  category: 图表
+---
+
+## 类
+
+| 类 | 元素 |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tiptap-chart` | 编辑器中图表的根，其中来自描述或标题的 `role="figure"` 和 `aria-label` |
+| `tiptap-chart-viewport` | 围绕画布。当图表放大时，您可以在其中滚动 |
+| `tiptap-chart-zoom-box` | 在视口和画布之间。占据缩放图表的空间 |
+| `tiptap-chart-canvas` | 图表在文本中占据的区域 |
+| `tiptap-chart-stage` | 渲染器绘制到的元素。应用 `minRenderWidth` 时按比例缩小 |
+| `tiptap-chart-caption` | 图表下方：说明，而规格中有 `caption: true` |
+| `tiptap-chart-text-input` | 双击图表文本时打开的字段，将其重命名（[编辑图表中的文本](/diagrams/charts/editing)） |
+| `tiptap-chart-attribution` | 图表下方：渲染器规则要求的链接为. `hidden`，而没有（[渲染器的规则](/diagrams/renderers/custom#rules-of-your-renderer)） |
+| `tiptap-chart-error` | 绘制失败时显示的消息 |
+| `tiptap-chart-unavailable` | 什么[`unavailable`](/diagrams/api-reference/options#unavailable) 返回，当此处没有渲染器绘制图表时显示 |
+| `tiptap-diagram-input` | 快速输入，您可以在其中键入图表语法 |
+| `tiptap-diagram-input-placeholder` |在快速输入中，在命名类型的第一行下方：`placeholder` 选项的示例行，直到您键入一行 |
+| `tiptap-chart-resize-handle` | 调整图表大小的句柄，使用 `resizable`。选择图表时显示 |
+
+## 数据属性
+
+### 在图表上
+
+在 `.tiptap-chart` 上：
+
+| 属性 | 值 |
+| ------------------------- | ------------------------------------------------------------------------------------ |
+| `data-tt-chart-type` | 图表的 `spec.type`：`line`、`bar`、`radar`、`sankey` … 或您注册的类型 |
+| `data-tt-chart-renderer` |绘制它的渲染器 |
+| `data-tt-chart-state` | `idle`、`empty`、`loading`、`ready`、`unavailable`、`error` |
+| `data-tt-chart-source` | `none`、`linked`、`detached` |
+| `data-tt-chart-readonly` | 数据只读时存在 |
+| `data-tt-chart-legend` | `top`、`right`、`bottom`、`left`、`none` |
+| `data-tt-chart-selected` | 选择图表时显示 |
+| `data-tt-chart-zoom` | `fit`，或缩放系数，例如 `1.5` (`setZoom`) |
+| `data-tt-chart-maximized` | 当图表放置在窗口上时显示(`setMaximized`) |
+| `data-tt-chart-border` | 存在，而规范中有 `border: true` |
+| `data-tt-chart-hidden` | 存在，而仅显示下面的图表。不显示图表 |
+| `data-tt-chart-panning` | 在拖动缩放图表时存在 (`setPan`) |
+| `data-tt-chart-sized` | 在规格具有`size` |
+| `data-tt-chart-align` | `left` 或 `right` 对于尺寸不居中的图表 (`setDiagramAlign`) |
+| `data-tt-chart-resizing` | 拖动手柄时出现 |
+
+### 在调整大小手柄上
+
+| 元素 | 属性 | 值 |
+| ----------------------------- | ---------------------- | -------------------------------------------------------- |
+| `.tiptap-chart-resize-handle` | `data-tt-chart-resize` | `left`、`right`、`bottom`、`bottom-left`、`bottom-right` |
+
+### 在快速输入上
+
+在 `.tiptap-diagram-input` 上：
+
+| 属性 | 值 |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `data-tt-diagram-input-type` | 快速输入的图表类型变为 |
+| `data-tt-chart-delimiter` | `comma`、`semicolon`、`pipe`、`tab`、`none`：分割您键入的内容的分隔符，使用 `setDiagramInputDelimiter` 设置或检测到的 |
+| `data-tt-chart-placeholder` | 快速输入为空时：`placeholder` 选项的文本，由 `::before` 显示 |
+
+### 在 HTML 输出中和其他节点上
+
+| 属性 | 元素|
+| ---------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `data-tt-chart-spec` | JSON 形式的图表规范，位于 `figure[data-type="chart"]` 上 |
+| `data-tt-chart-link` | JSON 形式的数据源，位于 `figure[data-type="chart"]` | 上
+| `data-tt-chart-synced-at` | 最后一次从其数据源读取数据的时间（ISO 时间），位于 `figure[data-type="chart"]` |
+| `data-tt-chart-renderer` | 所选渲染器，位于 `figure[data-type="chart"]` |
+| `data-tt-chart-delimiter` | 在 `figure[data-type="chart"]` 上输入数据时使用的分隔符 |
+| `data-tt-diagram-input` | 在用作图表输入的表格上 |
+| `data-tt-chart-table-id` | 在图表跟随的表格上 |
+| `data-tt-chart-image-source` | 在由 `keepData` |
+| 图表制作的图像上`data-tt-attribution` | 在图表或流程图的导出 SVG 中的 `<a>` 上，当其渲染器请求归属链接时 |
+
+## 自定义属性
+
+### 图表
+
+| 属性 | 默认值|
+| ---------------------------------- | ---------------------------------------------------------------------------------------- |
+| `--tt-chart-padding` | `12px` |
+| `--tt-chart-border` | `1px solid transparent` |
+| `--tt-chart-radius` | `8px` |
+| `--tt-chart-background` | `transparent`。规格的 `background` 将其设置在该图表 |
+| `--tt-chart-border-color` | `#d4d4d8` 上，带有 `border: true` |
+| `--tt-chart-border-width` 的图表框架| `1px` |
+| `--tt-chart-caption-color` | `#71717a` |
+| `--tt-chart-caption-size` | `0.875em` |
+| `--tt-chart-caption-align` | `center` |
+| `--tt-chart-text-input-border` | `1px solid #6a00f5`，围绕图表文本 | 的字段
+| `--tt-chart-text-input-background` | `Canvas` |
+| `--tt-chart-attribution-color` | `#71717a` |
+| `--tt-chart-attribution-size` | `0.75em` |
+| `--tt-chart-aspect-ratio` | `16 / 9`。带有 `size` 的图表将其设置为其 `ratio` |
+| `--tt-chart-max-height` | `480px`。不适用于带有 `size` |
+| `--tt-chart-width` | 在带有 `size` 的图表上设置：它所占的编辑器文本宽度，例如 `50%` |
+| `--tt-chart-handle-color` | `#6a00f5`，调整大小句柄的填充 |
+| `--tt-chart-handle-border` | `#ffffff` |
+| `--tt-chart-handle-radius` | `4px` |
+| `--tt-chart-selected-outline` | `2px solid #6a00f5` |
+| `--tt-chart-loading-opacity` | `0.5` |
+| `--tt-chart-error-color` | `#e5484d` |
+| `--tt-chart-unavailable-color` | `#71717a` |
+| `--tt-chart-maximized-inset` | `0`：最大化图表与窗口边缘，如 `inset` |
+| `--tt-chart-maximized-z-index` | `50` |
+| `--tt-chart-maximized-background` | `--tt-chart-background` 或 `Canvas` 时未设置的 |
+
+- **最大化图表**是 `position: fixed`。
+- **如果编辑器的祖先设置了 `transform`、`filter` 或 `contain`**，则最大化图表将相对于该祖先而不是窗口放置。
+
+### 绘图
+
+每个渲染器在绘制图表时都会读取这些属性。
+
+| 属性 | 默认值 |
+| --------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `--tt-chart-series-1` … `--tt-chart-series-8` | `#6a00f5`、`#00a3a3`、`#f59e0b`、`#e5484d`、 `#3b82f6`、`#16a34a`、`#d946ef`、`#64748b` |
+| `--tt-chart-axis-color` | `#9ca3af` |
+| `--tt-chart-grid-color` | `#e5e7eb` |
+| `--tt-chart-label-color` | `#4b5563` |
+| `--tt-chart-title-color` | `#111827` |
+| `--tt-chart-font-family` | `Arial, Helvetica, "Liberation Sans", sans-serif` |
+| `--tt-chart-font-size` | `12px` |
+| `--tt-chart-title-size` | `16px` |
+| `--tt-chart-title-weight` | `600` |
+| `--tt-chart-legend-gap` | `16px` |
+| `--tt-chart-legend-marker-size` | `10px` |
+
+- **大小**是像素，用或不用 `px` 写入。其他单位不换算。
+- **图表规范中的 `palette`** 会覆盖该图表的系列颜色。系列颜色是数据系列的颜色，例如条形或线条的颜色。
+
+#### 导出和 Word 中的字体
+
+- **导出的图像**只能使用导出它的计算机上安装的字体。
+- **页面加载的网络字体**不可用于导出的图像。
+- **原生 Word 图表** 命名单一字体。它是 Word 附带的第一个 `--tt-chart-font-family` 系列 (`WORD_FONTS`)，一个通用系列作为其 Word 对应项，或 `fallbackFont` (`'Arial'`)。
+- **`wordFontFor(fontFamily)`** 告诉您 Word 是否会绘制与页面不同的字体。
+
+### 快速输入
+
+| 属性 | 默认值 |
+| -------------------------------------- | --------------------------------------------------------------------- |
+| `--tt-diagram-input-radius` | `8px` |
+| `--tt-diagram-input-background` | `#f4f4f5` |
+| `--tt-diagram-input-color` | `inherit` |
+| `--tt-diagram-input-font-family` | `ui-monospace, monospace` |
+| `--tt-diagram-input-delimiter-color` | `#6a00f5` |
+| `--tt-diagram-input-placeholder-color` | `#a1a1aa` |
+| `--tt-diagram-input-placeholder-lines` | 在空快速输入上设置其占位符的行数 |
+| `--tt-diagram-input-cell-background` | `#f4f4f5` |
+
+### 突出显示的源
+
+源文本在快速输入、Mermaid 流程图的代码视图以及具有类 `tiptap-diagram-source` 的任何元素（例如您自己的源编辑器）中采用彩色。选项 [`sourceHighlighting`](/diagrams/api-reference/options#sourcehighlighting) 仅在快速输入和代码视图中关闭颜色，而不是在您自己的元素中关闭颜色。
+
+| 类别 | 零件 | 颜色属性 | 浅默认 |
+| -------------------------------- | --------------------------------------------- | ------------------------------ | ------------- |
+| `tiptap-diagram-source-keyword` | 图表或流程图类型、语句字 | `--tt-diagram-source-keyword` | `#1e40af` |
+| `tiptap-diagram-source-label` | 形状、引号和第一列中的标签 | `--tt-diagram-source-label` | `#3f6212` |
+| `tiptap-diagram-source-number` | 数字 | `--tt-diagram-source-number` | `#7c2d12` |
+| `tiptap-diagram-source-operator` | 箭头、分隔符、方括号、冒号 | `--tt-diagram-source-operator` | `#52525b` |
+| `tiptap-diagram-source-comment` | 注释 (`%%`) | `--tt-diagram-source-comment` | `#4b4b53` |
+
+- **每种颜色的暗值**是针对每种默认颜色得出的。在两种方案中，每种方案与输入背景的对比度均为 4.5:1 或更高。
+- **要使某一部分无色**，请将其属性设置为 `inherit`。
+
+## 图表
+
+流程图（`flowDiagram` 节点，参见[流程图概览](/diagrams/flow-diagrams/overview)）遵循相同的模式，并有各自的类名。
+
+### 图类
+
+| 类 | 元素 |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tiptap-flow-diagram` | 编辑器中图的根，其中包含 `role="figure"` 和 `aria-label`描述或标题 |
+| `tiptap-flow-diagram-viewport` | 画布周围。当图表放大时，您可以在其中滚动 |
+| `tiptap-flow-diagram-zoom-box` | 在视口和画布之间。占据缩放图表的空间 |
+| `tiptap-flow-diagram-canvas` | 将绘制的图表保存为 `<img>` |
+| `tiptap-flow-diagram-code` | 显示的源文本而不是绘制的图表而视图为 `code` |
+| `tiptap-flow-diagram-caption` | 图表下方：标题 |
+| `tiptap-flow-diagram-attribution` | 图表下方：图表渲染器规则要求的链接为. `hidden` 而没有 |
+| `tiptap-flow-diagram-error` | 绘图失败时显示的消息 |
+| `tiptap-flow-diagram-unavailable` | 什么 [`unavailable`](/diagrams/api-reference/options#unavailable)返回，当此处没有渲染器绘制图表时显示 |
+| `tiptap-flow-diagram-resize-handle` | 调整图表大小的句柄，带有 `resizable`。选择图表时显示 |
+| `tiptap-flow-diagram-label-input` | 双击任何类型的 Mermaid 图表中的文本时打开的字段，以对其进行编辑。不在draw.io或BPMN中（[在图中编辑](/diagrams/flow-diagrams/editing)） |
+
+### 图数据属性
+
+在 `.tiptap-flow-diagram` 上：
+
+| 属性 | 值 |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `data-tt-flow-diagram-format` | `mermaid`、`drawio`、`bpmn` 或您自己的图表渲染器绘制的格式的 id |
+| `data-tt-flow-diagram-kind` | A [Mermaid kind](/diagrams/flow-diagrams/overview#mermaid-kinds)，例如 `flowchart` 或 `unknown`，例如用于 draw.io 和 BPMN |
+| `data-tt-flow-diagram-view` | `diagram` 或 `code` |
+| `data-tt-flow-diagram-state` | `idle`（代码视图）、`empty`、`loading`、`ready`、`unavailable`、`error` |
+| `data-tt-flow-diagram-renderer` | 绘制的图表渲染器的 id |
+| `data-tt-flow-diagram-selected` | 选择图表时显示 |
+| `data-tt-flow-diagram-zoom` | `fit`，或缩放系数，例如 `1.5` (`setZoom`) |
+| `data-tt-flow-diagram-maximized` | 当图表放置在窗口上时显示 (`setMaximized`) |
+| `data-tt-flow-diagram-panning` | 当拖动缩放图表时显示 (`setPan`) |
+| `data-tt-flow-diagram-sized` | 当图表具有 `size` |
+| `data-tt-flow-diagram-align` | `left` 或 `right`（对于尺寸不存在的图表）时存在居中 (`setDiagramAlign`) |
+| `data-tt-flow-diagram-resizing` | 拖动手柄时出现 |
+
+在 `.tiptap-flow-diagram-resize-handle` 上：
+
+| 属性| 值 |
+| ----------------------------- | -------------------------------------------------------- |
+| `data-tt-flow-diagram-resize` | `left`、`right`、`bottom`、`bottom-left`、`bottom-right` |
+
+在 HTML 中， `figure[data-type="flow-diagram"]`:
+
+| 属性 | 值 |
+| ---------------------------------- | --------------------------------- |
+| `data-tt-flow-diagram-format` | 格式 |
+| `data-tt-flow-diagram-description` | 描述 |
+| `data-tt-flow-diagram-view` | `code`，而源显示为 |
+| `data-tt-flow-diagram-options` | `options` 作为 JSON |
+
+### 图表自定义属性
+
+| 属性 | 默认 |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `--tt-flow-diagram-padding` | `12px` |
+| `--tt-flow-diagram-border` | `1px solid transparent` |
+| `--tt-flow-diagram-radius` | `8px` |
+| `--tt-flow-diagram-max-height` | `640px`，最高的图表以其宽度绘制。不适用于带有 `size` |
+| `--tt-flow-diagram-width` | 在带有 `size` 的图表上设置：它占编辑器文本宽度的份额 |
+| `--tt-flow-diagram-aspect-ratio` | 在图表上设置 `size`：其 `ratio`。绘制的图表适合该纵横比 |
+| `--tt-flow-diagram-handle-color` | `#6a00f5` 的区域，调整大小手柄 |
+| `--tt-flow-diagram-handle-border` | `#ffffff` 的填充|
+| `--tt-flow-diagram-handle-radius` | `4px` |
+| `--tt-flow-diagram-code-radius` | `8px` |
+| `--tt-flow-diagram-code-background` | `#f4f4f5` |
+| `--tt-flow-diagram-code-color` | `inherit` |
+| `--tt-flow-diagram-code-font-family` | `ui-monospace, monospace` |
+| `--tt-flow-diagram-empty-text` | `"Empty diagram"`，源为空时显示的 CSS 字符串 |
+| `--tt-flow-diagram-caption-color` | `#71717a` |
+| `--tt-flow-diagram-caption-size` | `0.875em` |
+| `--tt-flow-diagram-caption-align` | `center` |
+| `--tt-flow-diagram-attribution-color` | `#71717a` |
+| `--tt-flow-diagram-attribution-size` | `0.75em` |
+| `--tt-flow-diagram-loading-opacity` | `0.5` |
+| `--tt-flow-diagram-error-color` | `#e5484d` |
+| `--tt-flow-diagram-unavailable-color` | `#71717a` |
+| `--tt-flow-diagram-selected-outline` | `2px solid #6a00f5` |
+| `--tt-flow-diagram-label-input-border` | `1px solid #6a00f5`，围绕图表文本字段 |
+| `--tt-flow-diagram-label-input-background` | `Canvas` |
+
+最大化图表使用 `--tt-chart-maximized-inset`、`--tt-chart-maximized-z-index` 和 `--tt-chart-maximized-background`。因此，图表和流程图在它们周围留有相同的空间。
+
+### 图表绘制
+
+图表渲染器在绘制图表时读取这些属性。导出也会读取它们。
+
+| 属性 | 默认值 |
+| ------------------------------------- | ------------------------------------------------- |
+| `--tt-flow-diagram-background` | `transparent` |
+| `--tt-flow-diagram-node-color` | `#f4eeff`，一个节点的填充 |
+| `--tt-flow-diagram-node-border-color` | `#6a00f5` |
+| `--tt-flow-diagram-text-color` | `#18181b` |
+| `--tt-flow-diagram-line-color` | `#52525b`，边线和箭头 |
+| `--tt-flow-diagram-group-color` | `#fafafa`，子图或泳道的填充|
+| `--tt-flow-diagram-note-color` | `#fff8db` |
+| `--tt-flow-diagram-font-family` | `Arial, Helvetica, "Liberation Sans", sans-serif` |
+| `--tt-flow-diagram-font-size` | `14px`。仅像素 |

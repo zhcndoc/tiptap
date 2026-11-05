@@ -10,7 +10,7 @@ meta:
 
 import { Callout } from '@/components/ui/Callout'
 
-项目符号列表和有序列表在 DOCX 和 Tiptap 之间转换时会保留嵌套结构。DOCX 中的编号格式和起始值在导入过程中不会被保留。
+项目符号列表和有序列表在 DOCX 和 Tiptap 之间转换，并保留嵌套。导入按照 Word 编号的方式将列表保存在一起，并读取每个有序列表的编号格式和起始编号。
 
 ## 你需要了解的内容
 
@@ -20,38 +20,55 @@ import { Callout } from '@/components/ui/Callout'
 ## 支持概览
 
 | | 导入 | 编辑器 | 导出 |
-| --- | --- | --- | --- |
-| 项目符号列表 | 支持 | 支持（ConvertKit） | 支持 |
-| 有序列表 | 支持 | 支持（ConvertKit） | 部分支持 |
-| 编号格式（a/A/i/I/1） | 内部读取用于区分有序列表与项目符号列表，然后丢弃 | OrderedList 扩展的 `type` 属性接受这些值，但导入器不会设置它 | 不保留 |
-| 起始编号 | 未从 DOCX 编号中的 `w:start` 提取 | OrderedList 扩展的 `start` 属性受支持，但导入器不会设置它 | 不保留 |
+| ---------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| 项目符号列表 | 支持 | 支持 (ConvertKit) | 支持 |
+| 有序列表 | 支持 | 支持 (ConvertKit) | 支持 |
+| 编号格式 (a/A/i/I/1) | 导入为 `numberingFormat`，加上用于字母和罗马数字的 `type` | 由 `OrderedListNumbering` 绘制（默认关闭）。 OrderedList 扩展的 `type` 属性也接受这些值 | 仅编辑器扩展，来自已注册的格式 |
+| 起始编号 | 当列表不从 1 开始时导入为 `start` | 支持 OrderedList 扩展的 `start` 属性| 仅编辑器扩展 |
 | 嵌套列表 | 支持 | 支持 | 支持 |
-| 任务列表 | 支持，可选 | 支持（ConvertKit） | 支持 |
+| 任务列表 | 支持，选择加入 | 支持(ConvertKit) | 支持 |
 
 ## 导入
 
 使用 [编辑器扩展](/conversion/import/docx/editor-extension) 或 [REST API](/conversion/import/docx/rest-api) 导入列表。两者产生的输出完全相同。
 
-转换服务会将所有连续的 DOCX 列表段落分组为列表结构，而不考虑它们的编号 ID。缩进级别（`ilvl`）控制嵌套。导入器只读取 `numFmt` 值来将每个段落分类为项目符号或有序列表项。项目符号样式的编号会生成 `bulletList` 节点。十进制、字母和罗马数字编号都会生成 `orderedList` 节点，但不会进一步区分：在 Word 中以 `A, B, C` 编写的列表和以 `1, 2, 3` 编写的列表，在编辑器中都会作为没有任何属性的相同 `orderedList` 节点进入。Tiptap 的 OrderedList 扩展的 `type` 属性（它会渲染为 `<ol type="a">`）在导入时不会被填充。若想如今端到端保留自定义编号样式，可在内容加载后于编辑器端设置 `type` 属性。
+转换服务根据 Word 编号为一个列表的连续列表段落构建一个列表：
 
-DOCX 编号定义中的 `w:start` 值不会被解析，因此起始编号不会被导入。
+- 同一编号 ID (`numId`) 上的段落。
+- 定义共享 `nsid` 和相同级别的不同编号 ID 上的段落。使用 `w:startOverride` 重新启动计数的编号 ID 会启动一个新列表。
+- 一个有序列表的项目之间的空段落。人们对他们的评价不断增加，所以他们并没有结束这个名单。每个都留在它前面的项目内，从而保留空白行。
+
+列表项之间有文本的段落（例如标题）结束列表，项目符号或任务列表中的空段落也是如此。缩进级别 (`ilvl`) 控制嵌套。
+
+项目符号式编号生成 `bulletList` 节点，十进制、字母和罗马编号生成 `orderedList` 节点。每个列表的最外面的列表都会获得 [`OrderedListNumbering`](/conversion/export/docx/ordered-list-numbering) 绘制的 `numberingFormat`，响应会在 `numberingFormats` 中列出这些格式。对于字母和罗马编号，有序列表还获得 `type`（`a`、`A`、`i` 或 `I`），并且当其第一级不从 1 开始时获得 `start`。
+
+仅当启用 `OrderedListNumbering` 时，编辑器才会保留 `numberingFormat`，例如使用 `ConvertKit.configure({ orderedListNumbering: true })`。默认的 ConvertKit 配置会在加载内容时移除该属性，仅保留 `type` 和 `start`。REST 响应始终包含这三个字段。
 
 ## 编辑器渲染
 
 [`BulletList`](/editor/extensions/nodes/bullet-list)、[`OrderedList`](/editor/extensions/nodes/ordered-list)、[`ListItem`](/editor/extensions/nodes/list-item) 和 `ListKeymap` 扩展由 [`ConvertKit`](/conversion/import/docx/convertkit) 注册。无需单独安装。
 
-列表使用标准 HTML 元素渲染：项目符号列表使用 `<ul>`，有序列表使用 `<ol>`，列表项使用 `<li>`。如果在 `orderedList` 节点上设置了 `start` 和 `type` 属性，编辑器会将它们渲染为 HTML 属性（例如，`<ol start="5" type="a">`），但 DOCX 导入器不会设置这些属性。
+使用标准 HTML 元素渲染列表：用于项目符号列表的 `<ul>`、用于有序列表的 `<ol>` 以及用于列表项的 `<li>`。如果在 `orderedList` 节点上设置 `start` 和 `type` 属性，编辑器会将它们渲染为 HTML 属性（例如 `<ol start="5" type="a">`）。当 `OrderedListNumbering` 打开时，列表的编号格式会绘制标记，并从格式自身的起始编号开始计数。
+
+仅在格式注册后，编辑器才会绘制格式标记。启用 `OrderedListNumbering` 后，`ImportDocx` 会自动注册导入的格式。使用 REST API 导入后，请将响应中的 `numberingFormats` 传给 `editor.commands.registerNumberingFormats()`，参见[编辑器运行后添加格式](/conversion/export/docx/ordered-list-numbering#adding-formats-after-the-editor-is-running)。
 
 嵌套通过 `listItem` 内容模型实现，它允许在列表项中包含块级内容，包括其他列表。`ConvertKit` 也会注册 [`TaskList`](/editor/extensions/nodes/task-list) 和 [`TaskItem`](/editor/extensions/nodes/task-item)，因此复选框列表无需额外设置即可渲染。
 
 ## 导出
 
-使用 [编辑器扩展](/conversion/export/docx/editor-extension) 或 [REST API](/conversion/export/docx/rest-api) 导出列表。两者对列表的处理完全相同。
+使用[编辑器扩展](/conversion/export/docx/editor-extension)或 [REST API](/conversion/export/docx/rest-api) 导出列表。两者都支持项目符号列表、有序列表、嵌套列表和任务列表。只有编辑器扩展会保留编号格式和起始编号。
 
-项目符号列表和有序列表都会以正确的结构导出为 DOCX。嵌套通过递归增加 DOCX 缩进级别来保留。每个有序列表实例都会获得一个唯一的编号 ID，因此同一文档中的多个列表会独立编号。
+项目符号列表和有序列表均以正确的结构导出到 DOCX。通过递归增加 DOCX 缩进级别来保留嵌套。每个有序列表实例都会收到一个唯一的编号 ID，因此同一文档编号中的多个列表是独立的。具有 `linkedStyle` 格式的列表是例外，请参见下文。
 
-<Callout title="编号格式和起始值不会被导出" variant="warning">
-  导出转换器不会读取有序列表节点中的 `type` 或 `start` 属性。所有有序列表都会导出为默认的十进制编号（1, 2, 3），而不管编辑器中设置了什么格式。在编辑器中 `type: "a"` 且 `start: 5` 的列表，在 Word 中会导出为标准的 1, 2, 3 列表。
+编辑器扩展按照编辑器显示的方式对有序列表进行编号，但有一个例外：
+
+- 具有 `numberingFormat` 的列表以该格式导出。该扩展从 `@tiptap-pro/extension-export-docx` 0.34.0 读取编辑器中注册的格式。请参阅[有序列表编号](/conversion/export/docx/ordered-list-numbering)。
+- 从版本 0.34.6 开始，不带 `numberingFormat` 的列表从其 `start` 编号开始。与编辑器一样，具有格式的列表从格式自身的起始编号开始计数。
+- 不导出 `type` 属性。包含 `type: "a"` 且不包含 `numberingFormat` 的列表导出为 1, 2, 3。
+- 例外：[`linkedStyle`](/conversion/export/docx/ordered-list-numbering#numberingleveldefinition) 级别的格式是 Word 中整个文档的一个列表。它的列表在 DOCX 中相互延续，而编辑器会重新启动每个列表。使用`linkedStyle`时检查导出的号码。
+
+<Callout title="REST API 将有序列表导出为 1, 2, 3" variant="warning">
+  `/v2/convert/export/docx` 端点不读取 `numberingFormat`、`type` 或 `start`。每个有序列表导出的十进制数字从 1 开始。
 </Callout>
 
 ## 任务列表

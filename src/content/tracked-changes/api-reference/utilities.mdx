@@ -3,12 +3,12 @@ title: 实用工具
 tags:
   - type: addon
 meta:
-  title: 实用工具 | Tiptap 变更跟踪文档
-  description: 用于查询和处理 Tiptap 变更跟踪扩展中建议的实用函数。
-  category: 变更跟踪
+  title: Utilities | Tiptap Tracked Changes Docs
+  description: 用于在 Tiptap Tracked Changes 扩展中查询建议和导出基础文档 JSON 的实用函数。
+  category: Tracked Changes
 ---
 
-该扩展导出了用于查询和处理建议的实用函数。
+该扩展导出用于查询建议和导出基础文档 JSON 的实用函数。
 
 ## findSuggestions()
 
@@ -250,6 +250,67 @@ import { rejectSuggestions } from '@tiptap-pro/extension-tracked-changes'
 rejectSuggestions(editor, ['suggestion-1', 'suggestion-2'])
 ```
 
+## withoutTrackedChanges()
+
+通过拒绝副本上的每个待处理建议来返回基础文档。建议的添加内容将被删除，建议的删除内容将被恢复，并且替换内容将恢复为原始内容。挂起的格式、属性、节点类型、列表嵌套和块分割更改也将被还原。节点类型建议在其他建议被拒绝后恢复原始类型和属性，同时保留当前内容。
+
+| 选项 | 类型 | 描述 |
+| --- | --- | --- |
+| `content` | `string \| JSONContent` | HTML 或完整文档 JSON 对象。不支持 JSON 字符串和内容数组。 |
+| `schema` | `Schema` | 源文档的 ProseMirror 架构，包括 `TrackedChanges` 以及所有自定义节点和标记。 |
+
+两个选项都是必需的。选项类型导出为 [`WithoutTrackedChangesOptions`](/tracked-changes/api-reference/types#withouttrackedchangesoptions).
+
+### 返回
+
+`JSONContent` — 完整的文档 JSON 对象，没有建议标记或保留的跟踪属性，包括 null 跟踪默认值。其他内容、标记和属性在拒绝后按照架构所表示的方式保留。
+
+该实用程序使输入和源编辑器保持不变，包括待处理的建议、选择、历史记录、回调、评论线程和协作提供程序。支持没有未决建议的内容。使用相同内容和架构重复导出会生成深度相等的 JSON。
+
+```js
+import { withoutTrackedChanges } from '@tiptap-pro/extension-tracked-changes'
+
+const base = withoutTrackedChanges({
+	content: editor.getJSON(),
+	schema: editor.schema,
+})
+
+// HTML input also returns JSON.
+const baseFromHTML = withoutTrackedChanges({
+	content: editor.getHTML(),
+	schema: editor.schema,
+})
+```
+
+例如，在 `Hello` 之后等待插入 ` world` 会生成仅包含 `Hello` 的基本 JSON。插入在源代码编辑器中保持待定状态。
+
+### 无需编辑器即可使用
+
+JSON 输入无需 DOM 即可工作。使用 `getSchema` 和源文档使用的相同扩展（包括自定义扩展）构建架构。
+
+```js
+import { getSchema } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { TrackedChanges, withoutTrackedChanges } from '@tiptap-pro/extension-tracked-changes'
+
+const schema = getSchema([StarterKit, TrackedChanges])
+
+const base = withoutTrackedChanges({
+	content: { type: 'doc', content: [{ type: 'paragraph' }] },
+	schema,
+})
+```
+
+### 限制和错误
+
+HTML 输入需要 DOM 环境并保留文本空白。自定义 HTML 渲染器必须保留解析器的建议数据以恢复基本内容。 HTML 无法恢复先前导出丢弃的数据或架构不支持的数据。
+
+该实用程序会因无效文档 JSON、缺少跟踪架构支持或无法恢复的建议而引发错误。没有 DOM 的 HTML 输入也会抛出异常。如果导出失败，源内容保持不变。
+
+内联原子建议必须使用节点属性。非文本节点上的建议标记会导致错误。显式列表嵌套增量必须是非零安全整数，对于 `sink` 为正整数，对于 `lift` 为负整数。旧文档仍支持省略或空增量。
+
+仅恢复待处理的建议。该实用程序无法撤消已接受的更改或未经跟踪所做的编辑。
+
 ## generateSuggestionId()
 
 生成唯一的建议 ID。结合时间戳和随机字符串确保唯一性。
@@ -304,7 +365,9 @@ const timestamp = getTimestamp()
 | `data-suggestion-user-metadata` | `suggestionUserMetadata`（JSON 序列化） |
 | `data-suggestion-nesting-delta` | `suggestionNestingDelta` |
 
-### 为什么是 `node`，不是 `HTMLAttributes`
+节点类型提案还会从 `suggestionNodeTypeChange` 生成 `data-suggestion-node-type-change`，即使删除或拆分使用节点的主要建议标识也是如此。对于独立类型提案，帮助器还提供常用的 `attributeChange` 身份属性。
+
+### Why `node`, not `HTMLAttributes`
 
 NodeView 中的 `HTMLAttributes` prop 在创建时计算一次后就不会更新。将其传给此工具会在建议状态变化时产生过期属性——例如，在远程协作更新之后，或者某个建议被接受或拒绝时。`node` prop 是响应式的真实数据源，并且会在每次渲染时更新，因此请始终传入 `node`。
 

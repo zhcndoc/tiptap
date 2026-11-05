@@ -1,0 +1,147 @@
+---
+title: 'draw.io'
+intro: '入口点<code>@tiptap-pro/extension-diagrams/drawio</code> 绘制存储为draw.io XML 的图表。它还连接了draw.io编辑器，因此您可以在那里更改这些图表。它不绘制图表。'
+headerDemo:
+  path: '/Extensions/DiagramsDrawio'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 'draw.io | Tiptap 图表文档'
+  description: '入口点@tiptap-pro/extension-diagrams/drawio 绘制存储为draw.io XML 的图表。'
+  category: 图表
+---
+
+## 快速启动
+
+```ts
+import { Diagrams } from '@tiptap-pro/extension-diagrams'
+import { drawioDiagramRenderer } from '@tiptap-pro/extension-diagrams/drawio'
+import rendererUrl from '@tiptap-pro/extension-diagrams/drawio-renderer?url&no-inline'
+import viewerUrl from './vendor/drawio/viewer-static.min.js?url'
+
+Diagrams.configure({
+  diagramRenderers: [drawioDiagramRenderer({ viewerUrl, rendererUrl })],
+})
+```
+
+## 选项
+
+| 选项 | 类型 | 说明 |
+| ------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `viewerUrl` | `string` | 必需。 draw.io 查看器，draw.io 版本中的 `viewer-static.min.js`（`jgraph/drawio` 存储库中的 `src/main/webapp/js/`）。它不在 npm 上，因此请自行提供 |
+| `rendererUrl` | `string` | 必需。 `@tiptap-pro/extension-diagrams/drawio-renderer`，作为一个文件。使用 Vite、`?url&no-inline` |
+| `scriptNonce` | `string \| null` | 对于具有基于随机数的内容安全策略的页面 |
+| `id` | `string` | 默认 `'drawio'` |
+| `label` | `string` | 默认 `'draw.io'` |
+
+## 什么是draw.io源
+
+带有 `format: 'drawio'` 的图表保存了 draw.io XML：
+
+```ts
+editor.commands.insertFlowDiagram({ source: drawioXml, format: 'drawio', title: 'Order process' })
+```
+
+- **源**是 `<mxfile>` 或裸 `<mxGraphModel>`。
+- **文档存储** `<mxfile>`，其页面是纯 XML，因此您可以读取和比较存储的文本。
+- **裸模型**成为一页文件。
+- **draw.io 压缩的页面**未压缩。无法解压缩的页面将保持原样。
+- **将 **draw.io XML 作为文本粘贴会给出一个 draw.io 图表。对于其他任何内容以及长度超过 1,000,000 个字符的源，
+
+`insertFlowDiagram` 和 `updateFlowDiagram` 返回 `false`。
+
+`updateFlowDiagram({ source, format })` 更改图表的格式，例如，当Mermaid 流程图从draw.io 编辑器返回时。新格式需要在同一调用中使用新的 `source`。
+
+## 如何绘制
+
+draw.io 查看器在每页一个隐藏的 iframe 中运行，具有 `sandbox="allow-scripts"` 和不允许网络请求的策略。它在第一次绘制 draw.io 图时加载，大约 4.4 MB，压缩后为 940 kB。绘图需要几十毫秒，结果由源缓存。
+
+### 图表的外观
+
+- **颜色。** 图表保留其绘制时所用的颜色。 `--tt-flow-diagram-*` 自定义属性无法达到它。
+- **背景。** 图表绘制在其自己的背景上或白色上。
+- **配色方案。** SVG 遵循draw.io 支持的页面浅色或深色配色方案。
+- **HTML 标签** 已绘制。
+- **标签中的链接**不执行任何操作，因为该图显示为图像。
+- 来自 AWS、Azure、Cisco 和其他库的 **模板形状** 绘制为空框。查看者无法在沙箱中加载其文件。
+- **图表中的图像**必须是 `data:` URL。
+
+### 在导出中
+
+- **PNG、WebP、JPEG 和 Word。** 标签是纯文本。标签内以 HTML 形式编写的粗体、颜色和换行符会丢失。
+- **在服务器上。**无法导出draw.io图表，因为查看器在浏览器中布置文本。
+
+## 在draw.io 编辑器中进行编辑
+
+入口点以JSON 嵌入模式连接draw.io 编辑器。您构建对话框和 iframe，包为您提供编辑器保存的内容。
+
+```ts
+import { connectDrawioEditor, drawioEditorUrl } from '@tiptap-pro/extension-diagrams/drawio'
+
+const frame = document.createElement('iframe')
+frame.src = drawioEditorUrl() // https://embed.diagrams.net/?embed=1&proto=json…
+dialog.append(frame)
+
+const connection = connectDrawioEditor(frame, {
+  source: diagram.source,
+  title: diagram.title ?? undefined,
+  onSave: (source) => editor.commands.updateFlowDiagram({ pos, source, format: 'drawio' }),
+  onExit: () => {
+    connection.destroy()
+    dialog.close()
+  },
+})
+```
+
+### drawioEditorUrl(options?)
+
+构建编辑器 URL。
+
+| 选项 | 类型 | 描述 |
+| ------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `base` | `string` | draw.io 编辑器。默认`https://embed.diagrams.net/`。将其指向您自己的副本，以防止图表来自第三方 |
+| `saveAndExit` | `boolean` | 在“保存”旁边提供“保存”和“退出”。默认 `true` |
+| `params` | `Record<string, string>` | 添加编辑器 URL 参数，例如 `lang` |
+
+### connectDrawioEditor(frame, options)
+
+在 `frame` 的编辑器中打开图表。返回 `{ destroy }`。
+
+| 选项 | 类型 | 说明 |
+| -------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `source` | `string` | 要打开的draw.io XML。清空打开空白页 |
+| `mermaid` | `string` | Mermaid源码打开代替。编辑器将其转换为draw.io形状，将`subgraph`转换为泳道 |
+| `title` | `string` | 显示在编辑器的标题栏中 |
+| `onSave(source, { exit })` | `(source, { exit }) => void` | 必需。保存时使用 XML 调用，保存并退出时使用 `exit: true` |
+| `onExit()` | `() => void` | 必需。编辑器关闭时以及保存并退出后调用 |
+| `onAutosave(source)` | `(source) => void` | 设置后，每次更改后使用 XML 调用 |
+| `onError(message)` | `(message) => void` | 当编辑器无法打开源代码或发送非draw.io XML 的内容时调用 |
+
+- **图表**仅发布到 iframe URL 的来源。
+- **消息**只能从该 iframe 和源读取。
+- **`onSave` 接收的内容** 像任何存储的 draw.io 源一样进行标准化。请参阅 [draw.io 源是 ](/diagrams/renderers/drawio#what-a-drawio-source-is)。
+- **编辑器在副本上工作。** 如果其他人在打开时更改同一个图表，则下一次保存将替换他们的更改。
+
+### 从 Mermaid 到 draw.io
+
+使用 `mermaid` 选项打开 Mermaid 图并使用 `format: 'drawio'` 保存。它变成了一个draw.io图。您只能通过撤消操作返回到Mermaid。
+
+### 自行托管编辑器
+
+draw.io 编辑器是一个静态 Web 应用程序，作为 `jgraph/drawio` Docker 映像发布：
+
+```sh
+docker run --rm -p 8080:8080 jgraph/drawio
+```
+
+```ts
+frame.src = drawioEditorUrl({ base: 'http://localhost:8080/' })
+```
+
+- 该图表仅发布到该源，因此任何内容都不会到达 draw.io 的服务器。
+- 如果您的页面通过 HTTPS 提供服务，则通过 HTTPS 提供服务。
+- 没有其他变化。嵌入协议与 `embed.diagrams.net` 上的相同。
+- 然后无需互联网连接即可进行编辑。标签中的网络字体和在线形状库仍然需要网络。
+- 将图像固定到标签。与您作为 `viewerUrl` 的查看器一起更新它，以便编辑器和查看器读取相同的 XML。

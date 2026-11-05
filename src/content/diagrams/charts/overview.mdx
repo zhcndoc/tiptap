@@ -1,0 +1,216 @@
+---
+title: '图表'
+intro: '图表是一个<code>chart</code>节点。它存储其值（图表数据）及其设置（图表规格）。要插入第一个图表，请参阅<a href="/docs/diagrams/getting-started/install#a-first-chart">入门</a>。'
+headerDemo:
+  path: '/Extensions/DiagramsChartTypes'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '图表 | Tiptap 图表文档'
+  description: '图表是图表节点。'
+  category: 图表
+---
+
+## 快速入门
+
+```ts
+editor.commands.insertFromText({ text: 'Month | Sales\nJan | 2\nFeb | 3' })
+```
+
+[`insertFromText`](/diagrams/data/pasting#insertfromtext) 以粘贴方式读取文本，因此这些行成为图表。这些行以 [图表语法](/diagrams/data/chart-syntax).
+
+## 有关图表的更多信息
+
+| 页面 | 涵盖 |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [外观](/diagrams/charts/appearance) | 标题、图例、颜色、框架、标题、线条样式以及绘制它的渲染器 |
+| [在图表中编辑](/diagrams/charts/editing) | 双击重命名标题、轴标题、系列和类别 |
+| [Axes](/diagrams/charts/axes) | 轴标题和范围、网格和轴线、刻度线、类别标签|
+| [参考线和波段](/diagrams/charts/references) | 某个值处的线和波段，例如目标或保持在其中的范围 |
+| [外观](/diagrams/charts/looks) | 复制颜色和线条将一个图表导出到另一个图表，或导出到新图表 |
+| [导出](/diagrams/export) | SVG、PNG、WebP、Word，并将图表替换为图像 |
+| [大小和视图](/diagrams/guides/size-and-view) | 大小、对齐、缩放、平移、最大化、缩小屏幕 |
+
+## 图表类型
+
+图表将其类型存储为 `spec.type`。大多数类型都以相同的方式读取图表数据。一列是标签列，通常是第一列：其单元格命名行，例如 `Jan` 和 `Feb`。其他每一列数字都是一系列，绘制为一条线、一组条形图或一组点。
+
+最后一列介绍了图表在 [Word 文档](/diagrams/export#word) 中的含义：可以在 Word、图像或 Word 表格中重新设置样式的原生 Word 图表。
+
+| 类型 | 在 Word 文档中将行读取为 | |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `line`、`area`、`scatter` | 标签列和一个或多个系列| 字图 |
+| `bar` | 相同。 `spec.orientation: 'horizontal'` 将条形放在其一侧 | 文字图表 |
+| `combo` | 相同。请参阅[组合图表](/diagrams/charts/overview#combo-charts) | 字图表 |
+| `radar` | 每行一个辐条，从中心向外的一条线表示该行的标签名称。每系列一条闭合线 | 文字图表 |
+| `pie`、`doughnut` | 一个标签栏和一个系列，整个部分 | 文字图表 |
+| `funnel` | 每个阶段一个标签和一个值，最宽的第一个 | 图像 |
+| `gauge` | 一个值。 `spec.range: { min, max }` 设置其范围，默认为 `0` 至 `100` | 图像 |
+| `treemap`、`tree` | 标签为路径，每行一个值。 `Europe / Germany` 将德国置于欧洲之下 | 图像 |
+| `sankey`、`network` | 每行一个链接。标签列是链接开始的位置，下一列是结束的位置，第三列是其权重 | 图像 |
+| `matrix` | 网格中的单词，请参见[Matrix](/diagrams/charts/overview#matrix) | 单词表 |
+
+- 并非每个渲染器都会绘制每种类型。不绘制类型的渲染器会将图表留给下一个绘制类型的渲染器，请参阅[选择渲染器](/diagrams/charts/appearance#choosing-the-renderer)。
+- 将关闭循环的 sankey 链接被删除。
+- 您使用 [`chartTypes`](/diagrams/api-reference/options#charttypes) 选项注册的类型将被存储、提供给 AI 模型并由列出它的任何渲染器绘制。
+- 该编辑器不知道的类型在文档中保持不变。
+
+### 组合图表
+
+组合图表将某些系列绘制为条形，将其他系列绘制为线条。您可以按列 ID 按系列选择此选项：
+
+| 字段 | 值 |
+| ---------------------------- | ------------------------------------------------ |
+| `spec.series[columnId].as` | `'bar'`（默认）或 `'line'` |
+| `spec.series[columnId].axis` | `'right'` 将序列放在第二个值轴上 |
+
+### 矩阵
+
+`matrix` 是字网格，例如 RACI 矩阵。标签列保存任务，每一列都是一个角色，每个单元格保存一个字母。
+
+```txt
+Task   | Lead | Team | Board
+Plan   | A    | R    | I
+Build  | C    | R    |
+```
+
+每个不同的单元格文本从系列颜色中获取一种颜色。 R、A、C 和我按顺序排在第一位。 ECharts Renderer 绘制一个矩阵。矩阵不能写成 Mermaid。
+
+## 图表的存储方式
+
+图表的属性包含再次绘制图表所需的所有内容：
+
+| 属性 | 内容 |
+| ------------ | ------------------------------------------------------------------------------------------------ |
+| `data` | 图表数据：`columns`（`label` 或 `series` 的 `id`、`label`、`role`）和 `rows` |
+| `spec` | 图表规格，请参阅[图表规格字段](/diagrams/charts/appearance#chart-spec-fields) |
+| `renderer` | 为此图表选择的渲染器的 ID，或默认的 `null` |
+| `source` | 从中读取数据的数据源，或`null` |
+| `delimiter` | 输入数据时使用的分隔符，因此当您再次将其编辑为文本时，数据看起来相同 |
+| `previewUrl` | 可选图像写入 HTML 输出的 URL |
+
+该文档从不存储绘制的图表、在屏幕上绘制的尺寸或其加载状态。您设置的大小存储在 `spec.size` 中。
+
+### 在 HTML 中
+
+图表是 `<figure data-type="chart">`。它的数据是 `<table>`，因此这些数字可以在 HTML 或 Markdown 导出中保留下来，并且屏幕阅读器可以读取它们。它的标题是 `<figcaption>`。图表规范和数据源以 JSON 形式存储在 `<figure>` 上的 `data-tt-chart-*` 属性中，请参阅[数据属性](/diagrams/api-reference/selectors#data-attributes)。
+
+## 命令
+
+### insertChart
+
+在所选内容或 `pos` 处插入图表，然后选择它。
+
+```ts
+editor.commands.insertChart({
+  type: 'bar',
+  data: {
+    columns: [
+      { id: 'month', label: 'Month', role: 'label' },
+      { id: 'revenue', label: 'Revenue', role: 'series' },
+    ],
+    rows: [
+      ['Jan', 120],
+      ['Feb', 150],
+    ],
+  },
+})
+```
+
+| 选项 | 类型 | 描述 |
+| ----------- | --------------------- | ------------------------------------------------------------------------------------------------- |
+| `data` | `ChartData` | 图表数据 |
+| `spec` | `Partial<ChartSpec>` | 图表规格。胜过 `look`，其中都设置了一个字段 |
+| `type` | `ChartType` | `spec.type` |
+| `renderer` 的快捷方式| `string \| null` | 用于绘制的渲染器的 ID。 `null` 使用默认的 |
+| `source` | `ChartSource \| null` | 图表遵循的数据源 |
+| `delimiter` | `string \| null` | 使用 |
+| `pos` | `number` | 要插入的位置。默认为选择 |
+| `look` | `ChartLook` | 图表开头的已保存外观，请参阅 [`applyChartLook`](/diagrams/charts/looks#applychartlook) |
+
+替换选择处的空段落。选择图表后，新图表将跟随它。
+
+### insertChartFrom
+
+插入以注册格式编写的图表。
+
+```ts
+editor.commands.insertChartFrom({
+  format: 'chart-syntax',
+  content: 'Month | Revenue\nJan | 120\nFeb | 150',
+})
+```
+
+| 选项 | 类型 | 说明 |
+| ---------- | ---------------- | --------------------------------------------------------------- |
+| `format` | `string` | `'chart-json'`、`'chart-syntax'`、 `'mermaid'`，或您添加的 |
+| `content` | `string` | 该格式的文本 |
+| `type` | `ChartType` | 类型，当内容不命名时使用|
+| `renderer` | `string \| null` | 使用 |
+| `pos` | `number` 进行绘制的渲染器的 ID | 要插入的位置。默认选择 |
+
+当无法读取内容时返回 `false`。
+
+### importMermaidChart
+
+插入来自 Mermaid 图表源的图表。
+
+```ts
+editor.commands.importMermaidChart({ source: 'pie\n  "Dogs" : 386\n  "Cats" : 85' })
+```
+
+| 选项 | 类型 | 说明 |
+| -------- | -------- | ---------------------------------------------------- |
+| `source` | `string` | Mermaid源 |
+| `pos` | `number` | 插入的位置。默认选择 |
+
+Mermaid 将大多数类型绘制为图表。这五种类型包含数字，因此它们成为带有可编辑数据的图表：
+
+| 第一行 | 图表类型 | 数据 |
+| -------------- | --------------- | ------------------------------------------------------------ |
+| `pie` | `pie` | 每切片一行|
+| `xychart-beta` | `bar` 或 `line` | 每个 x 轴类别一行，每个条形或线条一个系列 |
+| `sankey-beta` | `sankey` | 每流一行：源、目标、值 |
+| `radar-beta` | `radar` | 每轴一行，每曲线一系列。 `min` 和 `max` 保留 |
+| `treemap-beta` | `treemap` | 每个节点一行有一个值，其标签为路径， `A / B` |
+
+- 图表的标题来自 `title`，或者来自 sankey 和树形图的 frontmatter。
+- Mermaid 如何为图表着色（`classDef`、`showLegend`、`ticks`、`graticule`）被省略。
+- `toMermaidSource` 和 `mermaid` 格式将图表恢复为 Mermaid 源。他们写的都是同样的五种。
+- Mermaid的饼图、雷达和树形图没有读取负号，因此它们无法显示低于零的值。当这样的图表写回 Mermaid 时，低于零的饼图切片或树形图节点将被忽略，并且低于零的雷达值将被写入零。
+
+粘贴Mermaid图表源运行此命令，请参阅[粘贴](/diagrams/data/pasting#how-pasted-text-is-read)。
+
+对于任何其他Mermaid 流程图，返回 `false`。
+
+### conversionCodeBlockToChart
+
+将代码块替换为其 [Mermaid 图表源 ](/diagrams/charts/overview#importmermaidchart) 描述的图表。
+
+```ts
+if (editor.can().convertCodeBlockToChart()) editor.commands.convertCodeBlockToChart()
+```
+
+| 选项 | 类型 | 说明 |
+| ------ | -------- | ----------------------------------------------------------- |
+| `pos` | `number` | 代码块内的位置。默认选择 |
+
+其规范中具有 `code: true` 的任何节点都算作代码块。代码块中的 Mod-Enter 也运行该命令，请参阅[代码块中的 Mod-Enter](/diagrams/data/quick-input#mod-enter-in-a-code-block)。
+
+对于保存其他任何内容的代码块，返回 `false`。
+
+### insertDiagramInput
+
+在选择处打开一个空的 [快速输入](/diagrams/data/quick-input)，就像键入 [`trigger`](/diagrams/api-reference/options#trigger) 一样。
+
+```ts
+editor.chain().focus().insertDiagramInput({ type: 'pie' }).run()
+```
+
+| 选项 | 类型 | 说明 |
+| ------ | ----------- | -------------------------------------------------------------------------------------- |
+| `type` | `ChartType` | 快速输入开始时使用的图表类型。默认为 `chart.defaultType` 选项 |
+
+当架构没有 `diagramInput` 节点时，返回 `false`。

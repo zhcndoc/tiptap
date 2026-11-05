@@ -1,0 +1,169 @@
+---
+title: '表格中的图表'
+intro: '您可以将表格绘制为 Mermaid 流程图，每步一行。当您编辑表格时，图表如下。'
+headerDemo:
+  path: '/Extensions/DiagramsFromTable'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '表格中的图表 | Tiptap 图表文档'
+  description: '您可以将表格绘制为 Mermaid 流程图，每个步骤一行。'
+  category: 图表
+---
+
+## 快速入门
+
+这需要 `chart.linkTables` 选项，就像表 ](/diagrams/data/tables) 后面的图表一样。采取此表：
+
+| 步骤 | 下一步 | 团队 | 标签 | 形状 |
+| ----------- | ---------------- | --------- | ----------------- | -------- |
+| | 订单 查看库存 | 销售 | | 开始 |
+| 检查库存 | 包装，延期交货 | 仓库 | 有库存，缺少 | 决定 |
+| 包装 | 发票| 仓库 | | |
+
+将选择放入表中并调用：
+
+```ts
+editor.commands.insertDiagramFromTable({
+  columns: { step: 'Step', next: 'Next', lane: 'Team', label: 'Label', shape: 'Shape' },
+  title: 'Order process',
+})
+```
+
+一次撤消会同时收回对表的编辑和图表的更新。
+
+## 如何读取表格
+
+`columns` 通过标题文本（忽略大小写）或从 0 开始的位置将每个角色映射到列。如果没有 `columns`，扩展程序会根据标题（例如步骤、任务、下一步、然后、团队、所有者、标签、条件和形状）猜测角色。当没有标题名称 `step` 和 `next` 时，它将采用它们的前一个剩余列。它使用每列一次。
+
+| 角色 | 必需 | 单元保持 | 变为 |
+| ------- | -------- | --------------------------------------------------------------------- | -------------------------- |
+| `step` | 是 | 步骤的名称 | 节点|
+| `next` | 是 | 接下来的步骤，以逗号分隔 | 指向这些步骤的箭头 |
+| `lane` | 否 | 通道名称 | 带有步骤的 `subgraph` |
+| `label` | 否 | 箭头标签，以逗号分隔| 箭头上的文本 |
+| `shape` | 否 | 形状名称，请参见 [形状](/diagrams/flow-diagrams/from-table#shapes) | 节点的形状 |
+
+- 仅在`next` 单元格也被绘制。
+- 当计数匹配时，`label` 单元格为每个下一步提供一个标签。否则，每个箭头都会获得整个单元格。
+- 对于 `header: 'none'`，`columns` 必须给出位置。
+
+### 形状
+
+| 形状 | 单元格文本 |
+| ------------- | ------------------------------------- |
+| 方框 | `box`、`rect`、`task` |
+| 圆形框 | `rounded`、`round` |
+| 体育场 | `start`、`end`、`stadium`、`terminal` |
+| 菱形 | `decision`、`diamond`、`gateway` |
+| 圆形 | `circle`、`event` |
+| 平行四边形 | `data` |
+| 气缸 | `database` |
+| 子程序 | `subroutine` |
+
+任何其他文本都会给出一个框。
+
+## 当表格更改时
+
+- **重命名其行中的步骤**也会在每个 `next` 单元格中重命名它，因此其箭头会保留。比较名称时忽略大小写及其周围的空格。
+- **清空步骤单元格**，或为其指定另一个步骤的名称，不是重命名。 `next` 单元保持原样。
+- **更改泳道单元** 将该步骤移动到另一泳道。要重命名每行中的泳道，请使用 [`renameDiagramLane`](/diagrams/flow-diagrams/from-table#renamediagramlane).泳道通过文本进行比较，周围不带空格（包括大小写）。
+- **删除链接名称的列**，使图表保持原样，直到该列返回。
+- **使用 `updateFlowDiagram` 更改源**会结束链接，就像 `detachDiagramFromTable` 一样。
+- **双击形状**不会编辑其文本。文本属于表格。
+
+## 存储在文档中
+
+| 其中 | 什么 |
+| ---------------------------- | --------------------------------------- |
+| 图中的 `options.link` | `{ tableId, columns, header?, range? }` |
+| 表 | A `chartTableId` |
+
+使用 `flowDiagramLink(diagram)` 或 `listDiagrams()` 中的 `link` 读取链接，这也会以 `lanes` 的形式返回通道。 `updateLinkedTable` 更改表的读取方式。
+
+## 命令
+
+### insertDiagramFromTable
+
+在选择处或 `table` 处插入从表格绘制的流程图。
+
+```ts
+editor.commands.insertDiagramFromTable({
+  columns: { step: 'Step', next: 'Next', lane: 'Team' },
+  title: 'Order process',
+})
+
+// A table without a header, without its last row
+editor.commands.insertDiagramFromTable({
+  header: 'none',
+  range: { rows: { to: -2 } },
+  columns: { step: 0, next: 1 },
+})
+```
+
+| 选项 | 类型 | 说明 |
+| --------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `columns` | `{ step, next, lane?, label?, shape? }` | 标题文本或位置从 0 开始。省略时根据标题猜测|
+| `header` | `'none'` | 将每一行作为一个步骤读取。如果没有它，第一行是标题 |
+| `range` | `{ rows }` | 只读取一些行，如 [`insertLinkedChart`](/diagrams/data/tables#insertlinkedchart)。 `range.columns` 不适用 |
+| `table` | `number` | 表的位置。默认为选择处的表格 |
+| `title` | `string` | 图表标题 |
+| `below` | `boolean` | `false` 在表格上方插入图表。默认 `true` |
+
+当命名列不在表中、表少于两列、选择在表外部或 `chart.linkTables` 关闭时，返回 `false`。
+
+### linkDiagramToTable
+
+从表中绘制现有图表，替换其来源，并使其遵循该表。
+
+```ts
+editor.commands.linkDiagramToTable({ table: tablePos, columns: { step: 'Step', next: 'Next' } })
+```
+
+与 `insertDiagramFromTable` 一样，采用 `table`、`columns`、`header?` 和 `range?`，对于所选图表以外的图表则采用 `pos?`。
+
+### detachDiagramFromTable
+
+停止图表跟随其表。源保留下来，您可以对其进行编辑。
+
+```ts
+editor.commands.detachDiagramFromTable({ removeTable: true })
+```
+
+| 选项 | 类型 | 描述 |
+| ------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+| `removeTable` | `boolean` | 还删除表格，除非其后有其他图表或流程图。它的工作原理类似于图表的 `setChartLayout({ layout: 'chart' })` |
+
+对于不跟随表格的图表，返回 `false`。
+
+### renameDiagramLane
+
+重命名表中每一行中的泳道，以及 `range` 之外的行中的泳道。该图遵循相同的撤消步骤。
+
+```ts
+editor.commands.renameDiagramLane({ lane: 'Warehouse', name: 'Warehouse North' })
+```
+
+| 选项 | 类型 | 说明 |
+| ------ | -------- | -------------------------------------------------------- |
+| `lane` | `string` | 通道的当前名称 |
+| `name` | `string` | 新名称 |
+| `pos` | `number` | 图表的位置。默认为选定的图表 |
+
+对于没有表格的图表、没有 `lane` 列的链接、没有单元格名称的泳道以及空 `name`，返回 `false`。
+
+## 不带编辑器
+
+`@tiptap-pro/extension-diagrams/core` 中的这些函数对表的单元格文本执行命令操作，例如在服务器上。 `rows` 是单元格文本，标题行在前，除非 `read.header` 是 `'none'`。
+
+| 函数 | 返回 |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `tableToMermaid(rows, columns, read?)` | 流程图源，或缺少命名列时的 `null` |
+| `guessTableDiagramColumns(header)` | `columns` 从标题行猜测，或者 `null` 少于两列 |
+| `tableStepRenames(before, after, columns, read?)` | `{ renames, firstRow, nextColumn }`。 `renames` 将每个旧名称（小写、修剪）映射到新名称，或者是 `null` |
+| `stepRenameEdits(text, renames)` | `{ from, to, text }` 替换一个 `next` 单元格 |
+| `tableDiagramLanes(rows, columns, read?)` | 通道，按出现顺序排列 |
+| `tableLaneCells(rows, columns, read, lane)` | 标题下方名为 `lane` |

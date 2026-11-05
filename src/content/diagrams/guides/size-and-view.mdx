@@ -1,0 +1,152 @@
+---
+title: '大小和视图'
+intro: "图表或流程图占据编辑器文本的整个宽度，直到您为其指定自己的大小。在此之前，图表的宽高比为 16:9，而图表则保持其绘图的宽高比，高度最多为 640 像素。"
+headerDemo:
+  path: '/Extensions/DiagramsSizeAndZoom'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '尺寸和视图 | Tiptap 图表文档'
+  description: "图表或流程图占据编辑器文本的整个宽度，直到您为其指定自己的大小。"
+  category: 图表
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+## 快速入门
+
+```ts
+// Half the width of the editor's text, at 4:3, stored in the document
+editor.commands.setDiagramSize({ size: { width: 0.5, ratio: 4 / 3, locked: true } })
+
+// 150 % in this editor only
+editor.storage.diagrams.setZoom({}, 1.5)
+```
+
+## 存储什么和不存储什么
+
+文档存储大小和对齐方式。因此，协作者共享它们，并且在重新加载后保留它们。缩放、平移和最大化仅改变一个编辑器显示图表或流程图的方式。它们不被共享，并且在重新加载后就消失了。
+
+## 窄屏幕
+
+在手机上，[`chart.minRenderWidth`](/diagrams/api-reference/options#minrenderwidth) 选项会绘制与大屏幕一样宽的图表，然后将其缩小。比较带有和不带有选项的窄图表：
+
+<CodeDemo isPro viewer view="preview" path="/Extensions/DiagramsNarrowScreens" />
+
+## 查看函数
+
+查看函数位于 `editor.storage.diagrams` 上。每一个都取一个`target`，也就是`{ pos? }`。如果没有 `pos`，函数将作用于选定的图表或流程图。
+
+| 功能 | 作用 |
+| --------------------------------- | ----------------------------------------------------------------- |
+| `setZoom(target, zoom)` | 设置变焦。 `zoom` 是 `number \| 'fit'` |
+| `getZoom(target?)` | 返回缩放，或 `null` |
+| `setPan(target, { x, y })` | 移动缩放其框架内的图表或流程图 |
+| `getPan(target?)` | 返回偏移量 `{ x, y }` 或 `null` |
+| `setMaximized(target, maximized)` | 将图表或流程图置于其上方|
+| `getMaximized()` | 返回最大化图表或流程图的位置，或 `null` |
+| `getShownSize(target?)` | 返回其所在的大小屏幕显示为 `FigureSize` 或 `null` |
+
+这些功能仅适用于屏幕上的图表或流程图。对于不是这样的情况，`set` 函数返回 `false`，`get` 函数返回 `null`。
+
+## 缩放
+
+```ts
+editor.storage.diagrams.setZoom({ pos }, 1.5) // 150 % of the unzoomed size
+editor.storage.diagrams.setZoom({}, 'fit') // the selected chart, back to the unzoomed size
+```
+
+未缩放的大小 `'fit'` 是图表填充其自身宽度的大小。数字是它的一个因子，从 `0.25` 到 `4`。超出该范围的数字将被限制。
+
+放大后，图表保持其高度，您可以在其中滚动。缩小后，占用的空间更少。每个渲染器都可以使用缩放，因为绘制的图表是缩放的，而不是再次绘制。图表的根元素的缩放为 `data-tt-chart-zoom`。
+
+## 平移
+
+```ts
+editor.storage.diagrams.setZoom({ pos }, 2)
+editor.storage.diagrams.setPan({ pos }, { x: 120, y: 40 })
+```
+
+平移在其框架内移动放大的图表或流程图。
+
+- **按住鼠标按钮拖动**可移动它。单击而不移动即可选择它。
+- **`setPan`** 将其从代码中移出。 `x` 和 `y` 是缩放图表或流程图在左侧和顶部移出视图的像素数。
+- **`'fit'`** 将其移回 `0, 0`。
+- **拖动时**，根元素带有 `data-tt-chart-panning` 或 `data-tt-flow-diagram-panning`。
+
+## 最大化
+
+```ts
+editor.storage.diagrams.setMaximized({ pos }, true) // over the window
+editor.storage.diagrams.setMaximized({ pos }, false) // back into the text
+```
+
+最大化的图表覆盖窗口，距窗口边缘的距离为 `--tt-chart-maximized-inset`。图表将以新的尺寸再次绘制，并且其缩放从 `'fit'` 开始。最大化时，其根元素带有 `data-tt-chart-maximized`。
+
+只能最大化一张图表。最大化另一个图表，在编辑器中按 Esc 键，或者删除或移动图表会将其恢复原状。每个更改都会调度一个不更改文档的事务，因此侦听 `transaction` 的工具栏可以更新其按钮。
+
+## 调整手柄大小
+
+使用 [`resizable`](/diagrams/api-reference/options#resizable) 选项，选定的图表或流程图会在编辑器可编辑时显示手柄。手柄位于左右两侧、底部和两个下角。
+
+- **侧手柄**可更改宽度并保持高度。居中的图表或图解在两侧增长。左对齐或右对齐（请参阅[`setDiagramAlign`](/diagrams/guides/size-and-view#setdiagramalign)）仅在手柄的一侧生长。
+- **底部手柄**改变高度。
+- **角手柄**可以改变两者。它保持纵横比，同时尺寸为 `locked: true`。按住 Shift 会起到相反的作用。
+- **接近全宽度**，拖动会捕捉到编辑器文本的边缘。双击手柄即可设置全宽度。
+- **当拖动结束**时，`setDiagramSize` 写入大小，作为撤消步骤。
+
+## 命令
+
+### setDiagramSize
+
+为选定的图表或流程图或 `pos` 处的图表或流程图提供尺寸。
+
+```ts
+editor.commands.setDiagramSize({ size: { width: 0.5, ratio: 4 / 3, locked: true } })
+```
+
+| 选项 | 类型 | 说明 |
+| ------ | -------------------- | ------------------------------------------------------------------------------------ |
+| `size` | `FigureSize \| null` | 大小，请参见下文。 `null` 返回全宽度和自然宽高比 |
+| `pos` | `number` | 图表或流程图的位置。默认为选定的一项 |
+
+`FigureSize` 具有这些字段。超出范围的值将被限制。
+
+| 字段 | 类型 | 描述 |
+| -------- | ------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `width` | `number` | 编辑器文本宽度的一部分，从 `0.1` 到`1` |
+| `ratio` | `number` | 纵横比：绘图区域的宽度除以高度，从 `0.25` 到 `8` |
+| `locked` | `boolean` | 角手柄是否保持纵横比 |
+| `align` | `'left' \| 'center' \| 'right'` | 对齐方式，参见 [`setDiagramAlign`](/diagrams/guides/size-and-view#setdiagramalign)；可选 |
+
+| 其中 | 大小 |
+| --------------- | --------------------------------------------------------------- |
+| 图表 | 在其图表规范中保留为 `size` |
+| 图表 | 以 `size` |
+| 图像导出 | 保持纵横比，并使用导出时的常用宽度 |
+| 字| 将图表或流程图放置在页面宽度的相应部分 |
+| HTML | 在 `<figure>` 元素上变为 `style="width: …%"` |
+
+当没有图表或流程图时，或者当没有图表或流程图时，返回 `false` `size` 不是尺寸。
+
+### setDiagramAlign
+
+将选定的图表或流程图或 `pos` 处的图表或流程图与编辑器文本的 `'left'`、`'center'` 或 `'right'` 对齐。
+
+```ts
+editor.commands.setDiagramAlign({ align: 'right' })
+```
+
+| 选项 | 类型 | 说明 |
+| ------- | ------------------------------- | ------------------------------------------------------------------ |
+| `align` | `'left' \| 'center' \| 'right'` | 对齐方式 |
+| `pos` | `number` | 图表或流程图的位置。默认为选定的一个 |
+
+- **对齐方式存储**，大小为 `align`。 `center`是默认的，不写。
+- **没有自己尺寸的图表或流程图**获取其在屏幕上的尺寸，`getShownSize()` 以及对齐方式。
+- **在全宽**，只有当图表或流程图变窄时您才能看到对齐方式。
+- **HTML** 将对齐作为边距。 **Word** 将其作为包含图表或流程图的段落的对齐方式。
+
+当没有图表或示意图或者未知对齐时，返回 `false`。对于没有自己的大小且不在屏幕上的图表或流程图，它还会返回 `false`，因为该命令从屏幕读取纵横比。

@@ -1,0 +1,438 @@
+---
+title: 白板命令
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板命令 | Tiptap 编辑器文档
+  description: Tiptap Whiteboard 扩展的所有编辑器命令。
+  category: 编辑器
+---
+
+Whiteboard 扩展的所有编辑器命令。 `WhiteboardKit` 将它们全部相加。
+
+- 形状通过其 id 找到。
+- 位置和尺寸以板为单位。
+
+其他文本命令来自套件中的 Tiptap 扩展，例如 `toggleBold`、`setHighlight`、`setLink` 和 `toggleTaskList`。 `setHighlight` 采用白板颜色，与 `setHighlight({ color: 'blue' })` 类似。
+
+## `insertShape`
+
+在所有其他形状前面添加一个形状，其样式来自 [`setShapeStyle()`](#setshapestyle)，除非选项设置了它们。当形状包含文本时将插入符号放入其中，否则选择它。
+
+```js
+editor.commands.insertShape({ type: 'geo', kind: 'ellipse', x: 100, y: 100 })
+```
+
+### 参数 (`InsertShapeOptions`)
+
+- `type` (`string`)：形状的节点类型，如 `geo`、`freeText` 或 `arrow`。
+- `id?` (`string`)：白板上没有形状具有的 id。除非给出，否则生成。
+- 其他属性 (`unknown`)：形状的属性，例如 `x`、`y` 或 `color`。
+
+### 返回 (`boolean`)
+
+`false`，且不会添加任何内容：属性为 `NaN` 或无穷大、`type` 不是形状，或白板上已存在该 ID 的形状。
+
+## `updateShape`
+
+更改具有给定 ID 的形状的属性。与 [`updateShapes()`](#updateshapes) 一样，它会跳过不会改变的内容。
+
+```js
+editor.commands.updateShape({ id: 'note-1', attributes: { color: 'blue' } })
+```
+
+### 参数
+
+- `update` (`ShapeUpdate`)：形状的 id 和要更改的属性。
+
+### 当没有任何变化时，返回 (`boolean`)
+
+`false`。
+
+## `updateShapes`
+
+一步更改多个形状的属性。跳过不在白板上的 id、会更改 id 或保留 `NaN` 或无限数量的更新、形状不具有的属性以及已具有属性的形状。
+
+```js
+editor.commands.updateShapes([
+  { id: 'idea', attributes: { x: 0 } },
+  { id: 'plan', attributes: { x: 300 } },
+])
+```
+
+### 参数
+
+- `updates` (`readonly ShapeUpdate[]`)：每个形状的 id，以及要更改的属性。
+
+### 当没有任何变化时，返回 (`boolean`)
+
+`false`。
+
+## `moveShapes`
+
+移动具有给定 ID 的形状。箭头移动其自由端。
+
+```js
+editor.commands.moveShapes({ ids: ['note-1', 'note-2'], delta: { x: 40, y: 0 } })
+```
+
+### 参数 (`MoveShapesOptions`)
+
+- `ids` (`readonly string[]`)：形状的 id。
+- `delta` (`Point`)：移动它们的距离（以板为单位）。
+
+### 当没有任何移动时，返回 (`boolean`)
+
+`false`。
+
+## `duplicateShapes`
+
+将由 `offset` 移动的具有新 id 的形状副本添加到所有其他形状前面，并选择它们。复制的文档框架从 `docs` 选项获取其文档的副本。复制的框架带有其形状的副本。
+
+```js
+import { getSelectedShapeIds } from '@tiptap-pro/extension-whiteboard'
+
+editor.commands.duplicateShapes({ ids: getSelectedShapeIds(editor.state) })
+```
+
+### 参数 (`DuplicateShapesOptions`)
+
+- `ids` (`readonly string[]`)：形状的 id。
+- `offset?` (`Point`)：副本相对原形状的偏移量，单位为白板坐标。默认值为向右下偏移 24。
+
+### 返回 (`boolean`)
+
+`false`，且不会添加任何内容：白板上没有这些形状，或偏移量为 `NaN` 或无穷大。
+
+## `deleteShapes`
+
+一步删除给定 id 的形状，以及其中框架中的形状。连接已删除形状的箭头会保留下来，并在它们接触的地方有一个自由端。
+
+```js
+editor.commands.deleteShapes(['note-1'])
+```
+
+### 参数
+
+- `ids` (`readonly string[]`)：形状的 id。
+
+### 当白板上没有任何形状时，返回 (`boolean`)
+
+`false`。
+
+## `frameShapes`
+
+将形状放入其周围的新 [frame](/editor/whiteboard/guides/frames) 中，并具有 32 个板单元的空间，并选择框架。另一帧中的形状会移至新帧。框架和箭头不可见。
+
+```js
+editor.commands.frameShapes({ ids: ['note-1', 'note-2'], name: 'Ideas' })
+```
+
+### 参数 (`FrameShapesOptions`)
+
+- `ids` (`readonly string[]`)：要放入框架中的形状的 ID。
+- `id?` (`string`)：新帧的 id。默认为新的。
+- `name?` (`string`)：新帧的名称。如果没有，则显示“框架”。
+
+### 返回 (`boolean`)
+
+`false` 没有可以位于框架中的形状，或者当形状已经具有 id 时。
+
+## `removeFrame`
+
+移除框架并保留其形状在白板上。 `deleteShapes` 将它们与框架一起删除。
+
+```js
+editor.commands.removeFrame('frame-1')
+```
+
+### 参数
+
+- `id` (`string`)：帧的 ID。
+
+### 当板没有带有 id 的帧时，返回 (`boolean`)
+
+`false`。
+
+## `bringToFront`
+
+将形状放在所有其他形状的前面，并保持它们之间的顺序。
+
+```js
+import { getSelectedShapeIds } from '@tiptap-pro/extension-whiteboard'
+
+editor.commands.bringToFront(getSelectedShapeIds(editor.state))
+```
+
+### 参数
+
+- `ids` (`readonly string[]`)：形状的 id。
+
+### 当白板上没有任何形状时，返回 (`boolean`)
+
+`false`。
+
+## `sendToBack`
+
+将形状放在所有其他形状后面并保持它们之间的顺序。
+
+```js
+editor.commands.sendToBack(['note-1'])
+```
+
+### 参数
+
+- `ids` (`readonly string[]`)：形状的 id。
+
+### 当白板上没有任何形状时，返回 (`boolean`)
+
+`false`。
+
+## `insertStickyNote`
+
+在所有其他形状前面添加便签并将插入符号放入其中。注释为黄色，除非 [`setShapeStyle()`](#setshapestyle) 选择其他颜色。
+
+```js
+editor.commands.insertStickyNote({ x: 100, y: 100 })
+```
+
+### 参数 (`InsertStickyNoteOptions`)
+
+- `x` (`number`)：音符左边缘所在位置。
+- `y` (`number`)：钞票顶边所在位置。
+- `width?` (`number`): 默认：`stickyNoteSize` 的宽度，220。
+- `height?` (`number`)：默认：`stickyNoteSize` 的高度，160。
+- `id?` (`string`)：白板上尚未使用的 ID；省略时自动生成。
+
+### 返回 (`boolean`)
+
+`false`，且不会添加任何内容：选项为 `NaN` 或无穷大，或白板上已存在该形状 ID。
+
+## `selectShapes`
+
+选择具有给定 ID 的形状。未知的 ID 将被忽略。
+
+```js
+editor.commands.selectShapes(['idea', 'plan'])
+```
+
+### 参数
+
+- `ids` (`readonly string[]`)：形状的 id，按照选择的顺序排列。
+
+### 返回 (`boolean`)
+
+始终为 `true`。
+
+## `toggleShapeSelection`
+
+将形状添加到选择中，或在已选择形状时将其删除。
+
+```js
+editor.commands.toggleShapeSelection('idea')
+```
+
+### 参数
+
+- `id` (`string`)：形状的 id。
+
+### 返回 (`boolean`)
+
+始终为 `true`。
+
+## `selectAllShapes`
+
+选择白板上的每个形状。
+
+```js
+editor.commands.selectAllShapes()
+```
+
+### 参数
+
+无。
+
+### 返回 (`boolean`)
+
+始终为 `true`。
+
+## `clearShapeSelection`
+
+取消选择所有形状并结束文本编辑，因此按键在白板上起作用。
+
+```js
+editor.commands.clearShapeSelection()
+```
+
+### 参数
+
+无。
+
+### 返回 (`boolean`)
+
+始终为 `true`。
+
+## `editShapeText`
+
+取消选择所有形状并将插入符号放入形状的文本中：当它位于该文本中时，位于 `pos` 处，否则位于末尾处。文档框架开始编辑其文档。 [只读板](/editor/whiteboard/guides/shapes-and-tools#read-only-boards) 选择形状。
+
+```js
+editor.chain().focus().editShapeText({ id: 'note-1' }).run()
+```
+
+### 参数 (`EditShapeTextOptions`)
+
+- `id` (`string`)：形状的 id。
+- `pos?` (`number`)：插入符号在文档中形状文本内部的位置。默认：结束。
+
+### 返回 (`boolean`)
+
+`false` 当没有形状具有 id 时，对于没有文本的形状（如笔线）以及白板上没有 `docs` 的文档框架。
+
+## `focusBoard`
+
+在链交易后聚焦白板或编辑时的文本。与 `focus` 不同，它在文本只读时也可以工作。对于链外的代码，例如工具栏按钮的单击处理程序，请调用 [`focusBoard()` 函数 ](/editor/whiteboard/api-reference/utilities#focusboard)，它会立即聚焦。
+
+```js
+editor.chain().selectShapes(['note-1']).focusBoard().run()
+```
+
+### 参数
+
+无。
+
+### 返回 (`boolean`)
+
+始终为 `true`。
+
+## `selectShapeText`
+
+选择包含所选内容的形状的所有文本。
+
+```js
+editor.chain().editShapeText({ id: 'note' }).selectShapeText().run()
+```
+
+### 参数
+
+无。
+
+### 当没有形状保留所选内容时，返回 (`boolean`)
+
+`false`。虽然白板有键盘，但它返回 `true` 但不选择任何内容，因此首先开始编辑，就像 `editShapeText` 一样。
+
+## `setTextColor`
+
+使用板颜色为所选文本着色。该标记存储颜色的名称，因此您的 CSS 决定它的外观。
+
+```js
+editor.commands.setTextColor('red')
+```
+
+### 参数
+
+- `color` (`ShapeColor`)：白板颜色的名称，如 `red`。
+
+### 当所选文本均无法获取标记时，返回 (`boolean`)
+
+`false`。
+
+## `unsetTextColor`
+
+再次为所选文本提供形状颜色。
+
+```js
+editor.commands.unsetTextColor()
+```
+
+### 参数
+
+无。
+
+### 返回 (`boolean`)
+
+始终为 `true`。
+
+## `setTool`
+
+选择白板上按下的操作，并结束文本编辑，以便按键在白板上起作用。它不会移动焦点：单击工具栏按钮后，调用 [`focusBoard()` 函数 ](/editor/whiteboard/api-reference/utilities#focusboard)。 [只读板](/editor/whiteboard/guides/shapes-and-tools#read-only-boards) 从更改白板的工具返回到`select`。 `doc` 工具需要 [`docs` 选项](/editor/whiteboard/guides/doc-frames)。
+
+```js
+editor.commands.setTool('pen')
+```
+
+### 参数
+
+- `tool` (`Tool`)：该工具，如 `select`、`note` 或 `pen`。
+
+### 返回值（`boolean`）
+
+`doc` 工具所在的白板未启用 `docs` 时返回 `false`，其他工具均返回 `true`。
+
+## `setShapeStyle`
+
+一步给出所选形状或编辑文本的形状样式，以后添加的形状也获得样式。没有样式的形状保持原样。
+
+```js
+editor.commands.setShapeStyle({ name: 'color', value: 'blue' })
+```
+
+### 参数 (`SetShapeStyleOptions<Name>`)
+
+- `name` (`ShapeStyleName`)：样式，如 `color` 或 `fontSize`。
+- `value` (`ShapeStyleValue<Name>`)：其值的名称，如 `blue` 或 `l`。
+
+### 返回 (`boolean`)
+
+始终为 `true`。
+
+## `undoBoard`
+
+撤消上次更改并选择其更改的形状。仅更改文本的撤消操作将返回到编辑该文本。可与 Tiptap 的 `UndoRedo` 和协作配合使用。
+
+```js
+editor.commands.undoBoard()
+```
+
+### 参数
+
+无。
+
+### 返回 (`boolean`)
+
+没有可撤销的更改，或编辑器既未启用 `UndoRedo` 也未启用协作时，返回 `false`。
+
+## `redoBoard`
+
+重做上次撤消的更改并选择已更改的形状。仅更改文本的重做将返回到编辑该文本。
+
+```js
+editor.commands.redoBoard()
+```
+
+### 参数
+
+无。
+
+### 返回值（`boolean`）
+
+没有可重做的更改，或编辑器既未启用 `UndoRedo` 也未启用协作时，返回 `false`。
+
+## `setRemoteSelections`
+
+显示其他用户选择的形状，而不是之前显示的形状。请参阅[协作](/editor/whiteboard/guides/collaboration#show-what-others-select-and-drag)。
+
+```js
+editor.commands.setRemoteSelections([{ color: '#be185d', ids: ['idea'] }])
+```
+
+### 参数
+
+- `selections` (`readonly RemoteSelection[]`)：每个用户选择的形状，以及用户的颜色。
+
+### 返回 (`boolean`)
+
+始终为 `true`。
+
+颜色需要 `#RRGGBB` 形式，并且具有其他颜色的选择不会显示。当多个用户选择一个形状时，将显示第一个具有有效颜色的形状。

@@ -80,7 +80,10 @@ ImportDocx.configure({
 
 请参阅[图像上传配置](/conversion/import/docx/editor-extension#image-upload-configuration)参考，了解所有可用选项。
 
-### 回调处理流程
+当上传标头携带短期令牌时，请将 `imageUploadConfig` 传递给 `importDocx` 命令，以便每次导入都会发送一个新的令牌。请参阅[在每次导入时传递新令牌](/conversion/import/docx/editor-extension#pass-a-fresh-token-on-each-import)。
+
+### Callback process
+This endpoint can be implemented with any web framework or cloud function. The key steps you need to integrate are:
 
 1. **接收文件：** 读取原始请求体，并从 `File-Name` 请求头获取文件名。请参阅[请求内容](#what-the-request-looks-like)。
 2. **存储图像：** 将图像保存到可通过 URL 访问的位置。这可以是 AWS S3 存储桶、Cloudinary 等存储服务，或你服务器上的公共文件夹。为保存的文件生成公共 URL。

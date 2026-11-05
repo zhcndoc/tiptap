@@ -1,0 +1,52 @@
+---
+title: '格式'
+intro: '每个图表都以一种格式存储其源代码，由其 <code>format</code> 属性命名。格式是 Mermaid 文本、draw.io XML、BPMN XML 或您自己的图表渲染器列出的格式。粘贴的文本将在<a href="/docs/diagrams/data/pasting">粘贴</a>中变成什么样子。'
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '格式 | Tiptap 图表文档'
+  description: '每个图表都以一种格式存储其源，由其格式属性命名。'
+  category: 图表
+---
+
+## 格式
+
+| `format` | 源 | 由 |
+| ----------- | ---------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `'mermaid'` | Mermaid文本| mermaid.js 或 Pele，请参阅 [Mermaid 流程图](/diagrams/flow-diagrams/formats#mermaid-diagrams) |
+| `'drawio'` | draw.io XML | Draw.io 图表渲染器，请参阅[draw.io 图](/diagrams/flow-diagrams/formats#drawio-diagrams) |
+| `'bpmn'` | BPMN 2.0 XML 及其布局 | BPMN 图渲染器，请参见 [BPMN 图](/diagrams/flow-diagrams/formats#bpmn-diagrams) |
+| 另一个 id | 按原样存储 | A 图列出它的渲染器，请参阅[其他格式](/diagrams/flow-diagrams/formats#other-formats) |
+
+## Mermaid 流程图
+
+带有 `format: 'mermaid'` 的图保存Mermaid文本，在您键入时存储，但没有 `%%{…}%%` 指令和 frontmatter。请参阅[来源是 data](/diagrams/flow-diagrams/overview#source-is-data)。
+
+```ts
+editor.commands.insertFlowDiagram({ source: 'flowchart LR\n  A --> B', title: 'Order process' })
+```
+
+源以 Mermaid 类型开头，例如 `flowchart` 或 `sequenceDiagram`。 [Mermaid种类](/diagrams/flow-diagrams/overview#mermaid-kinds) 列出了图表可以容纳的每种类型。
+
+请为 Mermaid 源码注册 [`mermaidDiagramRenderer`](/diagrams/renderers/mermaid#diagrams) 或 [`peleDiagramRenderer`](/diagrams/renderers/pele)。[Pele 与 mermaid.js 的比较](/diagrams/renderers/pele#next-to-mermaidjs)介绍了两者的区别。
+
+## draw.io 图表
+
+带有 `format: 'drawio'` 的图表保存draw.io XML。 [draw.io 图渲染器](/diagrams/renderers/drawio) 绘制它并连接draw.io 编辑器，因此您可以更改它。它的页面有一个演示和[源](/diagrams/renderers/drawio#what-a-drawio-source-is)的规则。
+
+```ts
+editor.commands.insertFlowDiagram({ source: drawioXml, format: 'drawio', title: 'Order process' })
+```
+
+## BPMN 图
+
+带有 `format: 'bpmn'` 的图保存 BPMN 2.0 XML 及其布局，按书面形式存储。 [BPMN 图渲染器](/diagrams/renderers/bpmn) 绘制它并连接 bpmn-js 建模器，因此您可以更改它。它的页面有一个演示和源规则。
+
+```ts
+editor.commands.insertFlowDiagram({ source: bpmnXml, format: 'bpmn', title: 'Payment check' })
+```
+
+## 其他格式
+
+您自己的图表渲染器可以绘制自己的格式。 id规则、大小限制以及没有渲染器绘制它时会发生什么都在[您自己的](/diagrams/renderers/custom-diagrams#a-format-of-your-own)格式。

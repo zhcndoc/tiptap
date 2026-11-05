@@ -1,0 +1,91 @@
+---
+title: '粘贴'
+intro: '将 Mermaid、draw.io XML 或 BPMN XML 粘贴到文档时，扩展会把文本转换为流程图。粘贴到所选图表上的行会成为该图表的新数据。<a href="/docs/diagrams/data/quick-input">快速输入</a>也使用相同规则读取文本，并根据行内容生成图表。'
+headerDemo:
+  path: '/Extensions/DiagramsPasteDetection'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '粘贴 | Tiptap 图表文档'
+  description: '当您将 Mermaid、draw.io XML 或 BPMN XML 粘贴到文档中时，扩展程序会将文本转换为图表或流程图。'
+  category: 图表
+---
+
+## 粘贴的文本将变为
+
+| 粘贴的文本 | 变为 |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| 至少两列、符合[图表语法](/diagrams/data/chart-syntax)或 CSV 格式的行 | 未选中图表时按原样粘贴。要据此创建图表，请使用 [`insertFromText`](/diagrams/data/pasting#insertfromtext) |
+| Mermaid 图表，例如 `pie` 或 `sankey-beta` | 带可编辑数据的图表（[`importMermaidChart`](/diagrams/charts/overview#importmermaidchart)） |
+| 其他 Mermaid 类型 | 流程图（[格式](/diagrams/flow-diagrams/formats#mermaid-diagrams)） |
+| draw.io XML 或 BPMN XML | 流程图（[格式](/diagrams/flow-diagrams/formats)） |
+| 选中图表时粘贴的表格行 | 该图表的新数据，参见[粘贴到选中的图表](/diagrams/data/pasting#onto-a-selected-chart) |
+| 任何内容，放入代码块中 | 文本，未更改 |
+
+## 如何读取粘贴的文本
+
+该扩展以三种形式识别粘贴的 Mermaid 文本：
+
+- 纯 Mermaid 文本，周围没有其他内容。
+- 位于 Mermaid 代码围栏中。
+- 作为语言为 `mermaid` 的代码块。
+
+纯 Mermaid 文本必须以类型关键字（例如 `flowchart`）开头，且至少包含两行。因此，以 `pie` 开头的普通句子不会被识别为图表。
+
+包含已保存流程图源码的代码块可通过 [`convertCodeBlockToDiagram`](/diagrams/flow-diagrams/overview#convertcodeblocktodiagram) 或 [Mod-Enter](/diagrams/data/quick-input#mod-enter-in-a-code-block) 转换为流程图。
+
+## 检测您自己的字段中的文本
+
+要了解编辑器之外您自己的字段中的文本将变成什么，请调用 `detectDiagramInput`。
+
+### `detectDiagramInput`
+
+`detectDiagramInput(text, options?)` 返回 `{ kind, source }` 或 `null`。
+
+```ts
+import { detectDiagramInput } from '@tiptap-pro/extension-diagrams'
+
+const detected = detectDiagramInput(text)
+if (detected?.kind === 'mermaid-diagram')
+  editor.commands.insertFlowDiagram({ source: detected.source })
+```
+
+| `kind` | 文本 | 调用命令 |
+| ------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `'mermaid-chart'` | Mermaid 图表，例如 `pie` 或 `sankey-beta`，且至少包含一行数据 | `importMermaidChart({ source })` |
+| `'mermaid-diagram'` | 多行或位于代码围栏中的其他 [Mermaid 类型](/diagrams/flow-diagrams/overview#mermaid-kinds) | `insertFlowDiagram({ source })` |
+| `'drawio'` | `<mxfile>` 或 `<mxGraphModel>` | `insertFlowDiagram({ source, format: 'drawio' })` |
+| `'bpmn'` | BPMN 2.0 `<definitions>` | `insertFlowDiagram({ source, format: 'bpmn' })` |
+| `'chart-syntax'` | 带有分隔符的行，如图表语法或 CSV，至少有两列| `insertChartFrom({ format: 'chart-syntax', content: source })` |
+
+- `source` 是移除了 Mermaid 代码围栏后的文本。
+- 一个句子、一个单独的 Mermaid 关键字和无法读取的 XML 返回 `null`。
+- 如果设置 `delimiters` 或 `decimalSeparator` 选项，请传递与第二个参数相同的值：`detectDiagramInput(text, { delimiters, decimalSeparator })`。
+- 粘贴仅对 Mermaid、draw.io 和 BPMN 使用此函数，因此粘贴的行仍保留行。 [`insertFromText`](/diagrams/data/pasting#insertfromtext) 将其用于每种类型，包括行。
+
+## 到选定的图表上
+
+电子表格应用程序将行复制为由制表符分隔的单元格行。
+
+- **选中图表时**，粘贴的行会替换其数据并保留图表规格，调用 [`updateChartFromGrid`](/diagrams/data/overview#updatechartfromgrid)。
+- **当所选图表为只读时**，粘贴不会发生任何变化。
+- **在其他地方**，行将像没有扩展名一样粘贴。
+
+## 命令
+
+### insertFromText
+
+从文本插入图表或流程图。该命令使用 `detectDiagramInput` 识别文本，并采用编辑器的 `delimiters` 和 `decimalSeparator` 设置。与粘贴不同，它也能根据行数据创建图表。
+
+```ts
+editor.commands.insertFromText({ text: 'Month | Sales\nJan | 2\nFeb | 3' })
+```
+
+| 选项 | 类型 | 说明 |
+| ------ | -------- | ---------------------------------------------------- |
+| `text` | `string` | 粘贴的文本 |
+| `pos` | `number` | 插入的位置。默认选择 |
+
+文本既不是图表数据也不是流程图源码时，返回 `false`。

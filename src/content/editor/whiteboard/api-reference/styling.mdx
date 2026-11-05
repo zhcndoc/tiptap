@@ -1,0 +1,195 @@
+---
+title: 白板样式
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板样式 | Tiptap 编辑器文档
+  description: Tiptap 白板的 CSS，以及用于设置形状和舞台样式的数据属性和 CSS 变量。
+  category: 编辑器
+---
+
+该白板仅添加其工作所需的 CSS。颜色、字体和光标取决于您的应用程序，它使用其元素上的数据属性来设置白板的样式。
+
+## 白板的 CSS
+
+`boardStyles` 保存板工作所需的 CSS：白板的大小及其周围的区域，形状如何保存其文本、轮廓或组件，其他用户的手柄和光标显示的位置，以及框架的哪些部分需要按下。这些规则位于 `whiteboard` 级联层中，因此层外应用程序的 CSS 会覆盖它们。
+
+该白板在其编辑器启动时添加其 CSS，因此 `whiteboard` 层位于您的应用程序之前声明的层（如 Tailwind 的层）之后，并胜过它们。要从这些层覆盖板，请首先声明 `whiteboard` 层：
+
+```css
+/* With Tailwind, before @import 'tailwindcss' */
+@layer whiteboard, theme, base, components, utilities;
+```
+
+文档框架与其文档一样高。它的 `height: auto !important` 还胜过应用程序层外的 `!important` 规则。
+
+白板将此 CSS 添加到页面本身的 `<style data-tiptap-style-whiteboard>` 元素中。它使用编辑的`injectNonce`。使用 `injectCSS: false` 的编辑器将 CSS 留给您的应用程序：
+
+```js
+import { boardStyles } from '@tiptap-pro/extension-whiteboard'
+
+const style = document.createElement('style')
+style.textContent = boardStyles
+document.head.append(style)
+```
+
+形状具有其属性的大小。根据形状内容调整形状大小的应用程序也会在其上设置 `contain: none`。
+
+## 缩放
+
+将 `--zoom` 设置为容纳编辑器的元素上相机的缩放。其他用户的手柄和光标会读取它，以在每次缩放时保持其尺寸。也用它划分您自己的轮廓和边框：
+
+```css
+[data-shape][data-selected] {
+  outline: calc(2px / var(--zoom, 1)) solid #6a00f5;
+  outline-offset: calc(2px / var(--zoom, 1));
+}
+```
+
+## 形状
+
+每个形状元素都有 `data-shape` 和 `data-type`，形状类型为：`sticky-note`、`geo`、`free-text`、`freehand`、`doc-frame`、`frame`、 `board-image` 或 `arrow`。 [自定义形状](/editor/whiteboard/guides/custom-shapes) 具有来自 `shapeNodeView` 的 `data-type`。板元件有`data-type="board"`。
+
+| 属性 | 开 | 说明 |
+| ---------------------- | ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `data-id` | 每个形状 | 形状的 id |
+| `data-color` | 具有颜色的形状 | 其颜色的名称，如 `blue`。自定义形状具有 `color` 属性 |
+| `data-font-size` | 带有文本 | `s`、`m`、`l`、`xl` 或您自己的名称的形状 |
+| `data-text-align` | 带文本的形状 | `start`、`center` 或 `end` |
+| `data-font` | 带文本的形状 | `sans`、`serif`、`mono` 或您自己的名称 |
+| `data-kind` | 几何形状 | `rectangle`、`ellipse`、`diamond` 或 `triangle` |
+| `data-selected` | 选定的形状 | 在选择形状时显示 |
+| `data-editing` | 编辑的形状 | 在其文本或文档时显示|
+| `data-remote-selected` | 其他用户选择的形状 | 当另一个用户选择形状时渲染。该用户的颜色位于 `--remote-selection` |
+| `data-erasing` | 每个形状 | 当橡皮擦即将擦除形状时出现 |
+| `data-arrow-target` | 箭头连接的形状 | 当拖动的箭头末端将连接形状时出现 |
+
+`WhiteboardKit` 的 `shapeElementAttributes` 选项添加您自己的属性，例如 [跟踪更改](/editor/whiteboard/guides/tracked-changes) 的 `data-suggestion-*` 属性。
+
+### 形状的部分
+
+| 选择器 | 描述 |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[data-shape-content]` | 保存形状文本或文档框架文档的元素 |
+| `[data-shape-outline]` | 几何形状文本后面的 SVG 轮廓。它延伸到整个形状 |
+| `[data-shape-handle='resize']` | 位于选定形状一角的调整大小手柄。 `data-corner` 是 `top-left`、`top-right`、`bottom-left` 或 `bottom-right` |
+| `[data-arrow-handle]` | 选定箭头末端的手柄。其值为 `from` 或 `to` |
+| `[data-arrow-label]` | 箭头的标签，位于其线条的中间。如果没有文本，它具有 `data-empty`，并且仅在编辑时显示 |
+| `[data-shape-component]` | 自定义形状的节点视图的元素。它具有形状的大小，其中的 `NodeViewWrapper` 也具有形状的大小 |
+| `[data-shape-interactive]` | 您在自定义形状组件上的标记，这些组件需要自己按下，例如图表的图例 |
+| `[data-frame-title]` | 框架的名称，位于其左上角上方，最大与框架等宽。按下它可以选择并移动框架，双击可以将其重命名为 |
+| `[data-frame-title-field]` | 重命名框架时框架名称中的字段 |
+| `[data-frame-edge]` | 框架上的 SVG，其边缘受到框架边缘的压力。框架的其余部分可让压力穿过白板 |
+
+框架中的形状具有内联 `clip-path`，在未选择时会在框架边缘将其切断。
+
+图像形状包含一个 `img`，它填充整个形状。对于具有与图像不同的比例的形状，例如 `insertShape` 添加了您自己的尺寸的形状，请为 `img` 指定一个 `object-fit`：
+
+```css
+[data-type='board-image'] img {
+  object-fit: cover;
+}
+```
+
+箭头和笔线以当前颜色绘制，因此设置它们的 `color`。几何形状的轮廓是 CSS 填充和描边的路径：
+
+```css
+[data-type='arrow'],
+[data-type='freehand'] {
+  color: var(--stroke);
+}
+
+[data-shape-outline] path {
+  fill: var(--fill);
+  stroke: var(--stroke);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+```
+
+## 颜色
+
+形状、文本颜色和突出显示存储板颜色的名称，因此您的 CSS 决定每个颜色的外观。一种方法是每种颜色有几个变量：
+
+```css
+[data-color='blue'] {
+  --stroke: #0d74ce;
+  --fill: #ebf5ff;
+  --note: #bfe0ff;
+}
+
+[data-type='sticky-note'] {
+  background: var(--note);
+}
+```
+
+文本颜色是 `span` 元素和 `data-color`，并突出显示 `mark` 元素和 `data-color`。所有颜色的样式请参见[示例](/editor/whiteboard/examples/simple)。
+
+要添加您自己的颜色，请将其名称添加到 `WhiteboardKit` 的 `colors` 选项中，并将其样式设置为与其他颜色相同：
+
+```js
+import { shapeColors, WhiteboardKit } from '@tiptap-pro/extension-whiteboard'
+
+WhiteboardKit.configure({ colors: [...shapeColors, 'brand'] })
+```
+
+命令可采用任何名称。该列表决定粘贴的 HTML 保留哪些文本颜色和突出显示：其他文本颜色消失，其他突出显示变为黄色。
+
+## 舞台
+
+`attachStage` 标记舞台，以便您的 CSS 可以显示工具和平移：
+
+| 属性 | 说明 |
+| ----------- | -------------------------------------------------------------- |
+| `data-tool` | 活动工具，如保持空间时的 `select` 或 `pen` |
+| `data-pan` | `ready`，以及板平移时的 `active` |
+
+拖动时运行时，舞台上有一个预览元素：
+
+| 选择器 | 描述 |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `[data-selection-box]` | 选择框拖动 |
+| `[data-shape-preview]` | 工具绘制时的形状框。它的值是工具，如 `note`，`data-color` 保留所选颜色（如果有） |
+| `[data-arrow-preview]` | 箭头工具以当前颜色绘制箭头时的箭头线 |
+| `[data-pen-preview]` | 笔绘制时的线条（以当前颜色）。 `data-color` 保存线条的颜色 |
+
+预览不随白板缩放，因此不需要 `--zoom`：
+
+```css
+[data-selection-box],
+[data-shape-preview] {
+  background: rgba(106, 0, 245, 0.1);
+  border: 1px dashed #6a00f5;
+}
+
+[data-arrow-preview] {
+  color: #6a00f5;
+}
+```
+
+## 其他用户的光标
+
+[`createRemoteCursors`](/editor/whiteboard/api-reference/utilities#createremotecursors) 将光标置于编辑器元素旁边的 `data-remote-cursors` 元素，位于形状上方：
+
+| 选择器 | 描述 |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[data-remote-cursor]` | 光标，其用户颜色为 `--remote-cursor`。一分钟不移动后显示 `data-idle`，移动时显示 `data-leaving`。两者均淡出 |
+| `[data-remote-cursor-arrow]` | SVG 箭头，其尖端位于用户指向的位置 |
+| `[data-remote-cursor-name]` | 用户姓名，位于箭头旁边。如果没有名称，它不会显示 |
+
+仅在缩放暂停一次时设置 `--zoom` 的应用程序可以在 `data-remote-cursors` 元素上立即设置它，以便在板缩放时光标保持其大小。
+
+## 键盘
+
+当按键在白板上起作用时，编辑器元素具有 `data-keyboard="board"`。虽然可以编辑形状的文本，但实际上并没有编辑。当编辑文档框架的文档时，它会保留下来。
+
+## 只读
+
+虽然板为 [只读](/editor/whiteboard/guides/shapes-and-tools#read-only-boards)，但编辑器元素具有 `data-read-only`，并且选定的形状不显示手柄。将其用于承诺更改的光标，例如在形状上移动光标：
+
+```css
+.tiptap[data-read-only] [data-shape] {
+  cursor: default;
+}
+```

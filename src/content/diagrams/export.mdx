@@ -1,0 +1,303 @@
+---
+title: '导出'
+intro: '您可以将图表或流程图导出为 SVG、PNG、WebP 或 JPEG 文件，并将图表和流程图放入 Word 文档中。您还可以用图表的图像替换图表。导出会读取文档并且不会更改任何内容。只有<a href="/docs/diagrams/export#commands">命令</a>可以更改文档。'
+headerDemo:
+  path: '/Extensions/DiagramsExport'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '导出 | Tiptap 图表文档'
+  description: '您可以将图表或流程图导出为 SVG、PNG、WebP 或 JPEG 文件，并将图表和流程图放入 Word 文档中。'
+  category: 图表
+---
+
+## 文件
+
+```ts
+import { downloadBlob } from '@tiptap-pro/extension-diagrams/export'
+
+const { blob, svg, width, height, alt } = await editor.storage.diagrams.export(
+  { pos },
+  { format: 'png', scale: 2, background: '#ffffff' },
+)
+downloadBlob(blob, 'chart.png')
+```
+
+### 导出内容
+
+第一个参数 `target` 是以下之一：
+
+| 目标 | 导出 |
+| --------------------------- | ------------------------------------ |
+| `{ pos? }` | 文档中的图表或流程图 |
+| `{ data, spec, renderer? }` | 无文档中的图表数据 |
+
+通过其图表渲染器绘制图表。 `renderer` 和 `size` 选项不适用于图表。图表的颜色来自 `--tt-flow-diagram-*` 自定义属性。
+
+### 选项
+
+| 选项 | 类型 | 默认 | 说明 |
+| ------------ | ------------------------------------ | --------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `format` | `'svg' \| 'png' \| 'webp' \| 'jpeg'` | `'svg'` | 文件格式 |
+| `scale` | `number` | `2` | 图像的每个 SVG 单元的像素数 |
+| `background` | `string \| null` | `null` | 图表后面的填充 |
+| `renderer` | `string` |图表的 | 使用另一个渲染器绘制 |
+| `theme` | `ChartTheme` | 页面的 | A `ChartTheme` 而不是页面上的自定义属性 |
+| `size` | `{ width: number; height: number }` | `{ width: 800, height: 450 }`，或图表本身的 800 宽 `ratio` | 在 |
+| `scheme` 处绘制的尺寸| `'light' \| 'dark'` | `'light'` | 绘制的颜色方案，无论页面显示什么 |
+
+### 返回的内容
+
+| 字段 | 内容 |
+| ----------------- | ------------------------------------------------- |
+| `blob` | 文件 |
+| `svg` | SVG |
+| `width`、`height` | 绘图的大小 |
+| `alt` | `alt` 属性的标题和说明 |
+| `renderer` | 绘制的渲染器当渲染器绘制像素时使用 |
+| `raster` | `true` |
+
+- **SVG 具有具体颜色**，而不是 `var(…)`，因此它在页面外部看起来相同。
+- **绘制像素的渲染器**，例如在画布上绘制的渲染器，也可以导出。它的 SVG 保存的是图像而不是形状，因此它不会在无损失的情况下进行缩放。请参阅[您自己的渲染器](/diagrams/renderers/custom#members)。
+- **PNG、WebP 和 JPEG 文件**需要浏览器。
+- **ECharts和D3图表的SVG可以在服务器上制作。
+
+`@tiptap-pro/extension-diagrams/export` 还具有 `svgToBlob`、`svgToImage`、`toDataUrl`、`readSvgSize`、`inlineSvgStyles` 和 `rasterToSvg`。
+
+## 字
+
+将图表放入 Word 文档中的方法有以下三种：
+
+| 方式 | Word 文件包含的内容 |
+| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `editor.storage.diagrams.exportDocx()` | 仅图表和流程图，没有文档的其余部分。图表是 Word 可以绘制的原生 Word 图表，图表是图像 |
+| [`toPortableContent`](/diagrams/export#a-whole-document) 和 `ExportDocx` | 的整个文档。每个图表都是图像、表格或两者，每个图表都是图像或其来源 |
+| [`toPortableContent` 和 `charts: 'native'`，然后是 `addNativeCharts`](/diagrams/export#native-word-charts) | 整个文档，带有原生 Word 图表 |
+
+原生 Word 图表是Word 自己绘制的图表。您可以在 Word 中重新设置其样式，然后“编辑数据”会在 Excel 中打开其数据。
+
+### 仅图表和流程图
+
+`exportDocx` 写入仅包含图表和流程图的新 Word 文件：
+
+```ts
+const { blob, notes } = await editor.storage.diagrams.exportDocx({
+  targets: [{ pos }],
+  title: 'Report',
+})
+downloadBlob(blob, 'charts.docx')
+for (const note of notes) console.info(note.title ?? 'All charts', note.message)
+```
+
+| 选项 | 类型 | 描述 |
+| -------------- | -------------------- | ---------------------------------------------------------------------------------------- |
+| `targets` | `ChartTarget[]` | 要按顺序编写的图表和流程图 |
+| `title` | `string` | 图表上方的标题 |
+| `fallbackFont` | `string` | Word 在缺少页面字体时使用的字体。默认 `'Arial'` |
+| `images` | `'auto' \| 'always'` | 当图表变成图像时，请参阅[图表为图像](/diagrams/export#charts-as-images) |
+
+### 文件保存的内容
+
+- **每个目标** 按顺序成为原生 Word 图表，其数据位于嵌入式工作簿、Word 表格或图像中，如下所述。
+- **图表** 变成 PNG 图像，缩放到页面宽度，其标题作为说明文字。
+- **如果没有 `targets`**，该文件将按文档顺序保存每个包含数据且未隐藏在其表格后面的图表以及每个包含源的图表。
+- **当没有什么可写的**，或者什么都不能写时，promise 会被拒绝。
+- **带有 `caption`** 的图表后面是 Word 标题样式的描述。
+- **每个图表和图像**都有其标题和描述作为替代文本。
+- **`matrix`** 成为带有阴影单元格的 Word 表格。
+- **系列颜色和字体**来自页面。请参阅[样式](/diagrams/guides/styling)。
+
+### 图表作为图像
+
+`images` 决定图表何时变为 PNG 图像而不是原生 Word 图表：
+
+| `images` | 图表会变成什么 |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `'always'` | 由其渲染器以图表大小绘制的 PNG 图像 |
+| `'auto'` | Word 图表或 Word 表格（当 Word 具有该类型的表单时）。每个其他类型的图像，在下面的两种情况下 |
+| 省略 | [`docxImages`](/diagrams/api-reference/options#docximages) 选项决定 |
+
+使用 `'auto'`，当字图表显示不同内容时，图表也会变成图像：
+
+- 是 x 轴上有数字的散点图，因为 Word 会均匀地间隔 x 值，
+- 是带有参考线的图表，因为 Word 图表没有参考线。
+
+当无法绘制图像时，例如因为没有渲染器可以绘制图表，则类型为 Word 形式的图表将变为 Word 图表，并带有注释。任何其他类型的图表都会被省略，并附有注释。
+
+### 注释
+
+`notes` 列出了 Word 与编辑器显示的内容不同的内容，每个句子。该扩展程序从图表的数据和图表规格中提取注释，因此您无需打开文件即可获取它们。注释有 `pos`、`title` 和 `message`。注释涵盖：
+
+- Word 缺少的字体 (`pos: null`)、
+- 具有多个系列的饼图或圆环图，Word 仅显示第一个系列、
+- x 轴的范围，Word 忽略该范围，
+- 不是十六进制值的背景、系列或轴颜色，
+- 仅在某些类别上的网格线或标签，Word 将其放置在每个类别中，
+- 省略类别轴线的值网格线，
+- 面积图的边缘系列样式，Word 以自己的线条样式绘制，
+- 仅选择一个渲染器理解，
+- 链接图表在 Word 中保存其数据的快照，
+- `matrix`，这是一个 Word 表格，
+- 一个以图像形式编写的图表，以及为什么当其类型具有 Word 形式时，
+- 一个图表被遗漏，或者写为 Word 图表，因为无法绘制图像。
+- 一个图表，它是 Word 中的图像，或者因为无法绘制而被遗漏。
+
+### 不导出
+
+`@tiptap-pro/extension-diagrams/core` 中的这些函数可以告诉您 Word 获得的内容，而无需写入文件：
+
+| 函数 | 返回 |
+| ---------------------------------------------------------- | --------------------------------------------------------- |
+| `wordForm(type, images?)` | 类型会变成什么：`'chart'`、`'table'` 或 `'image'` |
+| `wordChartForm(data, spec, images?)` | 图表会变成什么：`'chart'`、`'table'` 或 `'image'` |
+| `wordLimitations(data, spec, { theme, source?, images? })` | 与 `notes` 相同的列表，用于一个图表 |
+
+## 整个文档
+
+不知道 `chart` 和 `flowDiagram` 节点的转换器把他们排除在外。 `@tiptap-pro/extension-diagrams/core` 的 `toPortableContent` 返回文档的副本，其中图表和流程图由每个转换器都知道的节点组成，例如表格、图像和段落。改为导出该副本。
+
+此示例使用 `@tiptap-pro/extension-export-docx` 导出副本，将其发送到 Tiptap 的转换服务：
+
+```ts
+import { Editor } from '@tiptap/core'
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+import { toPortableContent } from '@tiptap-pro/extension-diagrams/core'
+import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+
+const file = await new Promise((resolve, reject) => {
+  const exporter = new Editor({
+    element: null,
+    content: toPortableContent(editor.getJSON()),
+    extensions: [
+      ConvertKit,
+      ExportDocx.configure({ token: 'CONVERT_TOKEN', onCompleteExport: resolve, onError: reject }),
+    ],
+  })
+  exporter.commands.exportDocx()
+})
+```
+
+`toPortableContent` 不需要浏览器，因此它也在服务器上运行。 `CONVERT_TOKEN` 是您的 Convert API 令牌。请参阅 export-docx 文档了解其选项。
+
+### 副本包含什么内容
+
+| 在文档中 | 在副本中 |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 图表 | 它的图像，如果有的话，其数据为表格。它的标题位于没有图像的表格上方。它的描述如下，当图表将其显示为标题时 |
+| 隐藏在表格后面的图表 | 什么都没有，因为表格已经在那里 |
+| 图表 | 当 `imageFor` 给出一个时，它的图像。否则，其标题及其源为代码格式的行 |
+| 开放的快速输入 | 其文本为代码格式的行 |
+
+仅当您的应用使用 `uploadImage` 上传图表时，图表才会包含图像，这会设置 `previewUrl`。如果没有它，副本会将图表的数据保存为表格。
+
+`matrix` 单元格的颜色是其 `background` 属性，其文本颜色是 `textStyle` 标记。读取它们的转换器会保留颜色。
+
+### 选项
+
+| 选项 | 值 | 默认值 |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `charts` | `'both'`、`'image'`（图像或表（当没有时）、`'table'` 或 `'native'`（请参阅[原生字图表](/diagrams/export#native-word-charts)） | `'both'` |
+| `imageFor` | `(figure) => url \| null`，图表或流程图的图像。 `figure` 是 `{ kind, attrs }` | 图表的 `previewUrl` |
+| `sources` | `'paragraphs'`，每行一个代码格式的段落，或 `'codeBlock'` | `'paragraphs'` |
+| `names` | 节点名称，例如 `table`、`tableRow`、`tableHeader`、`tableCell`、`paragraph`、`image`、`codeBlock` | StarterKit 和 `@tiptap/extension-table` 提供的节点名称 |
+| `decimalSeparator` | `'.'` 或 `','`（表示表中的数字） | `'.'` |
+| `theme` | `ChartTheme`（表示颜色） `matrix` 图表的单元格 | `defaultChartTheme` |
+
+`'paragraphs'` 将图表源保留在转换器中，省略代码块。选择 `'codeBlock'` 作为写入它们的转换器，例如 Markdown 或 HTML。
+
+### 原生 Word 图表
+
+使用 `charts: 'native'`，Word 绘制的图表类型本身会变成标记线，而不是图像和表格。这些类型包括条形图、折线图、面积图、散点图、饼图、圆环图、雷达图和组合图。任何转换器都可以写入 Word 文件。之后，`addNativeCharts` 将每个标记替换为原生 Word 图表。
+
+```ts
+import { Editor } from '@tiptap/core'
+import { ConvertKit } from '@tiptap-pro/extension-convert-kit'
+import { addNativeCharts, toPortableContent } from '@tiptap-pro/extension-diagrams/core'
+import { ExportDocx } from '@tiptap-pro/extension-export-docx'
+
+const doc = editor.getJSON()
+const exported = await new Promise((resolve, reject) => {
+  const exporter = new Editor({
+    element: null,
+    content: toPortableContent(doc, { charts: 'native' }),
+    extensions: [
+      ConvertKit,
+      ExportDocx.configure({
+        token: 'CONVERT_TOKEN',
+        exportType: 'buffer',
+        onCompleteExport: resolve,
+        onError: reject,
+      }),
+    ],
+  })
+  exporter.commands.exportDocx()
+})
+const docx = addNativeCharts({ docx: exported, doc })
+```
+
+- **其他类型**的写法与 `'both'` 相同。
+- **将您传递给 `toPortableContent` 的同一文档传递给 `addNativeCharts`。它以相同的顺序查找图表。
+- **`addNativeCharts` 还采用 `theme` 和 `fallbackFont`。** `theme` 设置图表的颜色和字体，默认为 `defaultChartTheme`。 `fallbackFont` 是 Word 在缺少主题字体时使用的字体，默认为 `'Arial'`，至于 `exportDocx`。
+- **转换器分割或更改的标记** 保留为文本。
+
+## 命令
+
+### ConvertChartToImage
+
+用图表的图像替换图表。该图像是由 `imageNodeName` 选项命名的类型的节点。
+
+```ts
+editor.commands.convertChartToImage({ format: 'svg', keepData: true })
+```
+
+| 选项 | 类型 | 说明 |
+| ---------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `format` | `'svg' \| 'png' \| 'webp' \| 'jpeg'` | 图像格式。默认 `'png'` |
+| `keepData` | `boolean` | 图像保留图表，因此 [`convertImageToChart`](/diagrams/export#convertimagetochart) 将其带回来。保留，除非 `false` |
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+
+- **上传图像**：通过 `uploadImage` 上传；未提供时，将图像嵌入为数据 URL。
+- **一旦图像准备好，图表就会被替换**，除非图表同时发生变化。
+- **图像以两倍大小导出**，因此在高密度屏幕上保持清晰。
+- **当图像节点具有 `width` 属性**时，如 `@tiptap/extension-image` 一样，该命令将其设置为图表的宽度，并且图像以该尺寸显示。
+
+提供图像 `max-width: 100%`，以便它们在窄屏幕上缩小：
+
+```css
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+}
+```
+
+### ConvertImageToChart
+
+将使用 `keepData` 制作的图像转回到图表中。
+
+```ts
+editor.commands.convertImageToChart()
+```
+
+| 选项 | 类型 | 说明 |
+| ------ | -------- | ---------------------------------------------------- |
+| `pos` | `number` | 图像的位置。默认为所选图像 |
+
+### redrawChartImage
+
+使用当前样式、渲染器和配色方案，从其保留的图表中再次绘制使用 `keepData` 制作的图像。
+
+```ts
+editor.commands.redrawChartImage({ pos })
+```
+
+| 选项 | 类型 | 说明 |
+| -------- | ------------------------------------ | ---------------------------------------------------- |
+| `format` | `'svg' \| 'png' \| 'webp' \| 'jpeg'` | 图像格式。默认 `'png'` |
+| `pos` | `number` | 图像的位置。默认为所选图像 |
+
+- **图像保留**其其他属性及其保留的图表。
+- **一旦新文件准备好，仅其文件、文本和宽度发生变化**，除非图像同时发生变化。
+
+对于不保留图表且没有渲染器绘制其类型的图像，返回 `false`。

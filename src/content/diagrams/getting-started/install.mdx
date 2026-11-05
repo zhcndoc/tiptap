@@ -1,0 +1,156 @@
+---
+title: '安装图表'
+intro: '图表库（例如 ECharts）负责绘制图表。渲染器将 Diagrams 扩展连接到图表库。请为应用使用的每个图表库注册相应的渲染器。'
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '安装 Diagrams | Tiptap 图表文档'
+  description: '安装图表扩展、注册渲染器并插入第一个图表。'
+  category: 图表
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+<Callout title="Alpha" variant="info">
+  Diagrams 目前处于 Alpha 阶段，可通过试点计划申请使用。API 可能会在后续版本中变化。
+</Callout>
+
+## 安装
+
+1. [联系我们的团队](https://tiptap.dev/contact-sales?form=pilot-program) 申请加入 Tiptap Diagrams 试点计划。
+2. 按照 [私有注册表指南](/guides/pro-extensions) 配置您的包管理器。
+3. 安装您使用的每个渲染器的软件包和库：
+
+```bash
+npm install @tiptap-pro/extension-diagrams
+npm install echarts
+```
+
+| 软件包 | 种类 | 版本 |
+| ---------------------------- | ------------------------ | ------------------------------------ |
+| `@tiptap/core`、`@tiptap/pm` |对等依赖关系 | 3.31 或更高版本 |
+| `echarts` | 可选对等依赖关系 | `^6.0.0` |
+| `d3` |可选对等依赖关系 | `^7.9.0` |
+| `d3-sankey` | 可选对等依赖关系 | `^0.12.3`，用于具有 D3 的 sankey 图 |
+| `mermaid` | 可选对等依赖关系 | `>=11.16.1 <12` |
+| `pele` | 可选对等依赖关系 | `1.6.0`，用于 Pele 渲染器 |
+
+以下示例也使用 `@tiptap/starter-kit` 和 `@tiptap/extension-table`。如果您的编辑器还没有它们，也请安装它们。
+
+draw.io 和 BPMN 渲染器会从您提供的文件加载对应的库。请参阅 [draw.io](/diagrams/renderers/drawio) 和 [BPMN](/diagrams/renderers/bpmn)。[渲染器](/diagrams/renderers/overview)页面列出了所有渲染器。
+
+## 第一个图表
+
+在演示中，将行写入文本，将其作为图表插入，然后更改其类型：
+
+<CodeDemo isPro viewer view="preview" path="/Extensions/DiagramsInsertChart" />
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { TableKit } from '@tiptap/extension-table'
+import { Diagrams, chartStyleRules } from '@tiptap-pro/extension-diagrams'
+import { echartsRenderer } from '@tiptap-pro/extension-diagrams/echarts'
+
+const style = document.createElement('style')
+style.textContent = chartStyleRules()
+document.head.append(style)
+
+const editor = new Editor({
+  element: document.querySelector('#editor'),
+  extensions: [
+    StarterKit,
+    TableKit,
+    Diagrams.configure({
+      renderers: [echartsRenderer()],
+      chart: { defaultType: 'bar' },
+    }),
+  ],
+})
+
+editor.commands.insertChartFrom({
+  format: 'chart-syntax',
+  content: 'Month | Revenue\nJan | 120\nFeb | 150\nMar | 110',
+})
+```
+
+编辑器现在拥有一个包含三个条形的条形图，并且该图表已被选中。
+
+- `chartStyleRules()` 返回图表所需的样式表。
+- `TableKit` 是可选的。有了它，您可以将图表转换为表格，然后再转换回来。
+- `chart: { defaultType: 'bar' }` 给出类型为 `bar` 的新图表。请参阅[`defaultType`](/diagrams/api-reference/options#defaulttype)。
+- `chart-syntax` 是[图表语法](/diagrams/data/chart-syntax)：每行输入一条记录，单元格之间用 `|` 分隔。
+
+## 快速输入中的第二个图表
+
+1. 在空段落中键入 `:::` 以打开 [快速输入](/diagrams/data/quick-input)，文档内的文本字段。
+2. 输入 `Apr | 130` 等行。
+3. 在最后一行空行上按 Enter 键。
+
+## 第一个流程图
+
+流程图需要流程图渲染器，例如 Mermaid 渲染器。安装 `mermaid`，然后按 [Mermaid 快速入门](/diagrams/renderers/mermaid#quick-start) 配置渲染器和样式；该页面也介绍了两个资源 URL。
+
+```ts
+import { flowDiagramStyleRules } from '@tiptap-pro/extension-diagrams'
+import { mermaidDiagramRenderer } from '@tiptap-pro/extension-diagrams/mermaid'
+import rendererUrl from '@tiptap-pro/extension-diagrams/mermaid-renderer?url&no-inline'
+import mermaidUrl from 'mermaid/dist/mermaid.min.js?url'
+
+style.textContent = chartStyleRules() + flowDiagramStyleRules()
+
+// In the editor from A first chart
+Diagrams.configure({
+  renderers: [echartsRenderer()],
+  diagramRenderers: [mermaidDiagramRenderer({ mermaidUrl, rendererUrl })],
+  chart: { defaultType: 'bar' },
+})
+```
+
+然后插入 Mermaid 流程图：
+
+```ts
+editor.commands.insertFlowDiagram({
+  source: 'flowchart LR\n  order[Order placed] --> ship[Shipped]',
+  title: 'Order flow',
+})
+```
+
+## 更改它
+
+现在选择您上次插入的图表。单击 [第一个图表](/diagrams/getting-started/install#a-first-chart) 中的条形图将其选中，然后运行：
+
+```ts
+editor.commands.updateChartSpec({ spec: { type: 'line', title: 'Revenue' } })
+editor.commands.updateChartAxis({ axis: 'y', changes: { title: 'EUR', min: 0 } })
+```
+
+图表规范保存图表显示其数据的方式，例如其类型、标题、颜色和轴。这两个命令都会更改选定的图表。如果没有选定的图表，它们不会进行任何更改并返回 `false`。
+
+每项更改都是一个[命令](/diagrams/api-reference/commands)，可以撤销，也会同步给协作者。AI 模型通过调用这些命令的[工具](/diagrams/guides/ai)来更改图表和流程图。
+
+## 入口点
+
+每个渲染器都是其自己的包入口点。然后，您的捆绑包仅包含您使用的库。
+
+| 入口点 | 内容 |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `@tiptap-pro/extension-diagrams` | `Diagrams`、节点和命令、AI 工具、数据源、导出功能及样式 |
+| `@tiptap-pro/extension-diagrams/core` | 图表数据类型、解析器、格式和 Word 导出器；无需 Tiptap 或 DOM，可在服务器或 Web Worker 中运行 |
+| `@tiptap-pro/extension-diagrams/export` | 在浏览器中将 SVG 转换为 PNG 或 WebP，也可下载图像 |
+| `@tiptap-pro/extension-diagrams/theme` | 在浏览器中从 CSS 自定义属性读取图表和流程图颜色 |
+| [`@tiptap-pro/extension-diagrams/echarts`](/diagrams/renderers/echarts) | 使用 ECharts 绘制的图表 |
+| [`@tiptap-pro/extension-diagrams/d3`](/diagrams/renderers/d3) | 使用 D3 绘制的图表 |
+| [`@tiptap-pro/extension-diagrams/mermaid`](/diagrams/renderers/mermaid) | 使用 Mermaid 绘制的图表和流程图 |
+| [`@tiptap-pro/extension-diagrams/drawio`](/diagrams/renderers/drawio) | draw.io 图表 |
+| [`@tiptap-pro/extension-diagrams/bpmn`](/diagrams/renderers/bpmn) | BPMN 流程模型 |
+| [`@tiptap-pro/extension-diagrams/pele`](/diagrams/renderers/pele) | 使用 Pele 在 Web Worker 中绘制 Mermaid 流程图；Pele 的体积小于 mermaid.js |
+
+## 后续阅读
+
+- [数据](/diagrams/data/overview)：键入行、表格和数据源
+- [图表](/diagrams/charts/overview)：类型、外观、轴、参考线
+- [流程图](/diagrams/flow-diagrams/overview)：Mermaid、draw.io 和 BPMN
+- [样式](/diagrams/guides/styling)：颜色、深色模式和自定义类

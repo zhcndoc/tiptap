@@ -1,0 +1,211 @@
+---
+title: '数据源'
+intro: '图表可以从数据源、图表外部的位置获取数据：URL 处的 CSV 或 JSON 文件、同一文档中的表格或您编写的提供程序。'
+headerDemo:
+  path: '/Extensions/DiagramsDataSources'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '数据源 | Tiptap 图表文档'
+  description: '图表可以从数据源（图表外部的位置）获取数据。'
+  category: 图表
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+该图表存储**地址**（表示数据的来源）和**快照**（上次读取的数据的副本）。该图表是从快照中绘制的，因此它是在导出时离线绘制的，并且适合无法到达源的人员。
+
+## 快速入门
+
+```ts
+editor.commands.linkChartSource({
+  provider: 'url-csv',
+  address: { url: 'https://example.com/sales.csv' },
+  readOnly: true,
+})
+```
+
+## 存储在文档中
+
+| 属性 | 什么 |
+| ---------- | --------------------------------------------------------------- |
+| `source` | `{ provider, address, mode, readOnly }` |
+| `syncedAt` | 上次从源获取数据的 ISO 时间，或者 `null` |
+
+`listCharts()` 报告两者。
+
+## 链接或分离
+
+`mode`、`'linked'` 或 `'detached'`，表示图表是否遵循其源。
+
+**已链接** (`mode: 'linked'`)。快照由 `linkChartSource`、`syncChartData`、`requestSync`、`relinkChartSource` 以及使用 `subscribe` 推送更改的提供程序从源读取（请参阅[编写提供程序](/diagrams/data/sources#writing-a-provider)）。在两者之间，图表显示了最后一个快照。与 `readOnly: false` 链接的图表也可以手动编辑。
+
+**分离** (`mode: 'detached'`)。 `detachChartSource` 停止跟踪源并保留快照和地址，以便您可以再次编辑数据。 `relinkChartSource` 再次跟踪源并将数据替换为源返回的数据。
+
+## 只读
+
+`readOnly` 是一个单独的标志。它仅在图表链接时有效。使用 `readOnly: true`，更改数据的命令会返回 `false`，因此下次同步永远不会覆盖本地编辑。图表规格保持可编辑状态。分离会使标志保持原样，并且当您重新链接时它会再次起作用。
+
+## 仅显示部分列
+
+同步将替换所有列。要仅显示其中一些，请设置 [`encoding`](/diagrams/data/overview#which-columns-are-drawn) 和 `updateChartSpec`。它在每次同步中都存在。
+
+```ts
+editor.commands.updateChartSpec({ spec: { encoding: { label: 'region', series: ['revenue'] } } })
+```
+
+## 当图表同步时
+
+同步读取源并将新快照写入图表。
+
+- **快照不包含在撤消历史记录中**，因此撤消永远不会与您的编辑一起收回同步。
+- **每次同步都会设置 `syncedAt`**，当数据相同时也是如此。然后，该文档会记录上次检查数据的时间。在版本比较中，这算作更改，请参阅 [Versions](/diagrams/guides/versions).
+- **当无法读取源时**，图表将保留其快照。扩展调用 `onSourceError` 选项并显示错误和 `{ provider, address }`。
+- **每个同步客户端都需要注册提供程序。** 没有它的客户端会显示快照并且无法读取源。
+
+要同步读取 URL 的每个图表：
+
+```ts
+await editor.storage.diagrams.requestSync({ provider: 'url-csv', address: { url } })
+```
+
+该扩展程序不会按计划同步。例如，您的应用程序可以使用 `setInterval`。请遵守您所阅读的服务的限制。
+
+## 内置提供程序
+
+| 提供程序 | 地址 | 通过以下方式读取 |
+| ---------------- | ------------------------- | ------------------------------------------------------------ |
+`url-csv` | `{ url }` 或 URL 字符串 | CSV `fetch` 选项 |
+| `url-json` | `{ url }` 或 URL 字符串 | JSON：对象数组、数组数组或图表数据 |
+| `document-table` | `{ tableId }` | 同一文档中的表格 |
+
+### 读取 URL
+
+URL 必须是绝对的，并使用 `http:` 或 `https:`。当您设置 [`allowSourceUrl`](/diagrams/api-reference/options#allowsourceurl) 选项时，URL 也必须传递它。服务器必须允许您的应用程序的网页读取该文件 (CORS)。已发布的 Google 表格可以做到这一点。
+
+读取失败，图表保留其数据，在这些情况下：
+
+- 该地址不是这样的 URL。
+- 服务器以错误状态应答。
+- 请求被阻止。
+- 答案是 HTML 页面而不是文件。许多主机向他们不知道的地址发送状态为 200 的邮件。
+
+### 读取表格
+
+文档中表格后面的图表使用 `document-table`，请参阅[表格](/diagrams/data/tables)。
+
+## 编写提供程序
+
+读取天气 API 并用接下来的 7 天填充图表的提供程序：
+
+<CodeDemo isPro viewer view="preview" path="/Extensions/DiagramsCustomSource" />
+
+提供程序是具有 `id` 和 `read` 函数的对象。将其传递到 `sources` 选项中，或在运行时使用 `editor.storage.diagrams.registerSource(provider)` 添加：
+
+```ts
+import type { ChartSourceProvider } from '@tiptap-pro/extension-diagrams'
+
+const salesApi: ChartSourceProvider = {
+  id: 'sales-api',
+  read: async (address, { fetch }) => {
+    const { region } = address as { region: string }
+    const response = await fetch(`/api/sales?region=${encodeURIComponent(region)}`)
+    const rows: { month: string; total: number }[] = await response.json()
+    return {
+      columns: [
+        { id: 'month', label: 'Month', role: 'label' },
+        { id: 'total', label: 'Total', role: 'series' },
+      ],
+      rows: rows.map((row) => [row.month, row.total]),
+    }
+  },
+  describe: (address) => `Sales, ${(address as { region: string }).region}`,
+}
+```
+
+| 成员 | 必需 | 说明 |
+| --------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `id` | 是 | 什么图表存储为 `provider` |
+| `read(address, context)` | 是 | 返回图表数据或其 Promise。抛出以报告错误 |
+| `subscribe(address, onChange, context)` | 否 | 对于推送更改的源：使用每个新状态调用 `onChange(data)` 并返回停止 |
+| `describe(address)` 的函数| 否 | 用户界面的标签 |
+
+- `context` 具有 `fetch`、`decimalSeparator` 和 `editor`。当您的应用程序设置 `allowSourceUrl` 时，它也会设置 `allowUrl`。
+- 要报告错误，请抛出带有人们可以阅读的消息的 `ChartSourceError`。
+- 该扩展程序为每个链接地址保留一个订阅，并将每个更改写入与其链接的每个图表中。
+
+文档存储地址并与打开该文档的每个人共享该地址。切勿将凭据放入其中。当您创建提供程序时，需要密钥或令牌的提供程序将从您的应用程序中获取它。
+
+[Google Sheets、Excel 和 Airtable](/diagrams/guides/spreadsheets) 为每项服务都有一个提供程序，以及每项服务需要设置的内容。
+
+## 命令
+
+### linkChartSource
+
+将图表链接到数据源。
+
+```ts
+editor.commands.linkChartSource({
+  provider: 'url-csv',
+  address: { url: 'https://example.com/sales.csv' },
+  readOnly: true,
+})
+```
+
+| 选项 | 类型 | 描述 |
+| ---------- | ----------- | ---------------------------------------------------------------------------------------------- |
+| `provider` | `string` | 已注册提供商的 ID，例如 `'url-csv'` |
+| `address` | `unknown` | 提供程序以期望的形式读取的位置 |
+| `readOnly` | `boolean` | 链接时，数据仅通过源更改。默认 `false` |
+| `data` | `ChartData` | 第一个快照。如果没有它，则在源到达时读取源并写入快照 |
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+
+对于未知提供者返回 `false`。
+
+### syncChartData
+
+写入新快照。
+
+```ts
+editor.commands.syncChartData({
+  source: { provider: 'url-csv', address: { url: 'https://example.com/sales.csv' } },
+})
+```
+
+| 选项 | 类型 | 说明 |
+| -------- | ----------------------- | -------------------------------------------------------------------- |
+| `data` | `ChartData` | 新快照。如果没有它，则首先读取源 |
+| `source` | `{ provider, address }` | 写入链接到该源的每个图表。如果没有它，一张图表 |
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+
+返回没有匹配图表的 `false`，或者对于没有源的图表，不返回 `data`。
+
+### detachChartSource
+
+停止跟踪源，并保留快照和地址。
+
+```ts
+editor.commands.detachChartSource()
+```
+
+| 选项 | 类型 | 描述 |
+| ------ | -------- | ---------------------------------------------------- |
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+
+对于没有源的图表，返回 `false`。
+
+### relinkChartSource
+
+再次跟踪源并读取它。
+
+```ts
+editor.commands.relinkChartSource()
+```
+
+| 选项 | 类型 | 描述 |
+| ------ | -------- | ---------------------------------------------------- |
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+
+对于没有源的图表，返回 `false`。

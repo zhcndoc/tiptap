@@ -1,0 +1,97 @@
+---
+title: 'Pele 渲染器'
+intro: '入口点 <code>@tiptap-pro/extension-diagrams/pele</code> 使用 Obsidian 的 Mermaid 渲染器 <a href="https://pele.run">Pele</a> 绘制 Mermaid 图。 Pele 使用 Web Worker 进行绘制，不需要 DOM 和沙盒 iframe。它的加载量比 mermaid.js 小大约 5 倍。它绘制了图表中包含的每一种Mermaid，但没有图表。'
+headerDemo:
+  path: '/Extensions/DiagramsPele'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 'Pele 渲染器 | Tiptap 图表文档'
+  description: '入口点 @tiptap-pro/extension-diagrams/pele 使用 Pele（Obsidian 的 Mermaid 渲染器）绘制 Mermaid 图。'
+  category: 图表
+---
+
+## 快速入门
+
+```bash
+npm install pele@1.6.0
+```
+
+```ts
+import { Diagrams } from '@tiptap-pro/extension-diagrams'
+import { peleDiagramRenderer } from '@tiptap-pro/extension-diagrams/pele'
+import PeleWorker from '@tiptap-pro/extension-diagrams/pele-worker?worker'
+
+Diagrams.configure({
+  diagramRenderers: [peleDiagramRenderer({ worker: () => new PeleWorker() })],
+})
+```
+
+`pele` 是可选的对等依赖项，固定到 1.6.0。它的标记在版本之间发生变化，并且在图表中编辑会读取该标记。
+
+Worker 是入口点 `@tiptap-pro/extension-diagrams/pele-worker`。使用捆绑器的 Worker 导入来加载它。 `?worker`是Vite形式。
+
+只有 Worker 加载 Pele 并注册 25 个[Mermaid种类](/diagrams/flow-diagrams/overview#mermaid-kinds)。您的页面仅加载入口点 `@tiptap-pro/extension-diagrams/pele`。 `PELE_DIAGRAM_KINDS` 列出了种类。 `peleDrawsDiagram(source)` 是渲染器的 `draws` 函数。
+
+## 选项
+
+| 选项 | 类型 | 说明 |
+| -------- | ---------------------- | ------------------------------------------------------------------------------------------ |
+| `worker` | `() => PeleWorkerPort` | 必需。为第一个图表启动一次 Worker。 `Worker` 是 `PeleWorkerPort` |
+| `id` | `string` | 默认 `'pele'` |
+| `label` | `string` | 默认 `'Mermaid (Pele)'` |
+
+## 紧邻 mermaid.js
+
+该文档为两者存储相同的 Mermaid 源。仅绘图不同。将两者之一注册为 `mermaid` 格式，因为格式的第一个图表渲染器会绘制它。
+
+| | mermaid.js | Pele |
+| --------------------------- | ----------------------------------------- | -------------------------------------- |
+| 绘制 | 沙盒 iframe | Web Worker |
+| 大小，gzipped | 约 980 kB | 约 205 kB，在 Worker 中 |
+| 种类 | 列表的每种 | 相同 |
+| 边 | 曲线 | 直线，成直角 |
+| 旅程 | 时间线下的面 | 分数为线 |
+| 思维导图 |径向 | 两侧的树 |
+| 图表中的文本编辑 | 双击，每种有文本的类型 | 相同 |
+| 拖动形状 | 流程图| 相同 |
+| 在服务器上 | 需要浏览器 | 在 Node 中运行，带有 `renderPeleDiagram` |
+
+## 它如何绘制
+
+- **链接和图像**源被丢弃。 `click … href` 和 `@{ img: … }` 不绘制任何内容。
+- **颜色**来自 `--tt-flow-diagram-*` 自定义属性，与 mermaid.js 一样。 Pele 将它们写入 SVG。 `toPeleVariables(theme)` 列出映射。
+- **图表**显示在 `<img>` 中，就像每个图表一样。
+- **没有 `foreignObject`。** 标签是 SVG 文本，因此 PNG、WebP 和 Word 导出不需要任何额外内容。
+- **不解析的源**显示 Pele 消息的错误状态。
+- **失败的 Worker** 会拒绝等待它的每个图表。下图启动一个新的 Worker。
+
+## 在服务器上
+
+入口点 `@tiptap-pro/extension-diagrams/pele-render` 在 Node 或您自己的 Worker 中在没有页面的情况下进行绘制：
+
+```ts
+import { defaultDiagramTheme } from '@tiptap-pro/extension-diagrams/core'
+import { renderPeleDiagram } from '@tiptap-pro/extension-diagrams/pele-render'
+
+const { svg, width, height } = renderPeleDiagram({
+  format: 'mermaid',
+  source: 'flowchart LR\n  A --> B',
+  theme: defaultDiagramTheme,
+})
+```
+
+在没有画布的情况下，文本宽度来自 Pele 的内置字体指标。因此，图表可以比浏览器中的图表宽或窄几个像素。
+
+Word 需要在 SVG 旁边放置 PNG。使用 resvg 等光栅器将 SVG 转换为 PNG。
+
+## 在图表中编辑
+
+`peleDiagramEditing` 在 Pele 的 SVG 中查找文本和形状，就像 `mermaidDiagramEditing` 对 mermaid.js 所做的那样。参见[图中编辑](/diagrams/renderers/custom-diagrams#editing-in-the-diagram)。
+
+- **双击**将打开与 mermaid.js 相同的文本。请参阅[双击编辑](/diagrams/flow-diagrams/editing#what-a-double-click-edits)。
+- **拖动流程图的形状**会存储与使用 mermaid.js 进行拖动相同的偏移量。
+- **移动形状的边缘**在边界之间绘制为直线。他们的箭头随着他们转动，他们的文字位于中间。
+- **其他所有内容都保留在 Pele 绘制的位置**，包括子图的框架。贝利没有再次绘制图表。

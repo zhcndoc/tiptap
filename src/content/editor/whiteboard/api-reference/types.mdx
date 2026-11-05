@@ -1,0 +1,364 @@
+---
+title: 白板类型
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板类型 | Tiptap 编辑器文档
+  description: Tiptap Whiteboard 扩展的 TypeScript 类型。
+  category: 编辑器
+---
+
+从 `@tiptap-pro/extension-whiteboard` 导入相机、形状、工具、样式、文档框架、白板文件和图像的 TypeScript 类型。
+
+`Editor` 来自 `@tiptap/core`，`UndoRedoOptions` 来自 `@tiptap/extensions`。 `ProseMirrorNode` 是 `@tiptap/pm/model` 的 `Node`。
+
+## `Camera`
+
+白板在舞台上显示的位置。
+
+### 属性
+
+- `x` (`number`)：以屏幕像素为单位。
+- `y` (`number`)：以屏幕像素为单位。
+- `zoom` (`number`)：缩放，其中 1 表示 100%。
+
+## `UpdateCamera`
+
+类型：`(update: (camera: Camera) => Camera) => void`。通过更新函数更改相机，例如 React 状态设置器。
+
+## `Point`、`Rect` 和 `Size`
+
+### `Point`
+
+一个点，`x` 位于右侧，`y` 位于下方。
+
+- `x` (`number`)
+- `y` (`number`)
+
+### `Rect`
+
+一个矩形，从左上角开始。
+
+- `x` (`number`)
+- `y` (`number`)
+- `width` (`number`)
+- `height` (`number`)
+
+### `Size`
+
+宽度和高度。
+
+- `width` (`number`)
+- `height` (`number`)
+
+## `Insets`
+
+舞台每个边缘的空间（以屏幕像素为单位）。采用插入的选项也为每条边采用一个数字。
+
+### 属性
+
+- `top` (`number`)
+- `right` (`number`)
+- `bottom` (`number`)
+- `left` (`number`)
+
+## `ShapeAttributes`
+
+形状的属性。位置和尺寸以板为单位。
+
+### 属性
+
+- `id` (`string | null`)：白板上唯一。
+- `x` (`number`)
+- `y` (`number`)
+- `width` (`number`)
+- `height` (`number`)
+- `zIndex` (`string | null`)：分数索引：具有较高索引的形状在前面。
+- `frameId` (`string | null`)：形状所在的 [frame](/editor/whiteboard/guides/frames)，或 `null`。当形状移入和移出时，板会保持它。
+- `color` (`string`)：白板颜色的名称，如 `yellow`。
+- `kind?`（`GeoKind`）：几何形状的一种，名字来自`geoKinds`。
+
+箭头没有框，但有末端，请参阅 [`ArrowEndAttributes`](#arrowendattributes)、样式 `arrowheads`、`arrowheadKind`、`arrowKind` 和 `dash`，以及 `fontSize` 和 `font` 的标签。文档框架没有 `color`，但有 `docId`。框架没有 `color` 和 `frameId`，但有 `name`。图像没有 `color`，但有 `src`（图像的 URL）和 `alt`（屏幕阅读器的文本）。带文本的形状还具有 `fontSize`、`textAlign` 和 `font` 样式，请参阅 [`ShapeStyles`](#shapestyles)。笔线还有`points`和`strokeWidth`。
+
+## `ShapeGeometry`
+
+类型：`Pick<ShapeAttributes, 'x' | 'y' | 'width' | 'height'>`。形状的盒子，以板为单位。
+
+## `ArrowEndAttributes`
+
+箭头端点所在的位置。白板上带有形状 id 的一端遵循该形状。否则它是免费的并且处于它的点上。
+
+### 属性
+
+- `fromId` (`string | null`)
+- `toId` (`string | null`)
+- `fromX` (`number`)
+- `fromY` (`number`)
+- `toX` (`number`)
+- `toY` (`number`)
+- `fromAnchorX`、`fromAnchorY`、`toAnchorX` 和 `toAnchorY` (`number`)：连接端瞄准其形状的盒子时，从左侧或顶部的 0 到右侧或底部的 1。线条停在形状的轮廓处。曲线或肘线穿过最靠近它的一侧，除非它位于两个轴上盒子的中半部分。默认值：`0.5`，中间。
+
+## `ShapeUpdate`
+
+对一个形状的属性的更改。更新可以更改形状的任何属性（id 除外）。
+
+### 属性
+
+- `id` (`string`)
+- `attributes` (`ShapeUpdateAttributes`)
+
+### `ShapeUpdateAttributes`
+
+类型：`Partial<Omit<ShapeAttributes, 'id'> & ArrowEndAttributes & ShapeStyles & { points: string; strokeWidth: number; docId: string }> & { [attribute: string]: unknown; id?: never }`。
+
+`points` 和 `strokeWidth` 是笔线的文档，`docId` 是文档框架的文档。 [自定义形状](/editor/whiteboard/guides/custom-shapes) 可以有自己的属性，就像图表的数据一样。
+
+## `Tool`、`ShapeTool` 和 `ToolKeys`
+
+### `Tool`
+
+类型：`'select' | 'hand' | 'eraser' | ShapeTool`。按下白板上的功能：选择形状、平移板、擦除形状或添加形状。
+
+### `ShapeTool`
+
+类型：`'note' | 'text' | 'doc' | 'rectangle' | 'ellipse' | 'diamond' | 'pen' | 'arrow' | 'frame'`。 `ShapeTool` 增添了同类形状。
+
+### `ToolKeys`
+
+类型：`Readonly<Partial<Record<Tool, string | null>>>`。选择每个工具的关键。 `null` 留下的工具没有钥匙。请参阅[`toolKeys`](/editor/whiteboard/api-reference/utilities#toolkeys)。
+
+## `GeoKind` 和 `ShapeColor`
+
+### `GeoKind`
+
+类型：`(typeof geoKinds)[number]`，即 `'rectangle' | 'ellipse' | 'diamond' | 'triangle'`。一种几何形状，来自`geoKinds`。
+
+### `ShapeColor`
+
+类型：`(typeof shapeColors)[number] | (string & {})`。白板颜色的名称：`shapeColors` 中的一种，例如 `'black'` 或 `'red'`，或者您自己的一种。请参阅[颜色](/editor/whiteboard/api-reference/styling#colors)。
+
+## `ShapeStyles`
+
+类型：`{ [Name in ShapeStyleName]: ShapeStyleValue<Name> }`。形状的样式来自`shapeStyles`。 `ShapeStyles` 每种风格都有一个值。
+
+### `ShapeStyleName`
+
+类型：`keyof typeof shapeStyles`，即 `'color' | 'fontSize' | 'textAlign' | 'font' | 'arrowheads' | 'arrowheadKind' | 'arrowKind' | 'dash'`。样式的名称，例如 `color` 或 `fontSize`。
+
+### `ShapeStyleValue`
+
+类型：`(typeof shapeStyles)[Name][number] | (string & {})` 用于 `color`、`fontSize` 和 `font`，`(typeof shapeStyles)[Name][number]` 用于其他样式，其中 `Name extends ShapeStyleName`。样式值的名称，例如 `color` 的 `blue`。颜色、字体大小和字体也可以使用您自己的名称，因为只有您的 CSS 才能赋予它们外观。
+
+## `ShapeElementAttributes`
+
+类型：`(node: ProseMirrorNode) => Record<string, unknown>`。从形状的节点返回形状元素的额外属性。值变成字符串，`null` 或 `undefined` 会留下一个属性。
+
+## `WhiteboardKitOptions`
+
+`WhiteboardKit` 的选项。请参阅[扩展](/editor/whiteboard/api-reference/extensions#whiteboardkit)。
+
+### 属性
+
+- `undoRedo` (`Partial<UndoRedoOptions> | false`)
+- `shapeElementAttributes` (`ShapeElementAttributes | null`)
+- `docs` (`BoardDocs | null`)
+- `images` (`BoardImages | null`)
+- `colors` (`readonly ShapeColor[]`)
+- `toolKeys` (`ToolKeys | false`)
+
+`BoardOptions`，`Board` 的选项，有`shapeElementAttributes`、`docs` 和 `images`。 `BoardStorage` 是白板保留在 `editor.storage.board` 中的内容，请参阅[Extensions](/editor/whiteboard/api-reference/extensions#storage-boardstorage)。
+
+该套件将 `colors` 和 `toolKeys` 传递到其扩展。 `BoardTextColorOptions`，`BoardTextColor`的选项，有`colors`。 `BoardHighlightOptions`，`BoardHighlight`的选项，有`colors`和Tiptap的Highlight的`HighlightOptions`。 `ShapeSelectionOptions`，`ShapeSelection`的选项，有`toolKeys`。
+
+## `BoardDocs`
+
+文档框架的文档所在的位置，例如本地存储或 Tiptap Cloud。该应用程序提供了它，因此该白板无需任何存储空间。请参阅[文档框架](/editor/whiteboard/guides/doc-frames)。
+
+### 属性
+
+- `createEditor` (`(options: CreateDocEditorOptions) => Editor`)：在 `element`（框架的内容元素 `[data-shape-content]`）内创建文档编辑器。白板用它的框架摧毁它。
+- `start?` (`(docId: string) => void`)：启动此编辑器中的更改带入白板上的每个帧的文档：新帧、`copy` 之后的副本以及 `setContent` 或使用 `UndoRedo` 撤消带回的帧。在框架显示之前运行，因此请保留框架已有的文档。通过 Yjs、来自其他编辑器或来自其撤消的帧不会在此处开始文档。
+- `copy` (`(options: CopyDocOptions) => void`)：复制文档作为其框架的副本。在副本显示之前和 `start` 之前运行。
+- `load?` (`(options: LoadDocOptions) => void`)：使用白板文件中的框架内容填充新文档（对于 `importBoard`）。在帧显示之前和 `start` 之前运行。如果没有它，导入的帧将开始为空。
+
+### `CreateDocEditorOptions`
+
+- `element` (`HTMLElement`)
+- `docId` (`string`)
+
+### `CopyDocOptions`
+
+- `fromDocId` (`string`)
+- `toDocId` (`string`)
+
+### `LoadDocOptions`
+
+- `docId` (`string`)：导入框架显示的新文档的 ID。
+- `content` (`JSONContent`)：来自白板文件的文档的 JSON。
+
+## `BoardImages`
+
+图像形状文件所在的位置，就像应用程序的文件存储一样。该应用程序提供了它，因此该白板无需任何存储空间。图像显示 `upload` 返回的 URL。请参阅[图像](/editor/whiteboard/guides/images)。
+
+### 属性
+
+- `upload` (`(options: UploadImageOptions) => Promise<string>`)：上传图像文件并返回其图像形状显示的 URL。
+- `accept?` (`readonly string[]`)：用户可以添加的图像类型。默认值：`['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/avif', 'image/svg+xml']`。
+- `maxSize?` (`number`)：用户可以添加的最大文件的大小，以字节为单位。默认值：`10 * 1024 * 1024`，10 MB。
+- `onError?` (`(options: ImageErrorOptions) => void`)：告诉应用程序板遗漏的文件，例如显示消息。
+
+### `UploadImageOptions`
+
+- `file` (`File`)：用户粘贴、放置或拾取的图像文件。
+- `signal` (`AbortSignal`)：当上传结束之前白板的编辑器被破坏时中止。
+
+### `ImageErrorOptions`
+
+- `file` (`File`)：板遗漏的文件。
+- `reason` (`'type' | 'size' | 'upload'`)：当 `accept` 未列出文件类型或浏览器无法显示文件时为 `type`，当文件大于 `maxSize` 时为 `size`，当 `upload` 抛出或返回无法显示的 URL 时为 `upload`。
+- `error?` (`unknown`)：`upload` 抛出的内容，或者当 URL 无法显示时返回的 URL。
+
+## `BoardFile`
+
+由 `exportBoard` 保存为 JSON 的板，及其文档框架显示的文档。 `importBoard` 再次打开它。请参阅[导出和导入](/editor/whiteboard/guides/export-and-import)。
+
+### 属性
+
+- `type` (`'tiptap-whiteboard'`)：将 JSON 标记为白板文件。
+- `version` (`number`)：文件格式的版本。 `importBoard` 打开 `exportBoard` 编写的版本。
+- `content` (`JSONContent`)：白板的文件，如 `editor.getJSON()` 返回它。
+- `docs` (`Record<string, JSONContent>`)：文档框架按文档 ID 显示的文档。
+
+## `BoardFileError`
+
+扩展 `Error` 的类。当 JSON 不是它打开的文件，或者具有更新的白板或 tldraw 文件格式时，`importBoard` 会抛出该错误。
+
+### 属性
+
+- `code` (`BoardFileErrorCode`)：为什么无法打开文件。
+
+### `BoardFileErrorCode`
+
+类型：`'not-a-board-file' | 'version-too-new'`。 `not-a-board-file` 适用于 JSON，它不是 `importBoard` 打开的任何文件，而 `version-too-new` 适用于白板或 tldraw 的较新格式。
+
+## `ImportBoardResult`
+
+`importBoard` 添加了什么以及省略了什么。
+
+### 属性
+
+- `ids` (`string[]`)：添加的形状的 id。
+- `skipped` (`SkippedShape[]`)：编辑器无法显示的文件形状，例如它不具有的类型，或者具有错误类型的属性。对于 Excalidraw 或 tldraw 的文件，还有白板没有形状的东西，比如框架，以及其他页面的形状。每个文件都说明了原因、其中包含的内容以及文件中显示的内容。
+
+### `SkippedShape`
+
+- `id` (`string | null`)：文件中形状的 ID，如果没有，则为 `null`。
+- `type` (`string`)：文件中形状的节点类型，或其在保存文件的应用程序中的类型，例如 `frame`。
+- `reason` (`SkippedReason`)：为什么它被排除在外。
+- `detail`（`string`，可选）：它包含什么，可以通过以下方式命名：框架的名称、链接、页面的名称或文本。
+- `box`（[`Rect`](#point-rect-and-size)，可选）：当文件显示时，它在白板上的位置。当文件仅给出其位置时，宽度和高度均为 0。在 `insert` 模式下，它随副本一起移动。
+
+### `SkippedReason`
+
+类型：`'unsupported' | 'other-page' | 'missing-image' | 'unreadable'`。该白板没有类似的形状，例如框架，或者编辑器缺少其节点类型。它位于 tldraw 文件第一个文件之后的页面上。该文件缺少显示的图像。它的数据已损坏。
+
+## `BoardSvg`
+
+白板上形状的 SVG 图像，如 `exportBoardSvg` 返回的那样。
+
+### 属性
+
+- `svg` (`string`)：SVG 的标记。
+- `width` (`number`)：图像的宽度，以板为单位。
+- `height` (`number`)：图像的高度，以板为单位。
+
+## `RemoteSelection`
+
+其他用户选择的形状，其颜色为 `#RRGGBB`。不显示具有另一种颜色的选区，例如 `red` 或 `#abc`。
+
+### 属性
+
+- `color` (`string`)
+- `ids` (`readonly string[]`)
+
+## `RemoteCursor`
+
+其他用户在白板上的指向位置以及他们拖动的内容。
+
+### 属性
+
+- `owner` (`unknown`)：它是谁的光标，就像另一个用户的客户端 ID。
+- `point` (`Point`)：用户点的位置，以白板为单位。
+- `time?` (`number`)：当用户的浏览器通过其自己的时钟共享该点时，以毫秒为单位。光标按照共享点的速度移动。如果没有它，一个点到达需要时间。
+- `name` (`string`)：光标旁边的名称。
+- `color`（`string`）：用户的颜色为`#RRGGBB`，在光标的`--remote-cursor`中。另一种颜色不显示。
+- `drag?` (`{ ids: readonly string[]; delta: Point } | null`)：当用户指向 `point` 时，用户拖动的形状，以及自拖动开始以来它们移动的距离（以板为单位）。
+
+## `RemoteCursors`
+
+单白板上其他用户的光标。 `createRemoteCursors` 返回它。
+
+### 属性
+
+- `update` (`(cursors: readonly RemoteCursor[]) => void`)
+- `destroy` (`() => void`)
+
+## `RemoteMoves`
+
+显示其他对象的拖动用户，直到他们放弃形状。 `createRemoteMoves` 返回它。
+
+### 属性
+
+- `show` (`(options: ShowRemoteMoveOptions) => void`)
+- `end` (`(owner: unknown) => void`)
+
+### `ShowRemoteMoveOptions`
+
+- `owner` (`unknown`)：是谁的拖拽，就像另一个用户的客户端ID。
+- `ids` (`readonly string[]`)
+- `delta` (`Point`)：自开始以来拖动已将形状移动多远（以板为单位）。
+
+## `FreehandShape`
+
+类型：`ShapeGeometry & { points: string }`。框和笔线的点，如 `freehandFromPoints` 返回它们。
+
+## `StackPlace`
+
+类型：`'front' | 'back'`。 `restackShapes` 放置形状的位置：在所有其他形状的前面或后面。
+
+## 选项类型
+
+每个功能和命令的选项都有自己的类型：
+
+| 类型 | |
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| `StageOptions` | 的选项[`attachStage`](/editor/whiteboard/api-reference/utilities#attachstage) |
+| `ZoomAtStageCenterOptions` | [`zoomAtStageCenter`](/editor/whiteboard/api-reference/utilities#zoomatstagecenter) |
+| `StepZoomOptions` | [`stepZoom`](/editor/whiteboard/api-reference/utilities#stepzoom) |
+| `ZoomToFitShapesOptions` | [`zoomToFitShapes`](/editor/whiteboard/api-reference/utilities#zoomtofitshapes) |
+| `ScrollShapesIntoViewOptions` | [`scrollShapesIntoView`](/editor/whiteboard/api-reference/utilities#scrollshapesintoview) |
+| `FitCameraToRectOptions` | [`fitCameraToRect`](/editor/whiteboard/api-reference/utilities#fitcameratorect) |
+| `VisibleBoardRectOptions` | [`visibleBoardRect`](/editor/whiteboard/api-reference/utilities#visibleboardrect) |
+| `ClientToBoardOptions` | [`clientToBoard`](/editor/whiteboard/api-reference/utilities#clienttoboard) |
+| `TextShapeContentOptions` | [`textShapeContent`](/editor/whiteboard/api-reference/utilities#textshapecontent) |
+| `StickyNoteContentOptions` | [`stickyNoteContent`](/editor/whiteboard/api-reference/utilities#stickynotecontent) |
+| `FreehandFromPointsOptions` | [`freehandFromPoints`](/editor/whiteboard/api-reference/utilities#freehandfrompoints) |
+| `FindShapesOptions` | [`findShapes`](/editor/whiteboard/api-reference/utilities#findshapes) |
+| `InsertShapesInFrontOptions` | [`insertShapesInFront`](/editor/whiteboard/api-reference/utilities#insertshapesinfront) |
+| `RemoveShapesOptions` | [`removeShapes`](/editor/whiteboard/api-reference/utilities#removeshapes) |
+| `RestackShapesOptions` | [`restackShapes`](/editor/whiteboard/api-reference/utilities#restackshapes) |
+| `ShapeNodeViewOptions` | [`shapeNodeView`](/editor/whiteboard/api-reference/utilities#shapenodeview) |
+| `DataAttributeOptions` | [`dataAttribute`](/editor/whiteboard/api-reference/utilities#dataattribute) |
+| `AddImageFilesOptions` | [`addImageFiles`](/editor/whiteboard/api-reference/utilities#addimagefiles) |
+| `ExportBoardOptions` | [`exportBoard`](/editor/whiteboard/api-reference/utilities#exportboard) |
+| `ImportBoardOptions` | [`importBoard`](/editor/whiteboard/api-reference/utilities#importboard) |
+| `ExportBoardSvgOptions` | [`exportBoardSvg`](/editor/whiteboard/api-reference/utilities#exportboardsvg) |
+| `ExportBoardImageOptions` | [`exportBoardImage`](/editor/whiteboard/api-reference/utilities#exportboardimage) |
+| `InsertShapeOptions` | [`insertShape`](/editor/whiteboard/api-reference/commands#insertshape) |
+| `InsertStickyNoteOptions` | [`insertStickyNote`](/editor/whiteboard/api-reference/commands#insertstickynote) |
+| `MoveShapesOptions` | [`moveShapes`](/editor/whiteboard/api-reference/commands#moveshapes) |
+| `DuplicateShapesOptions` | [`duplicateShapes`](/editor/whiteboard/api-reference/commands#duplicateshapes) |
+| `FrameShapesOptions` | [`frameShapes`](/editor/whiteboard/api-reference/commands#frameshapes) |
+| `EditShapeTextOptions` | [`editShapeText`](/editor/whiteboard/api-reference/commands#editshapetext) |
+| `SetShapeStyleOptions<Name>` | [`setShapeStyle`](/editor/whiteboard/api-reference/commands#setshapestyle) |

@@ -1,0 +1,117 @@
+---
+title: '您自己的图表渲染器'
+intro: "图表渲染器将图表的源文本转换为 SVG 字符串，适用于一种或多种图表格式，例如 Mermaid。编辑器将 SVG 显示为图像。"
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '您自己的图表渲染器 | Tiptap 图表文档'
+  description: "图表渲染器将图表的源文本转换为 SVG 字符串，适用于一种或多种图表格式，例如 Mermaid。"
+  category: 图表
+---
+
+## 快速入门
+
+该图表渲染器将 Mermaid 源发送到您托管的渲染服务：
+
+```ts
+import type { DiagramRenderer } from '@tiptap-pro/extension-diagrams'
+
+export function serviceDiagramRenderer(endpoint: string): DiagramRenderer {
+  return {
+    id: 'mermaid-service',
+    label: 'Mermaid (service)',
+    formats: ['mermaid'],
+    async render({ source, theme, raster }) {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ source, theme, htmlLabels: !raster }),
+      })
+      if (!response.ok) throw new Error(`The diagram service answered ${response.status}`)
+      const svg = await response.text()
+      const root = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement
+      const width = Number.parseFloat(root.getAttribute('width') ?? '') || 600
+      const height = Number.parseFloat(root.getAttribute('height') ?? '') || 400
+      return { svg, width, height }
+    },
+  }
+}
+```
+
+```ts
+Diagrams.configure({
+  diagramRenderers: [serviceDiagramRenderer('https://diagrams.example.com/mermaid/svg')],
+})
+```
+
+## 成员
+
+| 成员 | 类型 | 描述|
+| --------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `id` | `string` | 命名渲染器 |
+| `label` | `string` |可选。对于菜单 |
+| `formats` | `readonly FlowDiagramFormat[]` | 绘制的图表格式 |
+| `draws` | `(source: string) => boolean` | 可选。是否汲取这个来源，比如只有一些人鱼种类。如果没有它，每个源 |
+| `rules` | `RendererRules` | 可选。请参阅[渲染器的规则](/diagrams/renderers/custom#rules-of-your-renderer) |
+| `render` | `(input) => Promise<{ svg, width, height }>` | 绘制源，如下所述 |
+| `editing` | `DiagramEditing` | 可选。在其 SVG 中查找文本和形状，请参阅[在图中编辑](/diagrams/renderers/custom-diagrams#editing-in-the-diagram) |
+
+## 哪个渲染器绘制图表
+
+该扩展程序选择第一个注册的图表渲染器，其 `formats` 包含图表的格式，并且其 `draws` 不会拒绝源。空源进入其格式的第一个图表渲染器，而不询问 `draws`。
+
+一种无渲染器绘制的显示内容 [`unavailable`](/diagrams/api-reference/options#unavailable) 返回，原因是 `'unsupported-kind'`。来源保留在文档中。与图表渲染器不同，衰退的图表渲染器根本不会绘制图表。
+
+### 您自己的
+
+`insertFlowDiagram` 和 `updateFlowDiagram` 接受格式，而注册的图表渲染器将其列在 `formats` 中。它不需要其他注册。
+
+- **格式的id**有字母、数字、`_`和`-`，最多64个字符。
+- **源**按原样存储，最多 1,000,000 个字符。
+- **未注册的图表渲染器绘制的格式**在文档中保持不变，并且在每次保存后都保留。该图显示了 `unavailable` 返回的内容。
+
+## 渲染器接收什么
+
+| 输入 | 类型 | 描述 |
+| -------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `format` | `FlowDiagramFormat` | `mermaid`、`drawio`、`bpmn` 或您自己的格式、渲染器的 `formats` |
+| 之一`source` | `string` | 图表源文本，如文档存储的那样 |
+| `theme` | `DiagramTheme` | 解析的颜色和字体，从 `--tt-flow-diagram-*` 自定义属性中读取([图](/diagrams/api-reference/selectors#diagrams)) |
+| `raster` | `boolean` | `true` 当 SVG 变成 PNG、WebP、JPEG 或 Word 中的图像时 |
+
+当 `raster` 为 `true` 时，请将标签写为 SVG 文本。SVG 不能包含 `foreignObject`，因为浏览器不允许画布导出该内容。
+
+## 渲染返回
+
+`render` 返回 `{ svg, width, height }`。 `svg` 是一个独立的 SVG 字符串，带有 `width` 和 `height`。 `width` 和 `height` 是数字，即绘图的大小（以像素为单位）。
+
+## 在图表中编辑
+
+用户可以双击图表中的文本进行编辑，并拖动形状来移动它。参见[图中编辑](/diagrams/flow-diagrams/editing)。只有渲染器知道文本和形状在其 SVG 中的位置，因此它通过 `editing` 告诉扩展。 `editing` 的每个函数都会接收 `render` 以字符串形式返回的 SVG 以及图表的源。
+
+| 成员 | 签名 | 没有它 |
+| --------------- | ------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `labelAt` | `(svg, point, source) => DiagramLabelHit \| null` | 双击什么也不打开 |
+| `nodeAt` | `(svg, point, source) => DiagramNodeHit \| null` | 无法拖动形状 |
+| `movePositions` | `(svg, positions, source) => string \| null` | 无法拖动形状。存储的偏移量不会被绘制，而是保留在文档中 |
+
+- **`point`** 通过其 `viewBox` 采用 SVG 自己的单位。
+- **`DiagramLabelHit`** 是 `{ target, label, box }`。 `target` 命名源中的文本，例如 `{ kind: 'node', id: 'A' }`。扩展程序将新文本写入此处。
+- **`DiagramNodeHit`** 是 `{ id, label, box }`。 `id` 是源中形状的 id。
+- **`movePositions`** 返回每个形状按其偏移量移动的 SVG，或者当没有任何移动时返回 `null`。
+- **对于渲染器无法处理的图表类型，返回 `null`**。
+
+使用 mermaid.js 进行绘制的渲染器可以重用内置的 `editing`：
+
+```ts
+import { mermaidDiagramEditing } from '@tiptap-pro/extension-diagrams/mermaid'
+
+const renderer = { id: 'my-mermaid', formats: ['mermaid'], render, editing: mermaidDiagramEditing }
+```
+
+## 保持网页安全
+
+编辑器在 `<img>` 中显示 SVG，因此 SVG 中的脚本和外部资源永远不会在您的网页中运行或加载。
+
+切勿评估网页中的源。像内置渲染器一样，在服务器或沙盒 iframe 中渲染它。仅解析文本且不需要 DOM 的库可以在 Web Worker 中进行绘制，就像 [Pele](/diagrams/renderers/pele) 渲染器那样。

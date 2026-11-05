@@ -1,0 +1,106 @@
+---
+title: 白板图像
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板图像 | Tiptap 编辑器文档
+  description: 在白板上显示图像。用户粘贴、删除或选取图像文件，您的应用程序上传它们，并且白板从其 URL 中显示它们。
+  category: 编辑器
+---
+
+图像形状显示来自 URL 的图像。用户将图像文件粘贴或拖放到白板上，您的应用程序上传它们，板会存储上传返回的 URL。因此，白板上没有任何存储空间。
+
+## 上传文件
+
+使用 `WhiteboardKit` 的 `images` 选项告诉白板图像文件的去向。如果没有它，用户将无法添加图像，但白板上的图像仍然会显示。此示例将每个文件发送到应用程序的端点，该端点以文件的 URL 进行应答：
+
+```js
+import { Editor } from '@tiptap/core'
+import { WhiteboardKit } from '@tiptap-pro/extension-whiteboard'
+
+const upload = async ({ file, signal }) => {
+  const body = new FormData()
+  body.append('file', file)
+  const response = await fetch('/api/uploads', { method: 'POST', body, signal })
+
+  if (!response.ok) {
+    throw new Error(`The upload failed with status ${response.status}`)
+  }
+
+  const { url } = await response.json()
+  return url
+}
+
+const editor = new Editor({
+  element: viewport,
+  extensions: [
+    WhiteboardKit.configure({
+      images: {
+        upload,
+        onError: ({ file, reason }) => showMessage(`${file.name}: ${reason}`),
+      },
+    }),
+  ],
+})
+```
+
+在 React 中，在组件外部或使用 `useMemo` 创建配置的套件一次。请参阅[在 React](/editor/whiteboard/guides/react) 中设置白板。
+
+`images` 对象具有以下成员：
+
+- `upload({ file, signal })` 上传图像文件并返回其图像显示的 URL。当白板的编辑器在上传结束之前被破坏时，`signal` 会中止，因此将其传递给 `fetch`。
+- `accept`（可选）列出了用户可以添加的图像类型。默认：PNG、JPEG、GIF、WebP、AVIF 和 SVG。
+- `maxSize` 可选，是用户可以添加的最大文件的大小，以字节为单位。默认值：10 MB。
+- `onError({ file, reason, error })` 是可选的，它告诉您的应用程序板遗漏的文件，例如显示消息。当 `accept` 未列出文件类型或浏览器无法显示文件时，`reason` 为 `type`；当文件大于 `maxSize` 时，`size`；当 `upload` 抛出或返回无法显示的 URL 时，`upload`。 `error` 保存 `upload` 抛出或返回的内容。
+
+### 图像的 URL
+
+板将 URL 存储在图像形状的 `src` 中。白板文件和白板的 Y.Doc 也保存 URL，每个用户的浏览器都会从中加载图像。因此，请返回一个持续有效的 URL，而不是像短期签名 URL 那样很快就会过期的 URL。
+
+图像显示来自 `http` 和 `https` URL、相对于页面的 URL 以及 `data:image/` URL。其他 URL 不会显示，例如 `blob:` URL，它们会在创建它们的页面关闭时停止工作。 `data:` URL 将整个文件放入白板的文档中，因此保留它用于小图像或没有服务器的演示。
+
+## 添加图像
+
+连接舞台后，请参阅[舞台和相机](/editor/whiteboard/guides/stage-and-camera#attach-the-stage)、用户粘贴到舞台中间的图像文件以及他们放置的文件放置到放置位置的位置。编辑文本时，文本中会粘贴粘贴内容，而图像文件则保留在外面。
+
+对于您自己的按钮，将文件输入的文件传递给 `addImageFiles`。它将图像添加到舞台中间，或以板为单位的 `point` 周围：
+
+```js
+import { addImageFiles, focusBoard } from '@tiptap-pro/extension-whiteboard'
+
+input.addEventListener('change', async () => {
+  await addImageFiles({ stage, editor, files: input.files ?? [] })
+  // Lets users pick the same file again, and gives the board the keyboard
+  input.value = ''
+  focusBoard(editor.view)
+})
+```
+
+为文件输入指定与 `accept` 相同的类型，如 `accept="image/png,image/jpeg"`，因此文件选择器仅提供这些类型。
+
+白板首先上传文件。所有上传完成后，它会将它们的图像添加到图板历史记录的一个步骤中，并选择它们。在此之前，白板不会显示任何内容，因此当上传时间较长时，请在 `upload` 中显示您自己的进度。每个图像都有其自然大小，但不超过舞台的一半，并且图像叠加在一起并排站立。在只读白板上，不添加任何内容。
+
+在代码中，像任何其他形状一样添加图像，并使用您自己的 URL 和尺寸。 `alt` 保存屏幕阅读器为图像读取的文本：
+
+```js
+editor.commands.insertShape({
+  type: 'boardImage',
+  src: '/plan.png',
+  width: 400,
+  height: 300,
+  alt: 'The floor plan',
+})
+```
+
+用户粘贴或放置的图像有一个空的 `alt`。稍后使用 [`updateShape`](/editor/whiteboard/api-reference/commands#updateshape) 设置它，就像任何其他属性一样。
+
+## 调整图像大小
+
+图像保持其比例，而角手柄可调整图像大小。增长较多的一侧决定了大小，因此指针停留在图像的边缘。图像至少为 16 x 16 板单元。
+
+## 后续步骤
+
+- 使用 [导出和导入] 保存白板及其图像 ](/editor/whiteboard/guides/export-and-import)
+- 使用 [形状选择器 ](/editor/whiteboard/api-reference/styling#shapes)
+- 设置图像样式 请参阅 [`BoardImages` 类型 ](/editor/whiteboard/api-reference/types#boardimages)

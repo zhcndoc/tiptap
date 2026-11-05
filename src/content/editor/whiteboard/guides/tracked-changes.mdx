@@ -1,0 +1,96 @@
+---
+title: 白板
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板上的跟踪更改 | Tiptap 编辑器文档
+  description: 在白板形状上显示跟踪更改的建议，并接受或拒绝它们。
+  category: 编辑器
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+形状是节点，因此可以像 AI 代理建议的文档内容一样，携带[修订跟踪](/tracked-changes/getting-started/overview)建议。白板会在形状上显示这些建议，并可通过修订跟踪命令审核它们。
+
+<Callout title="独立产品" variant="info">
+  [修订跟踪](/tracked-changes/getting-started/overview) 是独立于 Whiteboard 的 Tiptap 产品，需单独购买。
+</Callout>
+
+## 设置编辑器
+
+[安装跟踪更改](/tracked-changes/getting-started/install)，并将其添加到白板的编辑器中。将跟踪更改中的 `getSuggestionHTMLAttributes` 作为 `WhiteboardKit` 的 `shapeElementAttributes` 选项传递：
+
+```js
+import { Editor } from '@tiptap/core'
+import { getSuggestionHTMLAttributes, TrackedChanges } from '@tiptap-pro/extension-tracked-changes'
+import { WhiteboardKit } from '@tiptap-pro/extension-whiteboard'
+
+const editor = new Editor({
+  element: viewport,
+  extensions: [
+    WhiteboardKit.configure({ shapeElementAttributes: getSuggestionHTMLAttributes }),
+    TrackedChanges,
+  ],
+})
+```
+
+在 React 中，请在组件外部创建配置好的扩展，或使用 `useMemo` 保证只创建一次。参见 [React 白板设置指南](/editor/whiteboard/guides/react)。
+
+`shapeElementAttributes` 从形状的节点向每个形状的元素添加属性。使用 `getSuggestionHTMLAttributes`，建议更改的形状元素将获得 `data-suggestion-*` 属性，例如 `data-suggestion-type` 和 `data-suggestion-user`。
+
+跟踪更改以 `enabled: false` 开头。然后直接应用白板上的编辑，并且板会显示形状所带来的建议。
+
+## 显示建议
+
+设置建议根据其元素上的属性更改的形状的样式：
+
+```css
+/* A shape that a suggestion adds */
+[data-shape][data-suggestion-type='add'] {
+  outline: calc(2px / var(--zoom, 1)) dashed #2b9a66;
+}
+
+/* A shape that a suggestion deletes */
+[data-shape][data-suggestion-type='delete'] {
+  opacity: 0.5;
+}
+
+/* A shape that a suggestion moves or changes */
+[data-shape][data-suggestion-type='attributeChange'] {
+  outline: calc(2px / var(--zoom, 1)) dashed #0d74ce;
+}
+```
+
+接受或拒绝建议后，这些属性会消失。形状文本中的建议与其他文档中的显示方式相同。完整属性列表请参阅[样式](/tracked-changes/api-reference/styling)。
+
+## 查看建议
+
+使用 `findSuggestions` 查找建议，并通过 ID 接受或拒绝它们：
+
+```js
+import { findSuggestions } from '@tiptap-pro/extension-tracked-changes'
+
+const [suggestion] = findSuggestions(editor)
+
+if (suggestion) {
+  editor.commands.acceptSuggestion({ id: suggestion.id })
+}
+```
+
+添加形状的建议会在 `insertedNodes` 中列出这些形状，例如 `{ type: 'stickyNote' }`。一项建议可以添加多个形状，例如 AI 工具调用一次添加的所有便签；使用同一个 ID 即可接受或拒绝全部形状。
+
+| 建议 | 接受 | 拒绝 |
+| ---------------- | ------------------- | ------------------------ |
+| 添加形状 | 保留形状 | 删除形状 |
+| 删除形状 | 删除形状 | 保留形状 |
+| 移动形状 | 保留新位置 | 放回形状 |
+|更改其文本 | 保留新文本 | 返回旧文本 |
+
+当被拒绝的建议删除形状时，连接该形状的箭头将保留自由端。评论在协作白板上也有效：所有用户都会看到建议，并且评论适用于任何地方。
+
+## 后续步骤
+
+- 查看[修订跟踪的所有命令](/tracked-changes/api-reference/commands)
+- 让 AI 代理使用 [Server AI Toolkit](/ai/ai-toolkit/agents/whiteboard)
+- 了解如何通过 [`shapeElementAttributes`](/editor/whiteboard/api-reference/extensions#whiteboardkit) 提交更改建议

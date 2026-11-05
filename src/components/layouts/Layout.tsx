@@ -192,10 +192,12 @@ LayoutSecondarySidebar.displayName = 'LayoutSecondarySidebar'
 
 export type LayoutContentProps = React.HTMLAttributes<HTMLDivElement> & {
   contentPath?: string
+  /** Leaves out the space above the content, for a page whose header is placed above it. */
+  flushTop?: boolean
 }
 
 export const LayoutContent = forwardRef<HTMLDivElement, LayoutContentProps>(
-  ({ children, className, contentPath, ...rest }, ref) => {
+  ({ children, className, contentPath, flushTop, ...rest }, ref) => {
     return (
       <main
         {...rest}
@@ -205,8 +207,10 @@ export const LayoutContent = forwardRef<HTMLDivElement, LayoutContentProps>(
         )}
         ref={ref}
       >
-        <div className="pt-6 pb-8 sm:pb-24 sm:pt-8 lg:pb-16 lg:pt-10">{children}</div>
-        <div className="wwads-cn wwads-horizontal w-full my-4" data-id="354"></div>
+        <div className={cn('pb-16 sm:pb-24 lg:pb-32', flushTop ? '' : 'pt-6 sm:pt-8 lg:pt-10')}>
+          {children}
+        </div>
+
         <footer className="border-t border-grayAlpha-300 pt-8 pb-[3.125rem]">
           <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:relative lg:min-h-[200px]">
             <div className="z-10 flex flex-col items-start flex-none">

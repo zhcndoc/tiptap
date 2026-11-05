@@ -142,4 +142,6 @@ const editor = new Editor({
 })
 ```
 
-您可以在 `render` 函数中使用由 `@tiptap-pro/extension-export-docx` 包的 `Docx` 导入提供的 `Docx` 库类（如 `Paragraph`、`TextRun`、`Table` 等）构造任意支持的 DOCX 元素。
+You can construct any supported DOCX elements in the `render` function using the `Docx` library classes (`Paragraph`, `TextRun`, `Table`, etc.) that are provided via the `Docx` import from the `@tiptap-pro/extension-export-docx` package.
+
+`render` 函数获取与 DOCX 导出中相同的第二个参数，因此自定义节点可以将其图像适合页面或表格单元格。请参阅[使图像适合页面或表格单元格](/conversion/export/docx/custom-nodes#fit-images-to-the-page-or-table-cell)。

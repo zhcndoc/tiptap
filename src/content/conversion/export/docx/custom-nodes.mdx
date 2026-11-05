@@ -137,4 +137,89 @@ const editor = new Editor({
 editor.chain().exportDocx().run()
 ```
 
-您可以在 `render` 函数中使用 `Docx` 库类（`Paragraph`、`TextRun`、`Table` 等）构建任何支持的 `DOCX` 元素，这些类是通过从 `@tiptap-pro/extension-export-docx` 包的 `Docx` 导入提供的。
+You can construct any supported `DOCX` elements in the `render` function using the `Docx` library classes (`Paragraph`, `TextRun`, `Table`, etc.) that are provided via the `Docx` import from the `@tiptap-pro/extension-export-docx` package.
+
+有关 RTL 对齐方式、百分比宽度和默认样式，请参阅[原生 DOCX 选项](/conversion/export/docx/styles#native-docx-options)。
+
+## 使图像适合页面或表格单元格
+
+不带 `width` 和 `height` 的图像以其像素大小导出，因此大照片会超出 Word 中的右边距。渲染图像的自定义节点可以将其保留在页面内。
+
+`render` 获取第二个参数 `context`。它的 `maxImageWidth` 是页面文本列的宽度（以像素为单位），或者节点所在表格单元格的内容宽度（单元格宽度减去其左右边距）。列表缩进不会被减去。 `context` 是 [`customNodeDsl`](/conversion/export/docx/custom-nodes-dsl) 规则内的自定义节点的 `undefined`。
+
+将其作为 `maxWidth` 传递到 `convertImage` 或 `convertImageRun`：
+
+```ts
+import { convertImage, ExportDocx } from '@tiptap-pro/extension-export-docx'
+
+ExportDocx.configure({
+  customNodes: [
+    {
+      type: 'photo',
+      render: (node, context) => {
+        const { src, width, height } = node.attrs ?? {}
+
+        return convertImage({
+          node: { type: 'image', attrs: { src, width, height } },
+          maxWidth: context?.maxImageWidth,
+        })
+      },
+    },
+  ],
+})
+```
+
+`maxWidth` 仅更改既没有 `width` 也没有 `height` 的图像。较宽的图像缩小为 `maxWidth` 并保持其纵横比。具有自己尺寸的图像和 `imageOverrides.transformation` 仍然获胜。
+
+当节点在图像周围布置内容时，使用 `convertImageRunWithSize`。它返回运行的图像及其在文档中获得的大小（`{ imageRun, width, height }`，以像素为单位），或者对于导出跳过的图像返回 `null`。此示例将标题放在与图像一样宽的表中的图像下方：
+
+```ts
+import {
+  convertImageRunWithSize,
+  Docx,
+  ExportDocx,
+  pixelsToPoints,
+  pointsToTwips,
+} from '@tiptap-pro/extension-export-docx'
+
+ExportDocx.configure({
+  customNodes: [
+    {
+      type: 'figure',
+      render: async (node, context) => {
+        const { src, width, height } = node.attrs ?? {}
+        const image = await convertImageRunWithSize({
+          node: { type: 'image', attrs: { src, width, height } },
+          maxWidth: context?.maxImageWidth,
+        })
+        if (!image) return null
+
+        // Word measures table widths in twips.
+        const tableWidth = Math.round(pointsToTwips(pixelsToPoints(image.width)))
+
+        return new Docx.Table({
+          // A fixed layout without cell margins keeps the table exactly as wide as the image.
+          layout: Docx.TableLayoutType.FIXED,
+          width: { size: tableWidth, type: Docx.WidthType.DXA },
+          columnWidths: [tableWidth],
+          margins: { top: 0, bottom: 0, left: 0, right: 0 },
+          rows: [
+            new Docx.TableRow({
+              children: [
+                new Docx.TableCell({
+                  children: [
+                    new Docx.Paragraph({ children: [image.imageRun] }),
+                    new Docx.Paragraph({ text: node.attrs?.caption }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        })
+      },
+    },
+  ],
+})
+```
+
+内置 `image` 节点不受影响：它们继续以其自己的大小导出。

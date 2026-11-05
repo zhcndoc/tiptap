@@ -69,72 +69,79 @@ curl --output document.odt -X POST "https://api.tiptap.dev/v2/convert/export/odt
 
 | 名称                 | 类型     | 描述                                                            | 默认值      |
 | -------------------- | -------- | ---------------------------------------------------------------------- | ----------- |
-| `doc`                | `String` | 以字符串形式表示的 Tiptap JSON 文档                                       | `N/A`       |
-| `exportType`         | `string` | 预期的导出类型                                               | `blob`      |
-| `styleOverrides`     | `Object` | 样式覆盖                                                        | `{}`        |
-| `pageSize`           | `Object` | 页面尺寸配置                                                | `undefined` |
-| `pageMargins`        | `Object` | 页面边距配置                                             | `undefined` |
-| `headers`            | `Object` | 页眉配置                                              | `undefined` |
-| `footers`            | `Object` | 页脚配置                                              | `undefined` |
-| `tableOverrides`     | `Object` | 传递给 DOCX 步骤的表格级渲染覆盖             | `undefined` |
-| `paragraphOverrides` | `Object` | 传递给 DOCX 步骤的段落级渲染覆盖         | `undefined` |
-| `textRunOverrides`   | `Object` | 传递给 DOCX 步骤的文本运行渲染覆盖                | `undefined` |
-| `tableCellOverrides` | `Object` | 传递给 DOCX 步骤的表格单元格渲染覆盖              | `undefined` |
-| `imageOverrides`     | `Object` | 传递给 DOCX 步骤的图像渲染覆盖                   | `undefined` |
-| `headerFooterOverrides` | `Object` | 针对页眉/页脚内容的按字段覆盖，作用域限定于页眉/页脚内容（与元素覆盖相同的五个键）。参见 [元素覆盖](#element-overrides)。 | `undefined` |
-| `placeholders`       | `Object \| false` | 用于页眉/页脚中页码标记的重命名映射（`{ page?, total? }`），与 `Pages.configure({ placeholders })` 匹配。传入 `false` 可禁用替换。参见 [自定义标记名称](/conversion/export/docx/rest-api#custom-token-names-placeholders)。 | `undefined` |
-| `customNodeDsl` | `Object` | 用于将自定义 Tiptap 节点渲染到导出文件中的 [自定义节点 DSL](/conversion/export/docx/custom-nodes-dsl) 规则。 | `undefined` |
+| `doc`                | `String` | Tiptap JSON document as a string                                       | `N/A`       |
+| `exportType`         | `string` | The expected export type                                               | `blob`      |
+| `styleOverrides`     | `Object` | Style overrides                                                        | `{}`        |
+| `pageSize`           | `Object` | Page size configuration                                                | `undefined` |
+| `pageMargins`        | `Object` | Page margins configuration                                             | `undefined` |
+| `headers`            | `Object` | Page header configuration                                              | `undefined` |
+| `footers`            | `Object` | Page footer configuration                                              | `undefined` |
+| `tableOverrides`     | `Object` | Table-level rendering overrides forwarded to the DOCX step             | `undefined` |
+| `paragraphOverrides` | `Object` | Paragraph-level rendering overrides forwarded to the DOCX step         | `undefined` |
+| `textRunOverrides`   | `Object` | Text run rendering overrides forwarded to the DOCX step                | `undefined` |
+| `tableCellOverrides` | `Object` | Table cell rendering overrides forwarded to the DOCX step              | `undefined` |
+| `imageOverrides`     | `Object` | Image rendering overrides forwarded to the DOCX step                   | `undefined` |
+| `headerFooterOverrides` | `Object` | Per-field overrides scoped to header/footer content (same five keys as the element overrides). See [Element Overrides](#element-overrides). | `undefined` |
+| `placeholders` | `Object \| false` | 页眉/页脚中页码标记的重命名映射 (`{ page?, total? }`)，与 `Pages.configure({ placeholders })` 匹配。适用于每种槽形状：纯文本、字符串化 Tiptap JSON 或 Tiptap JSON 对象。传递 `false` 以禁用替换。请参阅[自定义代币名称](/conversion/export/docx/rest-api#custom-token-names-placeholders)。 | `undefined` |
+| `customNodeDsl` | `Object` | [Custom-node DSL](/conversion/export/docx/custom-nodes-dsl) rules for rendering custom Tiptap nodes into the exported file. | `undefined` |
 
-#### 页面尺寸配置
+#### Page Size Configuration
 
-`pageSize` 对象允许自定义导出 ODT 文档的页面尺寸：
+The `pageSize` object allows you to customize the dimensions of your exported ODT document:
 
-| 属性      | 类型     | 描述                                                                                              | 默认值    |
-| --------- | -------- | ------------------------------------------------------------------------------------------------ | --------- |
-| `width`   | `string` | 页面宽度。必须是紧跟有效单位（cm，in，pt，pc，mm，px）的正数。                                      | `"21.0cm"` |
-| `height`  | `string` | 页面高度。必须是紧跟有效单位（cm，in，pt，pc，mm，px）的正数。                                      | `"29.7cm"` |
+| Property | Type     | Description                                                                                         | Default    |
+| -------- | -------- | --------------------------------------------------------------------------------------------------- | ---------- |
+| `width`  | `string` | The width of the page. Must be a positive number followed by a valid unit (cm, in, pt, pc, mm, px). | `"21.0cm"` |
+| `height` | `string` | The height of the page. Must be a positive number followed by a valid unit (cm, in, pt, pc, mm, px).| `"29.7cm"` |
 
-#### 页面边距配置
+#### Page Margins Configuration
 
-`pageMargins` 对象允许自定义导出 ODT 文档的页面边距：
+The `pageMargins` object allows you to customize the margins of your exported ODT document:
 
-| 属性       | 类型     | 描述                                                                                                      | 默认值    |
-| ---------- | -------- | -------------------------------------------------------------------------------------------------------- | --------- |
-| `top`      | `string` | 页面顶部边距。可以为负。必须是数字，紧跟有效单位（cm，in，pt，pc，mm，px）。                                | `"1.0cm"` |
-| `bottom`   | `string` | 页面底部边距。可以为负。必须是数字，紧跟有效单位（cm，in，pt，pc，mm，px）。                                | `"1.0cm"` |
-| `left`     | `string` | 页面左侧边距。必须是紧跟有效单位（cm，in，pt，pc，mm，px）的正数。                                        | `"1.0cm"` |
-| `right`    | `string` | 页面右侧边距。必须是紧跟有效单位（cm，in，pt，pc，mm，px）的正数。                                        | `"1.0cm"` |
+| Property | Type     | Description                                                                                                       | Default  |
+| -------- | -------- | ----------------------------------------------------------------------------------------------------------------- | -------- |
+| `top`    | `string` | The top margin of the page. Can be negative. Must be a number followed by a valid unit (cm, in, pt, pc, mm, px).  | `"1.0cm"`|
+| `bottom` | `string` | The bottom margin of the page. Can be negative. Must be a number followed by a valid unit (cm, in, pt, pc, mm, px).| `"1.0cm"`|
+| `left`   | `string` | The left margin of the page. Must be a positive number followed by a valid unit (cm, in, pt, pc, mm, px).         | `"1.0cm"`|
+| `right`  | `string` | The right margin of the page. Must be a positive number followed by a valid unit (cm, in, pt, pc, mm, px).        | `"1.0cm"`|
 
-#### 页眉配置
+#### Headers Configuration
 
-`headers` 对象允许自定义导出 ODT 文档的页眉：
+The `headers` object allows you to customize the headers of your exported ODT document:
 
-| 属性                 | 类型       | 描述                                                                                             |
-| -------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
-| `evenAndOddHeaders`  | `boolean`  | 是否为奇数页和偶数页使用不同的页眉                                                               |
-| `differentFirstPage` | `boolean`  | 是否为首页使用不同的页眉。设置为 `true` 时，第一页使用 `first` 的值，替代默认的 `default` 页眉。   |
-| `default`            | `string`   | 每页的标准默认页眉，或开启 `evenAndOddHeaders` 时的奇数页页眉。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。 |
-| `first`              | `string`   | 首页的页眉，仅在 `differentFirstPage` 为 `true` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。   |
-| `even`               | `string`   | 偶数页页眉，仅当启用 `evenAndOddHeaders` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。           |
+| Property            | Type      | Description                                                                                                          |
+| ------------------- | --------- | -------------------------------------------------------------------------------------------------------------------- |
+| `evenAndOddHeaders` | `boolean` | Whether to use different headers for odd and even pages                                                              |
+| `differentFirstPage` | `boolean` | Whether to use a different header on the first page. When `true`, the `first` value is used on page one instead of `default`. |
+| `default` | `string \| Object` | 每页上的标准默认页眉，或激活 `evenAndOddHeaders` 时奇数页上的页眉。接受纯文本、字符串化 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
+| `first` | `string \| Object` | 第一页上的标题。仅当 `differentFirstPage` 设置为 `true` 时使用。接受纯文本、字符串化 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
+| `even` | `string \| Object` | 激活 `evenAndOddHeaders` 选项时偶数页上的页眉。接受纯文本、字符串化 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
 
-<Callout title="纯文本 VS Tiptap JSONContent">
-    每个页眉值可以是**纯文本字符串**（生成简单无样式页眉）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，发送请求体前请用 `JSON.stringify()` 对象进行字符串化。
+<Callout title="接受的槽值">
+  每个标头值可以是以下三种形状之一：
+
+- **纯文本字符串。** 生成简单的无样式标头。
+- A **字符串化 Tiptap JSONContent。** 启用丰富的格式，例如粗体、斜体和链接。使用 `JSON.stringify(yourHeaderDoc)` 生成它。
+- A **Tiptap JSONContent 对象。** 相同的丰富内容，作为请求正文中的嵌套 JSON 对象发送，而不对其进行字符串化。
+
+在 JSON 请求正文中，对象必须包含 `type` 字段，无效形状将返回 `400 Bad Request`。
+
 </Callout>
 
 #### 页脚配置
 
 `footers` 对象允许自定义导出 ODT 文档的页脚：
 
-| 属性                 | 类型       | 描述                                                                                             |
-| -------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
-| `evenAndOddFooters`  | `boolean`  | 是否为奇数页和偶数页使用不同的页脚                                                               |
-| `differentFirstPage` | `boolean`  | 是否为首页使用不同的页脚。设置为 `true` 时，第一页使用 `first` 的值，替代默认的 `default` 页脚。   |
-| `default`            | `string`   | 每页的标准默认页脚，或开启 `evenAndOddFooters` 时的奇数页页脚。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。 |
-| `first`              | `string`   | 首页的页脚，仅在 `differentFirstPage` 为 `true` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。   |
-| `even`               | `string`   | 偶数页页脚，仅当启用 `evenAndOddFooters` 时生效。支持纯文本字符串或字符串化的 Tiptap JSONContent，支持丰富格式化。           |
+| Property            | Type      | Description                                                                                                          |
+| ------------------- | --------- | -------------------------------------------------------------------------------------------------------------------- |
+| `evenAndOddFooters` | `boolean` | Whether to use different footers for odd and even pages                                                              |
+| `differentFirstPage` | `boolean` | Whether to use a different footer on the first page. When `true`, the `first` value is used on page one instead of `default`. |
+| `default` | `string \| Object` | 每页上的标准默认页脚，或激活 `evenAndOddFooters` 时奇数页上的页脚。接受纯文本、字符串化 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
+| `first` | `string \| Object` | 第一页的页脚。仅当 `differentFirstPage` 设置为 `true` 时使用。接受纯文本、字符串化 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
+| `even` | `string \| Object` | 激活 `evenAndOddFooters` 选项时偶数页上的页脚。接受纯文本、字符串化 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
 
-<Callout title="纯文本 VS Tiptap JSONContent">
-    每个页脚值可以是**纯文本字符串**（生成简单无样式页脚）或**字符串化的 Tiptap JSONContent** 对象（支持加粗、斜体、链接等丰富格式）。传递 JSONContent 时，发送请求体前请用 `JSON.stringify()` 对象进行字符串化。
+<Callout title="接受的槽值">
+  每个页脚值可以是与页眉值相同的三种形状之一：纯文本字符串、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。在 JSON 请求正文中，对象必须包含 `type` 字段，无效形状将返回 `400 Bad Request`。
 </Callout>
 
 ### 元素覆盖

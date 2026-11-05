@@ -53,10 +53,10 @@ npm i @tiptap-pro/extension-import-docx@^0.10.0
 
 一个四步流程：
 
-1. **在导入请求中选择启用。** 扩展要求 Convert API 在 `cssStyles.enabled` 为 `true` 时包含样式目录。
-2. **转换服务提取。** 转换器读取 DOCX 的样式定义，解析继承链（`basedOn`），将 OOXML 属性翻译为 CSS 等价物，并在导入响应中返回一个 `cssStyles` 对象。
-3. **扩展构建 CSS 规则。** 将 `cssStyles` 对象编译为 CSS 字符串，并按你配置的选择器进行作用域隔离（默认 `.tiptap`）。
-4. **自动注入或交给你处理。** 如果 `autoInject: true`，扩展会把作用域隔离的 `<style>` 元素追加到 `document.head`。如果 `autoInject: false`，你会在 `onImport` 回调中收到原始的 `cssStyles` 对象，并由你决定如何处理。
+1. **Opt in on the import request.** The extension asks the Convert API to include the style catalog when `cssStyles.enabled` is `true`.
+2. **Convert service extracts.** The converter reads the DOCX style definitions, resolves inheritance chains (`basedOn`), translates OOXML properties to CSS equivalents, and returns a `cssStyles` object on the import response.
+3. **Extension builds CSS rules.** The `cssStyles` object is compiled to a CSS string, scoped by the selector you configure (default `.tiptap`).
+4. **自动注入或移交。** 如果是 `autoInject: true`，则扩展会将作用域 `<style>` 元素附加到 `document.head`。如果是 `autoInject: false`，您将在 `onImport` 回调上收到原始 `cssStyles` 对象，并决定如何处理它。如果没有 DOM，例如在服务器端渲染期间或在无头编辑器中，扩展程序会跳过注入及其清理，并且 `cssStyles` 对象仍然会到达您的回调。
 
 ```ts
 import { ImportDocx } from '@tiptap-pro/extension-import-docx'

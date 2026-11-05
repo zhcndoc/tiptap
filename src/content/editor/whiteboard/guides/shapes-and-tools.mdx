@@ -1,0 +1,321 @@
+---
+title: 白板形状和工具
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板形状和工具 | Tiptap 编辑器文档
+  description: 用形状填充白板，使用命令添加和更改它们，选择它们，然后选择用户绘图所用的工具。
+  category: 编辑器
+---
+
+每个形状都是白板上的一个节点，命令通过其 ID 查找形状。本指南展示了如何填充板、添加和更改形状、选择它们以及选择工具。
+
+## 形状
+
+| 形状 | 节点类型 | `data-type` | 工具 | 保持 |
+| --------------- | ------------ | ------------- | --------------------------------- | ---------------------------- |
+| 便签纸 | `stickyNote` | `sticky-note` | `note` | 文本 |
+| 几何形状 | `geo` | `geo` | `rectangle`, `ellipse`、`diamond` | 文本 |
+| 自由文本 | `freeText` | `free-text` | `text` | 文本 |
+| 笔线 | `freehand` | `freehand` | `pen` | 点数 |
+| 文档框架 | `docFrame` | `doc-frame` | `doc` | 自己的文档 |
+| 框架 | `frame` | `frame` | `frame` |名称及其中的形状 |
+| 图像 | `boardImage` | `board-image` | — | 图像的 URL |
+| 箭头| `arrow` | `arrow` | `arrow` | 两端和一个标签 |
+
+每个形状都有一个 `id` 和一个 `zIndex`，用于从后到前对形状进行排序。框架位于所有其他形状后面，无论其 `zIndex` 是什么。除文档框架、框架和图像外的所有形状都有一个 `color`，除箭头之外的所有形状都有一个框：`x`、`y`、`width` 和 `height`，以板为单位。带盒子的形状（框架除外）也有 `frameId`：它们所在的框架，或 `null`。
+
+- **带文本的形状**保存段落和列表。他们还有 `fontSize`、`textAlign` 和 `font`。
+- **几何形状** 具有来自 `geoKinds` 的 `kind`：`rectangle`、`ellipse`、`diamond` 或 `triangle`。这些工具绘制前三个，形状可以在以后改变其类型。
+- **自由文本**周围没有形状。它的高度与文本一样高，其宽度包裹着线条。
+- **箭头** 连接形状或自由点。它后面有一个连接形状的末端。每个末端也有一个点，其中有一个自由端。当删除连接端的形状时，该端将保留在绘制时的位置。他们的段落是一个标签就行了。请参见[箭头](/editor/whiteboard/guides/arrows)。
+- **文档框架** 在自己的编辑器中显示文档。请参阅[文档框架](/editor/whiteboard/guides/doc-frames)。
+- **框架**组形状，随它们一起移动并在其边缘被切断。请参阅[框架](/editor/whiteboard/guides/frames)。
+- **图像** 在其 `src` 中显示来自 URL 的图像，并在调整大小时保持其比例。用户粘贴或删除您的应用上传的图像文件。请参阅[图像](/editor/whiteboard/guides/images)。
+- **自定义形状**是您自己的节点，其中包含应用程序的组件。请参阅[自定义形状](/editor/whiteboard/guides/custom-shapes)。
+
+请参阅 [Types](/editor/whiteboard/api-reference/types#shapeattributes) 了解所有属性。
+
+## 填充板
+
+`boardContent` 根据板形状的 JSON 构建白板的 JSON。 `stickyNoteContent` 和 `textShapeContent` 用一段文本构建形状，`freehandFromPoints` 将点转换为框和笔线的点：
+
+```js
+import {
+  boardContent,
+  freehandFromPoints,
+  stickyNoteContent,
+  textShapeContent,
+} from '@tiptap-pro/extension-whiteboard'
+
+const wave = freehandFromPoints({
+  points: [
+    { x: 0, y: 260 },
+    { x: 120, y: 300 },
+  ],
+  strokeWidth: 3,
+})
+
+const content = boardContent([
+  stickyNoteContent({ id: 'idea', x: 0, y: 0, text: 'An idea' }),
+  textShapeContent({
+    type: 'geo',
+    id: 'plan',
+    kind: 'ellipse',
+    x: 320,
+    y: 0,
+    color: 'green',
+    text: 'A plan',
+  }),
+  { type: 'arrow', attrs: { id: 'idea-to-plan', fromId: 'idea', toId: 'plan' } },
+  { type: 'freehand', attrs: { id: 'wave', ...wave, strokeWidth: 3 } },
+])
+
+editor.commands.setContent(content)
+```
+
+每个形状都需要一个白板上没有其他形状的 `id`。 `createShapeId` 返回一个新的随机数。 Board 是 Tiptap 文档，因此 `editor.getJSON()` 返回 JSON 来保存。
+
+## 添加形状
+
+`insertShape` 在所有其他形状前面添加任何形状节点类型的形状。它将插入符号放入带有文本的形状内，并选择其他形状：
+
+```js
+editor.commands.insertShape({ type: 'geo', kind: 'ellipse', x: 100, y: 100 })
+editor.commands.insertShape({ type: 'freeText', x: 100, y: 100, width: 240 })
+editor.commands.insertShape({ type: 'arrow', fromId: 'idea', toId: 'plan' })
+editor.commands.insertShape({ type: 'arrow', fromX: 0, fromY: 0, toX: 200, toY: 100 })
+```
+
+除非您传递一个，否则该形状将获得一个新的 id，并且除非您传递它们，否则将获得 [`setShapeStyle`](#styles-for-new-shapes) 中的样式。当属性为 `NaN` 或无限、类型不是形状或白板上的形状已具有 id 时，它不会添加任何内容。
+
+`insertStickyNote` 添加便签。如果没有尺寸，票据将变为 `stickyNoteSize`，220 x 160：
+
+```js
+editor.commands.insertStickyNote({ x: 100, y: 100 })
+```
+
+## 更改形状
+
+`updateShape` 更改一个形状的属性，`updateShapes` 一步更改多个形状的属性。它们会跳过不在白板上的 id、会更改 id 或保留 `NaN` 或无限数量的更新、形状不具有的属性以及已具有属性的形状。当没有任何变化时，他们返回 `false`。
+
+```js
+editor.commands.updateShape({ id: 'plan', attributes: { kind: 'diamond' } })
+
+editor.commands.updateShapes([
+  { id: 'idea', attributes: { color: 'blue' } },
+  { id: 'plan', attributes: { color: 'blue', fontSize: 'l' } },
+])
+```
+
+其他命令采用形状的 ID：
+
+```js
+import { getSelectedShapeIds } from '@tiptap-pro/extension-whiteboard'
+
+const ids = getSelectedShapeIds(editor.state)
+
+// Moves the shapes, in board units. Arrows move their free ends
+editor.commands.moveShapes({ ids, delta: { x: 40, y: 0 } })
+
+// Adds copies with new ids, 24 right and down, and selects them
+editor.commands.duplicateShapes({ ids })
+
+// Puts the shapes in front of or behind all others, in their order among each other
+editor.commands.bringToFront(ids)
+editor.commands.sendToBack(ids)
+
+// Deletes the shapes in one step
+editor.commands.deleteShapes(ids)
+```
+
+连接已删除形状的箭头保持不变，并在接触它的地方有一个自由端。也可以对选定的形状进行复制、剪切和粘贴操作。粘贴的形状会获得新的 id，并向下和向右移动，直到它们不覆盖同一位置的形状。
+
+## 选择形状
+
+除了文本选择之外，该白板将选定的形状保留为 id，因此该选择可以在其他用户的更改中保留下来：
+
+```js
+import { getSelectedShapeIds } from '@tiptap-pro/extension-whiteboard'
+
+editor.commands.selectShapes(['idea', 'plan'])
+getSelectedShapeIds(editor.state) // ['idea', 'plan']
+
+editor.commands.toggleShapeSelection('plan')
+editor.commands.selectAllShapes()
+editor.commands.clearShapeSelection()
+```
+
+`selectShapes` 忽略未知的 id，并保持选择形状的顺序。
+
+使用指针，按下某个形状即可将其选中，然后将其与其他选定的形状一起拖动。 <kbd>Shift</kbd> 将形状添加到选择中或将其删除。单击唯一选定的形状可以编辑指针所在位置的文本，因此双击注释即可开始书写。角控柄可调整按下的形状的大小，所选箭头的末端控柄可移动其末端。框架只需要在其边缘和名称上按下，因此在其内部拖动会绘制一个选择框。
+
+## 编辑文本
+
+编辑文本时，按键键入一个形状。否则，按键将作用于白板和选定的形状。 `editShapeText` 将插入符号放入形状的文本中，当插入符号位于该文本中时，将插入符号置于 `pos` 中，否则将其置于末尾：
+
+```js
+import { getEditedShapeId, isEditingText } from '@tiptap-pro/extension-whiteboard'
+
+editor.chain().focus().editShapeText({ id: 'idea' }).run()
+
+isEditingText(editor.state) // true
+getEditedShapeId(editor.state) // 'idea'
+```
+
+<kbd>Escape</kbd> 停止编辑并选择形状。 `selectShapeText` 选择已编辑形状的所有文本，并且选择永远不会到达另一个形状。
+
+该套件带来了形状使用的文本扩展，因此它们的命令适用于编辑的文本：
+
+```js
+editor.commands.toggleBold()
+editor.commands.setTextColor('red')
+editor.commands.setHighlight({ color: 'blue' })
+editor.commands.setLink({ href: 'https://tiptap.dev' })
+editor.chain().editShapeText({ id: 'idea' }).toggleTaskList().run()
+```
+
+文本颜色和突出显示存储板颜色的名称，就像形状一样，因此您的 CSS 决定它们的外观。单击 <kbd>Control</kbd> 或 macOS 上的 <kbd>Cmd</kbd> 会在新选项卡中打开链接。当没有编辑任何文本时，任务复选框也会切换。
+
+## 工具
+
+该工具决定白板上的按压操作。该白板以 `select` 开头：
+
+```js
+import { getActiveTool, getToolShapeType, toolKeys } from '@tiptap-pro/extension-whiteboard'
+
+editor.commands.setTool('pen')
+getActiveTool(editor.state) // 'pen'
+
+getToolShapeType('note') // 'stickyNote'
+toolKeys.pen // 'p'
+```
+
+`setTool` 也结束文本编辑，因此按键在白板上起作用。它不会移动焦点，因此工具栏按钮在单击后调用 [`focusBoard()` 函数 ](/editor/whiteboard/api-reference/utilities#focusboard)，如 [添加工具 ](/editor/whiteboard/guides/react#add-tools).工具及其默认键：
+
+| 工具 | 键 | 按一下有何作用 |
+| ----------- | ------------ | ------------------------------------------------------------------------------------ |
+| `select` | <kbd>V</kbd> | 选择并移动形状|
+| `hand` | <kbd>H</kbd> | 平移板 |
+| `note` | <kbd>N</kbd> | 添加便签 |
+| `text` | <kbd>T</kbd> | 添加自由文本 |
+| `doc` | <kbd>W</kbd> | 添加文档框架 |
+| `rectangle` | <kbd>R</kbd> | 添加矩形|
+| `ellipse` | <kbd>O</kbd> | 添加椭圆 |
+| `diamond` | <kbd>D</kbd> | 添加菱形 |
+| `frame` | <kbd>F</kbd> | 添加框架，该框架采用全部位于其中且不在其他框架中的形状 |
+| `arrow` | <kbd>A</kbd> | 在两点或两个形状之间绘制箭头 |
+| `pen` | <kbd>P</kbd> | 绘制笔线 |
+| `eraser` | <kbd>E</kbd> | 擦除其接触的形状（框架除外） |
+
+工具添加形状后，白板会切回 `select` 工具。笔和橡皮擦会保持当前状态。使用箭头工具时，每个端点会连接其下方的形状（笔迹除外）；若未连接形状，则保持为自由端。
+
+`doc` 工具需要 [`docs` 选项](/editor/whiteboard/guides/doc-frames)。如果没有它，`setTool('doc')` 将返回 `false`，并且 <kbd>W</kbd> 将继续显示该页面。
+
+要更改按键，请设置 `WhiteboardKit` 的 `toolKeys` 选项。您设置的键将替换其工具的默认键，`null` 使工具不带键，`false` 关闭所有工具键：
+
+```js
+WhiteboardKit.configure({ toolKeys: { pen: 'b', eraser: null } })
+```
+
+## 新形状的样式
+
+`setShapeStyle` 为选定形状、编辑文本的形状以及稍后添加的形状提供样式。没有样式的形状保留其样式：
+
+```js
+import { getNextShapeStyles } from '@tiptap-pro/extension-whiteboard'
+
+editor.commands.setShapeStyle({ name: 'color', value: 'blue' })
+editor.commands.setShapeStyle({ name: 'fontSize', value: 'l' })
+
+getNextShapeStyles(editor.state) // { color: 'blue', fontSize: 'l' }
+```
+
+`shapeStyles` 列出样式及其值的名称。使用它或 `shapeColors` 构建菜单：
+
+| 样式 | 值 |
+| --------------- | ------------------------------------------------------------------------ |
+| `color` | `black`、`gray`、`red`、 `orange`、`yellow`、`green`、`blue` 和 `violet` |
+| `fontSize` | `s`、`m`、`l` 和 `xl` |
+| `textAlign` | `start`、`center` 和 `end` |
+| `font` | `sans`、 `serif` 和 `mono` |
+| `arrowheads` | `none`、`end` 和 `both` |
+| `arrowheadKind` | `triangle`、`arrow`、`dot`、`diamond` 和 `bar` |
+| `arrowKind` | `straight`、`curved` 和 `elbow` |
+| `dash` | `solid`、`dashed` 和 `dotted` |
+
+形状存储名称。箭头根据四种箭头样式绘制线条和头部，而您的 CSS 决定其他样式的外观。请参阅[箭头](/editor/whiteboard/guides/arrows#lines-and-heads) 和[样式](/editor/whiteboard/api-reference/styling)。
+
+## 撤消和重做
+
+`undoBoard` 和 `redoBoard` 撤消和重做上次更改，并选择其更改的形状。仅更改文本的撤消会返回到编辑该文本：
+
+```js
+editor.commands.undoBoard()
+editor.commands.redoBoard()
+```
+
+该套件带来了 Tiptap 的 [`UndoRedo`](/editor/extensions/functionality/undo-redo)。使用 `undoRedo` 选项对其进行配置，如 `WhiteboardKit.configure({ undoRedo: { depth: 50 } })`。通过协作，设置 `undoRedo: false`，`undoBoard` 和 `redoBoard` 改为使用协作的撤消。请参阅[协作](/editor/whiteboard/guides/collaboration)。
+
+## 构建自己的交易
+
+构建自己的交易的代码（如 AI 工具）可以使用 `insertShapesInFront`、`removeShapes` 和 `restackShapes` 更改形状。他们将交易发送给您。通过 `UndoRedo`，每个交易都可以成为自己的撤消步骤。通过协作，Yjs 将快速发生的更改合并为一个步骤：
+
+```js
+import {
+  createShapeId,
+  insertShapesInFront,
+  stickyNoteContent,
+} from '@tiptap-pro/extension-whiteboard'
+
+const { tr, schema } = editor.state
+const note = stickyNoteContent({ id: createShapeId(), x: 0, y: 0, text: 'Idea' })
+
+insertShapesInFront({ tr, shapes: [schema.nodeFromJSON(note)] })
+editor.view.dispatch(tr)
+```
+
+`insertShapesInFront` 当形状没有 id 或板或另一个形状具有 id 时抛出 `RangeError`。每次更改后，自由文本和文档框架都会随着其内容的高度而增长。对于稍后到达的内容，例如人工智能在添加框架后编写的文档框架的文档，`keepShapeHeights(tr)` 会保留交易赋予其形状的高度。
+
+## 键盘快捷键
+
+未编辑任何文本时：
+
+| 操作 | Windows/Linux | macOS |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| 选择工具 | [工具键](#tools) | [工具键](#tools) |
+| 返回到`select`工具，然后清除选择| <kbd>Escape</kbd> | <kbd>Escape</kbd> |
+| 删除所选形状 | <kbd>Backspace</kbd> 或 <kbd>Delete</kbd> | <kbd>Backspace</kbd> 或 <kbd>Delete</kbd> |
+| 复制所选形状 | <kbd>Control</kbd> + <kbd>D</kbd> | <kbd>Cmd</kbd> + <kbd>D</kbd> |
+| 编辑所选形状的文字，当只有一个时 | <kbd>Enter</kbd> | <kbd>Enter</kbd> |
+| 选择所有形状 | <kbd>Control</kbd> + <kbd>A</kbd> | <kbd>Cmd</kbd> + <kbd>A</kbd> |
+| 将所选形状置于前面 | <kbd>]</kbd> 或<kbd>Control</kbd> + <kbd>Shift</kbd> + <kbd>↑</kbd> | <kbd>]</kbd> 或 <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>↑</kbd> |
+| 将选定的形状发送到后面 | <kbd>[</kbd> 或 <kbd>Control</kbd> + <kbd>Shift</kbd> + <kbd>↓</kbd> | <kbd>[</kbd> 或 <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>↓</kbd> |
+| 将所选形状移动 1 个板单元 | <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> | <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> |
+| 将所选形状移动 10 个板单位 | <kbd>Shift</kbd> + 箭头键| <kbd>Shift</kbd> + 箭头键 |
+| 撤消 | <kbd>Control</kbd> + <kbd>Z</kbd> | <kbd>Cmd</kbd> + <kbd>Z</kbd> |
+| 重做 | <kbd>Shift</kbd> + <kbd>Control</kbd> + <kbd>Z</kbd> 或 <kbd>Control</kbd> + <kbd>Y</kbd> | <kbd>Shift</kbd> + <kbd>Cmd</kbd> + <kbd>Z</kbd> 或 <kbd>Cmd</kbd> + <kbd>Y</kbd> |
+| 平移 | 保持 <kbd>Space</kbd> | 保持 <kbd>Space</kbd> |
+
+编辑文本时，<kbd>Escape</kbd>选择形状，<kbd>Control</kbd> + <kbd>A</kbd>（macOS 上为 <kbd>Cmd</kbd> + <kbd>A</kbd>）选择其文本，撤消和重做工作相同。有关缩放快捷方式，请参阅[舞台和相机](/editor/whiteboard/guides/stage-and-camera#attach-the-stage)。
+
+## 只读板
+
+`setEditable(false)` 使板只读，就像任何 Tiptap 编辑器一样：
+
+```js
+editor.setEditable(false)
+```
+
+用户仍可选择形状、平移、缩放和复制。选中的形状不会显示控制柄，编辑器元素会带有 `data-read-only` 属性，供应用的 CSS 使用。此时只有 `select` 和 `hand` 工具可用：切换到其他工具会自动返回 `select`，相关快捷键则会传递给页面。按键不会修改白板，任务复选框保持不变，也不会保留文本编辑状态；调用 `editShapeText` 时只会选中形状。如果白板在编辑过程中切换为只读，编辑会停止并选中对应形状。其他命令仍可修改白板，因此应用仍能加载新内容等。
+
+要判断白板是否可编辑（例如决定是否显示切换只读状态的按钮），请使用 [`isBoardEditable`](/editor/whiteboard/api-reference/utilities#isboardeditable)。只要焦点位于白板中，`editor.isEditable` 就会返回 `false`。
+
+## 后续步骤
+
+- 使用 [箭头连接形状](/editor/whiteboard/guides/arrows)
+- 在白板上显示文档 [文档框架](/editor/whiteboard/guides/doc-frames)
+- 让用户粘贴和放置 [图像](/editor/whiteboard/guides/images)
+- 添加使用 [自定义形状](/editor/whiteboard/guides/custom-shapes)
+- 查看所有 [命令](/editor/whiteboard/api-reference/commands)

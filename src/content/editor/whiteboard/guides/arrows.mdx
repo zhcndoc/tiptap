@@ -1,0 +1,76 @@
+---
+title: 白板箭头
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板箭头 | Tiptap 编辑器文档
+  description: 用箭头连接白板上的形状，并为箭头提供标签、曲线或折线、虚线和其他头。
+  category: 编辑器
+---
+
+箭头连接两个形状，或在白板上的自由点之间运行。当形状移动或改变其大小时，连接形状的一端会跟随该形状。
+
+## 连接形状
+
+使用 `arrow` 工具，用户可以通过拖动来绘制箭头。除笔线外，每一端都连接其下方的形状，或者在白板上保持自由状态。连接端瞄准形状中拖动开始或结束的点，并停止在形状的边缘。靠近形状的中间，它瞄准的是中间。选定箭头的末端手柄以相同的方式移动其末端。当拖动一端时，它将连接的形状具有 `data-arrow-target`，用于您的 CSS。
+
+`insertShape` 在形状之间、点之间或从形状到点添加箭头：
+
+```js
+editor.commands.insertShape({ type: 'arrow', fromId: 'idea', toId: 'plan' })
+editor.commands.insertShape({ type: 'arrow', fromId: 'idea', toX: 400, toY: 300 })
+```
+
+白板上具有形状 id 的末端位于该形状的边缘，线在到达末端锚点的途中与它相遇：`fromAnchorX` 和 `fromAnchorY`，或 `toAnchorX` 和 `toAnchorY`，形状框中从 0 到 1。默认值 0.5，瞄准中间。没有形状的一端位于其点处，`fromX` 和 `fromY` 或 `toX` 和 `toY`。删除连接的形状后，末端将保留在与形状接触的位置。请参阅[`ArrowEndAttributes`](/editor/whiteboard/api-reference/types#arrowendattributes)。
+
+## 标签
+
+箭头的段落是其标签，位于其行的中间。该线在标签周围留下间隙。双击箭头或 <kbd>Enter</kbd>（当它是唯一选定的形状时）可编辑标签。没有文本的箭头不显示标签。
+
+要启动带有标签的板，请为箭头指定一个段落：
+
+```js
+import { boardContent, stickyNoteContent } from '@tiptap-pro/extension-whiteboard'
+
+const content = boardContent([
+  stickyNoteContent({ id: 'idea', x: 0, y: 0, text: 'An idea' }),
+  stickyNoteContent({ id: 'plan', x: 400, y: 0, text: 'A plan' }),
+  {
+    type: 'arrow',
+    attrs: { id: 'idea-to-plan', fromId: 'idea', toId: 'plan' },
+    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'leads to' }] }],
+  },
+])
+
+editor.commands.setContent(content)
+```
+
+与其他形状的文本一样，标签也有 `fontSize` 和 `font`。
+
+## 线和头
+
+这些样式更改箭头的外观：
+
+| 样式 | 值 | 默认 |
+| --------------- | ----------------------------------------------- | ---------- |
+| `arrowKind` | `straight`、`curved` 和 `elbow` | `straight` |
+| `dash` | `solid`、`dashed` 和 `dotted` | `solid` |
+| `arrowheads` | `none`、`end` 和 `both` | `end` |
+| `arrowheadKind` | `triangle`、`arrow`、`dot`、`diamond` 和 `bar` | `triangle` |
+
+像其他样式一样设置它们，用于选定的箭头和稍后添加的箭头，或作为单个箭头的属性：
+
+```js
+editor.commands.setShapeStyle({ name: 'arrowKind', value: 'elbow' })
+editor.commands.insertShape({ type: 'arrow', fromId: 'idea', toId: 'plan', dash: 'dashed' })
+```
+
+弯曲箭头或肘形箭头通过距离其末端掉落点最近的一侧离开和进入每个形状，并在必要时绕过该形状。靠近其形状中间的一端落在使线条最简单的一侧。两端都在那里，箭头就在彼此相对的两侧之间运行。肘部以直角转动，曲线也以同样的方式平滑弯曲。当形状太接近时，箭头是直的。 `arrowheads` 决定哪一端有头部，`arrowheadKind` 决定头部的外观。
+
+箭头以当前颜色绘制其线条和头部，因此您的 CSS 设置其 `color`。有关箭头的标签和其他部分，请参阅 [Styling](/editor/whiteboard/api-reference/styling#parts-of-shapes)。
+
+## 后续步骤
+
+- 使用 [`setShapeStyle`](/editor/whiteboard/guides/shapes-and-tools#styles-for-new-shapes)
+- 查看所有命令 ](/editor/whiteboard/api-reference/commands)

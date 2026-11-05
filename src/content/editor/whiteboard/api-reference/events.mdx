@@ -1,0 +1,48 @@
+---
+title: 白板编辑器事件
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板编辑器事件 | Tiptap 编辑器文档
+  description: Tiptap Whiteboard 扩展的编辑器事件。
+  category: 编辑器
+---
+
+白板的编辑器发出这些事件。用 `editor.on()` 收听，用 `editor.off()` 停止。
+
+## `docChange`
+
+当文档框架文档的编辑器有事务（也是仅移动插入符）、编辑开始或停止时以及创建或销毁编辑器时触发。使用它来更新也适用于文档的工具栏，但不能保存文档。
+
+```js
+import { getEditedDocEditor } from '@tiptap-pro/extension-whiteboard'
+
+editor.on('docChange', ({ docId }) => {
+  const isEditing = getEditedDocEditor(editor) !== null
+  console.log(`The document ${docId} changed. A document is edited: ${isEditing}`)
+})
+```
+
+### 有效负载
+
+- `docId` (`string`)：已更改文档的 ID。
+
+## `shapesMove`
+
+在拖动移动形状时触发，以板为单位将其移动的距离作为 `delta`。拖动结束后，`delta` 变为 `null`。当拖动结束时，放置会在此事件报告结束之前更改文档。
+
+与其他用户共享，因此 [`createRemoteMoves`](/editor/whiteboard/api-reference/utilities#createremotemoves) 或 [`createRemoteCursors`](/editor/whiteboard/api-reference/utilities#createremotecursors) 在其白板上显示拖动：
+
+```js
+editor.on('shapesMove', ({ ids, delta }) => {
+  provider.setAwarenessField('drag', delta ? { ids, delta } : null)
+})
+```
+
+### 有效负载
+
+- `ids` (`readonly string[]`): 拖动形状的 id。
+- `delta` (`Point | null`)：拖动自开始以来已将形状移动多远，或一旦结束则​​为 `null`。
+
+请参阅[协作](/editor/whiteboard/guides/collaboration#show-what-others-select-and-drag)。

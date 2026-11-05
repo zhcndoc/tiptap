@@ -1,0 +1,103 @@
+---
+title: '模型工具'
+intro: 'AI 模型，例如大语言模型 (LLM)，可以通过工具调用插入、读取和更改图表和流程图。在此页面中，“模型”始终表示 AI 模型。该扩展根据您的编辑器支持的内容构建工具定义。每个工具都通过用户编辑所使用的相同命令来编写。'
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '模型工具 | Tiptap 图表文档'
+  description: 'AI 模型，例如大语言模型 (LLM)，可以通过工具调用插入、读取和更改图表和流程图。'
+  category: 图表
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+运行模型将进行的工具调用，并查看每个答案及其对文档的影响：
+
+<CodeDemo isPro viewer view="preview" path="/Extensions/DiagramsModelTools" />
+
+## 快速入门
+
+为模型提供图表工具和图表工具。使用匹配的运行函数应答每个工具调用：
+
+```ts
+import {
+  getChartToolDefinitions,
+  getDiagramToolDefinitions,
+  runChartTool,
+  runDiagramTool,
+} from '@tiptap-pro/extension-diagrams'
+
+const tools = [...getChartToolDefinitions(editor), ...getDiagramToolDefinitions(editor)]
+
+// A call to a chart tool
+const result = runChartTool(editor, name, input)
+// A call to a diagram tool
+const other = runDiagramTool(editor, name, input)
+```
+
+## 函数
+
+| 函数 | 返回 |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `getChartToolDefinitions(editor)` | 用于运行[图表工具](/diagrams/guides/ai#charts)的工具定义（`name`、`description`、`inputSchema`） |
+运行一款图表工具 | 后的 | `runChartTool(editor, name, input)` | `{ ok, output, pos? }`
+| `getDiagramToolDefinitions(editor)` | 用于运行[流程图工具](/diagrams/guides/ai#diagrams)的工具定义 |
+| `runDiagramTool(editor, name, input)` | `{ ok, output, pos? }` 的工具定义 |
+
+## 调用返回什么
+
+| 字段 | 类型 | 描述 |
+| -------- | --------- | -------------------------------------------------------------------------------------------------------- |
+| `ok` | `boolean` | 呼叫是否成功 |
+| `output` | `string` | JSON，或者失败时一条消息，告诉模型如何修复调用 |
+| `pos` | `number` | 插入或更新写入的图表或流程图的位置。 `output` 的末尾也将其命名为 |
+
+## 图表
+
+图表工具有 `insertChart`、`insertLinkedChart`、`updateChart`、`readChart`、`listCharts` 和 `describeChartCapabilities`。它们的定义将编辑器的格式和渲染器列为枚举。
+
+### 仅此编辑器可以绘制的内容
+
+这些工具绝不会插入未注册的渲染器无法绘制的图表。 `type` 枚举列出了已注册渲染器绘制的图表类型，`describeChartCapabilities` 命名了每个渲染器的类型。
+
+这些调用被拒绝，并且不写入任何内容：
+
+- 插入没有渲染器绘制的图表
+- 未注册的 `renderer`，或者不绘制图表类型
+- 将类型更改为没有渲染器绘制的 `updateChart` 调用
+
+答案命名要使用的类型或渲染器：
+
+```json
+{
+  "ok": false,
+  "output": "No Renderer here draws \"sankey\" charts. Use one of these types: line, bar, pie."
+}
+```
+
+### 读取数据源的图表
+
+`insertLinkedChart` 工具会插入图表，并通过 `linkChartSource` 将其关联到[数据源](/diagrams/data/sources)，例如 URL 上的 CSV 文件。同名命令 [`insertLinkedChart`](/diagrams/data/tables#insertlinkedchart) 则会生成一个跟随文档中表格更新的图表。该工具不支持这种用法，因为它不提供 `document-table` 数据源。
+
+| 参数 | 类型 | 说明 |
+| ---------- | --------- | ----------------------------------------------------------------------------------- |
+| `provider` | `string` | 数据源。除 `document-table` |
+| `address` | `object` | 之外的已注册数据源的枚举 源读取位置，例如 URL |
+| `type` | `string` | 图表类型。可选 |
+| `title` | `string` | 图表的标题。可选 |
+| `readOnly` | `boolean` | 图表是只读的，除非是 `false` |
+
+调用返回后数据到达。读取失败将转到 `onSourceError`。仅当您的应用设置 [`allowSourceUrl`](/diagrams/api-reference/options#allowsourceurl)，并且仅链接到它允许的 URL 时，该工具才会链接 `url-csv` 和 `url-json`。 `allowSourceUrl` 决定请求的去向，而不是 URL 保存的内容。模型仍然可以将文档文本放入允许的 URL 中，例如在其查询中。因此，仅允许您信任的主机处理文档内容。
+
+## 图表
+
+图表工具为 `insertDiagram`、`updateDiagram`、`readDiagram` 和 `listDiagrams`。一个模型写了《Mermaid》，它已经知道了。 `listDiagrams` 将每个图的 `format` 命名。 draw.io 或 BPMN 图作为其整个 XML 进行读取和更改。
+
+A [Mermaid图表类](/diagrams/charts/overview#importmermaidchart)，如饼图，是图表。带有 1 的图表工具调用被拒绝，并显示一条消息，将模型指向 `insertChart`。
+
+### 格式和渲染器
+
+- **`insertDiagram` 创建 Mermaid 或 BPMN。** 对于 BPMN，调用会传递 `format: 'bpmn'`。如果没有 `format`，它会创建 Mermaid，除非您的编辑器绘制 BPMN 而不是 Mermaid。
+- **`insertDiagram` 不提供 draw.io。** 它的 `format` 枚举是 `mermaid` 和 `bpmn`。该模型可以使用 `readDiagram` 和 `updateDiagram` 读取和更改现有的 draw.io 图。
+- **无论渲染器注册什么，工具都会写入源代码**，就像命令一样。这里没有渲染器绘制的格式或种类都是一样的。 `output` 告诉模型它在此编辑器中显示为不可用。

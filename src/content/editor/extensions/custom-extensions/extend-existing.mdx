@@ -139,11 +139,11 @@ const CustomParagraph = Paragraph.extend({
 // <p color="pink">示例文本</p>
 ```
 
-仅此就足以让 Tiptap 知道新的属性，并将 `'pink'` 设置为默认值。所有属性默认将呈现为 HTML 属性，并在初始化时从内容中解析。
+这已经足以告诉 Tiptap 有关新属性的信息，并将 `'pink'` 设置为默认值。默认情况下，所有属性都将渲染为 HTML 属性，并在启动时从内容中解析。
 
 让我们继续使用颜色示例，假设您想添加一个内联样式以实际改变文本的颜色。使用 `renderHTML` 函数，您可以返回将在输出中呈现的 HTML 属性。
 
-此示例根据 `color` 的值添加一个样式 HTML 属性：
+此示例根据 `color` 的值添加样式 HTML 属性：
 
 ```js
 const CustomParagraph = Paragraph.extend({

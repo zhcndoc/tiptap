@@ -1,0 +1,51 @@
+---
+title: '在图表中编辑'
+intro: '双击绘制图表中的文本（例如其标题或系列名称），将在其上方打开一个文本字段。确认后，新文本将写入图表数据或图表规格中。仅当编辑器可编辑时此功能才有效。'
+headerDemo:
+  path: '/Extensions/DiagramsRenameInChart'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '在图表中编辑 | Tiptap 图表文档'
+  description: '双击绘制图表中的文本（例如其标题或系列名称），将在其上方打开一个文本字段。'
+  category: 图表
+---
+
+## 重命名文本
+
+| 双击文本 | 写入该文本的命令，其中 |
+| -------------------------------- | ----------------------------------------------- |
+| 标题 | `updateChartSpec`，作为 `spec.title` |
+| 轴标题 | `updateChartAxis`，作为该轴的 `title` |
+| 图例中的系列名称 | `updateChartData`，作为其列的标题 |
+| 类别标签，或饼图 | `updateChartData`，作为其行的标签单元格 |
+
+**确认和取消。**输入或将焦点移出文本字段，可通过一个撤消步骤写入文本。 Escape 会关闭文本字段并且不会更改任何内容。
+
+**列 ids。** 当您重命名其标题时，列会保留其 id，因此 `spec.series` 仍然适用于它。
+
+**行作为系列。** 对于 `encoding.seriesIn: 'rows'`，系列名称是行的标签单元格，类别标签是列标题。
+
+**只读数据。** 在链接到只读数据源的图表上，只有标题和轴标题会打开文本字段。系列和类别均来自源头。
+
+**哪些渲染器支持它。** 并非每个渲染器都支持。 [图表中的文字 ](/diagrams/renderers/custom#text-in-the-chart) 说明了这一点。
+
+**值标签。** 沿值轴的数字不会被存储，因此双击它们不会打开任何内容。
+
+## 无绘制图表
+
+`@tiptap-pro/extension-diagrams/core` 中的 `renameChartDataText` 重命名图表数据中的系列或类别。当目标不是该数据的系列或类别时，它返回新的图表数据或 `null`。
+
+```ts
+import { parseChartSyntax, renameChartDataText } from '@tiptap-pro/extension-diagrams/core'
+
+const { data } = parseChartSyntax('Month | Sales\nJan | 2\nFeb | 4')
+const renamed = renameChartDataText({
+  data,
+  target: { kind: 'series', column: 'sales' },
+  text: 'Revenue',
+})
+editor.commands.updateChartData({ data: renamed ?? data })
+```

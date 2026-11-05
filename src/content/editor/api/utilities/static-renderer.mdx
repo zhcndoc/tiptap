@@ -24,11 +24,11 @@ import { Callout } from '@/components/ui/Callout'
 
 ## 为什么选择静态渲染？
 
-静态渲染的主要用例是在服务器端渲染 Tiptap/ProseMirror JSON 文档，例如在 Next.js 或 Nuxt.js 应用程序中。通过这种方式，您可以在将内容发送到客户端之前将编辑器的内容渲染为 HTML，这可以通过不再需要在客户端或服务器上加载编辑器来提高应用程序的性能。
+静态渲染的主要用例是在服务器端渲染 Tiptap/ProseMirror JSON 文档，例如在 Next.js 或 Nuxt.js 应用程序中。这样，您可以在将编辑器的内容发送到客户端之前将其渲染为 HTML，这样无需在客户端或服务器上加载编辑器即可提高应用程序的性能。
 
 另一个用例是将编辑器的内容渲染为另一种格式，比如 markdown，这在您想要将其发送到基于 markdown 的 API 时非常有用。静态渲染器的构建方式使得输出可以是您想要的任何内容，只要您提供正确的映射即可。
 
-但是什么使得它是静态的呢？静态渲染器不需要浏览器、DOM 甚至编辑器实例来渲染内容。它是一个纯 JavaScript 函数，接受文档（作为 JSON 或 Prosemirror Node 实例）并返回目标格式。
+但什么使它成为静态呢？静态渲染器不需要浏览器、DOM 甚至编辑器实例来渲染内容。它是一个纯 JavaScript 函数，它接受文档（作为 JSON 或 ProseMirror Node 实例）并返回目标格式。
 
 ## 从 JSON 生成 HTML 字符串
 

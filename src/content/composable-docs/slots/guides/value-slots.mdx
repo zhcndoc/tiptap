@@ -1,0 +1,409 @@
+---
+title: 值槽
+meta:
+  description: 使用内置表单控件和自定义 NodeView 编辑存储在槽属性中的 JSON 值。
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+值槽可让您在槽内存储除 Tiptap 内容之外的任何 JSON 值。将这些值显示为表单字段（例如文本输入和复选框），或构建您自己的自定义输入。
+
+<CodeDemo isPro path="/Examples/SlotValues" />
+
+## 插入值槽
+
+创建槽时，通过 `mode: 'value'` 创建值槽：
+
+```ts
+editor.commands.insertSlot({
+  mode: 'value',
+  kind: 'inline',
+  id: 'priority',
+  value: null,
+  config: {
+    label: 'Priority',
+    placeholder: 'Choose a priority',
+    input: {
+      type: 'select',
+      options: [
+        { value: 'normal', label: 'Normal' },
+        { value: 'urgent', label: 'Urgent' },
+      ],
+    },
+  },
+})
+```
+
+使用 `kind: 'block'` 将控件放入其自己的块中。如果没有 `mode: 'value'`，插入会创建一个普通的内容槽。
+
+值可以是任意有限 JSON：`null`、字符串、布尔值、数字、数组或对象。使用[验证](/composable-docs/slots/guides/validate-submission)执行应用程序的约束。
+
+## 内置输入
+
+插槽扩展附带一组内置输入类型。您还可以创建自己的自定义输入。
+
+设置 `config.input.type` 以选择控件。对于文本输入，省略 `input`。
+
+| 类型 | 控件 | 存储值 | 选项类型 (`config.input.options`) |
+| ---------- | --------------------- | -------------------------------- | ------------------------------------- |
+| `text` | 原生文本输入 | `string` | 未使用 |
+| `textarea` | 多行文本输入 | `string` | 未使用 |
+| `number` | 原生数字输入 | `string`，包括 `''` | 未使用 |
+| `date` | 原生日期输入 | `string`，例如 `'2026-10-14'` |未使用 |
+| `checkbox` | 原生复选框 | `boolean` | 未使用 |
+| `select` | 下拉选择 | `string` 选项值 | `{ value: string; label: string }[]` |
+| `radio` | 单选按钮列表 | `string` 选项值 | `{ value: string; label: string }[]` |
+
+`SlotInput.options` 是可选的。只有下拉选择和单选按钮控件会使用它；它们存储所选选项的 `value`，而不是显示标签。
+
+对于单选按钮组，将 `config.input` 设置为：
+
+```ts
+{
+  type: 'radio',
+  options: [
+    { value: 'standard', label: 'Standard' },
+    { value: 'express', label: 'Express' },
+  ],
+}
+```
+
+每个槽位都是一个独立的单选按钮组。对于多选，请使用自定义 NodeView，如演示的芯片选择器。
+
+数字输入将值存储为字符串，因为浏览器可能会针对不完整的数字返回 `''`。
+
+## 读取和更新值
+
+```ts
+import { getSlot } from '@tiptap-pro/extension-slot'
+
+editor.commands.setSlotValue({ id: 'priority', value: 'urgent' })
+// Clearing a slot sets its value to null.
+editor.commands.clearSlot({ id: 'priority' })
+
+// Update multiple slot values in an atomic batch.
+editor.commands.setSlotValues({
+  values: [
+    { id: 'priority', value: 'urgent' },
+    { id: 'name', value: 'Alex' },
+  ],
+})
+
+const slot = getSlot({ snapshot: editor.storage.slot.snapshot, id: 'priority' })
+if (slot?.mode === 'value') console.log(slot.value)
+```
+
+插槽与协作兼容。启用协作后，槽的更新会与协作文档的其他用户实时同步。
+
+## 混合自定义和默认 NodeViews
+
+按照完整教程构建自定义切换按钮，包括其 UI：
+
+- [使用普通 JavaScript 创建自定义输入](#create-a-custom-input-with-vanilla-javascript)
+- [使用 React](#create-a-custom-input-with-react)
+
+在 `addNodeView()` 内选择渲染器并保留内置控件作为后备：
+
+```ts
+import { Slot, InlineValueSlot, createDefaultSlotValueView } from '@tiptap-pro/extension-slot'
+
+const CustomValueSlot = InlineValueSlot.extend({
+  addNodeView() {
+    return (props) => {
+      if (props.node.attrs.config?.input?.type === 'rating') {
+        return createRatingView(props)
+      }
+      return createDefaultSlotValueView(props)
+    }
+  },
+})
+
+Slot.configure({ inlineValueSlot: CustomValueSlot })
+```
+
+`createRatingView` 是应用程序代码。该演示使用原生按钮来实现它。对块视图使用 `BlockValueSlot` 和 `blockValueSlot` 选项。保留原始节点名称和叶架构。请勿提供 `contentDOM` 或 `NodeViewContent`。
+
+在自定义视图内，`createSlotValueController({ editor, getPos })` 提供：
+
+- `getValue()` 和 `setValue(value)` 来读取和写入答案。
+- `getState()` 用于 `value`、`config`、`editable` 和 `available` 的稳定快照。
+- `subscribe(listener)` 在文档和权限更改后更新 UI。
+- `focus()` 当其输入接收焦点时选择插槽。
+- `destroy()` 用于在删除普通视图时释放订阅。
+
+自定义视图应：
+
+- 当 `editable` 为 false 时禁用控件。
+- 在 `setValue` 返回 `false`（拒绝写入）后渲染当前状态。
+- 将输入事件保留在控件内并处理文本输入的 IME 组合。
+- 删除视图时释放订阅。
+
+如果更改配置选择不同的渲染器，请从 NodeView 的 `update` 方法返回 `false`，以便 Tiptap 再次运行 `addNodeView` 的工厂。当输入类型更改时，默认视图会执行此操作。
+
+## 使用普通 JavaScript 创建自定义输入
+
+构建一个在**开**和**关**之间切换的按钮并存储布尔值。原生按钮提供 Enter 和 Space 键盘支持。
+
+### 1. 创建 UI
+
+创建 `toggle-slot.js`。使用值控制器进行读取、受保护的写入和权限更改：
+
+```js
+import {
+  BlockValueSlot,
+  createDefaultSlotValueView,
+  createSlotValueController,
+} from '@tiptap-pro/extension-slot'
+
+function createToggleView({ editor, getPos, node }) {
+  const slot = createSlotValueController({ editor, getPos })
+  const dom = document.createElement('div')
+  dom.contentEditable = 'false'
+  const button = document.createElement('button')
+  button.type = 'button'
+  dom.append(button)
+
+  function render() {
+    const { value, editable, available } = slot.getState()
+    const on = value === true
+    button.textContent = `${slot.getState().config?.label ?? 'Notifications'}: ${on ? 'On' : 'Off'}`
+    button.setAttribute('aria-pressed', String(on))
+    button.disabled = !available || !editable
+  }
+
+  button.addEventListener('focus', () => slot.focus())
+  button.addEventListener('click', () => {
+    slot.setValue(slot.getValue() !== true)
+    render() // Also restore the current state if the write was refused.
+  })
+  const unsubscribe = slot.subscribe(render)
+  render()
+
+  return {
+    dom,
+    update(nextNode) {
+      return nextNode.type === node.type && nextNode.attrs.config?.input?.type === 'toggle'
+    },
+    stopEvent: () => true,
+    ignoreMutation: () => true,
+    destroy() {
+      unsubscribe()
+      slot.destroy()
+    },
+  }
+}
+```
+
+`subscribe` 在值或权限更改时刷新按钮。它不会立即调用 `render`，因此请您自己调用一次。 `focus()`选择槽位；浏览器将焦点保持在按钮上。
+
+### 2. 注册自定义渲染器
+
+将其添加到同一文件中。处理 `toggle` 输入并保留内置输入的默认渲染器：
+
+```js
+export const ToggleSlot = BlockValueSlot.extend({
+  addNodeView() {
+    return (props) =>
+      props.node.attrs.config?.input?.type === 'toggle'
+        ? createToggleView(props)
+        : createDefaultSlotValueView(props)
+  },
+})
+```
+
+当输入类型更改时，视图的 `update` 返回 `false`，以便 Tiptap 可以选择另一个渲染器。保留叶架构：不添加 `contentDOM`。
+
+### 3. 配置编辑器并插入插槽
+
+```js
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { Slot } from '@tiptap-pro/extension-slot'
+import { ToggleSlot } from './toggle-slot.js'
+
+const editor = new Editor({
+  element: document.querySelector('#editor'),
+  extensions: [StarterKit, Slot.configure({ blockValueSlot: ToggleSlot })],
+  content: '<p>Notification preferences</p>',
+})
+
+editor.commands.insertSlot({
+  mode: 'value',
+  kind: 'block',
+  id: 'notifications',
+  value: false,
+  config: { label: 'Notifications', input: { type: 'toggle' } },
+})
+```
+
+将编辑器安装到 `<div id="editor"></div>` 中。单击该按钮或将其聚焦并按空格键：`attrs.value` 在 `true` 和 `false` 之间切换。撤消可恢复之前的答案。使用[内容保护](/composable-docs/slots/guides/fill-only)，锁定的插槽会自动禁用该按钮。
+
+`toggle` 是应用程序的输入类型，而不是内置的。存储的值仍然是普通的 JSON，导出的 HTML 渲染静态答案。
+
+## 使用 React 创建自定义输入
+
+使用 React 组件构建与 [JavaScript 教程](#create-a-custom-input-with-vanilla-javascript) 相同的布尔切换。该按钮支持 Enter 和 Space，无需自定义键盘处理程序。
+
+使用 `@tiptap/react` 中的 `ReactNodeViewRenderer` 来渲染组件。 slot 包本身没有 React 或 Vue 依赖。
+
+### 1. 创建组件
+
+创建 `ToggleSlot.jsx`。将控制器与 `useSyncExternalStore` 连接，以便文档和权限更改刷新 UI：
+
+```jsx
+import { useMemo, useSyncExternalStore } from 'react'
+import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react'
+import {
+  BlockValueSlot,
+  createDefaultSlotValueView,
+  createSlotValueController,
+} from '@tiptap-pro/extension-slot'
+
+function ToggleView({ editor, getPos }) {
+  const slot = useMemo(() => createSlotValueController({ editor, getPos }), [editor, getPos])
+  const { value, config, editable, available } = useSyncExternalStore(
+    slot.subscribe,
+    slot.getState,
+    slot.getState,
+  )
+  const on = value === true
+
+  return (
+    <NodeViewWrapper contentEditable={false}>
+      <button
+        type="button"
+        aria-pressed={on}
+        disabled={!available || !editable}
+        onFocus={() => slot.focus()}
+        onClick={() => slot.setValue(slot.getValue() !== true)}
+      >
+        {config?.label ?? 'Notifications'}: {on ? 'On' : 'Off'}
+      </button>
+    </NodeViewWrapper>
+  )
+}
+```
+
+- `setValue` 使用与内置控件相同的受保护命令。
+- 该按钮渲染控制器状态，因此拒绝写入使其答案保持不变。
+- React 在卸载时取消订阅。当最后一个订阅者离开时，控制器会释放其编辑器监听器，包括在 React Strict 模式清理期间。
+
+不要添加 `NodeViewContent`：值槽没有可编辑的子项。
+
+### 2. 注册 React 渲染器
+
+将其添加到 `ToggleSlot.jsx`。仅对 `toggle` 输入使用 React 并保留内置控件：
+
+```jsx
+export const ToggleSlot = BlockValueSlot.extend({
+  addNodeView() {
+    const renderToggle = ReactNodeViewRenderer(ToggleView, {
+      update: ({ newNode, updateProps }) => {
+        if (newNode.attrs.config?.input?.type !== 'toggle') return false
+        updateProps()
+        return true
+      },
+    })
+
+    return (props) =>
+      props.node.attrs.config?.input?.type === 'toggle'
+        ? renderToggle(props)
+        : createDefaultSlotValueView(props)
+  },
+})
+```
+
+当输入类型更改时返回 `false` 让 Tiptap 选择另一个渲染器。
+
+### 3. 安装编辑器并插入插槽
+
+```jsx
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { Slot } from '@tiptap-pro/extension-slot'
+import { ToggleSlot } from './ToggleSlot.jsx'
+
+export function NotificationEditor() {
+  const editor = useEditor({
+    extensions: [StarterKit, Slot.configure({ blockValueSlot: ToggleSlot })],
+    content: '<p>Notification preferences</p>',
+    immediatelyRender: false,
+  })
+
+  return (
+    <>
+      <button
+        type="button"
+        disabled={!editor}
+        onClick={() =>
+          editor.commands.insertSlot({
+            mode: 'value',
+            kind: 'block',
+            id: 'notifications',
+            value: false,
+            config: { label: 'Notifications', input: { type: 'toggle' } },
+          })
+        }
+      >
+        Add notifications toggle
+      </button>
+      <EditorContent editor={editor} />
+    </>
+  )
+}
+```
+
+单击 **添加通知切换** 一次，然后使用鼠标、Enter 或 Space 激活切换。其`attrs.value`在`true`和`false`之间切换；撤消可恢复之前的答案。插入附加开关时使用唯一的插槽 ID。
+
+添加[内容保护](/composable-docs/slots/guides/fill-only) 以限制编辑。该组件自动遵循控制器的 `editable` 状态。
+
+**使用 Vue？** 使用 `VueNodeViewRenderer` 代替。在设置中创建控制器，将 `getState()` 复制到 `shallowRef`，更新 `subscribe` 中的引用，然后取消订阅并销毁 `onBeforeUnmount` 中的控制器。渲染没有 `NodeViewContent` 的 `NodeViewWrapper`。
+
+## 验证
+
+验证会检查答案，但不会阻止用户起草无效值。例如，需要一个名称并在提交前进行检查：
+
+```ts
+import { isSlotValidationCurrent, validateEditorSlots } from '@tiptap-pro/extension-slot'
+
+editor.commands.insertSlot({
+  mode: 'value',
+  kind: 'block',
+  id: 'name',
+  value: null,
+  config: { label: 'Your name', required: true, input: { type: 'text' } },
+})
+
+// Run in your application's submit handler.
+const result = await validateEditorSlots({ editor })
+if (isSlotValidationCurrent({ editor, result })) {
+  if (result.valid) {
+    save(editor.getJSON()) // Your application's persistence function.
+  } else {
+    console.log(result.issues) // Display these beside the affected inputs.
+  }
+}
+```
+
+- 空名称或仅包含空格的名称无法通过验证，但用户仍然可以起草它。
+- `required` 将 `null`、空白字符串和空数组视为空。 `false` 和 `0` 算作答案；对必须选中的复选框使用自定义验证器。
+- 选择和单选答案必须与选项值匹配。 `allowedBlocks` 和 `defaultContent` 等内容设置不适用于值槽。
+
+有关自定义验证器和取消的运行，请参阅[提交前验证](/composable-docs/slots/guides/validate-submission)。
+
+## 内容保护
+
+使用内容保护让用户填写答案，同时保护文档的结构和槽位配置。插入插槽后，仅允许编辑 `name` 插槽：
+
+```ts
+import { createSlotFillingPolicy } from '@tiptap-pro/extension-slot'
+
+// Requires ContentProtection in the editor's extensions.
+editor.commands.setContentProtectionPolicy({
+  policy: createSlotFillingPolicy({ editableSlotIds: ['name'] }),
+})
+```
+
+用户可以更改插槽的值，但不能删除它或更改其配置。使用值控制器时，内置和自定义输入遵循相同的权限。
+
+关于保护设置，请参见[仅填充编辑](/composable-docs/slots/guides/fill-only)。

@@ -1,0 +1,124 @@
+---
+title: '存储'
+intro: '<code>editor.storage.diagrams</code> 包含的函数可告诉您文档中的内容以及编辑器可以绘制的内容。您可以直接调用它们，而不是作为命令。'
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '存储 | Tiptap 图表文档'
+  description: 'editor.storage.diagrams 上的读者：文档中的图表、流程图和表格、导出、数据源和视图。'
+  category: 图表
+---
+
+```ts
+const charts = editor.storage.diagrams.listCharts()
+const text = editor.storage.diagrams.read({ pos: charts[0].pos, format: 'chart-syntax' })
+```
+
+这些函数大部分只能读取。只有 `requestSync` 更改文档：它在链接到源的每个图表上运行 [`syncChartData`](/diagrams/data/sources#syncchartdata) 命令。 `registerSource`、`setZoom`、`setPan` 和 `setMaximized` 仅更改此编辑器。
+
+## 文档中的图表、流程图和表格
+
+| 函数 | 返回 |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `listCharts()` | 每个图表，请参阅[图表字段](/diagrams/api-reference/storage#chart-fields) |
+| `listDiagrams()` | 每个图表，请参阅[图表字段](/diagrams/api-reference/storage#diagram-fields) |
+| `listTables()` | 每个图表或流程图可以跟随的表格，请参阅[表格字段](/diagrams/api-reference/storage#table-fields)。空无 `chart.linkTables` |
+| `getOpenInput()` | 光标所在的快速输入或输入表，参见[打开输入](/diagrams/api-reference/storage#the-open-input)。 `null` 外一 |
+
+### 图表字段
+
+| 字段 | 值 |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `pos` | 图表的位置 |
+| `data` | 图表数据 |
+| `spec` | 图表规格 |
+| `renderer` | 渲染器图表名称 |
+| `source` | 其数据源 |
+| `delimiter` | 其分隔符 |
+| `previewUrl` | 其预览 URL |
+| `layout` | 是否独立、跟随表格或隐藏在表格下方 ([`setChartLayout`](/diagrams/data/tables#setchartlayout)) |
+| `tableId` | 它后面的表，或 `null` |
+| `tableRead` | 如何读取该表，`{ header?, range? }` 仅与默认值不同，或 `null` |
+
+### 图表字段
+
+| 字段 | 值 |
+| ------------- | ------------------------------------------------------------------- |
+| `pos` | 图表的位置 |
+| `format` | 其格式 |
+| `source` | 其来源 |
+| `title` | 其标题 |
+| `description` | 其描述 |
+| `view` | 其视图 |
+| `options` | 其选项|
+| `kind` | Mermaid 流程图的类型，或者 `null` |
+| `drawable` | 其格式的图表渲染器是否可以绘制源|
+| `link` | 从中绘制的表、 `{ tableId, columns }` 或 `null` |
+| `lanes` | 从表中绘制的图表的泳道，按它们出现的顺序 |
+
+### 表字段
+
+| 字段 | 值 |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pos` | 表的位置 |
+| `tableId` | 它的 id，一旦图表跟随它，或 `null` |
+| `header` | 它的第一行 |
+| `headerCells` | `true`。第一行普通单元格仅在第一列之外没有数字时才命名列 |
+| `charts` | 它后面有多少个图表 |
+| `diagrams` | 从其中绘制了多少个图表|
+| `followers` | 其后面的每个图表和流程图（如 `{ pos, kind: 'chart' \| 'diagram' }`），按文档顺序 |
+
+### 打开输入
+
+`getOpenInput()` 返回 `{ pos, view: 'chart-syntax' | 'table', type, delimiter, editing }`。当输入保存您正在更改的现有图表而不是新图表时，将设置 `editing`。
+
+## 读取图表数据
+
+| 函数 | 返回 |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `read({ pos?, format? })` | 图表作为文本格式，默认为 `'chart-json'` |
+| `readGrid({ pos? })` | 字符串网格形式的数据。第 0 行是标题 |
+| `readTable({ pos? })` | 表 JSON 形式的数据，或架构中没有表节点的 `null` |
+| `readText({ pos? })` | `{ format, text }`作者编辑时的图表或流程图，或从内容解析的 `null`（[图片旁边的文本](/diagrams/guides/split-view)） |
+| `parseFormat(format, content, type?)` | `{ data, spec, delimiter }` |
+| `getFormat(id)` | 一种注册格式，其 `serialize` |
+
+`parseFormat` 在无法解析内容时会抛出错误并显示一条消息。
+
+## 编辑器可以绘制的内容
+
+| 函数 | 返回 |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `describeCapabilities()` | 图表类型 (`{ id, label, shape, description? }`)、格式、渲染器及其类型，默认渲染器、源、分隔符、触发器和样式 |
+| `chartTypes` | 内置图表类型和 `chartTypes` 选项的图表类型。这是属性，而不是函数 |
+| `canRender(spec)` | 注册的渲染器是否绘制类型 |
+| `rendererFor(spec, preferred?)` | 绘制图表的渲染器|
+| `diagramRendererFor(format)` | 图表渲染器将绘制该格式的图表，或 `null` |
+| `rulesFor(renderer)` | 规则渲染器的图表和下面是它自己的图和 `rendererRules` 的图： `{ attribution?, exports? }` |
+| `refresh()` | 什么也没有。它会再次绘制每个图表和流程图。仅在 CSS 中进行主题更改后调用它 |
+
+## 导出
+
+| 函数 | 返回 |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `export(target, options?)` | 作为文件的图表或流程图，请参阅[export](/diagrams/export) |
+| `exportAll(options?)` | 每个可以绘制的图表和流程图，作为带有 `pos` 的文件，按文档顺序 |
+| `exportDocx(options?)` |带有原生图表和流程图作为图片的 Word 文档的承诺：`{ blob, notes }`。请参阅[Word](/diagrams/export#word) |
+
+## 数据源
+
+| 函数 | 作用 |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `readSource(source)` | 返回源现在返回的数据的承诺。它不写入任何内容 |
+| `requestSync(source)` | 读取源并将数据写入与其链接的每个图表中。写入数据时返回 `true` 的 Promise |
+| `registerSource(provider)` | 在运行时添加提供程序并返回删除该提供程序的函数 |
+| `getSource(id)`、`listSources()` | 返回注册的提供程序 |
+
+当读取失败或没有图表链接到源时，`requestSync` 解析为 `false`。读取失败会保留最后一个快照并转到 [`onSourceError`](/diagrams/api-reference/options#onsourceerror)。
+
+## 在屏幕上缩放、平移和最大化
+
+`setZoom`、`getZoom`、`setPan`、`getPan`、`getShownSize`、`setMaximized` 和 `getMaximized` 更改或读取此编辑器显示图表或流程图的方式。他们从不更改文档。请参阅[查看函数](/diagrams/guides/size-and-view#view-functions)。
+
+`setMaximized` 还会分派一个空事务，因此侦听 `transaction` 更新的 UI。该事务不会添加到撤消历史记录中。

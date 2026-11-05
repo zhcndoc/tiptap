@@ -114,14 +114,14 @@ const editor = new Editor({
 
 ### 通用行为（两种场景都适用）
 
-- **分页安全的表格渲染。** 表格位于页面内容区域内，不会在水平方向溢出。
-- **保留列比例。** 当每个单元格都带有 `colwidth` 时，列会按比例缩小以适配页面。10 % / 40 % / 50 % 的列分配在任何页面宽度下都会渲染为 10 / 40 / 50。
-- **行高行为。**
-  - `heightRule: "exact"`：行会按声明的高度渲染；放不下的内容和单元格边框会被裁剪。
-  - `heightRule: "atLeast"`（或未设置）：当内容或更窄的列本会导致裁剪时，行会在垂直方向增长。
-- **合并单元格。** 每个单元格都会保持在自己的列中，包括合并单元格下方的行。向下合并的单元格会在其覆盖的每一行保留边框和背景。如果边框来自你自己的 CSS，请参阅[设置合并单元格样式](#styling-merged-cells)。
-- **非常窄的列。** 单元格左右两侧的边距最多分别占单元格宽度的四分之一，因此单元格不会溢出到下一列。
-- **实时更新。** 增加、删除或重新排序单元格的编辑会立即重新布局该行。
+- **Pagination-safe table rendering.** Tables sit inside the page content area and never horizontally overflow it.
+- **Column proportions preserved.** When every cell carries a `colwidth`, columns shrink proportionally to fit the page. A 10 % / 40 % / 50 % column split renders as 10 / 40 / 50 at any page width.
+- **Row height behaviour.**
+  - `heightRule: "exact"`: the row renders at the declared height. Content and cell borders that don't fit are clipped.
+  - `heightRule: "atLeast"` (or unset): the row grows vertically when content or narrower columns would otherwise force clipping.
+- **合并单元格。** 每个单元格都保留在自己的列中，也保留在合并单元格下方的行中。向下合并的单元格会在其覆盖的每一行中保留其边框和背景，当它们来自您自己的 CSS 时也是如此。请参阅[设置合并单元格的样式](#styling-merged-cells)。
+- **非常窄的列。** 当列比单元格的左右内边距窄时，两侧会按相同的比例收缩，因此单元格及其边框保留在列内。文档和 DOCX 导出保留原始填充。使用 ConvertKit，页眉和页脚中的表格将每个单元格边距限制为单元格宽度的四分之一。
+- **Live updates.** Edits that add, remove, or reorder cells re-lay the row out immediately.
 
 ### 仅 DOCX 专属行为（场景 B）
 
@@ -135,25 +135,28 @@ const editor = new Editor({
 
 ## 设置合并单元格样式
 
-在合并单元格覆盖范围内、除第一行之外的行中，合并单元格通过 `.tiptap-merged-cell-continuation` 元素绘制。该元素会从单元格属性（例如 DOCX 导入得到的属性）获取边框和背景。你自己的 CSS 边框不会应用到它，因此请补充这些样式：
+在第一行下方的行中，由 `.tiptap-merged-cell-continuation` 元素绘制合并单元格。此元素复制单元格显示的背景和侧边框，无论它们来自单元格的属性（例如来自 DOCX 导入）还是来自您自己的 CSS。它在单元格覆盖的最后一行中绘制单元格的底部边框。 PagesTableKit 隐藏合并单元格本身的底部边框。
 
-```css
-.my-document .tiptap-merged-cell-continuation {
-  border-left: 1px solid #d5d5d5;
-  border-right: 1px solid #d5d5d5;
-}
+当出现以下情况时，元素会再次读取单元格的样式：
 
-.my-document .tiptap-merged-cell-continuation[data-merged-cell-end] {
-  border-bottom: 1px solid #d5d5d5;
-}
+- 其表格发生更改。
+- 在文档头中添加或删除了 `<style>` 或 `<link>` 元素，`<style>` 元素的文本发生更改，或者其中之一的 `href`、`media` 或 `disabled` 属性发生更改。
+- 链接样式表完成加载。
+- 编辑器或其祖先之一的 `class` 或 `style` 属性发生更改。
+- 窗口大小已调整。
+- 文档中其他位置的编辑会更改单元格的背景或边框。一旦打字暂停，PagesTableKit 就会检查这一点。根据表外部的内容仅更改底部边框宽度的规则将在该表中的下一次编辑后显示。
 
-.my-document .tiptap-merged-cell-continuation[data-merged-cell='tableHeader'] {
-  background-color: #f1f1f1;
-}
+通过 CSSOM 更改的样式表（例如使用 `insertRule` 或 `deleteRule`）不会更改任何元素，也不会触发任何事件，因此 PagesTableKit 看不到它。进行这样的更改后调用 `refreshTableStyles()`：
+
+```ts
+document.styleSheets[0].insertRule('td { border: 2px solid red }')
+editor.commands.refreshTableStyles()
 ```
 
-- `data-merged-cell` 是合并单元格的节点类型：`tableCell` 或 `tableHeader`。
-- `data-merged-cell-end` 会设置在单元格覆盖的最后一行。请在那里绘制底部边框。PagesTableKit 会隐藏合并单元格自身的底部边框。
+复制的背景和边框是元素上的内联样式。要以其他方式设置其样式，请使用其属性：
+
+- `data-merged-cell` is the merged cell's node type: `tableCell` or `tableHeader`.
+- `data-merged-cell-end` 设置在单元格覆盖的最后一行中。
 
 ## 不支持的内容
 
@@ -254,7 +257,15 @@ TableKit.configure({
 
 请参阅[跨越分页符的行](/pages/guides/row-fragmentation)，了解它的行为以及适用的行类型。
 
-## 相关内容
+它还添加了一个命令：
+
+```ts
+editor.commands.refreshTableStyles()
+```
+
+`refreshTableStyles()` 在不导致 DOM 突变的更改（例如用 `insertRule` 添加的规则）之后再次读取表 CSS。合并的单元格和单元格填充然后遵循新的样式。该命令不会更改文档，也不会添加撤消步骤。
+
+## Related
 
 - [Pages 概览](/pages/getting-started/overview)：PagesTableKit 所需的分页扩展。
 - [跨越分页符的行](/pages/guides/row-fragmentation)：让高大的行继续到下一页。

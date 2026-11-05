@@ -1,0 +1,100 @@
+---
+title: '图片旁边的文本'
+intro: '您可以在文档旁边的您自己的文本字段中显示图表或流程图的文本。任何一个的改变都会更新另一个。该包读取和写入文本。您构建文本字段和布局。'
+headerDemo:
+  path: '/Extensions/DiagramsSplitView'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '图片旁边的文字 | Tiptap 图表文档'
+  description: '您可以在文档旁边的您自己的文本字段中显示图表或流程图的文本。'
+  category: 图表
+---
+
+## 函数
+
+| 函数 | 作用 |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [`readText({ pos? })`](/diagrams/api-reference/storage#reading-a-charts-data) | 返回图表或流程图的文本，其格式为 |
+| [`updateFromText({ text, pos? })`](/diagrams/guides/split-view#updatefromtext) | 更改该文本的图表或流程图 |
+| [`highlightSource(text, format)`](/diagrams/api-reference/selectors#highlighted-source) | 以 HTML 形式返回文本，其中各部分着色，来自 `@tiptap-pro/extension-diagrams/core` |
+
+## 读取文本
+
+```ts
+const current = editor.storage.diagrams.readText({ pos })
+// { format: 'chart-syntax', text: 'bar\nMonth | Revenue\nJan | 120' }
+```
+
+对于图表，`readText` 返回其类型行及其在 [图表语法](/diagrams/data/chart-syntax) 中的行，在其分隔符处分割，如快速输入所示。格式为`'chart-syntax'`。对于图表，它以图表自己的格式返回源：`'mermaid'`、`'drawio'` 或 `'bpmn'`。如果 `pos` 处没有图表或流程图，或者没有选择，则返回 `null`。
+
+## 写回
+
+### updateFromText
+
+从文本更改图表或流程图，与 `readText` 返回的文本相同。
+
+```ts
+editor.commands.updateFromText({ pos, text: 'pie\nDogs, 3\nCats, 2' })
+```
+
+| 选项 | 类型 | 说明 |
+| ------ | -------- | ------------------------------------------------------------------ |
+| `text` | `string` | 文本 |
+| `pos` | `number` | 图表或流程图的位置。默认为选定的一个 |
+
+- **图表** 读取文本的方式与快速输入相同：可选类型行下方图表语法中的行，或 [Mermaid图表](/diagrams/charts/overview#importmermaidchart)。图表的数据和类型发生变化。Mermaid图表还设置其源名称，例如标题或轴。图表规范的其余部分（例如颜色）保留。
+- **图表**将文本作为其新来源，就像 `updateFlowDiagram` 一样。
+- **命令无法读取的文本**，例如未闭合的引号，不会更改任何内容，并且命令返回 `false`。将文本保留在文本字段中并将其标记为无效，这样用户输入的任何内容都不会丢失。
+- **数据为只读的图表**，因为它来自链接的数据源，所以为新数据返回 `false`。
+
+## 选择后
+
+当选择移动到另一个图表或流程图时，或者当图表在其他地方发生更改时，请再次阅读文本。跳过您自己的文本字段导致的更新，以便文本保持用户键入的状态。
+
+```ts
+const textField = document.createElement('textarea')
+document.body.append(textField)
+
+let pos = editor.storage.diagrams.listCharts()[0]?.pos ?? null
+if (pos !== null) textField.value = editor.storage.diagrams.readText({ pos })?.text ?? ''
+let typing = false
+
+editor.on('transaction', ({ transaction }) => {
+  // A command that changes a chart replaces its node. Mapping with -1 keeps pos at its start.
+  if (pos !== null) pos = transaction.mapping.map(pos, -1)
+  const { node, from } = editor.state.selection
+  if (node && ['chart', 'flowDiagram'].includes(node.type.name)) pos = from
+  if (!typing && pos !== null) {
+    textField.value = editor.storage.diagrams.readText({ pos })?.text ?? ''
+  }
+})
+
+textField.addEventListener('input', () => {
+  if (pos === null) return
+  typing = true
+  const valid = editor.commands.updateFromText({ pos, text: textField.value })
+  typing = false
+  textField.toggleAttribute('data-invalid', !valid)
+})
+```
+
+## 对文本着色
+
+`highlightSource` 将文本返回为 HTML。每个部件都位于 `<span>` 中，其类如 `tiptap-diagram-source-keyword`。它为图表语法和 Mermaid 着色。将draw.io 和BPMN XML 保留为纯文本。
+
+```ts
+import { highlightSource } from '@tiptap-pro/extension-diagrams/core'
+
+const { delimiters, chartTypes } = editor.storage.diagrams.describeCapabilities()
+code.innerHTML = highlightSource(text, 'chart-syntax', {
+  delimiters,
+  types: chartTypes.map((type) => type.id),
+})
+```
+
+将类 `tiptap-diagram-source` 放在 HTML 周围的元素上。然后，快速输入的[突出显示的源](/diagrams/api-reference/selectors#highlighted-source)颜色也适用于该处，无论是浅色还是深色。对于用户可以编辑的文本字段，将透明的 `<textarea>` 放置在保存 HTML 的 `<pre>` 上，并使用相同的字体、填充和行高。演示就是这样工作的。
+
+[`sourceHighlighting`](/diagrams/api-reference/options#sourcehighlighting) 选项仅在快速输入和图表的代码视图中关闭颜色，而不是在您自己的文本字段中关闭颜色。

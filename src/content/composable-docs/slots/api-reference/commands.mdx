@@ -22,6 +22,25 @@ meta:
 
 `JSONContent` 来自 `@tiptap/core`。[配置](/composable-docs/slots/api-reference/concepts)和[结果类型](/composable-docs/slots/api-reference/types)由 Slot 软件包导出。
 
+## 值槽命令
+
+`insertSlot` 还接受 `mode?: 'content' | 'value'` 和 `value?: JsonValue`。模式默认为 `content`。值插入拒绝`content`；内容插入拒绝 `value`。布局仍然使用`kind`。
+
+```ts
+editor.commands.insertSlot({
+  mode: 'value',
+  id: 'budget',
+  value: '1.0',
+  config: { input: { type: 'number' } },
+})
+editor.commands.setSlotValue({ id: 'budget', value: '2.50' })
+editor.commands.setSlotValues({ values: [{ id: 'budget', value: '3.00' }] })
+```
+
+`setSlotValue({ id, value })` 替换一个值属性。 `setSlotValues({ values })` 以原子方式应用批次。两者都需要针对值槽和有限 JSON 值的唯一 ID。他们尊重保护、可变控制、历史和演练。重复的批次目标将被拒绝。验证约束不会阻止草稿写入。
+
+`clearSlot` 为值槽写入 `null`。 `moveSlot`、`removeSlot`、`repairSlotIds` 和 `updateSlotConfig` 支持这两种模式。 `focusSlot` 选择一个值槽并聚焦其第一个输入、选择、文本区域、按钮或带有 tabindex 的元素（如果存在）。 `fillSlot`、`fillSlots`、`dissolveSlot` 和 `selectSlotContent` 拒绝​​值槽。包装内容会创建一个内容槽。
+
 ## `insertSlot`
 
 插入 Slot 或替换当前选区。
@@ -32,17 +51,44 @@ editor.commands.insertSlot()
 
 ### 参数（可选的 `InsertSlotOptions`）
 
-- `kind?` (`SlotKind`)：`'block'` 或 `'inline'`。省略时，如果插入位置的父节点接受行内内容（包括空段落），则为 `'inline'`；否则为 `'block'`。使用 `at` 或当前选区起点。
-- `id?` (`string`)：唯一且非空的 ID。省略时自动生成。
-- `config?` (`SlotConfig`)：嵌入配置。默认值为 `{}`。
-- `content?` (`JSONContent[]`)：初始内容。省略时依次使用 `defaultContent`，然后使用该类型的空内容。
-- `at?` (`number`)：文档位置。省略时替换当前选区。
+- `mode?` (`SlotMode`)：`'content'` 或 `'value'`。默认值：`'content'`。
+- `kind?` (`SlotKind`): `'block'` or `'inline'`. Omitted: `'inline'` when the parent at the insertion position accepts inline content (including an empty paragraph); otherwise `'block'`. Uses `at` or the current selection start.
+- `id?` (`string`): Unique, nonempty ID. Omitted: generated.
+- `config?` (`SlotConfig`): Embedded configuration. Default: `{}`.
+- `content?` (`JSONContent[]`)：仅用于内容槽的初始内容。省略：`defaultContent`，则该类内容为空。
+- `value?` (`JsonValue`)：仅针对值槽的初始答案。省略：`defaultValue`，然后 `null`。显式 `null` 会覆盖默认值。
+- `at?` (`number`): Document position. Omitted: replace the current selection.
 
 ### 返回值（`boolean`）
 
 插入成功时为 `true`，否则为 `false`。放置位置必须在不包裹或提升周围内容的情况下符合 schema。
 
 每次插入时，`defaultContent` 中的嵌套 Slot 都会获得新 ID，并重新映射它们之间的引用。显式 `content` 会保留提供的 ID；如果 ID 与现有 ID 重复，则会被拒绝。
+
+## `setSlotValue`
+
+替换值槽的答案，同时保留其 ID 和配置。
+
+### 参数 (`SetSlotValueOptions`)
+
+- `id` (`string`)：唯一目标值插槽 ID。
+- `value` (`JsonValue`)：替换有限 JSON 值，包括 `null`。
+
+### 接受时返回 (`boolean`)
+
+`true`，包括未更改的值；否则 `false`。内容槽、无效值和被拒绝的写入都会被拒绝。验证约束不会阻止草稿写入。
+
+## `setSlotValues`
+
+以原子方式更新多个值槽。
+
+### 参数
+
+- `values` (`SetSlotValueOptions[]`)：ID 和替换值。
+
+### 当所有写入成功（包括空批次）时，返回 (`boolean`)
+
+`true`。 `false` 用于重复目标或任何被拒绝的写入，且没有更改插槽。
 
 ## `wrapInSlot`
 
@@ -90,7 +136,7 @@ editor.commands.insertSlot()
 
 ## `clearSlot`
 
-使用该类型的空内容替换内容。嵌套 Slot 会被移除。
+对于内容槽，将内容替换为该类型的空内容并删除嵌套槽。对于值槽，将 `null` 写入值属性。
 
 ### 参数（`SlotTarget`）
 
@@ -98,7 +144,7 @@ editor.commands.insertSlot()
 
 ### 返回值（`boolean`）
 
-清空成功时为 `true`，否则为 `false`。不会恢复 `defaultContent`。
+`true` 清零时；否则 `false`。不恢复 `defaultContent` 或 `defaultValue`。
 
 ## `dissolveSlot`
 

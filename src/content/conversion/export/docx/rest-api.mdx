@@ -80,28 +80,30 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 
 | 名称                    | 类型              | 描述                                                                                                                                                                                                                                                                                                                                                                  | 默认值      |
 | ----------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `doc`                   | `String`          | Tiptap 的 JSON                                                                                                                                                                                                                                                                                                                                                               | `N/A`       |
-| `exportType`            | `string`          | 期望的导出类型                                                                                                                                                                                                                                                                                                                                                              | `blob`      |
-| `styleOverrides`        | `Object`          | 样式覆盖                                                                                                                                                                                                                                                                                                                                                                  | `{}`        |
-| `pageSize`              | `Object`          | 页面尺寸配置                                                                                                                                                                                                                                                                                                                                                                | `undefined` |
-| `pageMargins`           | `Object`          | 页面边距配置                                                                                                                                                                                                                                                                                                                                                               | `undefined` |
-| `headers`               | `Object`          | 页面页眉配置                                                                                                                                                                                                                                                                                                                                                               | `undefined` |
-| `footers`               | `Object`          | 页面页脚配置                                                                                                                                                                                                                                                                                                                                                               | `undefined` |
-| `tableOverrides`        | `Object`          | 表格级渲染覆盖                                                                                                                                                                                                                                                                                                                                                              | `undefined` |
-| `paragraphOverrides`    | `Object`          | 段落级渲染覆盖                                                                                                                                                                                                                                                                                                                                                              | `undefined` |
-| `textRunOverrides`      | `Object`          | 文本运行渲染覆盖                                                                                                                                                                                                                                                                                                                                                            | `undefined` |
-| `tableCellOverrides`    | `Object`          | 表格单元格渲染覆盖                                                                                                                                                                                                                                                                                                                                                          | `undefined` |
-| `imageOverrides`        | `Object`          | 图片渲染覆盖                                                                                                                                                                                                                                                                                                                                                               | `undefined` |
-| `headerFooterOverrides` | `Object`          | 作用域限定为页眉/页脚内容的按字段覆盖（与元素覆盖具有相同的五个键）。参见 [元素覆盖](#element-overrides)。                                                                                                                                                                                                                                                                    | `undefined` |
-| `customNodeDsl`         | `Object`          | [自定义节点 DSL](/conversion/export/docx/custom-nodes-dsl) 规则                                                                                                                                                                                                                                                                                                            | `undefined` |
-| `placeholders`         | `Object \| false` | 可选的 `{ page?, total? }` 重命名映射，需与 `Pages.configure({ placeholders })` 匹配，这样纯文本页眉/页脚中重命名后的标记（例如 `{p}` / `{pages}`）会变成动态的 `PAGE` / `NUMPAGES` 字段。传入 `false` 可完全禁用替换（导出的 `.docx` 中将保留字面量 `{page}` / `{total}` 文本）。参见 [自定义标记名称](#custom-token-names-placeholders)。 | `undefined` |
-| `comments`              | `Object`          | 作为原生 Word 注释嵌入的评论线程：`{ threads: [...] }`。每个线程包含其消息、作者、日期和已解决状态，并锚定到文档的 `inlineThread` / `blockThread` 标记。参见 [评论](#comments)。                                                                                                                              | `undefined` |
+| `doc`                   | `String`          | Tiptap's JSON                                                                                                                                                                                                                                                                                                                                                                | `N/A`       |
+| `exportType`            | `string`          | The expected export type                                                                                                                                                                                                                                                                                                                                                     | `blob`      |
+| `styleOverrides`        | `Object`          | Style overrides                                                                                                                                                                                                                                                                                                                                                              | `{}`        |
+| `pageSize`              | `Object`          | Page size configuration                                                                                                                                                                                                                                                                                                                                                      | `undefined` |
+| `pageMargins`           | `Object`          | Page margins configuration                                                                                                                                                                                                                                                                                                                                                   | `undefined` |
+| `headers`               | `Object`          | Page header configuration                                                                                                                                                                                                                                                                                                                                                    | `undefined` |
+| `footers`               | `Object`          | Page footer configuration                                                                                                                                                                                                                                                                                                                                                    | `undefined` |
+| `tableOverrides`        | `Object`          | Table-level rendering overrides                                                                                                                                                                                                                                                                                                                                              | `undefined` |
+| `paragraphOverrides`    | `Object`          | Paragraph-level rendering overrides                                                                                                                                                                                                                                                                                                                                          | `undefined` |
+| `textRunOverrides`      | `Object`          | Text run rendering overrides                                                                                                                                                                                                                                                                                                                                                 | `undefined` |
+| `tableCellOverrides`    | `Object`          | Table cell rendering overrides                                                                                                                                                                                                                                                                                                                                               | `undefined` |
+| `imageOverrides`        | `Object`          | Image rendering overrides                                                                                                                                                                                                                                                                                                                                                    | `undefined` |
+| `headerFooterOverrides` | `Object`          | Per-field overrides scoped to header/footer content (same five keys as the element overrides). See [Element Overrides](#element-overrides).                                                                                                                                                                                                                                  | `undefined` |
+| `customNodeDsl`         | `Object`          | [Custom-node DSL](/conversion/export/docx/custom-nodes-dsl) rules                                                                                                                                                                                                                                                                                                            | `undefined` |
+| `placeholders` | `Object \| false` | 可选的 `{ page?, total? }` 重命名映射匹配 `Pages.configure({ placeholders })` 以便重命名令牌（例如 `{p}` /`{pages}`) 在每个页眉或页脚槽中成为实时 `PAGE` / `NUMPAGES` 字段。传递 `false` 以完全禁用替换（导出的 `.docx` 中的文字 `{page}` / `{total}` 文本）。请参阅[自定义令牌名称](#custom-token-names-placeholders)。 | `undefined` |
+| `comments`              | `Object`          | Comment threads to embed as native Word comments: `{ threads: [...] }`. Each thread carries its messages, author, dates, and resolved state, and is anchored to the document's `inlineThread` / `blockThread` marks. See [Comments](#comments).                                                                                                                              | `undefined` |
+| `footnotes` | `Object` | 脚注正文由注释 ID 键入。每个值都是 Tiptap JSON 文档。请参阅[脚注和尾注](#footnotes-and-endnotes)。                                                                                                                                                                                                                                               | `undefined` |
+| `endnotes` | `Object` | 由注释 id 键控的尾注正文，形状与 `footnotes` 相同。请参阅[脚注和尾注](#footnotes-and-endnotes)。                                                                                                                                                                                                                                                    | `undefined` |
 
-#### 页面尺寸配置
+#### Page Size Configuration
 
-`pageSize` 对象允许您自定义导出 DOCX 文档的页面尺寸：
+The `pageSize` object allows you to customize the dimensions of your exported DOCX document:
 
-| 属性 | 类型     | 描述                                                                                          | 默认值     |
+| Property | Type     | Description                                                                                          | Default    |
 | -------- | -------- | ---------------------------------------------------------------------------------------------------- | ---------- |
 | `width`  | `string` | 页面的宽度。必须是一个正数，后跟有效单位（cm、in、pt、pc、mm、px）。  | `"21.0cm"` |
 | `height` | `string` | 页面的高度。必须是一个正数，后跟有效单位（cm、in、pt、pc、mm、px）。 | `"29.7cm"` |
@@ -151,16 +153,23 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 
 `headers` 对象允许您自定义导出 DOCX 文档的页眉：
 
-| 属性             | 类型      | 描述                                                                                                                                                                                            |
-| -------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `evenAndOddHeaders`  | `boolean` | 是否为奇数页和偶数页使用不同的页眉                                                                                                                                                |
-| `differentFirstPage` | `boolean` | 是否在首页使用不同的页眉。设为 `true` 时，首页使用 `first` 值而不是 `default`。                                                                          |
-| `default`            | `string`  | 每一页的标准默认页眉；当启用 `evenAndOddHeaders` 选项时，则为奇数页页眉。可接受纯文本字符串或字符串化的 Tiptap JSONContent 以实现富文本格式。 |
-| `first`              | `string`  | 首页页眉。仅当 `differentFirstPage` 设为 `true` 时使用。可接受纯文本字符串或字符串化的 Tiptap JSONContent 以实现富文本格式。                                 |
-| `even`               | `string`  | 启用 `evenAndOddHeaders` 选项时的偶数页页眉。可接受纯文本字符串或字符串化的 Tiptap JSONContent 以实现富文本格式。                                          |
+| 属性 | 类型 | 描述 |
+| -------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `evenAndOddHeaders` | `boolean` | 是否使用不同标头对于奇数页和偶数页 |
+| `differentFirstPage` | `boolean` | 是否在首页上使用不同的页眉。当 `true` 时，第一页上使用 `first` 值而不是 `default`。                                                                           |
+| `default` | `string \| Object` | 每页上的标准默认页眉，或激活 `evenAndOddHeaders` 选项时奇数页上的页眉。接受纯文本、字符串化 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
+| `first` | `string \| Object` | 第一页上的标题。仅当 `differentFirstPage` 设置为 `true` 时使用。接受纯文本、字符串化 Tiptap JSONContent 或 Tiptap JSONContent 对象。                                 |
+| `even` | `string \| Object` | 激活 `evenAndOddHeaders` 选项时偶数页上的页眉。接受纯文本、字符串化 Tiptap JSONContent 或 Tiptap JSONContent 对象。                                          |
 
-<Callout title="纯文本与 Tiptap JSONContent">
-  每个页眉值都可以是 **纯文本字符串**（生成简单、无样式的页眉）或 **字符串化的 Tiptap JSONContent** 对象（可启用加粗、斜体、链接等富文本格式）。当传入 JSONContent 时，请在请求体中发送前使用 `JSON.stringify()` 将对象转为字符串。
+<Callout title="接受的槽值">
+  每个标头值可以是以下三种形状之一：
+
+- A **纯文本字符串。** 生成简单的无样式标头。
+- A **字符串化 Tiptap JSONContent。** 启用丰富的格式，例如粗体、斜体和链接。使用 `JSON.stringify(yourHeaderDoc)` 生成它。
+- A **Tiptap JSONContent 对象。** 相同的丰富内容，作为请求正文内的嵌套 JSON 对象发送，而不对其进行字符串化。
+
+在 JSON 请求正文中，对象必须包含 `type` 字段，无效形状将返回 `400 Bad Request`。
+
 </Callout>
 
 **带自定义页眉的 cURL 示例：**
@@ -180,20 +189,20 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
 
 `footers` 对象允许您自定义导出 DOCX 文档的页脚：
 
-| 属性             | 类型      | 描述                                                                                                                                                                                            |
-| -------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `evenAndOddFooters`  | `boolean` | 是否为奇数页和偶数页使用不同的页脚                                                                                                                                                |
-| `differentFirstPage` | `boolean` | 是否在首页使用不同的页脚。设为 `true` 时，首页使用 `first` 值而不是 `default`。                                                                          |
-| `default`            | `string`  | 每一页的标准默认页脚；当启用 `evenAndOddFooters` 选项时，则为奇数页页脚。可接受纯文本字符串或字符串化的 Tiptap JSONContent 以实现富文本格式。 |
-| `first`              | `string`  | 首页页脚。仅当 `differentFirstPage` 设为 `true` 时使用。可接受纯文本字符串或字符串化的 Tiptap JSONContent 以实现富文本格式。                                 |
-| `even`               | `string`  | 启用 `evenAndOddFooters` 选项时的偶数页页脚。可接受纯文本字符串或字符串化的 Tiptap JSONContent 以实现富文本格式。                                          |
+| 属性 | 类型 | 说明 |
+| -------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `evenAndOddFooters` | `boolean` | 奇数页和偶数页是否使用不同的页脚 |
+| `differentFirstPage` | `boolean` | 是否在首页上使用不同的页脚。当 `true` 时，第一页上使用 `first` 值而不是 `default`。                                                                           |
+| `default` | `string \| Object` | 每页上的标准默认页脚，或激活 `evenAndOddFooters` 选项时奇数页上的页脚。接受纯文本、字符串化 Tiptap JSONContent 或 Tiptap JSONContent 对象。 |
+| `first` | `string \| Object` | 第一页的页脚。仅当 `differentFirstPage` 设置为 `true` 时使用。接受纯文本、字符串化 Tiptap JSONContent 或 Tiptap JSONContent 对象。                                 |
+| `even` | `string \| Object` | 激活 `evenAndOddFooters` 选项时偶数页上的页脚。接受纯文本、字符串化 Tiptap JSONContent 或 Tiptap JSONContent 对象。                                          |
 
-<Callout title="纯文本与 Tiptap JSONContent">
-  每个页脚值都可以是 **纯文本字符串**（生成简单、无样式的页脚）或 **字符串化的 Tiptap JSONContent** 对象（可启用加粗、斜体、链接等富文本格式）。当传入 JSONContent 时，请在请求体中发送前使用 `JSON.stringify()` 将对象转为字符串。
+<Callout title="接受的槽值">
+  每个页脚值可以是与页眉值相同的三种形状之一：纯文本字符串、字符串化的 Tiptap JSONContent 或 Tiptap JSONContent 对象。在 JSON 请求正文中，对象必须包含 `type` 字段，无效形状将返回 `400 Bad Request`。
 </Callout>
 
-<Callout title="`{page}` / `{total}` 标记将变为动态 Word 字段" variant="info">
-  REST API 会将纯文本页眉/页脚中的 `{page}`、`{total}` 以及 `{numpages}` 同义词转换为导出的 `.docx` 中动态的 Word `PAGE` / `NUMPAGES` 字段。自定义标记名称（例如 `{p}` / `{pages}`）需要传入可选的 `placeholders` 重命名映射。参见下方 [自定义标记名称](#custom-token-names-placeholders)。传入 `"placeholders": false` 可改为让这些标记以字面文本形式保留。
+<Callout title="`{page}` / `{total}` tokens become live Word fields" variant="info">
+  REST API 将页眉/页脚内的 `{page}`、`{total}` 和 `{numpages}` 同义词转换为导出的 `.docx` 中的实时 Word `PAGE` / `NUMPAGES` 字段。这适用于每种槽形状：纯文本字符串、字符串化 Tiptap JSON 或 Tiptap JSON 对象。自定义令牌名称（例如 `{p}` / `{pages}`）需要传递可选的 `placeholders` 重命名映射。请参阅下面的[自定义代币名称](#custom-token-names-placeholders)。传递 `"placeholders": false` 以将令牌作为文字文本发送。
 </Callout>
 
 #### 自定义标记名称 (`placeholders`)
@@ -268,7 +277,27 @@ curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/doc
     }'
 ```
 
-### 元素覆盖
+### 脚注和尾注
+
+通过 `footnotes` 和 `endnotes` 导出 Word 脚注和尾注。每个都是由注释 id 键控的对象，每个值都是带有 `"type": "doc"` 的 Tiptap JSON 文档。当 `doc` 中的 `footnoteReference` 或 `endnoteReference` 节点的 `noteId` 属性在匹配对象中具有条目时，该节点将成为 Word 注释。导出时会留下没有条目的参考文献。非 Tiptap JSON 文档的值返回 `400 Bad Request`。
+
+该形状与 [DOCX import](/conversion/import/docx/rest-api) 返回的 `footnotes` 和 `endnotes` 字段匹配。在 `multipart/form-data` 请求中，将每个字段作为 JSON 字符串发送。
+
+**带有脚注的 cURL 示例：**
+
+```bash
+curl --output example.docx -X POST "https://api.tiptap.dev/v2/convert/export/docx" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "doc": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Body text\"},{\"type\":\"footnoteReference\",\"attrs\":{\"noteId\":\"1\"}}]}]}",
+      "footnotes": {
+        "1": { "type": "doc", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "A footnote." }] }] }
+      }
+    }'
+```
+
+### Element Overrides
 
 <ElementOverridesRestApi />
 

@@ -1,0 +1,87 @@
+---
+title: 'Mermaid 渲染器'
+intro: 'Mermaid 渲染器使用 Mermaid 绘制饼图、甜甜圈（作为饼图）、折线图、条形图、桑基图、雷达图和树形图。来自同一入口点的第二个渲染器绘制Mermaid 流程图。 Mermaid 在沙盒 iframe 中运行，编辑器将结果显示为图像。因此，Mermaid 不会在您的页面中生成任何运行。'
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 'Mermaid渲染器 | Tiptap 图表文档'
+  description: '在沙箱中使用 Mermaid 绘制流程图、序列图和其他 Mermaid 图以及简单图表。'
+  category: 图表
+---
+
+## 快速入门
+
+```bash
+npm install mermaid@11
+```
+
+渲染器支持 Mermaid 11.16.1 及更高版本的 11.x。它拒绝了 Mermaid 12，它以不同的方式绘制了现有的图表。
+
+```ts
+import { mermaidRenderer } from '@tiptap-pro/extension-diagrams/mermaid'
+import mermaidUrl from 'mermaid/dist/mermaid.min.js?url'
+import rendererUrl from '@tiptap-pro/extension-diagrams/mermaid-renderer?url&no-inline'
+
+Diagrams.configure({ renderers: [mermaidRenderer({ mermaidUrl, rendererUrl })] })
+```
+
+`?url` 导入在 Vite 中工作，并为您提供文件的 URL。 `no-inline` 阻止 Vite 将小文件转换为 `data:` URL，而 iframe 无法加载该 URL。使用另一个捆绑器，您可以自己提供这两个文件并传递它们的 URL。
+
+## 选项
+
+| 选项 | 类型 | 说明 |
+| ------------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `mermaidUrl` | `string` | 必需。 Mermaid 单文件构建的 URL，`mermaid/dist/mermaid.min.js`，11.16.1 或更高版本及以下 12 |
+| `rendererUrl` | `string` | 必需。 `@tiptap-pro/extension-diagrams/mermaid-renderer` 的 URL，在 iframe 中绘制的脚本 |
+| `scriptNonce` | `string \| null` | 具有基于随机数的内容安全策略的页面的随机数。默认 `null` |
+| `id` | `string` | id 图表存储。默认 `'mermaid'` |
+| `label` | `string` | 菜单的名称。默认 `'Mermaid'` |
+
+## 限制
+
+Mermaid渲染器拒绝下面的图表，因此另一个注册的渲染器会绘制它们。如果没有其他渲染器绘制图表类型，那么 Mermaid 就会绘制它，如第二列所述。请参阅[当渲染器拒绝图表时](/diagrams/renderers/overview#when-a-renderer-declines-a-chart)。
+
+| 图表 | 由Mermaid绘制 |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| 包含多个系列的条形图 | 条形图相互重叠，没有图例 |
+| 条形图带有 `spec.orientation: 'horizontal'` | 的图表 条形直立 |
+| 带有 `spec.series` 的折线图设置 | 普通线条。Mermaid没有虚线、宽度、标记或曲线 |
+| 带有样式网格或轴线、`axes.y.step`、`axes.x.labels` 或 `references` 的图表，例如带有样式环或辐条的雷达 (`axes.y.grid`、`axes.x.line`) | 没有它们 |
+| 带有样式的雷达或树形图低于零的值 | Mermaid 读取不到负号。雷达显示值为零，而树状图则将其忽略 |
+| 顶部有一个没有子节点的节点的树状图，例如 `Products / Books \| 40` | 旁边的 `Gifts \| 30` 此类节点共享一个部分，以值列命名 |
+|面积图或散点图 | 未绘制。该图表显示了 [`unavailable`](/diagrams/api-reference/options#unavailable) 返回的内容 |
+
+Mermaid 也以不同的方式绘制这些图表，无论注册了其他内容：
+
+- **甜甜圈** 被绘制为饼图。
+- **缺失值**绘制为零。
+- **关闭循环的桑基链接**被省略。其他渲染器也将其省略。
+- **桑基的标题** 由渲染器绘制在图表上方，因为 Mermaid 不绘制任何内容。
+- **雷达的图例**始终位于右上角。 `legend.show: false` 隐藏它。
+- **双击文本**不会打开任何内容。您无法[重命名图表中的文本](/diagrams/charts/editing)。
+- **无法在服务器上导出**，因为 `toSVG` 需要浏览器。
+
+## 导入Mermaid
+
+Mermaid 的 `pie`、`xychart`、`sankey-beta`、`radar-beta` 和 `treemap-beta` 源码会转换为包含数据的图表。您可以通过 [`importMermaidChart`](/diagrams/charts/overview#importmermaidchart) 或[粘贴](/diagrams/data/pasting)来编辑这些图表。任何图表渲染器都可以绘制结果，因此无需注册 Mermaid 渲染器。
+
+## 图
+
+`mermaidDiagramRenderer` 从同一入口点绘制Mermaid 流程图。它绘制了图表所包含的所有 25 种 [Mermaid类型](/diagrams/flow-diagrams/overview#mermaid-kinds)，例如流程图、序列、类、甘特图、思维导图和时间线。
+
+```ts
+import { mermaidDiagramRenderer, mermaidRenderer } from '@tiptap-pro/extension-diagrams/mermaid'
+
+Diagrams.configure({
+  renderers: [mermaidRenderer({ mermaidUrl, rendererUrl })],
+  diagramRenderers: [mermaidDiagramRenderer({ mermaidUrl, rendererUrl })],
+})
+```
+
+- **其选项**与 `mermaidRenderer` 相同。
+- **它使用与 `mermaidRenderer` 相同的沙盒 iframe**。如果您同时注册两者，Mermaid 会加载一次。
+- **颜色和字体** 来自 `--tt-flow-diagram-*` 自定义属性，而不是来自源。参见[Diagrams](/diagrams/flow-diagrams/overview)，其中也有一个演示。
+- **它仅在浏览器中绘制**，就像图表渲染器一样。
+
+[Pele](/diagrams/renderers/pele) 是 Mermaid 源的第二个图表渲染器。它引入了 Web Worker 和服务器。

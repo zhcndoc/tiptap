@@ -1,0 +1,83 @@
+---
+title: '外观'
+intro: "外观是图表样式、颜色、框架、图例、线条和标签布局的副本。您可以从一个图表中取出它并将其提供给另一个图表，或者保存它并用它开始新的图表。"
+headerDemo:
+  path: '/Extensions/DiagramsLooks'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '外观 | Tiptap 图表文档'
+  description: "外观是图表样式、颜色、框架、图例、线条和标签布局的副本。"
+  category: 图表
+---
+
+## 快速入门
+
+```ts
+import { chartLook } from '@tiptap-pro/extension-diagrams'
+
+const [first, second] = editor.storage.diagrams.listCharts()
+
+// Give the second chart the look of the first one
+const look = chartLook(first.spec, first.data)
+editor.commands.applyChartLook({ look, pos: second.pos })
+
+// Insert a new line chart with the same look
+editor.commands.insertChart({ type: 'line', data: second.data, look })
+
+// A template also holds the chart type
+const template = chartLook(first.spec, first.data, { type: true })
+editor.commands.insertChart({ data: second.data, look: template })
+```
+
+[`listCharts()`](/diagrams/api-reference/storage) 返回文档中的每个图表。
+
+## 样式包含的内容
+
+`chartLook(spec, data, { references?, type? })` 看一下图表：
+
+- `style`、`palette`、`background`、`border` 和 `legend`
+- 网格和轴线
+- 类别轴的标签布局
+- 系列的线样式，按位置：第一个系列的样式转到第一个系列
+- 参考线
+
+标题、范围、步骤和数据保留在每个图表中。
+
+| 选项 | 类型 | 说明 |
+| ------------ | --------- | ------------------------------------------------------ |
+| `references` | `boolean` | `false` 省略参考线。默认 `true` |
+| `type` | `boolean` | `true` 也采用图表类型。默认 `false` |
+
+应用外观时，图表会保留外观未设置的每个字段。具有该类型的外观是一个模板：它应用到或启动的每个图表都会成为该类型。传递给 `insertChart` 的 `type` 胜过外观。
+
+## 保存外观
+
+外观是纯 JSON。您的应用程序可以按用户或每个团队保存它，并稍后将其传回。
+
+`readChartLook(value)` 以检查图表规范的方式检查已保存的外观，并删除任何不属于外观的内容。 `applyChartLook` 和 `insertChart` 自己称呼它。
+
+应用外观会将其字段复制到图表中，因此文档在没有保存的外观的情况下仍保持完整。
+
+## 外观和风格
+
+A [style](/diagrams/guides/styling#styles) 与外观不同。图表通过 id (`spec.style`) 命名样式，而不是复制其字段。当您更改注册样式时，为其命名的每个图表都会发生变化。
+
+## 命令
+
+### applyChartLook
+
+查看从另一个图表获取或之前保存的图表。
+
+```ts
+editor.commands.applyChartLook({ look, pos: second.pos })
+```
+
+| 选项 | 类型 | 描述 |
+| ------ | ----------- | ---------------------------------------------------- |
+| `look` | `ChartLook` | `chartLook` 或保存的 | 的外观
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+
+当 `pos` 处没有图表或未选择任何图表时，返回 `false`。

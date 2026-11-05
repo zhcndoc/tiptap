@@ -1,0 +1,211 @@
+---
+title: '快速输入'
+intro: '快速输入是在文档中直接编辑文本的输入框。在空段落中键入 <code>:::</code> 即可打开。确认后，输入或粘贴的内容会转换为图表或流程图。'
+headerDemo:
+  path: '/Extensions/DiagramsChartText'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '快速输入 | Tiptap 图表文档'
+  description: '在文档中输入文本，并将其转换为图表或流程图。'
+  category: 图表
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+## 快速入门
+
+输入数据行即可生成图表。第一行可以指定图表类型：
+
+```txt
+bar
+Month | Online | Retail
+Jan   | 42     | 30
+Feb   | 48     | 28
+```
+
+Mermaid 流程图源码也可通过快速输入生成流程图：
+
+```txt
+flowchart LR
+  idea[Idea] --> draft[Draft]
+```
+
+按 Escape，或在末行为空时按 Enter，即可确认输入。编辑[图表](/diagrams/charts/editing)或[流程图](/diagrams/flow-diagrams/editing)中的文本时，按 Escape 会关闭输入框并撤销本次修改。
+
+## 输入内容的处理方式
+
+| 快速输入中的文本 | 转换为 | 处理方式 |
+| ---------------------------------------------- | --------- | ----------------------------------------------------------------- |
+| 数据行，可选地以类型行（例如 `bar`）开头 | 图表 | [编写图表](/diagrams/data/quick-input#writing-a-chart) |
+| Mermaid 图表源码，例如 `pie` 或 `sankey` | 图表 | 根据 Mermaid 类型和标题行解析 |
+| 其他 Mermaid 源码 | 流程图 | [编写流程图](/diagrams/data/quick-input#writing-a-diagram) |
+| 粘贴的 draw.io XML 或 BPMN XML | 流程图 | 保留对应格式的源码 |
+
+`pie` 下方的行（例如 `Dogs, 3`）是数据行，不是 Mermaid 源码。快速输入按照[粘贴](/diagrams/data/pasting#how-pasted-text-is-read)中的规则读取文本。
+
+快速输入是名为 `diagramInput` 的节点。您可以通过下方命令从自定义工具栏控制它。
+
+## 编写图表
+
+图表使用[图表语法](/diagrams/data/chart-syntax)编写：每行表示一条记录，第一行也可以指定图表类型。该页面介绍标题规则、默认类型、分隔符、数字和引号。
+
+## 编写流程图
+
+您可以使用 Mermaid、draw.io 或 BPMN 各自的语法编写流程图。快速输入会保留您输入的源码。
+
+- **Mermaid**，例如包含 `A --> B` 连线的 `flowchart LR`。第一行指定流程图类型。请参阅[流程图](/diagrams/flow-diagrams/overview)。
+- **draw.io XML 或 BPMN XML**，您可以从绘制它们的工具中粘贴它们。请参阅 [draw.io](/diagrams/renderers/drawio) 和 [BPMN](/diagrams/renderers/bpmn)。
+
+## 返回文本
+
+`editChartAsText` 和 `editDiagramAsText` 会重新打开快速输入，分别编辑图表或 Mermaid 流程图。修改第一行可以更改图表类型或流程图类型。
+
+以文本形式打开流程图，然后输入 `flowchart LR` 和一条连线，例如 `A --> B`：
+
+<CodeDemo isPro viewer view="preview" path="/Extensions/DiagramsOverview" />
+
+## 快速输入中的键
+
+Mod 在 macOS 上为 Cmd，在其他系统上为 Ctrl。
+
+| 按键 | 快速输入中的作用 |
+| ----------------- | ----------------------------------------------------------------- |
+| Enter | 换行；如果光标位于末尾空行，则生成图表或流程图 |
+| Shift-Enter | 换行，即使光标位于末尾空行也一样 |
+| Mod-Enter、Escape | 生成图表或流程图 |
+| Mod-Shift-A | 选中快速输入中的全部内容 |
+| Mod-A | 仍会选中整个文档 |
+| Backspace | 快速输入为空时，将其删除 |
+
+如果第一行只有类型名称（例如 `pie` 或 `bar`），按 Enter 会开始新行，并保留该类型行。在只有类型名称的行下方，快速输入会显示该类型的示例数据，直到您开始输入。
+
+### 当快速输入关闭时
+
+- **将选区移出快速输入**会像确认输入一样生成图表或流程图。
+- **空的快速输入**将成为空段落。
+- **无法解析的文本**会使快速输入保持打开状态，并让 `confirmDiagramInput` 返回 `false`。
+
+## 代码块中的 Mod-Enter
+
+确认快速输入的按键也可将代码块转换为图表或流程图。
+
+- [Mermaid 图表源码](/diagrams/charts/overview#importmermaidchart)，例如 `pie` 或 `sankey-beta`，会转换为图表，就像调用 `convertCodeBlockToChart` 一样。
+- 其他 Mermaid 源码会转换为流程图，就像调用 `convertCodeBlockToDiagram` 一样。
+- 在任何其他代码块中，该键都会执行其之前执行的操作。在 Tiptap 中，这就是离开代码块。
+
+规范中包含 `code: true` 的任何节点都算作代码块。使用 [`codeBlockShortcut`](/diagrams/api-reference/options#codeblockshortcut) 选项设置另一个键，或设置 `false`（无键）。
+
+## 命令
+
+### `confirmDiagramInput`
+
+将当前打开的快速输入（或表格视图）转换为图表或流程图。
+
+```ts
+editor.commands.confirmDiagramInput()
+```
+
+| 选项 | 类型 | 说明 |
+| ------ | -------- | ------------------------------------------------------ |
+| `pos` | `number` | 输入内容中的位置。默认使用当前选区 |
+
+`detectDiagramInput` 会识别输入内容。当 `flowDiagram` 节点包含在编辑器 schema 中时，Mermaid 流程图源码、draw.io XML 或 BPMN XML 会转换为流程图。
+
+在没有打开输入或无法读取文本时返回 `false`。
+
+### `setDiagramInputType`
+
+设置当前快速输入生成的图表类型。已有的类型行会被替换为新类型。
+
+```ts
+editor.commands.setDiagramInputType('bar')
+```
+
+| 参数 | 类型 | 说明 |
+| --------- | ----------- | --------------------------------------------------------- |
+| `type` | `ChartType` | 内置图表类型，或通过 `chartTypes` 注册的类型 |
+
+如果类型未知或当前没有打开快速输入，则返回 `false`。
+
+### `setDiagramInputView`
+
+在文本输入和表格视图之间切换当前快速输入，并保留已输入的内容。
+
+```ts
+editor.commands.setDiagramInputView('table')
+```
+
+| 参数 | 类型 | 描述 |
+| --------- | --------------------------- | ---------------------------------------------------------- |
+| `view` | `'chart-syntax' \| 'table'` | `'chart-syntax'` 表示文本输入，`'table'` 表示表格视图 |
+
+表格视图要求编辑器 schema 中包含表格节点。
+
+如果当前没有打开快速输入，或 schema 中没有表格节点但视图设为 `'table'`，则返回 `false`。
+
+### `setDiagramInputDelimiter`
+
+让当前快速输入使用指定的分隔符拆分文本，而不是自动检测分隔符。
+
+```ts
+editor.commands.setDiagramInputDelimiter(';')
+```
+
+| 参数 | 类型 | 说明 |
+| ----------- | ---------------- | ------------------------------------------------------------------ |
+| `delimiter` | `string \| null` | 已配置的 `delimiters` 之一；设为 `null` 时恢复自动检测 |
+
+在快速输入打开期间，所选分隔符会保持有效。生成的图表也会记录用于拆分数据的分隔符。
+
+在没有打开的快速输入或未配置分隔符的情况下返回 `false`。
+
+### `editChartAsText`
+
+将图表转换为快速输入，其数据采用图表语法。
+
+```ts
+editor.commands.editChartAsText()
+```
+
+| 选项 | 类型 | 描述 |
+| ------ | -------- | ---------------------------------------------------- |
+| `pos` | `number` | 图表的位置。默认使用当前选中的图表 |
+
+确认快速输入后，图表会恢复原有规格、渲染器和数据源。
+
+对于链接源为只读的图表，返回 `false`。
+
+### `editDiagramAsText`
+
+将 Mermaid 流程图转换为包含其源码的快速输入。
+
+```ts
+editor.commands.editDiagramAsText()
+```
+
+| 选项 | 类型 | 描述 |
+| ------ | -------- | -------------------------------------------------------- |
+| `pos` | `number` | 流程图位置，默认使用当前选中的流程图 |
+
+确认后，文本会按普通输入处理。类型行（例如 `bar`）下方的数据行会生成图表。若流程图仍保持原类型，则会保留其标题、描述、视图和节点位置。
+
+对于 draw.io、BPMN 流程图，以及由表格生成的流程图，返回 `false`。
+
+### `editChartAsTable`
+
+将图表转换为数据表，以编辑数据。
+
+```ts
+editor.commands.editChartAsTable()
+```
+
+| 选项 | 类型 | 描述 |
+| ------ | -------- | ---------------------------------------------------- |
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+
+当您将所选内容移出表格时，它会再次变成图表。
+
+如果图表为只读，或 schema 中没有表格节点，则返回 `false`。

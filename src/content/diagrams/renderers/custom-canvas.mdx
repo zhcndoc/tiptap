@@ -1,0 +1,61 @@
+---
+title: '在画布上绘制的渲染器'
+intro: '某些库（例如 Chart.js）在画布上绘制像素，并且没有可提供的 SVG。他们的渲染器使用 <code>toImage</code> 而不是 <code>toSVG</code>，并且 <code>toImage</code> 返回 <code>input.size</code> 的 PNG。每个导出的文件都是由该 PNG 制作的，请参阅<a href="/docs/diagrams/renderers/custom#members">成员</a>。'
+headerDemo:
+  path: '/Extensions/DiagramsChartJs'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '在画布上绘制的渲染器 | Tiptap 图表文档'
+  description: '某些库（例如 Chart.js）在画布上绘制像素，并且没有可提供的 SVG。'
+  category: 图表
+---
+
+## 渲染器
+
+```ts
+import type { RasterChartRenderer } from '@tiptap-pro/extension-diagrams'
+import { Chart, registerables } from 'chart.js'
+
+Chart.register(...registerables)
+
+export const chartJsRenderer: RasterChartRenderer = {
+  id: 'chartjs',
+  label: 'Chart.js',
+  types: ['bar', 'line', 'pie', 'doughnut'],
+  mount(target, input) {
+    const canvas = document.createElement('canvas')
+    target.replaceChildren(canvas)
+    const chart = new Chart(canvas, toChartJsConfig(input))
+    return {
+      update: (next) => {
+        const config = toChartJsConfig(next)
+        chart.data = config.data
+        chart.options = config.options
+        chart.update('none')
+      },
+      destroy: () => chart.destroy(),
+    }
+  },
+  toImage(input) {
+    const canvas = document.createElement('canvas')
+    canvas.width = input.size.width
+    canvas.height = input.size.height
+    const chart = new Chart(canvas, { ...toChartJsConfig(input), options: { animation: false } })
+    return new Promise((resolve, reject) =>
+      canvas.toBlob((blob) => {
+        chart.destroy()
+        blob ? resolve(blob) : reject(new Error('No picture.'))
+      }, 'image/png'),
+    )
+  },
+}
+```
+
+`toChartJsConfig` 将图表数据和图表规范转换为 Chart.js 配置，颜色为 `input.theme`。该演示有完整的演示。
+
+- **SVG 文件** 保存的是 PNG，而不是形状，并且 `export` 返回 `raster: true`。
+- **在 `toImage` 中绘制无动画**。还要传递 `responsive: false` 和固定的 `devicePixelRatio`，因此 PNG 的大小正是所要求的。
+- **服务器**没有画布。因此 `toImage` 仅在浏览器中运行，或者使用您自己的画布库运行。

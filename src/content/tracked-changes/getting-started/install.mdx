@@ -100,6 +100,20 @@ TrackedChanges.configure({
 })
 ```
 
+### nodeTypeChangeTypes
+
+符合节点类型建议的文本块的架构名称。包括源类型和目标类型。将段落转换为标题后会创建一个 `attributeChange` 建议，同时保留一份文本副本。配置对之外的转换将保留现有的替换行为。
+
+默认值：`[]`
+
+```js
+TrackedChanges.configure({
+  nodeTypeChangeTypes: ['paragraph', 'heading'],
+})
+```
+
+选择加入 `nodeTypeChangeTypes` 设置适用于本地编辑器。使用 Tiptap Collaboration（Y.js 文档）时，请将其保留为默认 `[]` 以继续跟踪类型转换作为替换。使用 Tiptap Collaboration（Y.js 文档）配置非空列表会在编辑器初始化期间抛出异常。请参阅[节点类型更改](/tracked-changes/usage/advanced-usage#node-type-changes)，了解支持的转换和审核行为。
+
 ### onSuggestionCreate
 
 创建新建议时触发的回调。接收包含 id、type、userId、createdAt、from、to 和 text 的建议对象。

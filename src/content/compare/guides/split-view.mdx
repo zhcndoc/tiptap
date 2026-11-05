@@ -140,7 +140,7 @@ manager = createSplitView({ mainEditor, beforeEditor, afterEditor })
 | `afterEditor`  | `Editor`                                           | 显示新增内容和未变化内容。 |
 | `createSpacer` | `(options: SplitViewSpacerOptions) => HTMLElement` | 可选的自定义间隔元素。        |
 
-其他类型的建议（例如格式变化）会在两个窗格中继续显示。三个编辑器都保留完整文档，包括在某个窗格中隐藏的内容。再次连接相同编辑器前，请先销毁现有管理器。
+[节点类型建议](/tracked-changes/usage/advanced-usage#node-type-changes) 在前窗格中显示原始块类型和属性，在后窗格中显示建议的类型和属性。内联格式更改在两个窗格中仍然可见。所有三个编辑器都保留完整文档，包括隐藏在窗格中的内容。在再次连接相同的编辑器之前销毁现有的管理器。
 
 ### 管理器方法
 

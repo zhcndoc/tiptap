@@ -1,0 +1,186 @@
+---
+title: 自定义白板形状
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 自定义白板形状 | Tiptap 编辑器文档
+  description: 在白板中添加自定义形状，并在其中渲染应用组件，例如投票卡片或图表。白板会负责放置、选择、移动和缩放这些形状。
+  category: 编辑器
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+自定义形状是白板中的自定义节点，内部可渲染应用组件，例如投票卡片或图表。白板会像管理内置形状一样放置、选择、移动和缩放它们，组件则负责绘制形状内部的内容。
+
+<CodeDemo isPro path="/Extensions/WhiteboardCustomShape" />
+
+## 创建节点
+
+形状是 `shape` 组中的节点。`shapeAttributes` 会添加每个形状所需的属性：ID、位置、尺寸和 z-index。`dataAttribute` 用于添加自定义属性，例如投票卡片的票数。`shapeNodeView` 会将组件节点视图转换为白板形状。自定义形状不包含文本，因此应将其设为 atom：
+
+```js
+import { mergeAttributes, Node } from '@tiptap/core'
+import { ReactNodeViewRenderer } from '@tiptap/react'
+import { dataAttribute, shapeAttributes, shapeNodeView } from '@tiptap-pro/extension-whiteboard'
+
+import { VoteCardView } from './VoteCardView'
+
+export const VoteCard = Node.create({
+  name: 'voteCard',
+  group: 'shape',
+  atom: true,
+  // The board selects shapes by their ids, never as a node selection
+  selectable: false,
+
+  addAttributes() {
+    return {
+      ...shapeAttributes({ width: 220, height: 150 }),
+      votes: dataAttribute({ name: 'votes', default: 0 }),
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'div[data-type="vote-card"]' }]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes({ 'data-type': 'vote-card' }, HTMLAttributes)]
+  },
+
+  addNodeView() {
+    return shapeNodeView({ dataType: 'vote-card', view: ReactNodeViewRenderer(VoteCardView) })
+  },
+})
+```
+
+将节点添加到 `WhiteboardKit` 旁边的编辑器，如 `extensions: [WhiteboardKit, VoteCard]`。
+
+通过 HTML 复制并粘贴。 `dataAttribute` 将值保留为数据属性，就像 `data-votes` 一样，因此该值会保留。它将字符串、数字和布尔值以及对象和数组保存为 JSON。 `shapeAttributes` 对位置和大小执行相同的操作。
+
+## 绘制组件
+
+该组件是 Tiptap 的一个[React 节点视图](/editor/extensions/custom-extensions/node-views/react)。将其包裹在填充形状的 `NodeViewWrapper` 中，并从 `node.attrs` 中读取形状的数据：
+
+```jsx
+import { NodeViewWrapper } from '@tiptap/react'
+import { focusBoard } from '@tiptap-pro/extension-whiteboard'
+
+export function VoteCardView({ node, editor }) {
+  const { id, votes } = node.attrs
+
+  const vote = () => {
+    editor.commands.updateShape({ id, attributes: { votes: votes + 1 } })
+    // Gives the keyboard back to the board, so undo keeps working
+    focusBoard(editor.view)
+  }
+
+  return (
+    <NodeViewWrapper className="vote-card">
+      <p>{votes} votes</p>
+      <button type="button" onClick={vote}>
+        Vote
+      </button>
+    </NodeViewWrapper>
+  )
+}
+```
+
+应用中已有的组件也可以用同样的方式复用。在 `NodeViewWrapper` 内渲染组件，并传入形状数据，例如 `<ProjectCard title={node.attrs.title} />`。组件会在 `EditorContent` 的 React 树中渲染，因此可以读取应用上下文，例如主题。
+
+组件通过 `updateShape` 修改形状，也可以同时更新自定义属性；撤销操作会还原每次更改。形状被修改、移动或缩放，以及其他用户进行这些操作后，组件都会收到更新后的节点。
+
+### Vue 和纯 JavaScript
+
+在 Vue 中，以相同的方式使用 `@tiptap/vue-3` 中的 `VueNodeViewRenderer` 和 `NodeViewWrapper`。上面的演示有一个带有相同卡片的 Vue 选项卡。请参阅[Vue 节点视图](/editor/extensions/custom-extensions/node-views/vue)。
+
+没有框架，传递一个自己的[节点视图](/editor/extensions/custom-extensions/node-views/javascript)。它的 `update` 绘制每个变化。每次更改后都会重新绘制没有 `update` 的节点视图：
+
+```js
+shapeNodeView({
+  dataType: 'vote-card',
+  view: ({ node }) => {
+    const dom = document.createElement('div')
+    dom.textContent = `${node.attrs.votes} votes`
+
+    return {
+      dom,
+      update: (updated) => {
+        dom.textContent = `${updated.attrs.votes} votes`
+        return true
+      },
+    }
+  },
+})
+```
+
+节点视图的元素是 `[data-shape-component]`，并且它具有形状的大小。
+
+## 按下
+
+按下组件即可选择形状，然后拖动即可移动它，就像在白板的形状上一样。按组件中的链接、按钮、字段和可编辑内容会转至它们，因此它们可以正常工作。用 `data-shape-interactive` 标记其他需要自己按下的部件，例如图表的图例：
+
+```jsx
+<div className="legend" data-shape-interactive>
+  {legend}
+</div>
+```
+
+`iframe` 会将所有按下操作保留在其自身上，因此白板永远不会获得它们。给它 `pointer-events: none` 让用户选择并移动形状。
+
+## 只读板
+
+在只读板](/editor/whiteboard/guides/shapes-and-tools#read-only-boards) 上，用户可以选择形状，但不能移动它们或调整它们的大小。按下组件的按钮和字段仍然会转到它们，并且 `updateShape` 等命令也会更改只读板。因此，请关闭组件中更改白板的内容。 [`isBoardEditable`](/editor/whiteboard/api-reference/utilities#isboardeditable) 告诉白板是否可编辑。不要使用 `editor.isEditable`，只要白板有键盘，就使用 `false`。当板变为只读或可编辑时，`useEditorState` 再次绘制组件：
+
+```jsx
+import { NodeViewWrapper, useEditorState } from '@tiptap/react'
+import { isBoardEditable } from '@tiptap-pro/extension-whiteboard'
+
+export function VoteCardView({ editor }) {
+  const isEditable = useEditorState({ editor, selector: (ctx) => isBoardEditable(ctx.editor) })
+
+  return (
+    <NodeViewWrapper className="vote-card">
+      <button type="button" disabled={!isEditable}>
+        Vote
+      </button>
+    </NodeViewWrapper>
+  )
+}
+```
+
+如果没有 React，请在 `editor.setEditable()` 发送的编辑器的 `update` 事件上再次检查 `isBoardEditable(editor)`。
+
+## 添加形状
+
+没有工具绘制自定义形状，因此请使用 `insertShape` 添加它们，例如通过应用程序的按钮：
+
+```js
+editor.commands.insertShape({ type: 'voteCard', x: 100, y: 100 })
+```
+
+形状从 `shapeAttributes` 获取新的 id 和大小，除非您传递它们。然后，用户可以选择、移动、调整大小、复制、粘贴和删除它，并撤消每个更改。 `updateShape`、`moveShapes` 和 `deleteShapes` 等命令也适用于它。
+
+## 设置形状的样式
+
+当选择形状时，形状的元素具有 `data-shape`、`shapeNodeView` 中的 `data-type` 和 `data-selected`。其样式类似于白板的形状：
+
+```css
+[data-type='vote-card'] {
+  background: #fff;
+  border: 1px solid rgba(61, 37, 20, 0.12);
+  border-radius: 8px;
+  padding: 14px;
+}
+```
+
+请参阅 [Styling](/editor/whiteboard/api-reference/styling#parts-of-shapes) 了解形状的各个部分。
+
+## 限制
+
+- 自定义形状不包含用户在白板上编辑的文本。
+
+## 后续步骤
+
+- 查看 [`shapeNodeView()`](/editor/whiteboard/api-reference/utilities#shapenodeview) 和 [`dataAttribute()`](/editor/whiteboard/api-reference/utilities#dataattribute)
+- ] 的所有选项 使用 [commands](/editor/whiteboard/guides/shapes-and-tools)

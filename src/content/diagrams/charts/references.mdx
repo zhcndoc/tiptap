@@ -1,0 +1,57 @@
+---
+title: '参考线和范围'
+intro: '参考线标记整个绘图中的一个值，例如目标。带标记了两个值之间的范围，例如要停留的范围。两者都属于值轴并存储在 <code>spec.references</code> 中。'
+headerDemo:
+  path: '/Extensions/DiagramsReferenceLines'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '参考线和范围带 | Tiptap 图表文档'
+  description: '参考线标记整个绘图中的一个值，例如目标。'
+  category: 图表
+---
+
+## 快速启动
+
+使用 `updateChartSpec` 设置参考值。新列表替换旧列表，`undefined` 将其删除。
+
+```ts
+editor.commands.updateChartSpec({
+  spec: {
+    references: [
+      { value: 200, label: 'Target', color: '#dc2626' },
+      { from: 80, to: 120, label: 'Corridor', color: '#16a34a' },
+    ],
+  },
+})
+```
+
+## 字段
+
+`spec.references` 的每个条目都是 `ChartReference`：
+
+| 字段 | 类型 | 描述 |
+| ------------ | --------------------------------- | ------------------------------------------------------------------------------ |
+| `value` | `number` | 在此值处的一行。胜过 `from` 和 `to` |
+| `from`、`to` | `number` | 这些值之间的带，而不是 `value` |
+| `label` | `string` | 写在线条上方或顶部的带内 |
+| `labelAt` | `'start' \| 'end'` | 标签位于类别轴的哪一端。默认值：`'end'` |
+| `color` | `string` | CSS 颜色。乐队是它的浅色调。如果没有它，主题的标签颜色 |
+| `line` | `'solid' \| 'dashed' \| 'dotted'` | 仅一行。默认值：`'dashed'` |
+| `width` | `number` | 仅一行：0.5 到 4 个 CSS 像素。默认值：1.5 |
+
+既没有 `value` 也没有两个不同的 `from` 和 `to` 值的条目将被删除。一个图表最多保留 20 个条目。
+
+## 它们是如何绘制的
+
+乐队位于该系列的后面。台词和每个标签都遍布整个系列。在带有 `background` 的图表上，标签会获得该颜色的轮廓，因此您可以在条形图上读取它。
+
+数据外部的引用会加宽值轴以进行显示。在水平条上，参考文献是直立的。在具有第二个轴的组合图表上，它们属于左轴。
+
+## 哪些图表和渲染器绘制它们
+
+参考适用于折线图、条形图、面积图、散点图和组合图。 [ECharts](/diagrams/renderers/echarts#chart-types) 和 [D3](/diagrams/renderers/d3#chart-types) 渲染器] 绘制它们。Mermaid渲染器拒绝这样的图表，请参阅其[limits](/diagrams/renderers/mermaid#limits)。
+
+文字图表没有参考线，因此 `exportDocx` 将图表写为图像并在其注释中如此说明。

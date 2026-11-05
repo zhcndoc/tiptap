@@ -1,0 +1,84 @@
+---
+title: '注册您自己的图表类型'
+intro: '图表类型是图表存储在 <code>spec.type</code> 中的 ID，例如 <code>bar</code>。要添加您自己的类型，请使用 <code>chartTypes</code> 选项进行注册。然后将其列在绘制它的渲染器的 <code>types</code> 中。'
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '注册您自己的图表类型 | Tiptap 图表文档'
+  description: '图表类型是图表存储在 spec.type 中的 id，例如 bar。'
+  category: 图表
+---
+
+## 快速入门
+
+```ts
+import { Diagrams, chartLinks, type ChartRenderer } from '@tiptap-pro/extension-diagrams'
+
+const chordRenderer: ChartRenderer = {
+  id: 'chord',
+  label: 'Chord',
+  types: ['chord'],
+  mount(target, input) {
+    // chartLinks(input.data) gives { nodes, links }, read the way sankey and network read them.
+    // Draw into target, then return { update, destroy }.
+  },
+  async toSVG(input) {
+    // ...
+  },
+}
+
+Diagrams.configure({
+  renderers: [echartsRenderer(), chordRenderer],
+  chartTypes: [
+    {
+      id: 'chord',
+      label: 'Chord',
+      shape: 'graph',
+      word: 'image',
+      description: 'Flows between groups drawn around a circle: from, to and how much.',
+    },
+  ],
+})
+```
+
+[Members](/diagrams/renderers/custom#members) 具有渲染器的其余部分。
+
+## 图表类型的字段
+
+| 字段 | 类型 | 说明 |
+| ------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `id` | `string` | 图表内容存储在 `spec.type` 中：字母、数字、`_` 和 `-`，最多 64 个字符 |
+| `label` | `string` | 对于菜单 |
+| `shape` | `'cartesian' \| 'radial' \| 'single' \| 'hierarchy' \| 'matrix' \| 'graph'` | 数据布局：类型如何读取其列和行。快速输入显示该布局中的示例行 |
+| `word` | `'chart' \| 'table' \| 'image'` | Word 文档如何保存此类型的图表：作为 Word 图表、作为 Word 表格或作为图像。使用 `'image'`，参见下文 |
+| `description` | `string` | 可选。 AI 模型选择类型的一句话 |
+
+`shape` 的数据布局：
+
+| `shape` | 列和行 | 内置类型，例如 |
+| ----------- | ------------------------------------------------------ | --------------------------- |
+| `cartesian` | 一个标签栏和一个或多个系列 | 线条、条形图、雷达、组合 |
+| `radial` | 一个标签栏和一个系列，整个 | 饼图、漏斗的部分|
+| `single` | 一个值 | 仪表 |
+| `hierarchy` | 标签为路径（例如 `A / B`）和每个叶的值| 树状图、树 |
+| `matrix` | 网格中的字 | 矩阵 (RACI) |
+| `graph` | 源列、目标列和每个链接的值 | sankey，网络 |
+
+### 文字图表和表格
+
+扩展仅针对内置类型写入字图表或字表格。即使使用 `word: 'chart'` 或 `word: 'table'`，您自己的类型也会成为 Word 中的图像。所以给它`word: 'image'`。有关 Word 获取的内容，请参阅 [导出](/diagrams/export)。
+
+## 注册类型出现的地方
+
+- **快速输入。** 您可以在 `:::` 之后键入它。
+- **`setDiagramInputType`** 可以选择。
+- **AI 模型。** 工具和 `describeCapabilities()` 将其提供给 AI 模型。
+- **内置类型 id。** 具有内置类型 id 的条目将替换该类型的定义，例如其标签和描述。
+
+## 像内置类型一样读取行
+
+| 函数 | 以 | 的方式读取行 返回 |
+| ---------------------- | --------------------------------- | ----------------------------------------------------------------------------------------- |
+| `chartHierarchy(data)` | 内置 `hierarchy` 类型| `{ name, path, value, total, children }` 的树，来自 `Europe / Germany` |
+| `chartLinks(data)` | 等路径，内置 `graph` 类型执行 | `{ nodes, links }`，每行一个链接 |

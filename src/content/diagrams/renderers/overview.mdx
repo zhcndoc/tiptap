@@ -1,0 +1,82 @@
+---
+title: '渲染器'
+intro: '渲染器是扩展程序与绘图库（例如 ECharts 或 Mermaid）之间的适配器。每个渲染器都是其自己的入口点，因此您只需安装您使用的库。'
+headerDemo:
+  path: '/Extensions/DiagramsRenderers'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '渲染器 | Tiptap 图表文档'
+  description: '渲染器是扩展程序和绘图库（例如 ECharts 或 Mermaid）之间的适配器。'
+  category: 图表
+---
+
+## 快速入门
+
+```ts
+import { Diagrams } from '@tiptap-pro/extension-diagrams'
+import { d3Renderer } from '@tiptap-pro/extension-diagrams/d3'
+import { echartsRenderer } from '@tiptap-pro/extension-diagrams/echarts'
+
+Diagrams.configure({
+  renderers: [echartsRenderer(), d3Renderer()],
+  defaultRenderer: 'echarts',
+})
+```
+
+该扩展不捆绑任何图表库。每个库都是对等依赖项或您提供的脚本，并且您可以在其自己的许可证下使用它。
+
+## 使用哪个渲染器
+
+图表渲染器绘制图表，并在 `renderers` 中传递它。图表渲染器绘制一种或多种图表格式，例如 Mermaid 或 BPMN，并在 `diagramRenderers` 中传递它。您可以分别注册多个。图表由 `draws` 接受其源的第一个图表渲染器绘制，请参阅[哪个渲染器绘制图表](/diagrams/renderers/custom-diagrams#which-renderer-draws-a-diagram)。
+
+| 渲染器 | 绘制 | 用于 |
+| -------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| [ECharts](/diagrams/renderers/echarts) | 图表：每种内置类型 | 服务器上最多的图表类型和 SVG 文件|
+| [D3](/diagrams/renderers/d3) | 图表：大多数类型，以及带有 `d3-sankey` | 的 sankey 在代码中更改的图表，以及具有 DOM 的服务器上的 SVG 文件 |
+| [Mermaid](/diagrams/renderers/mermaid) | 图表：饼图、折线图、直立条形图、桑基图、雷达图、树形图。图表：每种Mermaid类型 | Mermaid外观，适用于图表和流程图 |
+| [Pele](/diagrams/renderers/pele) | 图表：每种Mermaid类型 | 没有 iframe 的Mermaid图表，加载小得多，也在服务器上 |
+| [draw.io](/diagrams/renderers/drawio) | 图表：draw.io XML | 您在 draw.io 编辑器中绘制和更改的图表 |
+| [BPMN](/diagrams/renderers/bpmn) | 图表：BPMN 2.0 XML | BPMN 工具读取的流程模型 |
+
+## 哪个渲染器绘制图表
+
+图表可以通过 ID 来命名渲染器，并使用 [`setChartRenderer`](/diagrams/charts/appearance#setchartrenderer) 设置。扩展程序按以下顺序选择已注册的图表渲染器之一：
+
+1. 渲染器为图表命名（如果已注册）并绘制图表的类型。
+2. 否则为 `defaultRenderer`（如果它绘制类型）。
+3. 否则，第一个注册的绘制该类型的渲染器。
+
+图表的根元素命名在 `data-tt-chart-renderer` 中绘制它的渲染器。
+
+### 当渲染器拒绝图表时
+
+渲染器可以拒绝其绘制的类型的图表。例如，[Mermaid Renderer](/diagrams/renderers/mermaid#limits) 拒绝​​包含多个系列的条形图。
+
+- **另一个渲染器绘制类型。** 按上述顺序的下一个渲染器绘制图表。
+- **没有其他渲染器绘制类型。** 衰退的渲染器毕竟绘制图表。
+- **图表保留其选择。** 它仍然命名之前命名的渲染器。
+- **带有 `renderer` 选项的导出**按原样使用该渲染器，即使它拒绝。
+
+### 当没有渲染器绘制类型时
+
+该图表显示了 [`unavailable`](/diagrams/api-reference/options#unavailable) 返回的内容。其数据保留在文档中。
+
+### 当渲染器更改时
+
+- **仅绘图更改。** 图表数据和图表规格保持原样。
+- **图表存储在 `spec.renderer[id]` 下的一个渲染器的选项**将被其他渲染器忽略。
+- **颜色和字体** 来自每个渲染器的相同 `--tt-chart-*` 自定义属性。请参阅[样式](/diagrams/guides/styling)。
+
+图表将转到第一个图表渲染器，因为其格式不会拒绝它。请参阅[哪个渲染器绘制图表](/diagrams/renderers/custom-diagrams#which-renderer-draws-a-diagram)。
+
+## 您自己的渲染器
+
+您自己的图表渲染器可以使用任何库进行绘制。它接收图表数据和图表规范，而不是文档。
+
+- [您自己的渲染器](/diagrams/renderers/custom) 是一个完整的图表渲染器，及其成员。
+- [在画布上绘制的渲染器](/diagrams/renderers/custom-canvas) 绘制 PNG。每个导出的文件（包括 SVG）都是由它制成的。
+- [图表类型](/diagrams/renderers/custom-chart-types) 添加图表类型。
+- [图表渲染器](/diagrams/renderers/custom-diagrams) 绘制图表格式。

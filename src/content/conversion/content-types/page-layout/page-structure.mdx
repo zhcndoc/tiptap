@@ -22,12 +22,12 @@ import { Callout } from '@/components/ui/Callout'
 
 | 功能 | 导入 | 编辑器 | 导出 |
 | --- | --- | --- | --- |
-| 分页符 | 支持 | 支持（PageBreak） | 支持 |
-| 页面大小 | 不支持 | 支持（[Pages](/pages/getting-started/overview)） | 支持（可配置） |
-| 页边距 | 不支持 | 支持（Pages） | 支持（可配置） |
-| 节 | 部分支持（会提取并应用栏配置） | 不支持 | 仅单节 |
-| 页码 | 支持（PAGE/NUMPAGES → `{page}`/`{numpages}` 标记，见[下文](#page-numbers)） | 支持（通过页眉/页脚） | 仅编辑器扩展：页眉/页脚中的 `{page}`/`{total}` 标记会输出实时的 `PAGE`/`NUMPAGES` 域。REST API 导出会输出字面文本。 |
-| 栏 | 导入时支持（会创建 columns/column 节点） | 不支持 | 不支持 |
+| Page breaks | Supported | Supported (PageBreak) | Supported |
+| Page size | Not supported | Supported ([Pages](/pages/getting-started/overview)) | Supported (configurable) |
+| Page margins | Not supported | Supported (Pages) | Supported (configurable) |
+| Sections | Partial (column configuration is extracted and applied) | Not supported | Single section only |
+| 页码 | 支持（PAGE/NUMPAGES → `{page}`/`{numpages}` 标记，请参阅[下文 ](#page-numbers)） | 支持（通过页眉/页脚） | 支持。编辑器扩展和 REST API 在页眉/页脚中发出 `{page}`/`{total}` 令牌作为实时 `PAGE`/`NUMPAGES` 字段。 REST API 还接受 `{numpages}`。 |
+| Columns | Supported on import (columns/column nodes created) | Not supported | Not supported |
 
 ## 分页符
 
@@ -80,9 +80,9 @@ Pages 扩展默认识别 `{page}` 和 `{total}`；它**不**识别 `{numpages}`�
 
 | 功能 | 可往返？ | 说明 |
 | --- | --- | --- |
-| 分页符 | 是 | 需要 `@tiptap-pro/extension-pagebreak` |
-| 页面大小 | 否 | 编辑器（Pages）和导出需分别配置 |
-| 页面边距 | 否 | 编辑器（Pages）和导出需分别配置 |
-| 节 | 部分 | 列配置会保留；其他节属性不会保留 |
-| 页码 | 是（编辑器扩展导出） | Word `PAGE` / `NUMPAGES` ↔ `{page}` / `{numpages}`（Pages 中总页数的规范名称是 `{total}`；配置 `placeholders: { total: 'numpages' }` 以实现映射）。通过 REST API 重新导出不会转换这些标记；往返请使用编辑器扩展。 |
-| 栏 | 部分 | 导入会创建栏节点；导出目前尚不会将其写回 |
+| Page breaks | Yes | Requires `@tiptap-pro/extension-pagebreak` |
+| Page size | No | Configure separately for editor (Pages) and export |
+| Page margins | No | Configure separately for editor (Pages) and export |
+| Sections | Partial | Column configuration survives; other section properties do not |
+| 页码 | 是 | 字 `PAGE` / `NUMPAGES` ↔ `{page}` / `{numpages}` （总计的页面规范名称为 `{total}`；将 `placeholders: { total: 'numpages' }` 配置为桥接）。如果没有该设置，REST API 会在导出时识别 `{numpages}`。 |
+| Columns | Partial | Import creates column nodes; export does not yet write them back |

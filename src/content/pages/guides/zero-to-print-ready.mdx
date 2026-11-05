@@ -189,10 +189,25 @@ editor
 
 当导入的文档包含页眉和页脚时，Pages 扩展会自动识别它们；它们会在每个渲染页面的顶部和底部显示，无需额外配置。
 
-<Callout title="获取你的 token" variant="hint">
-  参见 [转换安装指南](/conversion/getting-started/install) 进行设置，以及
-  [身份验证](/authentication) 了解如何签名 token。请在服务端签名 token，且永远不要
-  在浏览器中暴露你的签名密钥。
+Word page numbers in those headers and footers import as `{page}` and `{numpages}` tokens. Pages renders `{page}` right away. For the total page count, Pages expects `{total}` by default, so rename it to match the import. Replace the `Pages.configure` block from step 2 with this one, which adds the rename and updates the footer to the new token name:
+
+```ts
+Pages.configure({
+  pageFormat: 'A4',
+  pageGap: 40,
+  header: 'My Project',
+  footer: 'Page {page} of {numpages}',
+  pageGapBackground: '#f8f8f8',
+  placeholders: { total: 'numpages' },
+})
+```
+
+After the rename, Pages and the DOCX export both treat `{numpages}` as the total page count, and `{total}` no longer works.
+
+<Callout title="Where to get your token" variant="hint">
+  See the [Conversion install guide](/conversion/getting-started/install) for setup, and
+  [Authentication](/authentication) for how to sign a token. Sign tokens server-side and never
+  expose your signing key in the browser.
 </Callout>
 
 ---

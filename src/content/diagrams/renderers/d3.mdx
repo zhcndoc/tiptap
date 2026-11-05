@@ -1,0 +1,89 @@
+---
+title: 'D3 渲染器'
+intro: 'D3 渲染器使用 D3 以 SVG 形式绘制图表。'
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 'D3 渲染器 | Tiptap 图表文档'
+  description: 'D3 渲染器使用 D3 以 SVG 形式绘制图表。'
+  category: 图表
+---
+
+## 快速入门
+
+```bash
+npm install d3
+```
+
+```ts
+import { d3Renderer } from '@tiptap-pro/extension-diagrams/d3'
+
+Diagrams.configure({ renderers: [d3Renderer()] })
+```
+
+## 图表类型
+
+D3 渲染器通过 [`d3-sankey`](/diagrams/renderers/d3#sankey-charts) 绘制桑基图。
+
+- **网络**通过力模拟进行布局。它从固定的起点运行固定数量的步骤，因此每次都以相同的方式绘制相同的数据。
+- **`orientation: 'horizontal'`** 会将条形图改为横向布局；组合图中的柱形仍保持纵向。
+- **样式支持。** 支持[系列线条样式](/diagrams/charts/appearance#series-line-styles)、[坐标轴](/diagrams/charts/axes)和[参考线](/diagrams/charts/references)中的所有字段。
+- **双击文本**将其重命名，请参阅[图表中的编辑](/diagrams/charts/editing)。
+
+## 选项
+
+| 选项 | 类型 | 说明 |
+| ---------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `id` | `string` | id 图表存储。默认 `'d3'` |
+| `label` | `string` | 菜单的名称。默认 `'d3'` |
+| `customizers` | `Record<string, D3Customizer>` | 按名称更改绘制图表的函数。默认`{}`。请参阅[定制程序](/diagrams/renderers/d3#customizers) |
+| `measureText` | `(text, fontSize) => number` | 返回标签的宽度，了解确切的标签宽度。如果没有它，则估计宽度 |
+| `createDocument` | `() => Document` | 对于没有 `document` 的 `toSVG`，例如在服务器上 |
+| `sankey` | `d3-sankey` 模块 | 对于 sankey 图表 |
+
+## Sankey 图表
+
+```bash
+npm install d3-sankey
+```
+
+```ts
+import * as sankey from 'd3-sankey'
+
+d3Renderer({ sankey })
+```
+
+如果没有 `sankey`，D3 渲染器不会列出 `sankey` 类型，另一个渲染器会绘制 sankey图表。
+
+## 定制器
+
+定制器是您以名称注册的功能。图表通过该名称引用它：
+
+```ts
+d3Renderer({
+  customizers: {
+    highlightMax(svg, { data }) {
+      // change the drawn SVG element: add marks, reorder, restyle
+    },
+  },
+})
+
+editor.commands.updateChartSpec({ spec: { renderer: { d3: { customizer: 'highlightMax' } } } })
+```
+
+定制程序接收绘制的 `SVGSVGElement` 和 `{ data, spec, theme, size }`。它在每次绘制后在编辑器和导出中运行。
+
+该文档仅存储定制者的名称，而不存储其代码。绘制一个命名此编辑器没有的定制器的图表时，没有定制器。
+
+## 导出和服务器
+
+在浏览器中，`toSVG` 不需要其他任何东西。在服务器上，传递 DOM 实现：
+
+```ts
+import { parseHTML } from 'linkedom'
+
+d3Renderer({
+  createDocument: () => parseHTML('<!doctype html><html><body></body></html>').document,
+})
+```

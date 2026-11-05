@@ -1,0 +1,63 @@
+---
+title: 白板框架
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板框架 | Tiptap 编辑器文档
+  description: 将白板形状分组到框架中。框架会随其中的形状移动，并在边界处裁切超出的内容。
+  category: 编辑器
+---
+
+框架用于对形状分组，框架移动时其中的形状也会一起移动，超出边界的部分会被裁切。框架名称显示在左上角上方。与用于显示文档的[文档框架](/editor/whiteboard/guides/doc-frames)不同，普通框架用于容纳其他形状。
+
+## 添加框架
+
+使用 `frame` 工具，用户可以拖动绘制框架，也可以单击添加框架。快捷键是 <kbd>F</kbd>。新框架会接管其范围内的形状，但不会接管其他框架。
+
+`frameShapes` 将形状放入其周围的新框架中，空间为 32 个板单元，并选择框架：
+
+```js
+import { getSelectedShapeIds } from '@tiptap-pro/extension-whiteboard'
+
+editor.commands.frameShapes({ ids: getSelectedShapeIds(editor.state), name: 'Ideas' })
+```
+
+`insertShape` 像其他形状一样添加框架：
+
+```js
+editor.commands.insertShape({ type: 'frame', name: 'Ideas', width: 600, height: 400 })
+```
+
+## 框架中的形状
+
+形状的 `frameId` 是其框架的 id，或 `null`。当板发生变化时，板会保留它：
+
+- 添加、移动或调整大小的形状会进入其中间下方的最前面的框架，或移出其框架。添加了与其重叠的框架 ID 的形状将保留在其中。
+- 移动的框架会随之移动其形状，当 `updateShapes` 或 `moveShapes` 移动它时也是如此。
+- 调整大小的框架会放弃不再重叠的形状。它的形状保持其尺寸。
+- 由 `duplicateShapes` 或粘贴制作的框架的副本，附带其形状的副本，这些形状位于副本中。它没有其他形状。
+
+框架和箭头不在任何框架中，因此一个框架不包含其他框架。通过 Yjs 进行的更改保留了编辑器赋予形状的框架。两个编辑器同时进行更改可能会使某个形状脱离其框架，就像一个编辑器将形状添加到另一个编辑器移开的框架中一样。不与其框架重叠的形状算作没有框架。
+
+## 选择、删除和堆叠
+
+- 按下框架内的按钮即可到达白板和其中的形状，因此在此处拖动会绘制一个选择框。用户通过框架的边缘或名称来选择和移动框架。仅当框架全部位于选择框内时，选择框才会选择该框架。
+- `deleteShapes` 删除框架及其形状。 `removeFrame` 删除框架并保留其形状：
+
+```js
+editor.commands.removeFrame('frame-1')
+```
+
+- 框架位于所有其他形状的后面，无论其 `zIndex` 是什么。橡皮擦不会影响它们。
+- 框架中的形状仅显示框架到达的范围，除非选择了该形状。图像导出、形状适合、选择框和橡皮擦也仅此而已。
+- 框架的图像导出也会绘制其形状和名称。
+
+## 名称
+
+框架的 `name` 显示在其左上角上方，如果没有，则显示为“框架”。比框架宽的名称以省略号结尾。双击名称可重命名字段中的框架，除非该白板是只读的。 <kbd>Enter</kbd> 保留新名称，<kbd>Escape</kbd> 删除它。通过 `data-frame-title` 设置名称样式，请参阅[Styling](/editor/whiteboard/api-reference/styling#parts-of-shapes)。
+
+## 后续步骤
+
+- 在[形状和工具]中选择工具及其键](/editor/whiteboard/guides/shapes-and-tools)
+- 查看所有[命令](/editor/whiteboard/api-reference/commands)

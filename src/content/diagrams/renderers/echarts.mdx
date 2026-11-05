@@ -1,0 +1,63 @@
+---
+title: 'ECharts 渲染器'
+intro: 'ECharts 渲染器使用 ECharts 以 SVG 形式绘制图表。它绘制每种内置图表类型。'
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 'ECharts 渲染器 | Tiptap 图表文档'
+  description: 'ECharts 渲染器使用 ECharts 以 SVG 形式绘制图表。'
+  category: 图表
+---
+
+## 快速入门
+
+```bash
+npm install echarts
+```
+
+```ts
+import { echartsRenderer } from '@tiptap-pro/extension-diagrams/echarts'
+
+Diagrams.configure({ renderers: [echartsRenderer()] })
+```
+
+## 图表类型
+
+ECharts 渲染器绘制折线图、条形图、面积图、散点图、饼图、圆环图、矩阵图、雷达图、漏斗图、仪表图、树图、组合图、树图、桑基图和网络图。
+
+- **矩阵** 是彩色单元格的热图，其中包含文本。它的图例列出了每个值。
+- **网络**布置在一个圆圈上，因此每次绘制时看起来都一样。
+- **横向布局。** 条形图和组合图可以使用横向布局，并支持[系列线条样式](/diagrams/charts/appearance#series-line-styles)、[坐标轴](/diagrams/charts/axes)和[参考线](/diagrams/charts/references)中的所有字段。
+- **双击文本**可对其进行重命名，请参阅[图表中的编辑](/diagrams/charts/editing)。
+- **动画。** 它在编辑器中对图表进行动画处理，除非 [`animation`](/diagrams/api-reference/options#animation) 选项或用户系统将其关闭。
+
+## 选项
+
+| 选项 | 类型 | 说明 |
+| ------- | -------- | ---------------------------------------- |
+| `id` | `string` | id 图表存储。默认 `'echarts'` |
+| `label` | `string` | 菜单的名称。默认 `'ECharts'` |
+
+## 图表可以存储的选项
+
+图表可以在 `spec.renderer.echarts` 下存储 ECharts 选项。渲染器将​​它们放置在它构建的 ECharts 选项上，深一层：
+
+```ts
+editor.commands.updateChartSpec({
+  spec: { renderer: { echarts: { grid: { left: 80 }, legend: { icon: 'circle' } } } },
+})
+```
+
+- **一个对象** 与同名选项合并。
+- **任何其他值** 将替换它。
+- **工具提示的 `formatter` 和 `extraCssText`** 将被忽略。
+- **颜色**必须是 CSS 颜色，例如 `#1d3557`、`rgb(…)` 或 `var(…)`。任何其他颜色都会被忽略。
+- **带双引号的文本**被忽略。带有 `;`、`<`、`>` 或括号的字体系列也是如此。
+- **不是 `http:` 或 `https:` 地址的 `link` 或 `sublink`** 将被忽略。
+
+## 导出和服务器
+
+`toSVG` 使用 ECharts 的服务器端渲染，不需要 DOM，因此您可以在 Node.js 中制作 SVG 文件。
+
+`toEChartsOption(data, spec, theme)` 返回图表的 ECharts 选项，以使用您自己的 ECharts 设置绘制它。

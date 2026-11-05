@@ -78,7 +78,9 @@ meta:
 
 `data-suggestion-type` 保存的是内部的 [SuggestionNodeType](/tracked-changes/api-reference/types#suggestionnodetype)，而不是公开类型。[块拆分](/tracked-changes/usage/advanced-usage#block-splits) 在这里是 `blockSplit`，尽管查询 API 将其报告为 `split`。
 
-## 区块拆分标记
+节点类型提议还公开 `data-suggestion-node-type-change`，其中包含 JSON 序列化的原始和提议类型以及原始属性。当删除或拆分共享块时，它还包括格式建议的标识。以 `[data-suggestion-node-type-change]` 为目标，使这些建议的样式独立于块的主要建议类型。
+
+## Block split marker
 
 建议的区块拆分还会在**拆分前**的区块末尾渲染一个标记，用于显示断点添加的位置。默认标记是一个 class 为 `tiptap-tracked-change-split-marker` 的 `<span>`：
 
@@ -105,6 +107,6 @@ meta:
 
 此扩展处于积极开发中，未来几个月将会有重大变更。已知以下限制，未来版本会予以解决：
 
-- 仅支持对行内建议进行嵌套。不支持跨越整个块的嵌套建议
-- 不会跟踪节点类型的更改（例如将段落转换为标题）
-- 没有显式的建议模式，可以在跟踪版本旁渲染一个单独的“干净”文档
+- Nesting is supported for inline suggestions only. Nested suggestions spanning whole blocks are out of scope
+- 跟踪[节点类型更改](/tracked-changes/usage/advanced-usage#node-type-changes) 作为 `attributeChange` 建议需要选择加入 `nodeTypeChangeTypes` 设置，该设置可供本地编辑器使用。使用 Tiptap Collaboration（Y.js 文档）时，将此设置保留为 `[]` 以跟踪类型转换作为替换。
+- There is no explicit suggestion mode that renders a separate "clean" document alongside the tracked version

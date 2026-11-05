@@ -9,11 +9,11 @@ meta:
   category: 可组合文档
 ---
 
-从 `@tiptap-pro/extension-slot` 导入 `Slot`、`BlockSlot` 和 `InlineSlot`。
+从 `@tiptap-pro/extension-slot` 导入 `Slot`、`BlockSlot`、`InlineSlot`、`BlockValueSlot` 和 `InlineValueSlot`。
 
 ## `Slot`
 
-安装两个 Slot 节点、命令、索引和编辑行为。扩展和存储名称为 `slot`。
+安装四个插槽节点、命令、索引和编辑行为。其扩展名和存储名称为 `slot`。
 
 ```ts
 Slot.configure({ validators: { registeredPerson } })
@@ -21,29 +21,31 @@ Slot.configure({ validators: { registeredPerson } })
 
 ### 选项（`SlotOptions`）
 
-- `blockSlot` (`Node`)：块节点扩展。默认值为 `BlockSlot`。
-- `inlineSlot` (`Node`)：行内节点扩展。默认值为 `InlineSlot`。
-- `generateId` (`() => string`)：创建文档唯一 ID。默认使用 UUID 生成器。
-- `validators` (`Record<string, SlotValidator>`)：命名字段验证器。默认值为 `{}`；注册前引用的验证器不可用。
-- `crossFieldValidators` (`Record<string, CrossFieldValidator>`)：命名跨字段验证器。默认值为 `{}`；注册前引用的验证器不可用。
-- `getValidationContext` (`() => unknown`)：每次验证请求捕获一次应用数据。默认返回 `undefined`。
-- `shortcuts` (`false | SlotShortcuts`)：类型化创建和可选的分隔符转换。默认使用 `{{{` 立即创建行内 Slot，使用 `[[[` 创建块 Slot。设置为 `false` 可禁用所有 Slot 输入规则。
-- `resolveInputRuleSlot` (`SlotInputRuleResolver`)：插入前解析匹配的快捷方式。默认返回 `undefined`，保留捕获内容和快捷方式配置。参见[解析输入规则](#resolveinputruleslot)。
-- `onSlotsUpdate` (`(event: SlotsUpdateEvent) => void`)：`slotsUpdate` 监听器。默认为空操作。
-- `onActiveSlotChange` (`(event: ActiveSlotChangeEvent) => void`)：`activeSlotChange` 监听器。默认为空操作。
-- `onValidationUpdate` (`(event: SlotValidationUpdateEvent) => void`)：`slotValidationUpdate` 监听器。默认为空操作。
-- `onValidationError` (`(event: SlotValidationErrorEvent) => void`)：`slotValidationError` 监听器。默认为空操作。
-- `onCommandRejected` (`(event: SlotCommandRejectedEvent) => void`)：`slotCommandRejected` 监听器。默认为空操作。
+- `blockSlot` (`Node`): Block Node extension. Default: `BlockSlot`.
+- `inlineSlot` (`Node`): Inline Node extension. Default: `InlineSlot`.
+- `blockValueSlot` (`Node`)：块值节点扩展。默认值：`BlockValueSlot`。
+- `inlineValueSlot` (`Node`)：内联值节点扩展。默认值：`InlineValueSlot`。
+- `generateId` (`() => string`): Creates document-unique IDs. Default: UUID generator.
+- `validators` (`Record<string, SlotValidator>`): Named field validators. Default: `{}`; referenced validators are unavailable until registered.
+- `crossFieldValidators` (`Record<string, CrossFieldValidator>`): Named cross-field validators. Default: `{}`; referenced validators are unavailable until registered.
+- `getValidationContext` (`() => unknown`): Captures application data once per validation request. Default: returns `undefined`.
+- `shortcuts` (`false | SlotShortcuts`): Typed creation and optional delimiter conversion. Defaults to immediate inline creation with `{{{` and block creation with `[[[`. Set `false` to disable all Slot input rules.
+- `resolveInputRuleSlot` (`SlotInputRuleResolver`): Resolves a matched shortcut before insertion. Default: returns `undefined`, preserving captured content and shortcut configuration. See [resolving input rules](#resolveinputruleslot).
+- `onSlotsUpdate` (`(event: SlotsUpdateEvent) => void`): `slotsUpdate` listener. Default: no-op.
+- `onActiveSlotChange` (`(event: ActiveSlotChangeEvent) => void`): `activeSlotChange` listener. Default: no-op.
+- `onValidationUpdate` (`(event: SlotValidationUpdateEvent) => void`): `slotValidationUpdate` listener. Default: no-op.
+- `onValidationError` (`(event: SlotValidationErrorEvent) => void`): `slotValidationError` listener. Default: no-op.
+- `onCommandRejected` (`(event: SlotCommandRejectedEvent) => void`): `slotCommandRejected` listener. Default: no-op.
 
 这里的 `Node` 是来自 `@tiptap/core` 的扩展类型。请参阅[验证器](/composable-docs/slots/api-reference/validation)和[事件负载](/composable-docs/slots/api-reference/events)。
 
 ### 配置规则
 
-- 只注册一次 `Slot`。通过其选项传入定制节点；不要再单独注册这些节点。
-- 两个节点选项都是必需的，并在编辑器创建时固定。它们不接受 `false`。
-- 自定义节点必须保留其名称、属性和 schema 行为。
-- 无效节点实例、重复注册和无效快捷方式会导致初始化失败。
-- ID 生成会最多重试冲突五次。失败时会以 `idGenerationFailed` 拒绝命令。
+- Register `Slot` once. Pass customized Nodes through its options; do not also register them separately.
+- 所有节点选项都是必需的，并在编辑器构造时固定。他们不接受 `false`。
+- Custom Nodes must preserve their names, attributes and schema behavior.
+- Invalid Node instances, duplicate registrations and invalid shortcuts fail initialization.
+- ID generation retries collisions up to five times. Failure refuses the command with `idGenerationFailed`.
 
 ## `BlockSlot` 和 `InlineSlot`
 
@@ -74,9 +76,17 @@ Slot.configure({ validators: { registeredPerson } })
 
 在行内 Slot 中，Backspace 和 Delete 会删除完整的字素（包括 emoji 和组合字符），同时保留 Slot 包装器。
 
+## `BlockValueSlot` 和 `InlineValueSlot`
+
+名为 `blockValueSlot` 和 `inlineValueSlot` 的叶原子节点。它们使用相应的块或内联组，保留`defining`和`isolating`，并且没有内容表达。两者都支持 `HTMLAttributes` 以及共享的 `id` 和 `config` 属性。它们的 `value` 属性接受 `JsonValue` 并默认为 `null`。
+
+使用 `.extend({ addNodeView() { ... } })` 自定义它们，并将结果通过 `Slot.configure` 传递。请参阅[值槽](/composable-docs/slots/guides/value-slots)。
+
 ## `SlotShortcuts`
 
-### 属性
+快捷方式创建内容槽。使用 `insertSlot({ mode: 'value', ... })` 创建价值槽。
+
+### Properties
 
 - `inline?` (`SlotShortcut | false`)：行内规则。默认值为 `{ create: '{{{' }`。设置为 `false` 可禁用此类型。
 - `block?` (`SlotShortcut | false`)：块规则。默认值为 `{ create: '[[[' }`。设置为 `false` 可禁用此类型。

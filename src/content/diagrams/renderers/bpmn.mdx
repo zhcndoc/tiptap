@@ -1,0 +1,120 @@
+---
+title: 'BPMN'
+intro: '入口点 <code>@tiptap-pro/extension-diagrams/bpmn</code> 使用 <a href="https://bpmn.io/toolkit/bpmn-js/">bpmn-js</a> 绘制存储为 BPMN 2.0 XML 的图表。它还连接 bpmn-js 建模器，因此您可以在那里更改这些图表。它不绘制图表。'
+headerDemo:
+  path: '/Extensions/DiagramsBPMN'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 'BPMN | Tiptap 图表文档'
+  description: '入口点 @tiptap-pro/extension-diagrams/bpmn 使用 bpmn-js 绘制存储为 BPMN 2.0 XML 的图表。'
+  category: 图表
+---
+
+## 快速入门
+
+```ts
+import { Diagrams } from '@tiptap-pro/extension-diagrams'
+import { bpmnDiagramRenderer } from '@tiptap-pro/extension-diagrams/bpmn'
+import rendererUrl from '@tiptap-pro/extension-diagrams/bpmn-renderer?url&no-inline'
+import viewerUrl from 'bpmn-js/dist/bpmn-viewer.production.min.js?url&no-inline'
+
+Diagrams.configure({
+  diagramRenderers: [bpmnDiagramRenderer({ viewerUrl, rendererUrl })],
+})
+
+editor.commands.insertFlowDiagram({ source: bpmnXml, format: 'bpmn', title: 'Payment check' })
+```
+
+bpmn-js 不是包的依赖项。自己安装它，将其捆绑包作为文件提供，并接受它自己的许可证。
+
+## 选项
+
+| 选项 | 类型 | 说明 |
+| ------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
+| `viewerUrl` | `string` | 必需。 bpmn-js 包：`bpmn-js/dist/bpmn-viewer.production.min.js`。建模器捆绑包也可以使用 |
+| `rendererUrl` | `string` | 必需。 `@tiptap-pro/extension-diagrams/bpmn-renderer`，作为一个文件。使用 Vite、`?url&no-inline` |
+| `scriptNonce` | `string \| null` | 对于具有基于随机数的内容安全策略的页面 |
+| `id` | `string` | 默认 `'bpmn'` |
+| `label` | `string` | 默认 `'BPMN'` |
+
+## 如何绘制
+
+bpmn-js 在每页一个 iframe 中运行，具有 `sandbox="allow-scripts"` 和不允许网络请求的策略。 iframe 布置在屏幕之外，因为 bpmn-js 在绘制时测量标签。它加载第一个 BPMN 图，并且每个绘图都按源缓存。
+
+- **布局。** XML 必须携带其布局 (BPMN DI)，因为建模者会保存它。没有布局的流程不会绘制。
+- **颜色。** 图表在其自己的页面上以黑底白字绘制。 `--tt-flow-diagram-*` 自定义属性无法达到它。
+- **PNG、WebP、JPEG 和 Word 导出。** 标签是 SVG 文本，因此文件看起来像编辑器中的图表。
+- **在服务器上。** 无法导出 BPMN 图，因为 bpmn-js 在浏览器中布局文本。
+
+### bpmn.io 归属
+
+渲染器的规则要求带有 bpmn.io 徽标的“Powered by bpmn.io”链接。它显示在图表下方并绘制到每个导出的文件中。 `rendererRules` 无法删除它。请参阅[渲染器规则](/diagrams/renderers/custom#rules-of-your-renderer)。
+
+## 什么是 BPMN 源
+
+- **根元素**是命名空间 `http://www.omg.org/spec/BPMN/20100524/MODEL` 中的 `definitions`，可以使用任何前缀。根元素声明名称空间。
+- **XML 以该根元素的结束标记结束**，例如 `</bpmn:definitions>`。
+- **文档按书面形式存储**，包括布局。仅删除字节顺序标记和 XML 周围的空白。
+- **对于尚未建模的流程，允许使用空源**。
+- **将 BPMN XML 粘贴为文本** 给出 BPMN 图。
+- **`detectDiagramInput`** 为其返回 `{ kind: 'bpmn' }`。对于其他任何内容以及长度超过 1,000,000 个字符的源，
+
+`insertFlowDiagram` 和 `updateFlowDiagram` 返回 `false`。
+
+## 在建模器中进行编辑
+
+`connectBpmnEditor` 在您创建的 iframe 中运行 bpmn-js 建模器（仅使用脚本进行沙盒化），并在其中打开图表。您构建对话框、iframe 和按钮。当您需要时，该包会为您提供 XML。
+
+```ts
+import { connectBpmnEditor } from '@tiptap-pro/extension-diagrams/bpmn'
+import rendererUrl from '@tiptap-pro/extension-diagrams/bpmn-renderer?url&no-inline'
+import fontUrl from 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css?url&no-inline'
+import bpmnStyleUrl from 'bpmn-js/dist/assets/bpmn-js.css?url&no-inline'
+import diagramStyleUrl from 'bpmn-js/dist/assets/diagram-js.css?url&no-inline'
+import modelerUrl from 'bpmn-js/dist/bpmn-modeler.production.min.js?url&no-inline'
+
+const frame = document.createElement('iframe')
+dialog.append(frame)
+
+const connection = connectBpmnEditor(frame, {
+  modelerUrl,
+  rendererUrl,
+  styleUrls: [diagramStyleUrl, bpmnStyleUrl, fontUrl],
+  source: diagram.source,
+  onReady: () => (saveButton.disabled = false),
+})
+
+saveButton.onclick = async () => {
+  const source = await connection.save()
+  editor.commands.updateFlowDiagram({ pos, source, format: 'bpmn' })
+  connection.destroy()
+  dialog.close()
+}
+```
+
+### connectBpmnEditor(框架、选项)
+
+| 选项 | 类型 | 说明 |
+| ------------------ | ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `modelerUrl` | `string` | 必需。 bpmn-js 建模器捆绑包 `bpmn-js/dist/bpmn-modeler.production.min.js` |
+| `rendererUrl` | `string` | 必需。 `@tiptap-pro/extension-diagrams/bpmn-renderer`，渲染器使用的同一文件 |
+| `styleUrls` | `readonly string[]` | 必需。建模器的样式表：`diagram-js.css`、`bpmn-js.css` 和 `bpmn-font/css/bpmn-embedded.css` |
+| `scriptNonce` | `string \| null` | 对于具有基于随机数的内容安全策略的页面 |
+| `source` | `string` | 要打开的 BPMN XML。 Empty 打开带有启动事件的新流程 |
+| `onReady()` | `() => void` | 当图表打开且可编辑时调用 |
+| `onChange()` | `() => void` | 在建模器中每次更改后调用 |
+| `onError(message)` | `(message) => void` | 当建模器未加载或无法打开源时调用 |
+
+它返回 `{ save, destroy }`：
+
+| 函数 | 返回 |
+| ----------- | ---------------------------------------------------------------------------------------------------------------- |
+| `save()` | 现在的图表 Promise，作为 BPMN XML。当建模者发送非 BPMN |
+| `destroy()` | 无。停止监听并清空 iframe。 iframe 仍属于您 |
+
+使用嵌入的字体样式表，因为建模者的字体必须来自 `data:` URL 或来自样式表的来源。
+
+建模者处理副本。如果其他人在打开时更改同一个图表，则下一次保存将替换他们的更改。

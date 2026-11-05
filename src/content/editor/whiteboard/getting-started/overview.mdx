@@ -1,0 +1,113 @@
+---
+title: 白板
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板 | Tiptap 编辑器文档
+  description: 将带有便签、形状、箭头、绘图、框架、文档框架和图像的白板添加到您的应用程序。整个白板就是一个 Tiptap 文档。
+  category: 编辑器
+---
+
+import { Callout } from '@/components/ui/Callout'
+import { CodeDemo } from '@/components/CodeDemo'
+
+通过 **Whiteboard** 扩展，Tiptap 编辑器即可变成白板。用户可以在白板上添加便签、形状、文本、箭头、笔迹、框架、文档框架和图像，并在画布上平移和缩放。该扩展负责绘制形状；应用则提供工具栏和舞台。
+
+<CodeDemo isPro path="/Extensions/Whiteboard" />
+
+## 安装
+
+首先，[联系我们的团队](https://tiptap.dev/contact-sales?form=pilot-program) 加入 Tiptap Whiteboard 试点计划。
+
+然后，按照 [私有注册表指南](/guides/pro-extensions) 配置包管理器。
+
+然后，安装软件包：
+
+```bash
+npm install @tiptap/core @tiptap/pm @tiptap-pro/extension-whiteboard
+```
+
+<Callout title="必需的 Tiptap 版本" variant="warning" hasCalloutAfter>
+  确保所有 `@tiptap/*` 软件包均为 `3.22.5` 或更高版本，并且在一个版本上，还包括软件包安装的文本扩展，例如 `@tiptap/extension-bold`。
+</Callout>
+
+<Callout title="省略文档和 StarterKit" variant="warning" hasCalloutBefore>
+  `WhiteboardKit` 带来自己的文档、文本扩展和撤消，因此请勿将 `Document` 或 `StarterKit` 添加到白板的编辑器中。
+</Callout>
+
+协作是可选的，位于 `@tiptap-pro/extension-whiteboard/collaboration` 中，这是唯一需要 Yjs 的入口。参见[白板协作](/editor/whiteboard/guides/collaboration)。
+
+## 基本设置
+
+板在页面上需要两个元素：舞台（接收指针和滚轮事件）以及其中的视口（摄像机在其中移动）。在 `viewport` 中创建编辑器，并使用 `attachStage` 将其连接到 `stage`：
+
+```js
+import { Editor } from '@tiptap/core'
+import { attachStage, toCssTransform, WhiteboardKit } from '@tiptap-pro/extension-whiteboard'
+
+const editor = new Editor({ element: viewport, extensions: [WhiteboardKit] })
+let camera = { x: 0, y: 0, zoom: 1 }
+
+// Pan, zoom, draw and select in the stage, the element around the board
+const detach = attachStage({
+  stage,
+  editor,
+  updateCamera: (update) => {
+    camera = update(camera)
+    viewport.style.transform = toCssTransform(camera)
+    viewport.style.setProperty('--zoom', String(camera.zoom))
+  },
+})
+```
+
+`attachStage` 使用将旧相机转换为新相机的函数调用 `updateCamera`，并返回一个再次分离所有内容的函数。
+
+该阶段需要 `position: relative`、`overflow: clip` 和 `touch-action: none`。视口位于其左上角，包含 `position: absolute`、`top: 0`、`left: 0` 和 `transform-origin: 0 0`：
+
+```css
+.stage {
+  height: 32rem;
+  overflow: clip;
+  position: relative;
+  touch-action: none;
+}
+
+.viewport {
+  left: 0;
+  position: absolute;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+/* The board's origin sits in the corner of the viewport, so the editor keeps no margin */
+.viewport .tiptap {
+  margin: 0;
+}
+```
+
+## 工作原理
+
+### 该白板是一个 Tiptap 文档
+
+`WhiteboardKit` 提供专用的顶层节点。文档包含一个 `board` 节点，该节点保存所有形状。因此，白板可以像其他 Tiptap 文档一样加载、保存和同步，例如保存为 JSON 或通过 Yjs 同步。
+
+### 形状是节点
+
+每个形状都是白板上的一个节点。它的位置和大小是属性，以白板单位表示。便签、几何形状和自由文本包含段落和列表，用户可以像编辑其他内容一样编辑其中的文本。箭头将段落作为标签。笔迹、框架、文档框架和图像是原子节点。框架会将 `frameId` 指定的形状分组，参见[框架](/editor/whiteboard/guides/frames)。
+
+每个形状都有一个 `id`，命令通过 ID 查找形状。白板也通过 ID 单独记录选中的形状和文本选区。未编辑文本时，按键作用于白板：选择工具，或移动、删除及调整选中形状的层级。
+
+### 摄像机平移和缩放
+
+舞台是白板周围的元素。在其中，视口元素包含编辑器。相机 `{ x, y, zoom }` 是应用程序状态的一部分。 `attachStage` 将舞台中的指针和滚轮事件以及快捷方式转换为相机更改，并且您的应用程序使用 `toCssTransform(camera)` 移动视口。请参阅[舞台和相机](/editor/whiteboard/guides/stage-and-camera)。
+
+### 文档框架保存其自己的文档
+
+文档框架是一种在独立编辑器中显示富文本的形状。白板会保存框架及其文档 ID；应用负责保存文档并创建对应的编辑器。参见[文档框架](/editor/whiteboard/guides/doc-frames)。
+
+## 后续步骤
+
+要将白板接入应用，请参阅[React 设置指南](/editor/whiteboard/guides/react)，并添加工具按钮。然后了解如何[添加形状和选择工具](/editor/whiteboard/guides/shapes-and-tools)、用[文档框架](/editor/whiteboard/guides/doc-frames)显示文档、粘贴和放置[图像](/editor/whiteboard/guides/images)、通过[自定义形状](/editor/whiteboard/guides/custom-shapes)绘制应用组件，并用[导出和导入](/editor/whiteboard/guides/export-and-import)将白板保存为文件或图像。
+
+要共同编辑白板，请添加[协作](/editor/whiteboard/guides/collaboration)。要让 AI 在白板上添加注释、绘制图表和编写文档，请使用 [Server AI Toolkit](/ai/ai-toolkit/agents/whiteboard)。

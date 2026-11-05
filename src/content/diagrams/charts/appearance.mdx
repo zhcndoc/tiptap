@@ -1,0 +1,130 @@
+---
+title: '外观'
+intro: '图表规范保存图表的设置，例如其标题、图例、颜色和框架。您可以使用 <code>updateChartSpec</code> 更改它们。 <a href="/docs/diagrams/charts/axes">轴</a>和<a href="/docs/diagrams/charts/references">参考线</a>有自己的页面。'
+headerDemo:
+  path: '/Extensions/DiagramsAppearance'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '外观 | Tiptap 图表文档'
+  description: "图表规范保存图表的设置，例如其标题、图例、颜色和框架。"
+  category: 图表
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+## 快速入门
+
+```ts
+editor.commands.updateChartSpec({ spec: { title: 'Revenue', border: true, caption: true } })
+```
+
+## 图表规格字段
+
+| 字段 | 类型 | 描述 |
+| ------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title` | `string` | 写在图表上方 |
+| `description` | `string` | 替代文本和可访问说明 |
+| `caption` | `boolean` | `true` 将描述显示为图表下方的可见标题 |
+| `legend` | `ChartLegend` | `{ show, position }`。其中 `show` 为 `boolean`，`position` 可为 `'top'`、`'right'`、`'bottom'` 或 `'left'`。未设置时，图例显示在底部 |
+| `palette` | `string[]` | 该图表的系列颜色，作为 CSS 颜色。如果没有它，样式的颜色，然后是 `--tt-chart-series-1` 和以下自定义属性 |
+| `background` | `string` | 图表后面的纯 CSS 颜色，例如十六进制、`rgb()`、`hsl()` 或命名颜色。如果没有它，`--tt-chart-background` |
+| `border` | `boolean` | `true` 会在 `--tt-chart-border-color` |
+| 中构建图表`style` | `string` | 通过id注册的样式，例如`'ocean'`。请参阅[样式](/diagrams/guides/styling#styles) |
+| `stacked` | `boolean` | `true` 在彼此之上而不是并排绘制条形和区域 |
+| `innerRadius` | `number` | 环形孔，半径从 `0` 到 `0.9`。默认 `0.55` |
+| `orientation` | `'vertical' \| 'horizontal'` | `'horizontal'` 会将条形图改为横向布局。参见[横向条形图](/diagrams/charts/appearance#horizontal-bars) |
+| `series` | `Record<string, SeriesStyle>` | 折线图或面积图的线条样式（按列 ID）。参见[系列线型](/diagrams/charts/appearance#series-line-styles) |
+| `encoding` | `ChartEncoding` | `{ label?, series?, seriesIn? }`：绘制哪些列。参见[绘制了哪些列](/diagrams/charts/appearance#which-columns-are-drawn) |
+| `size` | `FigureSize` | `{ width, ratio, locked }`，参见[`setDiagramSize`](/diagrams/guides/size-and-view#setdiagramsize) |
+| `hidden` | `boolean` | `true`，而仅显示了下表。 `setChartLayout` 设置它。当该表消失时，它会被删除 |
+
+`type` 和 `range`（仪表刻度）位于 [图表](/diagrams/charts/overview#chart-types) 上。 `axes` 位于 [Axes](/diagrams/charts/axes) 上，`references` 位于 [参考线和参考带 ](/diagrams/charts/references) 上。 `renderer` 保存只有一个渲染器可以理解的选项，请参阅[当渲染器更改时](/diagrams/renderers/overview#when-the-renderer-changes)。
+
+- `palette`、`background` 和 `border` 覆盖 `style`。
+- 忽略未知的 `style` ID。
+- 显示了没有 `show` 的 `legend`。没有有效 `position` 的 `legend` 位于底部。
+- `palette` 或 `background` 中不是安全 CSS 颜色的颜色将被删除。可以加载资源的值（例如 `url()`）绝不是颜色。
+
+## 水平条形
+
+`spec.orientation: 'horizontal'` 会将条形图或组合图改为横向布局，类别位于左侧。未设置该选项或设为 `'vertical'` 时，柱形保持纵向。
+
+```ts
+editor.commands.updateChartSpec({ spec: { orientation: 'horizontal' } })
+```
+
+并非所有渲染器都支持横向布局。请参阅 [ECharts](/diagrams/renderers/echarts#chart-types) 和 [D3](/diagrams/renderers/d3#chart-types) 支持的图表类型，以及 [Mermaid](/diagrams/renderers/mermaid#limits) 的限制。
+
+其他图表类型会忽略 `orientation`，因此当您更改类型时它可以保留在规范中。长类别名称在侧放的条形上比在倾斜的标签上更容易阅读。
+
+## 系列线条样式
+
+为每条线赋予自己的描边、宽度、标记和曲线：
+
+<CodeDemo isPro viewer view="preview" path="/Extensions/DiagramsSeriesStyles" />
+
+`spec.series` 设置折线图或面积图每个系列的绘制方式，按列 ID：`{ [columnId]: { line?, width?, marker?, smooth? } }`。没有条目的列保留渲染器的默认值。
+
+```ts
+editor.commands.updateChartSpec({
+  spec: { series: { forecast: { line: 'dashed', marker: 'none' } } },
+})
+```
+
+| 字段 | 值 |
+| -------- | --------------------------------------------------- |
+| `line` | `'solid'`、`'dashed'` 或 `'dotted'` |
+| `width` | 以 CSS 像素为单位的描边宽度，0.5 到 8。 默认 2 |
+| `marker` | `'none'`、`'circle'` 或 `'square'` 每个值 |
+| `smooth` | `true` 通过值 |
+
+`updateChartSpec` 整体替换 `series` 绘制曲线。通过您想要保留的每个条目。
+
+[ECharts](/diagrams/renderers/echarts#chart-types) 和 [D3](/diagrams/renderers/d3#chart-types) 渲染器绘制每个字段。Mermaid渲染器拒绝使用 `series` 的折线图，请参阅其 [limits](/diagrams/renderers/mermaid#limits)。 Word 将所有四个都绘制在折线图上，而不绘制在面积图的边缘上。
+
+## 绘制了哪些列
+
+`encoding` 通过 ID 命名图表绘制的列。图表数据保留每一列。请参阅[绘制了哪些列](/diagrams/data/overview#which-columns-are-drawn)。
+
+## 其中框架显示
+
+背景到达每个渲染器和每个导出。边框和标题出现在编辑器、HTML 和 Word 文档中。 SVG 或图像导出使用与编辑器相同的填充、边框和标题来构建图表。
+
+## 选择渲染器
+
+图表由注册的渲染器之一绘制。您可以使用 `setChartRenderer` 命名其中之一。否则，扩展程序会选择一个，请参阅[哪个渲染器绘制图表](/diagrams/renderers/overview#which-renderer-draws-a-chart)。更改渲染器仅更改绘图，而不会更改图表数据或图表规格。
+
+## 命令
+
+### updateChartSpec
+
+更改图表规范的字段并保留其余字段。设置为 `undefined` 的字段被删除。
+
+```ts
+editor.commands.updateChartSpec({ spec: { title: 'Revenue', stacked: undefined } })
+```
+
+| 选项 | 类型 | 说明 |
+| ------ | ---------------- | ---------------------------------------------------- |
+| `spec` | `ChartSpecPatch` | 要更改的字段 |
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+
+无效字段（例如颜色不是一种）将被删除。当 `pos` 处没有图表或未选择任何图表时，返回 `false`。
+
+### setChartRenderer
+
+设置绘制图表的渲染器。 `null` 返回默认值。
+
+```ts
+editor.commands.setChartRenderer({ renderer: 'd3' })
+```
+
+| 选项 | 类型 | 描述 |
+| ---------- | ---------------- | ---------------------------------------------------- |
+| `renderer` | `string \| null` | 已注册渲染器的 ID，或 `null` |
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+
+当 `pos` 处没有图表或未选择任何图表时，返回 `false`。

@@ -102,13 +102,20 @@ const editor = new Editor({
     }),
     Collaboration.configure({
       document: doc,
+      // Pages waits for this provider to sync before it writes the page setup.
+      provider,
     }),
   ],
 })
 ```
 
-<Callout title="一个回调，八个子编辑器" variant="info">
-  你的回调会针对每个 `(editorType, subType)` 组合调用一次，总共八次。每次调用都会收到一个不同的 `ctx.field`，这样对应的子编辑器就能与文档中属于自己的那一部分保持同步。当前未被编辑的子类型仍会在后台接收远程更新，因此页面级预览会在每个客户端上立即反映变化。
+Pass your `provider` to `Collaboration`, as in the example above, so Pages waits for its first sync before it writes the page setup from `Pages.configure()` and fills in only the settings the document does not have yet.
+
+<Callout title="One callback, eight sub-editors" variant="info">
+  Your callback is called once per `(editorType, subType)` pair, eight times in total. Each
+  invocation receives a distinct `ctx.field` so the matching sub-editor stays in sync with its own
+  slice of the document. Subtypes that aren't currently being edited still receive remote updates
+  in the background, so the page-level preview reflects changes immediately on every client.
 </Callout>
 
 ### 使用 `CollaborationCaret` 添加 awareness
@@ -204,9 +211,10 @@ editor.commands.resetFooterBottomMargin()
 
 ## 注意事项
 
-- **在启用协作时，不要在 `Pages.configure()` 中传入 `header` / `footer` 默认值。** 在启用协作后，页眉/页脚内容由 Y 负责管理，而配置的默认值可能会在其他客户端清空内容后再次出现。请不要放入这些默认值；如果需要初始值，请在 provider 完成同步后，通过 `editor.commands.setHeader(...)` 只设置一次。
-- **该包不捆绑 `yjs` 或 `@tiptap/extension-collaboration`。** 它们是同级依赖：请在你的应用中安装它们，并通过 `headerFooterExtensions` 回调挂载 `Collaboration`。
-- **切换 `differentOddEven` 不会在网络中复制内容。** 启用后，不会将默认页眉中的内容预填充到其他客户端的奇数槽位。每个客户端看到的，都是各个 subtype 中实际被编辑过的内容。
+- **如果没有报告同步的提供程序，Pages 会立即写入页面设置。** 加入的客户端可以为每个人替换文档的页面设置。没有 `synced` 标志的自定义提供程序在此处算作没有提供程序。 Pages 从 `Collaboration` 读取提供程序，然后从 `CollaborationCaret` 读取提供程序，并且在开发过程中，当它发现没有报告同步的情况时，它会记录一条警告。
+- **Don't pass `header` / `footer` defaults in `Pages.configure()` when collaboration is on.** With collaboration enabled the header/footer content is owned by Y, and a configured default can re-appear after another client has cleared the content. Leave the defaults out; if you need a starter value, set it once via `editor.commands.setHeader(...)` after the provider has synced.
+- **The package does not bundle `yjs` or `@tiptap/extension-collaboration`.** They're peer dependencies: install them in your application and attach `Collaboration` through the `headerFooterExtensions` callback.
+- **Toggling `differentOddEven` does not copy content across the wire.** When you enable it, no content is pre-populated from the default header into the odd slot for other clients. Each client sees what's actually been edited into each subtype.
 
 ---
 

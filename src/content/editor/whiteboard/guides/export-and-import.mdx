@@ -1,0 +1,138 @@
+---
+title: 白板导出和导入
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板导出和导入 | Tiptap 编辑器文档
+  description: 将白板保存到 JSON 文件并再次打开，并将其形状导出为 SVG、PNG 或 JPEG 图像。
+  category: 编辑器
+---
+
+可将白板保存为 JSON 文件，并在当前应用或其他应用中重新打开；也可以导入 Excalidraw 和 tldraw 保存的白板。您还可以将整个白板或其中部分形状导出为 SVG、PNG 或 JPEG。导出函数会返回文件，应用负责保存，例如触发下载。
+
+## 将白板保存到文件
+
+`exportBoard` 返回白板文件：白板的 JSON 及其文档框架显示的文档。使用 `JSON.stringify` 将其转换为文件：
+
+```js
+import { exportBoard } from '@tiptap-pro/extension-whiteboard'
+
+const json = JSON.stringify(exportBoard({ editor }))
+const file = new Blob([json], { type: 'application/json' })
+```
+
+## 打开白板文件
+
+`importBoard` 接收已解析的白板文件 JSON。默认情况下，文件中的形状会替换当前白板上的形状。设置 `mode: 'insert'` 后，它会像粘贴一样将文件中的形状副本置于其他形状前面，并选中这些副本：
+
+```js
+import { importBoard, scrollShapesIntoView } from '@tiptap-pro/extension-whiteboard'
+
+const text = await file.text()
+const { ids } = importBoard({ editor, file: JSON.parse(text), mode: 'insert' })
+scrollShapesIntoView({ stage, editor, ids, updateCamera: setCamera })
+```
+
+与粘贴的形状一样，导入副本会保留文件中的相对位置，并整体向右下方偏移 24 个白板单位；第一个副本会从白板上现有形状所在的位置开始排列。`scrollShapesIntoView` 会移动视口以显示这些形状。一次撤销即可撤销整个导入操作。
+
+`importBoard` 会返回已添加形状的 ID。无法显示的形状会列在 `skipped` 中，例如编辑器没有相应扩展的自定义形状，或属性类型不正确的形状（如非数字的位置）。形状内部不受支持的 mark 会被移除，不受支持的节点会转换为段落或被移除。缺少 ID 或 ID 与文件中其他形状重复的形状会获得新 ID。
+
+`skipped` 中每条记录的 `reason` 都说明了形状被忽略的原因。记录还可能包含 `detail`（例如框架名称、链接或文本）和 `box`（形状在白板上的位置）。应用可以列出未导入的内容，并通过 [`fitCameraToRect`](/editor/whiteboard/api-reference/utilities#fitcameratorect) 移动视口。
+
+### 无法打开的文件
+
+当 JSON 不是它打开的文件或者具有较新的白板或 tldraw 文件格式时，`importBoard` 会引发 `BoardFileError`。它的 `code` 告诉了哪个，并且板保持原样：
+
+```js
+import { BoardFileError, importBoard } from '@tiptap-pro/extension-whiteboard'
+
+try {
+  importBoard({ editor, file: JSON.parse(text) })
+} catch (error) {
+  if (error instanceof BoardFileError && error.code === 'version-too-new') {
+    showMessage('Update the app to open this board.')
+  } else {
+    showMessage('This file is not a board.')
+  }
+}
+```
+
+## 打开 Excalidraw 和 tldraw 文件
+
+`importBoard` 也可以打开 Excalidraw (`.excalidraw`) 和 tldraw (`.tldr`) 文件。像导入白板文件一样传入解析后的 JSON，并在文件输入的 `accept` 属性中列出这些扩展名，例如 `accept=".json,.excalidraw,.tldr"`。
+
+文件中的形状会按以下规则转换为白板形状：
+
+- 矩形、椭圆形、菱形和三角形与其文本一起变成几何形状。其他几何形状，如星星，变成矩形。
+- 注释变为便签，文本变为自由文本。图像显示文件何时将它们保存为数据 URL 或 `http` 或 `https` URL。
+- 箭头保留它们连接的形状、它们的标签、头部和破折号以及它们的直线、曲线或肘线。
+- 图形和三点或更多点的线条变为笔线，两点的线条变为无头箭头。
+- 颜色变为最接近的板颜色，字体大小变为最接近的板尺寸。
+
+白板不支持的内容会被忽略或转换：
+
+- 形状会失去旋转，群组会被拆开。框架、嵌入内容、书签、视频和 tldraw 应用添加的自定义形状不会导入，但它们内部的形状会保留。`skipped` 会列出这些内容及其名称、链接、文本和位置。
+- 对于 tldraw 文件，会打开页面列表中的第一页，而不是上次打开的页面。`skipped` 会列出其他页面中的形状及其所属页面名称。
+- 白板箭头只支持直线、单段曲线或肘形线，因此 Excalidraw 箭头两端之间的中间点会丢失。
+- 图像会失去裁切和翻转设置，并填满边界框。
+- 白板形状不支持垂直对齐，因此形状顶部或底部对齐的文本会转换为自由文本。
+- 白板应用通常会填充形状，而其他应用默认不填充；因此，导入后的较大形状可能会显示在较小形状后面。
+
+Excalidraw 库 (`.excalidrawlib`) 和 tldraw 1 文件打不开，并抛出 `BoardFileError`，代码为 `not-a-board-file`。只要板知道其形状，新 tldraw 版本的文件就会打开。 tldraw 仍然写入其文件格式的版本 1，并且 `importBoard` 仅针对更高版本的文件抛出 `version-too-new`。
+
+## 文档框架
+
+白板文件也会保存文档框架中的文档。`importBoard` 为每个新增的文档框架分配新的文档 ID，因此不会与其他白板上的框架共享文档。通过 [`docs`](/editor/whiteboard/guides/doc-frames#provide-the-documents) 的 `load` 成员填充新文档：
+
+```js
+load: ({ docId, content }) => documents.set(docId, content),
+```
+
+`load` 会在文档框架显示和调用 `start` 之前运行，用于填充新文档。如果没有提供 `load`，导入的文档框架将显示空文档。
+
+## 图像
+
+白板文件会像白板文档一样保存每张[图像](/editor/whiteboard/guides/images)的 URL，但不会保存图像文件本身。因此，只有 URL 仍然有效时，导入的图像才会显示。
+
+## 导出图像
+
+`exportBoardImage` 会将白板形状绘制为 PNG 或 JPEG 文件，`exportBoardSvg` 则返回带有尺寸信息的 SVG 标记。它们会使用应用的 CSS 和字体绘制页面上的形状，但不包含选区、控制柄或文本光标：
+
+```js
+import { exportBoardImage, exportBoardSvg } from '@tiptap-pro/extension-whiteboard'
+
+const png = await exportBoardImage({ editor, background: '#fff' })
+const image = await exportBoardSvg({ editor, ids: ['note-1'] })
+```
+
+- 未提供 `ids` 时，会绘制所有形状。没有可绘制的形状时，函数返回 `null`。
+- `padding` 指形状周围留白，默认是 16 个白板单位。未设置 `background` 时，PNG 和 SVG 背景透明；JPEG 背景为白色。
+- PNG 和 JPEG 默认每个白板单位使用 2 个像素，可通过 `pixelRatio` 设置。浏览器对画布尺寸有限制，因此图像越大，每个单位可用的像素可能越少。
+
+图像从页面中已挂载的白板绘制，因此必须先挂载白板编辑器；否则函数会抛出错误。
+
+- 字体来自页面的 `@font-face` 规则、导入的样式表和其他来源的样式表（例如 Google Fonts）。字体文件加载失败时会回退到其他字体。通过 `FontFace` API 添加的字体不会包含在导出中。
+- 只有浏览器能加载的图像才会显示。页面无法获取的图像（例如来自缺少 CORS 响应头的其他来源）会被省略。
+- 10 秒内未加载完成的资源会被省略。
+- 文本是 `foreignObject` 内的 HTML。浏览器会显示它，但某些矢量编辑器不会。
+- CSS 背景图像、`canvas` 元素和伪元素（如 `::before`）不会显示。
+- 在 Safari 中，PNG 和 JPEG 图像没有框阴影，Safari 会将其绘制为灰色框。
+- 导出会读取每个元素的样式，因此大型白板需要一段时间：1,000 个音符大约需要一秒钟。
+
+## 复制图像
+
+Safari 仅在处理请求的单击或按键时才会写入剪贴板。因此，立即调用 `write`，并向 `ClipboardItem` 提供图像的承诺：
+
+```js
+const png = exportBoardImage({ editor }).then(
+  (image) => image ?? Promise.reject(new Error('No shapes to copy')),
+)
+
+await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })])
+```
+
+## 后续步骤
+
+- 使用 [`docs`](/editor/whiteboard/guides/doc-frames)
+- 查看 [`importBoard`](/editor/whiteboard/api-reference/utilities#importboard) 和[`exportBoardImage`](/editor/whiteboard/api-reference/utilities#exportboardimage)

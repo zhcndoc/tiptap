@@ -101,7 +101,18 @@ const config: SlotConfig = {
 - 内部拖动会保留 ID。当 ID 不再被使用时，本地剪切/粘贴可以保留 ID。
 - 缺失或重复的导入 ID 会保留并报告诊断信息。请显式使用 `repairSlotIds`。
 
-## 配置错误
+## 值槽配置
+
+值槽与内容槽共享 `label`、`instructions`、`placeholder`、`required`、`validators`、`crossFieldRules` 和 `metadata`。他们还接受：
+
+- `defaultValue?` (`JsonValue`)：插入省略 `value` 时的初始答案。省略：`null`。显式值（包括 `null`）会覆盖它。清除永远无法恢复它。
+- `input?` (`SlotInput`)：输入渲染。省略：文本输入。
+
+`SlotInput` 有 `type: string`、可选 `options: { value: string; label: string }[]` 和可选 `props: Record<string, JsonValue>`。道具用于应用程序渲染器。 [值槽指南](/composable-docs/slots/guides/value-slots#built-in-inputs)中列出了内置输入类型和输出约定。
+
+没有 `valueType`。自定义渲染器可以接受 JSON 值的联合。内容设置（`defaultContent`、`allowedBlocks`、`allowedInline`、`allowText`、`allowedMarks`、`nesting` 和子计数约束）在值槽上无效。仅当答案是字符串时，文本约束才适用。在验证过程中会检查选择的选项。
+
+## Configuration errors
 
 未知键、无效 JSON、格式错误的模式和无效计数会产生配置问题。感知 schema 的检查还会报告未知节点和标记类型。应用特定的数据请使用 `metadata`。
 

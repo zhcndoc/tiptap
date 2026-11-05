@@ -23,6 +23,10 @@ meta:
 
 类型：`'block' | 'inline'`。决定使用哪种 Slot 节点。
 
+## `SlotMode`
+
+类型：`'content' | 'value'`。独立于块或内联放置。源自快照中的节点类型；不是持久属性。
+
 ## `SlotDocument`
 
 类型：`JSONContent | Node`。完整的 Tiptap JSON 或 ProseMirror 文档。
@@ -33,21 +37,25 @@ meta:
 
 ### 属性
 
-- `id` (`string | null`)：Slot ID；缺失或无效时为 `null`。
-- `kind` (`SlotKind`)：块或行内。
-- `path` (`number[]`)：从文档根节点开始的子节点索引，用于区分重复 ID 条目。
-- `parentId` (`string | null`)：最近的包含 Slot ID；没有时为 `null`。
-- `depth` (`number`)：嵌套深度；顶层 Slot 的深度为 `0`。
-- `pos` (`number`)：Slot 节点前的位置。
-- `contentFrom` (`number`)：Slot 内的起始位置。
-- `contentTo` (`number`)：Slot 内的结束位置。
-- `config` (`SlotConfig | null`)：解析后的配置；无效时为 `null`。
-- `rawConfig` (`JsonValue`)：原始配置，包括格式错误的 JSON 值。
-- `content` (`JSONContent[]`)：当前子内容。
-- `text` (`string`)：验证文本投影。
-- `empty` (`boolean`)：内容是否为空，与必填性或有效性无关。
+- `id` (`string | null`): Slot ID; `null` if absent or invalid.
+- `kind` (`SlotKind`): Block or inline.
+- `mode` (`SlotMode`)：内容或值存储。
+- `value` (`JsonValue`)：存储值槽的答案； `null` 用于内容槽。
+- `path` (`number[]`): Child indexes from the document root. Distinguishes duplicate-ID entries.
+- `parentId` (`string | null`): Nearest containing Slot ID; `null` if none is available.
+- `depth` (`number`): Nesting depth; top-level Slots have depth `0`.
+- `pos` (`number`): Position before the Slot Node.
+- `contentFrom` (`number`): Start position inside the Slot.
+- `contentTo` (`number`): End position inside the Slot.
+- `config` (`SlotConfig | null`): Parsed configuration; `null` if invalid.
+- `rawConfig` (`JsonValue`): Original configuration, including malformed JSON values.
+- `content` (`JSONContent[]`): Current child content.
+- `text` (`string`): Validation text projection.
+- `empty` (`boolean`): Whether content is empty, independently of requiredness or validity.
 
 位置只适用于生成它们的快照。请参阅[测量](/composable-docs/slots/api-reference/validation#measurements)。
+
+值槽没有内部：`contentFrom` 和 `contentTo` 都等于 `pos`，并且 `content` 为空。他们的节点占用`[pos, pos + 1)`。 `text` 仅当该值是字符串时才包含该值；其他值产生空文本投影。使用 `value` 和 `empty` 检查答案。
 
 ## `SlotSnapshot`
 

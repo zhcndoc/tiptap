@@ -97,7 +97,9 @@ curl --location --request PATCH 'https://YOUR_APP_ID.collab.tiptap.cloud/api/doc
 为了确保精确更新，尤其是针对特定节点的更改，建议使用 `nodeAttributeName` 和 `nodeAttributeValue` 参数。这些参数可以由 Tiptap 的 [UniqueID Extension](/editor/extensions/functionality/uniqueid) 或自定义实现生成。
 请注意，这仅在使用 mode=default 时适用于顶层节点。
 
-省略这些参数可能会导致覆盖在获取文档和发出更新调用之间所做的任何更新。`get document` 调用返回一个头 `x-${fragmentName}-checksum`，可以通过将其传递给更新调用作为 `?checksum=${checksum}` 来检测冲突。如果自上次获取以来文档已被更新，更新将以 `409 Checksum mismatch.` 状态失败。
+Omitting these parameters may result in overwriting any updates made between fetching the document and issuing the update call. The `get document` call returns a header `x-${fragmentName}-checksum` which can be used to detect conflicts by passing
+it to the update call as `?checksum=${checksum}`. If the document has been updated since the last fetch, the update will fail with a `409 Checksum mismatch.` status.
+[`document.saved` 和 `content.changed` webhooks](/collaboration/core-concepts/webhooks#conflict-safe-updates-from-a-webhook) 为其 `checksums` 对象中的每个字段携带相同的校验和，因此您可以在其 webhook 之后立即更新文档，而无需先获取它。
 
 ### 模式
 

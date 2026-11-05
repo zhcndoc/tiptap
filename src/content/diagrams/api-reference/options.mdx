@@ -1,0 +1,332 @@
+---
+title: '选项'
+intro: '您将扩展的选项传递给 <code>Diagrams.configure()</code>。 <code>chart</code> 节点的选项位于 <code>chart</code> 下。'
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '选项 | Tiptap 图表文档'
+  description: '图表扩展及其图表节点的每个选项（按主题）。'
+  category: 图表
+---
+
+```ts
+Diagrams.configure({
+  renderers: [echartsRenderer(), d3Renderer()],
+  defaultRenderer: 'echarts',
+  chart: { defaultType: 'bar', linkTables: true },
+})
+```
+
+| 主题 | 选项 |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| [渲染器](/diagrams/api-reference/options#renderers) | `renderers`、`diagramRenderers`、`defaultRenderer`、 `chartTypes`、`rendererRules` |
+| [数据](/diagrams/api-reference/options#data) | `sources`、`formats`、`fetch`、`allowSourceUrl`、`onSourceError` |
+| [输入](/diagrams/api-reference/options#input) | `trigger`、`codeBlockShortcut` |
+| [显示](/diagrams/api-reference/options#display) | `resizable`、`lazyRendering`、`animation`、 `sourceHighlighting`、`styles`、`colorScheme`、`unavailable` |
+| [导出](/diagrams/api-reference/options#export) | `docxImages`、`uploadImage`、`imageNodeName` |
+| [节点](/diagrams/api-reference/options#nodes) | `chart`、`flowDiagram` |
+| [图表节点](/diagrams/api-reference/options#the-chart-node) | `defaultType`、`placeholder`、`delimiters`、 `decimalSeparator`、`linkTables`、`minRenderWidth`、`HTMLAttributes` |
+
+## 渲染器
+
+### 渲染器
+
+`ChartRenderer[]` · 默认 `[]`
+
+可以绘制图表的渲染器。请参阅[渲染器](/diagrams/renderers/overview)。如果没有渲染器，图表将显示 [`unavailable`](/diagrams/api-reference/options#unavailable) 返回的内容。
+
+### 图渲染器
+
+`DiagramRenderer[]` · 默认 `[]`
+
+可以绘制图表的图渲染器。请参阅[图](/diagrams/flow-diagrams/overview)。如果没有图表渲染器，图表将显示 [`unavailable`](/diagrams/api-reference/options#unavailable) 返回的内容。
+
+| 图表渲染器 | 从 | 导入
+| ------------------------ | ---------------------------------------- |
+| `mermaidDiagramRenderer` | `@tiptap-pro/extension-diagrams/mermaid` |
+| `drawioDiagramRenderer` | `@tiptap-pro/extension-diagrams/drawio` |
+| `bpmnDiagramRenderer` | `@tiptap-pro/extension-diagrams/bpmn` |
+
+### 默认渲染器
+
+`string | null` · 默认 `null`
+
+绘制未命名渲染器的图表的渲染器的 ID。如果没有它，图表将获取第一个绘制其类型的注册渲染器。
+
+### 图表类型
+
+`{ id, label, shape, word, description? }[]` · 默认 `[]`
+
+您添加到内置图表类型中的图表类型。具有内置类型 id 的类型将替换它。请参阅[注册您自己的图表类型](/diagrams/renderers/custom-chart-types)。
+
+### rendererRules
+
+`Record<string, { attribution?, exports? }>` · 默认 `{}`
+
+您添加到渲染器声明的规则中的规则，由渲染器 id 指定。他们只能让渲染器变得更严格。请参阅[添加规则](/diagrams/renderers/custom#adding-rules)。
+
+## 数据
+
+### 源
+
+`ChartSourceProvider[]` · 默认 `[]`
+
+您添加到内置 `url-csv`、`url-json` 和 `document-table` 的数据源提供程序。请参阅[数据源](/diagrams/data/sources)。
+
+### 格式
+
+`ChartFormat[]` · 默认 `[]`
+
+添加到 `chart-json`、`chart-syntax` 和 `mermaid` 的文本格式。格式为`{ id, description, mediaType, schema?, example, parse, serialize }`。具有内置格式 id 的格式将替换它。
+
+### 获取
+
+`typeof globalThis.fetch | null` · 默认 `globalThis.fetch`
+
+URL 提供程序读取的 `fetch` 函数。传递您自己的信息以添加凭据或通过代理。
+
+### allowedSourceUrl
+
+`((url: URL) => boolean) | null` · 默认 `null`
+
+决定 `url-csv` 和 `url-json` 可以读取哪些 URL。如果没有它，他们就会读取任何绝对的 `http:` 或 `https:` URL，并且 AI 工具 `insertLinkedChart` 会拒绝 URL 源。请参阅[读取 URL](/diagrams/data/sources#reading-a-url)。
+
+```ts
+Diagrams.configure({
+  allowSourceUrl: (url) => url.hostname === 'data.example.com',
+})
+```
+
+### onSourceError
+
+`((error, { provider, address }) => void) | null` · 默认 `null`
+
+无法读取数据源时调用。该图表保留其最后的快照。请参阅[数据源](/diagrams/data/sources)。
+
+## 输入
+
+### 触发器
+
+`string` · 默认 `':::'`
+
+在空段落开头键入时打开快速输入的文本。
+
+### codeBlockShortcut
+
+`string | false` · 默认 `'Mod-Enter'`
+
+将选择的代码块中的 Mermaid 源转换为图表或流程图，并确认快速输入的键。 `false` 不添加键。请参阅[代码块中的 Mod-Enter](/diagrams/data/quick-input#mod-enter-in-a-code-block)。
+
+## 显示
+
+### 可调整大小
+
+`boolean` · 默认 `false`
+
+`true` 在编辑器可编辑时将调整大小手柄放在选定的图表或流程图上。每个手柄的作用位于[调整手柄大小](/diagrams/guides/size-and-view#resize-handles)。
+
+### 惰性渲染
+
+`boolean` · 默认 `true`
+
+`true` 仅当图表或流程图进入视口的半个屏幕时才绘制图表或流程图。它开始为每个动画帧绘制最多一个图表或流程图。
+
+- 对远离视口的图表或流程图进行的更改（例如编辑、同步数据源或新主题）会在其再次靠近时绘制。
+- 在绘制之前，图表会保持其高度，而图表则只有几行高。
+- 出口自行提取，不受影响。
+- 如果没有 `IntersectionObserver`，则每个图表和流程图都将与 `false` 一样绘制。
+
+`false` 在文档打开时绘制每个图表和流程图，仍然是每帧一个。将其用于作为整体打印或捕获的页面，以及在其 DOM 实现具有从不报告的 `IntersectionObserver` 的测试中。
+
+### 动画
+
+`boolean` · 默认 `true`
+
+`true` 允许渲染器在首次绘制图表时以及当其数据或规格发生变化时对图表进行动画处理。 `false` 立即绘制最终状态的每个图表。
+
+- ECharts 渲染器动画。
+- D3 和 Mermaid 渲染器从不设置动画。图表也从不动画。
+- 当查看器的系统要求减少运动 (`prefers-reduced-motion: reduce`) 时，无论此选项说什么，都不会产生任何动画。
+- 导出从不动画。
+
+### 源突出显示
+
+`boolean` · 默认 `true`
+
+为快速输入和Mermaid 流程图代码视图中的文本部分着色：关键字、标签、数字、箭头和分隔符以及注释。 `false` 将文本保留为一种颜色。颜色及其类别位于[突出显示的源](/diagrams/api-reference/selectors#highlighted-source)下。您自己的文本字段可以使用 [`highlightSource`](/diagrams/guides/split-view).
+
+### 样式
+
+`ChartStyle[]` · 默认 `[]`
+
+除了内置图表之外，还可以在 `spec.style` 中指定图表的样式。具有内置样式 id 的样式将取代它。请参阅[样式](/diagrams/guides/styling#styles)。
+
+```ts
+Diagrams.configure({
+  styles: [
+    {
+      id: 'brand',
+      label: 'Brand',
+      palette: ['#0b5fff', '#ff7a00'],
+      appearance: { fontFamily: 'Inter, sans-serif' },
+    },
+  ],
+})
+```
+
+### colorScheme
+
+`'auto' | 'light'` · 默认 `'auto'`
+
+绘制配色方案图表和流程图。 `'auto'` 使用网页的配色方案，如[深色配色方案](/diagrams/guides/styling#dark-color-scheme). `'light'` 在任何页面上绘制它们。
+
+### 不可用
+
+`(figure) => string | HTMLElement | null` · 默认：一个句子，表示此处无法绘制图表或流程图
+
+当没有注册渲染器绘制其图表类型、图表格式或其 Mermaid 源类型时，图表或流程图在其位置显示的内容。返回一个字符串、一个元素或 `null` 以不显示任何内容。文档中的数据保持不变，除非您显示，否则不会显示任何数据。
+
+该函数接收 `figure`、`{ kind, reason, pos, title, type?, format? }`：
+
+| 字段 | 值 |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `kind` | `'chart'` 或`'flowDiagram'` |
+| `reason` | `'no-renderer'`；若没有已注册的 Renderer 绘制该 kind，则为 `'unsupported-kind'` |
+| `pos` | 其位置，用于命令或[存储功能](/diagrams/api-reference/storage)。 `null`（不在文档中） |
+| `title` | 其标题，或 `null` |
+| `type` | 图表的类型|
+| `format` | 图表的格式 |
+
+要让用户打开数据，请返回按下时读取数据的按钮：带有 [`read`](/diagrams/api-reference/storage) 或 `readTable`、图表的来源为 `listDiagrams`。在这里，`openDialog` 是您自己的对话框。您还可以就地显示数据。
+
+```ts
+Diagrams.configure({
+  unavailable: (figure) => {
+    const button = document.createElement('button')
+    button.textContent = `Show the ${figure.kind === 'chart' ? 'data' : 'source'}`
+    button.addEventListener('click', () => {
+      const text =
+        figure.kind === 'chart'
+          ? editor.storage.diagrams.read({ pos: figure.pos ?? -1, format: 'chart-syntax' })
+          : editor.storage.diagrams.listDiagrams().find((diagram) => diagram.pos === figure.pos)
+              ?.source
+      openDialog(text ?? '')
+    })
+    return button
+  },
+})
+```
+
+## 导出
+
+### docxImages
+
+`'auto' | 'always'` · 默认 `'auto'`
+
+当调用不通过 `images` 时，`exportDocx` 如何写入图表。 `'auto'` 写入 Word 图表或 Word 表格，其中 Word 正确显示图表，否则写入图像。 `'always'` 将每个图表写入图像。请参阅[图表为图像](/diagrams/export#charts-as-images)。
+
+### uploadImage
+
+`((blob, { alt, width, height, format }) => Promise<string>) | null` · 默认 `null`
+
+上传 `convertChartToImage` 制作的图像并返回其 URL。如果没有它，图像将存储为数据 URL。
+
+### imageNodeName
+
+`string` · 默认 `'image'`
+
+`convertChartToImage` 创建的映像节点的名称。
+
+## 节点
+
+### 图表
+
+`Partial<ChartOptions> | false` · 默认 `{}`
+
+`chart` 节点的选项，在 [图表节点 ](/diagrams/api-reference/options#the-chart-node) 下列出。 `false` 忽略了图表。
+
+### 流程图
+
+`Partial<FlowDiagramOptions> | false` · 默认 `{}`
+
+`flowDiagram` 节点的选项。 `FlowDiagramOptions` 是 `{ HTMLAttributes }`，图表根元素上的 HTML 属性，默认为 `{}`。 `false` 省略了图表。
+
+在共享文档中，具有 `false` 的客户端和旧 `@tiptap/y-tiptap` 删除每个客户端的图表。请参阅[没有 `Diagrams`](/diagrams/guides/collaboration#a-client-without-diagrams) 的客户端。
+
+## 图表节点
+
+这些选项位于 `chart` 下。
+
+### defaultType
+
+`ChartType` · 默认 `'line'`
+
+当没有指定其他类型（例如在快速输入或转换表中）时，新图表获取的类型。
+
+### 占位符
+
+`string | (({ type, shape, delimiter }) => string) | false` · 默认：快速输入图表类型的示例行，以及行 `Enter twice to finish`
+
+空快速输入显示的提示。
+
+```ts
+Diagrams.configure({
+  chart: {
+    placeholder: ({ type }) => (type === 'pie' ? 'Label, share' : 'Label, value, value …'),
+  },
+})
+```
+
+- 快速输入的图表类型更改时再次调用函数。
+- `shape` 是图表类型读取的行布局，也适用于使用 `chartTypes` 注册的类型。请参阅[注册您自己的图表类型](/diagrams/renderers/custom-chart-types)。
+- 提示中的换行符被保留。
+- `false` 不显示任何提示。
+
+### 分隔符
+
+`string[]` · 默认 `[',', ';', '|', '\t']`
+
+Chart 语法可用于分隔单元格的分隔符。
+
+### 小数分隔符
+
+`'auto' | '.' | ','` · 默认 `'auto'`
+
+如何读取图表行中的数字。请参阅[编号](/diagrams/data/chart-syntax#numbers)。
+
+### 链接表
+
+`boolean` · 默认 `false`
+
+允许图表跟随同一文档中的表格，包括 `insertLinkedChart`、`linkChartToTable` 和 `setChartLayout`。它将属性 `chartTableId` 添加到表节点。请参阅[表](/diagrams/data/tables)。
+
+### minRenderWidth
+
+`number | null` · 默认 `null`
+
+当编辑器的文本比这么多像素窄时，会绘制一个图表，并按比例缩小以适合（包括文本）。
+
+```ts
+Diagrams.configure({ chart: { minRenderWidth: 560 } })
+```
+
+在手机上，图表保持其宽屏布局，而不是挤在狭窄的宽度中。
+
+- 比例不低于 60 %。在其下方，图表的布局更加密集，并省略了会重叠的类别标签，除非 `axes.x.labels` 选择它们。
+- `null` 始终按所示宽度绘制。
+- 最大化图表和导出按其自己的尺寸绘制。
+
+### HTMLAttributes
+
+`Record<string, unknown>` · 图表根元素上的默认 `{}`
+
+HTML 属性。
+
+## 架构要求
+
+表命令和快速输入的表视图使用注册为 `table`、`tableRow`、`tableHeader` 和 `tableCell` 的节点，例如 `@tiptap/extension-table` 的节点。如果没有这些节点，这些命令将返回 `false`。
+
+`convertChartToImage` 需要 `imageNodeName` 命名的图像节点。
+
+扩展向这些节点添加属性。它从不以自己的名字注册自己的节点。

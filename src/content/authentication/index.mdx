@@ -151,7 +151,7 @@ $token = JWT::encode($payload, $privateKey, 'ES256');
 
 `Convert:*` 操作按文件格式 **和** 操作类型（`Import` 与 `Export`）进行作用域限定。令牌只需要它实际使用到的操作——例如，一个只导出 PDF 的令牌只需要 `Convert:Export:Pdf`。目前只有 DOCX 和 Markdown 支持双向；Doc、ODT、EPUB 和 PDF 仅支持导出。`Convert:Fonts` 不受作用域限制，并适用于 `/fonts/*` 路由。
 
-`AI:Generation` 覆盖文本和图像生成、建议、代理以及音频/语音端点。`AI:Toolkit` 覆盖工具包端点。两者都不会隐含另一个。AI 操作目前不按资源划分作用域，因此在 AI 权限中使用 `"resource": "*"`。
+`AI:Generation` 涵盖文本生成、建议和代理端点。 `AI:Toolkit` 涵盖了工具包端点。这两种行为都暗示着另一种行为。如今，AI 操作不受资源限制，因此对 AI 权限使用 `"resource": "*"`。
 
 操作不区分大小写——`"Documents:Read"` 和 `"documents:read"` 等价。资源和约束值（`prefix`、`suffix`、`in`）仍然区分大小写，因为它们可能引用具有外部意义的标识符。请为你自己的代码选择一致的大小写风格。
 

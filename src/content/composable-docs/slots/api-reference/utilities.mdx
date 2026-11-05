@@ -98,28 +98,29 @@ ID 使用 `<ruleIdPrefix>.<suffix>`。
 
 | 后缀                 | 优先级   | 效果                                                        |
 | -------------------- | -------- | ------------------------------------------------------------ |
-| `documentContent`    | `0`      | 拒绝编辑根内容。                                             |
-| `documentAttributes` | `0`      | 拒绝编辑所有根属性。                                           |
-| `fillableContent`    | `10`     | 允许编辑选定 Slot 及其后代的内容。                             |
-| `slotStructure`      | `20`     | 拒绝插入、移除、重新设置类型或移动 Slot 节点。                  |
-| `slotAttributes`     | `20`     | 拒绝更改所有 Slot 属性。                                       |
+| `documentContent`    | `0`      | Deny edits to root content.                                  |
+| `documentAttributes` | `0`      | Deny edits to all root attributes.                           |
+| `fillableContent`    | `10`     | Allow content edits in selected Slots and their descendants. |
+| `slotStructure`      | `20`     | Deny insertion, removal, retyping or movement of Slot Nodes. |
+| `slotAttributes`     | `20`     | Deny changes to all Slot attributes.                         |
+| `fillableValue` | `30` | 仅允许选定值插槽上的值属性。      |
 
-### 行为
+### Behavior
 
-- 允许父 Slot 也会允许编辑未列出的嵌套 Slot 内容。要限制后代，请添加优先级高于 `10` 的内容拒绝规则。列出的子 Slot 可以在未列出的父 Slot 中编辑。
-- 如果清空或替换父 Slot 会移除嵌套 Slot，则操作会被拒绝。
-- 允许的 Slot 内，普通文本和格式仍可编辑。Slot 验证不会阻止编辑。
-- 不会生成读取规则。现有读取限制仍然适用。
-- ID 会选择所有匹配的出现位置。分配字段前请验证导入的标识问题。
-- 使用 `setContentProtectionPolicy({ policy })` 替换策略；修改已安装对象不会产生影响。
-- 更高优先级的应用规则可以覆盖这些规则。组合策略时请使用唯一前缀。
+- Allowing a parent also permits content edits inside unlisted nested Slots. Add a content deny above priority `10` to restrict a descendant. A listed child can be edited inside an unlisted parent.
+- Clearing or replacing a parent is refused if it would remove nested Slots.
+- Ordinary text and formatting remain editable within allowed Slots. Slot validation remains non-blocking.
+- No read rules are generated. Existing read restrictions still apply.
+- IDs select every matching occurrence. Validate imported identity issues before assigning fields.
+- Replace assignments with `setContentProtectionPolicy({ policy })`; mutating an installed object has no effect.
+- Higher-priority application rules can override these rules. Use unique prefixes when composing policies.
 
 ## `SlotFillingPolicy`
 
 ### 属性
 
-- `version` (`1`)：策略格式版本。
-- `rules` (`SlotFillingRule[]`)：生成的五条规则。
+- `version` (`1`): Policy format version.
+- `rules` (`SlotFillingRule[]`)：六个生成的规则，包括 `fillableValue`。
 
 ## `SlotFillingRule`
 

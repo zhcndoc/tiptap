@@ -19,7 +19,8 @@ export const sidebarConfig: SidebarConfig = {
               title: '向文档添加 Slot',
               href: '/composable-docs/slots/guides/add-slots',
             },
-            { title: '仅允许填写', href: '/composable-docs/slots/guides/fill-only' },
+            { title: 'Allow filling only', href: '/composable-docs/slots/guides/fill-only' },
+            { title: '值 Slot', href: '/composable-docs/slots/guides/value-slots' },
             {
               title: '验证 Slot 值',
               href: '/composable-docs/slots/guides/validate-submission',

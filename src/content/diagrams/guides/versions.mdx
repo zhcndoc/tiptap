@@ -1,0 +1,79 @@
+---
+title: '版本'
+intro: '当您比较文档的两个版本时，图表和流程图将根据文档存储的内容进行比较，而不是根据它们的外观进行比较。当图表或流程图的任何存储属性不同时（除了您告诉比较要忽略的属性），图表或流程图已发生更改。'
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '版本 | Tiptap 图表文档'
+  description: '当您比较文档的两个版本时，图表和流程图将根据文档存储的内容进行比较，而不是根据它们的外观进行比较。'
+  category: 图表
+---
+
+## 比较内容
+
+图表按其数据、规格、渲染器、数据源、分隔符以及上次读取该源的时间进行比较。 [With Tiptap's Compare](/diagrams/guides/versions#with-tiptaps-compare) 下的表格说明了每次更改的时间。图表通过其源文本、格式、标题、描述、视图和选项进行比较。如果切换到代码视图不应算作更改，则将 `'view'` 添加到 `ignoreAttributes`。
+
+## 使用 Tiptap 的 Compare
+
+`@tiptap-pro/compare` 比较两个文档的 JSON。它报告其属性因更改块而不同的图表或流程图。忽略仅对显示或编辑重要的属性，因此它们不会显示为更改：
+
+```ts
+import { compareDocuments } from '@tiptap-pro/compare'
+
+const changeset = compareDocuments({
+  schema: editor.schema,
+  docA: olderVersion,
+  docB: newerVersion,
+  diffOptions: {
+    // Compare's defaults, plus a chart's uploaded preview image and a table's Quick Input view
+    ignoreAttributes: ['id', 'data-thread-id', '_hash', 'previewUrl', 'diagramInput'],
+  },
+})
+```
+
+| 属性 | 当 | 进行比较时更改 |
+| --------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `data` | 值被编辑，或者同步带来不同的数据| 更改 |
+| `spec` | 类型、标题、颜色、轴或引用更改 | 更改 |
+| `renderer` | 选择另一个渲染器。数据保持不变 | 更改 |
+| `source` | 数据源已链接或分离，或其地址更改 | 更改 |
+| `delimiter` | 将行更改为文本，并使用另一个分隔符 | 进行更改。将 `'delimiter'` 添加到 `ignoreAttributes` 以将其保留 |
+| `syncedAt` | 图表读取其数据源，当数据与 | 相同时也会发生变化。将 `'syncedAt'` 添加到 `ignoreAttributes` 以将其省略 |
+| `previewUrl` | 更改后上传预览图像 | 省略 |
+| `diagramInput`表格） | 该表格用作快速输入的表格视图 | 省略 |
+
+## 说出图表中发生的变化
+
+`@tiptap-pro/extension-diagrams/core` 中的 `describeChartChange` 告诉您图表内发生的变化，例如“二月：4 → 5，类型：条形 → 线”更改旁边：
+
+```ts
+import { describeChartChange } from '@tiptap-pro/extension-diagrams/core'
+
+const change = describeChartChange({ before: olderChart.attrs, after: newerChart.attrs })
+
+if (change.changed) {
+  const cells =
+    change.data?.cells.map(
+      (cell) => `${cell.row} ${cell.column}: ${cell.before} → ${cell.after}`,
+    ) ?? []
+  const fields = change.spec.map(
+    (field) => `${field.path}: ${String(field.before)} → ${String(field.after)}`,
+  )
+  console.log([...cells, ...fields].join(', '))
+}
+```
+
+它返回：
+
+| 字段 | 它保存什么 |
+| -------------------------------- | --------------------------------------------------------------------------------- |
+| `changed` | 以下是否有不同 |
+| `data` | `{ columnsAdded, columnsRemoved, rowsAdded, rowsRemoved, cells }` 或 `null` |
+| `spec` | `{ path, before, after }` 对于每个不同的规格字段，例如 `axes.y.min` |
+| `renderer`、`source`、`syncedAt` | `{ before, after }` 或 `null`（未更改时） |
+
+- **当每行具有不同标签时，行**按其标签命名。否则，他们将按其职位命名。
+- **单元格**由其行和列标题命名。
+- **来自任何文档的属性**有效，也可以来自 `syncedAt` 成为其自己的属性之前制作的文档。
+- **无法读取的属性**算作空图表。

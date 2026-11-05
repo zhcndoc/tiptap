@@ -21,11 +21,11 @@ Word 中的页眉和页脚会在每一页的顶部和底部显示重复内容。
 
 | 功能                         | 导入                                                                                                         | 编辑器                                                                            | 导出                                                                                                                                                                                       |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 默认页眉/页脚        | 支持                                                                                                      | 支持 ([Pages](/editor/extensions/functionality/pages))                       | 支持                                                                                                                                                                                    |
-| 首页不同         | 支持                                                                                                      | 支持                                                                         | 支持                                                                                                                                                                                    |
-| 奇偶页不同     | 支持                                                                                                      | 支持                                                                         | 支持                                                                                                                                                                                    |
-| 页码占位符     | 支持。PAGE/NUMPAGES 字段会被翻译为规范的 `{page}` / `{numpages}` 文本标记（在安装 Pages 时默认启用；传入 `placeholders: false` 可让缓存的显示值保持为纯文本）。 | 支持（`{page}`、`{total}` 会在渲染时由 Pages 扩展替换；可通过 `placeholders` 配置重命名）。 | 通过编辑器扩展支持：页眉/页脚中的 `{page}` / `{total}` 标记会作为实时的 `PAGE` / `NUMPAGES` 字段输出。REST API 目前不会翻译这些标记，因此它们会按字面文本渲染。 |
-| 页眉/页脚中的富文本 | 支持                                                                                                      | 支持                                                                         | 支持                                                                                                                                                                                    |
+| Default header/footer        | Supported                                                                                                      | Supported ([Pages](/editor/extensions/functionality/pages))                       | Supported                                                                                                                                                                                    |
+| Different first page         | Supported                                                                                                      | Supported                                                                         | Supported                                                                                                                                                                                    |
+| Different odd/even pages     | Supported                                                                                                      | Supported                                                                         | Supported                                                                                                                                                                                    |
+| 页码占位符 | 支持。 PAGE/NUMPAGES 字段被转换为规范的 `{page}` / `{numpages}` 文本标记（安装 Pages 时默认打开；传递 `placeholders: false` 以将缓存的显示值保留为纯文本）。支持 |（`{page}`、`{total}` 在渲染时由页面扩展替换；通过 `placeholders` 配置重命名）。导入的 `{numpages}` 仅在 `Pages.configure({ placeholders: { total: 'numpages' } })` 之后渲染。 | 支持。编辑器扩展和 REST API 在页眉/页脚中发出 `{page}` / `{total}` 令牌作为实时 `PAGE` / `NUMPAGES` 字段。 REST API 还接受 `{numpages}` 作为 `{total}` 的同义词。编辑器扩展使用 Pages 令牌名称，因此需要相同的重命名才能导出导入的 `{numpages}`。 |
+| Rich text in headers/footers | Supported                                                                                                      | Supported                                                                         | Supported                                                                                                                                                                                    |
 
 ## 导入
 
@@ -81,13 +81,13 @@ Pages 扩展支持三种与 Word 行为一致的页眉/页脚模式：
 - **首页不同：** 首页使用独立的页眉/页脚
 - **奇偶页不同：** 奇数页和偶数页使用不同的页眉/页脚
 
-页码通过占位符渲染：`{page}` 表示当前页，`{total}` 表示总页数。Pages 扩展在编辑器中渲染每一页时会替换这些占位符，而 [`ExportDocx` 编辑器扩展](/conversion/export/docx/editor-extension) 在导出时会将它们作为动态 `PAGE` / `NUMPAGES` 字段输出，因此导出的文档在 Word 中会显示真实页码。REST API 的导出路径目前不会转换这些标记，因此它们会作为字面文本显示。请参见下面的 [导出](#export) 部分。
+页码通过占位符渲染：`{page}` 表示当前页，`{total}` 表示总页数。在编辑器中渲染每个页面时，页面扩展会替换它们，并且 [`ExportDocx` 编辑器扩展](/conversion/export/docx/editor-extension) 在导出时将它们作为实时 `PAGE` / `NUMPAGES` 字段发出，因此导出的文档显示 Word 中的真实页码。 REST API 导出端点发出相同的实时字段。请参阅下面的 [Export](#export)] 部分。
 
 导入后，用户可以双击已导入的页眉或页脚进行编辑。Pages 扩展通过 `editor.storage.pages` 暴露当前激活的浮层编辑器，并提供 `headerEditorOn` / `headerEditorOff`（以及 `footerEditorOn` / `footerEditorOff`）事件订阅辅助方法，适用于同步工具栏或响应焦点变化。有关详情，请参见页面页眉和页脚指南中的 [Active editor state](/pages/core-concepts/page-header-footer#active-editor-state)。
 
 ## 导出
 
-可使用 [编辑器扩展](/conversion/export/docx/editor-extension) 或 [REST API](/conversion/export/docx/rest-api) 导出页眉和页脚。两者都支持默认、首页和奇偶页变体。该扩展接受 `docx.js` 的 Header/Footer 对象，或自动从 Pages 扩展中提取。REST API 接受纯文本字符串或字符串化的 Tiptap JSON。
+使用[编辑器扩展](/conversion/export/docx/editor-extension)或 [REST API](/conversion/export/docx/rest-api) 导出页眉和页脚。两者都支持默认、首页和奇数页/偶数页变体。扩展接受 `docx.js` 页眉/页脚对象，也可以从 Pages 扩展中自动提取；REST API 接受纯文本字符串、序列化后的 Tiptap JSON 或 Tiptap JSON 对象。
 
 对于 PDF 导出而言，该扩展还支持更丰富的槽位值集合（纯文本、字符串化的 JSONContent、JSONContent 对象、`docx.Header`/`Footer` 实例，以及按需构建页眉的异步工厂函数）。完整表格请参见 [PDF 页眉和页脚指南](/conversion/export/pdf/headers-footers)。
 
@@ -116,17 +116,12 @@ ExportDocx.configure({
 
 显式提供的页眉/页脚选项会覆盖从 Pages 扩展中自动提取的内容。
 
-<Callout variant="info" title="`{page}` 和 `{total}` 会渲染为实时的 DOCX 页码字段">
-  当页眉或页脚包含 `{page}` 或 `{total}` 时，[`ExportDocx` 编辑器扩展](/conversion/export/docx/editor-extension)
-  会将每个标记发出为实时的 `PAGE` / `NUMPAGES` 字段，因此 Word 显示的是实际的当前页码和
-  总页数，而不是字面量标记字符串。这适用于从 Pages 扩展中自动提取的页眉和页脚，
-  也适用于传入 `placeholders` 选项的直接 `convertHeader` / `convertFooter` 调用。当前 [REST API](/conversion/export/docx/rest-api)
-  不会转换这些标记，因此它们会以字面文本形式渲染。对于更丰富的组合
-  （例如超出基础标记的 `"Page X of Y"` 格式），你也可以手动提供
-  `Docx.Header` / `Docx.Footer` 实例，并使用 `Docx.PageNumber.CURRENT` /
-  `Docx.PageNumber.TOTAL_PAGES`。
+<Callout variant="info" title="`{page}` and `{total}` render as live DOCX page-number fields">
+  当页眉或页脚包含 `{page}` 或 `{total}` 时，[`ExportDocx` 编辑器扩展](/conversion/export/docx/editor-extension) 将每个标记作为实时 `PAGE` / `NUMPAGES` 字段发出，因此 Word 显示实际的当前页面和总页数，而不是文字标记字符串。这适用于从页面扩展自动提取的页眉和页脚，以及传递 `placeholders` 选项的直接 `convertHeader` / `convertFooter` 调用。 [REST API](/conversion/export/docx/rest-api) 在每个页眉和页脚槽形状中翻译相同的标记，并且还接受 `{numpages}` 作为 `{total}` 的同义词。对于更丰富的结构（例如，超出裸标记的 `"Page X of Y"` 格式），您还可以使用 `Docx.PageNumber.CURRENT` / `Docx.PageNumber.TOTAL_PAGES` 手动提供 `Docx.Header` / `Docx.Footer` 实例。
 </Callout>
 
 ### 可往返保留的内容
 
-当安装了 Pages 扩展时，页眉和页脚可以在完整的“导入到导出”往返流程中保留下来。导入扩展会提取并应用页眉/页脚内容，导出扩展会将其写回 DOCX。通过 Pages 扩展在编辑器中创建的内容，或通过导出配置提供的内容，也会在导出的 DOCX 中正确显示。
+Headers and footers survive a full import-to-export round trip when the Pages extension is installed. The import extension extracts and applies header/footer content, and the export extension writes it back to DOCX. Content authored in the editor through the Pages extension or supplied via export configuration will also appear correctly in the exported DOCX.
+
+页码在一个条件下往返。 `{page}` 无需设置。使用默认的 Pages 配置，导入将总页数写入 `{numpages}`，但 Pages 和导出扩展需要 `{total}`。配置 `Pages.configure({ placeholders: { total: 'numpages' } })`，以便在编辑器中渲染总计并再次导出为实时 `NUMPAGES` 字段。如果没有它，`{numpages}` 在这两个地方都保留文字文本。

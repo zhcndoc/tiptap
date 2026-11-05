@@ -37,13 +37,17 @@ export const sidebarConfig: SidebarConfig = {
               href: '/ai/ai-toolkit/agents/comments',
             },
             {
+              title: '白板工具',
+              href: '/ai/ai-toolkit/agents/whiteboard',
+              releaseTag: 'alpha',
+            },
+            {
               title: 'Selection awareness',
               href: '/ai/ai-toolkit/agents/selection-awareness',
             },
             {
               title: 'Streaming',
               href: '/ai/ai-toolkit/agents/streaming',
-              releaseTag: 'alpha',
             },
           ],
         },

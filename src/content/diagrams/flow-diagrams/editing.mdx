@@ -1,0 +1,151 @@
+---
+title: '在图表中编辑'
+intro: "您可以在绘制Mermaid 流程图的位置对其进行更改。双击文本进行更改，或拖动流程图的形状进行移动。两者都通过命令编写源代码，因此每个更改都是一个撤消步骤，并且像任何其他更改一样到达协作者。"
+headerDemo:
+  path: '/Extensions/DiagramsEditInPicture'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '编辑流程图 | Tiptap 图表文档'
+  description: '您可以在绘制Mermaid 流程图的位置对其进行更改。'
+  category: 图表
+---
+
+## 图中的文本
+
+在可编辑编辑器中，双击 Mermaid 图中的文本将在其上方打开一个文本字段。该字段保存该文本。
+
+- **输入或离开该字段**通过 `updateFlowDiagram` 将文本写入源。
+- **Escape** 关闭该字段而不做任何更改。
+- **仅文本发生变化。** 形状和线条来自源。
+- **从表格中绘制的图表**不打开任何字段。其文本属于表格。
+
+您自己需要的图表渲染器[`editing`](/diagrams/renderers/custom-diagrams#editing-in-the-diagram)。
+
+### 双击编辑
+
+| 种类 | 双击打开 | 写为 |
+| --------- | --------------------------------------- | --------------------------------------------------------------------- |
+| 流程图 | 形状 | `id["text"]` 首先`id@{ … }` |
+| 流程图 | 边缘上的文本 | `-->\|"text"\|` 或 `-- "text" -->`，其中边缘具有 |
+| 形式序列 | 参与者，位于顶部或底部 | `participant id as text`，如果需要，在首次提及之前声明 |
+| 序列 | 消息 | 冒号后的文本 |
+| 状态 | 状态 | `state "text" as id`，或第一条 `id : text` 线 |
+| 类 | 类名 | `class id["text"]`。 ID 会保留，因此关系和成员会保留它 |
+| 任何其他 | 在源中出现一次的文本 | 该文本在其位置 |
+
+在任何其他类型中，扩展程序都会在源中查找单击的文本。这涵盖了时间线的周期和事件、看板的列和卡片、思维导图的节点以及旅程或甘特图的任务和部分。
+
+文本必须在源中仅出现一次，作为完整的项目，而不是作为较长文本的一部分。项目从行首开始，在括号、引号、分隔符（例如 `:` 或 `,`）之后，或者在 `title` 或 `section` 之后。它以右括号、引号、分隔符或行尾结束。
+
+- **出现两次的文本**不会打开任何内容。例如，在 gitGraph 中，分支名称出现在 `branch dev` 和 `checkout dev` 中。双击分支不会打开任何字段，两者都保持原样。
+- **Mermaid 添加**到绘制的图表中的文本（例如计数）不在源中。它什么也没打开。
+- **带有 `:`、`;`、`,`、`|`、`%`、`#`、`"`、`<`、`>`、括号或换行符的新文本不会以这些类型编写，因为它会比文本改变更多。
+- **没有文本的边缘**没有任何可双击的内容。在源中或使用 [`renameMermaidLabel`](/diagrams/flow-diagrams/editing#without-an-editor).
+- **作为一条语句编写的边**，例如 `A & B --> C`，共享其文本。
+- **文本中的直双引号**变成印刷双引号（“ ”）。
+
+## 移动形状
+
+在可编辑编辑器中，您可以拖动 Mermaid 流程图的形状来移动它。
+
+- **拖动形状旁边的空白点**可平移放大的图表，请参阅[大小和视图](/diagrams/guides/size-and-view)。
+- **偏移** 捕捉到图表中 10 个单位的步长。
+- **当您放开指针时，**通过 [`setDiagramNodePosition`](/diagrams/flow-diagrams/editing#setdiagramnodeposition).一次撤消即可恢复形状。
+- **要将所有形状放回原处，** 调用 [`resetDiagramPositions`](/diagrams/flow-diagrams/editing#resetdiagrampositions).
+
+### 如何绘制移动的形状
+
+Mermaid 首先从源开始布置图表。然后，在编辑器和每个导出中，在其偏移处绘制移动的形状。
+
+- **移动形状的线条**从一个边框直接绘制到另一个边框，其标签位于中间。
+- **未移动的形状之间的线条**保持其布线。
+- **子图的框架**保留在布局放置的位置，即使您将形状移出其中也是如此。
+- **当您将形状移过其边缘时，图表会变大**。
+
+### 偏移量的保存位置
+
+偏移量按节点 ID 存储在 `options.positions` 中。
+
+- **重命名源中的 id** 会丢失偏移量。
+- **从源中消失的 id** 不会移动任何内容。
+- **源的更改**会保留偏移量。
+- **仅流程图**可以通过这种方式移动。其他 Mermaid 类型的形状、draw.io 和 BPMN 图则不能。您自己需要的图表渲染器[`nodeAt`和`movePositions`](/diagrams/renderers/custom-diagrams#editing-in-the-diagram)。
+
+## 图中的线条
+
+您可以使用 `linkStyle` 在其源中设置Mermaid 流程图线条的样式。在源之外没有他们的领域。
+
+```txt
+flowchart LR
+  a --> b --> c
+  linkStyle 0 stroke-dasharray: 5 5, stroke-width: 2px
+```
+
+## 命令
+
+### setDiagramNodePosition
+
+将选定 Mermaid 流程图的一种形状或 `pos` 处的形状移离布局放置的位置。
+
+```ts
+editor.commands.setDiagramNodePosition({ nodeId: 'ship', dx: 40, dy: 60 })
+```
+
+| 选项 | 类型 | 描述 |
+| -------- | -------- | ----------------------------------------------------------------------- |
+| `nodeId` | `string` | 源给出形状的 id，例如 `ship[Shipped]` 中的 `ship` |
+| `dx` | `number` | 水平偏移，以图表单位表示 |
+| `dy` | `number` | 垂直偏移（以图表单位表示）。 `0, 0` 将形状放回 |
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+
+对于不是 Mermaid 流程图的图表、带有除 `-` 和 `_` 之外的空格或标点符号的 id 以及不是数字或超过 10,000 的偏移量，返回 `false`。
+
+### resetDiagramPositions
+
+将每个移动的形状放回布局放置的位置。
+
+```ts
+editor.commands.resetDiagramPositions()
+```
+
+| 选项 | 类型 | 描述 |
+| ------ | -------- | -------------------------------------------------------- |
+| `pos` | `number` | 图表的位置。默认为选定的图表 |
+
+对于未移动形状的图表，返回 `false`。
+
+## 不带编辑器
+
+`@tiptap-pro/extension-diagrams/core` 中的这些函数在源上运行，无需编辑器或绘制图表：
+
+| 函数 | 返回 |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `renameMermaidLabel(source, target, label)` | 替换该文本的源，保留所有其他字符，或者当源不是目标类型、目标不在其中或标签为空时 `null` |
+| `renameMermaidNode(source, nodeId, label)` | 与目标为 kind 的 `renameMermaidLabel` 相同`'node'` |
+| `renameMermaidText(source, text, label)` | 与同类目标相同 `'text'` |
+| `isRenamableMermaidText(source, text)` | 文本是否作为完整内容在源中出现一次项，因此可以将其重命名为 |
+| `flowDiagramPositions(diagram)` | 偏移量为 `{ [nodeId]: { dx, dy } }`，省略无效的条目 |
+
+```ts
+import { renameMermaidLabel } from '@tiptap-pro/extension-diagrams/core'
+
+const source = renameMermaidLabel(
+  'flowchart LR\n  A[Order] --> B{Paid?}',
+  { kind: 'edge', id: 'L_A_B_0' },
+  'placed',
+)
+// 'flowchart LR\n  A[Order] -->|"placed"| B{Paid?}'
+```
+
+`target` 为 `{ kind, id }`:
+
+| `kind` | `id` |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `'node'` | 流程图形状的 id |
+| `'edge'` | Mermaid 给出的流程图边的 id：`L_<from>_<to>_<n>`，其中 `n` 从 0 开始计算相同两个节点之间的边 |
+| `'participant'`、`'state'`、`'class'` | 它的 id |
+| `'message'` | 它在消息中的位置，来自 `'0'` |
+| `'text'` | 任何其他类型的文本本身。它必须在源中作为完整项目出现一次 |

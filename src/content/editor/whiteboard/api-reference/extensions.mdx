@@ -1,0 +1,114 @@
+---
+title: 白板扩展
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板扩展 | Tiptap 编辑器文档
+  description: WhiteboardKit 及其选项、它带来的扩展以及 BoardCollaboration。
+  category: 编辑器
+---
+
+`WhiteboardKit` 带来了白板的每一个扩展。从 `@tiptap-pro/extension-whiteboard` 导入它以及每个扩展。 `BoardCollaboration` 来自其自己的条目。
+
+`Editor` 来自 `@tiptap/core`，`UndoRedoOptions` 来自 `@tiptap/extensions`。
+
+## `WhiteboardKit`
+
+白板：板及其形状、其文本、选择、工具、新形状的样式以及撤消。它也带来了自己的文档节点和文本扩展，因此不要将 `Document` 或 `StarterKit` 添加到其编辑器中。您的应用程序在白板周围提供了舞台，请参阅[`attachStage`](/editor/whiteboard/api-reference/utilities#attachstage)。
+
+```js
+import { Editor } from '@tiptap/core'
+import { WhiteboardKit } from '@tiptap-pro/extension-whiteboard'
+
+const editor = new Editor({ element: viewport, extensions: [WhiteboardKit] })
+```
+
+### 选项 (`WhiteboardKitOptions`)
+
+- `undoRedo` (`Partial<UndoRedoOptions> | false`): Tiptap 的 [`UndoRedo`](/editor/extensions/functionality/undo-redo) 的选项。当协作处理撤消时设置为 `false`。然后使用 `undoBoard` 和 `redoBoard`。默认值：`{}`。
+- `shapeElementAttributes` (`ShapeElementAttributes | null`)：来自形状节点的每个形状元素的额外属性。值变成字符串，`null` 或 `undefined` 会留下一个属性。默认值：`null`。
+- `docs` (`BoardDocs | null`)：文档框架的文档所在的位置。如果没有它，文档框架将不会显示任何文档。默认值：`null`。请参阅[文档框架](/editor/whiteboard/guides/doc-frames)。
+- `images` (`BoardImages | null`)：图像形状文件所在的位置。如果没有它，用户将无法添加图像，但白板上的图像仍然会显示。默认值：`null`。请参阅[图像](/editor/whiteboard/guides/images)。
+- `colors` (`readonly ShapeColor[]`)：板颜色的名称。粘贴的 HTML 中的文本颜色和突出显示仅保留这些。默认值：[`shapeColors`](/editor/whiteboard/api-reference/utilities#shapecolors)。请参阅[颜色](/editor/whiteboard/api-reference/styling#colors)。
+- `toolKeys` (`ToolKeys | false`)：替换其工具默认键的键，请参阅[`toolKeys`](/editor/whiteboard/api-reference/utilities#toolkeys)。 `null` 使工具不带钥匙，`false` 关闭所有工具钥匙。默认值：`toolKeys`。
+
+```js
+import { getSuggestionHTMLAttributes } from '@tiptap-pro/extension-tracked-changes'
+import { shapeColors, WhiteboardKit } from '@tiptap-pro/extension-whiteboard'
+
+WhiteboardKit.configure({
+  undoRedo: { depth: 50 },
+  // Lets CSS show the shapes that a suggestion changes
+  shapeElementAttributes: getSuggestionHTMLAttributes,
+  colors: [...shapeColors, 'brand'],
+  toolKeys: { pen: 'b', eraser: null },
+})
+```
+
+### 包含的扩展
+
+| 扩展 | 名称 | 描述 |
+| ---------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `WhiteboardDocument` | `doc` |白板的编辑器，仅包含白板 |
+| `Board` | `board` | 白板，包含各种形状，带有更改形状的命令 |
+| `StickyNote` | `stickyNote` | 带文本的便签 |
+| `Geo` | `geo` | 带文本的几何形状，如矩形或椭圆形 |
+| `FreeText` | `freeText` | 周围没有形状的文本 |
+| `Freehand` | `freehand` | 用笔绘制的线条 |
+| `DocFrame` | `docFrame` | 白板上的框架，在其自己的编辑器中显示自己的文档 |
+| `Frame` | `frame` | 对形状进行分组的框架，形状随其移动并在其边缘处被切断 |
+| `BoardImage` | `boardImage` | 来自 URL 的图像，在调整大小时保持其比例 |
+| `Arrow` | `arrow` | 形状或自由点之间的箭头 |
+| `BoardTextColor` | `textColor` | 使用板颜色名称为形状文本的部分着色|
+| `BoardHighlight` | `highlight` | 以板颜色突出显示形状文本的部分。没有板颜色的突出显示为黄色 |
+| `BoardLink` | `link` | 形状文本中的链接。点击 <kbd>Control</kbd>（macOS 上为 <kbd>Cmd</kbd>）可在新标签页中打开 |
+| `BoardTaskItem` | `taskItem` | 未编辑任何文本时其复选框也会切换的任务项目 |
+| `KeepSelectionInShape` | `keepSelectionInShape` | 停止选择、箭头键和跳转离开当前形状 |
+| `ShapeSelection` | `shapeSelection` | 按 ID 选择形状 |
+| `RemoteSelections` | `remoteSelections` | 显示其他用户选择的形状 |
+| `BoardHistory` | `boardHistory` | 对板进行撤消和重做，选择他们更改的形状 |
+| `BoardTools` | `boardTools` | 将活动工具保留在文档外部，例如选择 |
+| `ShapeStyle` | `shapeStyle` | 将新形状的样式保留在文档外部|
+
+该套件还添加了以下 Tiptap 扩展：`Paragraph`、`Text`、`Bold`、`Italic`、`Strike`、`Code`、`BulletList`、`OrderedList`、`ListItem`、`TaskList` 和`ListKeymap` 和 `UndoRedo`，除非 `undoRedo` 是 `false`。任务列表可以嵌套。
+
+各扩展提供的命令请参见[命令参考](/editor/whiteboard/api-reference/commands)。
+
+## `Board`
+
+白板包含所有形状及其修改命令。除非编辑器的 `injectCSS` 为 `false`，否则它会向页面添加白板所需的 CSS。通过 `WhiteboardKit` 配置；它会传递 `shapeElementAttributes`、`docs` 和 `images`。
+
+### 存储 (`BoardStorage`)
+
+在 `editor.storage.board` 上可用。
+
+- `shapeElementAttributes` (`ShapeElementAttributes | null`)：`shapeElementAttributes` 选项，用于形状的节点视图。
+- `docs` (`BoardDocs | null`)：`docs` 选项，用于文档框架及其副本。
+- `images` (`BoardImages | null`)：`images` 选项，用于用户粘贴、拖放或拾取的图像文件。
+- `docEditors` (`Map<string, Editor>`)：文档框架显示的文档的编辑者（按文档 ID）。
+
+要读取文档编辑器，请优先使用 [`getDocEditors`](/editor/whiteboard/api-reference/utilities#getdoceditors)。白板编辑器销毁后，此方法不再返回其编辑器。
+
+## `BoardCollaboration`
+
+协作还同步使文档留空的第一个更改，例如删除最后一个形状。当编辑器开始处理来自 Yjs 的内容时，普通 `Collaboration` 会删除该更改。使用它代替 `Collaboration`，并关闭套件自身的撤消功能。
+
+```js
+import { Editor } from '@tiptap/core'
+import { WhiteboardKit } from '@tiptap-pro/extension-whiteboard'
+import { BoardCollaboration } from '@tiptap-pro/extension-whiteboard/collaboration'
+import * as Y from 'yjs'
+
+const editor = new Editor({
+  element: viewport,
+  extensions: [
+    WhiteboardKit.configure({ undoRedo: false }),
+    BoardCollaboration.configure({ document: new Y.Doc() }),
+  ],
+})
+```
+
+它来自 `@tiptap-pro/extension-whiteboard/collaboration`，并采用 [Collaboration](/editor/extensions/functionality/collaboration).它需要可选的对等依赖项 `@tiptap/extension-collaboration`、`@tiptap/y-tiptap` 和 `yjs`，以及 `@tiptap/y-tiptap` 需要的 `y-protocols`。
+
+请参阅[白板上协作](/editor/whiteboard/guides/collaboration)。

@@ -77,6 +77,11 @@ export const sidebarConfig: SidebarConfig = {
           href: '/guides/collaboration-api',
           title: '协作 API',
         },
+        {
+          href: '/guides/mobile-apps',
+          title: '移动应用',
+          tags: ['实验性'],
+        },
       ],
     },
     {

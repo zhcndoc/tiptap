@@ -1,0 +1,219 @@
+---
+title: '表格'
+intro: '您可以将表格转换为图表，将图表转换为表格。图表或流程图也可以遵循同一文档中的表格，并且在编辑表格时会发生变化。'
+headerDemo:
+  path: '/Extensions/DiagramsTables'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '表 | Tiptap 图表文档'
+  description: '您可以将表格转换为图表，将图表转换为表格。'
+  category: 图表
+---
+
+import { CodeDemo } from '@/components/CodeDemo'
+
+## 快速入门
+
+当 [`chart.linkTables`](/diagrams/data/tables#following-a-table) 打开时，将选择放入表格中并调用：
+
+```ts
+editor.commands.insertLinkedChart({ type: 'bar' })
+```
+
+## 遵循表格
+
+要让图表或流程图跟随表格，请启用 [`chart.linkTables`](/diagrams/api-reference/options#linktables)。该选项会为每个表格添加 `chartTableId` 属性，以便图表之后能再次找到对应表格。若未启用，带表格参数的 `insertLinkedChart`、`linkChartToTable` 和 `setChartLayout` 都会返回 `false`。
+
+表格后面的图表在与表格编辑相同的撤消步骤中发生更改，因此一次撤消即可收回两者。该表格可以位于文档中的任何位置，`listTables()` 列出了图表可以遵循的表格。图表的数据通过`document-table`[数据源](/diagrams/data/sources).
+
+## 表的读取方式
+
+`insertLinkedChart`、`linkChartToTable` 和 `updateLinkedTable` 取 `header` 和 `range`。
+
+| 选项 | 类型 | 说明 |
+| --------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `header` | `'auto' \| 'first-row' \| 'none'` | 其中列名称所在。默认 `'auto'` |
+| `range.rows` | `{ from?, to? }` 或它们的数组 | 读取的数据行，从头下方的 0 开始计数 |
+| `range.columns` | `(number \| { from?, to? })[]` | 读取的列，从0开始计数，如`[0, { from: 2 }]`。第一列读取名称类别 |
+
+| `header` | 列名称 |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| `'auto'` | 第一行，当它由标题单元格组成或在第一列之外不包含数字时|
+| `'first-row'` | 第一行，无论它保存什么 |
+| `'none'` | 每一行都是数据。这些列获得默认名称 |
+
+- 包括范围的两端。
+- 负数从末尾开始计数。 `-1` 是最后一行，因此 `{ to: -2 }` 省略了总行。
+- 不计算空行。
+- 按给定的顺序读取多个范围。
+- 被命名两次的行或列被读取一次。
+- 如果没有 `range`，表格中的单元格选择就是范围：它涵盖的行和列，以表格的第一列作为标签。
+- `header` 和 `range` 存储在图表的数据源地址中。它们适用于以后对表格的每次编辑。
+
+## 命令
+
+将表格转换为图表并返回，或者将图表转换为保留其数据的图像：
+
+<CodeDemo isPro viewer view="preview" path="/Extensions/DiagramsConversions" />
+
+### ConvertTableToChart
+
+将选择处的表格替换为其数据图表。
+
+```ts
+editor.commands.convertTableToChart({ type: 'bar' })
+```
+
+| 选项 | 类型 | 说明 |
+| ------ | ----------- | ------------------------------------------------------ |
+| `type` | `ChartType` | 图表类型。默认为 `chart.defaultType` |
+| `pos` | `number` | 表内的位置。默认选择 |
+
+返回不带表的 `false`。
+
+### conversionChartToTable
+
+将图表替换为其数据的普通表格。
+
+```ts
+editor.commands.convertChartToTable()
+```
+
+| 选项 | 类型 | 描述 |
+| ------ | -------- | ---------------------------------------------------- |
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+
+返回架构中没有表的 `false`。
+
+### insertLinkedChart
+
+在表格后面插入图表。
+
+```ts
+editor.commands.insertLinkedChart({
+  table: editor.storage.diagrams.listTables()[0].pos,
+  type: 'bar',
+  columns: { label: 'Month', series: ['Retail'] },
+})
+
+// A table without a header, without its last row
+editor.commands.insertLinkedChart({
+  table,
+  header: 'none',
+  range: { rows: { to: -2 } },
+  columns: { label: 0, series: [2] },
+})
+
+// The first and the last two rows, and only the columns 0, 3 and 4
+editor.commands.insertLinkedChart({
+  table,
+  range: { rows: [{ to: 0 }, { from: -2 }], columns: [0, { from: 3, to: 4 }] },
+})
+```
+
+| 选项 | 类型 | 说明 |
+| --------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `type` | `ChartType` | 图表类型。默认为 `chart.defaultType` |
+| `table` | `number` | 表的位置，来自 `listTables()`。默认为选择时的表格 |
+| `columns` | `{ label?: string \| number, series?: (string \| number)[] }` | 按标题单元格文本或其位置从 0 开始的列 |
+| `header` | `'auto' \| 'first-row' \| 'none'` | 请参阅[如何读取表格](/diagrams/data/tables#how-the-table-is-read) |
+| `range` | `{ rows?, columns? }` | 请参阅[如何读取表格](/diagrams/data/tables#how-the-table-is-read) |
+| `title` | `string` | 图表标题 |
+| `below` | `boolean` | `false` 位置表格上方的图表。默认 `true` |
+
+`columns.label` 命名类别并绘制 `columns.series`。如果没有 `columns`，第一列是标签，每隔一列都会绘制。位置也适用于没有标题的表，并在 `range` 读取的列中计数。
+
+图表数据在链接时是只读的。
+
+在没有表、没有 `chart.linkTables` 或名称不在标题中或位置不在表中时返回 `false`。
+
+### updateLinkedTable
+
+更改图表或流程图读取其后面表格的方式，并再次读取该表格。
+
+```ts
+editor.commands.updateLinkedTable({ header: 'none' })
+editor.commands.updateLinkedTable({ header: undefined, range: { rows: { from: 1 } } })
+```
+
+| 选项 | 类型 | 说明 |
+| -------- | --------------------------------- | ------------------------------------------------------------------------ |
+| `header` | `'auto' \| 'first-row' \| 'none'` | 请参阅[如何读取表格](/diagrams/data/tables#how-the-table-is-read) |
+| `range` | `{ rows?, columns? }` | 请参阅[如何读取表格](/diagrams/data/tables#how-the-table-is-read) |
+| `pos` | `number` | 图表或流程图的位置。默认为选定的一个 |
+
+- 指定为 `undefined` 的键将返回默认值。
+- 省略的键保留其值。
+- 图表的标签和系列保留在同一列上。当仍在读取时，它们保留在列本身上，否则保留在列的相同位置上。所以他们在新的标题中幸存下来。
+- `listCharts()` 将当前值报告为 `tableRead`，将 `listDiagrams()` 报告为 `link` 的一部分。
+
+对于没有表格或表格已消失的图表或流程图，返回 `false`。对于图表，当图表命名的列不再存在时，它还会返回 `false`。
+
+### setChartLayout
+
+决定图表的表格是否在文档中，以及图表是否显示。
+
+```ts
+editor.commands.setChartLayout({ layout: 'with-table' })
+```
+
+| 选项 | 类型 | 说明 |
+| -------- | ------------------------------------ | ---------------------------------------------------- |
+| `layout` | `'chart' \| 'with-table' \| 'table'` | 您在文档中看到的内容，请参见下文 |
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+
+| `layout` | 您看到的内容 |
+| -------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `'chart'` | 图表。它保存自己的数据，不遵循任何表格 |
+| `'with-table'` | 图表及其遵循的表格。每个都位于您放置的位置 |
+| `'table'` | 仅表。该图表仍在文档中，直接隐藏在表格下方，并且仍然遵循表格 |
+
+该命令的作用取决于图表的当前布局：
+
+| 从 | 到 | 会发生什么 |
+| -------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `'chart'` | `'with-table'` | 在图表正上方插入图表数据表格。图表紧随其后，与 `insertLinkedChart` |
+| `'chart'` | `'table'` | 插入该表格，并将图表直接隐藏在其下方 |
+| `'with-table'` | `'table'` | 隐藏图表。如果图表位于其他位置，它将直接移动到其表格下方 |
+| `'table'` | `'with-table'` | 再次显示图表所在的位置 |
+| 任何 | `'chart'` | 保留表最后给出的数据，不遵循任何内容。删除表格，除非另一个图表或流程图仍位于其后面 |
+
+- 其中图表及其表格支架不是布局的一部分。移动任一节点即可移动它。
+- 标题、渲染器和规范的其余部分将被保留，同时隐藏图表。任何其他布局都会再次按原样显示图表。
+- 更改是一个撤消步骤。
+- `exportAll` 和 `exportDocx` 中省略了隐藏图表。在 HTML 中，其 `<figure>` 具有 `hidden` 属性。
+- 删除或移动其表格会再次显示图表。
+- 要仅保留表格而不保留图表，请使用 `convertChartToTable`。
+- `listCharts()` 将当前布局报告为 `layout`。
+
+当图表随后具有布局时（以及已经具有布局时）返回 `true`。在这些情况下返回 `false`：
+
+- 对于 `'with-table'` 和 `'table'`，架构中没有表节点或没有选项 `chart.linkTables`。
+- 对于 `'with-table'` 和 `'table'`，位于不跟随表格且链接到另一个只读源（例如只读 CSV URL）的图表上。
+- 对于 `'table'`，当另一个隐藏图表已经位于表格正下方时，或者当图表无法站立在那里时。
+
+### linkChartToTable
+
+使图表遵循文档中已有的表格，无论该表格位于何处。
+
+```ts
+const [table] = editor.storage.diagrams.listTables()
+if (table) editor.commands.linkChartToTable({ table: table.pos })
+```
+
+| 选项 | 类型 | 说明 |
+| ---------- | --------------------------------- | --------------------------------------------------------------------- |
+| `table` | `number` | 表的位置，如 `listTables()` 报告的那样|
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+| `readOnly` | `boolean` | `false` 在链接时保持图表数据可编辑。默认 `true` |
+| `header` | `'auto' \| 'first-row' \| 'none'` | 至于 [`insertLinkedChart`](/diagrams/data/tables#insertlinkedchart) |
+| `range` | `{ rows?, columns? }` | 至于 [`insertLinkedChart`](/diagrams/data/tables#insertlinkedchart) |
+
+如果表没有 id，则获取一个 id。该图表立即获取表格的数据。
+
+图表以布局 `'with-table'` 结束，与 `setChartLayout({ layout: 'with-table' })` 一样。不同之处在于，`linkChartToTable` 将图表的数据替换为现有表的数据，而 `setChartLayout` 从图表的数据直接在图表上方创建一个新表。
+
+对于不包含表格的位置以及作为显示为表格的快速输入的表格，返回不带 `chart.linkTables` 的 `false`。

@@ -1,0 +1,264 @@
+---
+title: '您自己的渲染器'
+intro: '您可以为任何绘图库编写渲染器。文档存储数据，而不是绘图，因此您的渲染器会绘制每个现有图表，并且文档无需迁移。此页面显示图表渲染器。有关图表格式，请参阅<a href="/docs/diagrams/renderers/custom-diagrams">图表渲染器</a>。'
+headerDemo:
+  path: '/Extensions/DiagramsCustomRenderer'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '您自己的渲染器 | Tiptap 图表文档'
+  description: '您可以为任何绘图库编写渲染器。'
+  category: 图表
+---
+
+## 图表渲染器
+
+该渲染器将条形图绘制为纯 SVG，不带库：
+
+```ts
+import type { ChartRenderer, ChartRenderInput } from '@tiptap-pro/extension-diagrams'
+
+const SVG = 'http://www.w3.org/2000/svg'
+
+function escapeXml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+function barsSvg({ data, spec, theme, size }: ChartRenderInput): string {
+  const series = data.columns.flatMap((column, index) =>
+    column.role === 'series' ? [{ ...column, index }] : [],
+  )
+  const colors = spec.palette ?? theme.series
+  const values = data.rows
+    .flatMap((row) => series.map((column) => row[column.index]))
+    .filter((cell): cell is number => typeof cell === 'number')
+  const max = Math.max(1, ...values)
+  const band = size.width / Math.max(1, data.rows.length)
+  const bar = band / (series.length + 1)
+  const plot = size.height - 24
+
+  const bars = data.rows.flatMap((row, rowIndex) => [
+    ...series.map((column, seriesIndex) => {
+      const value = typeof row[column.index] === 'number' ? (row[column.index] as number) : 0
+      const height = (value / max) * plot
+      const x = rowIndex * band + bar * (seriesIndex + 0.5)
+      return `<rect x="${x}" y="${plot - height}" width="${bar}" height="${height}" fill="${colors[seriesIndex % colors.length]}"/>`
+    }),
+    `<text x="${rowIndex * band + band / 2}" y="${size.height - 6}" text-anchor="middle" fill="${theme.labelColor}" font-family="${escapeXml(theme.fontFamily)}" font-size="${theme.fontSize}">${escapeXml(String(row[0] ?? ''))}</text>`,
+  ])
+
+  return `<svg xmlns="${SVG}" width="${size.width}" height="${size.height}" viewBox="0 0 ${size.width} ${size.height}">${bars.join('')}</svg>`
+}
+
+export const plainBarsRenderer: ChartRenderer = {
+  id: 'plain-bars',
+  label: 'Plain bars',
+  types: ['bar'],
+  // Leaves stacked bars to the next Renderer that draws bar charts
+  draws: ({ spec }) => !spec.stacked,
+  mount(target, input) {
+    const draw = (next: ChartRenderInput) => {
+      const svg = new DOMParser().parseFromString(barsSvg(next), 'image/svg+xml').documentElement
+      target.replaceChildren(target.ownerDocument.importNode(svg, true))
+    }
+    draw(input)
+    return { update: draw, destroy: () => target.replaceChildren() }
+  },
+  async toSVG(input) {
+    return barsSvg(input)
+  },
+}
+```
+
+### 注册
+
+```ts
+import { Diagrams } from '@tiptap-pro/extension-diagrams'
+import { echartsRenderer } from '@tiptap-pro/extension-diagrams/echarts'
+
+Diagrams.configure({
+  renderers: [echartsRenderer(), plainBarsRenderer],
+})
+
+editor.commands.setChartRenderer({ renderer: 'plain-bars' })
+```
+
+绘制名为 `plain-bars` 的图表。每个其他图表都保留其渲染器。请参阅[哪个渲染器绘制图表](/diagrams/renderers/overview#which-renderer-draws-a-chart)。
+
+### 成员
+
+| 成员 | 类型 | 说明 |
+| ----------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id` | `string` | 图表存储的内容`renderer` |
+| `label` | `string` | 可选。对于菜单 |
+| `types` | `readonly ChartType[]` | 绘制的图表类型 |
+| `draws({ data, spec })` | `(chart) => boolean` |可选。 `false` 对于它绘制得不好的类型的图表，因此另一个渲染器将其视为 |
+| `rules` | `RendererRules` | 可选。请参阅[渲染器的规则](/diagrams/renderers/custom#rules-of-your-renderer) |
+| `mount(target, input)` | `(target, input) => ChartRenderHandle \| Promise<ChartRenderHandle>` | 绘制到编辑器内的元素 `target` 中，并返回 `{ update, destroy }` |
+| `toSVG(input)` | `(input) => Promise<string>` | 返回具有具体颜色的独立 SVG 字符串，由 `export` 使用 |
+| `toImage(input)` | `(input) => Promise<Blob>` | 返回尺寸为 `input.size` 的 PNG。对于使用画布绘制的库，参见[在画布上绘制的渲染器](/diagrams/renderers/custom-canvas) |
+
+渲染器具有 `toSVG` 或 `toImage`，并且每个导出的文件都是由它返回的文件组成的。无论哪种方式，框架、属性和大小都是相同的。
+
+- **对于 `toSVG`**，类型为 `VectorChartRenderer`。内置的渲染器就是这种类型。
+- **对于 `toImage`**，类型为 `RasterChartRenderer`。然后，SVG 文件保存 PNG，而不是形状，并且 `export` 返回 `raster: true`。
+
+`mount` 返回 `{ update, destroy }`。当数据、规格、主题或大小发生变化时，扩展会使用新输入调用 `update(input)`。 `destroy()` 删除了 `mount` 添加的内容。
+
+### 渲染器接收的内容
+
+`input` 是 `ChartRenderInput`：
+
+| 字段 | 类型 | 说明 |
+| --------- | ------------------- | ------------------------------------------------------------------------------- |
+| `data` | `ChartData` | 图表数据，仅包含规格选择的列 |
+| `spec` | `ChartSpec` | 图表规格 |
+| `theme` | `ChartTheme` | 用于绘制的具体值，如下所示 |
+| `size` | `{ width, height }` | 以像素为单位 |
+| `animate` | `boolean` | `true` 当图表在绘制和更改时可能会移动。文件永远不会获取它 |
+
+`theme` 包含 `series` 颜色、`background`、`axisColor`、`gridColor`、`labelColor`、`titleColor`、`fontFamily`、`fontSize`、`titleSize`、`titleWeight`、`legendGap` 和 `legendMarkerSize`。这些是解析后的值，也包含深色配色方案下的值。绘制时请使用这些值，而不是 `var(…)`，这样图表才能匹配页面并正确导出。`toSVG` 和 `toImage` 默认接收浅色配色，除非调用方指定 `scheme: 'dark'`.
+
+当启用 [animation](/diagrams/api-reference/options#animation) 选项且用户系统未要求减少动态效果时，编辑器中的 `animate` 为 `true`。
+
+渲染器从不读取文档、表格或数据源。输入的行、图表后面的表格以及 URL 的快照都作为图表数据到达 `input.data` 中。请参阅[数据](/diagrams/data/overview)。
+
+### 渲染器不得执行的操作
+
+- 运行来自文档的代码。
+- 插入来自文档的标记。
+- 将标签和标题等文本设置为 HTML。文本是数据，所以将其设置为文本。
+
+### 规格中应遵循的内容
+
+| 规格字段 | 绘制内容 |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `type` | 仅 `types` 中的类型。对于无法绘制的变体，从 `draws` 返回 `false` |
+| `palette` | 使用它代替 `theme.series` |
+| `stacked` | 堆叠条形图或面积图的系列 |
+| `orientation` | `'horizontal'`：将条形图的条形放在侧面 |
+| `axes`、`references` | 网格线和轴线、每个 `axes.y.step` 处的刻度以及值处的线和带。如果无法通过 `draws` 拒绝 |
+| `range` | `{ min, max }` 仪表 |
+| `legend`、`title` | 显示或隐藏图例和标题 |
+| `series` | 折线图或面积图的每个系列的线条样式、宽度、标记和平滑。如果无法绘制它们，则通过 `draws` 拒绝 |
+| `renderer[id]` | 图表仅为渲染器存储的选项，位于 `id` |
+
+`@tiptap-pro/extension-diagrams/core` 中的这些函数在内置渲染器绘制时计算出轴其中：
+
+| 函数 | 返回 |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `hasAxisLines(type)` | `true` 对于折线、条形、面积、散点和组合，其轴线 `spec.axes` 设置 |
+| `hasRadarLines(type)` | `true` 用于雷达，其环（`y.grid`）和辐条（`x.line`） `spec.axes` 设置 |
+| `valueExtent(series, stacked)` | 的最低值和最高值轴必须达到，0包括值轴的|
+| `valueAxisScale(spec, extent)` | `{ min, max, ticks, fixed }`，带步长和[参考线](/diagrams/charts/references) |
+| `resolveAxisStrokes(spec, numericCategories?)` |绘制的网格和轴线，每个字段决定 |
+
+### 图表中的文本
+
+用户可以双击图表中的文本（例如其标题），并在那里重命名。请参阅[图表中的编辑](/diagrams/charts/editing)。 ECharts 和 D3 渲染器支持这一点。Mermaid渲染器没有，因此双击不会打开任何内容。
+
+当 `mount` 返回的句柄具有 `onTextDoubleClick` 时，您的渲染器支持它。该函数接受一个侦听器并返回一个将其删除的函数。双击调用侦听器，使用 `ChartTextHit`：
+
+| 字段 | 类型 | 描述 |
+| -------- | ----------------- | ------------------------------------------------------------------------------ |
+| `target` | `ChartTextTarget` | 击中了哪个文本，见下文 |
+| `text` | `string` | 绘制的文本 |
+| `box` | `ChartTextBox` |页面像素中的 `x`、`y`、`width`、`height`，来自 `getBoundingClientRect` |
+
+| 目标 | 文本 |
+| ------------------------------------ | ---------------------------------------------------------- |
+| `{ kind: 'title' }` | 标题 |
+| `{ kind: 'axis', axis: 'x' \| 'y' }` | 轴标题。 `x` 是类别轴，也在其侧面 |
+| `{ kind: 'series', column }` | 系列名称，按 `input.data` |
+| `{ kind: 'category', row }` | 中的列 id类别标签或饼图部分，按 `input.data` |
+
+```ts
+mount(target, input) {
+  const svg = draw(input)
+  target.append(svg)
+  const listeners = new Set<(hit: ChartTextHit) => void>()
+  svg.addEventListener('dblclick', event => {
+    const title = event.target instanceof Element ? event.target.closest('.title') : null
+    if (!title) return
+    const { x, y, width, height } = title.getBoundingClientRect()
+    const hit: ChartTextHit = {
+      target: { kind: 'title' },
+      text: title.textContent ?? '',
+      box: { x, y, width, height },
+    }
+    listeners.forEach(listener => listener(hit))
+  })
+  return {
+    update: next => {},
+    destroy: () => svg.remove(),
+    onTextDoubleClick: listener => {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
+  }
+}
+```
+
+在只读编辑器中不会打开文本输入框；对于只读数据，也不会为系列名称或类别标签打开文本输入框。
+
+## 渲染器的规则
+
+库的许可证可能会要求可见的信用，或限制您导出的文件格式。渲染器在 `rules` 中声明这一点，并且扩展将它们应用到其图表或流程图出现的任何位置。图渲染器采用相同的 `rules`，与 [BPMN 渲染器](/diagrams/renderers/bpmn#the-bpmnio-attribution) 相同。
+
+```ts
+export const creditedRenderer: ChartRenderer = {
+  ...plainBarsRenderer,
+  id: 'credited-bars',
+  rules: {
+    attribution: {
+      label: 'Drawn with Example',
+      href: 'https://example.com',
+      logo: '<svg viewBox="0 0 16 16">…</svg>',
+    },
+    exports: ['svg', 'png', 'docx'],
+  },
+}
+```
+
+| 规则 | 类型 | 说明 |
+| ------------- | ----------------------------------------------------------- | ---------------------------------------------------------------- |
+| `attribution` | `{ label: string, href: string, logo?: string }` | 每个图表或流程图中显示的积分，如下所述 |
+| `exports` | `readonly ('svg' \| 'png' \| 'webp' \| 'jpeg' \| 'docx')[]` | `export` 可能产生的格式。如果没有列表，每种格式 |
+
+### 归属信息的作用
+
+- **在编辑器中**，它是图表或流程图下方的链接（`tiptap-chart-attribution`、`tiptap-flow-diagram-attribution`）。
+- **在每个导出的 SVG、PNG、WebP、JPEG 和 Word 图像中**，其标签绘制在右下角。
+- **`logo`** 是独立的 SVG 标记，显示为 16 像素高。
+
+### 导出格式的影响
+
+- 导出什么 **不在列表中的格式**会使 `export` 抛出异常。
+- **如果没有 `docx`**，`exportDocx` 会在图表中留下注释，并将图表写入原生 Word 图表。
+
+### 添加规则
+
+您添加的规则只会使渲染器变得更加严格。 `withRendererRules(renderer, rules)` 返回添加了规则的渲染器。 `rendererRules` 选项按渲染器 ID 添加规则。
+
+```ts
+import { Diagrams, withRendererRules } from '@tiptap-pro/extension-diagrams'
+
+Diagrams.configure({
+  renderers: [withRendererRules(plainBarsRenderer, { exports: ['svg', 'png'] })],
+  rendererRules: {
+    drawio: { attribution: { label: 'draw.io', href: 'https://www.drawio.com' } },
+  },
+})
+```
+
+- **渲染器声明的属性**保留。您无法将其删除。
+- **您添加的属性**仅适用于渲染器未声明的情况。
+- **允许的格式**是两个列表都允许的格式。
+- **`editor.storage.diagrams.rulesFor(renderer)`** 返回有效的规则。
+- **ECharts、D3、Mermaid 和draw.io 的内置渲染器** 声明不归属并允许每种格式。

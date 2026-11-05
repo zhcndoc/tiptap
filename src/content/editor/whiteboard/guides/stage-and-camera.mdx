@@ -1,0 +1,198 @@
+---
+title: 白板舞台和相机
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板舞台和相机 | Tiptap 编辑器文档
+  description: 将白板连接到其周围的舞台，并使用相机助手平移、缩放和调整白板。
+  category: 编辑器
+---
+
+白板由三个要素组成。 **舞台**是白板周围的元素。它接受指针和滚轮事件，并剪辑其外部的所有内容。在舞台内部，**视口**包含编辑器。 **相机**移动并缩放视口。
+
+## 相机
+
+相机是应用状态的一部分：
+
+```ts
+type Camera = {
+  x: number
+  y: number
+  zoom: number
+}
+```
+
+`x` 和 `y` 以屏幕像素为单位，`zoom` 为 1 时表示 100%。相机助手将变焦保持在 `minZoom`（10%）和 `maxZoom`（400%）之间。
+
+使用相机显示板：使用 `toCssTransform` 移动视口，并将 `--zoom` 设置为缩放。手柄读取 `--zoom` 以在每次缩放时保持其尺寸。
+
+```js
+import { toCssTransform } from '@tiptap-pro/extension-whiteboard'
+
+toCssTransform({ x: 100, y: 50, zoom: 2 }) // 'translate(100px, 50px) scale(2)'
+```
+
+视口需要 `transform-origin: 0 0`。有关舞台和视口的 CSS，请参阅[添加舞台 CSS](/editor/whiteboard/guides/react#add-the-stage-css)。
+
+## 连接平台
+
+`attachStage` 将编辑器的板连接到其平台。它返回一个再次分离所有内容的函数：
+
+```js
+import { attachStage } from '@tiptap-pro/extension-whiteboard'
+
+const detach = attachStage({ stage, editor, updateCamera: setCamera })
+```
+
+`updateCamera` 通过更新函数更改相机，就像 React 状态设置器一样。在 React 中，传递 `useState` 的 setter。如果没有 React，请自行应用更新，请参阅[基本设置](/editor/whiteboard/getting-started/overview#basic-setup)。
+
+连接后，用户可以在舞台上使用该白板。当焦点位于舞台上时，其按键可以工作，因此页面的其余部分以及其上的其他板保留其按键：
+
+- **平移**：按住空格、使用鼠标中键或使用 `hand` 工具进行拖动。转动滚轮或在触控白板上滚动也会平移。在触摸屏上，当 `select` 工具处于活动状态时，用一根手指拖动空板，或移动两根手指。平底锅胜过绘画和选择。使用 `hand` 工具进行平移或单击可为白板提供键盘，就像使用 `select` 进行单击一样，因此在工具栏按钮选择该工具后，其按键即可工作。
+- **缩放**：<kbd>Control</kbd> + 滚轮，或 macOS 上的 <kbd>Cmd</kbd> + 滚轮，或在触控白板上捏合，在指针处缩放。在触摸屏上，用两根手指捏合可在它们之间的中间进行缩放。第二根手指停止第一根手指开始的动作，然后撤消它，就像移动形状一样。
+- **缩放快捷键**：<kbd>Control</kbd> + <kbd>=</kbd> 或 <kbd>+</kbd> 放大，<kbd>Control</kbd> + <kbd>-</kbd> 缩小，以及<kbd>Control</kbd> + <kbd>0</kbd> 返回到 100%，在舞台中间附近，而不是缩放页面。在 macOS 上，使用 <kbd>Cmd</kbd> 而不是 <kbd>Control</kbd>。字段中的键保留在该字段中。
+- **适合**：<kbd>Shift</kbd> + <kbd>1</kbd> 将所有形状适合视图，同时不编辑任何文本。
+- **绘制**：使用形状工具，在白板上拖动即可添加形状。单击可为其工具添加固定大小的注释、文本、文档框架、框架或几何形状，以指针为中心。笔绘制线条，橡皮擦擦除其接触的形状。当擦除开始时，文档框架会保留下来，因此用户可以擦除文档上的笔线。绘图也适用于其他形状。
+- **选择**：使用 `select` 工具，在空白板上拖动鼠标或笔即可选择其框接触的形状。只有当盒子容纳了所有框架时，框架才算数，并且在框架内拖动也会绘制一个盒子。按住 <kbd>Shift</kbd> 将它们添加到选择中。单击或点击空白板上可清除选择。
+- **图像**：使用白板的[`images`](/editor/whiteboard/guides/images)，用户放置的图像文件落在他们放置的位置，粘贴的图像文件落在舞台中央。
+
+<kbd>Escape</kbd> 在运行时取消拖动（平移除外）。
+
+### 为控件留出空间
+
+<kbd>Shift</kbd> + <kbd>1</kbd> 在舞台的每个边缘保留 64 个屏幕像素。当白板漂浮在舞台上方时，使用 `fitInsets` 保留更多空间：
+
+```js
+import { attachStage } from '@tiptap-pro/extension-whiteboard'
+
+attachStage({
+  stage,
+  editor,
+  updateCamera: setCamera,
+  // Keeps shapes out from under the toolbar when Shift + 1 fits them into view
+  fitInsets: () => ({ top: 80, right: 24, bottom: 24, left: 24 }),
+})
+```
+
+### 在 CSS 中显示工具和平移
+
+舞台将活动工具显示为 `data-tool`，将平移显示为 `data-pan`：保持空间时为 `ready`，在板平移时显示 `active`。将它们用作光标：
+
+```css
+.stage:where([data-tool]:not([data-tool='select'], [data-tool='hand'])),
+.stage:where([data-tool]:not([data-tool='select'], [data-tool='hand'])) * {
+  cursor: crosshair;
+}
+
+.stage[data-tool='hand'],
+.stage[data-tool='hand'] *,
+.stage[data-pan='ready'],
+.stage[data-pan='ready'] * {
+  cursor: grab;
+}
+
+.stage[data-pan='active'],
+.stage[data-pan='active'] * {
+  cursor: grabbing;
+}
+```
+
+拖动运行时，舞台会保留预览元素：`data-selection-box`、`data-shape-preview`、`data-arrow-preview` 或 `data-pen-preview`。请参阅[样式](/editor/whiteboard/api-reference/styling#stage)。
+
+## 缩放按钮
+
+`zoomAtStageCenter` 更改舞台中间周围的缩放，因此白板保持在那里。 `stepZoom` 返回某个方向的下一个缩放步骤，从 10% 到 400%：
+
+```js
+import { stepZoom, zoomAtStageCenter } from '@tiptap-pro/extension-whiteboard'
+
+// Zoom in one step
+zoomAtStageCenter({
+  stage,
+  updateCamera: setCamera,
+  nextZoom: (zoom) => stepZoom({ zoom, direction: 1 }),
+})
+
+// Back to 100%
+zoomAtStageCenter({ stage, updateCamera: setCamera, nextZoom: () => 1 })
+```
+
+两个步骤之间的缩放将转到该方向的下一步。例如，`stepZoom({ zoom: 0.8, direction: -1 })` 返回 `0.75`。
+
+## 使形状适合视图
+
+`zoomToFitShapes` 移动并缩放摄像机，以便每个形状都在舞台中。它永远不会放大超过 100%，或缩小超过 `minZoom`，并且在空白板上不执行任何操作：
+
+```js
+import { zoomToFitShapes } from '@tiptap-pro/extension-whiteboard'
+
+zoomToFitShapes({ stage, editor, updateCamera: setCamera })
+```
+
+`scrollShapesIntoView` 尽可能少地移动相机，因此具有给定 id 的形状位于舞台中。仅当它们不适合时才会缩小：
+
+```js
+import { getSelectedShapeIds, scrollShapesIntoView } from '@tiptap-pro/extension-whiteboard'
+
+scrollShapesIntoView({
+  stage,
+  editor,
+  ids: getSelectedShapeIds(editor.state),
+  updateCamera: setCamera,
+})
+```
+
+两者都在每个边缘保留 64 个屏幕像素。通过 `insets` 更改该房间，每个边缘一个数字或每个边缘一个数字。
+
+要显示白板的一部分（例如板打开时），`fitCameraToRect` 返回在舞台中间显示矩形的摄像机：
+
+```js
+import { fitCameraToRect } from '@tiptap-pro/extension-whiteboard'
+
+const camera = fitCameraToRect({
+  rect: { x: 0, y: 0, width: 1200, height: 800 },
+  viewport: { width: stage.clientWidth, height: stage.clientHeight },
+})
+```
+
+它会缩小直到适合矩形，但不会超出 `minZoom`，并且默认情况下不会放大超过 100%。设置 `largestZoom` 以允许更多。
+
+## 转换坐标
+
+形状使用板单位。 `clientToBoard` 将窗口坐标中的点（如指针事件的 `clientX` 和 `clientY`）转换为白板单位。当白板不在页面上时，它返回 `null`，就像在安装 `useEditor` 的编辑器之前，或者一旦编辑器被销毁：
+
+```js
+import { clientToBoard } from '@tiptap-pro/extension-whiteboard'
+
+stage.addEventListener('pointermove', (event) => {
+  const point = clientToBoard({ editor, point: { x: event.clientX, y: event.clientY } })
+
+  if (point) {
+    console.log(`The pointer is at ${point.x}, ${point.y} on the board`)
+  }
+})
+```
+
+`visibleBoardRect` 返回舞台显示的白板部分。使用它添加用户可查看的形状：
+
+```js
+import { stickyNoteSize, visibleBoardRect } from '@tiptap-pro/extension-whiteboard'
+
+const seen = visibleBoardRect({
+  camera,
+  viewport: { width: stage.clientWidth, height: stage.clientHeight },
+})
+const { width, height } = stickyNoteSize
+
+// A new note in the middle of the stage
+editor.commands.insertStickyNote({
+  x: seen.x + (seen.width - width) / 2,
+  y: seen.y + (seen.height - height) / 2,
+})
+```
+
+## 后续步骤
+
+- 添加和更改[形状，并选择工具](/editor/whiteboard/guides/shapes-and-tools)
+- 查看所有[实用程序](/editor/whiteboard/api-reference/utilities)，以及舞台和摄像机助手

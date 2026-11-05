@@ -91,17 +91,17 @@ const editor = new Editor({
 })
 ```
 
-| 属性                | 描述 |
-| ------------------- | ---- |
-| `token`             | 由你的服务器为 Convert 服务生成的 JWT。这是请求所需的唯一凭据。有关如何签发 JWT，请参阅[身份验证](/authentication)。 |
-| `endpoint`          | Convert API 的基础 URL。仅在需要指向其他部署时设置；设置后会覆盖 `region`。 |
-| `region`            | 执行转换的 Tiptap Cloud 区域，可选 `'eu'` 或 `'us'`。默认为 `'eu'`。设置 `endpoint` 后会忽略此项。 |
-| `imageUploadConfig` | 导入期间图片上传的结构化配置。详情请参阅[图片上传配置](#image-upload-configuration)。 |
-| `prosemirrorNodes`  | 重命名导入生成的节点类型，以适配使用不同名称的 schema。请参阅[自定义节点映射](/conversion/import/docx/custom-node-mapping)。 |
-| `prosemirrorMarks`  | 重命名导入生成的标记类型，并将 Word 字符样式映射到标记。请参阅[自定义标记映射](/conversion/import/docx/custom-mark-mapping)。 |
-| `cssStyles`         | 选择将文档的默认样式提取为 CSS，以便将其应用到编辑器。请参阅[CSS 注入](/conversion/import/docx/css-injection)。 |
-| `trackedChanges`    | 决定如何处理 Word 的插入和删除：保留为建议、应用或丢弃。默认为 `auto`，会根据你的 schema 选择。请参阅[修订记录](/conversion/import/docx/tracked-changes)。 |
-| `taskLists`         | 决定 Word 复选框列表是否转换为 `taskList` / `taskItem` 节点。`'auto'`（默认）会在编辑器 schema 同时包含这两个节点时导入它们，ConvertKit 就是这种情况；`'import'` 强制导入，`'ignore'` 关闭导入。请参阅[任务列表](/conversion/content-types/text-and-formatting/task-lists)。 |
+| Property            | Description                                                                                                                                                                                                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `token` | 您的服务器为转换服务生成的 JWT。这是请求所需的唯一凭证。请参阅[Authentication](/authentication)，了解如何发出一个。对于每次导入的新令牌，请参阅[传递新令牌](#pass-a-fresh-token-on-each-import)。                                                       |
+| `endpoint`          | The Convert API base URL. Set it only to point at another deployment. When set, it overrides `region`.                                                                                                                                                                                                       |
+| `region`            | The Tiptap Cloud region that runs the conversion, `'eu'` or `'us'`. Defaults to `'eu'`. Ignored when `endpoint` is set.                                                                                                                                                                                      |
+| `imageUploadConfig` | Structured configuration for image uploads during import. See [Image upload configuration](#image-upload-configuration) for details.                                                                                                                                                                         |
+| `prosemirrorNodes`  | Renames the node types the import produces, for schemas that use different names. See [custom node mapping](/conversion/import/docx/custom-node-mapping).                                                                                                                                                    |
+| `prosemirrorMarks`  | Renames the mark types the import produces, and maps Word character styles onto marks. See [custom mark mapping](/conversion/import/docx/custom-mark-mapping).                                                                                                                                               |
+| `cssStyles`         | Opts into extracting the document's default styles as CSS so you can apply them to the editor. See [CSS injection](/conversion/import/docx/css-injection).                                                                                                                                                   |
+| `trackedChanges`    | Decides what happens to Word insertions and deletions: keep them as suggestions, apply them, or discard them. Defaults to `auto`, which chooses based on your schema. See [tracked changes](/conversion/import/docx/tracked-changes).                                                                        |
+| `taskLists`         | Whether Word checkbox lists become `taskList` / `taskItem` nodes. `'auto'` (default) imports them when both nodes are in your editor schema, which is the case with `ConvertKit`. `'import'` forces it, `'ignore'` turns it off. See [Task lists](/conversion/content-types/text-and-formatting/task-lists). |
 
 <RegionalEndpoints />
 
@@ -214,7 +214,33 @@ editor
 | 内容修改            | 您可以根据需要插入额外节点、移除某些节点，或以其他方式调整转换后的 Tiptap JSON。                                                                                                                                                                          |
 | 编辑器插入          | 如果您想依赖扩展的默认插入行为（替换编辑器内容），可以调用回调中提供的 `setEditorContent()` 函数。如果您自行修改了内容，则必须手动使用 `editor.commands.setContent(content)` 进行设置。 |
 
-## 页眉与页脚
+### 在每次导入时传递新令牌
+
+转换令牌应该是短暂的（请参阅[Authentication](/authentication)）。 `ImportDocx.configure()` 中的 `token` 在编辑器的生命周期内保持不变，因此在每次导入之前获取新令牌并将其传递给 `importDocx` 命令。该命令还采用 `imageUploadConfig`，对于检查相同令牌的上传端点：
+
+```ts
+async function importFile(file: File) {
+  // Your server issues a new JWT for the Convert service.
+  const token = await fetchConvertToken()
+
+  editor
+    .chain()
+    .focus()
+    .importDocx({
+      file,
+      token,
+      imageUploadConfig: {
+        url: 'https://your-server.com/upload-image',
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    })
+    .run()
+}
+```
+
+传入命令的值仅应用于本次导入。若命令未接收 `token` 或 `imageUploadConfig`，导入会使用 `ImportDocx.configure()` 中配置的值。每次调用的 `imageUploadConfig` 会完整替换已配置的对象，因此需要重复设置在 `ImportDocx.configure()` 中的 `method`、`queryParams` 或其他 `headers`。
+
+## Headers & Footers
 
 当导入包含页眉和页脚的 `.docx` 文件时，如果已安装 [Pages 扩展](/pages/getting-started/overview)，导入扩展会自动检测并应用它们。没有 Pages 时，页眉/页脚数据仍会返回给你的 `onImport` 回调（见下方 [手动处理](#manual-handling)），但没有地方可以渲染。请安装 Pages 以便它们在编辑器中可见。
 
@@ -321,7 +347,7 @@ editor
 
 ### 页码字段
 
-Word 的页眉和页脚通常包含 `PAGE` 和 `NUMPAGES` 字段代码，它们会渲染为实时页码。默认情况下，当安装了 [Pages 扩展](/pages/getting-started/overview) 时，`importDocx` 会将这些字段转换为与你当前 Pages 注册表匹配的文本令牌（开箱即用为 `{page}` 和 `{total}`），从而在重新导出为 Word 时能够无缝地还原为实时字段，无需额外配置。
+Word 页眉和页脚通常包含渲染为实时页码的 `PAGE` 和 `NUMPAGES` 字段代码。默认情况下，安装 [Pages 扩展 ](/pages/getting-started/overview) 时，`importDocx` 会将这些字段转换为文本标记。如果没有页面重命名，转换服务会发出 `{page}` 和 `{numpages}`。 Pages 渲染 `{page}`，但不渲染 `{numpages}`，因为总页数的默认名称是 `{total}`。要在编辑器中显示总计并将其导出为实时 Word 字段，请将 Pages 标记重命名为 `Pages.configure({ placeholders: { total: 'numpages' } })`。
 
 当您重命名这些内置占位符时，导入器会将您的注册表转发给转换服务，以便输出相同的名称：
 
@@ -347,7 +373,7 @@ Pages.configure({
 editor.chain().importDocx({ file, placeholders: false }).run()
 ```
 
-当省略 `placeholders` 时，如果安装了 Pages 扩展，命令默认会启用该功能，除非你通过 `Pages.configure({ placeholders: false })` 禁用了令牌替换，在这种情况下它会保持关闭。传入 `true`（或显式的 `{ page?, total? }` 重命名映射）可强制启用翻译，其中重命名映射的优先级高于编辑器的 Pages 配置。
+当省略 `placeholders` 时，只要安装了 Pages 扩展，该命令就会默认选择加入，除非您已禁用 `Pages.configure({ placeholders: false })` 的令牌替换，在这种情况下，该命令将保持关闭状态。无论如何，传递 `true` 强制转换。 `true` 在重命名页面配置时保留令牌名称，否则使用默认名称。显式的 `{ page?, total? }` 重命名映射也会强制进行翻译，并优先于编辑器的页面配置。
 
 ## 脚注和尾注
 

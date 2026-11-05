@@ -1,0 +1,60 @@
+---
+title: '在写作中插入图表和流程图'
+intro: '将图表和流程图插入 Tiptap 文档。数据保存在文档中，并由您选择的图表库绘制。'
+headerDemo:
+  path: '/Extensions/DiagramsOverview'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '图表 | Tiptap 图表文档'
+  description: '将图表和 Mermaid、draw.io 和 BPMN 图表添加到 Tiptap，并将其数据存储在文档中。'
+  category: 图表
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+<Callout title="Alpha" variant="info">
+  Diagrams 目前处于 Alpha 阶段，可通过试点计划申请使用。API 可能会在后续版本中变化。
+</Callout>
+
+Diagrams 扩展会向 Tiptap 编辑器添加图表和流程图。您只需安装 `@tiptap-pro/extension-diagrams` 软件包并添加 `Diagrams` 扩展。要完成安装并插入第一个图表，请参阅[入门](/diagrams/getting-started/install)。
+
+## 添加的内容
+
+该扩展添加了两个节点：
+
+| 节点 | 您看到的内容 | 文档存储的内容 |
+| ------------- | ------------------------------------------------------- | ------------------------------------- |
+| `chart` | 条形图、折线图、饼图或其他图表 | 其数据及其设置 |
+| `flowDiagram` | 流程图、序列图或 BPMN 流程模型 | 其源文本，例如 Mermaid 代码 |
+
+文档存储的是数据，而不是图像。您选择的图表库会在浏览器中绘制图表和流程图。切换到其他库后，图表的外观可能不同，但文档内容保持不变。
+
+## 您可以用它做什么
+
+- **根据输入的行制作图表。** 在空段落中键入 `:::`，然后每行输入一条记录，例如 `Jan | 2`。您也可以将表格转换为图表。[数据](/diagrams/data/overview)
+- **更改图表。** 随时更改其类型、标题、颜色和轴。 [图表](/diagrams/charts/overview)
+- **插入流程图。** 以文本形式编写流程图、序列图或 BPMN 流程模型。您可以直接编辑 Mermaid 流程图中的文本。[流程图](/diagrams/flow-diagrams/overview)
+- **导出。** 将图表和流程图另存为图像，或将图表放入 Word 文档。[导出](/diagrams/export)
+- **让 AI 模型与它们一起工作。** 为模型提供插入、读取和更改图表和流程图的工具。 [模型工具](/diagrams/guides/ai)
+
+## 术语
+
+| 字 | 含义 |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 图表数据 | 图表以列和行形式存储的值。 [数据](/diagrams/data/overview) |
+| 图表规格 | 图表的设置，例如其类型、标题、颜色和轴。 [图表](/diagrams/charts/overview) |
+| 图表语法 | 以简短文本输入图表数据：每行输入一条记录，单元格用 `\|` 分隔，例如 `Jan \| 2`。[图表语法](/diagrams/data/chart-syntax) |
+| 快速输入 | 在空段落开头键入 `:::` 时打开的文本框。输入内容会转换为图表或流程图。[快速输入](/diagrams/data/quick-input) |
+| 渲染器 | 扩展与绘图库（例如 ECharts 或 Mermaid）之间的适配器。每个使用的库都需要注册对应的渲染器。[渲染器](/diagrams/renderers/overview) |
+| 数据源 | 图表从中读取数据的文档外部的位置，例如 URL 处的 CSV 文件。 [数据源](/diagrams/data/sources) |
+
+## 文档中的代码
+
+存储在文档中的代码（例如 Mermaid 源）永远不会在应用程序的网页中运行：
+
+- [Mermaid](https://mermaid.js.org)、[draw.io](https://www.drawio.com) 和 [BPMN](https://bpmn.io) 流程图会在沙盒 iframe 中绘制。
+- [Pele](/diagrams/renderers/pele) 在 Web Worker 中绘制 Mermaid 流程图。
+- 自定义 D3 代码是您在应用中注册的函数；图表仅存储其名称。

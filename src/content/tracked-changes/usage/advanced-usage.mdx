@@ -197,7 +197,35 @@ TrackedChanges.configure({
 
 使用 `[data-suggestion-type="attributeChange"]` 为受影响的节点设置样式。有关 DOM 和 API 详情，请参阅[样式](/tracked-changes/api-reference/styling)和 [SuggestionAttributeChange](/tracked-changes/api-reference/types#suggestionattributechange)。
 
-## 表格支持
+## 节点类型更改
+
+选择加入 [`nodeTypeChangeTypes: ['paragraph', 'heading']`](/tracked-changes/getting-started/install#nodetypechangetypes)，以提出段落到标题的转换作为一项 `attributeChange` 建议。源和目标都必须配置。支持的转换将一个文本块更改为另一个文本块，而不更改其内容或节点标记；列表、原子、包装和展开被排除在外。
+
+该文档在其建议的类型中保留一个可见块。通过现有的建议 API 进行查询：
+
+```ts
+import { findSuggestions } from '@tiptap-pro/extension-tracked-changes'
+
+const typeChanges = findSuggestions(editor).filter((suggestion) => suggestion.nodeTypeChange)
+// A paragraph converted to a heading exposes:
+// type: 'attributeChange'
+// nodeType: 'heading'
+// nodeTypeChange: { oldValue: 'paragraph', newValue: 'heading' }
+```
+
+接受会保留建议的类型和属性。拒绝会恢复原始类型和属性，同时保留当前内容以及可独立审阅的文本和标记建议。使用现有的接受、拒绝、范围、用户和批量审核命令。通过建议事件或文档更改编辑器事务刷新查询。
+
+作者可以修改同一 ID 下的待处理提案。返回完整的原始类型和属性可以取消它。另一位作者必须在更改块的类型或属性之前查看提案，但仍然可以编辑其文本和内联标记。
+
+与内容编辑分开提交类型转换：将两者结合在一起的事务作为一个整体被阻止。 Markdown 输入规则保留替换行为，因为它们还会删除触发文本。导致原始类型无法恢复的编辑（包括不明确的连接）将被阻止。如果导入的内容阻止恢复，则拒绝返回 `false`，而不更改文档；解决冲突的内容或接受建议的类型。被阻止的批量拒绝也会使文档保持不变。即使事务被阻止，普通编辑器命令也可以报告成功，因此在显示成功之前检查结果文档。
+
+拆分建议块会保留两个片段上的类型建议，并创建独立的拆分建议。稍后使一个片段不同的类型或属性编辑会创建单独的格式建议。在拒绝拆分之前检查不同的格式。
+
+JSON 保留 `attrs.suggestionNodeTypeChange` 中的原始类型和属性。 HTML 将它们保存在 `data-suggestion-node-type-change` 中；在自定义渲染器中保留此属性并在节点视图中使用 [`getSuggestionHTMLAttributes(node)`](/tracked-changes/api-reference/utilities#getsuggestionhtmlattributes)。撤消、重做和重新加载保留提案。粘贴副本会保留可见类型，而不复制提案标识。打开已保存提案的客户端必须支持节点类型更改。
+
+[分割视图](/compare/guides/split-view) 在其之前的窗格中显示原始类型，并在其之后的窗格中显示建议的类型。 [DOCX 跟踪的导出](/conversion/export/docx/tracked-changes) 要求首先接受或拒绝挂起的节点类型提案。
+
+## Table support
 
 该扩展会追踪表格内的结构性变更，包括行、单元格和列操作。
 
@@ -243,7 +271,9 @@ const editor = new Editor({
 
 意味着仅跟踪本地用户的编辑作为建议。
 
-## 评论集成
+使用 Tiptap Collaboration（Y.js 文档）时，将 `nodeTypeChangeTypes` 保留为其默认值 `[]`：类型转换继续使用替换建议。将这些转化记录为单个 `attributeChange` 建议的选择加入行为可供本地编辑使用；使用 Tiptap Collaboration（Y.js 文档）配置非空列表会在初始化期间抛出异常。如果协作文档已包含使用此设置创建的提案，则本地文档编辑和审阅将被阻止，直到兼容的客户端将其删除。远程同步继续。
+
+## Comments integration
 
 跟踪更改扩展与 [评论](/editor/extensions/functionality/comments) 扩展集成，支持将建议和评论线程一起处理的复审流程。该集成基于两个扩展提供的事件系统构建。
 

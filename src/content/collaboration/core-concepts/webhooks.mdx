@@ -33,16 +33,17 @@ import { Callout } from '@/components/ui/Callout'
 
 ```json
 {
-  "appName": "", // 您的文档服务器名称
-  "name": "", // 文档名称（如果需要，经过 URI 编码）
-  "time": 0, // 当前时间的 ISO 字符串（Date.getTime()）
-  "tiptapJson": {}, // 来自 Tiptap 的 JSON 输出（见 https://tiptap.dev/guide/output#option-1-json）：TiptapTransformer.fromYdoc()
-  "ydocState"?: {}, // 可选，包含整个 yDoc 的 base64 编码。此项可在运行时配置中启用（见 https://tiptap.dev/docs/collaboration/operations/configure 中的 `webhook_include_ydoc_state`）
-  "clientsCount": 100, // 当前连接客户端数量
-  "type": "", // 有效载荷类型（如果文档已更改，则为 DOCUMENT）；仅在您使用 webhooks v2 时可用
-  "trigger": "", // 触发事件的原因（通常是 "document.saved"）；仅在您使用 webhooks v2 时可用
-  "changedFields": [], // 内容发生变化的文档字段名称（见下文）
-  "users": [] // 自上一个 webhook 以来更改内容的用户列表（JWT 的 "sub" 字段）
+  "appName": "", // name of your document server
+  "name": "", // name of the document (URI encoded if necessary)
+  "time": 0, // current time as ISOString (Date.getTime())
+  "tiptapJson": {}, // JSON output from Tiptap (see https://tiptap.dev/guide/output#option-1-json): TiptapTransformer.fromYdoc()
+  "ydocState"?: {}, // optionally contains the entire yDoc as base64. This can be enabled in the runtime configuration (see https://tiptap.dev/docs/collaboration/operations/configure `webhook_include_ydoc_state`)
+  "clientsCount": 100,// number of currently connected clients
+  "type": "", // the payload type (if the document was changed, this is DOCUMENT) ; only available if you are on webhooks v2
+  "trigger": "", // what triggered the event (usually "document.saved") ; only available if you are on webhooks v2
+  "changedFields": [], // names of the document fields whose content changed (see below)
+  "checksums": {}, // checksum of every field in tiptapJson, for conflict-safe updates (see below)
+  "users": [] // list of users who changed the content since the last webhook ("sub" field from the JWT)
 }
 ```
 
@@ -126,7 +127,22 @@ import { Callout } from '@/components/ui/Callout'
 修改此设置会在下一次保存时生效。刚添加到集合中的字段尚无记录状态，因此会报告一次变化，之后恢复稳定。移除字段本身不算变化，
 它表示“停止监视此字段”。
 
-## 重试
+## 来自 Webhook 的冲突安全更新
+
+`document.saved` 和 `content.changed` 有效负载包括一个 `checksums` 对象，`tiptapJson` 中的每个字段都有一个条目：
+
+```json
+{
+  "tiptapJson": { "default": { "type": "doc", "content": [] } },
+  "checksums": { "default": "<sha256 hex string>" }
+}
+```
+
+每个值都是 [get document](/collaboration/documents/rest-api#get-a-document) 调用在其 `x-<field>-checksum` 中返回的校验和相同文档状态的标头。要仅在发送 Webhook 后无人编辑文档的情况下更新文档，请将校验和传递给 [update call](/collaboration/documents/content-injection#conflict-safe-update-with-checksum) as `?checksum=`.如果文档在此期间发生更改，则更新会失败并显示 `409 Checksum mismatch`，并且不会写入任何内容。您不需要先获取文档。
+
+使用有效负载中的值，而不是自己对 `tiptapJson` 进行哈希处理。不同的 JSON 库以不同的方式序列化相同的内容，因此您的哈希值与我们的不匹配。
+
+## Retries
 
 默认情况下，webhooks 不会重试，但您可以通过将 `webhook_retries` 设置为 `1` 来启用重试（见 [配置运行时](/collaboration/operations/configure)）。
 重试计划如下：

@@ -89,14 +89,45 @@ unsubscribe()
 
 ## HTML 序列化
 
-- `addNodeView` 控制编辑器 UI；`renderHTML` 控制导出的 HTML。
-- 自定义 `renderHTML` 必须保留三个序列化属性和一个内容插槽。
-- 根据当前节点生成属性，并正确进行转义。
-- 自定义 `parseHTML` 必须保留 ID 和完整配置。保留默认解析器作为回退。
-- HTML 中格式错误的配置 JSON 会变成 `config: null`，并产生验证问题。
-- UI 控件、占位符和验证消息属于 NodeView，不属于导出内容。
+- `addNodeView` controls the editor UI; `renderHTML` controls exported HTML.
+- 对于内容槽节点（`BlockSlot` 和 `InlineSlot`），自定义 `renderHTML` 必须保留 3 个序列化属性和 1 个内容槽。
+- Generate attributes from the current Node with proper escaping.
+- Custom `parseHTML` must preserve IDs and complete configuration. Keep the default parser as a fallback.
+- Malformed configuration JSON in HTML becomes `config: null` and produces a validation issue.
+- UI controls, placeholders and validation messages belong to the NodeView, not exported content.
 
-## 已隐藏内容
+## 值槽 NodeViews
+
+通过 `addNodeView` 自定义 `BlockValueSlot` 或 `InlineValueSlot`。这些叶节点没有 `contentDOM` 或 `NodeViewContent`。保持其包装不可编辑，并在其中使用原生控件或框架组件。请参阅[价值槽指南](/composable-docs/slots/guides/value-slots#mix-custom-and-default-nodeviews) 以获得完整的演示。
+
+### `createSlotValueController`
+
+```ts
+const slot = createSlotValueController({ editor, getPos })
+```
+
+接受 `Editor` 和 NodeView 的实时 `getPos: () => number | undefined` 回调。不需要框架依赖。
+
+- `getState(): SlotValueState`：具有 `value: JsonValue`、`config: SlotConfig | null`、`editable: boolean` 和 `available: boolean` 的稳定不可变快照。
+- `getValue(): JsonValue`：最新可读值；不可用时 `null`。
+- `setValue(value: JsonValue): boolean`：受保护的命令；当不可用、受保护、不明确或受变量控制时为 false。
+- `subscribe(listener: () => void): () => void`：状态变化时通知；返回取消订阅函数。显式读取初始状态。最后一个订阅者取消订阅后，编辑器侦听器将被删除。
+- `focus(): void`：当控件获得焦点时选择可读值节点。它不会移动 DOM 焦点。
+- `destroy(): void`：释放订阅并阻止进一步写入。
+
+快照引用仅在其属性发生变化时才会发生变化，因此适合 React 的 `useSyncExternalStore`。当其他使用者仍在使用控制器时，请勿销毁该控制器。丢失或不可读的字段具有 `available: false`，并且不会公开其值或配置。
+
+### `createDefaultSlotValueView`
+
+接受标准 `NodeViewRendererProps` 并返回完整的 ProseMirror `NodeView`。对于应保留内置控件的字段，在 `addNodeView` 内调用它。它永远不会再调用您的渲染器。
+
+默认视图管理事件、组合、值更新、权限更改和处置。当输入类型更改时它会重新创建。当配置更改需要不同的渲染器时，自定义视图还必须从 `update` 返回 false。
+
+### 值 HTML
+
+值节点序列化 `data-slot-kind`、`data-slot-mode="value"`、`data-slot-id`、`data-slot-config` 和 `data-slot-value`。配置和值使用转义 JSON。导出的 HTML 包含静态值表示，没有内容漏洞或交互式控件。自定义值槽序列化必须保留这些属性而不添加内容漏洞。
+
+## Redacted content
 
 内容保护会使用自己的[隐藏内容渲染器](/composable-docs/content-protection/api-reference/rendering)替换被隐藏的节点。原始 Slot NodeView 不会继续挂载。
 

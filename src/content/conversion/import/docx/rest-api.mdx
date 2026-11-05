@@ -195,6 +195,14 @@ curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
 
 默认情况下，页眉和页脚中的 Word `PAGE` 和 `NUMPAGES` 字段代码会作为 Word 在文档上次打开时保存的缓存显示值导入（例如字面文本 `1`）。在请求中传入 `placeholders={}`，即可改为将这些字段转换为规范文本标记：`PAGE` 对应 `{page}`，`NUMPAGES` 对应 `{numpages}`。当识别到字段指令时，缓存的数值会被丢弃。
 
+该服务以三种布局识别这些字段：
+
+- Word 的常用布局，字段的每个部分都有自己的运行方式。
+- 将整个字段打包到一次运行中。 Tiptap 自己的 DOCX 导出会写入此布局，因此从 Tiptap 导出并再次导入的文件将其页码作为标记取回。
+- 包含在块级内容控件中的页码，这就是 Word 的插入→页码库添加它的方式。
+
+该服务不会将 `PAGE` 或 `NUMPAGES` 字段转换为简单的 `w:fldSimple` 字段，并删除其缓存值。这适用于每个 `placeholders` 值，包括 `false`，它将其他布局的缓存数字保留为纯文本。
+
 ```bash
 curl -X POST "https://api.tiptap.dev/v2/convert/import/docx" \
     -H "Authorization: Bearer YOUR_TOKEN" \

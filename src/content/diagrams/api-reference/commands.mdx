@@ -1,0 +1,91 @@
+---
+title: '命令'
+intro: '对图表或流程图的每次更改都是一个命令。每个主题都在其主题页面上进行了完整描述。'
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '命令 | Tiptap 图表文档'
+  description: '对图表或流程图的每次更改都是一个命令。'
+  category: 图表
+---
+
+```ts
+editor.commands.updateChartSpec({ spec: { type: 'area', stacked: true } })
+editor.chain().focus().insertDiagramInput({ type: 'pie' }).run()
+```
+
+## 每个命令的行为方式
+
+采用 `pos` 的命令作用于图表或流程图的该位置。如果没有 `pos`，则作用于所选的一个。当没有任何操作时，它返回 `false` 并且不进行任何更改。
+
+您永远不需要命令来读取图表或流程图。读取它们的函数位于 [`editor.storage.diagrams`](/diagrams/api-reference/storage).
+
+## 图表
+
+| 命令 | 作用 | 页面 |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------ | ----------------------------------------- |
+| [`insertChart`](/diagrams/charts/overview#insertchart) | 从图表数据和图表规格插入图表| [图表](/diagrams/charts/overview) |
+| [`insertChartFrom`](/diagrams/charts/overview#insertchartfrom) | 插入以注册格式编写的图表 | [图表](/diagrams/charts/overview) |
+| [`importMermaidChart`](/diagrams/charts/overview#importmermaidchart) | 插入来自 Mermaid 海图源的图表，例如 `pie` | [图表](/diagrams/charts/overview) |
+| [`insertFromText`](/diagrams/data/pasting#insertfromtext) | 插入无论文本是什么，粘贴都会 | [粘贴](/diagrams/data/pasting) |
+| [`convertCodeBlockToChart`](/diagrams/charts/overview#convertcodeblocktochart) | 用图表 | 替换 Mermaid 图表源的代码块 [图表](/diagrams/charts/overview) |
+| [`insertDiagramInput`](/diagrams/charts/overview#insertdiagraminput) | 打开空的快速输入 | [图表](/diagrams/charts/overview) |
+| [`updateChartSpec`](/diagrams/charts/appearance#updatechartspec) | 更改图表规格的字段| [外观](/diagrams/charts/appearance) |
+| [`setChartRenderer`](/diagrams/charts/appearance#setchartrenderer) | 选择一张图表的渲染器 | [外观](/diagrams/charts/appearance) |
+| [`updateChartAxis`](/diagrams/charts/axes#updatechartaxis) | 更改一个轴：标题、范围、线条、步骤、标签 | [Axes](/diagrams/charts/axes) |
+| [`applyChartLook`](/diagrams/charts/looks#applychartlook) | 使图表具有另一个图表的外观| [Looks](/diagrams/charts/looks) |
+| [`convertChartToImage`](/diagrams/export#convertcharttoimage) | 用图表的图像替换图表 | [导出](/diagrams/export) |
+| [`convertImageToChart`](/diagrams/export#convertimagetochart) | 将此类图像转回图表 | [导出](/diagrams/export) |
+| [`redrawChartImage`](/diagrams/export#redrawchartimage) | 从保留的图表中再次绘制此类图像 | [导出](/diagrams/export) |
+
+## 数据
+
+| 命令 | 作用 | 页面 |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------- |
+| [`updateChartData`](/diagrams/data/overview#updatechartdata) |替换图表数据 | [数据](/diagrams/data/overview) |
+| [`setChartLabelColumn`](/diagrams/data/overview#setchartlabelcolumn) | 选择命名行的列 | [数据](/diagrams/data/overview) |
+| [`setChartSeriesIn`](/diagrams/data/overview#setchartseriesin) | 交换所绘制内容的行和列 | [数据](/diagrams/data/overview) |
+| [`updateChartFrom`](/diagrams/data/overview#updatechartfrom) | 以某种格式替换文本中的数据和规格| [数据](/diagrams/data/overview) |
+| [`updateChartFromGrid`](/diagrams/data/overview#updatechartfromgrid) | 替换字符串网格中的数据 | [数据](/diagrams/data/overview) |
+| [`updateChartFromTable`](/diagrams/data/overview#updatechartfromtable) | 替换表 JSON 中的数据 | [数据](/diagrams/data/overview) |
+| [`confirmDiagramInput`](/diagrams/data/quick-input#confirmdiagraminput) | 将打开的快速输入转换为图表 | [快速输入](/diagrams/data/quick-input) |
+| [`setDiagramInputType`](/diagrams/data/quick-input#setdiagraminputtype) | 设置打开快速输入的类型为| [快速输入](/diagrams/data/quick-input) |
+| [`setDiagramInputView`](/diagrams/data/quick-input#setdiagraminputview) | 在文本和表格之间切换打开输入 | [快速输入](/diagrams/data/quick-input) |
+| [`setDiagramInputDelimiter`](/diagrams/data/quick-input#setdiagraminputdelimiter) | 修复打开快速输入的分隔符 | [快速输入]输入](/diagrams/data/quick-input) |
+| [`editChartAsText`](/diagrams/data/quick-input#editchartastext) | 将图表变成其数据的快速输入 | [快速输入](/diagrams/data/quick-input) |
+| [`editChartAsTable`](/diagrams/data/quick-input#editchartastable) | 在编辑时将图表转换为数据表 | [快速输入](/diagrams/data/quick-input) |
+| [`editDiagramAsText`](/diagrams/data/quick-input#editdiagramastext) | 将Mermaid 流程图转换为其源的快速输入| [快速输入](/diagrams/data/quick-input) |
+| [`convertTableToChart`](/diagrams/data/tables#converttabletochart) | 用数据图表替换表格 | [表格](/diagrams/data/tables) |
+| [`convertChartToTable`](/diagrams/data/tables#convertcharttotable) | 将图表替换为其数据表格 | [表格](/diagrams/data/tables) |
+| [`insertLinkedChart`](/diagrams/data/tables#insertlinkedchart) | 在表格后面插入图表| [表格](/diagrams/data/tables) |
+| [`updateLinkedTable`](/diagrams/data/tables#updatelinkedtable) | 更改图表或流程图读取其表格的方式 | [表格](/diagrams/data/tables) |
+| [`setChartLayout`](/diagrams/data/tables#setchartlayout) | 在文档中显示图表、其表格或两者 | [表格](/diagrams/data/tables) |
+| [`linkChartToTable`](/diagrams/data/tables#linkcharttotable) | 使图表跟随表格中的任意位置文档 | [表格](/diagrams/data/tables) |
+| [`linkChartSource`](/diagrams/data/sources#linkchartsource) | 将图表链接到数据源 | [数据源](/diagrams/data/sources) |
+| [`syncChartData`](/diagrams/data/sources#syncchartdata) | 将数据源中的新数据写入图表中 | [数据源](/diagrams/data/sources) |
+| [`detachChartSource`](/diagrams/data/sources#detachchartsource) | 停止以下操作源，保留快照 | [数据源](/diagrams/data/sources) |
+| [`relinkChartSource`](/diagrams/data/sources#relinkchartsource) | 再次遵循源 | [数据源](/diagrams/data/sources) |
+
+## 流程图命令
+
+| 命令 | 作用 | 页面 |
+| ----------------------------------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------- |
+| [`insertFlowDiagram`](/diagrams/flow-diagrams/overview#insertflowdiagram) | 插入来自 Mermaid、draw.io 或 BPMN 源的图表 | [图表](/diagrams/flow-diagrams/overview) |
+| [`updateFlowDiagram`](/diagrams/flow-diagrams/overview#updateflowdiagram) | 更改源、格式、标题或描述 | [图表](/diagrams/flow-diagrams/overview) |
+| [`setFlowDiagramView`](/diagrams/flow-diagrams/overview#setflowdiagramview) | 显示绘制的图表或其源文本 | [图表](/diagrams/flow-diagrams/overview) |
+| [`convertCodeBlockToDiagram`](/diagrams/flow-diagrams/overview#convertcodeblocktodiagram) | 用图表 | 替换 Mermaid 源代码的代码块[图](/diagrams/flow-diagrams/overview) |
+| [`insertDiagramFromTable`](/diagrams/flow-diagrams/from-table#insertdiagramfromtable) | 插入从表中绘制的流程图 | [从表中](/diagrams/flow-diagrams/from-table) |
+| [`linkDiagramToTable`](/diagrams/flow-diagrams/from-table#linkdiagramtotable) | 从表格绘制图表并遵循它 | [从表格](/diagrams/flow-diagrams/from-table) |
+| [`detachDiagramFromTable`](/diagrams/flow-diagrams/from-table#detachdiagramfromtable) | 停止遵循表格 | [从表格table](/diagrams/flow-diagrams/from-table) |
+| [`renameDiagramLane`](/diagrams/flow-diagrams/from-table#renamediagramlane) | 重命名表中每一行中的泳道 | [来自表](/diagrams/flow-diagrams/from-table) |
+| [`setDiagramNodePosition`](/diagrams/flow-diagrams/editing#setdiagramnodeposition) | 移动流程图的形状 | [编辑](/diagrams/flow-diagrams/editing) |
+| [`resetDiagramPositions`](/diagrams/flow-diagrams/editing#resetdiagrampositions) | 将每个移动的形状放回去 | [编辑](/diagrams/flow-diagrams/editing) |
+
+## 图表和流程图
+
+| 命令 | 作用 | 页面 |
+| ------------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------ |
+| [`setDiagramSize`](/diagrams/guides/size-and-view#setdiagramsize) | 为图表或流程图指定尺寸 | [尺寸和视图](/diagrams/guides/size-and-view) |
+| [`setDiagramAlign`](/diagrams/guides/size-and-view#setdiagramalign) | 将其放置在左侧、居中或右侧 | [尺寸和视图](/diagrams/guides/size-and-view) |
+| [`updateFromText`](/diagrams/guides/split-view#updatefromtext) | 更改图表或流程图的文本 | [图片旁边的文本](/diagrams/guides/split-view) |

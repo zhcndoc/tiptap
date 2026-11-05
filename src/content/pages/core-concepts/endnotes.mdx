@@ -192,7 +192,23 @@ editor.commands.cleanupOrphanEndnotes()
 
 点击正文中的尾注标记会使文档滚动到该尾注可见的位置，这在长文档中非常方便。
 
-## 配置
+## 屏幕阅读器名称
+
+Pages 为正文中的每个尾注标记提供屏幕阅读器的名称，例如“Endnote 3”。该名称使用页面上的数字而不是罗马数字，因为屏幕阅读器不会将每个罗马数字都读取为数字。设置 `noteReferenceLabel` 更改名称，例如翻译：
+
+```ts
+Pages.configure({
+  endnotes: { enabled: true },
+  noteReferenceLabel: ({ type, number }) =>
+    type === 'footnote' ? `Fußnote ${number}` : `Endnote ${number}`,
+})
+```
+
+相同的选项命名脚注标记。有关函数接收的值，请参阅脚注页面上的 [屏幕阅读器名称](/pages/core-concepts/footnotes#screen-reader-names)。当您希望名称中包含罗马数字时，请使用 `marker`。
+
+如果您自己的 CSS 替换了 `.tiptap-endnote-ref::after` 中的 `content`，请保留 `content: attr(data-endnote-number) / attr(data-endnote-label)` 的名称。
+
+## Configuration
 
 所有脚注设置都位于 `endnotes` 选项组中：
 
@@ -344,15 +360,16 @@ Pages.configure({
 
 除非另有说明，所有脚注设置都位于 `Pages.configure()` 的 `endnotes` 键下。
 
-| 选项                           | 类型                                                | 默认值               | 描述                                                                  |
-| -------------------------------- | --------------------------------------------------- | -------------------- | ---------------------------------------------------------------------------- |
-| `enabled`                        | `boolean`                                           | `false`              | 脚注功能的总开关                                       |
-| `extensions`                     | `Extensions \| (ctx) => Extensions`                 | `ConvertKit`         | 脚注编辑器的扩展。协作场景请使用回调形式。 |
-| `initialContent`                 | `Record<string, JSONContent>`                       | `undefined`          | 以注释 id 为键的初始脚注内容种子（仅适用于非协作文档）     |
-| `separator`                      | `boolean`                                           | `true`               | 是否渲染列表上方的 Word 风格分隔线                          |
-| `editable`                       | `boolean`                                           | `true`               | 双击列表时是否打开脚注编辑器                   |
-| `accentColor`                    | `string`                                            | `accentColor` 值     | 标记和脚注编辑器的强调色                             |
-| `onDblClickEndnotesPreventClose` | `(event: MouseEvent) => boolean` (top-level option) | `undefined`          | 防止在外部双击时关闭脚注编辑器                  |
+| Option                           | Type                                                | Default             | Description                                                                  |
+| -------------------------------- | --------------------------------------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| `enabled`                        | `boolean`                                           | `false`             | Master switch for the endnotes feature                                       |
+| `extensions`                     | `Extensions \| (ctx) => Extensions`                 | `ConvertKit`        | Extensions for the endnotes editor. Use the callback form for collaboration. |
+| `initialContent`                 | `Record<string, JSONContent>`                       | `undefined`         | Seed endnote content keyed by note id (non-collaborative documents only)     |
+| `separator`                      | `boolean`                                           | `true`              | Render the Word-style separator rule above the list                          |
+| `editable`                       | `boolean`                                           | `true`              | Whether double-clicking the list opens the endnotes editor                   |
+| `accentColor`                    | `string`                                            | `accentColor` value | Accent color for markers and the endnotes editor                             |
+| `onDblClickEndnotesPreventClose` | `(event: MouseEvent) => boolean` (top-level option) | `undefined`         | Prevent closing the endnotes editor on double-click outside                  |
+| `noteReferenceLabel` | `NoteReferenceLabel`（顶级选项） | `undefined` | 每个脚注和尾注标记的屏幕阅读器名称 |
 
 ## 命令参考
 

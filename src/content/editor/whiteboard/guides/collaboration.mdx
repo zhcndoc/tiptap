@@ -1,0 +1,218 @@
+---
+title: 白板协作
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板协作 | Tiptap 编辑器文档
+  description: 通过 Yjs 一起实时编辑白板，并显示其他用户选择、拖动和指向的内容。
+  category: 编辑器
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+白板本身就是一个 Tiptap 文档，因此用户可以像协作编辑其他文档一样，通过 Yjs 实时共同编辑白板。白板扩展还提供 `BoardCollaboration`，以及用于显示其他用户选区、拖动和光标位置的辅助函数。
+
+## 安装
+
+协作功能位于独立入口 `@tiptap-pro/extension-whiteboard/collaboration` 中。只有该入口需要 Yjs，因此不启用协作的白板不会加载相关依赖。请安装其 peer dependencies，以及 `@tiptap/y-tiptap` 所需的 `y-protocols`：
+
+```bash
+npm install @tiptap/extension-collaboration @tiptap/y-tiptap yjs y-protocols
+```
+
+要通过 Tiptap Collaboration 进行同步，还需从专用注册表安装 `@tiptap-pro/provider`。请参阅[安装 Collaboration](/collaboration/getting-started/install)。
+
+## 设置编辑器
+
+<Callout title="使用 BoardCollaboration，并关闭工具包自带的撤销" variant="warning">
+  如果编辑器载入了 Yjs 中的内容，普通的 `Collaboration` 会丢弃使文档变为空的首个更改，例如删除最后一个形状。`BoardCollaboration` 也会同步这类更改。请在工具包中设置 `undoRedo: false`，让 `undoBoard` 和 `redoBoard` 使用协作扩展提供的撤销历史。
+</Callout>
+
+```js
+import { Editor } from '@tiptap/core'
+import { WhiteboardKit } from '@tiptap-pro/extension-whiteboard'
+import { BoardCollaboration } from '@tiptap-pro/extension-whiteboard/collaboration'
+import { TiptapCollabProvider } from '@tiptap-pro/provider'
+import * as Y from 'yjs'
+
+const ydoc = new Y.Doc()
+
+const provider = new TiptapCollabProvider({
+  name: 'board-1', // The name of the board's document
+  appId: 'your-app-id', // Your document server ID from the Cloud dashboard
+  token: 'your-jwt',
+  document: ydoc,
+})
+
+const editor = new Editor({
+  element: viewport,
+  extensions: [
+    // Collaboration handles undo, so the kit leaves its own out
+    WhiteboardKit.configure({ undoRedo: false }),
+    BoardCollaboration.configure({ document: ydoc }),
+  ],
+})
+```
+
+在 React 中，请在组件外部创建配置好的扩展，或使用 `useMemo` 保证只创建一次。参见 [React 白板设置指南](/editor/whiteboard/guides/react)。
+
+`BoardCollaboration` 接受与 [Collaboration](/editor/extensions/functionality/collaboration) 相同的选项。协作白板的内容来自 Yjs。要为新白板添加初始形状，请参阅[正确初始化内容](/collaboration/getting-started/install#initialize-content-properly)。
+
+## 显示其他用户的选区和拖动
+
+Yjs 同步文档，但不同步用户选择的内容或用户拖动时的形状。通过 [awareness](/collaboration/core-concepts/awareness) 共享这些：
+
+- `getSelectedShapeIds` 返回当前用户选中的形状 ID。`setRemoteSelections` 用于显示其他用户的选区。
+- 拖动形状时，白板编辑器会发出 `shapesMove` 事件；拖动结束时，`delta` 为 `null`。`createRemoteMoves` 会显示其他用户正在进行的拖动，但不修改文档。对方放下形状时，文档才会更新。
+
+```js
+import { createRemoteMoves, getSelectedShapeIds } from '@tiptap-pro/extension-whiteboard'
+
+provider.setAwarenessField('user', { name: 'Ada', color: '#be185d' })
+
+// Shares what this user selects, when it changes
+let sharedIds = []
+
+editor.on('transaction', () => {
+  const ids = getSelectedShapeIds(editor.state)
+
+  if (ids.length !== sharedIds.length || ids.some((id, index) => id !== sharedIds[index])) {
+    sharedIds = ids
+    provider.setAwarenessField('selection', ids)
+  }
+})
+
+// Shares the drags of this user, and `null` once a drag ends
+editor.on('shapesMove', ({ ids, delta }) => {
+  provider.setAwarenessField('drag', delta ? { ids, delta } : null)
+})
+
+// Shows what the other users select and drag
+const moves = createRemoteMoves(editor)
+let dragging = new Set()
+
+provider.on('awarenessChange', ({ states }) => {
+  const others = states.filter((state) => state.clientId !== ydoc.clientID)
+  const stillDragging = new Set()
+
+  editor.commands.setRemoteSelections(
+    others.map((state) => ({ color: state.user?.color ?? '#6a00f5', ids: state.selection ?? [] })),
+  )
+
+  for (const { clientId, drag } of others) {
+    if (drag) {
+      moves.show({ owner: clientId, ids: drag.ids, delta: drag.delta })
+      stillDragging.add(clientId)
+    }
+  }
+
+  // Ends the drags that stopped, also of users who left
+  for (const owner of dragging) {
+    if (!stillDragging.has(owner)) {
+      moves.end(owner)
+    }
+  }
+
+  dragging = stillDragging
+})
+```
+
+另一个用户选择的形状获取 `data-remote-selected`，该用户的颜色获取 `--remote-selection`。当多个用户选择一个形状时，将显示第一个具有有效颜色的形状。只有 `#RRGGBB` 形式的颜色（例如 `#be185d`）会通过，因为颜色会进入元素的样式。使用另一种颜色的选择（例如 `red` 或 `#abc`）不会显示：
+
+```css
+[data-shape][data-remote-selected] {
+  outline: calc(2px / var(--zoom, 1)) solid var(--remote-selection);
+}
+```
+
+## 显示其他用户的光标
+
+`createRemoteCursors` 会显示其他用户的光标和姓名。它还可以让被拖动的形状跟随光标移动，作为 `createRemoteMoves` 的替代方案。请共享指针下方的白板坐标、时间和拖动信息，每秒最多十次。指针事件来自白板外围的 `stage` 元素，参见[舞台和相机](/editor/whiteboard/guides/stage-and-camera)：
+
+```js
+import { clientToBoard, createRemoteCursors } from '@tiptap-pro/extension-whiteboard'
+
+const stage = document.querySelector('.stage')
+let point = null
+let drag = null
+let timer = null
+
+// Shares where this user points, and what they drag, ten times a second at most
+const share = () => {
+  timer ??= setTimeout(() => {
+    timer = null
+    provider.setAwarenessField('cursor', point && { point, time: Date.now(), drag })
+  }, 100)
+}
+
+stage.addEventListener('pointermove', (event) => {
+  point = clientToBoard({ editor, point: { x: event.clientX, y: event.clientY } })
+  share()
+})
+
+stage.addEventListener('pointerleave', () => {
+  point = null
+  share()
+})
+
+editor.on('shapesMove', ({ ids, delta }) => {
+  drag = delta && { ids, delta }
+  share()
+})
+
+// Shows the cursors of the other users
+const cursors = createRemoteCursors(editor)
+
+provider.on('awarenessChange', ({ states }) => {
+  cursors.update(
+    states
+      .filter((state) => state.clientId !== ydoc.clientID && state.cursor)
+      .map(({ clientId, user, cursor }) => ({
+        owner: clientId,
+        ...cursor,
+        name: user?.name ?? '',
+        color: user?.color ?? '',
+      })),
+  )
+})
+```
+
+光标会稍有延迟地平滑跟随用户移动，并按照共享频率更新。用户移开指针或一分钟没有移动后，光标会淡出。
+
+光标位于形状上方，并通过 `--zoom` 在每次缩放时保持其尺寸。每个光标在 `--remote-cursor` 中都有其用户的颜色，与选择具有相同的 `#RRGGBB` 规则。设置其箭头和名称的样式：
+
+```css
+[data-remote-cursor-arrow] {
+  fill: var(--remote-cursor);
+  stroke: white;
+  stroke-width: 2;
+}
+
+[data-remote-cursor-name] {
+  padding: 2px 6px;
+  color: white;
+  font-size: 12px;
+  background: var(--remote-cursor);
+  border-radius: 4px;
+}
+```
+
+## 文档框架
+
+白板的 Y.Doc 包含框架，但不包含其文档。您的 `createEditor` 决定每个文档的存储位置及其同步方式。请参阅[文档框架](/editor/whiteboard/guides/doc-frames)。
+
+`start` 只会在将文档框架添加到白板的编辑器中运行。通过 Yjs 同步过来的框架会沿用创建它时由对应编辑器启动的文档；通过 Yjs 撤销恢复的框架也一样。
+
+## 文本高度
+
+自由文本和文档框架的高度与其内容一样高。每个编辑器都使用自己的字体来衡量其所做的更改。其他用户的更改保留其编辑测量的高度。
+
+## 一起更新所有编辑器
+
+同一块白板的所有编辑器都应使用相同版本的 Whiteboard 扩展，并同时升级。旧版编辑器无法读取新版才支持的内容，可能会将这些内容删除并同步给所有用户。例如，0.1.0 版编辑器无法读取带标签的箭头。
+
+## 后续步骤
+
+- 在白板上显示建议 [跟踪的更改](/editor/whiteboard/guides/tracked-changes)
+- 了解有关 [Tiptap Collaboration](/collaboration/getting-started/overview)

@@ -32,7 +32,34 @@ import ExportStylesGuide from '../_shared/_export-styles-guide.mdx'
 
 <ExportStylesGuide />
 
-## 使用函数按节点覆盖
+## 原生 DOCX 选项
+
+导出的 `Docx` 命名空间和原始元素覆盖使用原生 `docx` 9.12 选项。
+
+### RTL 对齐
+
+在原始段落选项中将 `bidirectional: true` 和 `alignment` 设置在一起。对物理左侧的文本使用 `LEFT`；原生 docx 处理左/右映射：
+
+```ts
+import { Docx, ExportDocx } from '@tiptap-pro/extension-export-docx'
+
+ExportDocx.configure({
+  paragraphOverrides: {
+    bidirectional: true,
+    alignment: Docx.AlignmentType.LEFT,
+  },
+})
+```
+
+这适用于静态覆盖和回调。段落节点的显式 `textAlign` 优先于覆盖。
+
+### 表格宽度和默认样式
+
+对于 `Docx.WidthType.PERCENTAGE`，数字 `size: 50` 表示 50%。使用百分比字符串（例如 `size: '33.33%'`）来保持更精细的精度；原生数字百分比四舍五入为 0.02% 的增量。
+
+原生文档包括 `Normal` 和 `TableNormal` 样式，并推断省略的网格和单元格宽度。导出器还提供其段落和列表样式，您可以通过 `styleOverrides` 进行自定义。
+
+## Per-node overrides with a function
 
 每个元素覆盖项 — `paragraphOverrides`、`textRunOverrides`、`tableOverrides`、`tableRowOverrides`、`tableCellOverrides` 和 `imageOverrides` — 除了静态对象之外，还可以接受一个函数。该函数接收当前正在转换的节点，并返回该节点的覆盖项，因此你可以基于节点的属性按节点变化覆盖内容。对象形式仍然保持不变，因此这是一个无缝添加的功能。
 

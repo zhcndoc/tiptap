@@ -1,0 +1,142 @@
+---
+title: '轴'
+intro: "<code>spec.axes</code> 保存图表的轴标题、范围、网格和轴线以及刻度，以及以什么角度书写哪些类别标签。您可以使用 <code>updateChartAxis</code> 更改它。"
+headerDemo:
+  path: '/Extensions/DiagramsAxes'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '轴 | Tiptap 图表文档'
+  description: "spec.axes 保存图表的轴标题、范围、网格和轴线以及刻度，以及以什么角度书写哪些类别标签。"
+  category: 图表
+---
+
+## 快速入门
+
+```ts
+editor.commands.updateChartAxis({ axis: 'y', changes: { step: 25 } })
+editor.commands.updateChartAxis({ axis: 'x', changes: { labels: { angle: 45 } } })
+```
+
+## 轴字段
+
+`x` 是类别轴，`y` 是值轴。当杠横放时，这种情况保持不变。
+
+| 字段 | 轴 | 类型 | 描述 |
+| ------------ | ---- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `title` | 两者 | `string` | 轴标题|
+| `min`、`max` | 两者 | `number` | 数值轴的范围以及散点图保存数字时的 x 轴的范围。如果没有它们，数据将决定 |
+| `step` | `y` | `number` | 两个刻度之间的距离，以及两个值网格线之间的距离。请参阅[勾选步骤](/diagrams/charts/axes#tick-step) |
+| `grid` | 两者 | `ChartStroke` | 跨绘图的每个类别 (`x`) 或值 (`y`) 处的网格线。请参见[网格线和轴线](/diagrams/charts/axes#grid-and-axis-lines) |
+| `line` | 两者 | `ChartStroke` | 轴线本身 |
+| `labels` | `x` | `CategoryLabels` | 写入哪些类别标签以及旋转多远。请参阅[类别标签](/diagrams/charts/axes#category-labels) |
+
+## 网格和轴线
+
+`grid` 和 `line` 各自是一个 `ChartStroke`，一个说明如何绘制一条线的对象：
+
+| 字段| 类型 | 描述 |
+| ------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `line` | `'none' \| 'solid' \| 'dashed' \| 'dotted'` | 如何绘制线条。 `'none'` 将其保留 |
+| `width` | `number` | 0.5 至 4 CSS 像素。默认 1 |
+| `color` | `string` | CSS 颜色。如果没有它，主题的网格或轴颜色 |
+| `every` | `number` | 仅类别网格，请参阅[某些类别的网格线](/diagrams/charts/axes#grid-lines-at-some-categories) |
+| `at` | `number[]` | 仅类别网格，请参阅[某些类别的网格线](/diagrams/charts/axes#grid-lines-at-some-categories) |
+
+如果没有 `grid` 和 `line`，图表将具有：
+
+- 其值处的网格线，
+- 其类别处没有网格线，除非当类别是散点图上的数字时，
+- 为类别轴线，
+- 无值轴线。
+
+### 当网格线被省略时
+
+当网格线位于轴线之上时，仅绘制轴线。因此，值网格没有类别轴延伸的线，并且类别网格没有沿着值轴的线。如果使用 `x.line: { line: 'none' }` 隐藏类别轴，则图表底部根本没有线条。
+
+当值低于 0 时，类别轴在 0 处穿过绘图。然后值网格将其线保持在最低值。
+
+### 某些类别的网格线
+
+类别网格 (`x.grid`) 也采用 `every` 和 `at`：
+
+| 字段 | 描述 |
+| ------- | --------------------------------------------------------------------------------------- |
+| `every` | `every: 3` 从第一个类别开始，每隔三个类别绘制一条线 |
+| `at` | `at: [1, 4, 5]` 仅在这些类别上绘制一条线，从 0 开始计数。 `every` |
+
+在条形图上，类别网格线沿着条形的边缘延伸，因此线条数比类别数多。对于 `every` 和 `at`，最后一个柱右边缘的线算作下一个类别。如果有 4 个条，则为数字 4。
+
+值网格不包含任何字段。 x 轴上有数字的散点图两者都不会。
+
+```ts
+editor.commands.updateChartAxis({
+  axis: 'y',
+  changes: { grid: { line: 'dotted', color: '#94a3b8' } },
+})
+editor.commands.updateChartAxis({ axis: 'x', changes: { grid: { line: 'solid', width: 0.5 } } })
+editor.commands.updateChartAxis({ axis: 'x', changes: { grid: { line: 'solid', every: 3 } } })
+```
+
+## 类别标签
+
+`x.labels` 是 `CategoryLabels` 对象。对于狭窄图表上的长标签，它会省略或翻转类别标签。 `every` 和 `at` 选择类别，就像它们对[网格线](/diagrams/charts/axes#grid-lines-at-some-categories) 所做的那样。
+
+| 字段 | 类型 | 说明 |
+| ------- | ---------- | ----------------------------------------------------------------- |
+| `every` | `number` | `{ every: 2 }` 从第一个 | 开始每隔两个标签写入一次
+| `at` | `number[]` | `{ at: [0, 5, 11] }` 只写入从 0 开始计数的 |
+| `angle` | `number` |逆时针旋转标签，从 -90 到 90 度 |
+
+- 仅保留标签。类别、栏目和分数均保留。
+- 在 `angle: 45`，标签向右上升并在其类别处结束，因此长名称可以并排放置。
+- 如果没有 `every` 或 `at`，则会忽略重叠的标签。
+
+```ts
+editor.commands.updateChartAxis({ axis: 'x', changes: { labels: { every: 3 } } })
+```
+
+## 勾选步骤
+
+`y.step: 25` 在 0、25、50 等处放置勾选、标签和值网格线。
+
+- 轴的两端均舍入为整步，除非 `min` 或 `max` 修复它们。
+- 会忽略超过 100 个刻度的步骤。
+- 在具有第二个轴的组合图表上，该步骤适用于左侧轴。
+
+## 哪些图表绘制轴
+
+折线图、条形图、面积图、散点图和组合图占据每个字段。雷达图需要两个：`y.grid` 设置环，`x.line` 设置辐条。两者都是默认绘制的。
+
+[ECharts](/diagrams/renderers/echarts#chart-types) 和 [D3](/diagrams/renderers/d3#chart-types) 渲染器绘制每个字段。Mermaid渲染器拒绝设置它们的图表，请参阅其[limits](/diagrams/renderers/mermaid#limits)。您自己的渲染器可以像内置渲染器一样绘制轴，请参阅[spec](/diagrams/renderers/custom#what-to-honor-in-the-spec) 中应遵循的内容]。
+
+### 在 Word 文档中
+
+Word 绘制规范设置的内容和 `every`，但不绘制 `at`。
+
+- 当它是 `#rrggbb` 值时使用颜色。否则，Word 将使用主题的颜色。
+- 设置为 `'none'` 的类别轴线保持网格线沿着它。
+- `step` 成为值轴的主要单位。
+- `labels.every` 成为标签跳过。
+- `labels.angle` 成为标签的旋转。
+- `labels.at` 在 Word 中没有对应项，因此 Word 会写入每个标签。
+
+## 命令
+
+### updateChartAxis
+
+更改 `spec.axes.x` 或 `spec.axes.y` 的字段并保留其余字段。设置为 `undefined` 的字段被删除。
+
+```ts
+editor.commands.updateChartAxis({ axis: 'y', changes: { title: 'EUR', min: 0 } })
+```
+
+| 选项 | 类型 | 说明 |
+| --------- | -------------------- | -------------------------------------------------------------------------- |
+| `axis` | `'x' \| 'y'` | 类别轴 (`x`) 或值轴(`y`) |
+| `changes` | `Partial<ChartAxis>` | 要更改的字段，请参见[轴字段](/diagrams/charts/axes#axis-fields) |
+| `pos` | `number` | 图表的位置。默认为所选图表 |
+
+当 `pos` 处没有图表或未选择任何图表时，返回 `false`。

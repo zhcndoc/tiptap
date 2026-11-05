@@ -1,0 +1,261 @@
+---
+title: '流程图'
+intro: '流程图用于表示步骤、状态或实体及其关系，例如业务流程、时序交互或思维导图。您以文本编写源内容，再由扩展绘制。'
+headerDemo:
+  path: '/Extensions/DiagramsMermaid'
+  isPro: true
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '流程图 | Tiptap 图表文档'
+  description: '流程图用于表示步骤、状态或实体及其关系，例如业务流程、时序交互或思维导图。'
+  category: 图表
+---
+
+`flowDiagram` 节点以以下三种格式之一存储流程图的源文本：
+
+- Mermaid 文本，用于流程图、序列图、甘特图、思维导图及[其他 Mermaid 类型](/diagrams/flow-diagrams/overview#mermaid-kinds)。
+- draw.io XML，用于在 draw.io 编辑器中绘制的流程图。
+- BPMN XML，用于 BPMN 业务流程模型。
+
+## 快速入门
+
+安装扩展包和 mermaid.js（用于绘制 Mermaid 流程图的库）。示例还使用 `@tiptap/core` 和 `@tiptap/starter-kit`；若项目尚未安装它们，也请一并安装：
+
+```bash
+npm install @tiptap-pro/extension-diagrams mermaid
+```
+
+然后注册 Mermaid 渲染器并插入第一个流程图：
+
+```ts
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { Diagrams, chartStyleRules, flowDiagramStyleRules } from '@tiptap-pro/extension-diagrams'
+import { mermaidDiagramRenderer } from '@tiptap-pro/extension-diagrams/mermaid'
+import rendererUrl from '@tiptap-pro/extension-diagrams/mermaid-renderer?url&no-inline'
+import mermaidUrl from 'mermaid/dist/mermaid.min.js?url'
+
+const style = document.createElement('style')
+style.textContent = chartStyleRules() + flowDiagramStyleRules()
+document.head.append(style)
+
+const editor = new Editor({
+  element: document.querySelector('#editor'),
+  extensions: [
+    StarterKit,
+    Diagrams.configure({
+      diagramRenderers: [mermaidDiagramRenderer({ mermaidUrl, rendererUrl })],
+    }),
+  ],
+})
+
+editor.commands.insertFlowDiagram({
+  source: 'flowchart LR\n  A[Order] --> B{Paid?}\n  B -->|yes| C[Ship]',
+  title: 'How an order moves',
+})
+```
+
+流程图渲染器使用绘图库绘制流程图。您可以通过 `diagramRenderers` 选项传入渲染器。[渲染器](/diagrams/renderers/overview)页面介绍了 Mermaid、Pele、draw.io 和 BPMN。[Mermaid](/diagrams/renderers/mermaid#quick-start)页面说明了 `mermaidUrl`、`rendererUrl` 和 `?url` 导入。
+
+## 流程图相关页面
+
+| 页面 | 涵盖 |
+| --------------------------------------------------------------- | -------------------------------------------------------------- |
+| [格式](/diagrams/flow-diagrams/formats) | Mermaid、draw.io、BPMN 和您自己的格式 |
+| [在流程图中编辑](/diagrams/flow-diagrams/editing) | 双击文本进行编辑，或移动流程图中的形状 |
+| [从表格生成流程图](/diagrams/flow-diagrams/from-table) | 每行对应一个步骤的流程图 |
+| [渲染器](/diagrams/renderers/overview#which-renderer-to-use) | Mermaid、Pele、draw.io 和 BPMN，以及各自支持绘制的内容 |
+
+## Mermaid 流程图类型
+
+Mermaid 源码的第一行指定流程图类型，例如 `flowchart` 或 `sequenceDiagram`。Mermaid 流程图支持 Mermaid 11.17 中除[图表类型](/diagrams/flow-diagrams/overview#diagram-or-chart)之外的所有类型。`MERMAID_DIAGRAM_KINDS` 列出这些类型，`mermaidDiagramKind(source)` 返回源码类型。
+
+| 种类 | 第一行 |
+| --------------- | -------------------------------------------------------------------------------- |
+| `flowchart` | `flowchart`、`graph` |
+| `sequence` | `sequenceDiagram` |
+| `state` | `stateDiagram-v2`、`stateDiagram` |
+| `class` | `classDiagram`、`classDiagram-v2` |
+| `er` | `erDiagram` |
+| `journey` | `journey` |
+| `gantt` | `gantt` |
+| `mindmap` | `mindmap` |
+| `timeline` | `timeline` |
+| `quadrant` | `quadrantChart` |
+| `git` | `gitGraph` |
+| `kanban` | `kanban` |
+| `architecture` | `architecture-beta`、`architecture` |
+| `block` | `block-beta`、`block` |
+| `c4` | `C4Context`、`C4Container`、`C4Component`、`C4Dynamic`、`C4Deployment` |
+| `requirement` | `requirementDiagram`、`requirement` |
+| `packet` | `packet-beta`、`packet` |
+| `venn` | `venn-beta` |
+| `ishikawa` | `ishikawa-beta`、`ishikawa` |
+| `treeView` | `treeView-beta` |
+| `wardley` | `wardley-beta` |
+| `cynefin` | `cynefin-beta` |
+| `swimlane` | `swimlane-beta` |
+| `railroad` | `railroad-beta`、`railroad-ebnf-beta`、`railroad-abnf-beta`、`railroad-peg-beta` |
+| `eventModeling` | `eventmodeling` |
+
+mermaid.js 和 [Pele](/diagrams/renderers/pele#next-to-mermaidjs) 两种 Mermaid 渲染器都支持此列表中的类型。对于没有已注册渲染器支持的类型，请参阅[哪个渲染器绘制流程图](/diagrams/renderers/custom-diagrams#which-renderer-draws-a-diagram)。[在流程图中编辑](/diagrams/flow-diagrams/editing)列出了可以直接编辑文本的类型。
+
+## 图表或流程图
+
+Mermaid 的 `pie`、`xychart`、`sankey`、`radar` 和 `treemap` 类型会转换为 `chart` 节点，并保留可编辑数据，参见 [`importMermaidChart`](/diagrams/charts/overview#importmermaidchart)。[Mermaid 流程图类型列表](/diagrams/flow-diagrams/overview#mermaid-kinds)中的其他类型都会转换为流程图。[`insertFlowDiagram`](/diagrams/flow-diagrams/overview#insertflowdiagram) 和 [`updateFlowDiagram`](/diagrams/flow-diagrams/overview#updateflowdiagram) 不接受图表源码。
+
+## 流程图的存储方式
+
+| 属性 | 内容 |
+| ------------- | -------------------------------------------------------------------------------- |
+| `format` | `'mermaid'`、`'drawio'`、`'bpmn'` 或已注册渲染器绘制的其他格式 ID |
+| `source` | Mermaid 文本（最多 50,000 个字符）或 XML |
+| `title` | 显示在流程图下方的标题，或 `null` |
+| `description` | Alt 文本和可访问说明，或 `null` |
+| `view` | `'diagram'` 显示绘制结果，`'code'` 显示源文本 |
+| `options` | 源之外的设置，如下表所示。其他内容保持原样 |
+
+| 键入 `options` | 内容 |
+| ---------------- | ----------------------------------------------------------------------------------------------- |
+| `size` | 流程图的大小，参见 [setDiagramSize](/diagrams/guides/size-and-view#setdiagramsize) |
+| `link` | 流程图所跟随的表格 |
+| `positions` | 移动形状的偏移量，请参阅[移动形状](/diagrams/flow-diagrams/editing#moving-shapes) |
+
+文档不会存储绘制后的流程图、它在屏幕上的尺寸或加载状态。
+
+### 源是数据
+
+源绝不会在应用的网页中作为代码运行。编写图表时，扩展会删除 `%%{init: …}%%` 指令和 frontmatter 块，因此文档无法更改 Mermaid 的运行方式。前面的 `title` 将成为图表的标题，除非您给出标题。颜色来自页面的 CSS，而不是源代码。
+
+### 在 HTML 和纯文本中
+
+在 HTML 中，流程图使用 `<figure data-type="flow-diagram">`。源文本保存在 `<pre><code class="language-mermaid">` 中，标题保存在 `<figcaption>` 中。draw.io 和 BPMN 流程图分别使用 `language-drawio` 和 `language-bpmn`。
+
+未启用扩展的 HTML 或 Markdown 导出会将源文本保留为代码块。将这些 HTML 粘贴到启用了扩展的编辑器中，即可还原流程图。
+
+在纯文本中，Mermaid 流程图以 `[diagram: title]` 开头，后接源文本。其他格式的流程图则只包含 `[diagram: title]` 或 `[diagram]`，不带标题时省略 `: title`。
+
+## 更改流程图
+
+您可以使用 [命令](/diagrams/flow-diagrams/overview#commands):
+
+```ts
+editor.commands.updateFlowDiagram({ source: 'sequenceDiagram\n  A->>B: Hello' })
+editor.commands.setFlowDiagramView({ view: 'code' })
+```
+
+您自己的表单可以在有人键入时对每个输入调用 `updateFlowDiagram`。每次调用都是一个撤消步骤。
+
+每次更改后都会重新绘制流程图。新绘制完成后，旧图形会被移除。Mermaid 源码存在语法错误时会显示错误状态和消息，直到源码修复。
+
+### 编辑流程图或源码
+
+每个流程图都有自己的视图。要一次切换所有流程图（例如 Mermaid 演示），请将 `setFlowDiagramView` 加入命令链：
+
+```ts
+const chain = editor.chain()
+for (const { pos } of editor.storage.diagrams.listDiagrams()) {
+  chain.setFlowDiagramView({ pos, view: 'code' })
+}
+chain.run()
+```
+
+## 列出、缩放和导出流程图
+
+### 列出流程图
+
+`editor.storage.diagrams.listDiagrams()` 返回每个流程图的信息：
+
+| 字段| 内容 |
+| ---------- | ------------------------------------------------------------------------------------------------- |
+| `pos` | 其位置 |
+| 属性 | 其属性 |
+| `kind` | Mermaid 流程图类型；若源文本为空、不是可绘制类型或格式为 XML，则为 `null` |
+| `drawable` | 是否有已注册的渲染器可以绘制该格式的源文本 |
+
+### 缩放和最大化
+
+`setZoom`、`getZoom`、`setMaximized` 和 `getMaximized` 使用流程图在文档中的位置进行操作。参见[尺寸与视图](/diagrams/guides/size-and-view)。
+
+### 导出
+
+`export({ pos })`、`exportAll()` 和 `exportDocx()` 都会导出流程图。在 Word 中，流程图会作为 PNG 图像插入。参见[导出](/diagrams/export)了解选项和返回值。
+
+mermaid.js、draw.io 和 BPMN 流程图渲染器仅在浏览器中绘制。在服务器上，`export` 会抛出错误，而 `exportDocx` 会跳过这些流程图并附上注释。Pele 的 [`renderPeleDiagram`](/diagrams/renderers/pele#on-a-server) 仍可在服务器上绘制 Mermaid 源码。
+
+## 命令
+
+### `insertFlowDiagram`
+
+在当前选区或 `pos` 处插入流程图，并选中新流程图；若 `select` 为 `false`，则保留原选区。
+
+```ts
+editor.commands.insertFlowDiagram({
+  source: 'flowchart LR\n  order[Order placed] --> ship[Shipped]',
+  title: 'Order flow',
+})
+```
+
+| 选项 | 类型 | 描述 |
+| ------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `source` | `string` | Mermaid 源码；或在 `format: 'drawio'` 时使用 draw.io XML，在 `format: 'bpmn'` 时使用 BPMN 2.0 XML。可以为空 |
+| `format` | `string` | `'mermaid'`（默认）、`'drawio'`、`'bpmn'` 或已注册渲染器支持的其他格式 |
+| `title` | `string \| null` | 流程图标题 |
+| `description` | `string \| null` | 替代文本和可访问说明 |
+| `pos` | `number` | 插入的位置。默认为选择 |
+| `select` | `boolean` | `false` 将选择保留在原来的位置。默认 `true` |
+
+所选内容中的空段落会被替换。粘贴流程图源码时也会调用此命令，参见[粘贴](/diagrams/data/pasting)。
+
+当 Mermaid 源码表示 `pie`、`xychart`、`sankey`、`radar` 或 `treemap` 图表时，或类型不在 [Mermaid 流程图类型列表](/diagrams/flow-diagrams/overview#mermaid-kinds)中（例如 `zenuml`），或 draw.io/BPMN 源码不是有效 XML 时，返回 `false`。
+
+### `updateFlowDiagram`
+
+更改所选流程图或 `pos` 处流程图的源码、格式、标题或说明。未提供的字段保持不变。
+
+```ts
+editor.commands.updateFlowDiagram({ title: 'Order flow, revised' })
+```
+
+| 选项 | 类型 | 说明 |
+| ------------- | ---------------- | ----------------------------------------------------------------------------------------------------- |
+| `source` | `string` | 新源码。若流程图原本跟随表格，更新后将不再跟随该表格 |
+| `format` | `string` | 新格式。需要该格式的 `source` |
+| `title` | `string \| null` | 新标题。 `null` 删除 |
+| `description` | `string \| null` | 新描述。 `null` 删除它 |
+| `pos` | `number` | 流程图的位置，默认使用所选流程图 |
+
+新源码不是对应格式支持的类型，或更改 `format` 时未同时提供 `source`，则返回 `false`，且不做任何更改。
+
+### `setFlowDiagramView`
+
+切换为显示绘制后的流程图或其源码。
+
+```ts
+editor.commands.setFlowDiagramView({ view: 'code' })
+```
+
+| 选项 | 类型 | 描述 |
+| ------ | --------------------- | -------------------------------------------------------------- |
+| `view` | `'diagram' \| 'code'` | `'diagram'` 显示流程图，`'code'` 显示源码 |
+| `pos` | `number` | 流程图的位置，默认使用所选流程图 |
+
+视图存储在文档中，因此每个打开文档的人都会看到相同的视图。
+
+### `convertCodeBlockToDiagram`
+
+将当前选区或 `pos` 处的代码块转换为 Mermaid 流程图，并选中新流程图。
+
+```ts
+if (editor.can().convertCodeBlockToDiagram()) editor.commands.convertCodeBlockToDiagram()
+```
+
+| 选项 | 类型 | 说明 |
+| ------ | -------- | ----------------------------------------------------------- |
+| `pos` | `number` | 代码块内的位置。默认选择 |
+
+代码块中的 Mod-Enter 也会运行它，请参阅[代码块中的 Mod-Enter](/diagrams/data/quick-input#mod-enter-in-a-code-block)。
+
+代码块包含 Mermaid 图表源码，或包含其他类型的源码时，返回 `false`。

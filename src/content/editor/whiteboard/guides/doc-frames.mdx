@@ -1,0 +1,141 @@
+---
+title: 白板文档框架添加和更改形状
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: 白板文档框架 | Tiptap 编辑器文档
+  description: 在白板上显示富文本文档。每个文档框架在其自己的编辑器中保存一个文档，并且您的应用程序保留这些文档。
+  category: 编辑器
+---
+
+文档框架是一种在其自己的编辑器中显示富文本文档的形状。该白板存储其文档的框架和 ID。您的应用程序会保留文档，因此该白板不会有任何存储空间。
+
+## 提供文档
+
+使用 `WhiteboardKit` 的 `docs` 选项告诉白板文档所在的位置。如果没有它，文档框架将不会显示任何文档。此示例将文档保留在内存中：
+
+```js
+import { Editor } from '@tiptap/core'
+import { StarterKit } from '@tiptap/starter-kit'
+import { WhiteboardKit } from '@tiptap-pro/extension-whiteboard'
+
+// Document JSON by document id
+const documents = new Map()
+
+const editor = new Editor({
+  element: viewport,
+  extensions: [
+    WhiteboardKit.configure({
+      docs: {
+        createEditor: ({ element, docId }) =>
+          new Editor({
+            element,
+            extensions: [StarterKit],
+            content: documents.get(docId),
+            onUpdate: ({ editor: docEditor }) => documents.set(docId, docEditor.getJSON()),
+          }),
+        copy: ({ fromDocId, toDocId }) => {
+          const document = documents.get(fromDocId)
+
+          if (document) {
+            documents.set(toDocId, structuredClone(document))
+          }
+        },
+        load: ({ docId, content }) => documents.set(docId, content),
+      },
+    }),
+  ],
+})
+```
+
+在 React 中，在组件外部或使用 `useMemo` 创建一次配置的套件。请参阅[在 React](/editor/whiteboard/guides/react) 中设置白板。
+
+`docs` 对象具有以下成员：
+
+- `createEditor({ element, docId })` 在 `element`（框架的内容元素 `[data-shape-content]`）内创建文档编辑器。白板用它的框架摧毁了编辑器。该编辑器可以有任何扩展，例如 `StarterKit`。当用户复制或粘贴框架时，
+- `copy({ fromDocId, toDocId })` 会复制文档作为其框架的副本。它在副本显示之前运行。
+- `load({ docId, content })`（可选）填充[`importBoard`](/editor/whiteboard/guides/export-and-import#doc-frames) 从白板文件添加的框架的新文档。它在帧显示之前运行。如果没有它，导入的帧将开始为空。
+- `start(docId)`（可选）启动此编辑器中的更改带入白板上的每个帧的文档：新帧、副本以及 `setContent` 或使用 `UndoRedo` 撤消带回的帧。它在帧显示之前运行。通过 Yjs、来自其他编辑器或来自其撤消的帧不会在此处开始文档。
+
+因此，`start` 也适用于在 `copy` 之后文档已经存在的框架（如副本）。保留框架已有的文档：
+
+```js
+start: (docId) => {
+  if (!documents.has(docId)) {
+    documents.set(docId, { type: 'doc', content: [{ type: 'paragraph' }] })
+  }
+},
+```
+
+## 添加文档框架
+
+`doc` 工具（键 <kbd>W</kbd>）添加带有新文档的框架并开始编辑它。如果没有 `docs`，则该白板没有 `doc` 工具。在代码中，像任何其他形状一样添加一个框架：
+
+```js
+import { createShapeId } from '@tiptap-pro/extension-whiteboard'
+
+editor.commands.insertShape({ type: 'docFrame', docId: createShapeId(), x: 0, y: 0, width: 420 })
+```
+
+该框架显示 ID 为 `docId` 的文档。没有 `docId` 的框架使用自己的形状 id，因此它仍然获得自己的文档。 `docIdOf` 从框架的节点或节点的 JSON 返回框架文档的 id。
+
+## 编辑文档
+
+该白板可以像其他形状一样选择、移动框架并调整其大小。它的高度遵循它的文档。在编辑开始之前，文档编辑器是只读的：单击所选框架、使用 <kbd>Enter</kbd> 或使用 `editShapeText`：
+
+```js
+editor.commands.editShapeText({ id: 'frame' })
+```
+
+编辑文档时，框架内的按键和按键属于其编辑者。 <kbd>Escape</kbd> 停止编辑并再次选择该帧。按下另一个形状也会停止编辑，[使板变为只读](/editor/whiteboard/guides/shapes-and-tools#read-only-boards)。
+
+### 设置已编辑文档的格式
+
+您的工具栏可以在已编辑文档和形状文本上工作。 `getEditedDocEditor` 返回框架编辑的文档的编辑器，或 `null`，而没有进行编辑：
+
+```js
+import { getEditedDocEditor } from '@tiptap-pro/extension-whiteboard'
+
+// A bold button that works in documents too
+const textEditor = getEditedDocEditor(editor) ?? editor
+textEditor.commands.toggleBold()
+```
+
+白板的编辑器在文档编辑器的每个事务上发出 `docChange`，也是一个仅在编辑开始或停止时以及在创建或销毁其编辑器时移动插入符号的编辑器。使用它来更新工具栏，但不保存文档：
+
+```js
+editor.on('docChange', ({ docId }) => {
+  console.log(`The document ${docId} changed`)
+})
+```
+
+## 读取所有文档
+
+`getDocEditors` 返回白板上框架显示的文档的编辑器：
+
+```js
+import { getDocEditors } from '@tiptap-pro/extension-whiteboard'
+
+const contents = getDocEditors(editor).map((docEditor) => docEditor.getJSON())
+```
+
+一旦白板的编辑器被销毁，它不会返回任何编辑器。
+
+## 稍后到达的文档
+
+在此编辑器中进行每次更改后，框架将增长与其文档一样高。其他用户的编辑器衡量他们所做的更改。当文档到达框架之后时，例如 AI 添加框架并稍后写入其文档时，请保留您使用 `keepShapeHeights` 为框架指定的高度：
+
+```js
+import { keepShapeHeights } from '@tiptap-pro/extension-whiteboard'
+
+const { tr } = editor.state
+// … add a doc frame whose document arrives later
+editor.view.dispatch(keepShapeHeights(tr))
+```
+
+## 后续步骤
+
+- 使用 [collaboration](/editor/whiteboard/guides/collaboration)
+- 将板及其文档保存到文件中 [export and导入](/editor/whiteboard/guides/export-and-import)
+- 请参阅[`BoardDocs`类型](/editor/whiteboard/api-reference/types#boarddocs)

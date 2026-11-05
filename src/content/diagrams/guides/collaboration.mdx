@@ -1,0 +1,83 @@
+---
+title: '协作'
+intro: '图表和流程图与其他节点一样都是节点，因此 Tiptap Collaboration 无需额外设置即可共享它们。适用一条规则：<strong>每个打开共享文档的客户端都会注册<code>Diagrams</code>。</strong>'
+tags:
+  - type: alpha
+  - type: restricted
+meta:
+  title: '协作 | Tiptap 图表文档'
+  description: '图表和流程图与其他节点一样都是节点，因此 Tiptap Collaboration 无需额外设置即可共享它们。'
+  category: 图表
+---
+
+## 注册位置 图表
+
+在打开共享文档的任何位置注册 `Diagrams`： 每个编辑器中的
+
+- 在每个编辑器中
+- 在只读查看器中
+- 协作服务器上的代理
+- 在协作服务器上
+
+确保每个客户端都使用 `@tiptap/y-tiptap` 3.0.10 或更高版本。那么您错过的客户就无法删除任何内容。
+
+## 两个人更改一张图表
+
+图表将其数据、图表规格和渲染器存储为单独的属性。共享文档单独合并每个属性：
+
+- **同时对不同属性进行的更改**都会保留。例如，一个人更改标题，另一个人更改单元格。
+- **同时更改数据**只保留两者之一。例如，两个人更改一张图表的不同单元格。数据是一个属性，因此最后到达的更改会替换另一个属性。
+- **撤消**仅收回您自己的更改，在其他人更改图表后也是如此。
+
+图表也同样。它的来源是一种属性。
+
+## 没有图表的客户端
+
+架构没有 `chart` 或 `flowDiagram` 节点的客户端，或者设置了 `chart: false` 或 `flowDiagram: false` 的客户端无法构建这些节点。然后发生的情况取决于客户端使用的 `@tiptap/y-tiptap` 版本：
+
+| `@tiptap/y-tiptap` | 共享文档 | 该客户端 |
+| ------------------ | ---------------------------------------------------------------------- | -------------------------------------------------------- |
+| 3.0.10 或更高版本 | 保持原样。其他人都保留其图表和流程图 | 显示空文档，无法编辑，不发送任何内容 |
+| 3.0.9 或更早版本 | 丢失其图表和流程图。删除到达所有其他客户端 | 加载文档时，其绑定会删除它们 |
+
+`enableContentCheck` 不会阻止删除。在检查可以查看的事务之前，该节点将被删除。
+
+## 不显示任何内容的客户端
+
+不绘制任何内容的客户端在没有任何渲染器或图表渲染器的情况下注册 `Diagrams`。它不需要 DOM 和图表库，并且保持每个图表和流程图的原样。
+
+```ts
+import { getSchema } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { Diagrams } from '@tiptap-pro/extension-diagrams'
+
+const extensions = [StarterKit, Diagrams.configure({ renderers: [] })]
+const schema = getSchema(extensions)
+```
+
+没有渲染器的编辑器将每个图表或流程图显示为此处不可绘制，或者显示为 [`unavailable`](/diagrams/api-reference/options#unavailable) 返回的内容。其数据保持不变。
+
+## 拒绝​​没有图表的客户端
+
+如果您不控制的客户端可以连接，则让服务器拒绝那些未声明 `Diagrams` 的客户端。例如，使用 Hocuspocus，客户端会向其连接添加一个参数。服务器在加载文档之前对其进行检查：
+
+```ts
+// client
+const provider = new HocuspocusProvider({
+  url: 'wss://collaboration.example.com?schema=diagram-1',
+  name: 'document-id',
+})
+
+// server
+const server = new Hocuspocus({
+  async onConnect({ requestParameters }) {
+    if (requestParameters.get('schema') !== 'diagram-1') {
+      throw new Error('This document needs the Diagrams extension.')
+    }
+  },
+})
+```
+
+## 混合版本
+
+`@tiptap-pro/extension-diagrams` 的较新版本可能会存储旧客户端不知道的图表属性。旧客户端仅保留该属性直到它更改图表。那么属性就丢失了。在使用新版本添加的功能之前，请将每个客户端更新到相同版本。

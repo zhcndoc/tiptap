@@ -101,8 +101,9 @@ POST /v4/ai/toolkit/fetch-tools
 - `replaceDocument` (`boolean`, optional)
 - `createDocument` (`boolean`, optional): Alias for `replaceDocument`.
 - `readSelection` (`boolean`, optional)
-- `proofread` (`boolean | { meta?: string }`, optional): 当你希望 AI 在每次校对编辑中
-  包含一个额外的元数据字段时设置 `meta`，例如简短说明。
+- `proofread` (`boolean | { meta?: string }`, optional): Set `meta` when you want the AI to
+  include an extra metadata field on every proofreading edit, such as a short explanation.
+- `readBoard`， `createShapes`、`arrangeShapes`、`createDiagram`、`updateShapes`、`deleteShapes`、`connectShapes` 和 `createDocFrame`（`boolean`，可选）：[板工具](#board-tools)，用于白板。
 
 响应：
 
@@ -217,57 +218,59 @@ curl --location 'BASE_URL/v4/ai/toolkit/execute-tool' \
   }'
 ```
 
-#### 错误响应
+#### Error responses
 
-HTTP 错误返回：
+HTTP errors return:
 
-- `error` (`object`): 包含以下属性的对象：
-  - `message` (`string`): 人类可读的错误消息。
-  - `status` (`number`): HTTP 状态码。
-  - `code` (`string`): 稳定的错误代码。
-  - `data` (`object`, optional): 已清理的结构化上下文。文档和线程上游
-    失败包括诸如 `operation`、`upstreamStatus`、`upstreamUrl` 和
-    `upstreamMethod` 之类的字段。
+- `error` (`object`): An object with these properties:
+  - `message` (`string`): Human-readable error message.
+  - `status` (`number`): HTTP status code.
+  - `code` (`string`): Stable error code.
+  - `data` (`object`, optional): Sanitized structured context. Document and thread upstream
+    failures include fields such as `operation`, `upstreamStatus`, `upstreamUrl`, and
+    `upstreamMethod`.
 
-此端点可能返回：
+This endpoint can return:
 
-- `400` with `missing_document_credentials`: 请求使用了云文档，但 JWT 不包含文档服务器凭证。
-- `400` with `missing_document_options`: `getThreads` 或 `editThreads` 是针对一个
-  线内文档执行的。这些工具需要云文档。
-- `400` with a thread-store code such as `thread_not_found` or `comment_not_found`: 线程或
-  评论操作引用了不存在的数据。
-- `401` with `access_control_auth_required` or `missing_token`: 请求未包含
-  Tiptap 访问控制 JWT。
-- `401` with an access-control code such as `token_expired` or `signature_invalid`: JWT
-  被访问控制拒绝。
-- `403` with `feature_not_available`: 当前环境未启用 Server AI Toolkit。
-- `403` with `insufficient_permissions`: JWT 未授予 `AI:Toolkit`，或者未授予
-  对请求中的云文档的访问权限。
-- `403` with `origin_not_allowed`: 请求的 `Origin` 不允许用于该环境。
-- `403` with `unsupported_tool_format`: 所选工具不支持请求的 `format`。
-- `403` with `tracked_changes_unsupported_schema`: `reviewOptions.mode` 为 `trackedChanges`，但
-  编辑器 schema 不支持跟踪更改。
-- `403` with `thread_schema_not_supported`: 编辑器 schema 不支持评论或线程。
-- `409` with `concurrent_edit_conflict`: 云文档在工具执行时发生了更改。
-  使用最新的文档状态重试请求。
-- `422` with `validation_failed`: 请求体与端点 schema 不匹配。响应
-  包含 `error.issues`，即验证问题列表。
-- `429` with `rate_limited`: 访问控制限流了身份验证。
-- `429`: 服务器端限流器阻止了该请求。此响应使用不同的顶层
-  结构：
-  - `error` (`string`): 限流错误消息。
-  - `retryAfter` (`number`, optional): 重试前等待的秒数。
-  - `limit` (`number`, optional): 当前窗口的请求限制。
-  - `window` (`number`, optional): 限流窗口，单位为秒。
-- `500` with `document_save_failed`: 服务器在加载云文档后无法保存它，
-  或者在文档加载之前调用了保存流程。
-- `500` with `diff_worker_failed` or `diff_worker_invalid_result`: 在准备可审阅更改时，
-  内部 diff worker 失败。
-- `500` with `internal_server_error` or `unknown_error`: 发生了意外的服务器错误。
-- `500` with `missing_cloud_api_token`: 云服务缺少内部身份验证
-  配置。
-- `502` with `document_load_failed` or `document_save_failed`: 加载或保存云文档
-  时上游失败。检查 `error.data.upstreamStatus` 以获取上游 HTTP 状态。
+- `400` with `missing_document_credentials`: The request uses a cloud document, but the JWT does not
+  include document server credentials.
+- `400` with `missing_document_options`: `getThreads` or `editThreads` was executed against an
+  inline document. These tools require a cloud document.
+- `400` with a thread-store code such as `thread_not_found` or `comment_not_found`: A thread or
+  comment operation referenced data that does not exist.
+- `401` with `access_control_auth_required` or `missing_token`: The request did not include a
+  Tiptap Access Control JWT.
+- `401` with an access-control code such as `token_expired` or `signature_invalid`: The JWT was
+  rejected by Access Control.
+- `403` with `feature_not_available`: Server AI Toolkit is not enabled for the environment.
+- `403` with `insufficient_permissions`: The JWT does not grant `AI:Toolkit`, or it does not grant
+  access to the requested cloud document.
+- `403` with `origin_not_allowed`: The request `Origin` is not allowed for the environment.
+- `403` with `unsupported_tool_format`: The selected tool does not support the requested `format`.
+- `403` with `tracked_changes_unsupported_schema`: `reviewOptions.mode` is `trackedChanges`, but
+  the editor schema does not support tracked changes.
+- `403` with `thread_schema_not_supported`: The editor schema does not support comments or threads.
+- `403` 和 `board_schema_not_supported`：[白板工具](#board-tools) 获得的文档或编辑器模式不是可以使用的白板。
+- `409` with `concurrent_edit_conflict`: The cloud document changed while the tool was executing.
+  Retry the request with the latest document state.
+- `422` with `validation_failed`: The request body does not match the endpoint schema. The response
+  includes `error.issues`, a list of validation issues.
+- `429` with `rate_limited`: Access Control rate-limited authentication.
+- `429`: The server-side rate limiter blocked the request. This response uses a different top-level
+  shape:
+  - `error` (`string`): Rate limit error message.
+  - `retryAfter` (`number`, optional): Seconds to wait before retrying.
+  - `limit` (`number`, optional): Request limit for the current window.
+  - `window` (`number`, optional): Rate-limit window in seconds.
+- `500` with `document_save_failed`: The server could not save the cloud document after loading it,
+  or the save flow was called before a document was loaded.
+- `500` with `diff_worker_failed` or `diff_worker_invalid_result`: The internal diff worker failed
+  while preparing reviewable changes.
+- `500` with `internal_server_error` or `unknown_error`: An unexpected server error occurred.
+- `500` with `missing_cloud_api_token`: The cloud service is missing internal authentication
+  configuration.
+- `502` with `document_load_failed` or `document_save_failed`: Loading or saving the cloud document
+  failed upstream. Check `error.data.upstreamStatus` for the upstream HTTP status.
 - `502` with a thread or comment code such as `thread_list_failed`, `thread_create_failed`,
   `thread_update_failed`, `thread_delete_failed`, `thread_resolve_failed`,
   `thread_unresolve_failed`, `comment_create_failed`, `comment_update_failed`, or
@@ -276,10 +279,6 @@ HTTP 错误返回：
 - `503` with `service_unavailable`: 访问控制暂时不可用。
 
 ### 流式执行工具
-
-<Callout title="Alpha feature" variant="hint">
-  流式传输目前处于 alpha 阶段
-</Callout>
 
 ```txt
 POST /v4/ai/toolkit/stream-tool
@@ -474,26 +473,26 @@ POST /v4/ai/toolkit/stream-tool
 
 Replaces the entire document with new content.
 
-Tool input (`tool.input`):
+工具输入 (`tool.input`)：
 
 - `content` (`JSONContent | string`, required): The replacement document content. Use a Tiptap JSON
   document when `format` is `json`, or a Tiptap Shorthand string when `format` is `shorthand` or
   `shorthandV2`.
 
-Tool config (`tool.config`):
+工具配置 (`tool.config`)：
 
 `null`
 
-Tool output (`tool.output`):
+工具输出 (`tool.output`)：
 
-Success response:
+成功响应：
 
 - `success` (`true`): Indicates that the document was replaced successfully.
 
-Error response:
+错误响应：
 
 - `success` (`false`): Indicates that the document could not be replaced.
-- `error` (`string`): Error message.
+- `error` (`string`)：错误消息。
 
 ### `createDocument`
 
@@ -658,7 +657,295 @@ Alias for `replaceDocument`. It accepts the same input and returns the same outp
   - `success`（`boolean`）：该操作是否已成功完成。
   - `error`（`string | null`）：失败原因；如果操作成功则为 `null`。
 
-## 相关页面
+## 主板工具
+
+<Callout title="Alpha 功能" variant="hint">
+  主板工具目前处于 alpha 版本
+</Callout>
+
+这些工具读取和更改 [whiteboard](/editor/whiteboard/getting-started/overview).在董事会文档上使用董事会编辑器的编辑器上下文执行它们。请参阅[与 Whiteboard](/ai/ai-toolkit/agents/whiteboard) 一起使用进行设置。
+
+电路板工具采用纯文本，而不是文档内容，因此它们在每个 `format` 中的工作方式相同。它们无法通过 `stream-tool` 获得。
+
+无法运行的板工具没有任何改变。当模型可以修复调用时，例如与板上不匹配的架构或 id 的输入，该工具会使用 HTTP 状态 `200` 进行应答，并在其工具输出中使用 `success: false` 和 `error`。
+
+当请求本身无法工作时，`execute-tool` 会像其他工具一样失败：
+
+- `403` 和 `board_schema_not_supported`：文档或编辑器上下文不是该工具可以处理的白板，就像没有 `createDocFrame` 文档框架的白板。
+- `403` 和 `tracked_changes_unsupported_schema`：`reviewOptions.mode` 是 `'trackedChanges'`，用于更改电路板的工具，但编辑器上下文没有跟踪更改。 `readBoard` 不检查此项。
+
+### 板工具配置
+
+`readBoard`、`createShapes`、`createDiagram` 和 `createDocFrame` 采用此工具配置 (`tool.config`)：
+
+- `selectedIds`（`string[]`，可选）：形状的 ID用户选择的内容，按照选择的顺序。
+- `viewport`（`{ x: number, y: number, width: number, height: number }`，可选）：用户看到的板部分，以板为单位。 `width` 和 `height` 必须高于 `0`。
+
+每个缺失、`null` 或无效的字段都会自行回退：不进行选择，或不进行视口。
+
+### 电路板放置
+
+`createShapes`、`createDiagram` 和 `createDocFrame` 在其输入 (`tool.input`) 中采用这些字段，因此 AI 可以为新内容命名位置：
+
+- `near`（`string[]`，可选）：最多新内容所属形状的 100 个 id，例如摘要所涉及的图表。默认为选定的形状。
+- `side`（`'right' | 'below' | 'left' | 'above'`，可选）：新内容的这些形状的侧面。当空闲点较近时，默认为 `'right'` 或 `'below'`。
+
+新形状位于棋盘上 `near` 中的形状旁边，或者位于所选形状旁边。如果没有这样的形状，它们将位于视口的中间，或者位于板上所有形状的右侧，或者位于空板的原点。当其他形状挡路时，它们会移动到最近的自由点。
+
+### 电路板建议
+
+使用 `reviewOptions.mode: 'trackedChanges'`，电路板工具将其更改写入为 [跟踪更改](/tracked-changes/getting-started/overview):
+
+- ] 的建议。 一次调用添加或删除的形状共享一个建议，因此 `acceptSuggestion` 或 `rejectSuggestion` 会审核所有这些建议。
+- 每个更改的形状和每个新文本都会得到自己的建议。稍后等待同一用户审核的形状更改将纳入该建议。
+- 这些工具会单独留下等待其他用户审阅的形状，或等待审阅将其删除的形状，并且不会删除等待审阅更改的形状。他们在 `skipped` 或 `skippedArrows` 中说明了原因。
+
+`suggestionIds` (`string[]`) 列出呼叫发出或继续进行的建议。调用继续进行的建议也保留了先前的更改，并且对先前建议添加的形状的更改是该添加的一部分，因此未列出。当您查看这些 ID 时，其他建议保持不变。如果没有审查，`suggestionIds` 是空的，并且工具会保留每个等待审查的形状。
+
+### `readBoard`
+
+读取棋盘的形状、它们之间的箭头以及选择。它不会更改文档。
+
+工具输入 (`tool.input`)：
+
+该工具不接受任何输入。传递一个空对象（`{}`）。
+
+工具配置 (`tool.config`):
+
+[板工具配置](#board-tool-config)。
+
+工具输出 (`tool.output`)：
+
+成功响应：
+
+- `success` (`true`)：表示已读取电路板。
+- `shapeCount` (`number`)：板上形状的数量，包括箭头。
+- `selectedIds` (`string[]`)：板上选定形状的 ID。
+- `shapes` (`array`)：形状，首先选择形状。
+  - `id` (`string`)：唯一形状标识符。
+  - `type` (`string`)：节点类型，例如 `stickyNote`、`geo`、`freeText`、`freehand` 或 `docFrame`。
+  - `kind?` (`string`)：一种几何形状，如 `rectangle` 或 `diamond`。
+  - `x`、`y`、`width`、`height` (`number`)：盒子形状，以整板为单位。 `y` 向下增长。
+  - `color?` (`string`)：颜色名称，如 `yellow`。
+  - `text?` (`string`)：形状文本，每个段落或列表项一行。列表项以 `- `、`1. `、`[ ] ` 或 `[x] ` 开头。未选择的形状的文本将在 280 个字符后被剪切。
+  - `docId?` (`string`)：文档框架显示的文档的 ID。每个文档框架都有它。对于没有 `docId` 属性的框架，它是形状 id，框架显示其文档。
+  - `selected?` (`true`)：用户选择形状。
+  - `suggestion?` (`'add' | 'delete' | 'change'`)：等待审核的建议，并添加或删除形状，或者更改其属性或文本。
+- `arrows` (`array`)：板上的箭头。
+  - `id` (`string`)：唯一箭头标识符。
+  - `fromId` (`string | null`)：箭头开始处的形状的 ID，或 `null` 表示自由端。
+  - `toId` (`string | null`)：箭头指向的形状的 ID，或 `null` 表示自由端。
+- `omittedShapeCount` (`number`)：输出遗漏的形状和箭头的数量。最多列出 300 个。
+- `viewport` (`object | null`)：工具配置的 `viewport`。
+
+### `createShapes`
+
+在所有形状前面添加便签作为一个网格。
+
+刀具输入 (`tool.input`)：
+
+- `notes`（`array`，必需）：1 至 24 个注释，按读取顺序。
+  - `text`（`string`，必需）：注释文本，最多 500 个字符。换行符开始一个新段落。以 `- `、`1. `、`[ ] ` 或 `[x] ` 开头的行构成项目符号列表、编号列表或任务列表。
+  - `color`（`'black' | 'gray' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'violet'`，可选）：票据的颜色。默认值：`'yellow'`
+- `near` 和 `side`（可选）：注释所在位置。请参阅[董事会布局](#board-placement)。
+
+工具配置 (`tool.config`):
+
+[板工具配置](#board-tool-config)。
+
+工具输出 (`tool.output`)：
+
+成功响应：
+
+- `success` (`true`)：表示注释已添加。
+- `createdIds` (`string[]`)：新笔记的 ID，按输入顺序排列。
+- `suggestionIds` (`string[]`)：请参阅[董事会建议](#board-suggestions)。
+
+错误响应：
+
+- `success` (`false`)：表示未添加注释。
+- `error` (`string`)：错误消息。
+
+### `arrangeShapes`
+
+将形状从左到右分组为列，每个列顶部都有一个自由文本标题。列从形状所在的位置开始，或者在它们覆盖其他形状时从最近的自由点开始。形状只会移动，因此连接它们的箭头也会随之移动。
+
+刀具输入（`tool.input`）：
+
+- `groups`（`array`，必填）：1 至 12 组，从左到右，总共最多 300 个 id。
+  - `title`（`string`，必需）：组的标题，最多 60 个字符。
+  - `ids`（`string[]`，必需）：组中形状的 ID，按读取顺序排列。形状加入第一个为其命名的组。
+
+工具配置 (`tool.config`)：
+
+`null`
+
+工具输出 (`tool.output`)：
+
+成功响应：
+
+- `success` (`true`)：表示形状已排列。
+- `movedIds` (`string[]`)：移动的形状的 ID。
+- `titleIds` (`string[]`)：新标题的 ID。
+- `skipped` (`array`)：保持原样的形状，每个形状都有 `id` 和 `reason`，例如不是板上形状的 id、箭头、早期组命名的 id 或等待其他用户审阅的形状。
+- `suggestionIds` (`string[]`): See [board suggestions](#board-suggestions).
+
+Error response:
+
+- `success` (`false`): Indicates that no shapes were arranged.该错误列出了原因。
+- `error` (`string`): Error message.
+
+### `createDiagram`
+
+用文本绘制形状，通过箭头连接，并将它们布置为图表。箭头连接形状，因此当用户移动形状时它们会跟随。
+
+刀具输入 (`tool.input`)：
+
+- `title`（`string`，可选）：图表上方的标题，最多 80 个字符。
+- `direction` (`'down' | 'right'`, optional): Where the arrows mostly point. Default: `'down'`
+- `nodes` (`array`, required): 1 to 40 shapes.
+  - `key`（`string`，必填）：AI 自己的形状名称，最多 40 个字符，并且在图中是唯一的。箭头指的是它。
+  - `text` (`string`, required): Text in the shape, up to 60 characters.
+  - `shape` (`'rectangle' | 'ellipse' | 'diamond'`, optional): Kind of the shape.另一种则成为长方形。默认值：`'rectangle'`
+  - `color`（`string`，可选）：`createShapes` 的颜色之一。默认值：`'black'`
+- `arrows`（`array`，可选）：最多 60 个箭头。
+  - `from`（`string`，必需）：箭头开始处的形状的关键点。
+  - `to`（`string`，必需）：箭头指向的形状的键。
+  - `label`（`string`，可选）：箭头旁边的标签，最多 24 个字符。
+- `near` 和 `side`（可选）：图表所在的位置。请参阅[董事会布局](#board-placement)。
+
+工具配置 (`tool.config`):
+
+[板工具配置](#board-tool-config)。
+
+工具输出 (`tool.output`)：
+
+成功响应：
+
+- `success` (`true`)：表示已绘制图表。
+- `createdIds` (`string[]`)：所有新形状的 ID：标题、形状、箭头及其标签。
+- `nodeIds` (`Record<string, string>`)：每个新形状的 ID（按其键）。
+- `skippedArrows` (`array`)：省略的箭头，每个箭头都有 `from`、`to` 和 `reason`。带有未知键的箭头（从形状到自身）或较早出现的箭头将被忽略。
+- `suggestionIds` (`string[]`)：请参阅[董事会建议](#board-suggestions)。
+
+错误响应：
+
+- `success` (`false`)：表示未绘制图表。
+- `error` (`string`)：错误消息。
+
+### `updateShapes`
+
+更改文本、颜色或形状种类。形状保持其位置和大小。
+
+刀具输入（`tool.input`）：
+
+- `shapes`（`array`，必填）：1 至 40 个形状，每个形状一次，仅更改内容。
+  - `id`（`string`，必需）：形状的 ID。
+  - `text`（`string`，可选）：新文本，最多 500 个字符，行数与 `createShapes` 相同。它替换形状的文本，但不设置其格式。 `readBoard` 为形状提供的文本没有变化。只有便利贴、几何形状和自由文本才有文本。
+  - `color`（`string`，可选）：新颜色，`createShapes`的颜色之一。
+  - `kind`（`'rectangle' | 'ellipse' | 'diamond' | 'triangle'`，可选）：新型几何形状。
+
+工具配置 (`tool.config`)：
+
+`null`
+
+工具输出 (`tool.output`)：
+
+成功响应：
+
+- `success` (`true`)：表示至少有一个形状发生了变化。
+- `updatedIds` (`string[]`)：已更改形状的 ID。
+- `skipped` (`array`)：保持原样的形状，每个形状都有 `id` 和 `reason`，就像等待其他用户审阅的形状，或者没有文本但获得 `text` 的形状。
+- `suggestionIds` (`string[]`)：请参阅[董事会建议](#board-suggestions)。
+
+错误响应：
+
+- `success` (`false`)：表示形状没有改变。该错误列出了原因。
+- `error` (`string`)：错误消息。
+
+### `deleteShapes`
+
+删除形状，包括箭头。连接已删除形状的箭头保留自由端。
+
+刀具输入 (`tool.input`)：
+
+- `ids`（`string[]`，必需）：1 至 100 个形状 ID。
+
+工具配置 (`tool.config`)：
+
+`null`
+
+工具输出 (`tool.output`)：
+
+成功响应：
+
+- `success` (`true`)：表示形状已删除。经过审核，他们会保留 `delete` 建议，直到用户接受为止。
+- `deletedIds` (`string[]`)：已删除形状的 ID。
+- `skipped` (`array`)：留在棋盘上的形状，每个形状都有 `id` 和 `reason`，就像不是棋盘上形状的 id，或者等待审核的形状。
+- `suggestionIds` (`string[]`)：请参阅[董事会建议](#board-suggestions)。
+
+错误响应：
+
+- `success` (`false`)：表示未删除任何形状。该错误列出了原因。
+- `error` (`string`)：错误消息。
+
+### `connectShapes`
+
+在板上的形状之间绘制箭头，每个形状旁边都有一个可选标签。
+
+刀具输入 (`tool.input`)：
+
+- `arrows`（`array`，必需）：1 至 40 个箭头。
+  - `from`（`string`，必需）：箭头开始处的形状的 ID。
+  - `to`（`string`，必需）：箭头指向的形状的 ID。
+  - `label`（`string`，可选）：箭头旁边的标签，最多 24 个字符。
+
+工具配置 (`tool.config`)：
+
+`null`
+
+工具输出 (`tool.output`)：
+
+成功响应：
+
+- `success` (`true`)：表示至少绘制了一个箭头。
+- `createdIds` (`string[]`)：新箭头和标签的 ID。
+- `skippedArrows` (`array`)：被遗漏的箭头，每个箭头都有 `from`、`to` 和 `reason`：未知形状、从形状到自身的箭头、等待删除的形状或棋盘上已有的箭头。
+- `suggestionIds` (`string[]`)：请参阅[董事会建议](#board-suggestions)。
+
+错误响应：
+
+- `success` (`false`)：表示未绘制箭头。该错误列出了原因。
+- `error` (`string`)：错误消息。
+
+### `createDocFrame`
+
+在所有形状前面添加带有新的空文档的文档框架。用`tiptapEdit`写文档，在其`docId`的Tiptap Cloud文档上。参见[编写文档框架](/ai/ai-toolkit/agents/whiteboard#write-the-documents-of-doc-frames)的文档。
+
+Tool input (`tool.input`):
+
+- `lines`（`number`，可选）：关于文档将有多少行，作为从 1 到 400 的整数。框架为它们保留了空间。默认值：`12`
+- `near` 和 `side`（可选）：帧所在的位置。请参阅[董事会布局](#board-placement)。
+
+Tool config (`tool.config`):
+
+[板工具配置](#board-tool-config)。
+
+Tool output (`tool.output`):
+
+Success response:
+
+- `success` (`true`)：表示帧已添加。
+- `frameId` (`string`)：新帧的 ID。
+- `docId` (`string`)：框架文档的 ID。
+- `suggestionIds` (`string[]`)：请参阅[董事会建议](#board-suggestions)。
+
+Error response:
+
+- `success` (`false`)：表示没有添加帧。
+- `error` (`string`): Error message.
+
+## Related pages
 
 - [审核选项](/ai/ai-toolkit/api-reference/review-options)
 - [编辑器上下文](/ai/ai-toolkit/api-reference/editor-context)

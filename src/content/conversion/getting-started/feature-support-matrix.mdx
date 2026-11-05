@@ -95,24 +95,24 @@ import { Callout } from '@/components/ui/Callout'
 
 | 功能 | 导入 | 编辑器 | 导出 |
 | --- | --- | --- | --- |
-| [基础表格](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
-| [合并单元格（colspan）](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
-| [合并单元格（rowspan）](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
-| [表头行](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✕ |
-| [表格宽度](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓† |
-| [列宽](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
-| [表格边框](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
-| [单元格背景](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
-| [单元格边框](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
-| [单元格垂直对齐](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
-| [行高](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
-| [表格级单元格边距](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [Basic tables](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [Merged cells (colspan)](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [Merged cells (rowspan)](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [表格标题行](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓‡ |
+| [Table width](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓† |
+| [Column widths](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [Table borders](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [Cell backgrounds](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [Cell borders](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [Cell vertical alignment](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [Row height](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
+| [Table-level cell margins](/conversion/content-types/structures-and-media/tables) | ✓ | ✓ | ✓ |
 
-**†** 设置明确宽度的表格会保持固定宽度。未设置宽度的表格会保持全宽（流式）布局并随页面重新排列，而不会锁定为固定尺寸。
+**†** 具有明确宽度的表格保持固定宽度宽度。未设置宽度的表格保持全宽度（流动）并回流到页面，而不是锁定到固定测量值。<br /> ******** 仅当 `repeatTableHeaderRows` 在[编辑器扩展名](/conversion/export/docx/editor-extension) 中启用时，标题行才会导出为 Word 的“重复为标题行”。默认情况下它处于关闭状态，并且 REST API 不接受它。
 
-## 媒体
+## Media
 
-| 功能 | 导入 | 编辑器 | 导出 |
+| Feature | Import | Editor | Export |
 | --- | --- | --- | --- |
 | [行内图片](/conversion/content-types/structures-and-media/images) | ✓ | ✓ | ✓ |
 | [浮动图片](/conversion/content-types/structures-and-media/images) | ~ | ✕ | ✕ |
@@ -126,20 +126,20 @@ import { Callout } from '@/components/ui/Callout'
 
 | 功能 | 导入 | 编辑器 | 导出 |
 | --- | --- | --- | --- |
-| [分页符](/conversion/content-types/page-layout/page-breaks) | ✓ | ~ | ✓ |
-| [页眉和页脚](/conversion/content-types/page-layout/headers-footers) | ✓* | ✓ | ✓ |
-| [节](/conversion/content-types/page-layout/page-structure) | ~ | ✕ | ✕ |
-| [页面大小和边距](/conversion/content-types/page-layout/page-structure) | ✕ | ✓ | ✓ |
-| [页码](/conversion/content-types/page-layout/page-structure) | ~** | ✓ | ~** |
-| [脚注](/conversion/content-types/structures-and-media/footnotes-endnotes) | ✓* | ✕ | ✕ |
-| [尾注](/conversion/content-types/structures-and-media/footnotes-endnotes) | ✓* | ✕ | ✕ |
-| [评论](/conversion/content-types/structures-and-media/comments) | ✓ | ✓ | ✓ |
+| [Page breaks](/conversion/content-types/page-layout/page-breaks) | ✓ | ~ | ✓ |
+| [Headers and footers](/conversion/content-types/page-layout/headers-footers) | ✓* | ✓ | ✓ |
+| [Sections](/conversion/content-types/page-layout/page-structure) | ~ | ✕ | ✕ |
+| [Page size and margins](/conversion/content-types/page-layout/page-structure) | ✕ | ✓ | ✓ |
+| [页码](/conversion/content-types/page-layout/page-structure) | ~** | ✓ | ✓** |
+| [Footnotes](/conversion/content-types/structures-and-media/footnotes-endnotes) | ✓* | ✕ | ✕ |
+| [Endnotes](/conversion/content-types/structures-and-media/footnotes-endnotes) | ✓* | ✕ | ✕ |
+| [Comments](/conversion/content-types/structures-and-media/comments) | ✓ | ✓ | ✓ |
 
-**\*** 导入行为在不同集成路径中有所不同。[REST API](/conversion/import/docx/rest-api) 会在响应中将脚注、尾注以及页眉/页脚作为单独字段返回。[编辑器扩展](/conversion/import/docx/editor-extension) 会通过 Pages 扩展自动应用页眉和页脚，但不会显示脚注或尾注数据。详情请参见安装页面。<br />
-**\*\*** 页眉/页脚中的 Word `PAGE` 和 `NUMPAGES` 字段会转换为规范文本标记（`{page}` / `{numpages}`）：在使用 Pages 扩展时默认开启；在其他情况下可通过 `placeholders` 字段选择启用。其他字段代码（`DATE`、`AUTHOR`、`MERGEFIELD`）仍会按其缓存的显示值导入。导出时，**编辑器扩展** 和 **REST API** 都会将页眉/页脚内容中的 `{page}` / `{total}` 标记作为实时的 `PAGE` / `NUMPAGES` 字段输出。请参见[页码字段](/conversion/content-types/page-layout/page-structure#page-numbers)。
+**\*** Import behavior differs between integration paths. The [REST API](/conversion/import/docx/rest-api) returns footnotes, endnotes, and headers/footers as separate fields in the response. The [editor extension](/conversion/import/docx/editor-extension) auto-applies headers and footers via the Pages extension but does not surface footnote or endnote data. See the install pages for details.<br />
+**\*\*** Word `PAGE` and `NUMPAGES` fields in headers/footers translate to canonical text tokens (`{page}` / `{numpages}`): auto-on with the Pages extension, opt-in elsewhere via the `placeholders` field. Other field codes (`DATE`, `AUTHOR`, `MERGEFIELD`) still import as their cached display value. On export, both the **editor extension** and the **REST API** emit `{page}` / `{total}` tokens in header/footer content as live `PAGE` / `NUMPAGES` fields. See [page-number fields](/conversion/content-types/page-layout/page-structure#page-numbers).
 
-<Callout variant="info" title="页面布局需要 Pages 扩展">
-  页眉、页脚、分页符以及分页布局都需要 [Pages 扩展](/pages/getting-started/overview) 才能在编辑器中渲染。没有它，即使转换服务生成了这些内容，也没有地方可供显示。
+<Callout variant="info" title="Page layout requires the Pages extension">
+  Headers, footers, page breaks, and paginated layout all require the [Pages extension](/pages/getting-started/overview) for editor rendering. Without it, these features have nowhere to render even if the conversion service produces them.
 </Callout>
 
 ## 审阅和协作
@@ -156,12 +156,12 @@ import { Callout } from '@/components/ui/Callout'
 
 | 功能 | 状态 |
 | --- | --- |
-| 目录 | 作为 `tableOfContents` 节点导入（标题和标题范围）。需要一个[自定义扩展](/editor/extensions/custom-extensions/extend-existing)来在编辑器中渲染它。现有的[目录扩展](/editor/extensions/functionality/table-of-contents)是一个用于构建侧边栏导航的无头工具，而不是文档块渲染器。不导出。 |
-| 文本框 | 不会转换。文本框中的内容不会被提取。 |
-| 形状、SmartArt、WordArt | 不会转换。这些元素在导入期间不会被提取。 |
-| 域代码（DATE、AUTHOR、MERGEFIELD） | 缓存的显示值会以纯文本形式保留（例如，显示为“2026年4月10日”的 DATE 域会作为文本“2026年4月10日”导入）。域代码本身不会转换，因此该值会变为静态且不会更新。 |
-| 页码域代码（PAGE、NUMPAGES） | 当启用 `placeholders` 时，会翻译为规范文本标记（`PAGE` 对应 `{page}`，`NUMPAGES` 对应 `{numpages}`）（Pages 扩展默认启用；也可通过 REST API 的 `placeholders={}` 表单字段显式启用）。Pages 扩展可原生渲染 `{page}`；通过 `Pages.configure({ placeholders: { total: 'numpages' } })` 将 `{numpages}` 映射后即可动态渲染。若 `placeholders: false`（或在 REST API 中省略），缓存的显示值会作为纯文本导入。 |
-| 文档元数据（作者、标题、关键词） | 不会转换。元数据不包含在 JSON 输出中。 |
-| 表单域和内容控件 | 不会转换。内联结构化文档标记（SDT）的文本内容会保留，但控件元数据会被丢弃。 |
-| 隐藏文本 | 标记为隐藏的文本运行（`w:vanish`）会从导入输出中排除。 |
-| 从右到左的文本方向 | 导入时不会解析 DOCX `<w:bidi>`（段落方向）和 `<w:rtl>`（文本运行方向），导出时也不会写入。用阿拉伯语、希伯来语、波斯语、乌尔都语及其他 RTL 语言编写的文档会按编辑器的 CSS 方向渲染（默认 LTR）。请在编辑器根元素上设置 `dir="rtl"`，或在应用层检测语言以处理此类情况。详见[文本对齐](/conversion/content-types/text-and-formatting/text-alignment)。 |
+| Table of Contents | Imported as `tableOfContents` node (title and heading range). A [custom extension](/editor/extensions/custom-extensions/extend-existing) is needed to render it in the editor. The existing [Table of Contents extension](/editor/extensions/functionality/table-of-contents) is a headless utility for building sidebar navigation, not a document block renderer. Not exported. |
+| Text boxes | Not converted. Content inside text boxes is not extracted. |
+| Shapes, SmartArt, WordArt | Not converted. These elements are not extracted during import. |
+| Field codes (DATE, AUTHOR, MERGEFIELD) | The cached display value is preserved as plain text (e.g., a DATE field showing "April 10, 2026" imports as the text "April 10, 2026"). The field code itself is not converted, so the value becomes static and will not update. |
+| Page-number field codes (PAGE, NUMPAGES) | Translated to canonical text tokens (`{page}` for `PAGE`, `{numpages}` for `NUMPAGES`) when `placeholders` is enabled (default-on with the Pages extension; opt-in via the `placeholders={}` form field on the REST API). The Pages extension renders `{page}` natively; map `{numpages}` via `Pages.configure({ placeholders: { total: 'numpages' } })` to render it live. With `placeholders: false` (or omitted on the REST API), the cached display value imports as plain text. |
+| Document metadata (author, title, keywords) | Not converted. Metadata is not included in the JSON output. |
+| 表单字段和内容控件 | 部分转换。内联和块级结构化文档标签 (SDT) 保留其内容，但控制元数据被丢弃。复选框内容控件是例外。打开任务列表导入后，以 1 开头的列表项将作为具有勾选状态的任务项导入，任务项将导出为复选框内容控件。请参阅[任务列表](/conversion/content-types/text-and-formatting/task-lists)。 |
+| Hidden text | Text runs marked as hidden (`w:vanish`) are excluded from the import output. |
+| Right-to-left text direction | DOCX `<w:bidi>` (paragraph direction) and `<w:rtl>` (run direction) are not parsed on import or written on export. Documents authored in Arabic, Hebrew, Persian, Urdu, and other RTL languages render with the editor's CSS direction (LTR by default). Set `dir="rtl"` on the editor root or detect language at the application level to handle this today. See [Text alignment](/conversion/content-types/text-and-formatting/text-alignment) for details. |

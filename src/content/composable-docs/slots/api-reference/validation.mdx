@@ -24,9 +24,10 @@ if (result.valid && isSlotValidationCurrent({ editor, result })) {
 
 ### 参数
 
-- `config` (`unknown`)：要检查的配置。
-- `kind?` (`SlotKind`)：Slot 类型。对于 `'inline'`，拒绝 `allowedBlocks`、`constraints.minChildren` 和 `constraints.maxChildren`。省略时跳过特定类型检查。
-- `schema?` (`Schema`)：用于类型名称检查的 schema。省略时仅检查语法。
+- `config` (`unknown`): Configuration to check.
+- `mode?` (`SlotMode`)：默认为 `content`。通过 `value` 允许输入设置并拒绝仅内容设置。
+- `kind?` (`SlotKind`): Slot kind. For `'inline'`, rejects `allowedBlocks`, `constraints.minChildren` and `constraints.maxChildren`. Omitted: skips kind-specific checks.
+- `schema?` (`Schema`): Schema for type-name checks. Omitted: syntax checks only.
 
 ### 返回值（`{ valid: boolean; issues: SlotConfigIssue[] }`）
 

@@ -642,6 +642,59 @@ export const sidebarConfig: SidebarConfig = {
     },
     {
       type: 'group',
+      href: '/editor/whiteboard',
+      title: '白板',
+      tags: ['alpha'],
+      children: [
+        { title: '概览', href: '/editor/whiteboard/getting-started/overview' },
+        {
+          title: '指南',
+          href: '/editor/whiteboard/guides/react',
+          children: [
+            { title: 'React', href: '/editor/whiteboard/guides/react' },
+            { title: '舞台与相机', href: '/editor/whiteboard/guides/stage-and-camera' },
+            { title: '形状与工具', href: '/editor/whiteboard/guides/shapes-and-tools' },
+            { title: '箭头', href: '/editor/whiteboard/guides/arrows' },
+            { title: '框架', href: '/editor/whiteboard/guides/frames' },
+            { title: '文档框架', href: '/editor/whiteboard/guides/doc-frames' },
+            { title: '图像', href: '/editor/whiteboard/guides/images' },
+            { title: '自定义形状', href: '/editor/whiteboard/guides/custom-shapes' },
+            { title: '导出与导入', href: '/editor/whiteboard/guides/export-and-import' },
+            {
+              title: '白板协作',
+              href: '/editor/whiteboard/guides/collaboration',
+            },
+            {
+              title: '白板修订跟踪',
+              href: '/editor/whiteboard/guides/tracked-changes',
+            },
+          ],
+        },
+        {
+          title: '示例',
+          href: '/editor/whiteboard/examples/simple',
+          children: [
+            { title: '简单白板', href: '/editor/whiteboard/examples/simple' },
+            { title: '自定义形状', href: '/editor/whiteboard/examples/custom-shape' },
+          ],
+        },
+        { title: 'AI Agent', href: '/ai/ai-toolkit/agents/whiteboard' },
+        {
+          title: 'API 参考',
+          href: '/editor/whiteboard/api-reference/extensions',
+          children: [
+            { title: '扩展', href: '/editor/whiteboard/api-reference/extensions' },
+            { title: '命令', href: '/editor/whiteboard/api-reference/commands' },
+            { title: '工具函数', href: '/editor/whiteboard/api-reference/utilities' },
+            { title: '类型', href: '/editor/whiteboard/api-reference/types' },
+            { title: '样式', href: '/editor/whiteboard/api-reference/styling' },
+            { title: '编辑器事件', href: '/editor/whiteboard/api-reference/events' },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'group',
       href: '/editor/api',
       title: 'API 文档',
       children: [
