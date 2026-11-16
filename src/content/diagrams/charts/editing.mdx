@@ -41,11 +41,22 @@ meta:
 ```ts
 import { parseChartSyntax, renameChartDataText } from '@tiptap-pro/extension-diagrams/core'
 
-const { data } = parseChartSyntax('Month | Sales\nJan | 2\nFeb | 4')
+const { data } = parseChartSyntax('Month | Revenue\nJan | 120\nFeb | 150\nMar | 110')
 const renamed = renameChartDataText({
   data,
-  target: { kind: 'series', column: 'sales' },
-  text: 'Revenue',
+  target: { kind: 'series', column: 'revenue' },
+  text: 'Sales',
 })
 editor.commands.updateChartData({ data: renamed ?? data })
 ```
+
+| Option     | Type              | Default  | Description                                                                                  |
+| ---------- | ----------------- | -------- | -------------------------------------------------------------------------------------------- |
+| `data`     | `ChartData`       | Required | The Chart Data                                                                               |
+| `encoding` | `ChartEncoding`   | None     | The chart's `spec.encoding`, so `seriesIn: 'rows'` counts                                    |
+| `target`   | `ChartTextTarget` | Required | `{ kind: 'series', column }` with a column id, or `{ kind: 'category', row }` counted from 0 |
+| `text`     | `string`          | Required | The new text                                                                                 |
+
+使用 `data.columns` 中的列 `id`。新图表的 ID 根据列标题生成，例如 `Revenue` 对应 `revenue`；如果标题重复，则生成 `revenue` 和 `revenue-2`。重命名列不会改变其 ID，因此以下示例中的列仍为 `revenue`。
+
+使用 `encoding: { seriesIn: 'rows' }` 时，目标位置按照图表中的数据布局确定。一个系列对应一行，其 `column` 值是标签对应的 ID，例如 `Jan` 对应 `jan`。一个类别对应一列，其 `row` 值从 0 开始计算系列所在的行。

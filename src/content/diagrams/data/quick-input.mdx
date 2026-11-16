@@ -19,18 +19,17 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 输入数据行即可生成图表。第一行可以指定图表类型：
 
-```txt
-bar
-Month | Online | Retail
-Jan   | 42     | 30
-Feb   | 48     | 28
+```ts
+document.querySelector('#new-chart')?.addEventListener('click', () => {
+  editor.chain().focus().insertDiagramInput({ type: 'bar' }).run()
+})
 ```
 
 Mermaid 流程图源码也可通过快速输入生成流程图：
 
 ```txt
-flowchart LR
-  idea[Idea] --> draft[Draft]
+Month | Online | Retail
+Jan   | 42     | 30
 ```
 
 按 Escape，或在末行为空时按 Enter，即可确认输入。编辑[图表](/diagrams/charts/editing)或[流程图](/diagrams/flow-diagrams/editing)中的文本时，按 Escape 会关闭输入框并撤销本次修改。

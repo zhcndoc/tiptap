@@ -138,6 +138,10 @@ meta:
 
 类型：`(typeof shapeColors)[number] | (string & {})`。白板颜色的名称：`shapeColors` 中的一种，例如 `'black'` 或 `'red'`，或者您自己的一种。请参阅[颜色](/editor/whiteboard/api-reference/styling#colors)。
 
+### `ShapeSide`
+
+类型：`(typeof shapeSides)[number]`，取值为 `'top' | 'right' | 'bottom' | 'left'`。表示形状框的一条边，来源于 [`shapeSides`](/editor/whiteboard/api-reference/utilities#shapesides)。
+
 ## `ShapeStyles`
 
 类型：`{ [Name in ShapeStyleName]: ShapeStyleValue<Name> }`。形状的样式来自`shapeStyles`。 `ShapeStyles` 每种风格都有一个值。
@@ -164,6 +168,7 @@ meta:
 - `shapeElementAttributes` (`ShapeElementAttributes | null`)
 - `docs` (`BoardDocs | null`)
 - `images` (`BoardImages | null`)
+- `chooseConnectedShape` (`ChooseConnectedShape | null`)
 - `colors` (`readonly ShapeColor[]`)
 - `toolKeys` (`ToolKeys | false`)
 
@@ -218,6 +223,25 @@ meta:
 - `file` (`File`)：板遗漏的文件。
 - `reason` (`'type' | 'size' | 'upload'`)：当 `accept` 未列出文件类型或浏览器无法显示文件时为 `type`，当文件大于 `maxSize` 时为 `size`，当 `upload` 抛出或返回无法显示的 URL 时为 `upload`。
 - `error?` (`unknown`)：`upload` 抛出的内容，或者当 URL 无法显示时返回的 URL。
+
+## `ChooseConnectedShape`
+
+类型：`(choice: ConnectedShapeChoice) => Promise<GeoKind | null>`。当用户从连接手柄拖动到白板空白处时，询问要添加哪种形状，类似 FigJam 在此显示的菜单。选择后返回几何形状类型；返回 `null` 则不添加形状。在选择完成前，白板会显示箭头和预览形状。参阅[形状和工具](/editor/whiteboard/guides/shapes-and-tools#change-shapes)。
+
+```js
+import { WhiteboardKit } from '@tiptap-pro/extension-whiteboard'
+
+WhiteboardKit.configure({
+  chooseConnectedShape: ({ clientPoint }) => openShapeMenu(clientPoint),
+})
+```
+
+### `ConnectedShapeChoice`
+
+- `id` (`string`)：开始拖动的形状 ID。
+- `clientPoint` (`Point`)：拖动结束位置的客户端像素坐标，例如用于定位菜单。
+- `point` (`Point`)：拖动结束位置的白板坐标。相机移动后，可通过 [`boardToClient`](/editor/whiteboard/api-reference/utilities#boardtoclient) 再将其转换为客户端像素坐标，从而让菜单保持在箭头末端。
+- `preview` (`(kind: GeoKind | null) => void`)：在箭头末端显示几何形状预览，类似菜单指向某个选项时的效果。传入 `null` 会恢复为与起始形状相同的形状。
 
 ## `BoardFile`
 

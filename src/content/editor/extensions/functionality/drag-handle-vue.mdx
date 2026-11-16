@@ -6,6 +6,8 @@ extension:
   description: 您是否曾希望在基于 Vue 的编辑器中拖动节点？好吧，我们也有这个想法。
   type: extension
   icon: GripVertical
+  group: menus
+  package: '@tiptap/extension-drag-handle-vue-3 @tiptap/extension-drag-handle @tiptap/extension-node-range @tiptap/extension-collaboration @tiptap/y-tiptap yjs y-protocols'
 tags:
   - type: image
     src: https://img.shields.io/npm/v/@tiptap/extension-drag-handle-vue.svg?label=version
@@ -108,7 +110,7 @@ export default {
 
 ### onElementDragStart
 
-A function that is called when the element starts to be dragged. This can be used to add custom logic when dragging starts.
+元素开始拖动时调用的函数。可用于在拖动开始时执行自定义逻辑。
 
 Signature: `(event: DragEvent) => void`
 
@@ -143,7 +145,7 @@ export default {
 
 ### onElementDragEnd
 
-A function that is called when the element stops being dragged. This can be used to add custom logic when dragging ends.
+元素停止拖动时调用的函数。可用于在拖动结束时执行自定义逻辑。
 
 Signature: `(event: DragEvent) => void`
 

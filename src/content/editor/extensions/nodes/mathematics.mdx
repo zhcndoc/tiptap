@@ -1,39 +1,41 @@
 ---
-title: Mathematics extension
+title: 数学公式扩展
 extension:
   name: Mathematics
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-mathematics
-  description: This extension allows your users to write and visualize mathematical formulas via LaTeX.
+  description: '使用 LaTeX 编写并渲染数学公式。'
   type: extension
   icon: SquareDivide
+  group: code-and-math
+  package: '@tiptap/extension-mathematics katex'
 tags:
   - type: image
     src: https://img.shields.io/npm/v/@tiptap/extension-mathematics.svg?label=version
     url: https://www.npmjs.com/package/@tiptap/extension-mathematics
-    label: Version
+    label: 版本
   - type: image
     src: https://img.shields.io/npm/dm/@tiptap/extension-mathematics.svg
     url: https://npmcharts.com/compare/@tiptap/extension-mathematics?minimal=true
-    label: Downloads
+    label: 下载量
 meta:
-  title: Mathematics extension | Tiptap Editor Docs
-  description: This extension allows your users to write and visualize mathematical formulas via LaTeX. Learn how to set it up in the docs!
-  category: Editor
+  title: 数学公式扩展 | Tiptap 编辑器文档
+  description: 此扩展支持用户使用 LaTeX 编写和查看数学公式。请参阅文档了解配置方法。
+  category: 编辑器
 ---
 
 import { CodeDemo } from '@/components/CodeDemo'
 
-This extension allows you to insert math formulas into your editor. It uses [KaTeX](https://katex.org/) to render math formulas written in LaTeX.
+此扩展可让你在编辑器中插入数学公式，并使用 [KaTeX](https://katex.org/) 渲染以 LaTeX 编写的公式。
 
 <CodeDemo path="/Extensions/Mathematics" />
 
-## Install
+## 安装
 
 ```bash
 npm install @tiptap/extension-mathematics katex
 ```
 
-## Usage
+## 用法
 
 ```js
 import { Mathematics } from '@tiptap/extension-mathematics'
@@ -55,19 +57,19 @@ const editor = new Editor({
 })
 ```
 
-## Additional Setup
+## 其他设置
 
-### Styling the KaTeX rendering
+### 设置 KaTeX 渲染样式
 
-You are free to style the rendering element and the editor input.
+你可以自行设置渲染元素和编辑器输入区域的样式。
 
-**Import of KaTeX styling (needed).**
+**必须导入 KaTeX 样式。**
 
 ```js
 import 'katex/dist/katex.min.css'
 ```
 
-The following classes allow you to select and style the math nodes. For an example, see demonstration code at the end of this page.
+你可以使用以下 class 选择数学公式节点并设置其样式。示例代码见本页末尾。
 
 ```css
 /* The rendered math node */
@@ -91,9 +93,9 @@ The following classes allow you to select and style the math nodes. For an examp
 }
 ```
 
-### Configuring the extension and updating math nodes
+### 配置扩展并更新数学公式节点
 
-The extension comes with a few options to configure the behavior of the math nodes.
+此扩展提供若干选项，用于配置数学公式节点的行为。
 
 ```js
 import Mathematics from '@tiptap/extension-mathematics'
@@ -136,9 +138,9 @@ Mathematics.configure({
 }
 ```
 
-### Migrating existing math decorations to math nodes
+### 将现有数学装饰迁移为数学公式节点
 
-Since the Math extension used to be a decoration extension, you might have existing math decorations in your editor. To migrate them to the new math nodes, you can use the `migrateMathStrings` utility function provided by the extension.
+Math 扩展以前使用装饰来表示公式，因此你的编辑器中可能已有数学装饰。你可以使用扩展提供的 `migrateMathStrings` 工具函数，将它们迁移为新的数学公式节点。
 
 ```js
 import { migrateMathStrings } from '@tiptap/extension-mathematics'
@@ -163,9 +165,9 @@ const editor = new Editor({
 })
 ```
 
-### Only importing one type of math node
+### 只导入一种数学公式节点
 
-If you only want to use one type of math node (either inline or block), you can import the respective extension directly:
+如果只需要一种数学公式节点（行内或块级），可以直接导入对应扩展：
 
 ```js
 import { InlineMath } from '@tiptap/extension-mathematics/inline'
@@ -187,13 +189,13 @@ InlineMath.configure({
 })
 ```
 
-## Settings
+## 设置
 
 ### `inlineOptions`
 
-This option allows you to configure the inline math node. You can pass any options that are supported by the inline math node, such as `onClick` to handle click events on the node.
+此选项用于配置行内数学公式节点。你可以传入该节点支持的任意选项，例如使用 `onClick` 处理节点的点击事件。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```js
 import Mathematics from '@tiptap/extension-mathematics'
@@ -216,9 +218,9 @@ Mathematics.configure({
 
 ### `blockOptions`
 
-This option allows you to configure the block math node. You can pass any options that are supported by the block math node, such as `onClick` to handle click events on the node.
+此选项用于配置块级数学公式节点。你可以传入该节点支持的任意选项，例如使用 `onClick` 处理节点的点击事件。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```js
 import Mathematics from '@tiptap/extension-mathematics'
@@ -241,9 +243,9 @@ Mathematics.configure({
 
 ### `katexOptions`
 
-This option allows you to configure the KaTeX renderer. You can see all options [here](https://katex.org/docs/options.html).
+此选项用于配置 KaTeX 渲染器。所有选项请参阅[此处](https://katex.org/docs/options.html)。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```js
 import Mathematics from '@tiptap/extension-mathematics'
@@ -261,13 +263,13 @@ Mathematics.configure({
 })
 ```
 
-## Settings: `InlineMath`
+## `InlineMath` 设置
 
 ### `onClick`
 
-This option allows you to handle click events on the inline math node. You can use it to open a dialog to edit the math node or just a prompt to edit the LaTeX code for a quick prototype.
+此选项用于处理行内数学公式节点的点击事件。你可以借此打开对话框编辑节点，也可以使用 prompt 快速编辑 LaTeX 代码以进行原型验证。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```js
 import { InlineMath } from '@tiptap/extension-mathematics'
@@ -288,9 +290,9 @@ InlineMath.configure({
 
 ### `katexOptions`
 
-This option allows you to configure the KaTeX renderer for the inline math node. You can see all options [here](https://katex.org/docs/options.html).
+此选项用于配置行内数学公式节点的 KaTeX 渲染器。所有选项请参阅[此处](https://katex.org/docs/options.html)。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```js
 import { InlineMath } from '@tiptap/extension-mathematics'
@@ -308,13 +310,13 @@ InlineMath.configure({
 })
 ```
 
-## Settings: `BlockMath`
+## `BlockMath` 设置
 
 ### `onClick`
 
-This option allows you to handle click events on the block math node. You can use it to open a dialog to edit the math node or just a prompt to edit the LaTeX code for a quick prototype.
+此选项用于处理块级数学公式节点的点击事件。你可以借此打开对话框编辑节点，也可以使用 prompt 快速编辑 LaTeX 代码以进行原型验证。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```js
 import { BlockMath } from '@tiptap/extension-mathematics'
@@ -335,9 +337,9 @@ BlockMath.configure({
 
 ### `katexOptions`
 
-This option allows you to configure the KaTeX renderer for the block math node. You can see all options [here](https://katex.org/docs/options.html).
+此选项用于配置块级数学公式节点的 KaTeX 渲染器。所有选项请参阅[此处](https://katex.org/docs/options.html)。
 
-Default: `undefined`
+默认值：`undefined`
 
 ```js
 import { BlockMath } from '@tiptap/extension-mathematics'
@@ -355,11 +357,11 @@ BlockMath.configure({
 })
 ```
 
-## Commands: InlineMath
+## `InlineMath` 命令
 
 ### `insertInlineMath({ latex, pos })`
 
-Inserts a new inline math node with the given LaTeX code at the specified position. If `pos` is not provided, it will insert the node at the current selection.
+在指定位置插入包含给定 LaTeX 代码的行内数学公式节点。如果未提供 `pos`，则在当前选区插入节点。
 
 ```js
 // with a specified position
@@ -376,7 +378,7 @@ editor.commands.insertInlineMath({
 
 ### `deleteInlineMath({ pos })`
 
-Deletes the inline math node at the specified position. If `pos` is not provided, it will delete the node at the current selection.
+删除指定位置的行内数学公式节点。如果未提供 `pos`，则删除当前选区中的节点。
 
 ```js
 // with a specified position
@@ -390,7 +392,7 @@ editor.commands.deleteInlineMath()
 
 ### `updateInlineMath({ latex, pos })`
 
-Updates the inline math node at the specified position with the given LaTeX code. If `pos` is not provided, it will update the node at the current selection.
+在指定位置使用给定的 LaTeX 代码更新行内数学公式节点。如果未提供 `pos`，则更新当前选区中的节点。
 
 ```js
 // with a specified position
@@ -405,11 +407,11 @@ editor.commands.updateInlineMath({
 })
 ```
 
-## Commands: BlockMath
+## `BlockMath` 命令
 
 ### `insertBlockMath({ latex, pos })`
 
-Inserts a new block math node with the given LaTeX code at the specified position. If `pos` is not provided, it will insert the node at the current selection.
+在指定位置插入包含给定 LaTeX 代码的块级数学公式节点。如果未提供 `pos`，则在当前选区插入节点。
 
 ```js
 // with a specified position
@@ -426,7 +428,7 @@ editor.commands.insertBlockMath({
 
 ### `deleteBlockMath({ pos })`
 
-Deletes the block math node at the specified position. If `pos` is not provided, it will delete the node at the current selection.
+删除指定位置的块级数学公式节点。如果未提供 `pos`，则删除当前选区中的节点。
 
 ```js
 // with a specified position
@@ -440,7 +442,7 @@ editor.commands.deleteBlockMath()
 
 ### `updateBlockMath({ latex, pos })`
 
-Updates the block math node at the specified position with the given LaTeX code. If `pos` is not provided, it will update the node at the current selection.
+在指定位置使用给定的 LaTeX 代码更新块级数学公式节点。如果未提供 `pos`，则更新当前选区中的节点。
 
 ```js
 // with a specified position
@@ -455,11 +457,11 @@ editor.commands.updateBlockMath({
 })
 ```
 
-## Utilities & Constants
+## 工具函数和常量
 
 ### `mathMigrationRegex`
 
-The default regular expression used to find and migrate math strings in the editor. It matches LaTeX expressions wrapped in `$` symbols.
+用于查找并迁移编辑器中数学表达式的默认正则表达式。它会匹配由 `$` 符号包裹的 LaTeX 表达式。
 
 ```js
 import { mathMigrationRegex } from '@tiptap/extension-mathematics'
@@ -467,13 +469,13 @@ import { mathMigrationRegex } from '@tiptap/extension-mathematics'
 
 ### `createMathMigrateTransaction(editor, transaction, regex)`
 
-Creates a ProseMirror transaction that migrates math strings in the editor document to math nodes. It uses the provided regular expression to find math strings.
+创建一个 ProseMirror 事务，将编辑器文档中的数学表达式迁移为数学公式节点，并使用传入的正则表达式查找这些表达式。
 
-### Params
+### 参数
 
-- `editor`: The ProseMirror editor instance.
-- `transaction`: The ProseMirror transaction to modify.
-- `regex` (Optional): The regular expression to use for finding math strings. Defaults to `mathMigrationRegex`.
+- `editor`：ProseMirror 编辑器实例。
+- `transaction`：要修改的 ProseMirror 事务。
+- `regex`（可选）：用于查找数学表达式的正则表达式。默认为 `mathMigrationRegex`。
 
 ```js
 import { createMathMigrateTransaction } from '@tiptap/extension-mathematics'
@@ -484,12 +486,12 @@ editor.view.dispatch(tr)
 
 ### `migrateMathStrings(editor, regex)`
 
-Creates and runs a migration transaction to convert math strings in the editor document to math nodes. It uses the provided regular expression to find math strings.
+创建并运行迁移事务，将编辑器文档中的数学表达式转换为数学公式节点，并使用传入的正则表达式查找这些表达式。
 
-### Params
+### 参数
 
-- `editor`: The ProseMirror editor instance.
-- `regex` (Optional): The regular expression to use for finding math strings. Defaults to `mathMigrationRegex`.
+- `editor`：ProseMirror 编辑器实例。
+- `regex`（可选）：用于查找数学表达式的正则表达式。默认为 `mathMigrationRegex`。
 
 ```js
 import { migrateMathStrings } from '@tiptap/extension-mathematics'

@@ -15,8 +15,22 @@ meta:
 
 ## 快速入门
 
+`insertChart()` 会根据代码中的数据插入图表。在按照[创建第一个图表](/diagrams/getting-started/install#a-first-chart)配置了 `Diagrams` 和渲染器的编辑器中，以下代码会插入并选中柱状图：
+
 ```ts
-editor.commands.insertFromText({ text: 'Month | Sales\nJan | 2\nFeb | 3' })
+editor.commands.insertChart({
+  type: 'bar',
+  data: {
+    columns: [
+      { id: 'month', label: 'Month', role: 'label' },
+      { id: 'revenue', label: 'Revenue', role: 'series' },
+    ],
+    rows: [
+      ['Jan', 120],
+      ['Feb', 150],
+    ],
+  },
+})
 ```
 
 [`insertFromText`](/diagrams/data/pasting#insertfromtext) 以粘贴方式读取文本，因此这些行成为图表。这些行以 [图表语法](/diagrams/data/chart-syntax).
@@ -104,19 +118,7 @@ Build  | C    | R    |
 在所选内容或 `pos` 处插入图表，然后选择它。
 
 ```ts
-editor.commands.insertChart({
-  type: 'bar',
-  data: {
-    columns: [
-      { id: 'month', label: 'Month', role: 'label' },
-      { id: 'revenue', label: 'Revenue', role: 'series' },
-    ],
-    rows: [
-      ['Jan', 120],
-      ['Feb', 150],
-    ],
-  },
-})
+editor.commands.insertChart({ type: 'line', pos: 0 })
 ```
 
 | 选项 | 类型 | 描述 |

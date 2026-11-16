@@ -1,0 +1,31 @@
+---
+title: 文本块
+description: '文本块是构成文档的节点，包括段落、标题、引用、可折叠区域，以及用于承载它们的文档和文本节点。'
+meta:
+  title: 文本块 | Tiptap 文档
+  description: 在 Tiptap 编辑器中使用段落、标题、引用块、可折叠详情、水平分隔线和硬换行构建文档。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="text-blocks" />
+
+## 使用场景
+
+- **文档结构。** Heading 可添加最多六级标题，Paragraph 用于存放正文。
+- **引用。** Blockquote 用 `blockquote` 标签渲染引用内容。
+- **可折叠区域。** Details 使用 HTML `details` 标签，在摘要后显示或隐藏内容。
+- **分隔。** Hard break 可在内容块中强制换行，Horizontal rule 会绘制分隔内容的横线。
+
+## 工作原理
+
+- **它们都是节点。** Document 是用于容纳其他节点的顶层节点，Text 用于存放纯文本。每个编辑器都需要 Document；任何文本内容都需要 Text，段落则需要 Paragraph。[节点和标记](/editor/core-concepts/nodes-and-marks)
+- **StarterKit 自带其中大多数节点。** Blockquote、Document、Hard break、Heading、Horizontal rule、Paragraph 和 Text 属于 [StarterKit](/editor/extensions/functionality/starterkit)；Details 需要手动添加。
+- **Details 还需要两个节点。** Details 需要与同一软件包中的 Details summary 和 Details content 配合使用。
+- **Markdown 快捷输入。** 在行首输入 `# ` 可开始标题，输入 `> ` 可开始引用块，输入 `---` 可插入水平分隔线。[键盘快捷键](/editor/core-concepts/keyboard-shortcuts)
+
+## 相关内容
+
+- [列表](/editor/extensions/lists)和[表格](/editor/extensions/tables)介绍其他类型的内容块。
+- 若需要本文未介绍的内容块，请参阅[创建自己的节点](/editor/extensions/custom-extensions/create-new/node)。

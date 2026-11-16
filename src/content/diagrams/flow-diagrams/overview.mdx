@@ -30,27 +30,19 @@ npm install @tiptap-pro/extension-diagrams mermaid
 然后注册 Mermaid 渲染器并插入第一个流程图：
 
 ```ts
-import { Editor } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
-import { Diagrams, chartStyleRules, flowDiagramStyleRules } from '@tiptap-pro/extension-diagrams'
+import { Diagrams } from '@tiptap-pro/extension-diagrams'
 import { mermaidDiagramRenderer } from '@tiptap-pro/extension-diagrams/mermaid'
 import rendererUrl from '@tiptap-pro/extension-diagrams/mermaid-renderer?url&no-inline'
 import mermaidUrl from 'mermaid/dist/mermaid.min.js?url'
 
-const style = document.createElement('style')
-style.textContent = chartStyleRules() + flowDiagramStyleRules()
-document.head.append(style)
-
-const editor = new Editor({
-  element: document.querySelector('#editor'),
-  extensions: [
-    StarterKit,
-    Diagrams.configure({
-      diagramRenderers: [mermaidDiagramRenderer({ mermaidUrl, rendererUrl })],
-    }),
-  ],
+const diagrams = Diagrams.configure({
+  diagramRenderers: [mermaidDiagramRenderer({ mermaidUrl, rendererUrl })],
 })
+```
 
+在 `new Editor()` 的 `extensions` 中加入 `diagrams` 后，以下代码会插入标题为“订单流转方式”的流程图：
+
+```ts
 editor.commands.insertFlowDiagram({
   source: 'flowchart LR\n  A[Order] --> B{Paid?}\n  B -->|yes| C[Ship]',
   title: 'How an order moves',

@@ -12,11 +12,14 @@ meta:
 
 ## 快速入门
 
+安装 ECharts（`^6.0.0`）并注册渲染器：
+
 ```bash
 npm install echarts
 ```
 
 ```ts
+import { Diagrams } from '@tiptap-pro/extension-diagrams'
 import { echartsRenderer } from '@tiptap-pro/extension-diagrams/echarts'
 
 Diagrams.configure({ renderers: [echartsRenderer()] })

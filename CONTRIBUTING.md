@@ -1,36 +1,48 @@
-# 贡献指南
+# Contribution Guidelines
 
-感谢您对贡献 Tiptap 文档的兴趣。我们欢迎所有人的贡献，并感谢您帮助我们使文档变得更好。
+Thank you for your interest in contributing to the Tiptap documentation. We welcome contributions from everyone and appreciate your help in making our documentation even better.
 
-## 如何贡献
+## How to Contribute
 
-请按照以下步骤进行贡献：
+To contribute, please follow these steps:
 
-1. **Fork 仓库**：首先[Fork 仓库](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo)并将其克隆到您的本地机器。
-2. **创建新分支**：为您的更改创建一个新分支，以保持工作有序并与主分支分离。
-   - 命名分支时，请使用以下格式：
-     - `fix/<描述>` 用于修复文档中的错误（拼写错误、不正确信息）或网站代码中的 bug。
-     - `feature/<描述>` 用于网站的新功能或文档的新内容。
-3. **进行更改**：对文档进行修改或添加内容。
-4. **测试更改**：确保您的更改正常工作且不会引入任何问题。
-   - 使用 `pnpm dev` 命令在本地运行文档，在浏览器中预览更改。
-   - 使用 `pnpm lint` 命令运行代码风格检查。
-5. **提交更改**：使用清晰且描述性的提交信息提交您的更改。推荐使用 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) 格式。
-6. **推送到您的 Fork**：将更改推送到您在 GitHub 上的 Fork 仓库。
-7. **创建 Pull Request**：向原仓库的 `main` 分支提交 Pull Request。Pull Request 中请包含：
-   - 一个清晰的标题，概述您的更改。
-   - 如果您的 PR 记录的是 [Tiptap 仓库](https://github.com/ueberdosis/tiptap) 中的更改，请添加引入该更改的 Tiptap 仓库 PR 链接。
-   - 添加任何相关的问题或讨论的链接。
-   - 详细描述您所做的更改。
-   - 任何有助于维护者理解您更改的相关信息。
-8. **审查和合并**：等待维护者审查您的更改。经批准后，您的更改将被合并。
+1. **Fork the Repository**: Start by [forking the repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) and cloning it to your local machine.
+2. **Create a New Branch**: Create a new branch for your changes to keep your work organized and separate from the main branch.
+   - When naming your branch, please use the following format:
+     - `fix/<description>` for fixes to the documentation (typos, incorrect information) or bugs in the website code.
+     - `feature/<description>` for new features of the website or new content of the documentation.
+3. **Make Your Changes**: Implement your changes or additions to the documentation.
+4. **Test Your Changes**: Ensure your changes work correctly and do not introduce any issues.
+   - Run the docs locally with the `pnpm dev` command. Preview the changes in your browser.
+   - Run the linter with `pnpm lint` command.
+5. **Commit Your Changes**: Commit your changes with a clear and descriptive commit message. We recommend using the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format.
+6. **Push to Your Fork**: Push your changes to your fork on GitHub.
+7. **Create a Pull Request**: Open a pull request to the `main` branch of the original repository. In the pull request, include:
+   - A clear title that summarizes your changes.
+   - If your PR documents a change in the [Tiptap repository](https://github.com/ueberdosis/tiptap), add a link to the PR in the Tiptap repository that introduced that change.
+   - Add links to any issues or discussions that are related to your changes.
+   - A detailed description of the changes you made.
+   - Any relevant information that will help the maintainers understand your changes.
+8. **Review and Merge**: Wait for a maintainer to review your changes. Once approved, your changes will be merged.
 
-## 发布文档
+## Feature Catalog
 
-文档会在更改推送到 `main` 后自动发布。文档没有版本化发布，因此贡献不需要 changeset 或版本升级。
+The catalog at `/editor/extensions/overview` lists every page whose frontmatter has an `extension` block with a `group`. The groups, their order, and their area (Editor or Document Platform) are in `src/content/catalog.ts`; editor groups also make up the sidebar under Features, next to the larger features such as Comments or Conversion, which keep their own sections. A page's plan comes from its `tags`. A new extension page needs a `group` and its npm `package`, as its install command names them.
 
-## 许可协议
+Industries for the catalog filter are in `src/content/industries.ts`; each lists the features that matter most there, by catalog name.
 
-贡献即表示您同意您的贡献将遵守与项目相同的许可协议。更多细节请参阅 [LICENSE.md](LICENSE) 文件。
+## Labels
 
-感谢您帮助我们改进 Tiptap 的文档！
+- **Plan and status come from the feature.** Tag the feature's overview page in its frontmatter (`start`, `team`, `addon`, `restricted`, `mit`; `alpha`, `beta`, `deprecated`). Its pages inherit the plan and status through the sidebar and show them in the page header. Tag a page only when it differs from its feature, such as a Team page inside a Start feature.
+- **The sidebar shows one grey label per entry**, in this order: Deprecated, Paid, New. Paid stands for any plan, add-on, or the pilot program; the page header names which. A group says Paid when all its entries are paid, and the entries below a paid one don't repeat it; a group that mixes free and paid features says nothing, only its paid entries do. Open source stays unlabeled. Alpha and Beta show in the page header, not in the sidebar.
+- **"New" carries a date and goes away after 90 days.** In frontmatter, `- type: new` with `since: '2026-10-01'`; in a sidebar, `newSince: '2026-10-01'` on the entry.
+
+## Publishing Documentation
+
+The documentation is published automatically when changes are pushed to `main`. The docs do not have versioned releases, so contributions do not need a changeset or a version bump.
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the same license as the project. For more details, please refer to the [LICENSE.md](LICENSE) file.
+
+Thank you for helping us improve Tiptap's documentation!

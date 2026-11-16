@@ -1,0 +1,30 @@
+---
+title: 文本样式
+description: '文本样式扩展可修改文本的颜色、背景色、字体、大小、行高和对齐方式。'
+meta:
+  title: 文本样式 | Tiptap 文档
+  description: 在 Tiptap 编辑器中设置文本颜色、背景色、字体、字号、行高和对齐方式。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="text-styling" />
+
+## 使用场景
+
+- **颜色。** Color 可设置文本颜色，Background color 可设置文本背景色，两者都支持任意颜色。
+- **字体。** Font family 和 Font size 可设置所选文本的字体和字号。
+- **间距。** Line height 可设置文本的行高。
+- **对齐。** Text align 可将段落、标题或其他内容块设为左对齐、居中、右对齐或两端对齐。
+
+## 工作原理
+
+- **它们基于 Text style 标记。** Text style 会渲染为 `span` 标签，但本身不添加样式。Background color、Color、Font family、Font size 和 Line height 会将对应值作为行内样式添加到该 `span`，因此每个扩展都需要 Text style。[节点和标记](/editor/core-concepts/nodes-and-marks)
+- **TextStyle kit 将它们组合在一起。** [TextStyle kit](/editor/extensions/functionality/text-style-kit) 包含 Text style、Background color、Color、Font family、Font size 和 Line height。这些扩展都不属于 [StarterKit](/editor/extensions/functionality/starterkit)。
+- **Text align 作用于节点。** 它会为 `types` 设置中列出的节点类型添加属性，该设置默认为空。Text align 使用独立的软件包，不属于 TextStyle kit。
+
+## 相关内容
+
+- [文本格式](/editor/extensions/text-formatting)介绍如何将词语和短语标记为粗体、斜体、链接或高亮。
+- [文本块](/editor/extensions/text-blocks)介绍 Text align 可对齐的段落和标题。

@@ -1,0 +1,30 @@
+---
+title: 菜单和拖动手柄
+description: '菜单和拖动手柄可在内容旁放置自定义控件，包括选中文本旁的菜单、空行上的菜单，以及用于拖动块的手柄。'
+meta:
+  title: 菜单和拖动手柄 | Tiptap 文档
+  description: 在 Tiptap 编辑器中添加选中文本的气泡菜单、空行上的浮动菜单，以及用于移动内容块的拖动手柄；支持 React、Vue 或原生 JavaScript。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="menus" />
+
+## 使用场景
+
+- **设置选区格式。** Bubble menu 会在选中文本旁显示菜单，例如提供用于应用标记的按钮。
+- **插入内容块。** Floating menu 会在空行上显示菜单，例如用于插入内容块。
+- **移动内容块。** Drag handle 会显示可拖动的手柄，用于将内容块移到其他位置。启用 `nested` 设置后，它也适用于列表项和其他嵌套内容。
+
+## 工作原理
+
+- **控件由你构建。** 扩展会显示并定位你提供的元素，其标记和样式由你决定。
+- **React 和 Vue 提供组件。** `@tiptap/react` 和 `@tiptap/vue-3` 包含 Bubble menu 和 Floating menu 组件；使用这些组件时无需另行添加对应扩展。Drag handle React 和 Drag handle Vue 将拖动手柄封装为组件，并会自动将其注册到编辑器。
+- **多个实例需要使用不同的键。** 同一个编辑器中的每个菜单或手柄都要使用唯一的 `pluginKey`。
+- **需要手动添加。** 这些扩展都不包含在 [StarterKit](/editor/extensions/functionality/starterkit) 中。
+
+## 相关内容
+
+- [光标和选区](/editor/extensions/cursor-and-selection)介绍如何显示拖动内容的放置位置。
+- [文本格式](/editor/extensions/text-formatting)介绍气泡菜单通常会应用的文本标记。

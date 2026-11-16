@@ -15,6 +15,8 @@ meta:
 
 ## 快速启动
 
+此渲染器使用 draw.io viewer 绘图。该脚本不发布在 npm 上。请从 draw.io 发布版本中复制 `viewer-static.min.js`（位于 `jgraph/drawio` 仓库的 `src/main/webapp/js/` 目录）到应用中，并传入两个脚本的 URL：
+
 ```ts
 import { Diagrams } from '@tiptap-pro/extension-diagrams'
 import { drawioDiagramRenderer } from '@tiptap-pro/extension-diagrams/drawio'
@@ -80,20 +82,31 @@ draw.io 查看器在每页一个隐藏的 iframe 中运行，具有 `sandbox="al
 ```ts
 import { connectDrawioEditor, drawioEditorUrl } from '@tiptap-pro/extension-diagrams/drawio'
 
+const diagram = editor.storage.diagrams.listDiagrams().find(item => item.format === 'drawio')
+
+const dialog = document.createElement('dialog')
 const frame = document.createElement('iframe')
 frame.src = drawioEditorUrl() // https://embed.diagrams.net/?embed=1&proto=json…
 dialog.append(frame)
+document.body.append(dialog)
+dialog.showModal()
 
 const connection = connectDrawioEditor(frame, {
   source: diagram.source,
   title: diagram.title ?? undefined,
-  onSave: (source) => editor.commands.updateFlowDiagram({ pos, source, format: 'drawio' }),
-  onExit: () => {
-    connection.destroy()
-    dialog.close()
-  },
+  onSave: source =>
+    editor.commands.updateFlowDiagram({ pos: diagram.pos, source, format: 'drawio' }),
+  onExit: () => dialog.close(),
 })
+
+// Escape closes the dialog too
+dialog.onclose = () => {
+  connection.destroy()
+  dialog.remove()
+}
 ```
+
+编辑器会在副本上工作，因此保存时会覆盖其他人在此期间所做的更改。
 
 ### drawioEditorUrl(options?)
 

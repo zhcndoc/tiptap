@@ -17,6 +17,8 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ## 快速入门
 
+在[创建第一个图表](/diagrams/getting-started/install#a-first-chart)示例的编辑器中，`insertChart` 会选中新插入的图表。将 `resizable: true` 添加到 `Diagrams.configure()` 以显示调整大小的控制柄，然后运行：
+
 ```ts
 // Half the width of the editor's text, at 4:3, stored in the document
 editor.commands.setDiagramSize({ size: { width: 0.5, ratio: 4 / 3, locked: true } })
@@ -53,6 +55,8 @@ editor.storage.diagrams.setZoom({}, 1.5)
 
 ## 缩放
 
+`setZoom` 可在图表或流程图的框架内缩放内容：
+
 ```ts
 editor.storage.diagrams.setZoom({ pos }, 1.5) // 150 % of the unzoomed size
 editor.storage.diagrams.setZoom({}, 'fit') // the selected chart, back to the unzoomed size
@@ -63,6 +67,8 @@ editor.storage.diagrams.setZoom({}, 'fit') // the selected chart, back to the un
 放大后，图表保持其高度，您可以在其中滚动。缩小后，占用的空间更少。每个渲染器都可以使用缩放，因为绘制的图表是缩放的，而不是再次绘制。图表的根元素的缩放为 `data-tt-chart-zoom`。
 
 ## 平移
+
+平移可在框架内移动已放大的图表或流程图：
 
 ```ts
 editor.storage.diagrams.setZoom({ pos }, 2)
@@ -77,6 +83,8 @@ editor.storage.diagrams.setPan({ pos }, { x: 120, y: 40 })
 - **拖动时**，根元素带有 `data-tt-chart-panning` 或 `data-tt-flow-diagram-panning`。
 
 ## 最大化
+
+`setMaximized` 可让图表或流程图铺满窗口，也可将其恢复原位：
 
 ```ts
 editor.storage.diagrams.setMaximized({ pos }, true) // over the window
@@ -98,6 +106,8 @@ editor.storage.diagrams.setMaximized({ pos }, false) // back into the text
 - **当拖动结束**时，`setDiagramSize` 写入大小，作为撤消步骤。
 
 ## 命令
+
+这些命令用于设置尺寸和对齐方式。
 
 ### setDiagramSize
 

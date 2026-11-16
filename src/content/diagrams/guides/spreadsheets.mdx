@@ -96,11 +96,11 @@ export function googleSheetsSource(options: {
 
       const { values = [] }: { values?: unknown[][] } = await response.json()
       return gridToChartData(
-        values.map((row) => row.map((cell) => String(cell ?? ''))),
+        values.map(row => row.map(cell => String(cell ?? ''))),
         { decimalSeparator: '.' },
       )
     },
-    describe: (address) => `Google Sheet, ${sheetAddress(address).range}`,
+    describe: address => `Google Sheet, ${sheetAddress(address).range}`,
   }
 }
 ```
@@ -215,6 +215,8 @@ async function getAccessToken(): Promise<string> {
 注册它并将图表链接到名为 `Sales` 的表：
 
 ```ts
+import { Diagrams } from '@tiptap-pro/extension-diagrams'
+
 Diagrams.configure({ sources: [excelSource({ getAccessToken })] })
 
 editor.commands.linkChartSource({
@@ -251,7 +253,7 @@ export function airtableProxy(options: {
   token: string
   bases: string[]
 }): (request: Request) => Promise<Response> {
-  return async (request) => {
+  return async request => {
     const url = new URL(request.url)
     const path = url.pathname.replace(/^\/api\/airtable\//, '')
     if (request.method !== 'GET' || !options.bases.includes(path.split('/')[0] ?? '')) {
@@ -313,7 +315,7 @@ export function airtableSource(options: { proxyUrl: string }): ChartSourceProvid
 
         const page: { records: { fields: Record<string, unknown> }[]; offset?: string } =
           await response.json()
-        records.push(...page.records.map((record) => record.fields))
+        records.push(...page.records.map(record => record.fields))
         offset = page.offset ?? ''
       } while (offset)
 
@@ -321,11 +323,11 @@ export function airtableSource(options: { proxyUrl: string }): ChartSourceProvid
       const cell = (value: unknown) =>
         typeof value === 'string' || typeof value === 'number' ? String(value) : ''
       return gridToChartData(
-        [fields, ...records.map((record) => fields.map((field) => cell(record[field])))],
+        [fields, ...records.map(record => fields.map(field => cell(record[field])))],
         { decimalSeparator: '.' },
       )
     },
-    describe: (address) => `Airtable, ${tableAddress(address).table}`,
+    describe: address => `Airtable, ${tableAddress(address).table}`,
   }
 }
 ```
@@ -333,6 +335,8 @@ export function airtableSource(options: { proxyUrl: string }): ChartSourceProvid
 注册它并将图表链接到表的两个字段：
 
 ```ts
+import { Diagrams } from '@tiptap-pro/extension-diagrams'
+
 Diagrams.configure({ sources: [airtableSource({ proxyUrl: '/api/airtable' })] })
 
 editor.commands.linkChartSource({

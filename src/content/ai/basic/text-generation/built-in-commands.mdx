@@ -80,28 +80,28 @@ editor.chain().focus().aiTranslate(language: Language, options: TextOptions).run
 
 对于支持 `TextOptions` 的每个命令，您可以指定以下选项：
 
-| Setting          | Type                                                                   | Default                                       | Definition                                                                                                                                                                                                                 |
+| 设置项           | 类型                                                                   | 默认值                                        | 说明                                                                                                                                                                                                                     |
 | ---------------- | ---------------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `modelName` | 参见[支持的文本模型](#supported-text-models) | `gpt-6-luna` (AI Server 4.3.0+) | OpenAI 使用的模型 |
-| `format`         | `'rich-text' \| 'plain-text'`                                          | `plain-text`                                  | Determines the [format](/ai/basic/text-generation/format) of how the model should respond                                                                                                        |
-| `stream`         | `boolean`                                                              | `false`                                       | Should the command stream characters to the editor? It’s like the **typewriter** behavior in ChatGPT. **This requires the newest extension version!**                                                                      |
-| `insertAt`       | `undefined \| number \| {from: number; to: number}`                    | `undefined`                                   | Where to insert the response into the editor, if `undefined` the response will be inserted at the current selection. If a number, the response will be inserted at that position. If an object it will replace that range. |
-| `language`       | `string` (e.g. `en`, `de`)                                             | `null`                                        | Although we do our best to prompt OpenAI for a response in the language of the input, sometimes it’s better to define it yourself.                                                                                         |
-| `tone`           | `string`                                                               | `null`                                        | A [voice of tone](#aiadjusttone) the response should be transformed to                                                                                                                                                   |
-| `textLength`     | `number`                                                               | `undefined`                                   | The number of `textLengthUnit`s the AI should respond with (e.g. the `3` in "3 paragraphs")                                                                                                                                |
-| `textLengthUnit` | `'paragraphs' \| 'words' \| 'characters'`                              | `undefined`                                   | The unit of `textLength`s the AI should respond with (e.g. the `paragraphs` in "3 paragraphs")                                                                                                                             |
-| `collapseToEnd`  | `boolean`                                                              | `true`                                        | Whether the cursor should be set to the end after the operation or the insertion should get selected.                                                                                                                      |
-| `context`        | `Array<{ type: 'text', text: string} \| { type: 'url', url: string }>` | `[]`                                          | [Context](/ai/basic/text-generation/provide-context) to provide the model for generating a Response.                                                                                             |
-| `text`           | `string`                                                               | `undefined`                                   | An optional message to have the model respond to                                                                                                                                                                           |
-| `insert`         | `boolean`                                                              | `true`                                        | Allows disabling inserting content directly into the editor                                                                                                                                                                |
-| `append`         | `boolean`                                                              | `true`                                        | If `true`, the response will be appended to the end of the current selection. If `false`, the response will replace the current selection.                                                                                 |
-| `regenerate`     | `boolean`                                                              | `false`                                       | Whether the command regenerates the response that was previously generated. If set to true, the `initialContent` property will not be updated.                                                                             |
+| `format`         | `'rich-text' \| 'plain-text'`                                          | `plain-text`                                  | 设置模型响应的[格式](/ai/basic/text-generation/format)。                                                                                                                                                                  |
+| `stream`         | `boolean`                                                              | `false`                                       | 是否将生成的字符流式写入编辑器？效果类似 ChatGPT 的**打字机**动画。**需要使用最新版本的扩展！**                                                                                                                       |
+| `insertAt`       | `undefined \| number \| {from: number; to: number}`                    | `undefined`                                   | 响应插入编辑器的位置。未定义时插入当前选区；为数字时插入指定位置；为对象时替换指定范围。                                                                                                                               |
+| `language`       | `string`（例如 `en`、`de`）                                             | `null`                                        | 虽然我们会尽力提示 OpenAI 使用输入内容的语言作答，但有时最好自行指定语言。                                                                                                                                            |
+| `tone`           | `string`                                                               | `null`                                        | 要应用于响应的[语气](#aiadjusttone)。                                                                                                                                                                                    |
+| `textLength`     | `number`                                                               | `undefined`                                   | AI 响应应包含的 `textLengthUnit` 数量，例如“3 个段落”中的 `3`。                                                                                                                                                         |
+| `textLengthUnit` | `'paragraphs' \| 'words' \| 'characters'`                              | `undefined`                                   | AI 响应所采用的 `textLength` 单位，例如“3 个段落”中的 `paragraphs`。                                                                                                                                                    |
+| `collapseToEnd`  | `boolean`                                                              | `true`                                        | 操作完成后，是将光标移到末尾，还是选中刚插入的内容。                                                                                                                                                                    |
+| `context`        | `Array<{ type: 'text', text: string} \| { type: 'url', url: string }>` | `[]`                                          | 提供给模型用于生成响应的[上下文](/ai/basic/text-generation/provide-context)。                                                                                                                                            |
+| `text`           | `string`                                                               | `undefined`                                   | 可选消息，作为模型的响应依据。                                                                                                                                                                                          |
+| `insert`         | `boolean`                                                              | `true`                                        | 是否允许将内容直接插入编辑器；设为 `false` 可禁用直接插入。                                                                                                                                                             |
+| `append`         | `boolean`                                                              | `true`                                        | 为 `true` 时，将响应追加到当前选区末尾；为 `false` 时，用响应替换当前选区。                                                                                                                                             |
+| `regenerate`     | `boolean`                                                              | `false`                                       | 命令是否重新生成先前的响应。设为 `true` 时，不会更新 `initialContent` 属性。                                                                                                                                             |
 
-_Unfortunately the combination of **tone** and **language** sometimes leads to responses which are not in the desired language._
+_遗憾的是，**语气**和**语言**选项的组合有时会导致响应语言与预期不符。_
 
-### Supported text models
+### 支持的文本模型
 
-We currently support the following OpenAI chat models:
+目前支持以下 OpenAI 对话模型：
 
 - `gpt-6-luna`
 - `gpt-6.1-terra`
@@ -116,7 +116,9 @@ We currently support the following OpenAI chat models:
 - `gpt-5-nano`
 - `gpt-5-nano-2025-08-07`
 - `gpt-5.4-mini`
-- `gpt-5.4-nano`
+- `gpt-5.4-mini-2026-03-17`
+- `gpt-5.4-nano`：已弃用，将于 2027 年 4 月 1 日停用；替代模型：`gpt-6-luna`
+- `gpt-5.4-nano-2026-03-17`：已弃用，将于 2027 年 4 月 1 日停用；替代模型：`gpt-6-luna`
 - `gpt-4.1`
 - `gpt-4.1-2025-04-14`
 - `gpt-4.1-mini`
@@ -129,10 +131,10 @@ We currently support the following OpenAI chat models:
 
 ## 选择合适的模型
 
-在配置 Tiptap AI 扩展时，请根据您的应用需求考虑：
+配置 Tiptap AI 扩展时，请根据应用需求选择模型：
 
-- **对于成本效益型操作：** 如果主要关注预算，且任务不需要最先进的能力，则选择 GPT-5 mini。
-- **对于高级需求：** 如果您的应用需要最高水平的语言理解或图像生成质量，且预算限制较少，则选择 GPT-5。
+- **注重成本效益：** 如果预算优先，且任务不需要最先进的能力，请选择 GPT-5 mini。
+- **处理高级任务：** 如果应用需要最高水平的语言理解或图像生成质量，且预算较宽裕，请选择 GPT-5。
 
 Tiptap AI 扩展的灵活配置使您能够根据具体需求和预算调整 AI 集成方案。
 

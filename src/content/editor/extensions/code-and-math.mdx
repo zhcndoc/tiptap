@@ -1,0 +1,31 @@
+---
+title: 代码和数学公式
+description: '代码和数学公式扩展可添加代码块（支持语法高亮）以及使用 LaTeX 编写的数学公式。'
+meta:
+  title: 代码和数学公式 | Tiptap 文档
+  description: 在 Tiptap 编辑器中添加代码块、使用 lowlight 进行语法高亮，以及通过 KaTeX 渲染 LaTeX 数学公式。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="code-and-math" />
+
+## 使用场景
+
+- **代码示例。** Code Block 会添加由 `pre` 和 `code` 标签包裹的围栏代码块。
+- **高亮代码。** Code Block Lowlight 会添加由 lowlight 库提供语法高亮的代码块。
+- **数学公式。** Mathematics 可插入行内或块级 LaTeX 公式，并使用 KaTeX 渲染。
+
+## 工作原理
+
+- **它们都是节点。** 代码块和数学公式都是文档中的节点。Mathematics 会添加两个节点，分别用于行内公式和块级公式。[节点和标记](/editor/core-concepts/nodes-and-marks)
+- **StarterKit 自带 Code Block。** Code Block 属于 [StarterKit](/editor/extensions/functionality/starterkit)；Code Block Lowlight 和 Mathematics 需要手动添加。
+- **语法高亮由单独扩展提供。** Code Block 不提供样式或语法高亮。Code Block Lowlight 可为代码添加高亮，你需要向它传入包含所加载语言的 `lowlight` 模块。
+- **Mathematics 需要 KaTeX。** 安装扩展时还要安装 `katex`，并导入 KaTeX 样式。
+- **Markdown 快捷输入。** 输入三个反引号和一个空格即可开始代码块。也可以在反引号后指定语言，例如 `css`。
+
+## 相关内容
+
+- [文本格式](/editor/extensions/text-formatting)介绍用于标记句中名称或命令的 Code 标记。
+- [文本块](/editor/extensions/text-blocks)介绍代码周围的段落和标题。

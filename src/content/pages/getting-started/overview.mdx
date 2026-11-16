@@ -9,6 +9,13 @@ meta:
   category: 页面
 sidebars:
   hideSecondary: true
+extension:
+  name: Pages
+  description: '将编辑器转换为分页文档界面，并支持页边距和分页符。'
+  type: extension
+  icon: File
+  group: page-layout
+  package: '@tiptap-pro/extension-convert-kit @tiptap-pro/extension-pages-tablekit @tiptap-pro/extension-pages'
 ---
 
 import { ExternalLinkIcon, Expand } from 'lucide-react'
@@ -120,11 +127,11 @@ const editor = new Editor({
 - **没有按页样式，也没有页面模板。** 每一页都使用相同的布局和视觉样式。
 - **没有浏览器打印集成。** 如需可直接打印的输出，请使用[Conversion 扩展和 REST 端点](/conversion/getting-started/overview)。
 
-## Expectations
+## 使用预期
 
-- **Beta stage.** Pages is still under active development. If you depend on it, pin the exact package version, because minor versions may introduce breaking changes.
-- **Pixel values are CSS pixels.** All sizes in the API correspond to standard browser CSS pixels (1 inch = 96 px). The `cmToPixels` and `inchToPixels` utilities can round-trip without loss, so you can create using real-world units.
-- **What you see is what you edit in collaboration.** Double-clicking the header or footer opens the full Tiptap editor, and that editor is in the same collaborative session as the main document.
+- **Beta 阶段。** Pages 仍在积极开发中。如果你的产品依赖它，请锁定准确的软件包版本，因为次要版本可能引入不兼容变更。
+- **像素值均为 CSS 像素。** API 中的所有尺寸都使用标准浏览器 CSS 像素（1 英寸 = 96 px）。`cmToPixels` 和 `inchToPixels` 工具函数支持无损往返转换，因此可以使用现实世界的单位创建页面。
+- **协作时所见即所编。** 双击页眉或页脚会打开完整的 Tiptap 编辑器，该编辑器与主文档处于同一个协作会话中。
 
 ## 不要期待的内容
 

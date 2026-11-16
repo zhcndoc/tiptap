@@ -3,23 +3,22 @@ import type { SidebarConfig } from '@/types'
 export const sidebarConfig: SidebarConfig = {
   id: 'diagrams',
   rootHref: '/diagrams/getting-started/overview',
-  title: '图表与流程图',
+  title: '图表',
   items: [
     {
       type: 'group',
       href: '/diagrams/getting-started/overview',
-      title: '图表与流程图',
+      title: '图表',
       tags: ['Alpha'],
       children: [
-        { title: '概览', href: '/diagrams/getting-started/overview' },
+        { title: '概述', href: '/diagrams/getting-started/overview' },
         { title: '安装', href: '/diagrams/getting-started/install' },
-        { title: '实时演示', href: '/diagrams/getting-started/live-demo' },
         {
           title: '图表',
           href: '/diagrams/charts/overview',
           children: [
             { title: '外观', href: '/diagrams/charts/appearance' },
-            { title: '样式方案', href: '/diagrams/charts/looks' },
+            { title: '视觉风格', href: '/diagrams/charts/looks' },
             { title: '在图表中编辑', href: '/diagrams/charts/editing' },
             { title: '坐标轴', href: '/diagrams/charts/axes' },
             { title: '参考线', href: '/diagrams/charts/references' },
@@ -31,7 +30,7 @@ export const sidebarConfig: SidebarConfig = {
           children: [
             { title: '格式', href: '/diagrams/flow-diagrams/formats' },
             { title: '在流程图中编辑', href: '/diagrams/flow-diagrams/editing' },
-            { title: '从表格生成流程图', href: '/diagrams/flow-diagrams/from-table' },
+            { title: '从表格创建流程图', href: '/diagrams/flow-diagrams/from-table' },
           ],
         },
         {
@@ -64,7 +63,7 @@ export const sidebarConfig: SidebarConfig = {
               children: [
                 { title: '在画布上绘制', href: '/diagrams/renderers/custom-canvas' },
                 { title: '自定义图表类型', href: '/diagrams/renderers/custom-chart-types' },
-                { title: '自定义流程图渲染器', href: '/diagrams/renderers/custom-diagrams' },
+                { title: '自定义图表渲染器', href: '/diagrams/renderers/custom-diagrams' },
               ],
             },
           ],
@@ -75,14 +74,14 @@ export const sidebarConfig: SidebarConfig = {
           href: '',
           children: [
             {
-              title: 'Google 表格、Excel 和 Airtable',
+              title: 'Google Sheets、Excel 和 Airtable',
               href: '/diagrams/guides/spreadsheets',
             },
             { title: '协作', href: '/diagrams/guides/collaboration' },
-            { title: '版本', href: '/diagrams/guides/versions' },
-            { title: '模型工具', href: '/diagrams/guides/ai' },
+            { title: '版本管理', href: '/diagrams/guides/versions' },
+            { title: '供模型调用的工具', href: '/diagrams/guides/ai' },
             { title: '尺寸与视图', href: '/diagrams/guides/size-and-view' },
-            { title: '图旁文本', href: '/diagrams/guides/split-view' },
+            { title: '图表旁的文本', href: '/diagrams/guides/split-view' },
             { title: '样式', href: '/diagrams/guides/styling' },
           ],
         },

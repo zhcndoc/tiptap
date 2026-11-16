@@ -17,7 +17,7 @@ import { Callout } from '@/components/ui/Callout'
   参考](/ai/ai-toolkit/api-reference/rest-api-v3)。
 </Callout>
 
-## 如何提供文档
+## 基础 URL
 
 Tiptap Cloud 的基础 URL 为：
 
@@ -37,10 +37,10 @@ BASE_URL=https://api.tiptap.dev
 
 请使用以下设置在服务器端签名令牌：
 
-- Audience: `AI`
-- Permissions: `AI:Toolkit`
+- 受众：`AI`
+- 权限：`AI:Toolkit`
 
-要自动获取并保存 Tiptap Cloud 文档，请添加 `Documents` audience 和 `Documents:Write` permission。`Documents:Write` 包含读和评论访问权限。
+要自动获取并保存 Tiptap Cloud 文档，请将 `Documents` 添加到受众，并添加 `Documents:Write` 权限。`Documents:Write` 包含读取和评论权限。
 
 请参阅 [身份验证](/authentication) 了解如何创建密钥对并签名令牌，以及 [授权指南](/ai/ai-toolkit/install#set-up-authorization) 了解完整设置。
 
@@ -68,7 +68,7 @@ const JWT_TOKEN = await new SignJWT({
 
 可选字段可以省略、`null` 或 `undefined`。
 
-## 终端点。
+## 端点
 
 ### 获取工具定义
 
@@ -81,38 +81,31 @@ POST /v4/ai/toolkit/fetch-tools
 请求体：
 
 - `editorContext` (`object`，必需)：由 `getEditorContext` 返回的编辑器上下文。
-- `tools` (`Record<string, boolean | ToolConfig>`，可选，默认：`{}`)：启用、禁用或
-  配置工具。工具默认处于禁用状态。
-- `format` (`'json' | 'shorthand' | 'shorthandV2'`，可选，默认：`'json'`)：工具
-  定义和模型输出所使用的文档格式。参见 [Tiptap
-  Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand)。
+- `hiddenAttributes` (`string[]`，可选，默认：`[]`)：从 schema awareness 提示词中排除的节点属性，包括它们的默认值。执行工具或流式传输受支持的工具时也要使用相同列表。`stream-tool` 不允许在 `tiptapEdit` 中使用非空的 `hiddenAttributes`；此类编辑请使用 `execute-tool`。参见[隐藏属性](#hidden-attributes)。
+- `tools` (`Record<string, boolean | ToolConfig>`，可选，默认：`{}`)：启用、禁用或配置工具。工具默认处于禁用状态。
+- `format` (`'json' | 'shorthand' | 'shorthandV2'`，可选，默认：`'json'`)：工具定义和模型输出所使用的文档格式。参见 [Tiptap Shorthand](/ai/ai-toolkit/advanced-guides/tiptap-shorthand)。
 
 `tools` 可以包含以下键：
 
-- `tiptapRead` (`boolean`, optional)
-- `tiptapEdit` (`boolean | { meta?: string }`, optional): 当你希望 AI 在每次编辑操作中
-  包含一个额外的元数据字段时设置 `meta`，例如简短说明。
-- `tiptapQuery` (`boolean | { meta?: string }`, optional): Set `meta` when you want the AI to
-  在你希望 AI 为每个会更改文档的操作添加额外元数据字段时设置 `meta`。参见
-  [`tiptapQuery`](/ai/ai-toolkit/api-reference/tiptap-query).
-- `getThreads` (`boolean`, optional)
-- `editThreads` (`boolean`, optional)
-- `readDocument` (`boolean`, optional)
-- `replaceDocument` (`boolean`, optional)
-- `createDocument` (`boolean`, optional): Alias for `replaceDocument`.
-- `readSelection` (`boolean`, optional)
-- `proofread` (`boolean | { meta?: string }`, optional): Set `meta` when you want the AI to
-  include an extra metadata field on every proofreading edit, such as a short explanation.
-- `readBoard`， `createShapes`、`arrangeShapes`、`createDiagram`、`updateShapes`、`deleteShapes`、`connectShapes` 和 `createDocFrame`（`boolean`，可选）：[板工具](#board-tools)，用于白板。
+- `tiptapRead`（`boolean`，可选）
+- `tiptapEdit`（`boolean | { meta?: string }`，可选）：若要让 AI 在每个编辑操作中包含额外的元数据字段（例如简短说明），请设置 `meta`。
+- `tiptapQuery`（`boolean | { meta?: string }`，可选）：若要让 AI 在每个文档变更操作中包含额外的元数据字段，请设置 `meta`。参见 [`tiptapQuery`](/ai/ai-toolkit/api-reference/tiptap-query)。
+- `getThreads`（`boolean`，可选）
+- `editThreads`（`boolean`，可选）
+- `readDocument`（`boolean`，可选）
+- `replaceDocument`（`boolean`，可选）
+- `createDocument`（`boolean`，可选）：`replaceDocument` 的别名。
+- `readSelection`（`boolean`，可选）
+- `proofread`（`boolean | { meta?: string }`，可选）：若要让 AI 在每项校对编辑中包含额外的元数据字段（例如简短说明），请设置 `meta`。
+- `readBoard`、`createShapes`、`arrangeShapes`、`distributeShapes`、`createDiagram`、`updateShapes`、`deleteShapes`、`connectShapes` 和 `createDocFrame`（`boolean`，可选）：用于白板的[画板工具](#board-tools)。
 
 响应：
 
-- `systemPrompt` (`string`): 将其添加到你 AI 请求的 system prompt 中。它会教会 AI
-  Tiptap 文档如何工作、编辑器支持哪些元素，以及应使用哪种文档格式。
-- `tools` (`array`): AI 或开发者可以调用的工具定义。每个数组元素包含：
-  - `name` (`string`): 工具名称。
-  - `description` (`string`): 工具描述。
-  - `inputSchema` (`object`): AI 生成的工具输入的 JSON schema。
+- `systemPrompt`（`string`）：将其添加到 AI 请求的系统提示词中。它会说明 Tiptap 文档的工作方式、编辑器支持的元素以及应使用的文档格式。
+- `tools`（`array`）：AI 或开发者可以调用的工具定义。数组中的每一项包含：
+  - `name`（`string`）：工具名称。
+  - `description`（`string`）：工具描述。
+  - `inputSchema`（`object`）：AI 生成的工具输入所用的 JSON schema。
 
 示例：
 
@@ -136,30 +129,30 @@ curl --location 'BASE_URL/v4/ai/toolkit/fetch-tools' \
 
 HTTP 错误会返回：
 
-- `error` (`object`): 一个包含以下属性的对象：
-  - `message` (`string`): 人类可读的错误消息。
-  - `status` (`number`): HTTP 状态码。
-  - `code` (`string`): 稳定的错误代码。
-  - `data` (`object`, optional): 已清理的结构化上下文。
+- `error`（`object`）：包含以下属性的对象：
+  - `message`（`string`）：便于阅读的错误消息。
+  - `status`（`number`）：HTTP 状态码。
+  - `code`（`string`）：稳定的错误代码。
+  - `data`（`object`，可选）：经过清理的结构化上下文。
 
 此端点可能返回：
 
-- `401` with `access_control_auth_required` or `missing_token`: 请求未包含 Tiptap Access Control JWT。
-- `401` with an access-control code such as `token_expired` or `signature_invalid`: JWT 未通过 Access Control 的验证。
-- `403` with `feature_not_available`: 环境未启用服务器端 AI Toolkit。
-- `403` with `insufficient_permissions`: JWT 未授予 `AI:Toolkit` 权限。
-- `403` with `origin_not_allowed`: 请求的 `Origin` 不被该环境允许。
-- `422` with `validation_failed`: 请求体与端点 schema 不匹配。响应包含 `error.issues`，其中列出验证问题。
-- `422` with `tool_config_validation_failed`: 请求体中提供的工具配置无效。响应包含 `error.data.issues`，其中列出验证问题。
-- `429` with `rate_limited`: Access Control 对身份验证请求进行了速率限制。
-- `429`: 服务器端速率限制器阻止了请求。此响应使用不同的顶层结构：
-  - `error` (`string`): 速率限制错误消息。
-  - `retryAfter` (`number`, optional): 重试前需要等待的秒数。
-  - `limit` (`number`, optional): 当前时间窗口内的请求限制。
-  - `window` (`number`, optional): 速率限制窗口的秒数。
-- `500` with `internal_server_error`: 发生了意外的服务器错误。
-- `500` with `missing_cloud_api_token`: 云服务缺少内部身份验证配置。
-- `503` with `service_unavailable`: Access Control 暂时不可用。
+- `401`，错误码为 `access_control_auth_required` 或 `missing_token`：请求未包含 Tiptap Access Control JWT。
+- `401`，错误码为 `token_expired` 或 `signature_invalid` 等 Access Control 错误码：JWT 未通过 Access Control 验证。
+- `403`，错误码为 `feature_not_available`：此环境未启用 Server AI Toolkit。
+- `403`，错误码为 `insufficient_permissions`：JWT 未授予 `AI:Toolkit` 权限。
+- `403`，错误码为 `origin_not_allowed`：此环境不允许该请求的 `Origin`。
+- `422`，错误码为 `validation_failed`：请求体与端点 schema 不匹配。响应中的 `error.issues` 列出了验证问题。
+- `422`，错误码为 `tool_config_validation_failed`：请求体中的工具配置无效。响应中的 `error.data.issues` 列出了验证问题。
+- `429`，错误码为 `rate_limited`：Access Control 对身份验证请求进行了速率限制。
+- `429`：服务器端速率限制器阻止了请求。此响应采用不同的顶层结构：
+  - `error`（`string`）：速率限制错误消息。
+  - `retryAfter`（`number`，可选）：重试前需要等待的秒数。
+  - `limit`（`number`，可选）：当前时间窗口内允许的请求数。
+  - `window`（`number`，可选）：速率限制窗口的秒数。
+- `500`，错误码为 `internal_server_error`：发生了意外的服务器错误。
+- `500`，错误码为 `missing_cloud_api_token`：云服务缺少内部身份验证配置。
+- `503`，错误码为 `service_unavailable`：Access Control 暂时不可用。
 
 ### 执行工具
 
@@ -218,65 +211,50 @@ curl --location 'BASE_URL/v4/ai/toolkit/execute-tool' \
   }'
 ```
 
-#### Error responses
+#### 错误响应
 
-HTTP errors return:
+HTTP 错误会返回：
 
-- `error` (`object`): An object with these properties:
-  - `message` (`string`): Human-readable error message.
-  - `status` (`number`): HTTP status code.
-  - `code` (`string`): Stable error code.
-  - `data` (`object`, optional): Sanitized structured context. Document and thread upstream
-    failures include fields such as `operation`, `upstreamStatus`, `upstreamUrl`, and
-    `upstreamMethod`.
+- `error`（`object`）：包含以下属性的对象：
+  - `message`（`string`）：便于阅读的错误消息。
+  - `status`（`number`）：HTTP 状态码。
+  - `code`（`string`）：稳定的错误代码。
+  - `data`（`object`，可选）：经过清理的结构化上下文。文档和线程的上游请求失败时，可能包含 `operation`、`upstreamStatus`、`upstreamUrl` 和 `upstreamMethod` 等字段。
 
-This endpoint can return:
+此端点可能返回：
 
-- `400` with `missing_document_credentials`: The request uses a cloud document, but the JWT does not
-  include document server credentials.
-- `400` with `missing_document_options`: `getThreads` or `editThreads` was executed against an
-  inline document. These tools require a cloud document.
-- `400` with a thread-store code such as `thread_not_found` or `comment_not_found`: A thread or
-  comment operation referenced data that does not exist.
-- `401` with `access_control_auth_required` or `missing_token`: The request did not include a
-  Tiptap Access Control JWT.
-- `401` with an access-control code such as `token_expired` or `signature_invalid`: The JWT was
-  rejected by Access Control.
-- `403` with `feature_not_available`: Server AI Toolkit is not enabled for the environment.
-- `403` with `insufficient_permissions`: The JWT does not grant `AI:Toolkit`, or it does not grant
-  access to the requested cloud document.
-- `403` with `origin_not_allowed`: The request `Origin` is not allowed for the environment.
-- `403` with `unsupported_tool_format`: The selected tool does not support the requested `format`.
-- `403` with `tracked_changes_unsupported_schema`: `reviewOptions.mode` is `trackedChanges`, but
-  the editor schema does not support tracked changes.
-- `403` with `thread_schema_not_supported`: The editor schema does not support comments or threads.
+- `400`，错误码为 `missing_document_credentials`：请求使用了云文档，但 JWT 不包含文档服务器凭据。
+- `400`，错误码为 `missing_document_options`：`getThreads` 或 `editThreads` 被用于内联文档。这些工具需要云文档。
+- `400`，线程存储错误码为 `thread_not_found` 或 `comment_not_found` 等：线程或评论操作引用了不存在的数据。
+- `401`，错误码为 `access_control_auth_required` 或 `missing_token`：请求未包含 Tiptap Access Control JWT。
+- `401`，错误码为 `token_expired` 或 `signature_invalid` 等 Access Control 错误码：Access Control 拒绝了该 JWT。
+- `403`，错误码为 `feature_not_available`：此环境未启用 Server AI Toolkit。
+- `403`，错误码为 `insufficient_permissions`：JWT 未授予 `AI:Toolkit` 权限，或未授予对所请求云文档的访问权限。
+- `403`，错误码为 `origin_not_allowed`：此环境不允许该请求的 `Origin`。
+- `403`，错误码为 `unsupported_tool_format`：所选工具不支持请求的 `format`。
+- `403`，错误码为 `tracked_changes_unsupported_schema`：`reviewOptions.mode` 为 `trackedChanges`，但编辑器 schema 不支持修订记录。
+- `403`，错误码为 `thread_schema_not_supported`：编辑器 schema 不支持评论或线程。
 - `403` 和 `board_schema_not_supported`：[白板工具](#board-tools) 获得的文档或编辑器模式不是可以使用的白板。
-- `409` with `concurrent_edit_conflict`: The cloud document changed while the tool was executing.
-  Retry the request with the latest document state.
-- `422` with `validation_failed`: The request body does not match the endpoint schema. The response
-  includes `error.issues`, a list of validation issues.
-- `429` with `rate_limited`: Access Control rate-limited authentication.
-- `429`: The server-side rate limiter blocked the request. This response uses a different top-level
-  shape:
-  - `error` (`string`): Rate limit error message.
-  - `retryAfter` (`number`, optional): Seconds to wait before retrying.
-  - `limit` (`number`, optional): Request limit for the current window.
-  - `window` (`number`, optional): Rate-limit window in seconds.
-- `500` with `document_save_failed`: The server could not save the cloud document after loading it,
-  or the save flow was called before a document was loaded.
-- `500` with `diff_worker_failed` or `diff_worker_invalid_result`: The internal diff worker failed
-  while preparing reviewable changes.
-- `500` with `internal_server_error` or `unknown_error`: An unexpected server error occurred.
-- `500` with `missing_cloud_api_token`: The cloud service is missing internal authentication
-  configuration.
-- `502` with `document_load_failed` or `document_save_failed`: Loading or saving the cloud document
-  failed upstream. Check `error.data.upstreamStatus` for the upstream HTTP status.
-- `502` with a thread or comment code such as `thread_list_failed`, `thread_create_failed`,
-  `thread_update_failed`, `thread_delete_failed`, `thread_resolve_failed`,
-  `thread_unresolve_failed`, `comment_create_failed`, `comment_update_failed`, or
-  `comment_delete_failed`: 评论 API 操作在上游失败。
-- `503` with `diff_worker_queue_timeout`: diff worker 队列已饱和或超时。
-- `503` with `service_unavailable`: 访问控制暂时不可用。
+- `409`，错误码为 `concurrent_edit_conflict`：工具执行期间云文档发生了变化。请使用最新文档状态重试请求。
+- `422`，错误码为 `validation_failed`：请求体与端点 schema 不匹配。响应中的 `error.issues` 列出了验证问题。
+- `422`，错误码为 `tool_config_validation_failed`：`tool.config` 无效，例如调用 `readSelection` 时未提供 `user`。响应中的 `error.data.issues` 列出了验证问题。
+- `429`，错误码为 `rate_limited`：Access Control 对身份验证请求进行了速率限制。
+- `429`：服务器端速率限制器阻止了请求。此响应采用不同的顶层结构：
+  - `error`（`string`）：速率限制错误消息。
+  - `retryAfter`（`number`，可选）：重试前需要等待的秒数。
+  - `limit`（`number`，可选）：当前时间窗口内允许的请求数。
+  - `window`（`number`，可选）：速率限制窗口的秒数。
+- `500`，错误码为 `document_save_failed`：服务器读取云文档后无法保存，或在文档加载前调用了保存流程。
+- `500`，错误码为 `diff_worker_failed` 或 `diff_worker_invalid_result`：准备可审阅的更改时，内部 diff worker 执行失败。
+- `500`，错误码为 `internal_server_error` 或 `unknown_error`：发生了意外的服务器错误。
+- `500`，错误码为 `missing_cloud_api_token`：云服务缺少内部身份验证配置。
+- `502`，错误码为 `document_load_failed` 或 `document_save_failed`：从上游加载或保存云文档失败。请检查 `error.data.upstreamStatus` 中的上游 HTTP 状态码。
+- `502`，线程或评论错误码为 `thread_list_failed`、`thread_create_failed`、
+  `thread_update_failed`、`thread_delete_failed`、`thread_resolve_failed`、
+  `thread_unresolve_failed`、`comment_create_failed`、`comment_update_failed` 或
+  `comment_delete_failed`：线程或评论 API 操作在上游失败。
+- `503`，错误码为 `diff_worker_queue_timeout`：diff worker 队列已饱和或超时。
+- `503`，错误码为 `service_unavailable`：Access Control 暂时不可用。
 
 ### 流式执行工具
 
@@ -317,61 +295,55 @@ POST /v4/ai/toolkit/stream-tool
 
 在流式传输开始之前，HTTP 错误使用与 `execute-tool` 相同的 JSON 结构：
 
-- `error` (`object`): 一个包含以下属性的对象：
-  - `message` (`string`): 人类可读的错误消息。
-  - `status` (`number`): HTTP 状态码。
-  - `code` (`string`): 稳定的错误代码。
-  - `data` (`object`, optional): 已清理的结构化上下文。
+- `error`（`object`）：包含以下属性的对象：
+  - `message`（`string`）：便于阅读的错误消息。
+  - `status`（`number`）：HTTP 状态码。
+  - `code`（`string`）：稳定的错误代码。
+  - `data`（`object`，可选）：经过清理的结构化上下文。
 
 在流式传输开始之后，错误会以 NDJSON 事件形式发送：
 
-- `version` (`number`): 流协议版本。
-- `type` (`'error'`): 事件类型。
-- `code` (`string`): 稳定的错误代码。
-- `status` (`number`): 类 HTTP 状态码。
-- `message` (`string`): 人类可读的错误消息。
+- `version`（`number`）：流协议版本。
+- `type`（`'error'`）：事件类型。
+- `code`（`string`）：稳定的错误代码。
+- `status`（`number`）：类似 HTTP 状态码的数值。
+- `message`（`string`）：便于阅读的错误消息。
 
 此端点可能返回或发出：
 
-- `400` with `invalid_request`: 请求没有正文。
-- `400` with `missing_document_credentials`: JWT 不包含文档服务器凭据。
-- `400` with `invalid_stream_message`: 流消息不是有效的 JSON，未通过 schema 验证，
+- `400`，错误码为 `invalid_request`：请求没有正文。
+- `400`，错误码为 `missing_document_credentials`：JWT 不包含文档服务器凭据。
+- `400`，错误码为 `invalid_stream_message`：流消息不是有效的 JSON，未通过 schema 验证，
   使用了不支持的协议版本，或者流在 NDJSON 行未终止时结束。
-- `400` with `duplicate_start`: 发送了多个 `start` 消息。
-- `400` with `delta_before_start`: `delta` 消息在 `start` 之前到达。
-- `400` with `end_before_start`: `end` 消息在 `start` 之前到达。
-- `400` with `incomplete_stream`: 请求在 `end` 消息到达之前结束。
-- `400` with a thread-store code such as `thread_not_found` or `comment_not_found`: 缓冲的
+- `400`，错误码为 `duplicate_start`：发送了多个 `start` 消息。
+- `400`，错误码为 `delta_before_start`：`delta` 消息在 `start` 之前到达。
+- `400`，错误码为 `end_before_start`：`end` 消息在 `start` 之前到达。
+- `400`，错误码为 `incomplete_stream`：请求在收到 `end` 消息之前结束。
+- `400`，线程存储错误码为 `thread_not_found` 或 `comment_not_found` 等：缓冲的
   线程或评论操作引用了不存在的数据。
-- `401` with `access_control_auth_required` or `missing_token`: 请求未包含
+- `401`，错误码为 `access_control_auth_required` 或 `missing_token`：请求未包含
   Tiptap Access Control JWT。
-- `401` with an access-control code such as `token_expired` or `signature_invalid`: JWT 被
+- `401`，错误码为 `token_expired` 或 `signature_invalid` 等 Access Control 错误码：JWT 被
   Access Control 拒绝。
-- `403` with `feature_not_available`: 当前环境未启用 Server AI Toolkit。
-- `403` with `insufficient_permissions`: JWT 未授予 `AI:Toolkit`。
-- `403` with `origin_not_allowed`: 请求的 `Origin` 不被当前环境允许。
-- `403` with `tracked_changes_unsupported_schema`: `reviewOptions.mode` 为 `trackedChanges`，但
-  编辑器 schema 不支持跟踪更改。
-- `403` with `thread_schema_not_supported`: 编辑器 schema 不支持评论或线程。
-- `413` with `ndjson_line_too_long`: 单个 NDJSON 行超过了最大大小。
-- `429` with `stream_rate_limit_exceeded`: 同一客户端打开的并发流过多。
-- `429` with `rate_limited`: Access Control 认证被限流。
-- `429`: 服务器端限流器在流式传输开始前阻止了请求。此响应
-  使用不同的顶层结构：
-  - `error` (`string`): 限流错误消息。
-  - `retryAfter` (`number`, optional): 重试前等待的秒数。
-  - `limit` (`number`, optional): 当前窗口的请求上限。
-  - `window` (`number`, optional): 限流窗口，单位为秒。
-- `500` with `diff_worker_failed`, `diff_worker_invalid_result`, `stream_internal_error`, or
-  `unknown_error`: 流处理期间发生了意外的服务器错误。
-- `500` with `missing_cloud_api_token`: 云服务缺少内部身份验证
-  配置。
-- `502` with document, thread, or comment upstream failure codes such as `document_load_failed`,
-  `document_save_failed`, `thread_list_failed`, or `comment_create_failed`: 云文档或
-  评论 API 操作在上游失败。
-- `503` with `diff_worker_queue_timeout`: diff worker 队列已饱和或超时。
-- `503` with `service_unavailable`: Access Control 暂时不可用。
-- `504` with `stream_request_timeout`: 流超过了服务器请求超时时间。
+- `403`，错误码为 `feature_not_available`：当前环境未启用 Server AI Toolkit。
+- `403`，错误码为 `insufficient_permissions`：JWT 未授予 `AI:Toolkit` 权限。
+- `403`，错误码为 `origin_not_allowed`：当前环境不允许请求的 `Origin`。
+- `403`，错误码为 `tracked_changes_unsupported_schema`：`reviewOptions.mode` 为 `trackedChanges`，但编辑器 schema 不支持修订记录。
+- `403`，错误码为 `thread_schema_not_supported`：编辑器 schema 不支持评论或线程。
+- `413`，错误码为 `ndjson_line_too_long`：单条 NDJSON 消息超过允许的最大长度。
+- `429`，错误码为 `stream_rate_limit_exceeded`：同一客户端打开的并发流数量过多。
+- `429`，错误码为 `rate_limited`：Access Control 对身份验证请求进行了速率限制。
+- `429`：服务器端限流器在流式传输开始前阻止了请求。此响应采用不同的顶层结构：
+  - `error`（`string`）：限流错误消息。
+  - `retryAfter`（`number`，可选）：重试前需要等待的秒数。
+  - `limit`（`number`，可选）：当前窗口内允许的请求数。
+  - `window`（`number`，可选）：限流窗口的秒数。
+- `500`，错误码为 `diff_worker_failed`、`diff_worker_invalid_result`、`stream_internal_error` 或 `unknown_error`：流处理期间发生了意外的服务器错误。
+- `500`，错误码为 `missing_cloud_api_token`：云服务缺少内部身份验证配置。
+- `502`，错误码为 `document_load_failed`、`document_save_failed`、`thread_list_failed` 或 `comment_create_failed` 等文档、线程或评论上游错误：云文档或评论 API 操作在上游失败。
+- `503`，错误码为 `diff_worker_queue_timeout`：diff worker 队列已饱和或超时。
+- `503`，错误码为 `service_unavailable`：Access Control 暂时不可用。
+- `504`，错误码为 `stream_request_timeout`：流处理超过了服务器请求超时时间。
 
 ## 可用工具
 
@@ -381,6 +353,26 @@ POST /v4/ai/toolkit/stream-tool
 根据需要启用其他工具。
 
 你也可以直接从应用程序代码中调用这些工具，以构建自定义工作流。
+
+### 读取时的属性默认值
+
+`tiptapRead`、`readDocument`、`readSelection`、`getThreads` 和 `tiptapQuery` 在读取时会自动省略与 schema 默认值相同的节点和标记属性。此规则适用于 JSON 和两种 Shorthand 格式，包括通过 `execute-tool` 执行的读取，以及 `stream-tool` 支持的读取操作。无需额外配置。
+
+例如，当 schema 默认级别为 `1` 时，标题节点的 `level: 1` 会被省略，而 `level: 2` 会保留。此规则同样适用于 `null`、布尔值、字符串以及结构相同的数组和对象。没有 schema 默认值的属性会保留在输出中，除非显式将其隐藏。
+
+因等于 schema 默认值而省略的属性仍保留该默认值。`hiddenAttributes` 中的属性无论实际值为何都会被省略；省略它们并不表示它们使用默认值。`fetch-tools` 返回的 `systemPrompt` 会包含这些默认值，使 AI 能正确理解读取结果并写回内容，而不会丢失属性值。这样可以缩短读取结果，同时不改变文档。
+
+### 隐藏属性
+
+在 `execute-tool` 和 `stream-tool` 请求中使用 `hiddenAttributes` 字段（`string[]`），可阻止 AI 读取节点属性，例如仅供导出使用的布局设置。`tiptapRead`、`tiptapEdit`、`tiptapQuery`、`replaceDocument`、`createDocument`、`readSelection`、`getThreads` 和 `readDocument` 都支持此字段：通过这些工具，AI 无法读取或修改指定属性，文档中的属性值会保留。其他工具会忽略此字段，因此[画板工具](#board-tools)仍会读取和写入形状的全部属性，例如文档框架的 `docId`。每次读取或编辑文档时都要传入相同的属性列表。
+
+- 读取结果不会包含这些属性。
+- 编辑操作会忽略 AI 为这些属性写入的值。文本未变化的节点会保留原值，即使节点被移动也是如此。发生变化的节点会保留被其替换的同类型节点的属性值；即使 AI 重写整个表格或列表并增删行，也会保留这些值。段落被 AI 拆分为多个段落时，原属性值会传递给拆分后的每个段落。
+- 新内容（例如新增的表格行）以及类型发生变化的节点（例如改成标题的段落）会使用 schema 默认值。AI 通过单独的插入和删除操作移动节点时，该节点也会被视为新内容。
+- 一次编辑新增节点并完全重写相邻节点的文本时，属性值可能会转移到新增节点上。
+- AI 无法执行依赖这些属性的请求，例如将行高调小。
+- 只能隐藏节点属性。`_hash` 和修订记录属性不能隐藏。属性列表无效时，`execute-tool` 会返回 `422` 和 `validation_failed`，`stream-tool` 会返回 `400` 和 `invalid_stream_message`。
+- `stream-tool` 会以 `invalid_stream_message` 拒绝 `tiptapEdit` 的此选项，因为流式编辑无法保留这些属性值。
 
 ### `tiptapRead`
 
@@ -471,13 +463,11 @@ POST /v4/ai/toolkit/stream-tool
 
 ### `replaceDocument`
 
-Replaces the entire document with new content.
+用新内容替换整个文档。
 
 工具输入 (`tool.input`)：
 
-- `content` (`JSONContent | string`, required): The replacement document content. Use a Tiptap JSON
-  document when `format` is `json`, or a Tiptap Shorthand string when `format` is `shorthand` or
-  `shorthandV2`.
+- `content`（`JSONContent | string`，必需）：用于替换文档的内容。`format` 为 `json` 时传入 Tiptap JSON 文档；`format` 为 `shorthand` 或 `shorthandV2` 时传入 Tiptap Shorthand 字符串。
 
 工具配置 (`tool.config`)：
 
@@ -487,16 +477,16 @@ Replaces the entire document with new content.
 
 成功响应：
 
-- `success` (`true`): Indicates that the document was replaced successfully.
+- `success`（`true`）：表示文档已成功替换。
 
 错误响应：
 
-- `success` (`false`): Indicates that the document could not be replaced.
+- `success`（`false`）：表示无法替换文档。
 - `error` (`string`)：错误消息。
 
 ### `createDocument`
 
-Alias for `replaceDocument`. It accepts the same input and returns the same output.
+`replaceDocument` 的别名，接受相同的输入并返回相同的输出。
 
 ### `readSelection`
 
@@ -657,50 +647,50 @@ Alias for `replaceDocument`. It accepts the same input and returns the same outp
   - `success`（`boolean`）：该操作是否已成功完成。
   - `error`（`string | null`）：失败原因；如果操作成功则为 `null`。
 
-## 主板工具
+## 白板工具
 
 <Callout title="Alpha 功能" variant="hint">
-  主板工具目前处于 alpha 版本
+  白板工具目前处于 Alpha 阶段。
 </Callout>
 
-这些工具读取和更改 [whiteboard](/editor/whiteboard/getting-started/overview).在董事会文档上使用董事会编辑器的编辑器上下文执行它们。请参阅[与 Whiteboard](/ai/ai-toolkit/agents/whiteboard) 一起使用进行设置。
+这些工具会读取和修改[白板](/editor/whiteboard/getting-started/overview)。请在白板文档上使用白板编辑器的上下文执行它们。设置方法请参阅[与白板搭配使用](/ai/ai-toolkit/agents/whiteboard)。
 
-电路板工具采用纯文本，而不是文档内容，因此它们在每个 `format` 中的工作方式相同。它们无法通过 `stream-tool` 获得。
+白板工具处理的是形状数据，而不是文档内容，因此不受 `format` 影响。它们无法通过 `stream-tool` 使用。
 
-无法运行的板工具没有任何改变。当模型可以修复调用时，例如与板上不匹配的架构或 id 的输入，该工具会使用 HTTP 状态 `200` 进行应答，并在其工具输出中使用 `success: false` 和 `error`。
+无法执行的白板工具不会进行任何更改。如果模型能够修正调用，例如调整与白板不匹配的 schema 或 ID，工具会返回 HTTP `200`，并在工具输出中设置 `success: false` 和 `error`。
 
 当请求本身无法工作时，`execute-tool` 会像其他工具一样失败：
 
-- `403` 和 `board_schema_not_supported`：文档或编辑器上下文不是该工具可以处理的白板，就像没有 `createDocFrame` 文档框架的白板。
-- `403` 和 `tracked_changes_unsupported_schema`：`reviewOptions.mode` 是 `'trackedChanges'`，用于更改电路板的工具，但编辑器上下文没有跟踪更改。 `readBoard` 不检查此项。
+- `403`，错误码为 `board_schema_not_supported`：文档或编辑器上下文不是该工具支持的白板，例如缺少 `createDocFrame` 文档框架的白板。
+- `403`，错误码为 `tracked_changes_unsupported_schema`：修改白板的工具使用了 `reviewOptions.mode: 'trackedChanges'`，但编辑器上下文不支持修订记录。`readBoard` 不检查此项。
 
-### 板工具配置
+### 白板工具配置
 
-`readBoard`、`createShapes`、`createDiagram` 和 `createDocFrame` 采用此工具配置 (`tool.config`)：
+`readBoard`、`createShapes`、`createDiagram` 和 `createDocFrame` 接受以下工具配置（`tool.config`）：
 
-- `selectedIds`（`string[]`，可选）：形状的 ID用户选择的内容，按照选择的顺序。
-- `viewport`（`{ x: number, y: number, width: number, height: number }`，可选）：用户看到的板部分，以板为单位。 `width` 和 `height` 必须高于 `0`。
+- `selectedIds`（`string[]`，可选）：用户所选形状的 ID，按选择顺序排列。
+- `viewport`（`{ x: number, y: number, width: number, height: number }`，可选）：用户当前看到的白板区域，以白板单位表示。`width` 和 `height` 必须大于 `0`。
 
-每个缺失、`null` 或无效的字段都会自行回退：不进行选择，或不进行视口。
+每个缺失、值为 `null` 或无效的字段都会单独回退：不指定选区或视口。
 
-### 电路板放置
+### 白板内容的放置
 
-`createShapes`、`createDiagram` 和 `createDocFrame` 在其输入 (`tool.input`) 中采用这些字段，因此 AI 可以为新内容命名位置：
+`createShapes`、`createDiagram` 和 `createDocFrame` 在输入（`tool.input`）中接受以下字段，以便 AI 指定新内容的位置：
 
-- `near`（`string[]`，可选）：最多新内容所属形状的 100 个 id，例如摘要所涉及的图表。默认为选定的形状。
-- `side`（`'right' | 'below' | 'left' | 'above'`，可选）：新内容的这些形状的侧面。当空闲点较近时，默认为 `'right'` 或 `'below'`。
+- `near`（`string[]`，可选）：最多 100 个形状的 ID，新内容会放在这些形状附近，例如摘要所涉及图表的 ID。默认使用所选形状。
+- `side`（`'right' | 'below' | 'left' | 'above'`，可选）：新内容相对这些形状的方位。通常默认放在右侧或下方，具体取决于哪个空位更近。
 
-新形状位于棋盘上 `near` 中的形状旁边，或者位于所选形状旁边。如果没有这样的形状，它们将位于视口的中间，或者位于板上所有形状的右侧，或者位于空板的原点。当其他形状挡路时，它们会移动到最近的自由点。
+新形状会放在白板上 `near` 指定的形状旁边，或放在所选形状旁边。如果没有合适的形状，则放在视口中央；视口不可用时，放在白板上所有形状的右侧；如果白板为空，则放在原点。若目标位置被其他形状占据，新形状会移到最近的空位。
 
-### 电路板建议
+### 白板更改建议
 
-使用 `reviewOptions.mode: 'trackedChanges'`，电路板工具将其更改写入为 [跟踪更改](/tracked-changes/getting-started/overview):
+使用 `reviewOptions.mode: 'trackedChanges'` 时，白板工具会将更改记录为[修订记录](/tracked-changes/getting-started/overview)：
 
-- ] 的建议。 一次调用添加或删除的形状共享一个建议，因此 `acceptSuggestion` 或 `rejectSuggestion` 会审核所有这些建议。
-- 每个更改的形状和每个新文本都会得到自己的建议。稍后等待同一用户审核的形状更改将纳入该建议。
-- 这些工具会单独留下等待其他用户审阅的形状，或等待审阅将其删除的形状，并且不会删除等待审阅更改的形状。他们在 `skipped` 或 `skippedArrows` 中说明了原因。
+- 一次调用中添加或删除的形状共用一个建议，因此 `acceptSuggestion` 或 `rejectSuggestion` 会一并审核这些更改。
+- 每个被修改的形状和每段新文本都有自己的建议。同一用户稍后作出的待审阅形状修改会并入该建议。
+- 这些工具会跳过等待其他用户审核的形状，以及等待审核删除的形状；也不会删除仍有待审阅修改的形状。跳过原因会列在 `skipped` 或 `skippedArrows` 中。
 
-`suggestionIds` (`string[]`) 列出呼叫发出或继续进行的建议。调用继续进行的建议也保留了先前的更改，并且对先前建议添加的形状的更改是该添加的一部分，因此未列出。当您查看这些 ID 时，其他建议保持不变。如果没有审查，`suggestionIds` 是空的，并且工具会保留每个等待审查的形状。
+`suggestionIds`（`string[]`）列出本次调用新建或继续更新的建议。继续更新建议时，先前的更改也会保留。若本次修改的是先前建议新增的形状，该修改会并入原建议，因此不会重复列出。审核这些 ID 时，其他建议不会变化。未启用审核时，`suggestionIds` 为空，工具会保留所有待审核形状。
 
 ### `readBoard`
 
@@ -719,8 +709,8 @@ Alias for `replaceDocument`. It accepts the same input and returns the same outp
 成功响应：
 
 - `success` (`true`)：表示已读取电路板。
-- `shapeCount` (`number`)：板上形状的数量，包括箭头。
-- `selectedIds` (`string[]`)：板上选定形状的 ID。
+  - `shapeCount` (`number`)：白板上的形状数量，包括箭头。
+  - `selectedIds` (`string[]`)：白板上所选形状的 ID。
 - `shapes` (`array`)：形状，首先选择形状。
   - `id` (`string`)：唯一形状标识符。
   - `type` (`string`)：节点类型，例如 `stickyNote`、`geo`、`freeText`、`freehand` 或 `docFrame`。
@@ -788,12 +778,39 @@ Alias for `replaceDocument`. It accepts the same input and returns the same outp
 - `movedIds` (`string[]`)：移动的形状的 ID。
 - `titleIds` (`string[]`)：新标题的 ID。
 - `skipped` (`array`)：保持原样的形状，每个形状都有 `id` 和 `reason`，例如不是板上形状的 id、箭头、早期组命名的 id 或等待其他用户审阅的形状。
-- `suggestionIds` (`string[]`): See [board suggestions](#board-suggestions).
+- `suggestionIds`（`string[]`）：参见[白板更改建议](#board-suggestions)。
 
-Error response:
+错误响应：
 
-- `success` (`false`): Indicates that no shapes were arranged.该错误列出了原因。
-- `error` (`string`): Error message.
+- `success`（`false`）：表示没有排列任何形状。错误消息会列出原因。
+- `error`（`string`）：错误消息。
+
+### `distributeShapes`
+
+将形状按其沿排列方向的顺序排成一行或一列，并在形状之间留出相等间距。形状沿中线对齐。排列时会保留形状两端的外边缘；如果形状间距不足 48 个白板单位，则将间距调整为 48。当排列结果会遮挡其他形状时，会将整组移动到最近的空位；形状所属的框架不计作遮挡。该操作只移动形状，因此连接它们的箭头也会随之移动，移动框架中的形状也会一同移动。
+
+工具输入（`tool.input`）：
+
+- `ids`（`string[]`，必需）：要排列的 2 至 300 个形状 ID。
+- `direction`（`'horizontal' | 'vertical'`，可选）：`horizontal` 表示从左向右排列成一行，`vertical` 表示从上向下排列成一列。默认值：`'horizontal'`。
+
+工具配置（`tool.config`）：
+
+`null`
+
+工具输出（`tool.output`）：
+
+成功响应：
+
+- `success`（`true`）：表示形状已完成排列。
+- `movedIds`（`string[]`）：已移动的形状 ID，包括随框架一同移动的形状。不包含原本就在目标位置的形状。
+- `skipped`（`array`）：未移动的形状及其 `id` 和 `reason`，例如 ID 不对应白板上的形状、对应的是箭头、ID 已由前面的条目处理，或形状正在等待其他用户审核。
+- `suggestionIds`（`string[]`）：参见[白板更改建议](#board-suggestions)。
+
+错误响应：
+
+- `success`（`false`）：表示无法排列至少两个形状。错误消息会列出原因。
+- `error`（`string`）：错误消息。
 
 ### `createDiagram`
 
@@ -802,11 +819,11 @@ Error response:
 刀具输入 (`tool.input`)：
 
 - `title`（`string`，可选）：图表上方的标题，最多 80 个字符。
-- `direction` (`'down' | 'right'`, optional): Where the arrows mostly point. Default: `'down'`
-- `nodes` (`array`, required): 1 to 40 shapes.
+  - `direction`（`'down' | 'right'`，可选）：箭头的主要指向。默认值：`'down'`。
+  - `nodes`（`array`，必需）：1 到 40 个形状。
   - `key`（`string`，必填）：AI 自己的形状名称，最多 40 个字符，并且在图中是唯一的。箭头指的是它。
-  - `text` (`string`, required): Text in the shape, up to 60 characters.
-  - `shape` (`'rectangle' | 'ellipse' | 'diamond'`, optional): Kind of the shape.另一种则成为长方形。默认值：`'rectangle'`
+  - `text`（`string`，必需）：形状中的文本，最多 60 个字符。
+  - `shape`（`'rectangle' | 'ellipse' | 'diamond'`，可选）：形状类型。默认值为长方形，即 `'rectangle'`。
   - `color`（`string`，可选）：`createShapes` 的颜色之一。默认值：`'black'`
 - `arrows`（`array`，可选）：最多 60 个箭头。
   - `from`（`string`，必需）：箭头开始处的形状的关键点。
@@ -826,7 +843,7 @@ Error response:
 - `createdIds` (`string[]`)：所有新形状的 ID：标题、形状、箭头及其标签。
 - `nodeIds` (`Record<string, string>`)：每个新形状的 ID（按其键）。
 - `skippedArrows` (`array`)：省略的箭头，每个箭头都有 `from`、`to` 和 `reason`。带有未知键的箭头（从形状到自身）或较早出现的箭头将被忽略。
-- `suggestionIds` (`string[]`)：请参阅[董事会建议](#board-suggestions)。
+- `suggestionIds`（`string[]`）：参见[白板更改建议](#board-suggestions)。
 
 错误响应：
 
@@ -922,30 +939,30 @@ Error response:
 
 在所有形状前面添加带有新的空文档的文档框架。用`tiptapEdit`写文档，在其`docId`的Tiptap Cloud文档上。参见[编写文档框架](/ai/ai-toolkit/agents/whiteboard#write-the-documents-of-doc-frames)的文档。
 
-Tool input (`tool.input`):
+工具输入（`tool.input`）：
 
 - `lines`（`number`，可选）：关于文档将有多少行，作为从 1 到 400 的整数。框架为它们保留了空间。默认值：`12`
 - `near` 和 `side`（可选）：帧所在的位置。请参阅[董事会布局](#board-placement)。
 
-Tool config (`tool.config`):
+工具配置（`tool.config`）：
 
 [板工具配置](#board-tool-config)。
 
-Tool output (`tool.output`):
+工具输出（`tool.output`）：
 
-Success response:
+成功响应：
 
 - `success` (`true`)：表示帧已添加。
 - `frameId` (`string`)：新帧的 ID。
 - `docId` (`string`)：框架文档的 ID。
 - `suggestionIds` (`string[]`)：请参阅[董事会建议](#board-suggestions)。
 
-Error response:
+错误响应：
 
 - `success` (`false`)：表示没有添加帧。
-- `error` (`string`): Error message.
+- `error`（`string`）：错误消息。
 
-## Related pages
+## 相关页面
 
 - [审核选项](/ai/ai-toolkit/api-reference/review-options)
 - [编辑器上下文](/ai/ai-toolkit/api-reference/editor-context)

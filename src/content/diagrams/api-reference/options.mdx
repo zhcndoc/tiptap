@@ -10,10 +10,17 @@ meta:
   category: 图表
 ---
 
+大多数编辑器都会设置渲染器、新图表的类型以及调整大小的控制柄。每个渲染器都需要安装对应的库；此例使用 `echarts` 和 `d3`：
+
 ```ts
-Diagrams.configure({
+import { Diagrams } from '@tiptap-pro/extension-diagrams'
+import { d3Renderer } from '@tiptap-pro/extension-diagrams/d3'
+import { echartsRenderer } from '@tiptap-pro/extension-diagrams/echarts'
+
+const diagrams = Diagrams.configure({
   renderers: [echartsRenderer(), d3Renderer()],
   defaultRenderer: 'echarts',
+  resizable: true,
   chart: { defaultType: 'bar', linkTables: true },
 })
 ```
@@ -94,7 +101,7 @@ URL 提供程序读取的 `fetch` 函数。传递您自己的信息以添加凭�
 
 ```ts
 Diagrams.configure({
-  allowSourceUrl: (url) => url.hostname === 'data.example.com',
+  allowSourceUrl: url => url.hostname === 'data.example.com',
 })
 ```
 
@@ -202,14 +209,14 @@ Diagrams.configure({
 
 ```ts
 Diagrams.configure({
-  unavailable: (figure) => {
+  unavailable: figure => {
     const button = document.createElement('button')
     button.textContent = `Show the ${figure.kind === 'chart' ? 'data' : 'source'}`
     button.addEventListener('click', () => {
       const text =
         figure.kind === 'chart'
           ? editor.storage.diagrams.read({ pos: figure.pos ?? -1, format: 'chart-syntax' })
-          : editor.storage.diagrams.listDiagrams().find((diagram) => diagram.pos === figure.pos)
+          : editor.storage.diagrams.listDiagrams().find(diagram => diagram.pos === figure.pos)
               ?.source
       openDialog(text ?? '')
     })
@@ -220,7 +227,7 @@ Diagrams.configure({
 
 ## 导出
 
-### docxImages
+如何将图表转换为图像和 Word 内容。
 
 `'auto' | 'always'` · 默认 `'auto'`
 

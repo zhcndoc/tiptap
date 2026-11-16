@@ -1,0 +1,31 @@
+---
+title: 文档辅助
+description: '文档辅助扩展可处理整个文档：收集标题以生成目录、在文档末尾保留一个空节点，并为节点分配唯一 ID。'
+meta:
+  title: 文档辅助 | Tiptap 文档
+  description: 在 Tiptap 编辑器中生成目录、在文档末尾保留尾随节点，并为节点添加唯一 ID。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="document-helpers" />
+
+## 使用场景
+
+- **文档导航。** Table of contents 会收集文档中的标题和其他锚点，以及它们的层级、ID 和滚动状态，你可以据此自行渲染目录。
+- **在最后一个块后添加节点。** Trailing node 会在编辑器的最后一个块节点之后添加节点。
+- **引用节点。** Unique ID 会为你配置的节点类型分配 ID；用户拆分、合并、粘贴或撤销操作时，ID 会随节点保留。
+
+## 工作原理
+
+- **它们都是扩展。** 它们会处理文档中的节点，但不会自行添加节点或标记。[扩展](/editor/core-concepts/extensions)
+- **StarterKit 自带 Trailing node。** 它属于 [StarterKit](/editor/extensions/functionality/starterkit)；Table of contents 和 Unique ID 需要手动添加。
+- **目录由你渲染。** `onUpdate` 回调会接收锚点，你可以使用任意框架或原生 DOM 代码渲染目录。
+- **在服务端生成 ID。** `generateTocIds` 和 `generateUniqueIds` 无需编辑器实例即可为 JSON 文档添加 ID。
+- **协作时在同步后挂载。** 将 Unique ID 与 Collaboration 搭配使用时，请等协作 provider 完成同步后再挂载编辑器。
+
+## 相关内容
+
+- [文本块](/editor/extensions/text-blocks)介绍目录会收集的 Heading 节点。
+- [实时协作](/editor/extensions/collaboration)介绍如何在多人之间同步文档。

@@ -19,7 +19,10 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ## 快速入门
 
+在[创建第一个图表](/diagrams/getting-started/install#a-first-chart)中的编辑器里，下面的命令会插入并选中一个空图表，然后将其关联到 CSV 文件。无需设置其他选项：
+
 ```ts
+editor.commands.insertChart({ type: 'line' })
 editor.commands.linkChartSource({
   provider: 'url-csv',
   address: { url: 'https://example.com/sales.csv' },
@@ -53,7 +56,7 @@ editor.commands.linkChartSource({
 同步将替换所有列。要仅显示其中一些，请设置 [`encoding`](/diagrams/data/overview#which-columns-are-drawn) 和 `updateChartSpec`。它在每次同步中都存在。
 
 ```ts
-editor.commands.updateChartSpec({ spec: { encoding: { label: 'region', series: ['revenue'] } } })
+editor.commands.updateChartSpec({ spec: { encoding: { series: ['revenue'] } } })
 ```
 
 ## 当图表同步时
@@ -118,10 +121,10 @@ const salesApi: ChartSourceProvider = {
         { id: 'month', label: 'Month', role: 'label' },
         { id: 'total', label: 'Total', role: 'series' },
       ],
-      rows: rows.map((row) => [row.month, row.total]),
+      rows: rows.map(row => [row.month, row.total]),
     }
   },
-  describe: (address) => `Sales, ${(address as { region: string }).region}`,
+  describe: address => `Sales, ${(address as { region: string }).region}`,
 }
 ```
 
@@ -147,11 +150,7 @@ const salesApi: ChartSourceProvider = {
 将图表链接到数据源。
 
 ```ts
-editor.commands.linkChartSource({
-  provider: 'url-csv',
-  address: { url: 'https://example.com/sales.csv' },
-  readOnly: true,
-})
+editor.commands.linkChartSource({ provider: 'url-csv', address: { url } })
 ```
 
 | 选项 | 类型 | 描述 |
@@ -169,9 +168,7 @@ editor.commands.linkChartSource({
 写入新快照。
 
 ```ts
-editor.commands.syncChartData({
-  source: { provider: 'url-csv', address: { url: 'https://example.com/sales.csv' } },
-})
+editor.commands.syncChartData({ source: { provider: 'url-csv', address: { url } } })
 ```
 
 | 选项 | 类型 | 说明 |

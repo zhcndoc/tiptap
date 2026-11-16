@@ -63,8 +63,12 @@ if (pos !== null) textField.value = editor.storage.diagrams.readText({ pos })?.t
 let typing = false
 
 editor.on('transaction', ({ transaction }) => {
-  // A command that changes a chart replaces its node. Mapping with -1 keeps pos at its start.
-  if (pos !== null) pos = transaction.mapping.map(pos, -1)
+  // Typing replaces the node. Mapping with -1 keeps pos at its start; any other replacement or a
+  // deletion lets go, so the next figure is never changed instead.
+  if (pos !== null) {
+    const mapped = transaction.mapping.mapResult(pos, -1)
+    pos = mapped.deletedAfter && !typing ? null : mapped.pos
+  }
   const { node, from } = editor.state.selection
   if (node && ['chart', 'flowDiagram'].includes(node.type.name)) pos = from
   if (!typing && pos !== null) {
@@ -91,7 +95,7 @@ import { highlightSource } from '@tiptap-pro/extension-diagrams/core'
 const { delimiters, chartTypes } = editor.storage.diagrams.describeCapabilities()
 code.innerHTML = highlightSource(text, 'chart-syntax', {
   delimiters,
-  types: chartTypes.map((type) => type.id),
+  types: chartTypes.map(type => type.id),
 })
 ```
 

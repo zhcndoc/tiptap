@@ -48,19 +48,43 @@ const changeset = compareDocuments({
 `@tiptap-pro/extension-diagrams/core` 中的 `describeChartChange` 告诉您图表内发生的变化，例如“二月：4 → 5，类型：条形 → 线”更改旁边：
 
 ```ts
+import type { Range } from '@tiptap/core'
+import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { describeChartChange } from '@tiptap-pro/extension-diagrams/core'
 
-const change = describeChartChange({ before: olderChart.attrs, after: newerChart.attrs })
+const older = editor.schema.nodeFromJSON(changeset.docA)
+const newer = editor.schema.nodeFromJSON(changeset.docB)
 
-if (change.changed) {
-  const cells =
-    change.data?.cells.map(
-      (cell) => `${cell.row} ${cell.column}: ${cell.before} → ${cell.after}`,
-    ) ?? []
-  const fields = change.spec.map(
-    (field) => `${field.path}: ${String(field.before)} → ${String(field.after)}`,
-  )
-  console.log([...cells, ...fields].join(', '))
+const chartsIn = (doc: ProseMirrorNode, range: Range) => {
+  const charts: ProseMirrorNode[] = []
+  doc.nodesBetween(range.from, range.to, node => {
+    if (node.type.name === 'chart') charts.push(node)
+  })
+  return charts
+}
+
+for (const { rangeA, rangeB } of changeset.changes) {
+  const olderCharts = chartsIn(older, rangeA)
+  const newerCharts = chartsIn(newer, rangeB)
+  // A chart was added or removed here, so the order cannot pair them
+  if (olderCharts.length !== newerCharts.length) continue
+
+  newerCharts.forEach((newerChart, index) => {
+    const olderChart = olderCharts[index]
+    const change = describeChartChange({ before: olderChart.attrs, after: newerChart.attrs })
+
+    if (change.changed) {
+      const cells =
+        change.data?.cells.map(
+          cell => `${cell.row} ${cell.column}: ${cell.before} → ${cell.after}`,
+        ) ?? []
+      const fields = change.spec.map(
+        field => `${field.path}: ${String(field.before)} → ${String(field.after)}`,
+      )
+      const lines = [...cells, ...fields]
+      if (lines.length) console.log(lines.join(', '))
+    }
+  })
 }
 ```
 

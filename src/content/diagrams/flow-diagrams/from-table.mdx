@@ -85,17 +85,13 @@ editor.commands.insertDiagramFromTable({
 
 ## 命令
 
+无法执行时，这些命令都会返回 `false`，且不会进行任何更改。
+
 ### insertDiagramFromTable
 
 在选择处或 `table` 处插入从表格绘制的流程图。
 
 ```ts
-editor.commands.insertDiagramFromTable({
-  columns: { step: 'Step', next: 'Next', lane: 'Team' },
-  title: 'Order process',
-})
-
-// A table without a header, without its last row
 editor.commands.insertDiagramFromTable({
   header: 'none',
   range: { rows: { to: -2 } },

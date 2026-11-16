@@ -1,0 +1,29 @@
+---
+title: 剪贴板和文件
+description: '剪贴板和文件扩展负责处理粘贴或拖入编辑器的内容，包括文件以及从 Microsoft Word、Excel 和 Google Docs 复制的内容。'
+meta:
+  title: 剪贴板和文件 | Tiptap 文档
+  description: 处理拖放或粘贴到 Tiptap 编辑器中的文件，并清理从 Microsoft Word、Excel 和 Google Docs 粘贴的内容。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="clipboard-and-files" />
+
+## 使用场景
+
+- **图片和其他文件。** File Handler 会在用户拖放或粘贴文件时调用你的代码，例如将文件插入为图片。
+- **来自办公应用的内容。** Paste Handler 会清理从 Microsoft Excel、Word 和 Google Docs 粘贴的内容，并移除源内容中的格式残留。
+
+## 工作原理
+
+- **文件上传由你负责。** File Handler 的 `onPaste` 和 `onDrop` 回调会接收文件。它不会显示或上传文件；你需要插入节点并将文件上传到自己的服务器。`allowedMimeTypes` 可限制接受的文件类型。
+- **Paste Handler 无需配置。** 将它添加到编辑器后，它会转换粘贴的 HTML。如果转换失败，则会使用原始 HTML。
+- **Paste Handler 需要 Team 计划。** 它来自 `@tiptap-pro/extension-paste-handler` 软件包。
+- **需要手动添加。** 这两个扩展都不包含在 [StarterKit](/editor/extensions/functionality/starterkit) 中。
+
+## 相关内容
+
+- [媒体和嵌入内容](/editor/extensions/media)介绍用于显示已上传图片的 Image 节点。
+- [写作辅助](/editor/extensions/writing-helpers)介绍可在写作过程中提供帮助的扩展。

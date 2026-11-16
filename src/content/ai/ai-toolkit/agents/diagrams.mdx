@@ -1,0 +1,97 @@
+---
+title: 与 Diagrams 搭配使用
+tags:
+  - type: alpha
+meta:
+  title: 与 Diagrams 搭配使用 | Tiptap Server AI Toolkit
+  description: 让服务端 AI 代理读取、添加和修改 Tiptap 文档中的图表和流程图。
+  category: AI 工具包
+---
+
+import { Callout } from '@/components/ui/Callout'
+
+让 AI 代理处理 [Diagrams](/diagrams/getting-started/overview) 中的图表和流程图。Server AI Toolkit 的文档工具可以像处理其他内容一样读取、添加和修改它们，无需启用额外工具。
+
+<Callout title="Alpha 版本" variant="info">
+  [Diagrams](/diagrams/getting-started/overview) 目前处于 alpha 阶段，可通过试点计划使用。
+  API 可能会在后续版本中变更。
+</Callout>
+
+<Callout title="接续 AI 代理聊天机器人指南" variant="info">
+  本指南接续[AI 代理聊天机器人指南](/ai/ai-toolkit/agents/ai-agent-chatbot)，请先阅读该指南。
+</Callout>
+
+## 工作原理
+
+1. 当编辑器包含 Diagrams 的 `chart` 和 `flowDiagram` 节点时，`getEditorContext` 会在编辑器上下文中加入它们的说明。Server AI Toolkit 会通过 `fetch-tools` 的 `systemPrompt` 将说明提供给 AI。
+2. 图表会将[图表数据](/diagrams/data/overview#chart-data)保存在 `data` 属性中，并将类型、标题以及横向条形或目标线等其他设置保存在[图表规格](/diagrams/charts/appearance#chart-spec-fields)的 `spec` 属性中。流程图会将 Mermaid 代码保存在 `source` 中，并将说明文字保存在 `title` 中。图表的 `source` 属性含义不同，它用于将图表关联到[数据源](/diagrams/data/sources)。AI 会按照请求中的 `format` 读取和写入这些属性。
+3. AI 会通过 `tiptapQuery` 等文档工具修改图表和流程图。
+
+## 设置编辑器
+
+将 Diagrams 添加到 AI 代理聊天机器人的编辑器中，参阅[安装 Diagrams](/diagrams/getting-started/install)。然后像 AI 代理聊天机器人指南中的示例一样，从该编辑器获取上下文：
+
+```ts
+import { getEditorContext, ServerAiToolkit } from '@tiptap/ai-toolkit'
+import { useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { Diagrams } from '@tiptap-pro/extension-diagrams'
+import { echartsRenderer } from '@tiptap-pro/extension-diagrams/echarts'
+
+const editor = useEditor({
+  immediatelyRender: false,
+  extensions: [StarterKit, ServerAiToolkit, Diagrams.configure({ renderers: [echartsRenderer()] })],
+})
+
+const editorContext = editor ? getEditorContext(editor) : null
+```
+
+此编辑器可以绘制图表。若还要绘制流程图，请添加 Diagram Renderer，参阅[创建第一个流程图](/diagrams/getting-started/install#a-first-diagram)。如果没有 Mermaid Renderer，AI 创建的流程图会显示为不可用。
+
+无需通过 `customNodes` 描述图表和流程图；`getEditorContext` 会自动添加相应说明。
+
+## 启用工具
+
+获取工具定义时启用 `tiptapQuery`：
+
+```ts
+tools: {
+  tiptapQuery: true,
+}
+```
+
+它的 `setAttrs` 操作只会修改 AI 指定的属性。因此 AI 修改图表数据或流程图代码时，图表的其他设置和流程图的尺寸都会保留。`tiptapRead` 和 `tiptapEdit` 也可以读写图表和流程图，但 `tiptapEdit` 会替换整个节点。详见[限制](#limitations)。
+
+可以尝试以下提示：
+
+- “在第一段后添加 6 月份收入和成本的饼图”
+- “将条形图中的 6 月收入改为 230”
+- “在订单流程图中，在‘有现货？’和‘发货’之间添加‘打包’步骤”
+
+## 检查结果
+
+AI 的修改会像其他用户的修改一样，通过协作同步到编辑器。若要检查 AI 创建的图表，可从编辑器中读取：
+
+```ts
+const charts = editor.getJSON().content?.filter((node) => node.type === 'chart') ?? []
+
+console.log(charts.map((chart) => chart.attrs?.spec?.type))
+```
+
+## 自行描述图表和流程图
+
+内置说明列出了 Diagrams 的[图表类型](/diagrams/charts/overview#chart-types)。你的渲染器可能只支持其中一部分，也可能支持自定义类型。若要告知 AI 编辑器支持哪些类型，请使用 `addJsonSchemaAwareness`，或通过 `getEditorContext` 的 `customNodes` 选项添加 `chart` 项，并在其中列出类型。添加 `chart` 或 `flowDiagram` 项后，会替代内置说明。详见[自定义节点](/ai/ai-toolkit/advanced-guides/custom-nodes)。
+
+## 限制
+
+- 服务端不会检查 AI 写入的数据。没有数据行，或数据格式无法被 Diagrams 读取的图表会显示为空。没有已注册渲染器支持的图表类型会显示为不可用。
+- 替换图表或流程图时，AI 未重复提供的属性会重置，例如流程图尺寸。使用 `tiptapQuery` 的 `setAttrs` 可以保留这些属性。
+- 文本搜索和 `contains` 不会检查属性，因此无法找到图表中的数值或流程图标题。AI 会按节点类型查找图表和流程图。
+- AI 无法将图表关联到[数据源](/diagrams/data/sources)或表格。Diagrams 的[模型工具](/diagrams/guides/ai)可通过 `insertLinkedChart` 将图表关联到数据源。若要使用 URL 上的 CSV 或 JSON 文件，需要启用默认关闭的 [`allowSourceUrl`](/diagrams/api-reference/options#allowsourceurl)。
+- AI 可以创建 Mermaid 流程图。服务端会提示 AI 保留 draw.io 和 BPMN 流程图的代码，不要修改从[数据源](/diagrams/data/sources)读取数据的图表，并在图表或流程图[跟随表格](/diagrams/data/tables#following-a-table)时修改表格而不是图表或流程图，但不会强制执行这些要求。
+
+## 后续步骤
+
+- 进一步了解 [Diagrams](/diagrams/getting-started/overview)
+- 查看 [Tiptap Query](/ai/ai-toolkit/api-reference/tiptap-query) API 参考
+- 通过[自定义节点](/ai/ai-toolkit/advanced-guides/custom-nodes)描述自己的节点

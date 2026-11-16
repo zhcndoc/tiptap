@@ -49,9 +49,9 @@ const detach = attachStage({ stage, editor, updateCamera: setCamera })
 
 连接后，用户可以在舞台上使用该白板。当焦点位于舞台上时，其按键可以工作，因此页面的其余部分以及其上的其他板保留其按键：
 
-- **平移**：按住空格、使用鼠标中键或使用 `hand` 工具进行拖动。转动滚轮或在触控白板上滚动也会平移。在触摸屏上，当 `select` 工具处于活动状态时，用一根手指拖动空板，或移动两根手指。平底锅胜过绘画和选择。使用 `hand` 工具进行平移或单击可为白板提供键盘，就像使用 `select` 进行单击一样，因此在工具栏按钮选择该工具后，其按键即可工作。
-- **缩放**：<kbd>Control</kbd> + 滚轮，或 macOS 上的 <kbd>Cmd</kbd> + 滚轮，或在触控白板上捏合，在指针处缩放。在触摸屏上，用两根手指捏合可在它们之间的中间进行缩放。第二根手指停止第一根手指开始的动作，然后撤消它，就像移动形状一样。
-- **缩放快捷键**：<kbd>Control</kbd> + <kbd>=</kbd> 或 <kbd>+</kbd> 放大，<kbd>Control</kbd> + <kbd>-</kbd> 缩小，以及<kbd>Control</kbd> + <kbd>0</kbd> 返回到 100%，在舞台中间附近，而不是缩放页面。在 macOS 上，使用 <kbd>Cmd</kbd> 而不是 <kbd>Control</kbd>。字段中的键保留在该字段中。
+- **平移**：按住空格并拖动、使用鼠标中键拖动，或选择 `hand` 工具后拖动。转动滚轮或在触控板上双指滑动也会平移。在触摸屏上，`select` 工具处于活动状态时，可用一根手指拖动空白区域，或用两根手指移动。平移手势优先于绘制和选择。使用 `hand` 工具进行平移，或单击舞台，可让白板接收键盘输入；使用 `select` 工具单击时也一样。因此，在工具栏中选择工具后，快捷键即可生效。
+- **缩放**：按住 <kbd>Control</kbd> 并滚动滚轮，macOS 上按住 <kbd>Cmd</kbd> 并滚动；也可以在触控板上捏合。缩放以指针位置为中心。触摸屏上用两根手指捏合时，以两指之间的中点为中心缩放。第二根手指会中断第一根手指发起的操作，并将其撤销，就像移动形状一样。
+- **缩放快捷键**：按 <kbd>Control</kbd> + <kbd>=</kbd> 或 <kbd>+</kbd> 放大，按 <kbd>Control</kbd> + <kbd>-</kbd> 缩小，按 <kbd>Control</kbd> + <kbd>0</kbd> 将缩放恢复到 100%。这些操作以舞台中心为基准，不会缩放整个页面。macOS 上使用 <kbd>Cmd</kbd> 代替 <kbd>Control</kbd>。当焦点位于输入框中时，按键会留在输入框内。
 - **适合**：<kbd>Shift</kbd> + <kbd>1</kbd> 将所有形状适合视图，同时不编辑任何文本。
 - **绘制**：使用形状工具，在白板上拖动即可添加形状。单击可为其工具添加固定大小的注释、文本、文档框架、框架或几何形状，以指针为中心。笔绘制线条，橡皮擦擦除其接触的形状。当擦除开始时，文档框架会保留下来，因此用户可以擦除文档上的笔线。绘图也适用于其他形状。
 - **选择**：使用 `select` 工具，在空白板上拖动鼠标或笔即可选择其框接触的形状。只有当盒子容纳了所有框架时，框架才算数，并且在框架内拖动也会绘制一个盒子。按住 <kbd>Shift</kbd> 将它们添加到选择中。单击或点击空白板上可清除选择。
@@ -70,7 +70,7 @@ attachStage({
   stage,
   editor,
   updateCamera: setCamera,
-  // Keeps shapes out from under the toolbar when Shift + 1 fits them into view
+  // Keeps shapes out from under the toolbar when the camera shows them
   fitInsets: () => ({ top: 80, right: 24, bottom: 24, left: 24 }),
 })
 ```

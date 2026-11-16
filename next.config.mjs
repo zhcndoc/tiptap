@@ -30,6 +30,7 @@ const nextConfig = {
     },
   },
   pageExtensions: ['js', 'jsx', 'mdx', 'ts', 'tsx'],
+  experimental: { cpus: 2 },
   images: { unoptimized: true },
   basePath: process.env.BASE_PATH ?? '',
   async headers() {

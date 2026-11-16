@@ -1,0 +1,31 @@
+---
+title: 媒体和嵌入内容
+description: '媒体扩展可将图片、音频文件以及来自 YouTube 和 Twitch 的视频添加到文档中。'
+meta:
+  title: 媒体和嵌入内容 | Tiptap 文档
+  description: 在 Tiptap 编辑器中嵌入图片、音频文件、YouTube 视频以及 Twitch 视频、片段和频道。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="media" />
+
+## 使用场景
+
+- **图片。** Image 使用 `img` 标签显示图片，可作为块级内容或与文本同行显示，也可以通过控制柄调整图片大小。
+- **音频。** Audio 会将音频文件嵌入为原生 `audio` 元素，并可选择显示浏览器自带的控件。
+- **视频。** YouTube 可嵌入 YouTube 视频；Twitch 可嵌入 Twitch 视频、片段和直播频道。
+
+## 工作原理
+
+- **它们都是节点。** 每个扩展都会向文档添加一个节点。Image 和 Audio 默认是块级节点，四个扩展都提供 `inline` 设置。[节点和标记](/editor/core-concepts/nodes-and-marks)
+- **需要手动添加。** 这些扩展都不包含在 [StarterKit](/editor/extensions/functionality/starterkit) 中。
+- **它们不会上传文件。** Image 只负责显示图片。若要处理用户拖放或粘贴的文件，请使用 [File Handler](/editor/extensions/functionality/filehandler) 并将文件上传到你的服务器。
+- **粘贴时会创建嵌入内容。** 默认情况下，Audio 和 Twitch 会处理粘贴的音频源和 Twitch 链接；将 `addPasteHandler` 设为 `false` 可关闭此功能。
+- **Twitch 需要配置域名。** 将 `parent` 设为嵌入播放器的域名，否则嵌入内容不会显示。
+
+## 相关内容
+
+- [剪贴板和文件](/editor/extensions/clipboard-and-files)介绍如何处理用户粘贴或拖放的文件和内容。
+- [文本块](/editor/extensions/text-blocks)介绍媒体周围的段落和标题。

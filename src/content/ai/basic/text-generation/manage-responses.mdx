@@ -38,9 +38,9 @@ AI 扩展将当前状态存储在其扩展存储中，路径为 `editor.storage.
 | pastResponses  | `string[]`                                                                              | 存储之前成功生成的响应，最新的排在最前。接受或拒绝响应时会清空该数组。                                                                                                                                                                                                                                                   |
 | initialContent | `Slice \| null`                                                                         | 插入 AI 响应前编辑器的内容。用于通过 `aiReject` 命令撤销 AI 响应。                                                                                                                                                                                                                                                        |
 
-## Access AI Storage
+## 访问 AI 存储
 
-You can access the current AI-generated state through extension storage.
+你可以通过扩展存储访问当前 AI 生成状态。
 
 ```ts
 const aiStorage = editor.storage.ai || editor.storage.aiAdvanced

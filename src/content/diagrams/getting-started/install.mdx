@@ -94,20 +94,31 @@ editor.commands.insertChartFrom({
 流程图需要流程图渲染器，例如 Mermaid 渲染器。安装 `mermaid`，然后按 [Mermaid 快速入门](/diagrams/renderers/mermaid#quick-start) 配置渲染器和样式；该页面也介绍了两个资源 URL。
 
 ```ts
-import { flowDiagramStyleRules } from '@tiptap-pro/extension-diagrams'
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { TableKit } from '@tiptap/extension-table'
+import { Diagrams, chartStyleRules, flowDiagramStyleRules } from '@tiptap-pro/extension-diagrams'
+import { echartsRenderer } from '@tiptap-pro/extension-diagrams/echarts'
 import { mermaidDiagramRenderer } from '@tiptap-pro/extension-diagrams/mermaid'
 import rendererUrl from '@tiptap-pro/extension-diagrams/mermaid-renderer?url&no-inline'
 import mermaidUrl from 'mermaid/dist/mermaid.min.js?url'
 
+const style = document.createElement('style')
 style.textContent = chartStyleRules() + flowDiagramStyleRules()
+document.head.append(style)
 
-// In the editor from A first chart
-Diagrams.configure({
-  renderers: [echartsRenderer()],
-  diagramRenderers: [mermaidDiagramRenderer({ mermaidUrl, rendererUrl })],
-  chart: { defaultType: 'bar' },
+const editor = new Editor({
+  element: document.querySelector('#editor'),
+  extensions: [
+    StarterKit,
+    TableKit,
+    Diagrams.configure({
+      renderers: [echartsRenderer()],
+      diagramRenderers: [mermaidDiagramRenderer({ mermaidUrl, rendererUrl })],
+      chart: { defaultType: 'bar' },
+    }),
+  ],
 })
-```
 
 然后插入 Mermaid 流程图：
 
@@ -122,10 +133,7 @@ editor.commands.insertFlowDiagram({
 
 现在选择您上次插入的图表。单击 [第一个图表](/diagrams/getting-started/install#a-first-chart) 中的条形图将其选中，然后运行：
 
-```ts
-editor.commands.updateChartSpec({ spec: { type: 'line', title: 'Revenue' } })
-editor.commands.updateChartAxis({ axis: 'y', changes: { title: 'EUR', min: 0 } })
-```
+## Packages
 
 图表规范保存图表显示其数据的方式，例如其类型、标题、颜色和轴。这两个命令都会更改选定的图表。如果没有选定的图表，它们不会进行任何更改并返回 `false`。
 

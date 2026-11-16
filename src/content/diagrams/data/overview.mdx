@@ -45,6 +45,8 @@ import { CodeDemo } from '@/components/CodeDemo'
 
 ## 命令
 
+每个命令都会作用于文档中位于 `pos` 的图表；如果未指定 `pos`，则作用于当前选中的图表。不存在相应图表时会返回 `false`。
+
 ### updateChartData
 
 替换图表数据。
@@ -92,12 +94,7 @@ editor.commands.setChartSeriesIn({ seriesIn: 'rows' })
 
 设为 `'rows'` 后，每一行都会成为一个以行标签命名的系列，每个要绘制的列都会成为一个类别。以下面的柱状图数据为例：
 
-```txt
-Month | Visitors
-Jan   | 120
-Feb   | 150
-Mar   | 170
-```
+交换行列后，为系列设置的样式会按行 ID 应用，例如 `jan`。
 
 | `seriesIn` | 类别 | 每个类别中的柱形 |
 | ----------- | ------------- | ------------------------- |
@@ -129,7 +126,12 @@ editor.commands.updateChartFrom({ format: 'chart-syntax', content: 'Jan | 2\nFeb
 替换字符串网格中的数据。
 
 ```ts
-editor.commands.updateChartFromGrid({ grid })
+editor.commands.updateChartFromGrid({
+  grid: [
+    ['Month', 'Sales'],
+    ['Jan', '2'],
+  ],
+})
 ```
 
 | 选项 | 类型 | 说明 |

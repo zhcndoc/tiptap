@@ -105,6 +105,33 @@ editor.commands.duplicateShapes({ ids: getSelectedShapeIds(editor.state) })
 
 `false`，且不会添加任何内容：白板上没有这些形状，或偏移量为 `NaN` 或无穷大。
 
+## `insertConnectedShape`
+
+在指定形状的 `side` 一侧、相距 100 个白板单位处添加一个相似形状，并用箭头连接，然后将插入符号放入新形状。新形状沿用原形状的类型、大小和样式，但不包含文本。如果目标位置被其他形状占用，会沿该侧寻找最近的空位：先向后，再向前，也就是先向下再向上。如果整侧都被占用（例如较高的文档框架），新形状会放到这些形状之外。指定 `at` 时，新形状会放在该点之外并朝向原形状；指定 `kind` 时，则添加指定类型的几何形状。箭头从原形状的 `side` 一侧引出，并沿用 [`setShapeStyle()`](#setshapestyle) 的样式；默认采用 FigJam 风格的直角折线，除非 `setShapeStyle()` 指定了其他 `arrowKind`。[`attachStage`](/editor/whiteboard/api-reference/utilities#attachstage) 所连接的舞台会移动相机，以显示新形状。
+
+[连接手柄](/editor/whiteboard/guides/shapes-and-tools#change-shapes)以及 <kbd>Control</kbd> + <kbd>Enter</kbd>（macOS 上为 <kbd>Cmd</kbd> + <kbd>Enter</kbd>）都会运行此命令。
+
+```js
+editor.commands.insertConnectedShape({ id: 'step-1', side: 'right' })
+editor.commands.insertConnectedShape({
+  id: 'step-1',
+  side: 'right',
+  at: { x: 600, y: 80 },
+  kind: 'diamond',
+})
+```
+
+### 参数（`InsertConnectedShapeOptions`）
+
+- `id` (`string`)：作为起点的形状 ID，可以是几何形状或便签。
+- `side` (`ShapeSide`)：新形状放置的一侧，也是箭头离开原形状的一侧：`top`、`right`、`bottom` 或 `left`。
+- `at?` (`Point`)：箭头终点的白板坐标，例如从连接手柄拖动结束的位置。新形状会放在该点之外，并让朝向原形状的一侧中心对准该点。
+- `kind?` (`GeoKind`)：要添加的几何形状类型；不指定时沿用起始形状的类型。
+
+### 返回值（`boolean`）
+
+如果起始形状不是支持的类型、ID/方位/形状类型无效，或新形状的位置为无穷大，则返回 `false` 且不添加任何内容。
+
 ## `deleteShapes`
 
 一步删除给定 id 的形状，以及其中框架中的形状。连接已删除形状的箭头会保留下来，并在它们接触的地方有一个自由端。

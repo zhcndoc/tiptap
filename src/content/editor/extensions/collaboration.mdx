@@ -1,0 +1,29 @@
+---
+title: 实时协作
+description: '实时协作扩展支持多人同时编辑文档，并显示其他人的输入位置。'
+meta:
+  title: 实时协作 | Tiptap 文档
+  description: 在 Tiptap 编辑器中使用 Collaboration 和 Collaboration Caret 扩展共同编辑文档，并通过 Document Server 或 Hocuspocus 同步。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="collaboration" />
+
+## 使用场景
+
+- **共同编辑。** Collaboration 会将编辑器与 Y.js 文档同步，让多人能够同时编辑。
+- **查看彼此的位置。** Collaboration Caret 会在其他人输入时显示他们的光标、选区、姓名和颜色。
+
+## 工作原理
+
+- **需要同步服务器。** 将编辑器连接到 Tiptap Cloud 或自托管的 [Document Server](/collaboration/getting-started/overview)，也可以连接到开源项目 [Hocuspocus](/hocuspocus/getting-started/overview)。
+- **Collaboration Caret 依赖 Collaboration。** 它需要 Y.js provider，以及当前用户的姓名和颜色。它没有默认样式，因此需要为光标添加 CSS。
+- **Collaboration 有自己的撤销和重做机制。** 请关闭[撤销和重做](/editor/extensions/functionality/undo-redo)扩展；使用 StarterKit 时设置 `undoRedo: false`。
+- **需要手动添加。** 这两个扩展都不包含在 [StarterKit](/editor/extensions/functionality/starterkit) 中。
+
+## 相关内容
+
+- 参阅[安装 Collaboration](/collaboration/getting-started/install)，将其与 Document Server 搭配使用。
+- [文档辅助](/editor/extensions/document-helpers)介绍 Unique ID；请在协作 provider 完成同步后再挂载它。

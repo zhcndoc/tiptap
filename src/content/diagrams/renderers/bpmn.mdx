@@ -15,6 +15,12 @@ meta:
 
 ## 快速入门
 
+bpmn-js 不是此软件包的依赖项。请单独安装，并以文件形式提供其构建产物，同时遵循它自己的许可证。`bpmnXml` 表示某个流程的 XML：
+
+```bash
+npm install bpmn-js
+```
+
 ```ts
 import { Diagrams } from '@tiptap-pro/extension-diagrams'
 import { bpmnDiagramRenderer } from '@tiptap-pro/extension-diagrams/bpmn'
@@ -76,8 +82,16 @@ import bpmnStyleUrl from 'bpmn-js/dist/assets/bpmn-js.css?url&no-inline'
 import diagramStyleUrl from 'bpmn-js/dist/assets/diagram-js.css?url&no-inline'
 import modelerUrl from 'bpmn-js/dist/bpmn-modeler.production.min.js?url&no-inline'
 
+const diagram = editor.storage.diagrams.listDiagrams().find(item => item.format === 'bpmn')
+
+const dialog = document.createElement('dialog')
 const frame = document.createElement('iframe')
-dialog.append(frame)
+const saveButton = document.createElement('button')
+saveButton.textContent = 'Save'
+saveButton.disabled = true
+dialog.append(frame, saveButton)
+document.body.append(dialog)
+dialog.showModal()
 
 const connection = connectBpmnEditor(frame, {
   modelerUrl,
@@ -87,10 +101,15 @@ const connection = connectBpmnEditor(frame, {
   onReady: () => (saveButton.disabled = false),
 })
 
+// Escape closes the dialog too
+dialog.onclose = () => {
+  connection.destroy()
+  dialog.remove()
+}
+
 saveButton.onclick = async () => {
   const source = await connection.save()
-  editor.commands.updateFlowDiagram({ pos, source, format: 'bpmn' })
-  connection.destroy()
+  editor.commands.updateFlowDiagram({ pos: diagram.pos, source, format: 'bpmn' })
   dialog.close()
 }
 ```

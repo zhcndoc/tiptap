@@ -28,12 +28,14 @@ import {
   runDiagramTool,
 } from '@tiptap-pro/extension-diagrams'
 
-const tools = [...getChartToolDefinitions(editor), ...getDiagramToolDefinitions(editor)]
+// Pass these to the model as its tools
+const chartTools = getChartToolDefinitions(editor)
+const tools = [...chartTools, ...getDiagramToolDefinitions(editor)]
 
-// A call to a chart tool
-const result = runChartTool(editor, name, input)
-// A call to a diagram tool
-const other = runDiagramTool(editor, name, input)
+// Answer one tool call, and send result.output back to the model
+const result = chartTools.some(tool => tool.name === name)
+  ? runChartTool(editor, name, input)
+  : runDiagramTool(editor, name, input)
 ```
 
 ## 函数

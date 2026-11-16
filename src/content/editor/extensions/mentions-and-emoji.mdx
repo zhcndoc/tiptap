@@ -1,0 +1,30 @@
+---
+title: 提及和表情符号
+description: 'Mention 和 Emoji 可在文本中添加 @提及和表情符号，并将它们作为独立节点处理；输入时还会显示建议弹窗。'
+meta:
+  title: 提及和表情符号 | Tiptap 文档
+  description: 在 Tiptap 编辑器中添加带建议弹窗的用户 @提及，以及带备用图片的表情符号。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="mentions-and-emoji" />
+
+## 使用场景
+
+- **提及用户。** Mention 可添加 @提及，例如提醒其他用户；输入时会显示匹配项弹窗。
+- **多种提及类型。** Mention 的 `suggestions` 设置可定义多个触发字符，例如用 `@` 提及用户、用 `#` 搜索电影。
+- **表情符号。** Emoji 会将输入和粘贴的表情符号转换为节点；当系统无法显示某个表情时，会使用备用图片。它还可以将 `<3` 等颜文字转换为表情符号。
+
+## 工作原理
+
+- **它们都是节点。** 提及或表情符号都是文本中的节点，Emoji 会将其行内渲染。将文本复制出编辑器时，表情符号会还原为纯文本。[节点和标记](/editor/core-concepts/nodes-and-marks)
+- **弹窗由 Suggestion 工具提供。** 两个扩展都有 `suggestion` 设置，例如可用它定义打开弹窗的触发字符。Mention 还需要安装 `@tiptap/suggestion`。[Suggestion 工具](/editor/api/utilities/suggestion)
+- **匹配项和渲染方式由你决定。** Mention 的匹配项可以来自筛选后的列表，也可以通过异步 API 查询获取；你还可以传入自定义组件进行渲染。
+- **需要手动添加。** 这两个扩展都不包含在 [StarterKit](/editor/extensions/functionality/starterkit) 中。
+
+## 相关内容
+
+- [菜单和拖动手柄](/editor/extensions/menus)介绍如何在内容旁放置其他控件。
+- [文本格式](/editor/extensions/text-formatting)介绍句子中的链接和其他标记。

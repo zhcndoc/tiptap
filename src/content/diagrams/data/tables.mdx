@@ -20,6 +20,8 @@ import { CodeDemo } from '@/components/CodeDemo'
 当 [`chart.linkTables`](/diagrams/data/tables#following-a-table) 打开时，将选择放入表格中并调用：
 
 ```ts
+Diagrams.configure({ renderers: [echartsRenderer()], chart: { linkTables: true } })
+
 editor.commands.insertLinkedChart({ type: 'bar' })
 ```
 
@@ -93,24 +95,21 @@ editor.commands.convertChartToTable()
 在表格后面插入图表。
 
 ```ts
+const table = editor.storage.diagrams.listTables()[0].pos
+
 editor.commands.insertLinkedChart({
-  table: editor.storage.diagrams.listTables()[0].pos,
+  table,
   type: 'bar',
   columns: { label: 'Month', series: ['Retail'] },
 })
 
-// A table without a header, without its last row
+// A table without a header, without its last row: of the columns kept, 0 names the categories
+// and 2 is drawn
 editor.commands.insertLinkedChart({
   table,
   header: 'none',
   range: { rows: { to: -2 } },
   columns: { label: 0, series: [2] },
-})
-
-// The first and the last two rows, and only the columns 0, 3 and 4
-editor.commands.insertLinkedChart({
-  table,
-  range: { rows: [{ to: 0 }, { from: -2 }], columns: [0, { from: 3, to: 4 }] },
 })
 ```
 
@@ -135,7 +134,10 @@ editor.commands.insertLinkedChart({
 更改图表或流程图读取其后面表格的方式，并再次读取该表格。
 
 ```ts
+// Read every row as data, also the first one
 editor.commands.updateLinkedTable({ header: 'none' })
+
+// Go back to the default header, and leave out the first data row
 editor.commands.updateLinkedTable({ header: undefined, range: { rows: { from: 1 } } })
 ```
 

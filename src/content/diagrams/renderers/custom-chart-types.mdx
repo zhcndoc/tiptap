@@ -12,19 +12,26 @@ meta:
 
 ## 快速入门
 
+下面的代码会添加一个由自定义渲染器绘制的弦图。`chordSvg(input)` 代表你的绘图代码，它会将 `chartLinks(input.data)` 绘制为独立 SVG 标记：
+
 ```ts
-import { Diagrams, chartLinks, type ChartRenderer } from '@tiptap-pro/extension-diagrams'
+import { Diagrams, type ChartRenderer, type ChartRenderInput } from '@tiptap-pro/extension-diagrams'
+import { echartsRenderer } from '@tiptap-pro/extension-diagrams/echarts'
 
 const chordRenderer: ChartRenderer = {
   id: 'chord',
   label: 'Chord',
   types: ['chord'],
   mount(target, input) {
-    // chartLinks(input.data) gives { nodes, links }, read the way sankey and network read them.
-    // Draw into target, then return { update, destroy }.
+    const draw = (next: ChartRenderInput) => {
+      const svg = new DOMParser().parseFromString(chordSvg(next), 'image/svg+xml').documentElement
+      target.replaceChildren(target.ownerDocument.importNode(svg, true))
+    }
+    draw(input)
+    return { update: draw, destroy: () => target.replaceChildren() }
   },
   async toSVG(input) {
-    // ...
+    return chordSvg(input)
   },
 }
 

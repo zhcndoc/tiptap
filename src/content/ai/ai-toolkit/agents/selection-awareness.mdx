@@ -51,6 +51,10 @@ const response = await fetch(`${apiBaseUrl}/v4/ai/toolkit/fetch-tools`, {
 
 `readSelection` 工具读取单个用户的选区。通常，该用户就是向 AI 发出提示的用户。执行工具时，将用户 ID 作为 `tool.config.user` 参数传入。此参数由开发者传入，因此 AI 不会生成该参数。
 
+在聊天机器人指南的 `executeTool` 辅助函数中添加 `selectionUserId: string` 参数，并在请求的 `tool` 对象中包含 `config: { user: selectionUserId }`。每次调用时，都从聊天处理程序传入相同的用户 ID。如果编辑器使用的[协作字段](/editor/extensions/functionality/collaboration#field)不是 `default`，还要通过 `field` 传入该字段名。
+
+例如，最终的 `readSelection` 请求如下：
+
 ```ts
 const response = await fetch(`${apiBaseUrl}/v4/ai/toolkit/execute-tool`, {
   method: 'POST',

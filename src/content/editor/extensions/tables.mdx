@@ -1,0 +1,31 @@
+---
+title: 表格
+description: '表格扩展可向编辑器添加表格，并提供增删行列、合并和拆分单元格以及设置表头单元格的命令。'
+meta:
+  title: 表格 | Tiptap 文档
+  description: 使用 TableKit、Table、TableRow、TableCell 和 TableHeader 向 Tiptap 编辑器添加表格，包括表头行和合并单元格。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="tables" />
+
+## 使用场景
+
+- **按行列组织数据。** Table 会插入一个表格，默认包含表头行且为三行三列，并可添加或删除行列。
+- **表头。** Table header 会添加表头单元格。相关命令可将当前行、列或单元格设为表头。
+- **合并单元格。** Table 可将选中的单元格合并为一个，也可以再次拆分已合并的单元格。
+- **单元格属性。** `setCellAttribute()` 可设置你在 Table cell 上定义的属性，例如背景色。
+
+## 工作原理
+
+- **表格由四种节点组成。** Table 容纳 Table row，而每一行都容纳 Table cell 和 Table header。Table cell、Table header 和 Table row 都依赖 Table。[节点和标记](/editor/core-concepts/nodes-and-marks)
+- **Table kit 将它们组合在一起。** [Table kit](/editor/extensions/functionality/table-kit) 包含 Table、Table cell、Table header 和 Table row。表格扩展不属于 [StarterKit](/editor/extensions/functionality/starterkit)。
+- **通过命令编辑表格。** Table 的 `addRowAfter()` 和 `mergeCells()` 等命令可修改表格；`goToNextCell()` 和 `goToPreviousCell()` 可在单元格间移动。
+- **表头是可选的。** 若要允许不带表头的表格，请修改 Table row 的 `content`，使其只包含单元格。
+
+## 相关内容
+
+- [文本块](/editor/extensions/text-blocks)和[列表](/editor/extensions/lists)是文档中的其他内容块。
+- 参阅[扩展现有扩展](/editor/extensions/custom-extensions/extend-existing)，为表格单元格添加自定义属性。

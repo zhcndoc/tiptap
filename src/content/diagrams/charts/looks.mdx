@@ -15,21 +15,25 @@ meta:
 
 ## 快速入门
 
+编辑器中有两个图表时（例如[图表快速入门](/diagrams/charts/overview#quick-start)创建的图表，以及用同样方式通过 `insertChart()` 插入的另一个图表），可按如下方式操作：
+
 ```ts
 import { chartLook } from '@tiptap-pro/extension-diagrams'
 
 const [first, second] = editor.storage.diagrams.listCharts()
 
-// Give the second chart the look of the first one
-const look = chartLook(first.spec, first.data)
-editor.commands.applyChartLook({ look, pos: second.pos })
+if (first && second) {
+  // Give the second chart the look of the first one
+  const look = chartLook(first.spec, first.data)
+  editor.commands.applyChartLook({ look, pos: second.pos })
 
-// Insert a new line chart with the same look
-editor.commands.insertChart({ type: 'line', data: second.data, look })
+  // Insert a new line chart with the same look
+  editor.commands.insertChart({ type: 'line', data: second.data, look })
 
-// A template also holds the chart type
-const template = chartLook(first.spec, first.data, { type: true })
-editor.commands.insertChart({ data: second.data, look: template })
+  // A template also holds the chart type
+  const template = chartLook(first.spec, first.data, { type: true })
+  editor.commands.insertChart({ data: second.data, look: template })
+}
 ```
 
 [`listCharts()`](/diagrams/api-reference/storage) 返回文档中的每个图表。

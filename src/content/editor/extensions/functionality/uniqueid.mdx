@@ -1,11 +1,13 @@
 ---
 title: UniqueID 扩展
 extension:
-  name: UniqueID
+  name: Unique ID
   link: https://github.com/ueberdosis/tiptap/tree/main/packages/extension-unique-id
   description: 为每个节点添加唯一 ID 并跟踪它们。
   type: 扩展
   icon: Hash
+  group: document-helpers
+  package: '@tiptap/extension-unique-id'
 tags:
   - type: image
     src: https://img.shields.io/npm/v/@tiptap/extension-unique-id.svg?label=version
@@ -110,13 +112,13 @@ UniqueID.configure({
 
 ## 与协作（Collaboration）一起使用
 
-<Callout title="Important" variant="warning">
-When using the UniqueID extension together with the [Collaboration extension](/editor/extensions/functionality/collaboration), ensure that the editor is only mounted **after** the collaboration provider has synced. Mounting the editor on an unsynced `Y.Doc` can lead to unintended document state (e.g., persistent empty paragraphs), which the UniqueID extension will then preserve.
+<Callout title="重要" variant="warning">
+将 UniqueID 扩展与 [Collaboration 扩展](/editor/extensions/functionality/collaboration)搭配使用时，请确保协作 provider 完成同步**之后**再挂载编辑器。在尚未同步的 `Y.Doc` 上挂载编辑器可能导致非预期的文档状态（例如持续存在的空段落），而 UniqueID 扩展会保留这些状态。
 </Callout>
 
 ### 不正确的设置
 
-In this example, the editor is mounted immediately with the Collaboration extension before the provider has synced. This causes the editor to initialize against an empty `Y.Doc`, which leads to unintended document mutations.
+在此示例中，编辑器在 provider 完成同步之前就立即挂载了 Collaboration 扩展。这会导致编辑器基于空的 `Y.Doc` 初始化，并引发非预期的文档修改。
 
 ```tsx
 import Collaboration from '@tiptap/extension-collaboration'
@@ -160,13 +162,13 @@ export default () => {
 
 ### 正确的设置
 
-To avoid this issue, follow this initialization order:
+为避免此问题，请按以下顺序初始化：
 
-1. Initialize the `Y.Doc`
-2. Start the collaboration provider
-3. Wait for the `synced` event
-4. Check if the collaborative document is empty
-5. Mount the editor with the correct content
+1. 初始化 `Y.Doc`
+2. 启动协作 provider
+3. 等待 `synced` 事件
+4. 检查协作文档是否为空
+5. 使用正确的内容挂载编辑器
 
 ```tsx
 import Collaboration from '@tiptap/extension-collaboration'

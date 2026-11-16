@@ -39,6 +39,12 @@ const detach = attachStage({ stage, editor, updateCamera: setCamera })
 
 该阶段需要 `position: relative`、`overflow: clip` 和 `touch-action: none`。视口是容纳编辑器的元素，位于其左上角，包含 `position: absolute`、`top: 0`、`left: 0` 和 `transform-origin: 0 0`。用[`toCssTransform(camera)`](#tocsstransform)移动它，并将其上的`--zoom`设置为变焦。
 
+<Callout title="仅在相机移动时设置 will-change" variant="hint">
+
+只在相机移动期间为视口设置 `will-change: transform`，这样平移时移动的是已绘制的白板，而不是重新绘制每个形状。若一直保留该设置，浏览器会将白板保持为绘制时缩放比例下的单一图层。白板较大时，该图层可能超出图形内存容量，导致形状变化时部分区域变空白。
+
+</Callout>
+
 ## `toCssTransform`
 
 返回显示带有摄像头的白板的 CSS 转换。变换移动的视口需要 `transform-origin: 0 0`。
@@ -195,6 +201,25 @@ stage.addEventListener('pointermove', (event) => {
 ### 返回 (`Point | null`)
 
 白板单位中的点，或当白板不在页面上时的 `null`，就像在安装 `useEditor` 的编辑器之前或在编辑器被销毁后一样。
+
+## `boardToClient`
+
+使用白板当前显示的相机，将白板单位中的点转换为窗口坐标。它与 `clientToBoard` 的转换方向相反，可用于让菜单在相机移动时仍停留在白板上的同一位置。
+
+```js
+import { boardToClient } from '@tiptap-pro/extension-whiteboard'
+
+const place = boardToClient({ editor, point: { x: 400, y: 300 } })
+```
+
+### 参数（`BoardToClientOptions`）
+
+- `editor` (`Editor`)：白板对应的编辑器。
+- `point` (`Point`)：白板单位中的点。
+
+### 返回值（`Point | null`）
+
+窗口坐标中的点。如果白板尚未挂载到页面（例如 `useEditor` 创建的编辑器尚未挂载）或编辑器已销毁，则返回 `null`。
 
 ## `minZoom`
 
@@ -907,6 +932,12 @@ const png = await exportBoardImage({ editor, background: '#fff' })
 形状的默认颜色，例如颜色菜单的样本颜色。形状存储名称，CSS 决定它的外观。使用 `WhiteboardKit` 的 `colors` 选项添加您自己的颜色，请参阅[Colors](/editor/whiteboard/api-reference/styling#colors)。
 
 值：`['black', 'gray', 'red', 'orange', 'yellow', 'green', 'blue', 'violet']`。
+
+## `shapeSides`
+
+形状框的边，供 [`insertConnectedShape()`](/editor/whiteboard/api-reference/commands#insertconnectedshape) 放置新形状时使用。
+
+取值：`['top', 'right', 'bottom', 'left']`。
 
 ## `shapeStyles`
 

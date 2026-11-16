@@ -36,7 +36,7 @@ function barsSvg({ data, spec, theme, size }: ChartRenderInput): string {
   )
   const colors = spec.palette ?? theme.series
   const values = data.rows
-    .flatMap((row) => series.map((column) => row[column.index]))
+    .flatMap(row => series.map(column => row[column.index]))
     .filter((cell): cell is number => typeof cell === 'number')
   const max = Math.max(1, ...values)
   const band = size.width / Math.max(1, data.rows.length)
@@ -78,14 +78,15 @@ export const plainBarsRenderer: ChartRenderer = {
 
 ### 注册
 
+指定 `plain-bars` 的图表会由该渲染器绘制，其他图表仍使用各自的渲染器。参见[哪个渲染器绘制图表](/diagrams/renderers/overview#which-renderer-draws-a-chart)：
+
 ```ts
 import { Diagrams } from '@tiptap-pro/extension-diagrams'
 import { echartsRenderer } from '@tiptap-pro/extension-diagrams/echarts'
 
-Diagrams.configure({
-  renderers: [echartsRenderer(), plainBarsRenderer],
-})
+Diagrams.configure({ renderers: [echartsRenderer(), plainBarsRenderer] })
 
+// The selected chart names the Renderer from now on
 editor.commands.setChartRenderer({ renderer: 'plain-bars' })
 ```
 
@@ -178,30 +179,25 @@ editor.commands.setChartRenderer({ renderer: 'plain-bars' })
 | `{ kind: 'series', column }` | 系列名称，按 `input.data` |
 | `{ kind: 'category', row }` | 中的列 id类别标签或饼图部分，按 `input.data` |
 
+在这个处理器中，`svg` 是你绘制的图表，标题位于 class 为 `title` 的元素中：
+
 ```ts
-mount(target, input) {
-  const svg = draw(input)
-  target.append(svg)
-  const listeners = new Set<(hit: ChartTextHit) => void>()
-  svg.addEventListener('dblclick', event => {
-    const title = event.target instanceof Element ? event.target.closest('.title') : null
-    if (!title) return
-    const { x, y, width, height } = title.getBoundingClientRect()
-    const hit: ChartTextHit = {
-      target: { kind: 'title' },
-      text: title.textContent ?? '',
-      box: { x, y, width, height },
-    }
-    listeners.forEach(listener => listener(hit))
-  })
-  return {
-    update: next => {},
-    destroy: () => svg.remove(),
-    onTextDoubleClick: listener => {
-      listeners.add(listener)
-      return () => listeners.delete(listener)
-    },
-  }
+import type { ChartTextHit } from '@tiptap-pro/extension-diagrams/core'
+
+const listeners = new Set<(hit: ChartTextHit) => void>()
+svg.addEventListener('dblclick', event => {
+  const title = event.target instanceof Element ? event.target.closest('.title') : null
+  if (!title) return
+  const { x, y, width, height } = title.getBoundingClientRect()
+  const text = title.textContent ?? ''
+  listeners.forEach(listener =>
+    listener({ target: { kind: 'title' }, text, box: { x, y, width, height } }),
+  )
+})
+const handle = {
+  update: next => {},
+  destroy: () => svg.remove(),
+  onTextDoubleClick: listener => (listeners.add(listener), () => listeners.delete(listener)),
 }
 ```
 
@@ -247,7 +243,7 @@ export const creditedRenderer: ChartRenderer = {
 您添加的规则只会使渲染器变得更加严格。 `withRendererRules(renderer, rules)` 返回添加了规则的渲染器。 `rendererRules` 选项按渲染器 ID 添加规则。
 
 ```ts
-import { Diagrams, withRendererRules } from '@tiptap-pro/extension-diagrams'
+import { withRendererRules } from '@tiptap-pro/extension-diagrams'
 
 Diagrams.configure({
   renderers: [withRendererRules(plainBarsRenderer, { exports: ['svg', 'png'] })],

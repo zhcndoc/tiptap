@@ -1,0 +1,33 @@
+---
+title: 写作辅助
+description: '写作辅助扩展可在写作过程中提供帮助，包括统计字符、查找和替换文本、显示隐藏字符、提供输入提示、设置排版字符以及撤销更改。'
+meta:
+  title: 写作辅助 | Tiptap 文档
+  description: 在 Tiptap 编辑器中统计字符和单词、查找并替换文本、显示不可见字符、添加占位提示、应用排版字符，以及撤销和重做。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="writing-helpers" />
+
+## 使用场景
+
+- **长度限制。** Character count 可统计字符和单词，也可以限制字符数。
+- **搜索。** Find and replace 可搜索文档、高亮匹配项并替换文本，还支持区分大小写、全词匹配和正则表达式。
+- **隐藏字符。** Invisible characters 可显示空格、硬换行和段落结尾。
+- **输入提示。** Placeholder 可在空编辑器或空节点中显示简短提示。
+- **排版。** 输入时，Typography 会替换特定文本模式，例如将两个连字符替换为长破折号，或将三个句点替换为省略号。
+- **更正错误。** Undo and redo 可撤销更改并重新应用已撤销的更改。
+
+## 工作原理
+
+- **它们都是扩展。** 它们不会向文档添加节点或标记。[扩展](/editor/core-concepts/extensions)
+- **StarterKit 自带 Undo and redo。** 它属于 [StarterKit](/editor/extensions/functionality/starterkit)；其他扩展需要手动添加。
+- **不要用于协作编辑器。** Collaboration 有自己的撤销和重做机制，因此应在协作编辑器中关闭 Undo and redo；使用 StarterKit 时设置 `undoRedo: false`。
+- **界面由你构建。** Find and replace 不包含界面；Character count 通过 `characters()` 和 `words()` 提供统计结果。[查找和替换界面指南](/guides/find-and-replace)
+
+## 相关内容
+
+- [文档辅助](/editor/extensions/document-helpers)介绍如何处理整个文档。
+- [实时协作](/editor/extensions/collaboration)介绍如何支持多人同时写作。

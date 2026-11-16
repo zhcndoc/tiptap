@@ -1,0 +1,31 @@
+---
+title: 列表
+description: '列表扩展可在编辑器中添加项目符号列表、编号列表以及带复选框的任务列表。'
+meta:
+  title: 列表 | Tiptap 文档
+  description: 在 Tiptap 编辑器中添加项目符号列表、有序列表和带复选框的任务列表，也可通过 ListKit 一次性完成配置。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="lists" />
+
+## 使用场景
+
+- **项目符号。** Bullet list 会添加无序列表，并渲染为 `ul` 标签。
+- **编号步骤。** Ordered list 会添加编号列表，并渲染为 `ol` 标签。
+- **待办事项。** Task list 和 Task item 会添加任务，每项都带有可勾选的复选框。
+- **编辑列表。** 在列表项开头按 Backspace 时，List keymap 会将内容提升到上一个列表项中。
+
+## 工作原理
+
+- **列表由两个节点组成。** Bullet list 和 Ordered list 容纳 List item，Task list 容纳 Task item。每种列表都需要对应的列表项节点。[节点和标记](/editor/core-concepts/nodes-and-marks)
+- **List kit 将它们组合在一起。** [List kit](/editor/extensions/functionality/list-kit) 包含 Bullet list、List item、Ordered list、Task item、Task list 和 List keymap。
+- **StarterKit 包含基础列表。** Bullet list、List item、Ordered list 和 List keymap 属于 [StarterKit](/editor/extensions/functionality/starterkit)；Task list 和 Task item 不包含在内。
+- **快捷输入。** 在行首输入 `- ` 可开始项目符号列表，输入 `1. ` 可开始有序列表，输入 `[ ] ` 可开始任务列表。按 <kbd>Tab</kbd> 可缩进列表项，按 <kbd>Shift</kbd> + <kbd>Tab</kbd> 可将其提升。[键盘快捷键](/editor/core-concepts/keyboard-shortcuts)
+
+## 相关内容
+
+- [文本块](/editor/extensions/text-blocks)介绍列表周围的段落、标题和引用。
+- [表格](/editor/extensions/tables)介绍如何将内容组织成行和列。

@@ -8,7 +8,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/pages/getting-started',
-      title: '开始使用',
+      title: '入门',
       children: [
         {
           title: '概述',
@@ -19,9 +19,9 @@ export const sidebarConfig: SidebarConfig = {
           href: '/pages/getting-started/install',
         },
         {
-          title: 'Live demo',
+          title: '在线演示',
           href: '/pages/getting-started/live-demo',
-          tags: ['New'],
+          newSince: '2026-06-11',
         },
       ],
     },
@@ -39,37 +39,37 @@ export const sidebarConfig: SidebarConfig = {
           href: '/pages/core-concepts/page-format',
         },
         {
-          title: '页面页眉和页脚',
+          title: '页眉和页脚',
           href: '/pages/core-concepts/page-header-footer',
         },
         {
-          title: 'Footnotes',
+          title: '脚注',
           href: '/pages/core-concepts/footnotes',
-          tags: ['New'],
+          newSince: '2026-06-10',
         },
         {
-          title: 'Endnotes',
+          title: '尾注',
           href: '/pages/core-concepts/endnotes',
-          tags: ['New'],
+          newSince: '2026-06-24',
         },
         {
-          title: 'Page gap & background',
+          title: '页面间距和背景',
           href: '/pages/core-concepts/page-gap',
         },
         {
           title: '缩放',
           href: '/pages/core-concepts/zoom',
-          tags: ['新增'],
+          newSince: '2026-04-09',
         },
         {
-          title: 'PageBreak 节点',
+          title: '分页符节点',
           href: '/pages/core-concepts/page-break-node',
-          tags: ['新增'],
+          newSince: '2026-03-19',
         },
         {
           title: '布局参与者',
           href: '/pages/core-concepts/layout-participants',
-          tags: ['新增'],
+          newSince: '2026-09-18',
         },
         {
           title: '限制',
@@ -83,15 +83,15 @@ export const sidebarConfig: SidebarConfig = {
       title: '工具函数',
       children: [
         {
-          title: '页面格式常量',
+          title: '页面格式',
           href: '/pages/utilities/page-formats',
         },
         {
-          title: 'cmToPixels 工具',
+          title: 'cmToPixels',
           href: '/pages/utilities/cm-to-pixels',
         },
         {
-          title: 'inchToPixels 工具',
+          title: 'inchToPixels',
           href: '/pages/utilities/inch-to-pixels',
         },
       ],
@@ -102,29 +102,29 @@ export const sidebarConfig: SidebarConfig = {
       title: '指南',
       children: [
         {
-          title: '从零开始到打印就绪',
+          title: '从零开始生成可打印文档',
           href: '/pages/guides/zero-to-print-ready',
         },
         {
-          title: '在 Pages 中使用 TableKit',
+          title: '包含表格的页面',
           href: '/pages/guides/table-with-pages',
         },
         {
           title: 'PagesTableKit',
           href: '/pages/guides/pages-tablekit',
-          tags: ['实验性'],
+          tags: ['Experimental'],
         },
         {
-          title: '跨越分页符的行',
+          title: '跨页表格行',
           href: '/pages/guides/row-fragmentation',
-          tags: ['实验性'],
+          tags: ['Experimental'],
         },
         {
           title: 'PageKit',
           href: '/pages/guides/pagekit-usage',
         },
         {
-          title: '为 Pages 添加协作功能',
+          title: '为 Pages 添加协作',
           href: '/pages/guides/collaboration-with-pages',
         },
       ],

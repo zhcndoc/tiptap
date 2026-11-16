@@ -1,0 +1,30 @@
+---
+title: 光标和选区
+description: '光标和选区扩展可显示光标、选区和拖动内容的位置，并允许光标移动到原本无法到达的位置。'
+meta:
+  title: 光标和选区 | Tiptap 文档
+  description: 使用 Dropcursor、Focus、Gapcursor 和 Selection 显示放置位置、焦点节点和失焦编辑器的选区，并允许光标停在表格旁。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="cursor-and-selection" />
+
+## 使用场景
+
+- **拖动内容。** Dropcursor 会显示拖动内容的放置位置。
+- **移动到空隙。** Gapcursor 允许光标停在常规选区无法到达的位置，例如文档末尾的表格之后。
+- **显示当前节点。** Focus 会为包含光标的节点添加 class，默认为 `has-focus`。
+- **保持选区可见。** 编辑器失焦时，Selection 会为选区添加 class，默认为 `selection`。
+
+## 工作原理
+
+- **它们都是扩展。** 它们不会向文档添加节点或标记，而是改变光标和选区的行为及外观。[扩展](/editor/core-concepts/extensions)
+- **StarterKit 自带其中两个。** Dropcursor 和 Gapcursor 属于 [StarterKit](/editor/extensions/functionality/starterkit)；Focus 和 Selection 需要手动添加。
+- **样式由你设置。** Focus 和 Selection 只会添加 CSS class，样式由你决定。Dropcursor 也需要 CSS，并提供颜色、宽度和 class 设置。
+
+## 相关内容
+
+- [菜单和拖动手柄](/editor/extensions/menus)介绍用于移动块的拖动手柄。
+- [实时协作](/editor/extensions/collaboration)介绍如何显示其他人的光标和选区。

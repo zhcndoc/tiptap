@@ -1,0 +1,30 @@
+---
+title: 文本格式
+description: '文本格式扩展可将部分文本标记为粗体、斜体、链接或高亮，帮助用户在写作时为词语和短语设置格式。'
+meta:
+  title: 文本格式 | Tiptap 文档
+  description: 在 Tiptap 编辑器中为词语和短语设置粗体、斜体、下划线、删除线、代码、链接、高亮、下标、上标和 Ruby 文本格式。
+  category: 编辑器
+---
+
+import { CatalogGroup } from '@/components/CatalogGroup'
+
+<CatalogGroup id="text-formatting" />
+
+## 使用场景
+
+- **强调。** Bold、Italic、Underline 和 Strike 可突出词语，或表示词语已删除。
+- **引用和标记。** Link 可指向其他页面；Code 可标记句子中的名称或命令。
+- **高亮。** Highlight 可为一段文本着色，例如标出需要检查的内容。
+- **科学和语言标记。** Subscript 和 Superscript 可设置公式及脚注标记；Ruby text 可在字符上方添加读音说明。
+
+## 工作原理
+
+- **它们都是标记。** 标记会应用于内容块（例如段落或标题）中的一段文本。同一段文本可以应用多个标记。[节点和标记](/editor/core-concepts/nodes-and-marks)
+- **StarterKit 自带其中大多数标记。** Bold、Code、Italic、Link、Strike 和 Underline 属于 [StarterKit](/editor/extensions/functionality/starterkit)；其他标记需要手动添加。
+- **键盘快捷键和 Markdown 快捷输入。** 大多数标记都有键盘快捷键；写作时输入 `**粗体**` 等 Markdown 语法也会应用相应格式。[键盘快捷键](/editor/core-concepts/keyboard-shortcuts)
+
+## 相关内容
+
+- [文本样式](/editor/extensions/text-styling)介绍如何修改文本的颜色、字体、大小和对齐方式。
+- 若需要本文未介绍的格式，请参阅[创建自己的标记](/editor/extensions/custom-extensions/create-new/mark)。

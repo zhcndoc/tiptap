@@ -12,11 +12,14 @@ meta:
 
 ## 快速入门
 
+安装 D3（`^7.9.0`）并注册渲染器：
+
 ```bash
 npm install d3
 ```
 
 ```ts
+import { Diagrams } from '@tiptap-pro/extension-diagrams'
 import { d3Renderer } from '@tiptap-pro/extension-diagrams/d3'
 
 Diagrams.configure({ renderers: [d3Renderer()] })
@@ -44,9 +47,7 @@ D3 渲染器通过 [`d3-sankey`](/diagrams/renderers/d3#sankey-charts) 绘制桑
 
 ## Sankey 图表
 
-```bash
-npm install d3-sankey
-```
+安装 `d3-sankey`（`^0.12.3`）并将其作为 `sankey` 传入。没有该依赖时，D3 渲染器不会绘制桑基图；如果注册了其他支持桑基图的渲染器，则由其绘制；如果没有，桑基图会[显示为不可用](/diagrams/renderers/overview#when-no-renderer-draws-the-type)。
 
 ```ts
 import * as sankey from 'd3-sankey'
@@ -87,3 +88,5 @@ d3Renderer({
   createDocument: () => parseHTML('<!doctype html><html><body></body></html>').document,
 })
 ```
+
+未提供该函数时，`toSVG` 会抛出错误："The d3 Renderer needs `createDocument` to export without a browser."

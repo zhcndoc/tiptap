@@ -9,15 +9,14 @@ export const sidebarConfig: SidebarConfig = {
       href: '/ai/ai-toolkit/getting-started/overview',
       title: 'AI Toolkit',
       type: 'group',
-      tags: ['Add-on'],
+      tags: ['Add-on', 'Beta'],
       children: [
         {
-          title: 'Overview',
-          releaseTag: 'beta',
+          title: '概述',
           href: '/ai/ai-toolkit/overview',
         },
         {
-          title: 'Install',
+          title: '安装',
           href: '/ai/ai-toolkit/install',
         },
         {
@@ -33,13 +32,16 @@ export const sidebarConfig: SidebarConfig = {
               href: '/ai/ai-toolkit/agents/tracked-changes',
             },
             {
-              title: 'Comments',
+              title: '评论',
               href: '/ai/ai-toolkit/agents/comments',
             },
             {
               title: '白板工具',
               href: '/ai/ai-toolkit/agents/whiteboard',
-              releaseTag: 'alpha',
+            },
+            {
+              title: '与图表集成',
+              href: '/ai/ai-toolkit/agents/diagrams',
             },
             {
               title: 'Selection awareness',
@@ -52,7 +54,7 @@ export const sidebarConfig: SidebarConfig = {
           ],
         },
         {
-          title: 'API reference',
+          title: 'API 参考',
           href: '/ai/ai-toolkit/api-reference',
           children: [
             {
@@ -62,7 +64,6 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: 'Tiptap Query',
               href: '/ai/ai-toolkit/api-reference/tiptap-query',
-              releaseTag: 'alpha',
             },
             {
               title: 'Editor context',
@@ -89,7 +90,6 @@ export const sidebarConfig: SidebarConfig = {
             {
               title: 'Tiptap Shorthand',
               href: '/ai/ai-toolkit/advanced-guides/tiptap-shorthand',
-              releaseTag: 'alpha',
             },
             {
               title: 'Security',
@@ -117,7 +117,7 @@ export const sidebarConfig: SidebarConfig = {
           tags: ['Add-on'],
           children: [
             {
-              title: 'Overview',
+              title: '概述',
               href: '/ai/ai-toolkit/client/overview',
             },
             {
@@ -125,7 +125,7 @@ export const sidebarConfig: SidebarConfig = {
               href: '/ai/ai-toolkit/client/use-cases',
             },
             {
-              title: 'Install',
+              title: '安装',
               href: '/ai/ai-toolkit/client/install',
             },
             {
@@ -167,7 +167,7 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/ai/ai-toolkit/client/agents/streaming',
                 },
                 {
-                  title: 'Comments',
+                  title: '评论',
                   href: '/ai/ai-toolkit/client/agents/comments',
                 },
                 {
@@ -231,7 +231,7 @@ export const sidebarConfig: SidebarConfig = {
                   href: '/ai/ai-toolkit/client/workflows/tiptap-edit',
                 },
                 {
-                  title: 'Comments',
+                  title: '评论',
                   href: '/ai/ai-toolkit/client/workflows/comments',
                 },
                 {
@@ -245,11 +245,11 @@ export const sidebarConfig: SidebarConfig = {
               href: '/ai/ai-toolkit/client/advanced-guides',
               children: [
                 {
-                  title: 'Live demo',
+                  title: '在线演示',
                   href: '/ai/ai-toolkit/client/advanced-guides/live-demo',
                 },
                 {
-                  title: 'Concepts',
+                  title: '概念',
                   href: '/ai/ai-toolkit/client/advanced-guides/concepts',
                 },
                 {
@@ -301,7 +301,7 @@ export const sidebarConfig: SidebarConfig = {
               ],
             },
             {
-              title: 'API reference',
+              title: 'API 参考',
               href: '/ai/ai-toolkit/client/api-reference',
               children: [
                 {
@@ -354,7 +354,7 @@ export const sidebarConfig: SidebarConfig = {
           href: '/ai/basic',
           children: [
             {
-              title: 'Overview',
+              title: '概述',
               href: '/ai/basic/overview',
             },
             {
@@ -362,7 +362,7 @@ export const sidebarConfig: SidebarConfig = {
               href: '/ai/basic/use-cases',
             },
             {
-              title: 'Install',
+              title: '安装',
               href: '/ai/basic/install',
             },
             {
@@ -412,7 +412,7 @@ export const sidebarConfig: SidebarConfig = {
               href: '/ai/basic/custom-llms',
             },
             {
-              title: 'Configure',
+              title: '配置',
               href: '/ai/basic/configure',
             },
           ],

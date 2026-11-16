@@ -6,6 +6,8 @@ extension:
   description: 你是否曾经想在编辑器中拖拽节点？好吧，我们也想——所以这里有一个扩展。
   type: extension
   icon: GripVertical
+  group: menus
+  package: '@tiptap/extension-drag-handle'
 tags:
   - type: image
     src: https://img.shields.io/npm/v/@tiptap/extension-drag-handle.svg?label=version
@@ -118,7 +120,7 @@ DragHandle.configure({
 
 ### onElementDragStart
 
-A function that is called when the element starts to be dragged. This can be used to add custom logic when dragging starts.
+元素开始拖动时调用的函数。可用于在拖动开始时执行自定义逻辑。
 
 Signature: `(event: DragEvent) => void`
 
@@ -134,7 +136,7 @@ DragHandle.configure({
 
 ### onElementDragEnd
 
-A function that is called when the element stops being dragged. This can be used to add custom logic when dragging ends.
+元素停止拖动时调用的函数。可用于在拖动结束时执行自定义逻辑。
 
 Signature: `(event: DragEvent) => void`
 

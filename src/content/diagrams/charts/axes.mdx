@@ -15,6 +15,8 @@ meta:
 
 ## 快速入门
 
+选中图表后（例如完成[图表快速入门](/diagrams/charts/overview#quick-start)后），以下代码会每隔 25 个单位显示一个刻度，并旋转类别标签：
+
 ```ts
 editor.commands.updateChartAxis({ axis: 'y', changes: { step: 25 } })
 editor.commands.updateChartAxis({ axis: 'x', changes: { labels: { angle: 45 } } })
@@ -72,11 +74,6 @@ editor.commands.updateChartAxis({ axis: 'x', changes: { labels: { angle: 45 } } 
 值网格不包含任何字段。 x 轴上有数字的散点图两者都不会。
 
 ```ts
-editor.commands.updateChartAxis({
-  axis: 'y',
-  changes: { grid: { line: 'dotted', color: '#94a3b8' } },
-})
-editor.commands.updateChartAxis({ axis: 'x', changes: { grid: { line: 'solid', width: 0.5 } } })
 editor.commands.updateChartAxis({ axis: 'x', changes: { grid: { line: 'solid', every: 3 } } })
 ```
 

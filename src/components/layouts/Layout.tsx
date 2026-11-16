@@ -3,7 +3,7 @@ import { ArrowRightIcon } from 'lucide-react'
 import { PageEditStatus } from '../ui/PageEditStatus'
 import PageHelpFeedback from '../PageHelpFeedback'
 import { TiptapLogo } from '../TiptapLogo'
-import { ProductDropdown } from '../ProductDropdown'
+import { DocsSwitcher } from '../DocsSwitcher'
 import { NavLink } from '../NavLink'
 import { SearchButton } from '../SearchButton'
 import { ToCButton } from '../ToCButton'
@@ -13,7 +13,7 @@ import { MobileNavigationButton } from '../MobileNavigationButton'
 import { DocsSidebar } from '../SidebarRenderer'
 import { MobileNavigationDropdown } from '../MobileNavigationDropdown'
 import { SidebarTableOfContent } from '../SidebarTableOfContent'
-// import { VersionSwitch } from '../VersionSwitch'
+import { VersionSwitch } from '../VersionSwitch'
 import styles from './Layout.module.css'
 import Link from '@/components/Link'
 import { cn } from '@/utils'
@@ -59,23 +59,24 @@ export const LayoutHeader = forwardRef<HTMLDivElement, { config?: SidebarConfig 
   ({ config, ...rest }, ref) => {
     return (
       <header ref={ref} {...rest} className="container sticky top-0 w-full py-1.5 z-50">
-        <div className="bg-white h-14 shadow-slim rounded-tl-pilled rounded-tr-pilled lg:rounded-pilled px-[1.125rem] py-3 flex items-center">
+        <div
+          data-header-bar
+          className="bg-white h-14 shadow-slim rounded-tl-pilled rounded-tr-pilled lg:rounded-pilled px-[1.125rem] py-3 flex items-center"
+        >
           <div className="flex items-center gap-2">
-            <Link href="/" className="font-deco text-lg flex items-center gap-2.5 pr-2.5">
+            <Link href="/" className="text-lg flex items-center gap-2.5 pr-2.5">
               <TiptapLogo />
-              <span>
-                <span className="font-semibold">Tiptap 中文文档</span>
+              <span className="whitespace-nowrap">
+                <span className="font-semibold">Tiptap</span> Docs
               </span>
             </Link>
-            {/* <VersionSwitch /> */}
-            <span className="hidden select-none lg:block text-black/15">/</span>
-            <nav className="hidden lg:flex items-center gap-[0.5px]">
-              <ProductDropdown />
-              <NavLink href="/guides">指南</NavLink>
-              <NavLink href="/examples">示例</NavLink>
-              <NavLink href="/ui-components/getting-started/overview">UI 组件</NavLink>
-              <NavLink href="https://www.zhcndoc.com" target="_blank">
-                简中文档
+            <VersionSwitch />
+            {/* The links fit from tablet width; below it they move into the menu */}
+            <span className="hidden select-none md:block text-black/15">/</span>
+            <nav className="hidden md:flex items-center gap-[0.5px]">
+              <DocsSwitcher />
+              <NavLink href="https://tiptap.dev" target="_blank">
+                Website
               </NavLink>
             </nav>
           </div>
@@ -87,10 +88,8 @@ export const LayoutHeader = forwardRef<HTMLDivElement, { config?: SidebarConfig 
               <ToCButton />
               <SearchButton />
             </div>
-            <div className="block lg:hidden">
-              <MobileNavigationDropdown />
-            </div>
-            {/* <div className="hidden lg:block">
+            {/* Sign up stays next to the menu as long as it fits */}
+            <div className="hidden min-[390px]:block">
               <NavLink
                 variant="invert"
                 href="https://cloud.tiptap.dev/register"
@@ -99,7 +98,10 @@ export const LayoutHeader = forwardRef<HTMLDivElement, { config?: SidebarConfig 
               >
                 Sign up
               </NavLink>
-            </div> */}
+            </div>
+            <div className="block md:hidden">
+              <MobileNavigationDropdown />
+            </div>
           </div>
         </div>
         <div className="block lg:hidden py-1.5 bg-white px-[1.125rem] shadow-slim rounded-bl-pilled rounded-br-pilled border-t border-neutral-200">
@@ -221,7 +223,7 @@ export const LayoutContent = forwardRef<HTMLDivElement, LayoutContentProps>(
             </div>
           </div>
           <div className="flex flex-col items-start justify-between gap-4 text-sm mt-14">
-            {/* <div className="flex flex-wrap items-center flex-none gap-3">
+            <div className="flex flex-wrap items-center flex-none gap-3">
               <Link className="hover:underline" href="/hocuspocus/getting-started/overview">
                 Hocuspocus
               </Link>
@@ -253,16 +255,7 @@ export const LayoutContent = forwardRef<HTMLDivElement, LayoutContentProps>(
                 Changelog
               </Link>
             </div>
-            <div className="flex-none">Copyright © {new Date().getFullYear()} Tiptap</div> */}
-            <div className="text-balance text-center text-sm leading-loose text-muted-foreground md:text-left">
-              <a href="https://www.zhcndoc.com" target="_blank">
-                简中文档
-              </a>
-              ｜
-              <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer">
-                沪ICP备2024070610号-3
-              </a>
-            </div>
+            <div className="flex-none">Copyright © {new Date().getFullYear()} Tiptap</div>
           </div>
         </footer>
       </main>

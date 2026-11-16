@@ -30,7 +30,7 @@ export const sidebarConfig: SidebarConfig = {
           href: '/comments/core-concepts/manage-threads',
         },
         {
-          title: '风格线程',
+          title: '设置线程样式',
           href: '/comments/core-concepts/style-threads',
         },
         {
@@ -38,7 +38,7 @@ export const sidebarConfig: SidebarConfig = {
           href: '/comments/core-concepts/configure',
         },
         {
-          title: '线程认证',
+          title: '线程身份验证',
           href: '/comments/core-concepts/thread-authentication',
         },
       ],
@@ -46,11 +46,15 @@ export const sidebarConfig: SidebarConfig = {
     {
       type: 'group',
       href: '/comments/integrate',
-      title: '整合',
+      title: '集成',
       children: [
         {
           title: '编辑器命令',
           href: '/comments/integrate/editor-commands',
+        },
+        {
+          title: '编辑器事件',
+          href: '/comments/integrate/editor-events',
         },
         {
           title: '代码评论',
@@ -61,7 +65,7 @@ export const sidebarConfig: SidebarConfig = {
           href: '/comments/integrate/rest-api',
         },
         {
-          title: 'Create threads via API',
+          title: '通过 API 创建线程',
           href: '/comments/integrate/create-thread-via-api',
         },
         {

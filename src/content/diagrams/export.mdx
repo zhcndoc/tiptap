@@ -18,8 +18,8 @@ meta:
 ```ts
 import { downloadBlob } from '@tiptap-pro/extension-diagrams/export'
 
-const { blob, svg, width, height, alt } = await editor.storage.diagrams.export(
-  { pos },
+const { blob } = await editor.storage.diagrams.export(
+  {},
   { format: 'png', scale: 2, background: '#ffffff' },
 )
 downloadBlob(blob, 'chart.png')
@@ -83,6 +83,8 @@ downloadBlob(blob, 'chart.png')
 `exportDocx` 写入仅包含图表和流程图的新 Word 文件：
 
 ```ts
+import { downloadBlob } from '@tiptap-pro/extension-diagrams/export'
+
 const { blob, notes } = await editor.storage.diagrams.exportDocx({
   targets: [{ pos }],
   title: 'Report',

@@ -37,9 +37,7 @@ export function serviceDiagramRenderer(endpoint: string): DiagramRenderer {
     },
   }
 }
-```
 
-```ts
 Diagrams.configure({
   diagramRenderers: [serviceDiagramRenderer('https://diagrams.example.com/mermaid/svg')],
 })
@@ -105,9 +103,15 @@ Diagrams.configure({
 使用 mermaid.js 进行绘制的渲染器可以重用内置的 `editing`：
 
 ```ts
+import type { DiagramRenderer } from '@tiptap-pro/extension-diagrams'
 import { mermaidDiagramEditing } from '@tiptap-pro/extension-diagrams/mermaid'
 
-const renderer = { id: 'my-mermaid', formats: ['mermaid'], render, editing: mermaidDiagramEditing }
+const renderer: DiagramRenderer = {
+  id: 'my-mermaid',
+  formats: ['mermaid'],
+  render,
+  editing: mermaidDiagramEditing,
+}
 ```
 
 ## 保持网页安全
